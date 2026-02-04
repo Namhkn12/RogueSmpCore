@@ -1,0 +1,30 @@
+package com.roguesmp.utils;
+
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
+import net.kyori.adventure.text.Component;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
+
+public class ItemUtils {
+    public static boolean isValidItem(ItemStack itemStack) {
+        return itemStack != null && !itemStack.getType().isAir();
+    }
+
+    public static ItemStack hideTooltip(ItemStack itemStack) {
+        ItemStack res = itemStack.clone();
+        res.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true));
+        return res;
+    }
+
+    public static void setLore(ItemStack stack, List<Component> components) {
+        stack.setData(DataComponentTypes.LORE, ItemLore.lore(components));
+    }
+
+    public static void setItemName(ItemStack stack, Component component) {
+        stack.setData(DataComponentTypes.ITEM_NAME, component);
+    }
+
+}
