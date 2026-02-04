@@ -42,4 +42,9 @@ public class AttackSpeed implements SmpAttribute {
     public void addVanillaAttribute(Player player, double value) {
         player.getAttribute(Attribute.ATTACK_SPEED).addTransientModifier(new AttributeModifier(MODIFIER_KEY, value, AttributeModifier.Operation.ADD_NUMBER));
     }
+
+    @Override
+    public void removeVanillaAttribute(Player player) {
+        player.getAttribute(Attribute.ATTACK_SPEED).removeModifier(MODIFIER_KEY);
+    }
 }
