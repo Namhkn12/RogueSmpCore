@@ -1,6 +1,6 @@
 package com.roguesmp.gui;
 
-import com.roguesmp.utils.ItemUtils;
+import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
@@ -50,14 +50,14 @@ public abstract class BaseGui implements InventoryHolder {
 
     public void fillEmpty() {
         for (int i = 0; i < inventory.getSize(); i++) {
-            if (ItemUtils.isValidItem(inventory.getItem(i))) continue;
+            if (ItemStackUtils.isValidItem(inventory.getItem(i))) continue;
             addButton(i, FILLER, event -> event.setCancelled(true));
         }
     }
 
     public void fillEmpty(ItemStack itemStack) {
         for (int i = 0; i < inventory.getSize(); i++) {
-            if (ItemUtils.isValidItem(inventory.getItem(i))) continue;
+            if (ItemStackUtils.isValidItem(inventory.getItem(i))) continue;
             addButton(i, itemStack, event -> event.setCancelled(true));
         }
     }

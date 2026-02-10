@@ -10,33 +10,36 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class CriticalDamage implements SmpAttribute {
+public class PhysicalDamageBase implements SmpAttribute {
     @Override
     public @NotNull String getId() {
-        return "critical";
+        return "physical_damage_base";
     }
 
     @Override
     public @NotNull Attributes getEnumConstant() {
-        return Attributes.CRITICAL_DAMAGE;
+        return Attributes.PHYSICAL_DAMAGE_BASE;
     }
 
     @Override
     public @NotNull String getSimpleName() {
-        return "Chí mạng";
+        return "Sát thương vật lý";
     }
 
     @Override
     public @NotNull List<Component> getDisplayText(double value, SmpPlayer player, PersistentDataContainerView pdc) {
-        return List.of(Utils.fromString("<blue><!i>" + Utils.formatValue(value) + " Sát thương chí mạng"));
+        Component res = Component.text(" " + Utils.formatDecimal(value) + " " + getSimpleName(), NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false);
+        return List.of(res);
     }
 
     @Override
-    public void onAttackEntity(DamageContext context, double value) {
-        context.addDamageModifier(new DamageModifier("critical", value, DamageType.PHYSICAL, DamageOperation.ADDITIVE));
+    public void onDamageEntity(DamageContext context, double value, SmpPlayer player) {
+        context.addDamageModifier(new DamageModifier(getId(), value, DamageType.PHYSICAL, DamageOperation.ADDITIVE));
     }
 }

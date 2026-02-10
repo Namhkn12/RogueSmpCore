@@ -1,14 +1,8 @@
 package com.roguesmp.item.modifier;
 
-import com.roguesmp.item.modifier.effect.ModifierEffect;
+import com.roguesmp.item.SmpItem;
+import com.roguesmp.player.SmpPlayer;
 
-import java.util.List;
-
-public record ItemModifier(String id, List<ModifierEffect> effects) {
-
-    public void apply(ModifierContext modifierContext) {
-        effects.forEach(modifierEffect -> {
-            modifierEffect.apply(modifierContext);
-        });
-    }
+public interface ItemModifier {
+    void collectAndApply(SmpItem smpItem, SmpPlayer player);
 }

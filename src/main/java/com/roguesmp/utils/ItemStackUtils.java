@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
-public class ItemUtils {
+public class ItemStackUtils {
     public static boolean isValidItem(ItemStack itemStack) {
         return itemStack != null && !itemStack.getType().isAir();
     }

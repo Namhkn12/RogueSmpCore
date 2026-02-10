@@ -3,30 +3,28 @@ package com.roguesmp.attribute.impl;
 import com.roguesmp.attribute.SmpAttribute;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class Speed implements SmpAttribute {
+public class SpeedFlat implements SmpAttribute {
 
     public static NamespacedKey MODIFIER_ID = new NamespacedKey("smp","speed");
 
     @Override
     public @NotNull String getId() {
-        return "speed";
+        return "speed_flat";
     }
 
     @Override
     public @NotNull Attributes getEnumConstant() {
-        return Attributes.SPEED;
+        return Attributes.SPEED_FLAT;
     }
 
     @Override
@@ -36,7 +34,7 @@ public class Speed implements SmpAttribute {
 
     @Override
     public @NotNull List<Component> getDisplayText(double value, SmpPlayer player, PersistentDataContainerView pdc) {
-        return Utils.fromStrings("<!i><aqua>" + value + " " + getSimpleName());
+        return defaultFlatLoreProvider(value);
     }
 
     @Override

@@ -5,8 +5,7 @@ import com.roguesmp.constant.Enchants;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ItemComponent;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -16,7 +15,7 @@ public class EnchantComponent implements ItemComponent {
     private final Map<Enchants, Integer> enchants = new EnumMap<>(Enchants.class);
 
     @GsonIgnore
-    private EnumMap<Enchants, Integer> modifierEnchants = null;
+    private final EnumMap<Enchants, Integer> modifierEnchants = new EnumMap<>(Enchants.class);
 
     public EnchantComponent(Map<Enchants, Integer> enchants) {
         this.enchants.putAll(enchants);
@@ -27,7 +26,7 @@ public class EnchantComponent implements ItemComponent {
     }
 
     public int getModifierLevel(Enchants enchants) {
-        return this.modifierEnchants == null ? 0 : this.modifierEnchants.getOrDefault(enchants, 0);
+        return this.modifierEnchants.getOrDefault(enchants, 0);
     }
 
     public @Unmodifiable Map<Enchants, Integer> getEnchants() {
@@ -35,9 +34,6 @@ public class EnchantComponent implements ItemComponent {
     }
 
     public void addModifier(Modifier modifier) {
-        if (modifierEnchants == null) {
-            modifierEnchants = new EnumMap<>(Enchants.class);
-        }
 
         for (var entry : modifier.modifiers().entrySet()) {
             modifierEnchants.merge(entry.getKey(), entry.getValue(), Integer::sum);
@@ -55,31 +51,19 @@ public class EnchantComponent implements ItemComponent {
         List<Component> res = new ArrayList<>();
         for (Enchants enchants : enchants.keySet()) {
             int level = getLevel(enchants);
-            int bonus = getModifierLevel(enchants);
 
             List<Component> lines = enchants.getEnchant().getDisplayText(level, context.player(), context.data());
-            if (bonus != 0) {
-                lines = appendModifierText(lines, bonus);
-            }
-
-            res.addAll(lines);
+            if (lines != null) res.addAll(lines);
         }
 
         context.builder().putLines(3, res);
     }
 
-    private List<Component> appendModifierText(List<Component> lines, int bonus) {
-        List<Component> result = new ArrayList<>();
-        TextColor color = NamedTextColor.GREEN;
-        String prefix = "+";
-        if (bonus <= 0) {
-            color = NamedTextColor.RED;
-            prefix = "-";
-        }
-        for (Component c : lines) {
-            result.add(c.append(Component.text("( "+ prefix + bonus + ")").color(color)));
-        }
-        return result;
+    @Override
+    public void save(PersistentDataContainer pdc) {
+        enchants.forEach((enchants1, integer) -> {
+            enchants1.getEnchant().attachDefaultData(pdc);
+        });
     }
 
     public record Modifier(int priority, Map<Enchants, Integer> modifiers){}

@@ -11,6 +11,7 @@ import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -109,7 +110,4 @@ public class SmpPlayer {
     public @Nullable Player getPlayer() {
         return Bukkit.getPlayer(uuid);
     }
-
-
-
 }

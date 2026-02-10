@@ -3,12 +3,22 @@ package com.roguesmp.attribute;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.context.DamageContext;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
-import org.bukkit.attribute.Attribute;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -19,29 +29,95 @@ public interface SmpAttribute {
 
     @NotNull String getSimpleName();
 
-    @NotNull List<Component> getDisplayText(double value, SmpPlayer player, PersistentDataContainerView pdc);
+    //return null for no display
+    @Nullable List<Component> getDisplayText(double value, SmpPlayer player, PersistentDataContainerView pdc);
 
     /**
-     * Add attribute on equip
+     * Add attribute on equip, must implement both add and remove method
      */
     default void addVanillaAttribute(Player player, double value) {
 //        Example:
-//        player.getAttribute(Attribute.ATTACK_DAMAGE).addTransientModifier(new AttributeModifier(new NamespacedKey("smp", "attack"), 10d, AttributeModifier.Operation.ADD_NUMBER));
+//        player.getAttribute(Attribute.ATTACK_DAMAGE).addTransientModifier(new AttributeModifier(MODIFIER_ID, 10d, AttributeModifier.Operation.ADD_NUMBER));
     }
 
     /**
-     * Remove attribute on unequip
+     * Remove attribute on unequip, must implement both add and remove method
      */
     default void removeVanillaAttribute(Player player) {
 //        Example
 //        player.getAttribute(Attribute.ATTACK_DAMAGE).removeModifier(MODIFIER_ID);
     }
 
-    default void onAttackEntity(DamageContext context, double value) {
+    default void tick(SmpPlayer player, double value, boolean twoHz, boolean oneHz) {
 
     }
 
-    default void onKillEntity(EntityDeathEvent event, double value) {
+    default void onDamageEntity(DamageContext context, double value, SmpPlayer player) {
 
+    }
+
+    default void onKillEntity(EntityDeathEvent event, double value, SmpPlayer player) {
+
+    }
+
+    default void onHurt(DamageContext context, double value, SmpPlayer player) {
+
+    }
+
+    default void onHurtFatal(DamageContext context, double value, SmpPlayer player) {
+
+    }
+
+    default void onConsume(PlayerItemConsumeEvent event, double value, SmpPlayer player) {
+
+    }
+
+    default void onExpChange(PlayerExpChangeEvent event, double value, SmpPlayer player) {
+
+    }
+
+    default void onBlockBreak(BlockBreakEvent event, double value, SmpPlayer player) {
+
+    }
+
+    default void onProjectileHit(ProjectileHitEvent event, double value, SmpPlayer player) {
+
+    }
+
+    default void onProjectileLaunch(ProjectileLaunchEvent event, double value, SmpPlayer player) {
+
+    }
+
+    default List<Component> defaultFlatLoreProvider(double value) {
+        Component fullDisplay;
+        TextColor color;
+
+        String numberPrefix = value > 0 ? "+" : "";
+        color = value > 0 ? NamedTextColor.BLUE : NamedTextColor.RED;
+        fullDisplay = Component.text(numberPrefix + Utils.formatDecimal(value) + " " + getSimpleName(), color).decoration(TextDecoration.ITALIC, false);
+
+        return List.of(fullDisplay);
+    }
+
+    default List<Component> defaultPercentLoreProvider(double value) {
+        Component fullDisplay;
+        TextColor color;
+
+        String numberPrefix = value > 0 ? "+" : "";
+        color = value > 0 ? NamedTextColor.BLUE : NamedTextColor.RED;
+        fullDisplay = Component.text(numberPrefix + Utils.formatDecimal(value) + "% " + getSimpleName(), color).decoration(TextDecoration.ITALIC, false);
+
+        return List.of(fullDisplay);
+    }
+
+    default List<Component> defaultMultLoreProvider(double value) {
+        Component fullDisplay;
+        TextColor color;
+
+        String numberPrefix = value > 0 ? "×" : "× ";
+        color = value > 0 ? NamedTextColor.BLUE : NamedTextColor.RED;
+        fullDisplay = Component.text(numberPrefix + Utils.formatDecimal(value) + " " + getSimpleName(), color).decoration(TextDecoration.ITALIC, false);
+
+        return List.of(fullDisplay);
     }
 }
