@@ -7,7 +7,6 @@ import com.roguesmp.item.gem.GemData;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.GemRegistry;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -15,7 +14,7 @@ import java.util.List;
  * Provide methods to work with our custom items. Including adding, removing, modifying components and their modifiers
  */
 public class SmpItemUtils {
-    public static @Nullable ItemStack addGem(ItemStack itemStack, SmpPlayer player, List<String> gemIds) {
+    public static ItemStack addGem(ItemStack itemStack, SmpPlayer player, List<String> gemIds) {
         SmpItem smpItem = new SmpItem(itemStack);
         GemSocketComponent gemSocketComponent = smpItem.getComponent(ComponentKeys.GEM_SOCKET);
         if (gemSocketComponent == null) {

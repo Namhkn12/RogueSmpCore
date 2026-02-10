@@ -17,6 +17,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -42,7 +43,7 @@ public class Greed implements SmpEnchant {
     }
 
     @Override
-    public List<Component> getDisplayText(int level, SmpPlayer player, PersistentDataContainerView pdc) {
+    public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
         Integer stack = pdc.get(DATA_KEY, PersistentDataType.INTEGER);
         return List.of(Component.text(getSimpleName() + " " + Utils.toRoman(level) + " (" + stack + ")", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
     }

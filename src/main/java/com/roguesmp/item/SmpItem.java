@@ -76,7 +76,11 @@ public class SmpItem {
         return itemStack;
     }
 
-    public ItemStack generateItemStack(SmpPlayer player, int stackAmount) {
+    public ItemStack generateItemStack(int stackAmount) {
+        return generateItemStack(null, stackAmount);
+    }
+
+    public ItemStack generateItemStack(@Nullable SmpPlayer player, int stackAmount) {
         if (baseItem == null) return itemStack;
         ItemStack result = ItemStack.of(baseItem.getBase(), stackAmount);
 
@@ -109,7 +113,7 @@ public class SmpItem {
         return result;
     }
 
-    public void applyModifiers(SmpPlayer player) {
+    public void applyModifiers(@Nullable SmpPlayer player) {
         if (loadedModifier) return;
         ModifierRegistry.getInstance().getModifiers().forEach((itemModifierType, itemModifier) -> {
             itemModifier.collectAndApply(this, player);
