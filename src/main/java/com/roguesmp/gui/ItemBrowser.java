@@ -4,7 +4,8 @@ import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.ItemRegistry;
-import com.roguesmp.utils.ItemUtils;
+import com.roguesmp.utils.ItemStackUtils;
+import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.IntegerArgument;
@@ -26,7 +27,7 @@ public class ItemBrowser extends BaseGui {
     private final List<Map.Entry<String, BaseItem>> entries;
     private final SmpPlayer player;
 
-    private final ItemStack filler = ItemUtils.hideTooltip(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE));
+    private final ItemStack filler = ItemStackUtils.hideTooltip(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE));
     private final ItemStack nextPage = ItemStack.of(Material.ARROW);
     private final ItemStack prePage = ItemStack.of(Material.ARROW);
     private final ItemStack infoBook = ItemStack.of(Material.BOOK);
@@ -123,6 +124,12 @@ public class ItemBrowser extends BaseGui {
                             new ItemBrowser(PlayerManager.getInstance().getSmpPlayer(player.getUniqueId())).showInventory(player);
                         })
                 )
+                .withSubcommand(new CommandAPICommand("modify")
+                        .withArguments(new StringArgument("add_gem_id"))
+                        .executesPlayer((player, commandArguments) -> {
+                            ItemStack res = SmpItemUtils.addGem(player.getEquipment().getItemInMainHand(), PlayerManager.getInstance().getSmpPlayer(player.getUniqueId()), List.of((String) commandArguments.get("add_gem_id")));
+                            player.getEquipment().setItemInMainHand(res);
+                        }))
                 .register();
     }
 

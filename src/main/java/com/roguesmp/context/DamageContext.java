@@ -15,13 +15,14 @@ import java.util.List;
  * Custom damage event for more control
  */
 public class DamageContext {
-    private Entity victim;
-    private Entity damager;
-    private Entity directDamager;
-    private boolean ignoreIframe;
-    private boolean isCritical;
+    private final Entity victim;
+    private final Entity damager;
     private final double baseDamage;
-    private double finalDamage;
+
+    private boolean ignoreIframe;
+    private boolean isCancelled;
+    private boolean isCritical;
+
     private final List<DamageModifier> damageModifiers = new ArrayList<>();
 
     public DamageContext(Entity victim, Entity damager, double baseDamage) {
@@ -47,16 +48,18 @@ public class DamageContext {
                 case MULTIPLICATIVE -> initialDmg *= 1 + damageModifier.value();
             }
         }
-        if (damager instanceof Player player && !(directDamager instanceof Projectile)) {
+        double finalDamage;
+        if (damager instanceof Player player) {
             // If melee
             finalDamage = getDamageWithCooldown(initialDmg + additiveBonus, player);
+            if (isCritical()) finalDamage = finalDamage * 1.5;
         } else finalDamage = initialDmg + additiveBonus;
 
         return finalDamage;
     }
 
     private double getDamageWithCooldown(double baseDamage, Player player) {
-        float p = player.getAttackCooldown();// damage-accurate value
+        float p = player.getAttackCooldown();
         player.sendMessage(String.valueOf(p));
         return baseDamage * (0.2 + 0.8 * p * p);
     }
@@ -65,7 +68,15 @@ public class DamageContext {
         return isCritical;
     }
 
+    public boolean isCancelled() {
+        return isCancelled;
+    }
+
     public void setCritical(boolean critical) {
         isCritical = critical;
+    }
+
+    public void setCancelled(boolean cancelled) {
+        isCancelled = cancelled;
     }
 }

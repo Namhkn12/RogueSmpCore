@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Mark a field to be skipped by gson when serializing/deserializing
+ * Mark a field to be skipped by gson when serializing/deserializing. <br>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

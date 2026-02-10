@@ -6,6 +6,8 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -14,18 +16,18 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class AttackSpeed implements SmpAttribute {
+public class AttackSpeedBase implements SmpAttribute {
 
-    public static NamespacedKey MODIFIER_KEY = new NamespacedKey("smp","atk_spd");
+    public static NamespacedKey MODIFIER_KEY = new NamespacedKey("smp","atk_spd_base");
 
     @Override
     public @NotNull String getId() {
-        return "attack_speed";
+        return "attack_speed_base";
     }
 
     @Override
     public @NotNull Attributes getEnumConstant() {
-        return Attributes.ATTACK_SPEED;
+        return Attributes.ATTACK_SPEED_BASE;
     }
 
     @Override
@@ -35,12 +37,13 @@ public class AttackSpeed implements SmpAttribute {
 
     @Override
     public @NotNull List<Component> getDisplayText(double value, SmpPlayer player, PersistentDataContainerView pdc) {
-        return Utils.fromStrings("<!i><blue>" + value + " " + getSimpleName());
+        Component res = Component.text(" " + Utils.formatDecimal(value) + " " + getSimpleName(), NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false);
+        return List.of(res);
     }
 
     @Override
     public void addVanillaAttribute(Player player, double value) {
-        player.getAttribute(Attribute.ATTACK_SPEED).addTransientModifier(new AttributeModifier(MODIFIER_KEY, value, AttributeModifier.Operation.ADD_NUMBER));
+        player.getAttribute(Attribute.ATTACK_SPEED).addTransientModifier(new AttributeModifier(MODIFIER_KEY, value - 4, AttributeModifier.Operation.ADD_NUMBER));
     }
 
     @Override

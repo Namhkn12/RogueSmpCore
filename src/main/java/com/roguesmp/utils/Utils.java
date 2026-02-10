@@ -1,26 +1,42 @@
 package com.roguesmp.utils;
 
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.annotation.GsonIgnore;
+import com.roguesmp.item.component.ItemComponent;
+import com.roguesmp.item.component.serialize.ComponentMapCodec;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.SplittableRandom;
+import java.util.*;
 
 public class Utils {
 
-    private static final DecimalFormat FORMAT;
     public static final Random RANDOM = Random.from(new SplittableRandom());
 
-    static {
-        FORMAT = new DecimalFormat("#.##");
-        FORMAT.setRoundingMode(RoundingMode.DOWN);
-    }
+    public static final Gson GSON = new GsonBuilder()
+            .registerTypeAdapter( new TypeToken<Map<String, ItemComponent>>() {}.getType(), new ComponentMapCodec())
+            .addSerializationExclusionStrategy(new ExclusionStrategy() {
+                @Override
+                public boolean shouldSkipField(FieldAttributes f) {
+                    return f.getAnnotation(GsonIgnore.class) != null;
+                }
+
+                @Override
+                public boolean shouldSkipClass(Class<?> clazz) {
+                    return false;
+                }
+            })
+            .setPrettyPrinting()
+            .disableHtmlEscaping()
+            .create();
 
     public static void runLater(Runnable runnable) {
         new BukkitRunnable() {
@@ -69,8 +85,8 @@ public class Utils {
         return components;
     }
 
-    public static String formatValue(double value) {
-        return FORMAT.format(value);
+    public static String formatDecimal(double value) {
+        return new BigDecimal(value).setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
     }
 
     private static final double EPSILON = 0.0001;

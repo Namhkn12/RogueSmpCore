@@ -1,22 +1,12 @@
 package com.roguesmp.registry;
 
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.annotation.GsonIgnore;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.Enchants;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.item.BaseItem;
-import com.roguesmp.item.component.impl.DurabilityComponent;
-import com.roguesmp.item.component.impl.EnchantComponent;
-import com.roguesmp.item.component.impl.EquipAttributeComponent;
-import com.roguesmp.item.component.impl.NameComponent;
-import com.roguesmp.item.component.serialize.ComponentMapCodec;
-import com.roguesmp.item.component.ItemComponent;
+import com.roguesmp.item.component.impl.*;
+import com.roguesmp.utils.Utils;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -25,6 +15,7 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ItemRegistry {
@@ -32,23 +23,6 @@ public class ItemRegistry {
     private static ItemRegistry INSTANCE = null;
 
     public static final String FOLDER_NAME = "items";
-
-    private static final Gson gson = new GsonBuilder()
-            .registerTypeAdapter( new TypeToken<Map<String, ItemComponent>>() {}.getType(), new ComponentMapCodec())
-            .addSerializationExclusionStrategy(new ExclusionStrategy() {
-                @Override
-                public boolean shouldSkipField(FieldAttributes f) {
-                    return f.getAnnotation(GsonIgnore.class) != null;
-                }
-
-                @Override
-                public boolean shouldSkipClass(Class<?> clazz) {
-                    return false;
-                }
-            })
-            .setPrettyPrinting()
-            .disableHtmlEscaping()
-            .create();
 
     private final RogueSmpCore plugin;
     private final Map<String, BaseItem> dataMap = new HashMap<>();
@@ -64,7 +38,12 @@ public class ItemRegistry {
                                         Map.of(Enchants.GREED, 4)
                                 ),
                                 "attribute", new EquipAttributeComponent(
-                                        Map.of(Attributes.SPEED, 0.2d, Attributes.PHYSICAL_ATTACK_DAMAGE, 4d), EquipSlot.MAINHAND))));
+                                        Map.of(Attributes.SPEED_FLAT, 0.05d, Attributes.PHYSICAL_DAMAGE_BASE, 4d), EquipSlot.MAINHAND))));
+
+        dataMap.put("fallback_item",
+                new BaseItem("fallback_item", Material.REDSTONE_BLOCK,
+                        Map.of("name", new NameComponent("<red>ERROR"),
+                                "description", new DescriptionComponent(List.of("<b><red><!i>Something went wrong if you see this item.")))));
     }
 
     public @Nullable BaseItem getBaseItem(@NotNull String id) {
@@ -87,11 +66,11 @@ public class ItemRegistry {
         return new File(plugin.getDataFolder(), FOLDER_NAME);
     }
 
-    public void saveToFile() {
+    public void saveToFile(boolean override) {
         File file = getDataFolder();
 
         if (!file.exists() && !file.mkdirs()) {
-            plugin.getLogger().severe("Failed to create items directory");
+            plugin.getLogger().severe("Failed to create " + FOLDER_NAME +  " directory");
             return;
         }
 
@@ -102,9 +81,12 @@ public class ItemRegistry {
             BaseItem item = entry.getValue();
 
             File child = new File(file, id + ".json");
+            if (child.exists() && !override) {
+                return;
+            }
 
             try (Writer writer = new FileWriter(child)) {
-                gson.toJson(item, writer);
+                Utils.GSON.toJson(item, writer);
             } catch (IOException e) {
                 plugin.getLogger().severe("Failed to save item: " + id);
             }
@@ -112,7 +94,7 @@ public class ItemRegistry {
     }
 
     public void loadFromFile() {
-        File itemsDir = new File(plugin.getDataFolder(), "items");
+        File itemsDir = new File(plugin.getDataFolder(), FOLDER_NAME);
 
         if (!itemsDir.exists() || !itemsDir.isDirectory()) {
             plugin.getLogger().info("No items folder found, starting with empty registry");
@@ -128,7 +110,7 @@ public class ItemRegistry {
 
         for (File file : files) {
             try (Reader reader = new FileReader(file)) {
-                BaseItem item = gson.fromJson(reader, BaseItem.class);
+                BaseItem item = Utils.GSON.fromJson(reader, BaseItem.class);
 
                 if (item == null || item.getId() == null) {
                     plugin.getLogger().warning("Invalid item file: " + file.getName());
@@ -139,6 +121,7 @@ public class ItemRegistry {
 
             } catch (Exception e) {
                 plugin.getLogger().severe("Failed to load item file: " + file.getName());
+                e.printStackTrace();
             }
         }
 

@@ -15,6 +15,7 @@ public class ComponentKeys {
     public static final ComponentKey<EquipAttributeComponent> ATTRIBUTE;
     public static final ComponentKey<DurabilityComponent> DURABILITY;
     public static final ComponentKey<DescriptionComponent> DESCRIPTION;
+    public static final ComponentKey<GemSocketComponent> GEM_SOCKET;
 
     static {
         ITEM_NAME = ItemComponentCodecRegistry.register("name",
@@ -25,6 +26,8 @@ public class ComponentKeys {
                 ComponentCodec.singleArg(Integer.class, DurabilityComponent::new, DurabilityComponent::maxDurability));
         DESCRIPTION = ItemComponentCodecRegistry.register("description",
                 ComponentCodec.singleArg(new TypeToken<List<String>>(){}.getType(), DescriptionComponent::new, DescriptionComponent::description));
+        GEM_SOCKET = ItemComponentCodecRegistry.register("socket",
+                ComponentCodec.singleArg(Integer.class, GemSocketComponent::new, GemSocketComponent::getSocketCount));
     }
 
     public static void loadClass() {
