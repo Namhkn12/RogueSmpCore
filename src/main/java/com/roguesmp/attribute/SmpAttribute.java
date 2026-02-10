@@ -9,7 +9,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -30,7 +29,7 @@ public interface SmpAttribute {
     @NotNull String getSimpleName();
 
     //return null for no display
-    @Nullable List<Component> getDisplayText(double value, SmpPlayer player, PersistentDataContainerView pdc);
+    @Nullable List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc);
 
     /**
      * Add attribute on equip, must implement both add and remove method

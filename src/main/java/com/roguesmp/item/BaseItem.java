@@ -1,23 +1,15 @@
 package com.roguesmp.item;
 
-import com.roguesmp.constant.Keys;
-import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ComponentKey;
 import com.roguesmp.item.component.ItemComponent;
-import com.roguesmp.item.lore.LoreBuilder;
 import com.roguesmp.player.SmpPlayer;
-import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.ItemLore;
-import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Represent base item data (prototype)
@@ -37,8 +29,12 @@ public class BaseItem {
         return (T) components.get(key.id());
     }
 
-    public ItemStack generateItemStack(SmpPlayer player, int stackAmount) {
+    public ItemStack generateItemStack(@Nullable SmpPlayer player, int stackAmount) {
         return new SmpItem(this).generateItemStack(player, stackAmount);
+    }
+
+    public ItemStack generateItemStack(int stackAmount) {
+        return new SmpItem(this).generateItemStack(stackAmount);
     }
 
     public @Unmodifiable Map<String, ItemComponent> getComponents() {

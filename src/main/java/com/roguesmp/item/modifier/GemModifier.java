@@ -6,12 +6,13 @@ import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.EquipAttributeComponent;
 import com.roguesmp.item.component.impl.GemSocketComponent;
 import com.roguesmp.player.SmpPlayer;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
 public class GemModifier implements ItemModifier {
     @Override
-    public void collectAndApply(SmpItem smpItem, SmpPlayer player) {
+    public void collectAndApply(SmpItem smpItem, @Nullable SmpPlayer player) {
 
         GemSocketComponent gemSocketComponent = smpItem.getComponent(ComponentKeys.GEM_SOCKET);
         if (gemSocketComponent == null) return;

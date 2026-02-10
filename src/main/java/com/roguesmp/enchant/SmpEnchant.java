@@ -31,7 +31,7 @@ public interface SmpEnchant {
     @NotNull String getSimpleName();
 
     // return null for no display
-    @Nullable List<Component> getDisplayText(int level, SmpPlayer player, PersistentDataContainerView pdc);
+    @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc);
 
     @NotNull Set<EquipSlot> getActiveSlots();
 

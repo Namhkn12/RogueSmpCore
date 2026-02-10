@@ -5,7 +5,8 @@ import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public record ItemDataContext(SmpItem smpItem, SmpPlayer player, ItemStack newStack, @NotNull ItemStack oldStack,
+public record ItemDataContext(SmpItem smpItem, @Nullable SmpPlayer player, ItemStack newStack, @NotNull ItemStack oldStack,
                               @NotNull PersistentDataContainerView data) {
 }
