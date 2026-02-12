@@ -60,7 +60,7 @@ public class Greed implements SmpEnchant {
     }
 
     @Override
-    public void onDamageEntity(DamageContext context, int level, SmpPlayer player) {
+    public void onMeleeDamageEntity(DamageContext context, int level, SmpPlayer player) {
         context.addDamageModifier(new DamageModifier(getId(), level, DamageType.PHYSICAL, DamageOperation.ADDITIVE));
     }
 

@@ -55,6 +55,10 @@ public interface SmpAttribute {
 
     }
 
+    default void onProjectileDamageEntity(DamageContext context, double value, SmpPlayer player) {
+
+    }
+
     default void onKillEntity(EntityDeathEvent event, double value, SmpPlayer player) {
 
     }

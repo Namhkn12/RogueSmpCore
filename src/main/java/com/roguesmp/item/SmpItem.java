@@ -93,7 +93,7 @@ public class SmpItem {
         result.editPersistentDataContainer(pdc -> {
 
             oldData.copyTo(pdc, true);
-
+            pdc.set(Keys.ITEM_ID, PersistentDataType.STRING, baseItem.getId());
             ItemDataContext dataContext = new ItemDataContext(this, player, result, itemStack, pdc);
             ItemLoreContext loreContext = new ItemLoreContext(this, player, loreBuilder, pdc);
 

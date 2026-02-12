@@ -2,6 +2,7 @@ package com.roguesmp.constant;
 
 import com.google.gson.annotations.SerializedName;
 import com.roguesmp.enchant.SmpEnchant;
+import com.roguesmp.enchant.impl.Explosive;
 import com.roguesmp.enchant.impl.Greed;
 
 public enum Enchants {
@@ -10,7 +11,9 @@ public enum Enchants {
     @SerializedName("sharpness")
     SHARPNESS(new Greed()),
     @SerializedName("critical")
-    CRITICAL(new Greed())
+    CRITICAL(new Greed()),
+    @SerializedName("explosive")
+    EXPLOSIVE(new Explosive())
     ;
 
     private final SmpEnchant enchant;
