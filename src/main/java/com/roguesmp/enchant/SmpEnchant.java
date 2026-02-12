@@ -46,7 +46,11 @@ public interface SmpEnchant {
 
     }
 
-    default void onDamageEntity(DamageContext context, int level, SmpPlayer player) {
+    default void onMeleeDamageEntity(DamageContext context, int level, SmpPlayer player) {
+
+    }
+
+    default void onProjectileDamageEntity(DamageContext context, int level, SmpPlayer player) {
 
     }
 
@@ -54,11 +58,11 @@ public interface SmpEnchant {
 
     }
 
-    default void onHurt(DamageContext context, double value, SmpPlayer player) {
+    default void onHurt(DamageContext context, int level, SmpPlayer player) {
 
     }
 
-    default void onHurtFatal(DamageContext context, double value, SmpPlayer player) {
+    default void onHurtFatal(DamageContext context, int level, SmpPlayer player) {
 
     }
 
@@ -66,23 +70,23 @@ public interface SmpEnchant {
 
     }
 
-    default void onExpChange(PlayerExpChangeEvent event, double value, SmpPlayer player) {
+    default void onExpChange(PlayerExpChangeEvent event, int level, SmpPlayer player) {
 
     }
 
-    default void onBlockBreak(BlockBreakEvent event, double value, SmpPlayer player) {
+    default void onBlockBreak(BlockBreakEvent event, int level, SmpPlayer player) {
 
     }
 
-    default void onProjectileHit(ProjectileHitEvent event, double value, SmpPlayer player) {
+    default void onProjectileHit(ProjectileHitEvent event, int level, SmpPlayer player) {
 
     }
 
-    default void onProjectileLaunch(ProjectileLaunchEvent event, double value, SmpPlayer player) {
+    default void onProjectileLaunch(ProjectileLaunchEvent event, int level, SmpPlayer player) {
 
     }
 
     default List<Component> defaultLoreProvider(int level) {
-        return List.of(Component.text(getSimpleName() + Utils.toRoman(level), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        return List.of(Component.text(getSimpleName() + " " + Utils.toRoman(level), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
     }
 }

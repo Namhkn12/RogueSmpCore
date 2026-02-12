@@ -1,10 +1,10 @@
 package com.roguesmp.listener;
 
-import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.context.DamageContext;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.PlayerManager;
+import com.roguesmp.player.PlayerProjectile;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.Utils;
@@ -23,10 +23,6 @@ import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 public class PlayerListener implements Listener {
 
@@ -63,7 +59,6 @@ public class PlayerListener implements Listener {
                 }
 
                 smpPlayer.updateSlotStat(player, equipSlot, new SmpItem(equipmentChange.oldItem()), newItem);
-                player.sendMessage("EquipmentChange " + equipSlot.name());
             }
         });
     }
@@ -71,8 +66,21 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onDamageEntity(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Projectile projectile) {
-            if (!(projectile.getShooter() instanceof Player)) return;
+            if (!(projectile.getShooter() instanceof Player player)) return;
             //Player projectiles (bow, trident, etc...) damage entity
+            SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
+            if (smpPlayer == null) return;
+
+            DamageContext damageContext = new DamageContext(event.getEntity(), projectile, 1);
+            PlayerProjectile playerProjectile = smpPlayer.getProjectile(projectile.getUniqueId());
+            if (playerProjectile == null) return;
+            playerProjectile.getActiveEnchants().forEach((enchants, integer) -> {
+                enchants.getEnchant().onProjectileDamageEntity(damageContext, integer, smpPlayer);
+            });
+            playerProjectile.getActiveAttributes().forEach((attributes, aDouble) -> {
+                attributes.getAttribute().onProjectileDamageEntity(damageContext, aDouble, smpPlayer);
+            });
+            return;
         }
 
         if (!(event.getDamager() instanceof Player) && event.getEntity() instanceof Player player)  {
@@ -109,7 +117,7 @@ public class PlayerListener implements Listener {
             DamageContext damageContext = new DamageContext(event.getEntity(), player, 1);
             damageContext.setCritical(event.isCritical());
             smpPlayer.getActiveEnchants().forEach((enchants, integer) -> {
-                enchants.getEnchant().onDamageEntity(damageContext, integer, smpPlayer);
+                enchants.getEnchant().onMeleeDamageEntity(damageContext, integer, smpPlayer);
             });
 
             smpPlayer.getActiveAttributes().forEach((attributes, aDouble) -> {
@@ -181,12 +189,18 @@ public class PlayerListener implements Listener {
         if (!(event.getEntity().getShooter() instanceof Player player)) return;
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
         if (smpPlayer == null) return;
-        smpPlayer.getActiveEnchants().forEach((enchants, integer) -> {
+        PlayerProjectile playerProjectile = smpPlayer.getProjectile(event.getEntity().getUniqueId());
+        if (playerProjectile == null) return;
+        playerProjectile.getActiveEnchants().forEach((enchants, integer) -> {
             enchants.getEnchant().onProjectileHit(event, integer, smpPlayer);
         });
-        smpPlayer.getActiveAttributes().forEach((attributes, aDouble) -> {
+        playerProjectile.getActiveAttributes().forEach((attributes, aDouble) -> {
             attributes.getAttribute().onProjectileHit(event, aDouble, smpPlayer);
         });
+        if (event.getHitBlock() != null) {
+            Utils.runLater(() -> smpPlayer.untrackProjectile(event.getEntity().getUniqueId()));
+        }
+
     }
 
     @EventHandler
@@ -194,11 +208,17 @@ public class PlayerListener implements Listener {
         if (!(event.getEntity().getShooter() instanceof Player player)) return;
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
         if (smpPlayer == null) return;
-        smpPlayer.getActiveEnchants().forEach((enchants, integer) -> {
+        event.getEntity().setPersistent(false);
+        smpPlayer.trackProjectile(event.getEntity());
+        PlayerProjectile playerProjectile = smpPlayer.getProjectile(event.getEntity().getUniqueId());
+        if (playerProjectile == null) return;
+        playerProjectile.getActiveEnchants().forEach((enchants, integer) -> {
             enchants.getEnchant().onProjectileLaunch(event, integer, smpPlayer);
         });
-        smpPlayer.getActiveAttributes().forEach((attributes, aDouble) -> {
+        playerProjectile.getActiveAttributes().forEach((attributes, aDouble) -> {
             attributes.getAttribute().onProjectileLaunch(event, aDouble, smpPlayer);
         });
+        // Untrack in case the projectile never hit anything
+        Utils.runLater(() -> smpPlayer.untrackProjectile(event.getEntity().getUniqueId()), 20 * 10);
     }
 }

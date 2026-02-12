@@ -1,12 +1,8 @@
 package com.roguesmp.context;
 
-import com.destroystokyo.paper.event.player.PlayerAttackEntityCooldownResetEvent;
 import com.roguesmp.damage.DamageModifier;
-import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +54,7 @@ public class DamageContext {
         return finalDamage;
     }
 
-    private double getDamageWithCooldown(double baseDamage, Player player) {
+    private static double getDamageWithCooldown(double baseDamage, Player player) {
         float p = player.getAttackCooldown();
         player.sendMessage(String.valueOf(p));
         return baseDamage * (0.2 + 0.8 * p * p);

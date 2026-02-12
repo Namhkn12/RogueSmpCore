@@ -1,0 +1,58 @@
+package com.roguesmp.enchant.impl;
+
+import com.roguesmp.constant.Enchants;
+import com.roguesmp.constant.EquipSlot;
+import com.roguesmp.context.DamageContext;
+import com.roguesmp.enchant.SmpEnchant;
+import com.roguesmp.player.SmpPlayer;
+import io.papermc.paper.persistence.PersistentDataContainerView;
+import net.kyori.adventure.text.Component;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Set;
+
+public class Explosive implements SmpEnchant {
+    @Override
+    public @NotNull String getId() {
+        return "explosive";
+    }
+
+    @Override
+    public @NotNull Enchants getEnumConstant() {
+        return Enchants.EXPLOSIVE;
+    }
+
+    @Override
+    public @NotNull String getSimpleName() {
+        return "Tên nổ";
+    }
+
+    @Override
+    public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
+        return defaultLoreProvider(level);
+    }
+
+    @Override
+    public @NotNull Set<EquipSlot> getActiveSlots() {
+        return Set.of(EquipSlot.MAINHAND, EquipSlot.PROJECTILE);
+    }
+
+    @Override
+    public void onProjectileDamageEntity(DamageContext context, int level, SmpPlayer player) {
+        player.getPlayer().sendMessage("Damage! " + level);
+    }
+
+    @Override
+    public void onProjectileLaunch(ProjectileLaunchEvent event, int level, SmpPlayer player) {
+        player.getPlayer().sendMessage("Launched " + level);
+    }
+
+    @Override
+    public void onProjectileHit(ProjectileHitEvent event, int level, SmpPlayer player) {
+        player.getPlayer().sendMessage("EXPLODE! " + level);
+    }
+}

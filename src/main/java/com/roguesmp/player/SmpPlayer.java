@@ -10,24 +10,29 @@ import com.roguesmp.item.component.impl.EquipAttributeComponent;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class SmpPlayer {
     private final UUID uuid;
     private final Map<Enchants, Integer> activeEnchants;
     private final Map<Attributes, Double> activeAttributes;
 
+    private final Map<UUID, PlayerProjectile> projectiles = new HashMap<>();
+
     public SmpPlayer(UUID uuid) {
         this.uuid = uuid;
         activeEnchants = new EnumMap<>(Enchants.class);
         activeAttributes = new EnumMap<>(Attributes.class);
     }
+
+    public SmpPlayer(Player player) {
+        this(player.getUniqueId());
+    }
+
 
     public void updateSlotStat(Player player, EquipSlot slot, @Nullable SmpItem oldItem, @Nullable SmpItem newItem) {
         if (oldItem != null) {
@@ -95,19 +100,28 @@ public class SmpPlayer {
 
     }
 
-    public SmpPlayer(Player player) {
-        this(player.getUniqueId());
-    }
-
-    public Map<Enchants, Integer> getActiveEnchants() {
+    public @Unmodifiable Map<Enchants, Integer> getActiveEnchants() {
         return Map.copyOf(activeEnchants);
     }
 
-    public Map<Attributes, Double> getActiveAttributes() {
+    public @Unmodifiable Map<Attributes, Double> getActiveAttributes() {
         return Map.copyOf(activeAttributes);
     }
 
     public @Nullable Player getPlayer() {
         return Bukkit.getPlayer(uuid);
+    }
+
+    public @Nullable PlayerProjectile getProjectile(UUID uuid) {
+        return projectiles.get(uuid);
+    }
+
+    public void trackProjectile(Projectile projectile) {
+        projectiles.put(projectile.getUniqueId(), new PlayerProjectile(this, projectile, activeEnchants, activeAttributes));
+    }
+
+    public @Nullable PlayerProjectile untrackProjectile(UUID uuid) {
+        Bukkit.getLogger().info("Removed arrow");
+        return projectiles.remove(uuid);
     }
 }
