@@ -14,31 +14,29 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class CriticalDamageFlat implements SmpAttribute {
+public class ProjectileDamagePercent implements SmpAttribute {
     @Override
     public @NotNull String getId() {
-        return "crit_damage_flat";
+        return "projectile_damage_percent";
     }
 
     @Override
     public @NotNull Attributes getEnumConstant() {
-        return Attributes.CRIT_DAMAGE_FLAT;
+        return Attributes.PROJECTILE_DAMAGE_PERCENT;
     }
 
     @Override
     public @NotNull String getSimpleName() {
-        return "Sát thương chí mạng";
+        return "Sát thương tầm xa";
     }
 
     @Override
-    public @NotNull List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
-        return defaultFlatLoreProvider(value);
+    public @Nullable List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
+        return defaultPercentLoreProvider(value);
     }
 
     @Override
-    public void onDamageEntity(DamageContext context, double value, SmpPlayer player) {
-        if (context.isCritical()) {
-            context.addDamageModifier(new DamageModifier(getId(), value, DamageType.PHYSICAL, DamageOperation.ADD_FINAL));
-        }
+    public void onProjectileDamageEntity(DamageContext context, double value, SmpPlayer player) {
+        context.addDamageModifier(new DamageModifier(getId(), value / 100, DamageType.PHYSICAL, DamageOperation.INCREASE_BASE));
     }
 }

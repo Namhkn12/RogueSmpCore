@@ -70,8 +70,9 @@ public class PlayerListener implements Listener {
             //Player projectiles (bow, trident, etc...) damage entity
             SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
             if (smpPlayer == null) return;
+            DamageContext damageContext = new DamageContext(event.getEntity(), projectile, 0);
+            damageContext.setCritical(event.isCritical());
 
-            DamageContext damageContext = new DamageContext(event.getEntity(), projectile, 1);
             PlayerProjectile playerProjectile = smpPlayer.getProjectile(projectile.getUniqueId());
             if (playerProjectile == null) return;
             playerProjectile.getActiveEnchants().forEach((enchants, integer) -> {
@@ -80,6 +81,10 @@ public class PlayerListener implements Listener {
             playerProjectile.getActiveAttributes().forEach((attributes, aDouble) -> {
                 attributes.getAttribute().onProjectileDamageEntity(damageContext, aDouble, smpPlayer);
             });
+
+            event.setCancelled(damageContext.isCancelled());
+            event.setDamage(damageContext.calculateFinalDamage());
+            player.sendMessage(String.valueOf(event.getDamage()));
             return;
         }
 
@@ -87,7 +92,8 @@ public class PlayerListener implements Listener {
             //Other entity (including projectiles) damage player
             SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
             if (smpPlayer == null) return;
-            DamageContext damageContext = new DamageContext(player, event.getDamager(), 1);
+            DamageContext damageContext = new DamageContext(player, event.getDamager(), event.getDamage());
+
             smpPlayer.getActiveEnchants().forEach((enchants, integer) -> {
                 enchants.getEnchant().onHurt(damageContext, integer, smpPlayer);
             });
@@ -103,9 +109,10 @@ public class PlayerListener implements Listener {
                     attributes.getAttribute().onHurtFatal(damageContext, aDouble, smpPlayer);
                 });
             }
+
             event.setCancelled(damageContext.isCancelled());
             event.setDamage(damageContext.calculateFinalDamage());
-            event.getDamager().sendMessage(String.valueOf(event.getDamage()));
+            event.getEntity().sendMessage(String.valueOf(event.getDamage()));
 
             return;
         }
@@ -114,8 +121,9 @@ public class PlayerListener implements Listener {
             //Player (melee) damage other entities
             SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
             if (smpPlayer == null) return;
-            DamageContext damageContext = new DamageContext(event.getEntity(), player, 1);
+            DamageContext damageContext = new DamageContext(event.getEntity(), player, 0);
             damageContext.setCritical(event.isCritical());
+
             smpPlayer.getActiveEnchants().forEach((enchants, integer) -> {
                 enchants.getEnchant().onMeleeDamageEntity(damageContext, integer, smpPlayer);
             });
@@ -123,6 +131,7 @@ public class PlayerListener implements Listener {
             smpPlayer.getActiveAttributes().forEach((attributes, aDouble) -> {
                 attributes.getAttribute().onDamageEntity(damageContext, aDouble, smpPlayer);
             });
+
             event.setCancelled(damageContext.isCancelled());
             event.setDamage(damageContext.calculateFinalDamage());
             event.getDamager().sendMessage(String.valueOf(event.getDamage()));
@@ -218,6 +227,7 @@ public class PlayerListener implements Listener {
         playerProjectile.getActiveAttributes().forEach((attributes, aDouble) -> {
             attributes.getAttribute().onProjectileLaunch(event, aDouble, smpPlayer);
         });
+        player.sendMessage(String.valueOf(event.getEntity().getVelocity().length()));
         // Untrack in case the projectile never hit anything
         Utils.runLater(() -> smpPlayer.untrackProjectile(event.getEntity().getUniqueId()), 20 * 10);
     }

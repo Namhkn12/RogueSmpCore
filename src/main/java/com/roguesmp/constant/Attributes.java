@@ -2,14 +2,17 @@ package com.roguesmp.constant;
 
 import com.google.gson.annotations.SerializedName;
 import com.roguesmp.attribute.SmpAttribute;
-import com.roguesmp.attribute.impl.AttackSpeedBase;
-import com.roguesmp.attribute.impl.CriticalDamageFlat;
-import com.roguesmp.attribute.impl.PhysicalDamageBase;
-import com.roguesmp.attribute.impl.SpeedFlat;
+import com.roguesmp.attribute.impl.*;
 
 public enum Attributes {
     @SerializedName("physical_damage_base")
     PHYSICAL_DAMAGE_BASE(new PhysicalDamageBase()),
+    @SerializedName("projectile_damage_base")
+    PROJECTILE_DAMAGE_BASE(new ProjectileDamageBase()),
+    @SerializedName("defense_flat")
+    DEFENSE_FLAT(new DefenseFlat()),
+    @SerializedName("projectile_damage_percent")
+    PROJECTILE_DAMAGE_PERCENT(new ProjectileDamagePercent()),
     @SerializedName("attack_speed_base")
     ATTACK_SPEED_BASE(new AttackSpeedBase()),
     @SerializedName("crit_damage_flat")
