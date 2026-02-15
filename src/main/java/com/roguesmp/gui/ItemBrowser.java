@@ -130,6 +130,10 @@ public class ItemBrowser extends BaseGui {
                             ItemStack res = SmpItemUtils.addGem(player.getEquipment().getItemInMainHand(), PlayerManager.getInstance().getSmpPlayer(player.getUniqueId()), List.of((String) commandArguments.get("add_gem_id")));
                             player.getEquipment().setItemInMainHand(res);
                         }))
+                .withSubcommand(new CommandAPICommand("reload") // WILL CAUSE THE SERVER TO FREEZE
+                        .executesPlayer((player1, commandArguments) -> {
+                            Utils.runLater(() -> ItemRegistry.getInstance().loadFromFile());
+                        }))
                 .register();
     }
 

@@ -1,20 +1,25 @@
 package com.roguesmp;
 
 import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.effect.EffectManager;
 import com.roguesmp.gui.ItemBrowser;
-import com.roguesmp.item.gem.GemData;
+import com.roguesmp.listener.EffectListener;
 import com.roguesmp.listener.GuiListener;
-import com.roguesmp.registry.GemRegistry;
-import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.listener.PlayerListener;
 import com.roguesmp.player.PlayerManager;
+import com.roguesmp.registry.GemRegistry;
+import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.registry.ModifierRegistry;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class RogueSmpCore extends JavaPlugin {
 
     private static RogueSmpCore INSTANCE;
+
+    public static final Logger LOGGER = LoggerFactory.getLogger("RogueSMP");
 
     // Init whatever here, called before initListeners
     public void init() {
@@ -26,6 +31,7 @@ public final class RogueSmpCore extends JavaPlugin {
         GemRegistry.init(this);
 
         PlayerManager.init(this);
+        EffectManager.init(this);
     }
 
     // Load data from files, databases, etc
@@ -44,6 +50,7 @@ public final class RogueSmpCore extends JavaPlugin {
     public void initListeners() {
         registerListener(new PlayerListener(PlayerManager.getInstance()));
         registerListener(new GuiListener());
+        registerListener(new EffectListener(EffectManager.getInstance()));
     }
 
     //Register CommandAPICommand
