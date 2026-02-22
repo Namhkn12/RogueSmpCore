@@ -1,6 +1,7 @@
 package com.roguesmp.listener;
 
 import com.roguesmp.effect.EffectManager;
+import com.roguesmp.event.DamageEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -17,6 +18,11 @@ public class EffectListener implements Listener {
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         effectManager.onEntityDeath(event);
+    }
+
+    @EventHandler
+    public void onDamage(DamageEvent event) {
+        effectManager.onDamage(event);
     }
 
     @EventHandler

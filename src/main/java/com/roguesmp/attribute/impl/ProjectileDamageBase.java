@@ -4,8 +4,7 @@ import com.roguesmp.attribute.SmpAttribute;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.constant.DamageType;
-import com.roguesmp.context.DamageContext;
-import com.roguesmp.damage.DamageModifier;
+import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -40,7 +39,10 @@ public class ProjectileDamageBase implements SmpAttribute {
     }
 
     @Override
-    public void onProjectileDamageEntity(DamageContext context, double value, SmpPlayer player) {
-        context.addDamageModifier(new DamageModifier(getId(), value, DamageType.PHYSICAL, DamageOperation.BASE));
+    public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
+        if (event.getDamageType() == DamageType.PROJECTILE) {
+            event.addDamageModifier(value, DamageOperation.BASE);
+        }
+
     }
 }

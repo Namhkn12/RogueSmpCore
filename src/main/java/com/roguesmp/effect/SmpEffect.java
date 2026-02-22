@@ -1,6 +1,7 @@
 package com.roguesmp.effect;
 
 import com.google.gson.annotations.SerializedName;
+import com.roguesmp.event.DamageEvent;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.jetbrains.annotations.NotNull;
@@ -89,6 +90,10 @@ public abstract class SmpEffect implements Comparable<SmpEffect> {
     }
 
     public void onDeath(EntityDeathEvent event) {
+
+    }
+
+    public void onDamage(DamageEvent event) {
 
     }
 }

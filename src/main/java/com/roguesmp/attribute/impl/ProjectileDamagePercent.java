@@ -4,8 +4,7 @@ import com.roguesmp.attribute.SmpAttribute;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.constant.DamageType;
-import com.roguesmp.context.DamageContext;
-import com.roguesmp.damage.DamageModifier;
+import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
@@ -36,7 +35,10 @@ public class ProjectileDamagePercent implements SmpAttribute {
     }
 
     @Override
-    public void onProjectileDamageEntity(DamageContext context, double value, SmpPlayer player) {
-        context.addDamageModifier(new DamageModifier(getId(), value / 100, DamageType.PHYSICAL, DamageOperation.INCREASE_BASE));
+    public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
+        if (event.getDamageType() == DamageType.PROJECTILE) {
+            event.addDamageModifier(value / 100, DamageOperation.INCREASE_BASE);
+        }
+
     }
 }

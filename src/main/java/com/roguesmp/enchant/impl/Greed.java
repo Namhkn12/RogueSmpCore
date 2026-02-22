@@ -1,9 +1,11 @@
 package com.roguesmp.enchant.impl;
 
-import com.roguesmp.constant.*;
-import com.roguesmp.context.DamageContext;
-import com.roguesmp.damage.DamageModifier;
+import com.roguesmp.constant.DamageOperation;
+import com.roguesmp.constant.Enchants;
+import com.roguesmp.constant.EquipSlot;
+import com.roguesmp.constant.Keys;
 import com.roguesmp.enchant.SmpEnchant;
+import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -60,17 +62,12 @@ public class Greed implements SmpEnchant {
     }
 
     @Override
-    public void onMeleeDamageEntity(DamageContext context, int level, SmpPlayer player) {
-        context.addDamageModifier(new DamageModifier(getId(), level, DamageType.PHYSICAL, DamageOperation.ADD_BASE));
+    public void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
+        event.addDamageModifier(level, DamageOperation.ADD_BASE);
     }
 
     @Override
-    public void onProjectileDamageEntity(DamageContext context, int level, SmpPlayer player) {
-        context.addDamageModifier(new DamageModifier(getId(), level, DamageType.PHYSICAL, DamageOperation.ADD_BASE));
-    }
-
-    @Override
-    public void onKillEntity(EntityDeathEvent event, int level, SmpPlayer player) {
+    public void onKillEntity(EntityDeathEvent event, int level, @NotNull SmpPlayer player) {
         Player player1 = (Player) event.getDamageSource().getCausingEntity();
         player1.getEquipment().getItemInMainHand().editPersistentDataContainer(pdc -> {
             Integer stack = pdc.get(DATA_KEY, PersistentDataType.INTEGER);
