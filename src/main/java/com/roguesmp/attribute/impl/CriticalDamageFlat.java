@@ -3,9 +3,7 @@ package com.roguesmp.attribute.impl;
 import com.roguesmp.attribute.SmpAttribute;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.DamageOperation;
-import com.roguesmp.constant.DamageType;
-import com.roguesmp.context.DamageContext;
-import com.roguesmp.damage.DamageModifier;
+import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
@@ -36,9 +34,9 @@ public class CriticalDamageFlat implements SmpAttribute {
     }
 
     @Override
-    public void onDamageEntity(DamageContext context, double value, SmpPlayer player) {
-        if (context.isCritical()) {
-            context.addDamageModifier(new DamageModifier(getId(), value, DamageType.PHYSICAL, DamageOperation.ADD_FINAL));
+    public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
+        if (event.isCritical()) {
+            event.addDamageModifier(value, DamageOperation.ADD_BASE);
         }
     }
 }

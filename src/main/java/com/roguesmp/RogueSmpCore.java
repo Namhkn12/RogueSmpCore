@@ -3,6 +3,7 @@ package com.roguesmp;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.gui.ItemBrowser;
+import com.roguesmp.listener.DamageListener;
 import com.roguesmp.listener.EffectListener;
 import com.roguesmp.listener.GuiListener;
 import com.roguesmp.listener.PlayerListener;
@@ -48,8 +49,10 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Register Listener here
     public void initListeners() {
-        registerListener(new PlayerListener(PlayerManager.getInstance()));
         registerListener(new GuiListener());
+
+        registerListener(new DamageListener());
+        registerListener(new PlayerListener(PlayerManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
     }
 

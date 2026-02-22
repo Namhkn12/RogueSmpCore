@@ -2,7 +2,7 @@ package com.roguesmp.enchant;
 
 import com.roguesmp.constant.Enchants;
 import com.roguesmp.constant.EquipSlot;
-import com.roguesmp.context.DamageContext;
+import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -42,47 +42,43 @@ public interface SmpEnchant {
 
     }
 
-    default void tick(SmpPlayer player, int level, boolean twoHz, boolean oneHz) {
+    default void tick(@NotNull SmpPlayer player, int level, boolean twoHz, boolean oneHz) {
 
     }
 
-    default void onMeleeDamageEntity(DamageContext context, int level, SmpPlayer player) {
+    default void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 
-    default void onProjectileDamageEntity(DamageContext context, int level, SmpPlayer player) {
+    default void onKillEntity(EntityDeathEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 
-    default void onKillEntity(EntityDeathEvent event, int level, SmpPlayer player) {
+    default void onHurt(DamageEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 
-    default void onHurt(DamageContext context, int level, SmpPlayer player) {
+    default void onHurtFatal(DamageEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 
-    default void onHurtFatal(DamageContext context, int level, SmpPlayer player) {
+    default void onConsume(PlayerItemConsumeEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 
-    default void onConsume(PlayerItemConsumeEvent event, int level, SmpPlayer player) {
+    default void onExpChange(PlayerExpChangeEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 
-    default void onExpChange(PlayerExpChangeEvent event, int level, SmpPlayer player) {
+    default void onBlockBreak(BlockBreakEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 
-    default void onBlockBreak(BlockBreakEvent event, int level, SmpPlayer player) {
+    default void onProjectileHit(ProjectileHitEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 
-    default void onProjectileHit(ProjectileHitEvent event, int level, SmpPlayer player) {
-
-    }
-
-    default void onProjectileLaunch(ProjectileLaunchEvent event, int level, SmpPlayer player) {
+    default void onProjectileLaunch(ProjectileLaunchEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 

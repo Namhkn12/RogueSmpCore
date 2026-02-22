@@ -12,16 +12,18 @@ public class SpeedBuffEffect extends SmpEffect {
     public static final String EFFECT_ID = "speed_buff";
 
     private final double value;
+    private final String modifierId;
 
-    public SpeedBuffEffect(int duration, double value, DeathBehavior behavior) {
+    public SpeedBuffEffect(int duration, double value, DeathBehavior behavior, String modifierId) {
         super(duration, EFFECT_ID, behavior);
         this.value = value;
-
+        this.modifierId = modifierId;
     }
 
-    public SpeedBuffEffect(int duration, double value) {
+    public SpeedBuffEffect(int duration, double value, String modifierId) {
         super(duration, EFFECT_ID);
         this.value = value;
+        this.modifierId = modifierId;
     }
 
     @Override
@@ -39,7 +41,7 @@ public class SpeedBuffEffect extends SmpEffect {
         if (entity instanceof LivingEntity le) {
             AttributeInstance speedInstance = le.getAttribute(Attribute.MOVEMENT_SPEED);
             if (speedInstance != null) {
-                AttributeModifier modifier = new AttributeModifier(Keys.of(EFFECT_ID), value, AttributeModifier.Operation.MULTIPLY_SCALAR_1);
+                AttributeModifier modifier = new AttributeModifier(Keys.of(modifierId), value, AttributeModifier.Operation.MULTIPLY_SCALAR_1);
                 speedInstance.addTransientModifier(modifier);
             }
             entity.sendMessage("GAINED " + value);
@@ -51,7 +53,7 @@ public class SpeedBuffEffect extends SmpEffect {
         if (entity instanceof LivingEntity le) {
             AttributeInstance speedInstance = le.getAttribute(Attribute.MOVEMENT_SPEED);
             if (speedInstance != null) {
-                speedInstance.removeModifier(Keys.of(EFFECT_ID));
+                speedInstance.removeModifier(Keys.of(modifierId));
             }
             entity.sendMessage("EXPIRED " + value);
         }

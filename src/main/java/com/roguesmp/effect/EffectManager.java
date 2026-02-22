@@ -2,7 +2,8 @@ package com.roguesmp.effect;
 
 import com.google.gson.*;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.effect.impl.SpeedBuffEffect;
+import com.roguesmp.effect.impl.DamageIncreaseEffect;
+import com.roguesmp.event.DamageEvent;
 import com.roguesmp.registry.EffectCodecRegistry;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -113,7 +114,6 @@ public class EffectManager {
 
         // Get or create the TreeSet for this effect type
         TreeSet<SmpEffect> effects = entityEffects.computeIfAbsent(sourceId, k -> new TreeSet<>());
-
         if (!effects.isEmpty()) {
             SmpEffect currentActiveEffect = effects.getLast();
             // Iterate through effects to check if there is already an effect with existing magnitude but less duration.
@@ -205,7 +205,15 @@ public class EffectManager {
             });
             allEffects.remove(le.getUniqueId());
         }
+    }
 
+    public void onDamage(DamageEvent event) {
+        Entity le = event.getDamager();
+        Map<String, TreeSet<SmpEffect>> effectMap = allEffects.get(le.getUniqueId());
+        if (effectMap == null) return;
+        effectMap.forEach((s, smpEffects) -> {
+            smpEffects.getLast().onDamage(event);
+        });
     }
 
     public static void init(RogueSmpCore plugin) {
@@ -333,7 +341,7 @@ public class EffectManager {
                         .executesPlayer((player, commandArguments) -> {
                             int duration = (Integer) commandArguments.get("duration");
                             double magnitude = (Double) commandArguments.get("magnitude");
-                            EffectManager.getInstance().addEffect(player, "command", new SpeedBuffEffect(duration, magnitude, SmpEffect.DeathBehavior.KEEP_ON_DEATH));
+                            EffectManager.getInstance().addEffect(player, "command", new DamageIncreaseEffect(duration, magnitude));
                         }))
                 .register();
     }
