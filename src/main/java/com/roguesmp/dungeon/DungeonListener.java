@@ -24,7 +24,6 @@ public class DungeonListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event){
         //handle player join
-        partyManager.refreshPSDPartyId(event.getPlayer());
     }
 
     @EventHandler
