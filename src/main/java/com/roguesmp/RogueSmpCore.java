@@ -1,6 +1,7 @@
 package com.roguesmp;
 
 import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.dungeon.party.PartyManager;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.item.gem.GemData;
 import com.roguesmp.listener.GuiListener;
@@ -26,6 +27,7 @@ public final class RogueSmpCore extends JavaPlugin {
         GemRegistry.init(this);
 
         PlayerManager.init(this);
+        PartyManager.init();
     }
 
     // Load data from files, databases, etc
@@ -49,6 +51,7 @@ public final class RogueSmpCore extends JavaPlugin {
     //Register CommandAPICommand
     public void initCommands() {
         ItemBrowser.registerCommand();
+        PartyManager.getInstance().registerCommands();
     }
 
     @Override

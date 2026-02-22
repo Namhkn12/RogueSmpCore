@@ -1,149 +1,189 @@
 package com.roguesmp.dungeon.party;
 
-import com.roguesmp.RogueSmpCore;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 public class PartyManager {
-    private final Map<UUID, Party> partyManager = new HashMap<>();
+    private static PartyManager INSTANCE = null;
+    private final PartyInviteManager inviteManager;
+    private final Map<UUID, Party> partyMap = new HashMap<>();
+    private final Map<UUID, UUID> playerToPartyMap = new HashMap<>();
 
-    private static final Logger logger = RogueSmpCore.getInstance().getLogger();
-
-    public void register(){
-        //refresh
-
+    public static void init() {
+        if (INSTANCE != null) {
+            throw new IllegalStateException("PartyManager already initialized!");
+        }
+        INSTANCE = new PartyManager();
     }
 
-    public void refreshPSDPartyId(Player player) {
-        String partyId = player.getPersistentDataContainer().get(NamespacedKeys.PARTY_KEY, PersistentDataType.STRING);
-
-        if (partyId != null) {
-            logger.warning("Found player " + player.getName() + " with psd partyId: " + partyId);
-            player.getPersistentDataContainer().remove(NamespacedKeys.PARTY_KEY);
-        } else {
-            logger.info("Player " + player.getName() + " has no partyId");
+    public static PartyManager getInstance(){
+        if (INSTANCE == null) {
+            throw new RuntimeException(PartyManager.class.getSimpleName() + "is null when getInstance() is called.");
         }
+        return INSTANCE;
     }
 
-
-    public void createParty(Player sender){
-        if(isInParty(sender)){
-            sender.sendMessage("Bạn đã có party");
-            return;
-        }
-        Party party = new Party(sender.getUniqueId(), sender.getName(), new ArrayList<>(), 3, true);
-        sender.getPersistentDataContainer().set(NamespacedKeys.PARTY_KEY, PersistentDataType.STRING, party.getPartyId().toString());
-        partyManager.put(party.getPartyId(), party);
-        sender.sendMessage("Bạn đã tạo 1 party! Hãy mời đồng đội cùng tham gia");
+    public PartyInviteManager getInviteManager() {
+        return inviteManager;
     }
 
-    public void removeParty(Player sender){
-        if(!isInParty(sender)){
-            sender.sendMessage("Bạn không thuộc party nào!");
-            return;
-        }
-        if(!isOwner(sender)){
-            sender.sendMessage("Bạn không có quyền xóa party!");
-            return;
-        }
-
-        partyManager.get(sender.getUniqueId()).getMembers().forEach(uuid -> {
-            Player member = Bukkit.getPlayer(uuid);
-            if(member != null) member.getPersistentDataContainer().remove(NamespacedKeys.PARTY_KEY);
-        });
-        sender.getPersistentDataContainer().remove(NamespacedKeys.PARTY_KEY);
-        partyManager.remove(sender.getUniqueId());
-        sender.sendMessage("Bạn đã giải tán party!");
+    public void registerCommands() {
+        new PartyCommand(this, inviteManager).register();
     }
 
-    public Party getParty(UUID partyId){
-        return partyManager.get(partyId);
+    private PartyManager() {
+        this.inviteManager = new PartyInviteManager(this);
     }
 
-    public void joinParty(Player sender, Player inviter){
-        if(isInParty(sender)){
-            sender.sendMessage("Bạn đang trong 1 party! Hãy rời party cũ trước khi tham gia!");
+    /*
+    * Create a party
+    * */
+    public void createParty(Player player) {
+        if (isInParty(player)) {
+            player.sendMessage("Bạn đã có party!");
             return;
         }
-        if(!isOwner(inviter)){
-            sender.sendMessage("Người này không phải chủ team!");
-            return;
-        }
-        //check : have inviter
 
-        partyManager.get(inviter.getUniqueId()).getMembers().add(sender.getUniqueId());
-        sender.getPersistentDataContainer().set(NamespacedKeys.PARTY_KEY, PersistentDataType.STRING, inviter.getUniqueId().toString());
-        sender.sendMessage("Bạn đã tham gia party của " + inviter.getName());
+        UUID partyId = UUID.randomUUID();
+        List<UUID> members = new ArrayList<>();
+        members.add(player.getUniqueId());
 
+        Party party = new Party(partyId, player.getUniqueId(), members, 3, true);
+
+        partyMap.put(partyId, party);
+        playerToPartyMap.put(player.getUniqueId(), partyId);
+
+        player.sendMessage("Bạn đã tạo party!");
     }
 
-    public void leaveParty(Player sender){
-        if(!isInParty(sender)){
-            sender.sendMessage("Bạn không thuộc party nào!");
+    /*
+     * DisBand a party
+     * */
+    public void disbandParty(Player player) {
+        if (!isOwner(player)) {
+            player.sendMessage("Bạn không phải chủ party!");
             return;
         }
-        if(isOwner(sender)){
-            sender.sendMessage("Hãy dùng /team disband để bỏ team");
-            return;
-        }
-        UUID partyId = UUID.fromString(Objects.requireNonNull(sender.getPersistentDataContainer().get(NamespacedKeys.PARTY_KEY, PersistentDataType.STRING)));
-        partyManager.get(partyId).getMembers().remove(sender.getUniqueId());
-        sender.getPersistentDataContainer().remove(NamespacedKeys.PARTY_KEY);
-        sender.sendMessage("Bạn đã rời party của " + getParty(partyId).getOwner());
-    }
 
-    public Party getPartyFromPlayer(Player player){
-        String psdPartyId = player.getPersistentDataContainer().get(NamespacedKeys.PARTY_KEY, PersistentDataType.STRING);
-        if(psdPartyId != null){
-            UUID partyId = UUID.fromString(psdPartyId);
-            Party party = partyManager.get(partyId);
-            if(party == null){
-                player.getPersistentDataContainer().remove(NamespacedKeys.PARTY_KEY);
-                return null;
+        UUID partyId = playerToPartyMap.get(player.getUniqueId());
+        Party party = partyMap.get(partyId);
+
+        if (party == null) return;
+
+        for (UUID member : party.getMembers()) {
+            playerToPartyMap.remove(member);
+
+            Player online = Bukkit.getPlayer(member);
+            if (online != null) {
+                online.sendMessage("Party đã bị giải tán!");
             }
-            return party;
         }
-        return null;
+
+        partyMap.remove(partyId);
     }
 
-    public boolean isInParty(Player player){
-        String psdPartyId = player.getPersistentDataContainer().get(NamespacedKeys.PARTY_KEY, PersistentDataType.STRING);
-        Bukkit.getLogger().warning("PSD PartyId:" + psdPartyId);
-        if(psdPartyId == null){
-            player.getPersistentDataContainer().remove(NamespacedKeys.PARTY_KEY);
-            return false;
+    /*
+     * Join a party
+     * */
+    public void joinParty(Player player, Player owner) {
+        if (isInParty(player)) {
+            player.sendMessage("Bạn đang ở trong party khác!");
+            return;
         }
-        return partyManager.containsKey(UUID.fromString(psdPartyId));
+
+        if (!isOwner(owner)) {
+            player.sendMessage("Người này không phải chủ party!");
+            return;
+        }
+
+        UUID partyId = playerToPartyMap.get(owner.getUniqueId());
+        Party party = partyMap.get(partyId);
+
+        if (party == null) return;
+
+        if (party.getMembers().size() >= party.getSize()) {
+            player.sendMessage("Party đã đầy!");
+            return;
+        }
+
+        party.getMembers().add(player.getUniqueId());
+        playerToPartyMap.put(player.getUniqueId(), partyId);
+
+        player.sendMessage("Bạn đã tham gia party!");
     }
 
-    public boolean isOwner(Player player){
-        return partyManager.containsKey(player.getUniqueId());
+    /*
+     * Leave a party
+     * */
+    public void leaveParty(Player player) {
+        if (!isInParty(player)) {
+            player.sendMessage("Bạn không ở trong party nào!");
+            return;
+        }
+
+        if (isOwner(player)) {
+            player.sendMessage("Chủ party phải dùng lệnh disband!");
+            return;
+        }
+
+        UUID partyId = playerToPartyMap.remove(player.getUniqueId());
+        Party party = partyMap.get(partyId);
+
+        if (party != null) {
+            party.getMembers().remove(player.getUniqueId());
+        }
+
+        player.sendMessage("Bạn đã rời party!");
     }
 
-    public boolean isPartyOwner(Player player){
-        return partyManager.containsKey(player.getUniqueId());
+    public Party getParty(UUID partyId) {
+        return partyMap.get(partyId);
     }
 
+    public Party getParty(Player player) {
+        UUID partyId = playerToPartyMap.get(player.getUniqueId());
+        return partyId != null ? partyMap.get(partyId) : null;
+    }
+
+    public boolean isInParty(Player player) {
+        return playerToPartyMap.containsKey(player.getUniqueId());
+    }
+
+    public boolean isOwner(Player player) {
+        UUID partyId = playerToPartyMap.get(player.getUniqueId());
+        if (partyId == null) return false;
+
+        Party party = partyMap.get(partyId);
+        return party != null && party.getOwner().equals(player.getUniqueId());
+    }
+
+    /*
+     * Show a party
+     * */
     public String getPartyInfo(Player player) {
-        Party party = getPartyFromPlayer(player);
+        Party party = getParty(player);
 
         if (party == null) {
             return "Bạn không ở trong party nào.";
         }
 
         StringBuilder sb = new StringBuilder();
-
         sb.append("§a=== Thông tin Party ===\n");
-        sb.append("§fLeader: ").append(Bukkit.getPlayer(party.getOwner())).append("\n");
+
+        Player leader = Bukkit.getPlayer(party.getOwner());
+        sb.append("§fLeader: ")
+                .append(leader != null ? leader.getName() : "Offline")
+                .append("\n");
+
         sb.append("§fThành viên:\n");
 
         for (UUID memberId : party.getMembers()) {
             Player member = Bukkit.getPlayer(memberId);
-            sb.append(" - ").append(member != null ? member.getName() : "Offline player").append("\n");
+            sb.append(" - ")
+                    .append(member != null ? member.getName() : "Offline")
+                    .append("\n");
         }
 
         return sb.toString();

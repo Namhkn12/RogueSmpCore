@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class Party {
     private UUID partyId;
-    private String owner;
+    private UUID owner;
     private List<UUID> members;
     private int size;
     private boolean status;
@@ -13,7 +13,7 @@ public class Party {
     public Party() {
     }
 
-    public Party(UUID partyId, String owner, List<UUID> members, int size, boolean status) {
+    public Party(UUID partyId, UUID owner, List<UUID> members, int size, boolean status) {
         this.partyId = partyId;
         this.owner = owner;
         this.members = members;
@@ -25,7 +25,7 @@ public class Party {
         return partyId;
     }
 
-    public String getOwner() {
+    public UUID getOwner() {
         return owner;
     }
 
@@ -45,7 +45,7 @@ public class Party {
         this.partyId = partyId;
     }
 
-    public void setOwner(String owner) {
+    public void setOwner(UUID owner) {
         this.owner = owner;
     }
 
