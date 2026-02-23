@@ -1,5 +1,7 @@
 package com.roguesmp.dungeon;
 
+import com.roguesmp.dungeon.room.Room;
+
 import java.util.List;
 
 public class Dungeon {
