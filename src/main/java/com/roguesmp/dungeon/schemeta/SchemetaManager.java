@@ -3,6 +3,7 @@ package com.roguesmp.dungeon.schemeta;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.dungeon.room.Room;
 import com.roguesmp.dungeon.ultis.TimeId;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
@@ -15,17 +16,16 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.LocalSession;
 import org.bukkit.entity.Player;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.Writer;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SchemetaManager {
 
+    private final String prefix = "schemeta";
     private static SchemetaManager INSTANCE = null;
-    private final Map<String, Schemeta> schemetaMap = new HashMap<>();
+    private final Map<String, Schemeta> schemetas = new HashMap<>();
     private final File schemFolder;
     private final File jsonFolder;
     private final Gson gson;
@@ -36,6 +36,8 @@ public class SchemetaManager {
             throw new IllegalStateException("PartyManager already initialized!");
         }
         INSTANCE = new SchemetaManager(plugin);
+
+        INSTANCE.load();
     }
 
     public static SchemetaManager getInstance(){
@@ -59,6 +61,26 @@ public class SchemetaManager {
         if (!jsonFolder.exists()) jsonFolder.mkdirs();
 
         this.gson = new GsonBuilder().setPrettyPrinting().create();
+    }
+
+    public void load() {
+        schemetas.clear();
+
+        File[] files = jsonFolder.listFiles((dir, name) -> name.endsWith(".json"));
+        if (files == null) return;
+
+        for (File file : files) {
+            try (Reader reader = Files.newBufferedReader(file.toPath())) {
+                Schemeta schemeta = gson.fromJson(reader, Schemeta.class);
+                if (schemeta != null && schemeta.getSchemId() != null) {
+                    schemetas.put(schemeta.getSchemId(), schemeta);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        plugin.getLogger().info("Loaded " + this.schemetas.size() + " schemetas successfully");
     }
 
     public Schemeta createFromSelection(Player player, String name) throws Exception {
@@ -93,7 +115,7 @@ public class SchemetaManager {
         }
 
         Schemeta schemeta = new Schemeta();
-        schemeta.setSchemId(TimeId.generateTimeId());
+        schemeta.setSchemId(prefix + "_" + TimeId.generateTimeId());
         schemeta.setSchemName(name);
         schemeta.setSchematic("schematics/" + name + ".schem");
 
@@ -111,7 +133,7 @@ public class SchemetaManager {
                 gson.toJson(schemeta, writer);
             }
 
-            schemetaMap.put(schemeta.getSchemId(), schemeta);
+            schemetas.put(schemeta.getSchemId(), schemeta);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,7 +141,7 @@ public class SchemetaManager {
     }
 
     public void delete(String id) {
-        schemetaMap.remove(id);
+        schemetas.remove(id);
 
         File json = new File(jsonFolder, id + ".json");
         File schem = new File(schemFolder, id + ".schem");
@@ -129,7 +151,7 @@ public class SchemetaManager {
     }
 
     public Schemeta get(String id) {
-        return schemetaMap.get(id);
+        return schemetas.get(id);
     }
 
     private Region getSelection(Player player) throws Exception {

@@ -8,12 +8,12 @@ public class Dungeon {
     private String dgId;
     private String dgName;
     private String dgDescription;
-    private List<Room> dgRooms;
+    private List<String> dgRooms;
 
     public Dungeon() {
     }
 
-    public Dungeon(String dgId, String dgName, String dgDescription, List<Room> dgRooms) {
+    public Dungeon(String dgId, String dgName, String dgDescription, List<String> dgRooms) {
         this.dgId = dgId;
         this.dgName = dgName;
         this.dgDescription = dgDescription;
@@ -44,11 +44,11 @@ public class Dungeon {
         this.dgDescription = dgDescription;
     }
 
-    public List<Room> getDgRooms() {
+    public List<String> getDgRooms() {
         return dgRooms;
     }
 
-    public void setDgRooms(List<Room> dgRooms) {
+    public void setDgRooms(List<String> dgRooms) {
         this.dgRooms = dgRooms;
     }
 }
