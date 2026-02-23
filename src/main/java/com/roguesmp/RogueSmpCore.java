@@ -1,10 +1,11 @@
 package com.roguesmp;
 
 import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.dungeon.DungeonManager;
 import com.roguesmp.dungeon.party.PartyManager;
+import com.roguesmp.dungeon.room.RoomManager;
 import com.roguesmp.dungeon.schemeta.SchemetaManager;
 import com.roguesmp.gui.ItemBrowser;
-import com.roguesmp.item.gem.GemData;
 import com.roguesmp.listener.GuiListener;
 import com.roguesmp.registry.GemRegistry;
 import com.roguesmp.registry.ItemRegistry;
@@ -30,6 +31,8 @@ public final class RogueSmpCore extends JavaPlugin {
         PlayerManager.init(this);
         PartyManager.init();
         SchemetaManager.init(this);
+        RoomManager.init(this);
+        DungeonManager.init(this);
     }
 
     // Load data from files, databases, etc
@@ -55,6 +58,8 @@ public final class RogueSmpCore extends JavaPlugin {
         ItemBrowser.registerCommand();
         PartyManager.getInstance().registerCommands();
         SchemetaManager.getInstance().registerCommands();
+        RoomManager.getInstance().registerCommand();
+        DungeonManager.getInstance().registerCommand();
     }
 
     @Override

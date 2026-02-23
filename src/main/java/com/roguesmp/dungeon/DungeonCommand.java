@@ -1,11 +1,15 @@
 package com.roguesmp.dungeon;
 
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DungeonCommand {
 
-    public static void register(){
+    public void register(){
         new CommandAPICommand("dungeon")
                 .withSubcommand(
                         new CommandAPICommand("start")
@@ -33,6 +37,25 @@ public class DungeonCommand {
                                     //check for dungeon
                                     //stop dungeon
                                     //delete instance
+                                })
+                )
+                .withSubcommand(
+                        new CommandAPICommand("create")
+                                .withArguments(new StringArgument("name"))
+                                .withArguments(new StringArgument("description"))
+                                .executesPlayer((player, args) -> {
+
+                                    String name = (String) args.get("name");
+                                    String description = (String) args.get("description");
+
+                                    Dungeon dungeon = DungeonManager.getInstance().create(
+                                            name,
+                                            description,
+                                            new ArrayList<>(List.of("roomiddemo"))
+                                    );
+
+                                    player.sendMessage("§aDungeon created!");
+                                    player.sendMessage("§7ID: §e" + dungeon.getDgId());
                                 })
                 )
                 .executes((sender, args) -> {

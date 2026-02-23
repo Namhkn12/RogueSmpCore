@@ -16,7 +16,6 @@ public class RoomCommand {
     public void register() {
 
         new CommandAPICommand("room")
-                .withPermission("dungeon.room")
                 .withSubcommand(
                         new CommandAPICommand("create")
                                 .withArguments(new StringArgument("rName"))
@@ -25,10 +24,14 @@ public class RoomCommand {
                                     String roomName = (String) args.get("rName");
                                     Room room = roomManager.createRoom(roomName);
 
+
                                     if (room == null) {
                                         sender.sendMessage("§cFailed to create room.");
                                         return;
                                     }
+
+                                    //save file
+                                    roomManager.saveRoom(room.getRoomId());
 
                                     sender.sendMessage("§aRoom created successfully: §e" + room.getRoomId());
                                 })
