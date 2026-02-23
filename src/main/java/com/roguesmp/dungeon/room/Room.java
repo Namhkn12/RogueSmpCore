@@ -9,12 +9,12 @@ public class Room {
     private String roomId;
     private String roomName;
     private RoomType roomType;
-    private List<Schemeta> schemetaList;
+    private List<String> schemetaList;
 
     public Room() {
     }
 
-    public Room(String roomId, String roomName, RoomType roomType, List<Schemeta> schemetaList) {
+    public Room(String roomId, String roomName, RoomType roomType, List<String> schemetaList) {
         this.roomId = roomId;
         this.roomName = roomName;
         this.roomType = roomType;
@@ -45,11 +45,11 @@ public class Room {
         this.roomType = roomType;
     }
 
-    public List<Schemeta> getSchemetaList() {
+    public List<String> getSchemetaList() {
         return schemetaList;
     }
 
-    public void setSchemetaList(List<Schemeta> schemetaList) {
+    public void setSchemetaList(List<String> schemetaList) {
         this.schemetaList = schemetaList;
     }
 }
