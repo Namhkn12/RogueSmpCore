@@ -5,7 +5,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -30,9 +29,7 @@ public class PlayerManager {
                 boolean twoHz = ticks % 10 == 0;
                 boolean oneHz = ticks % 20 == 0;
 
-                for (Map.Entry<UUID, SmpPlayer> entry : players.entrySet()) {
-                    SmpPlayer player = entry.getValue();
-
+                for (SmpPlayer player : players.values()) {
                     player.getActiveEnchants().forEach((enchants, integer) -> enchants.getEnchant().tick(player, integer, twoHz, oneHz));
                     player.getActiveAttributes().forEach((attributes, aDouble) -> attributes.getAttribute().tick(player, aDouble, twoHz, oneHz));
                 }

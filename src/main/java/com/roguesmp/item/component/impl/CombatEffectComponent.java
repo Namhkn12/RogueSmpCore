@@ -5,6 +5,9 @@ import com.roguesmp.item.component.ItemComponent;
 import org.jetbrains.annotations.NotNull;
 
 public class CombatEffectComponent implements ItemComponent {
+
+
+
     @Override
     public @NotNull ItemComponent copy() {
         return null;

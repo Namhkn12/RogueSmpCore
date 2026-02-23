@@ -35,6 +35,10 @@ public class SmpPlayer {
 
 
     public void updateSlotStat(Player player, EquipSlot slot, @Nullable SmpItem oldItem, @Nullable SmpItem newItem) {
+        activeAttributes.forEach((attributes, aDouble) -> {
+            attributes.getAttribute().removeVanillaAttribute(player);
+        });
+
         if (oldItem != null) {
             EnchantComponent oldEnchant = oldItem.getComponent(ComponentKeys.ENCHANT);
             EquipAttributeComponent oldAttribute = oldItem.getComponent(ComponentKeys.ATTRIBUTE);
@@ -54,7 +58,6 @@ public class SmpPlayer {
             if (oldAttribute != null) {
                 oldAttribute.getAttributes().forEach((attributes, aDouble) -> {
                     if (oldAttribute.getSlot() == slot) {
-                        attributes.getAttribute().removeVanillaAttribute(player);
                         activeAttributes.merge(attributes, -aDouble, (aDouble1, aDouble2) -> {
                             double res = aDouble1 + aDouble2;
                             if (Utils.isEffectiveZero(res)) return null;
@@ -86,7 +89,6 @@ public class SmpPlayer {
             if (newAttribute != null) {
                 newAttribute.getAttributes().forEach((attributes, aDouble) -> {
                     if (newAttribute.getSlot() == slot) {
-                        attributes.getAttribute().addVanillaAttribute(player, aDouble);
                         activeAttributes.merge(attributes, aDouble, (aDouble1, aDouble2) -> {
                             double res = aDouble1 + aDouble2;
                             if (Utils.isEffectiveZero(res)) return null;
@@ -97,6 +99,9 @@ public class SmpPlayer {
             }
         }
 
+        activeAttributes.forEach((attributes, aDouble) -> {
+            attributes.getAttribute().addVanillaAttribute(player, aDouble);
+        });
 
     }
 
@@ -121,7 +126,6 @@ public class SmpPlayer {
     }
 
     public @Nullable PlayerProjectile untrackProjectile(UUID uuid) {
-        Bukkit.getLogger().info("Removed arrow");
         return projectiles.remove(uuid);
     }
 }

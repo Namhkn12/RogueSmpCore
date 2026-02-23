@@ -38,7 +38,7 @@ public class ItemRegistry {
                                         Map.of(Enchants.GREED, 4)
                                 ),
                                 "attribute", new EquipAttributeComponent(
-                                        Map.of(Attributes.SPEED_FLAT, 0.05d, Attributes.PHYSICAL_DAMAGE_BASE, 4d), EquipSlot.MAINHAND))));
+                                        Map.of(Attributes.SPEED_FLAT, 0.05d, Attributes.MELEE_DAMAGE_BASE, 4d), EquipSlot.MAINHAND))));
 
         dataMap.put("fallback_item",
                 new BaseItem("fallback_item", Material.REDSTONE_BLOCK,

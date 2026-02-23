@@ -3,7 +3,6 @@ package com.roguesmp.registry;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.EquipSlot;
-import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.gem.GemData;
 import com.roguesmp.utils.Utils;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +24,7 @@ public class GemRegistry {
         this.plugin = plugin;
 
         dataMap.put("test_gem", new GemData("test_gem", "fallback_item",
-                Map.of(EquipSlot.MAINHAND, Map.of(Attributes.PHYSICAL_DAMAGE_BASE, 10d))));
+                Map.of(EquipSlot.MAINHAND, Map.of(Attributes.MELEE_DAMAGE_BASE, 10d))));
     }
 
     public @Nullable GemData getGemData(String id) {

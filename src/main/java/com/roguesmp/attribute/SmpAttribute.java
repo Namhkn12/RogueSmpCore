@@ -1,7 +1,7 @@
 package com.roguesmp.attribute;
 
 import com.roguesmp.constant.Attributes;
-import com.roguesmp.context.DamageContext;
+import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -47,47 +47,43 @@ public interface SmpAttribute {
 //        player.getAttribute(Attribute.ATTACK_DAMAGE).removeModifier(MODIFIER_ID);
     }
 
-    default void tick(SmpPlayer player, double value, boolean twoHz, boolean oneHz) {
+    default void tick(@NotNull SmpPlayer player, double value, boolean twoHz, boolean oneHz) {
 
     }
 
-    default void onDamageEntity(DamageContext context, double value, SmpPlayer player) {
+    default void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 
-    default void onProjectileDamageEntity(DamageContext context, double value, SmpPlayer player) {
+    default void onKillEntity(EntityDeathEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 
-    default void onKillEntity(EntityDeathEvent event, double value, SmpPlayer player) {
+    default void onHurt(DamageEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 
-    default void onHurt(DamageContext context, double value, SmpPlayer player) {
+    default void onHurtFatal(DamageEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 
-    default void onHurtFatal(DamageContext context, double value, SmpPlayer player) {
+    default void onConsume(PlayerItemConsumeEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 
-    default void onConsume(PlayerItemConsumeEvent event, double value, SmpPlayer player) {
+    default void onExpChange(PlayerExpChangeEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 
-    default void onExpChange(PlayerExpChangeEvent event, double value, SmpPlayer player) {
+    default void onBlockBreak(BlockBreakEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 
-    default void onBlockBreak(BlockBreakEvent event, double value, SmpPlayer player) {
+    default void onProjectileHit(ProjectileHitEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 
-    default void onProjectileHit(ProjectileHitEvent event, double value, SmpPlayer player) {
-
-    }
-
-    default void onProjectileLaunch(ProjectileLaunchEvent event, double value, SmpPlayer player) {
+    default void onProjectileLaunch(ProjectileLaunchEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 
