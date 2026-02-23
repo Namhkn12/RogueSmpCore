@@ -1,9 +1,11 @@
 package com.roguesmp;
 
+import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.gui.ItemBrowser;
-import com.roguesmp.item.gem.GemData;
+import com.roguesmp.listener.BlockListener;
 import com.roguesmp.listener.GuiListener;
+import com.roguesmp.registry.BlockMachineRegistry;
 import com.roguesmp.registry.GemRegistry;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.listener.PlayerListener;
@@ -20,12 +22,15 @@ public final class RogueSmpCore extends JavaPlugin {
     public void init() {
         ComponentKeys.loadClass();
 
-        ModifierRegistry.init(this);
+        PlayerManager.init(this);
+        BlockManager.init(this);
 
+        BlockMachineRegistry.init(this);
+        ModifierRegistry.init(this);
         ItemRegistry.init(this);
         GemRegistry.init(this);
 
-        PlayerManager.init(this);
+        BlockMachineRegistry.getInstance().registerMachineRecipes();
     }
 
     // Load data from files, databases, etc
@@ -44,6 +49,7 @@ public final class RogueSmpCore extends JavaPlugin {
     public void initListeners() {
         registerListener(new PlayerListener(PlayerManager.getInstance()));
         registerListener(new GuiListener());
+        registerListener(new BlockListener());
     }
 
     //Register CommandAPICommand

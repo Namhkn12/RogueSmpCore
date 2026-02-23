@@ -1,6 +1,7 @@
 package com.roguesmp.registry;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.block.impl.machine.SteelFurnace;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.Enchants;
 import com.roguesmp.constant.EquipSlot;
@@ -44,6 +45,13 @@ public class ItemRegistry {
                 new BaseItem("fallback_item", Material.REDSTONE_BLOCK,
                         Map.of("name", new NameComponent("<red>ERROR"),
                                 "description", new DescriptionComponent(List.of("<b><red><!i>Something went wrong if you see this item.")))));
+
+        dataMap.put("steel_ingot", new BaseItem("steel_ingot", Material.IRON_INGOT, Map.of("name", new NameComponent("Steel Ingot"))));
+        dataMap.put("steel_block", new BaseItem("steel_block", Material.IRON_BLOCK, Map.of("name", new NameComponent("Steel Block"))));
+
+        BlockMachineRegistry.getInstance().getRegistry().forEach((id, machine) -> {
+            dataMap.put(id, machine.getItem());
+        });
     }
 
     public @Nullable BaseItem getBaseItem(@NotNull String id) {
@@ -127,6 +135,5 @@ public class ItemRegistry {
 
         plugin.getLogger().info("Loaded item registry (" + dataMap.size() + " entries)");
     }
-
 
 }
