@@ -3,6 +3,7 @@ package com.roguesmp.attribute.impl;
 import com.roguesmp.attribute.SmpAttribute;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.DamageOperation;
+import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
@@ -15,20 +16,20 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class PhysicalDamageBase implements SmpAttribute {
+public class MeleeDamageBase implements SmpAttribute {
     @Override
     public @NotNull String getId() {
-        return "physical_damage_base";
+        return "melee_damage_base";
     }
 
     @Override
     public @NotNull Attributes getEnumConstant() {
-        return Attributes.PHYSICAL_DAMAGE_BASE;
+        return Attributes.MELEE_DAMAGE_BASE;
     }
 
     @Override
     public @NotNull String getSimpleName() {
-        return "Sát thương vật lý";
+        return "Sát thương cận chiến";
     }
 
     @Override
@@ -39,6 +40,6 @@ public class PhysicalDamageBase implements SmpAttribute {
 
     @Override
     public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
-        event.addDamageModifier(value, DamageOperation.BASE);
+        if (event.getDamageType() == DamageType.MELEE) event.addDamageModifier(value, DamageOperation.BASE);
     }
 }

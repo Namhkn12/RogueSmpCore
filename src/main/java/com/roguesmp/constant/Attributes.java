@@ -5,8 +5,8 @@ import com.roguesmp.attribute.SmpAttribute;
 import com.roguesmp.attribute.impl.*;
 
 public enum Attributes {
-    @SerializedName("physical_damage_base")
-    PHYSICAL_DAMAGE_BASE(new PhysicalDamageBase()),
+    @SerializedName("melee_damage_base")
+    MELEE_DAMAGE_BASE(new MeleeDamageBase()),
     @SerializedName("projectile_damage_base")
     PROJECTILE_DAMAGE_BASE(new ProjectileDamageBase()),
     @SerializedName("defense_flat")
