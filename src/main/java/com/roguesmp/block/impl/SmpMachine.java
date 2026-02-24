@@ -8,12 +8,16 @@ import com.roguesmp.recipe.impl.MachineRecipe;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class SmpMachine extends SmpBlock {
@@ -37,14 +41,23 @@ public abstract class SmpMachine extends SmpBlock {
     }
 
     protected abstract MachineGui createGui();
+
     public abstract void registerRecipes();
+
     public MachineGui getGui() {return this.gui;}
+
     public void setProgress(int progress) {this.progress = progress;}
+
     public int getProgress() {return this.progress;}
+
     public boolean isProgressing() {return isProgressing;}
+
     public void setProgressing(boolean progressing) {isProgressing = progressing;}
+
     public void setCurrentRecipe(MachineRecipe recipe) {this.currentRecipe = recipe;}
+
     public MachineRecipe getCurrentRecipe() {return this.currentRecipe;}
+
     public void setPercent(int percent) {
         if(!isProgressing){
             gui.setProcessingDefault();
@@ -70,8 +83,32 @@ public abstract class SmpMachine extends SmpBlock {
         Action action = event.getAction();
 
         if(action.isRightClick() && !isSneaking){
+            event.setCancelled(true);
             event.getPlayer().openInventory(gui.getInventory());
         }
     }
 
+    @Override
+    public void onBlockBreak(BlockBreakEvent event) {
+        super.onBlockBreak(event);
+
+        int[] inputSlots = gui.getInputSlots();
+        int[] outputSlots = gui.getOutputSlots();
+        Inventory inv = gui.getInventory();
+        Location loc = event.getBlock().getLocation();
+
+        List<ItemStack> itemsToDrop = new ArrayList<>();
+        for(int i: inputSlots){
+            ItemStack item = inv.getItem(i);
+            if(item != null) itemsToDrop.add(item);
+        }
+        for(int i: outputSlots){
+            ItemStack item = inv.getItem(i);
+            if(item != null) itemsToDrop.add(item);
+        }
+
+        itemsToDrop.forEach(item -> {
+            loc.getWorld().dropItemNaturally(loc, item);
+        });
+    }
 }

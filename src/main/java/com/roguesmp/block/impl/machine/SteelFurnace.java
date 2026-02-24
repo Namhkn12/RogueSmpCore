@@ -27,12 +27,12 @@ public class SteelFurnace extends ProcessingMachine {
     @Override
     public void registerRecipes(){
         RecipeManager.register(new MachineRecipe("steel_ingot", getItem().getId(), 120)
-                .addInput(List.of(ItemStack.of(Material.IRON_INGOT, 1), ItemStack.of(Material.COAL, 1)))
+                .addInput(List.of(ItemStack.of(Material.IRON_INGOT, 1), ItemStack.of(Material.COAL, 16)))
                 .addOutput(ItemRegistry.getInstance().getBaseItem("steel_ingot").generateItemStack(1))
         );
 
         RecipeManager.register(new MachineRecipe("steel_block", getItem().getId(), 120 * 9)
-                .addInput(List.of(ItemStack.of(Material.IRON_BLOCK, 1), ItemStack.of(Material.COAL_BLOCK, 1)))
+                .addInput(List.of(ItemStack.of(Material.IRON_BLOCK, 1), ItemStack.of(Material.COAL_BLOCK, 16)))
                 .addOutput(ItemRegistry.getInstance().getBaseItem("steel_block").generateItemStack(1))
         );
     }

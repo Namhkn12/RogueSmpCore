@@ -28,14 +28,10 @@ public class BlockListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent event){
         ItemStack item = event.getItemInHand();
 
-        if(!item.hasItemMeta()) return;
+        String id = item.getPersistentDataContainer().get(Keys.ITEM_ID, PersistentDataType.STRING);
+        if(id == null) return;
 
-        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-        if(!container.has(Keys.ITEM_ID, PersistentDataType.STRING)) return;
-
-        String id = container.get(Keys.ITEM_ID, PersistentDataType.STRING);
         SmpBlock block = manager.getBlock(id);
-
         block.onBlockPlace(event, id);
     }
 

@@ -5,18 +5,22 @@ import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.block.impl.machine.SteelFurnace;
 import com.roguesmp.block.manager.BlockManager;
+import com.roguesmp.item.BaseItem;
+import com.roguesmp.item.component.impl.NameComponent;
+import org.bukkit.Material;
 import org.bukkit.plugin.Plugin;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BlockMachineRegistry {
-    private static BlockMachineRegistry INSTANCE;
+public class BlockRegistry {
+    private static BlockRegistry INSTANCE;
     public static final String FOLDER_NAME = "block";
     private final Plugin plugin;
     private static final Map<String, SmpBlock> dataMap = new HashMap<>();
 
-    public BlockMachineRegistry(RogueSmpCore plugin) {
+    public BlockRegistry(RogueSmpCore plugin) {
         this.plugin = plugin;
 
         setup();
@@ -24,7 +28,13 @@ public class BlockMachineRegistry {
 
     private void setup(){
         BlockManager.registerBlockType("steel_furnace", SteelFurnace::new);
+
+        registerDataMap();
+    }
+
+    private void registerDataMap(){
         dataMap.put("steel_furnace", new SteelFurnace());
+        dataMap.put("steel_block", new SmpBlock(new BaseItem("steel_block", Material.IRON_BLOCK, Map.of("name", new NameComponent("Steel Block"))), true));
     }
 
     public void registerMachineRecipes(){
@@ -35,11 +45,13 @@ public class BlockMachineRegistry {
         }
     }
 
-    public Map<String, SmpBlock> getRegistry() {return new HashMap<>(dataMap);}
+    public Map<String, SmpBlock> getRegistry() {return Collections.unmodifiableMap(dataMap);}
 
-    public static void init(RogueSmpCore plugin) {INSTANCE = new BlockMachineRegistry(plugin);}
+    public static SmpBlock getBlock(String id) {return dataMap.get(id);}
 
-    public static BlockMachineRegistry getInstance(){
+    public static void init(RogueSmpCore plugin) {INSTANCE = new BlockRegistry(plugin);}
+
+    public static BlockRegistry getInstance(){
         return INSTANCE;
     }
 }
