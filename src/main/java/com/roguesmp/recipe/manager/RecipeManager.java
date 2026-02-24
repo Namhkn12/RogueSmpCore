@@ -33,4 +33,9 @@ public class RecipeManager {
 
         return null;
     }
+
+    public static BaseRecipe getRecipe(String recipeId) {
+        if (recipeId == null) return null;
+        return recipeMap.get(recipeId);
+    }
 }

@@ -38,6 +38,19 @@ public class BlockManager {
                     if(block instanceof SmpMachine machine){
                         MachineGui gui = machine.getGui();
 
+                        if (machine.isProgressing() && machine.getCurrentRecipe() == null) {
+                            String machineId = block.getItem().getId();
+                            BaseRecipe foundRecipe = RecipeManager.findRecipe(machineId, gui.getInventory(), gui.getInputSlots());
+
+                            if (foundRecipe instanceof MachineRecipe) {
+                                machine.setCurrentRecipe((MachineRecipe) foundRecipe);
+                            } else {
+                                machine.setProgressing(false);
+                                machine.setProgress(0);
+                                return;
+                            }
+                        }
+
                         if (!machine.isProgressing()) {
                             String machineId = block.getItem().getId();
                             BaseRecipe foundRecipe = RecipeManager.findRecipe(machineId, gui.getInventory(), gui.getInputSlots());
@@ -139,5 +152,10 @@ public class BlockManager {
         return BlockRegistry.getInstance().getRegistry().get(id);
     }
 
+    public Map<Location, SmpBlock> getAllBlocks() {return blockLocation;}
+
+    public Map<Location, String> getAllBlockIds() {return blockIdLocation;}
+
     public static void init(RogueSmpCore core) {INSTANCE = new BlockManager(core);}
+
 }

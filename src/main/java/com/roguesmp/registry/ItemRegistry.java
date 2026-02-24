@@ -45,7 +45,8 @@ public class ItemRegistry {
                         Map.of("name", new NameComponent("<red>ERROR"),
                                 "description", new DescriptionComponent(List.of("<b><red><!i>Something went wrong if you see this item.")))));
 
-        dataMap.put("steel_ingot", new BaseItem("steel_ingot", Material.IRON_INGOT, Map.of("name", new NameComponent("Steel Ingot"))));
+        dataMap.put("steel_ingot", new BaseItem("steel_ingot", Material.IRON_INGOT, Map.of("name", new NameComponent("Thép"))));
+        dataMap.put("condensed_steel", new BaseItem("condensed_steel", Material.NETHERITE_INGOT, Map.of("name", new NameComponent("Thép đặc"))));
 
         BlockRegistry.getInstance().getRegistry().forEach((id, machine) -> {
             dataMap.put(id, machine.getItem());

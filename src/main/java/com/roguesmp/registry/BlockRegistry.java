@@ -34,7 +34,7 @@ public class BlockRegistry {
 
     private void registerDataMap(){
         dataMap.put("steel_furnace", new SteelFurnace());
-        dataMap.put("steel_block", new SmpBlock(new BaseItem("steel_block", Material.IRON_BLOCK, Map.of("name", new NameComponent("Steel Block"))), true));
+        dataMap.put("steel_block", new SmpBlock(new BaseItem("steel_block", Material.IRON_BLOCK, Map.of("name", new NameComponent("Khối thép"))), true));
     }
 
     public void registerMachineRecipes(){

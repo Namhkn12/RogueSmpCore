@@ -1,6 +1,7 @@
 package com.roguesmp;
 
 import com.roguesmp.block.manager.BlockManager;
+import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.listener.BlockListener;
@@ -30,6 +31,8 @@ public final class RogueSmpCore extends JavaPlugin {
         ItemRegistry.init(this);
         GemRegistry.init(this);
 
+        BlockStorage.init(this, BlockManager.getInstance());
+
         BlockRegistry.getInstance().registerMachineRecipes();
     }
 
@@ -37,12 +40,14 @@ public final class RogueSmpCore extends JavaPlugin {
     public void loadData() {
         ItemRegistry.getInstance().loadFromFile();
         GemRegistry.getInstance().loadFromFile();
+        BlockStorage.getInstance().loadFromFile();
     }
 
     //Run on onDisable
     public void saveData() {
-        ItemRegistry.getInstance().saveToFile(false);
-        GemRegistry.getInstance().saveToFile(false);
+        ItemRegistry.getInstance().saveToFile(true);
+        GemRegistry.getInstance().saveToFile(true);
+        BlockStorage.getInstance().saveToFile(true);
     }
 
     // Register Listener here
