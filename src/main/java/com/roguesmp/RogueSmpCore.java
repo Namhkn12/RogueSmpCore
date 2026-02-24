@@ -3,6 +3,7 @@ package com.roguesmp;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.gui.ItemBrowser;
+import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.listener.DamageListener;
 import com.roguesmp.listener.EffectListener;
 import com.roguesmp.listener.GuiListener;
@@ -24,6 +25,8 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Init whatever here, called before initListeners
     public void init() {
+        new PlaceholderAPIIntegration(this).register();
+
         ComponentKeys.loadClass();
 
         ModifierRegistry.init(this);
@@ -59,6 +62,7 @@ public final class RogueSmpCore extends JavaPlugin {
     //Register CommandAPICommand
     public void initCommands() {
         ItemBrowser.registerCommand();
+        EffectManager.registerCommand();
     }
 
     @Override

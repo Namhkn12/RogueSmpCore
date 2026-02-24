@@ -2,15 +2,22 @@ package com.roguesmp.effect;
 
 import com.google.gson.annotations.SerializedName;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.utils.Utils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public abstract class SmpEffect implements Comparable<SmpEffect> {
+public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEffect {
 
     protected int duration;
     private final String effectID;
     private final DeathBehavior deathBehavior;
+
+    private boolean display = true;
+    private boolean displayTime = true;
 
     public SmpEffect(int duration, String effectID, DeathBehavior deathBehavior) {
         this.duration = duration;
@@ -37,6 +44,40 @@ public abstract class SmpEffect implements Comparable<SmpEffect> {
     public abstract boolean isPersistent();
 
     /**
+     * Effect name display, return null for no display
+     * @return Component
+     */
+    @Override
+    public abstract @Nullable Component getDisplay();
+
+    @Override
+    public int getDisplayPriority() {
+        if (!displayTime) {
+            return -1;
+        }
+        return duration;
+    }
+
+    /**
+     * Display effect with remaining time generally used in tab list, return null to not display
+     * @return Component
+     */
+    @Override
+    public @Nullable Component getDisplayWithTime() {
+        if (display) {
+            Component displayWithoutTime = getDisplay();
+            if (displayWithoutTime != null) {
+                Component display = displayWithoutTime;
+                if (displayTime) {
+                    display = display.append(Component.text(" " + Utils.intToMinuteAndSeconds(duration / 20), NamedTextColor.GRAY));
+                }
+                return display;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Ticks the effect, called regularly
      *
      * @param ticks Ticks passed since the last time this method was called to check duration expiry
@@ -61,6 +102,22 @@ public abstract class SmpEffect implements Comparable<SmpEffect> {
 
     public DeathBehavior getDeathBehavior() {
         return deathBehavior;
+    }
+
+    public void setDisplay(boolean display) {
+        this.display = display;
+    }
+
+    public void setDisplayTime(boolean displayTime) {
+        this.displayTime = displayTime;
+    }
+
+    public boolean isDisplay() {
+        return display;
+    }
+
+    public boolean isDisplayTime() {
+        return displayTime;
     }
 
     @Override

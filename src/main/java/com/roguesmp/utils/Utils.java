@@ -65,6 +65,15 @@ public class Utils {
         }.runTaskAsynchronously(RogueSmpCore.getInstance());
     }
 
+    public static void runAsync(Runnable runnable, int delay, int period) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                runnable.run();
+            }
+        }.runTaskTimerAsynchronously(RogueSmpCore.getInstance(), delay, period);
+    }
+
     public static Component fromString(String miniMessage) {
         return MiniMessage.miniMessage().deserialize(miniMessage);
     }
@@ -115,6 +124,20 @@ public class Utils {
         }
 
         return sb.toString();
+    }
+
+    public static String intToMinuteAndSeconds(int i) {
+        int minutes = i / 60;
+        int seconds = i % 60;
+        if (seconds < 10) {
+            return minutes + ":0" + seconds;
+        } else {
+            return minutes + ":" + seconds;
+        }
+    }
+
+    public static String toString(Component component) {
+        return MiniMessage.miniMessage().serialize(component);
     }
 
 }
