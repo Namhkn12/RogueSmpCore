@@ -3,12 +3,11 @@ package com.roguesmp.effect;
 import com.google.gson.*;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.effect.impl.DamageIncreaseEffect;
+import com.roguesmp.effect.impl.SpeedBuffEffect;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.registry.EffectCodecRegistry;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.DoubleArgument;
-import dev.jorel.commandapi.arguments.IntegerArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -22,24 +21,40 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
+/*
+ * The first map layer use UUID for identifying entities from each other.
+ *
+ * The second map layer uses String keys as "sources" of the effects, and ordered sets of effects as values.
+ * Sources could be specific to an ability, like "PowerInjectionPercentSpeedEffect",
+ * or more generic, like "VulnerabilityEffect" (increased damage, given by a variety of spells).
+ *
+ * Importantly, only the Effect with the highest "magnitude" from any given source is applied. Thus, all
+ * spell specific buffs will stack with each other, while generic Vulnerability will only have the strongest
+ * application take effect.
+ *
+ * Effects from the SAME SOURCE should ALWAYS be the SAME TYPE, and only ever have
+ * differing durations and magnitudes.
+ *
+ * The ordered sets themselves are sorted by magnitude. While only the top Effect is ever applied, all Effects
+ * are tracked and ticked down by the over-arching runnable, meaning that after a stronger Effect wears off,
+ * longer lasting weaker Effects are still active and will be applied.
+ */
 public class EffectManager {
     public static final int PERIOD = 5;
     public static final String DATA_FOLDER = "player_effect_tmp";
 
     private static EffectManager INSTANCE;
 
-    private final Map<UUID, Map<String, TreeSet<SmpEffect>>> allEffects = new HashMap<>();
-    private final Map<UUID, Map<String, TreeSet<SmpEffect>>> playerCache = new HashMap<>();
+    private final Map<UUID, Map<String, NavigableSet<SmpEffect>>> allEffects = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<String, NavigableSet<SmpEffect>>> playerCache = new ConcurrentHashMap<>();
 
     private final BukkitRunnable runnable;
 
     private EffectManager(JavaPlugin plugin) {
-        registerCommand();
 
         runnable = new BukkitRunnable() {
             int mTicks = 0;
@@ -107,13 +122,22 @@ public class EffectManager {
         runnable.runTaskTimer(plugin, 0, PERIOD);
     }
 
+    public static void registerCommand() {
+        new CommandAPICommand("smpeffect")
+                .withSubcommand(new CommandAPICommand("add")
+                        .withSubcommand(DamageIncreaseEffect.registerCommand())
+                        .withSubcommand(SpeedBuffEffect.registerCommand()))
+
+                .register();
+    }
+
     public void addEffect(Entity entity, String sourceId, SmpEffect smpEffect) {
         UUID uuid = entity.getUniqueId();
         // Get or create the inner map for this entity
-        Map<String, TreeSet<SmpEffect>> entityEffects = allEffects.computeIfAbsent(uuid, k -> new HashMap<>());
+        Map<String, NavigableSet<SmpEffect>> entityEffects = allEffects.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>());
 
-        // Get or create the TreeSet for this effect type
-        TreeSet<SmpEffect> effects = entityEffects.computeIfAbsent(sourceId, k -> new TreeSet<>());
+        // Get or create the NavigableSet for this effect type
+        NavigableSet<SmpEffect> effects = entityEffects.computeIfAbsent(sourceId, k -> new ConcurrentSkipListSet<>());
         if (!effects.isEmpty()) {
             SmpEffect currentActiveEffect = effects.getLast();
             // Iterate through effects to check if there is already an effect with existing magnitude but less duration.
@@ -146,12 +170,31 @@ public class EffectManager {
 
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    public Map<String, SmpEffect> getActiveEffects(Entity entity) {
+        Map<String, NavigableSet<SmpEffect>> effects = allEffects.get(entity.getUniqueId());
+        HashMap<String, SmpEffect> output = new HashMap<>();
+        if (effects != null) {
+            for (Map.Entry<String, NavigableSet<SmpEffect>> entry : effects.entrySet()) {
+                try {
+                    SmpEffect effect = entry.getValue().last();
+                    if (effect != null) {
+                        output.put(entry.getKey(), effect);
+                    }
+                } catch (NoSuchElementException e) {
+                    // ignore - effect was probably removed in another thread (and this method can be called by the tab list from arbitrary threads)
+                }
+            }
+        }
+        return output;
+    }
+
     public void onPlayerJoin(PlayerJoinEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
-        Map<String, TreeSet<SmpEffect>> effectMap = playerCache.get(uuid);
+        Map<String, NavigableSet<SmpEffect>> effectMap = playerCache.get(uuid);
         if (effectMap == null) {
             Utils.runAsync(() -> {
-                Map<String, TreeSet<SmpEffect>> effects = loadPlayerEffectsFromFile(uuid);
+                Map<String, NavigableSet<SmpEffect>> effects = loadPlayerEffectsFromFile(uuid);
                 if (effects != null) {
                     Utils.runLater(() -> {
                         allEffects.put(uuid, effects);
@@ -184,7 +227,7 @@ public class EffectManager {
 
     public void onEntityDeath(EntityDeathEvent event) {
         LivingEntity le = event.getEntity();
-        Map<String, TreeSet<SmpEffect>> effectMap = allEffects.get(le.getUniqueId());
+        Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(le.getUniqueId());
         if (effectMap == null) return;
         if (le instanceof Player) {
             effectMap.forEach((s, smpEffects) -> {
@@ -209,7 +252,7 @@ public class EffectManager {
 
     public void onDamage(DamageEvent event) {
         Entity le = event.getDamager();
-        Map<String, TreeSet<SmpEffect>> effectMap = allEffects.get(le.getUniqueId());
+        Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(le.getUniqueId());
         if (effectMap == null) return;
         effectMap.forEach((s, smpEffects) -> {
             smpEffects.getLast().onDamage(event);
@@ -229,12 +272,14 @@ public class EffectManager {
 
     private void cachePlayerAndScheduleRemoval(Player player) {
         UUID uuid = player.getUniqueId();
-        playerCache.put(uuid, allEffects.get(uuid));
+        var effects = allEffects.get(uuid);
+        if (effects == null) return;
+        playerCache.put(uuid, effects);
 
         Utils.runLater(() -> {
             //Player logged in before removal is run
             if (Bukkit.getEntity(uuid) != null) return;
-            Map<String, TreeSet<SmpEffect>> effectsMap = playerCache.remove(uuid);
+            Map<String, NavigableSet<SmpEffect>> effectsMap = playerCache.remove(uuid);
             if (effectsMap != null) {
                 effectsMap.forEach((s, smpEffects) -> {
                     var effectIter = smpEffects.descendingIterator();
@@ -251,7 +296,7 @@ public class EffectManager {
         }, 100); //Remove after 5s
     }
 
-    private static void savePlayerEffectToFile(UUID playerId, @NotNull Map<String, TreeSet<SmpEffect>> effectsMap) {
+    private static void savePlayerEffectToFile(UUID playerId, @NotNull Map<String, NavigableSet<SmpEffect>> effectsMap) {
         File folder = new File(RogueSmpCore.getInstance().getDataFolder(), DATA_FOLDER);
         if (!folder.exists()) {
             folder.mkdirs();
@@ -286,7 +331,7 @@ public class EffectManager {
         }
     }
 
-    private static @Nullable Map<String, TreeSet<SmpEffect>> loadPlayerEffectsFromFile(@NotNull UUID playerId) {
+    private static @Nullable Map<String, NavigableSet<SmpEffect>> loadPlayerEffectsFromFile(@NotNull UUID playerId) {
         File folder = new File(RogueSmpCore.getInstance().getDataFolder(), DATA_FOLDER);
         File playerFile = new File(folder, playerId + ".json");
 
@@ -294,7 +339,7 @@ public class EffectManager {
             return null;
         }
 
-        Map<String, TreeSet<SmpEffect>> result = new HashMap<>();
+        Map<String, NavigableSet<SmpEffect>> result = new HashMap<>();
 
         try (Reader reader = new FileReader(playerFile)) {
             Gson gson = Utils.GSON;
@@ -302,7 +347,7 @@ public class EffectManager {
             for (var entry : root.entrySet()) {
                 String key = entry.getKey();
                 JsonArray array = entry.getValue().getAsJsonArray();
-                TreeSet<SmpEffect> effects = new TreeSet<>();
+                NavigableSet<SmpEffect> effects = new ConcurrentSkipListSet<>();
 
                 for (JsonElement element : array) {
                     JsonObject obj = element.getAsJsonObject();
@@ -332,17 +377,5 @@ public class EffectManager {
         }
 
         return result;
-    }
-
-    private static void registerCommand() {
-        new CommandAPICommand("smpeffect")
-                .withSubcommand(new CommandAPICommand("add")
-                        .withArguments(new IntegerArgument("duration"), new DoubleArgument("magnitude"))
-                        .executesPlayer((player, commandArguments) -> {
-                            int duration = (Integer) commandArguments.get("duration");
-                            double magnitude = (Double) commandArguments.get("magnitude");
-                            EffectManager.getInstance().addEffect(player, "command", new DamageIncreaseEffect(duration, magnitude));
-                        }))
-                .register();
     }
 }

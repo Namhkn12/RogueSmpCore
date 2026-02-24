@@ -1,8 +1,16 @@
 package com.roguesmp.effect.impl;
 
 import com.roguesmp.constant.DamageOperation;
+import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.event.DamageEvent;
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.DoubleArgument;
+import dev.jorel.commandapi.arguments.IntegerArgument;
+import dev.jorel.commandapi.arguments.StringArgument;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.jetbrains.annotations.Nullable;
 
 public class DamageIncreaseEffect extends SmpEffect {
 
@@ -26,7 +34,24 @@ public class DamageIncreaseEffect extends SmpEffect {
     }
 
     @Override
+    public @Nullable Component getDisplay() {
+        return Component.text("+" + increaseValue + " sát thương", NamedTextColor.GREEN);
+    }
+
+    @Override
     public void onDamage(DamageEvent event) {
         event.addDamageModifier(increaseValue, DamageOperation.ADD_FINAL);
+    }
+
+    public static CommandAPICommand registerCommand() {
+        return new CommandAPICommand("damageincrease")
+                .withArguments(new IntegerArgument("duration"), new DoubleArgument("magnitude"), new StringArgument("source"))
+                .executesPlayer((player, args) -> {
+                    int duration = (Integer) args.get("duration");
+                    double magnitude = (Double) args.get("magnitude");
+                    String source = (String) args.get("source");
+
+                    EffectManager.getInstance().addEffect(player, source, new DamageIncreaseEffect(duration, magnitude));
+                });
     }
 }
