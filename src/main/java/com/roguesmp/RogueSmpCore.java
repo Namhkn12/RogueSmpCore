@@ -1,8 +1,15 @@
 package com.roguesmp;
 
+import com.roguesmp.block.manager.BlockManager;
+import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.gui.ItemBrowser;
+import com.roguesmp.listener.BlockListener;
+import com.roguesmp.listener.GuiListener;
+import com.roguesmp.registry.BlockRegistry;
+import com.roguesmp.registry.GemRegistry;
+import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.listener.DamageListener;
 import com.roguesmp.listener.EffectListener;
 import com.roguesmp.listener.GuiListener;
@@ -26,30 +33,37 @@ public final class RogueSmpCore extends JavaPlugin {
     public void init() {
         ComponentKeys.loadClass();
 
-        ModifierRegistry.init(this);
+        PlayerManager.init(this);
+        BlockManager.init(this);
 
+        BlockRegistry.init(this);
+        ModifierRegistry.init(this);
         ItemRegistry.init(this);
         GemRegistry.init(this);
 
-        PlayerManager.init(this);
-        EffectManager.init(this);
+        BlockStorage.init(this, BlockManager.getInstance());
+
+        BlockRegistry.getInstance().registerMachineRecipes();
     }
 
     // Load data from files, databases, etc
     public void loadData() {
         ItemRegistry.getInstance().loadFromFile();
         GemRegistry.getInstance().loadFromFile();
+        BlockStorage.getInstance().loadFromFile();
     }
 
     //Run on onDisable
     public void saveData() {
-        ItemRegistry.getInstance().saveToFile(false);
-        GemRegistry.getInstance().saveToFile(false);
+        ItemRegistry.getInstance().saveToFile(true);
+        GemRegistry.getInstance().saveToFile(true);
+        BlockStorage.getInstance().saveToFile(true);
     }
 
     // Register Listener here
     public void initListeners() {
         registerListener(new GuiListener());
+        registerListener(new BlockListener());
 
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance()));
