@@ -1,12 +1,17 @@
 package com.roguesmp.utils;
 
 import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.constant.Keys;
+import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.GemSocketComponent;
 import com.roguesmp.item.gem.GemData;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.GemRegistry;
+import com.roguesmp.registry.ItemRegistry;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -14,6 +19,13 @@ import java.util.List;
  * Provide methods to work with our custom items. Including adding, removing, modifying components and their modifiers
  */
 public class SmpItemUtils {
+
+    public static @Nullable BaseItem getBaseItem(ItemStack itemStack) {
+        String id = itemStack.getPersistentDataContainer().get(Keys.ITEM_ID, PersistentDataType.STRING);
+        if (id == null) return null;
+        return ItemRegistry.getInstance().getBaseItem(id);
+    }
+
     public static ItemStack addGem(ItemStack itemStack, SmpPlayer player, List<String> gemIds) {
         SmpItem smpItem = new SmpItem(itemStack);
         GemSocketComponent gemSocketComponent = smpItem.getComponent(ComponentKeys.GEM_SOCKET);

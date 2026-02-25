@@ -3,21 +3,31 @@ package com.roguesmp;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.effect.EffectManager;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.listener.BlockListener;
 import com.roguesmp.listener.GuiListener;
 import com.roguesmp.registry.BlockRegistry;
 import com.roguesmp.registry.GemRegistry;
 import com.roguesmp.registry.ItemRegistry;
+import com.roguesmp.listener.DamageListener;
+import com.roguesmp.listener.EffectListener;
+import com.roguesmp.listener.GuiListener;
 import com.roguesmp.listener.PlayerListener;
 import com.roguesmp.player.PlayerManager;
+import com.roguesmp.registry.GemRegistry;
+import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.registry.ModifierRegistry;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class RogueSmpCore extends JavaPlugin {
 
     private static RogueSmpCore INSTANCE;
+
+    public static final Logger LOGGER = LoggerFactory.getLogger("RogueSMP");
 
     // Init whatever here, called before initListeners
     public void init() {
@@ -52,9 +62,12 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Register Listener here
     public void initListeners() {
-        registerListener(new PlayerListener(PlayerManager.getInstance()));
         registerListener(new GuiListener());
         registerListener(new BlockListener());
+
+        registerListener(new DamageListener());
+        registerListener(new PlayerListener(PlayerManager.getInstance()));
+        registerListener(new EffectListener(EffectManager.getInstance()));
     }
 
     //Register CommandAPICommand

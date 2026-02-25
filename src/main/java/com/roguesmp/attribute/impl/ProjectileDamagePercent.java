@@ -3,6 +3,7 @@ package com.roguesmp.attribute.impl;
 import com.roguesmp.attribute.SmpAttribute;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.DamageOperation;
+import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -12,31 +13,32 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class CriticalDamageFlat implements SmpAttribute {
+public class ProjectileDamagePercent implements SmpAttribute {
     @Override
     public @NotNull String getId() {
-        return "crit_damage_flat";
+        return "projectile_damage_percent";
     }
 
     @Override
     public @NotNull Attributes getEnumConstant() {
-        return Attributes.CRIT_DAMAGE_FLAT;
+        return Attributes.PROJECTILE_DAMAGE_PERCENT;
     }
 
     @Override
     public @NotNull String getSimpleName() {
-        return "Sát thương chí mạng";
+        return "Sát thương tầm xa";
     }
 
     @Override
-    public @NotNull List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
-        return defaultFlatLoreProvider(value);
+    public @Nullable List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
+        return defaultPercentLoreProvider(value);
     }
 
     @Override
     public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
-        if (event.isCritical()) {
-            event.addDamageModifier(value, DamageOperation.ADD_BASE);
+        if (event.getDamageType() == DamageType.PROJECTILE) {
+            event.addDamageModifier(value / 100, DamageOperation.INCREASE_BASE);
         }
+
     }
 }
