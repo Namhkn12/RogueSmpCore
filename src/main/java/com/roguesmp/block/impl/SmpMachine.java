@@ -1,6 +1,7 @@
 package com.roguesmp.block.impl;
 
 import com.roguesmp.block.SmpBlock;
+import com.roguesmp.constant.TransferMode;
 import com.roguesmp.gui.MachineGui;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.recipe.BaseRecipe;
@@ -10,6 +11,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -18,7 +20,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class SmpMachine extends SmpBlock {
 
@@ -27,10 +31,19 @@ public abstract class SmpMachine extends SmpBlock {
     private boolean isProgressing = false;
     private final Material progressDisplay;
     private MachineRecipe currentRecipe = null;
+    private final Map<BlockFace, TransferMode>  sideConfigs = new HashMap<>();
+    public static final BlockFace[] FACES = {
+            BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST
+    };
 
     public SmpMachine(BaseItem baseItem, Material progressDisplay) {
         super(baseItem);
         this.gui = createGui();
+
+        for(BlockFace face: FACES){
+            sideConfigs.put(face, TransferMode.NONE);
+        }
+
         ItemStack item = ItemStack.of(progressDisplay);
         if(item.hasData(DataComponentTypes.MAX_DAMAGE) && !item.hasData(DataComponentTypes.UNBREAKABLE)){
             this.progressDisplay = progressDisplay;
@@ -38,6 +51,7 @@ public abstract class SmpMachine extends SmpBlock {
         else{
             throw new IllegalArgumentException("Progress display item must be a damageable one");
         }
+
     }
 
     protected abstract MachineGui createGui();
@@ -74,6 +88,18 @@ public abstract class SmpMachine extends SmpBlock {
 
             gui.setProcessing(processing);
         }
+    }
+
+    public TransferMode getTransferMode(BlockFace face){
+        return sideConfigs.getOrDefault(face, TransferMode.NONE);
+    }
+
+    public void setTransferMode(BlockFace face, TransferMode mode){
+        sideConfigs.put(face, mode);
+    }
+
+    public Map<BlockFace, TransferMode> getSideConfigs() {
+        return sideConfigs;
     }
 
     @Override

@@ -3,8 +3,10 @@ package com.roguesmp.dto;
 import com.roguesmp.annotation.GsonIgnore;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
+import com.roguesmp.constant.TransferMode;
 import com.roguesmp.utils.InventoryBase64;
 import org.bukkit.Location;
+import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 
@@ -22,6 +24,7 @@ public class BlockSaveData {
     public boolean isProgressing;
     public String inventoryBase64;
     public String currentRecipeId;
+    public Map<BlockFace, TransferMode> sideConfigs;
 
     // Biến này chỉ dùng lúc code, KHÔNG LƯU VÀO JSON
     @GsonIgnore
@@ -39,6 +42,7 @@ public class BlockSaveData {
             this.isMachine = true;
             this.progress = machine.getProgress();
             this.isProgressing = machine.isProgressing();
+            this.sideConfigs = machine.getSideConfigs();
 
             // LƯU ID CỦA RECIPE (Nếu máy đang chạy một recipe nào đó)
             if (machine.getCurrentRecipe() != null) {

@@ -9,6 +9,7 @@ import com.roguesmp.recipe.BaseRecipe;
 import com.roguesmp.recipe.impl.MachineRecipe;
 import com.roguesmp.recipe.manager.RecipeManager;
 import com.roguesmp.registry.BlockRegistry;
+import com.roguesmp.utils.MachineTransferUtils;
 import com.roguesmp.utils.RecipeUtils;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
@@ -98,6 +99,8 @@ public class BlockManager {
                                 }
                             }
                         }
+
+                        MachineTransferUtils.processMachineTransfers(machine, loc, BlockManager.this);
                     }
                 });
             }

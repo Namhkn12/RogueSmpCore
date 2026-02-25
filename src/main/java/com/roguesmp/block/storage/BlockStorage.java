@@ -7,6 +7,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.block.manager.BlockManager;
+import com.roguesmp.constant.TransferMode;
 import com.roguesmp.dto.BlockSaveData;
 import com.roguesmp.recipe.BaseRecipe;
 import com.roguesmp.recipe.impl.MachineRecipe;
@@ -16,6 +17,7 @@ import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
@@ -150,6 +152,12 @@ public class BlockStorage {
 
                             machine.setProgress(data.progress);
                             machine.setProgressing(data.isProgressing);
+
+                            if (data.sideConfigs != null) {
+                                for (Map.Entry<BlockFace, TransferMode> entry : data.sideConfigs.entrySet()) {
+                                    machine.setTransferMode(entry.getKey(), entry.getValue());
+                                }
+                            }
 
                             // --- PHỤC HỒI RECIPE ---
                             if (data.currentRecipeId != null && !data.currentRecipeId.isEmpty()) {

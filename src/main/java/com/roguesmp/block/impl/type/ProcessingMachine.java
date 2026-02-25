@@ -22,7 +22,7 @@ public abstract class ProcessingMachine extends SmpMachine {
 
     @Override
     protected MachineGui createGui() {
-        return new MachineGui(getMachineName().value(), GUI_ROWS) {
+        return new MachineGui(this, getMachineName().value(), GUI_ROWS) {
             @Override
             public int[] getInputSlots() {
                 return new int[]{19, 20};

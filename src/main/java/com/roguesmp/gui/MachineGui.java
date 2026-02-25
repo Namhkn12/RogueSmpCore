@@ -1,5 +1,6 @@
 package com.roguesmp.gui;
 
+import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -17,10 +18,11 @@ public abstract class MachineGui extends BaseGui {
     private final ItemStack PROCESSING_FILLER = ItemStackUtils.hideTooltip(ItemStack.of(Material.GRAY_STAINED_GLASS_PANE));
     private final ItemStack SETTING_FILLER = ItemStackUtils.hideTooltip(ItemStack.of(Material.GREEN_STAINED_GLASS_PANE));
 //    private final ItemStack upgrade = ItemStack.of(Material.ITEM_FRAME);
-    private final ItemStack settings = ItemStack.of(Material.NETHER_STAR);
+    private final ItemStack SETTINGS = ItemStack.of(Material.NETHER_STAR);
     private final int row;
     private final String name;
     private final int settingSlot = 8;
+    protected SmpMachine machine;
 
     /**
      * Instantiate the machine GUI
@@ -29,18 +31,19 @@ public abstract class MachineGui extends BaseGui {
      *           the first row is automatically the settings row,
      *           the rest belongs to the machine itself
      */
-    public MachineGui(String name, int row) {
+    public MachineGui(SmpMachine machine, String name, int row) {
         super(Utils.fromString(name), row+1);
         this.row = row + 1;
         this.name = name;
+        this.machine = machine;
 
-        settings.setData(DataComponentTypes.ITEM_NAME, Component.text("Cài đặt máy", NamedTextColor.GREEN));
         setup();
     }
 
     @Override
     public void setup() {
         fillMachineSides();
+        itemDecoration();
         for(int i: getInputSlots()){
             if(i > 9*row)
                 throw new IllegalArgumentException("Input slots for this " + name + " machine is outside gui");
@@ -55,6 +58,7 @@ public abstract class MachineGui extends BaseGui {
                 this.addButton(i, null, event -> {});
             }
         }
+        this.addButton(8, SETTINGS, ClickHandler.openGui(new MachineTransferGui(machine, this)));
     }
 
     private void fillMachineSides(){
@@ -70,6 +74,10 @@ public abstract class MachineGui extends BaseGui {
                 else this.addButton(thisSlot, PROCESSING_FILLER, ClickHandler.noAction());
             }
         }
+    }
+
+    private void itemDecoration(){
+        ItemStackUtils.setItemName(SETTINGS, Component.text("Cài đặt", NamedTextColor.GREEN));
     }
 
     /**
