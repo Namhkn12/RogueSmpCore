@@ -12,6 +12,7 @@ import java.util.*;
 public class DungeonManager {
 
     private final String prefix = "dungeon";
+    private final String folder = "dungeons";
     private static DungeonManager INSTANCE = null;
 
     private final Map<String, Dungeon> dungeons = new HashMap<>();
@@ -23,7 +24,7 @@ public class DungeonManager {
         this.plugin = plugin;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
 
-        this.dungeonFolder = new File(plugin.getDataFolder(), "dungeons");
+        this.dungeonFolder = new File(plugin.getDataFolder(), folder);
 
         if (!dungeonFolder.exists()) {
             dungeonFolder.mkdirs();
@@ -85,7 +86,7 @@ public class DungeonManager {
 
         if (dungeon == null || dungeon.getDgId() == null) return;
 
-        dungeons.put(dungeon.getDgId(), dungeon); // update nếu đã tồn tại
+        dungeons.put(dungeon.getDgId(), dungeon); // override
 
         File file = new File(dungeonFolder, dungeon.getDgId() + ".json");
 
