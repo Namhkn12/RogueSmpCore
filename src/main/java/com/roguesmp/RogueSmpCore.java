@@ -4,16 +4,12 @@ import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.effect.EffectManager;
+import com.roguesmp.entity.EntityManager;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
-import com.roguesmp.listener.DamageListener;
-import com.roguesmp.listener.EffectListener;
-import com.roguesmp.listener.GuiListener;
-import com.roguesmp.listener.PlayerListener;
+import com.roguesmp.listener.*;
 import com.roguesmp.player.PlayerManager;
-import com.roguesmp.registry.GemRegistry;
-import com.roguesmp.registry.ItemRegistry;
-import com.roguesmp.registry.ModifierRegistry;
+import com.roguesmp.registry.*;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
@@ -34,6 +30,9 @@ public final class RogueSmpCore extends JavaPlugin {
         PlayerManager.init(this);
         EffectManager.init(this);
         BlockManager.init(this);
+
+        //Entity
+        EntityManager.init();
 
         BlockRegistry.init(this);
         ModifierRegistry.init(this);

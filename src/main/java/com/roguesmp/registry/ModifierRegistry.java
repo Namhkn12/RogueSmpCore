@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -26,7 +25,7 @@ public class ModifierRegistry {
         registerDefault();
     }
 
-    public void registerDefault() {
+    private void registerDefault() {
         modifiers.put(ItemModifierType.GEM, new GemModifier());
     }
 
