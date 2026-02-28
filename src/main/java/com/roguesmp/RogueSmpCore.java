@@ -8,11 +8,6 @@ import com.roguesmp.entity.EntityManager;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.listener.*;
-import com.roguesmp.integration.PlaceholderAPIIntegration;
-import com.roguesmp.listener.DamageListener;
-import com.roguesmp.listener.EffectListener;
-import com.roguesmp.listener.GuiListener;
-import com.roguesmp.listener.PlayerListener;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.registry.*;
 import org.bukkit.event.Listener;
@@ -38,6 +33,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         //Entity
         EntityManager.init();
+        EntityRegistry.init(this);
 
         BlockRegistry.init(this);
         ModifierRegistry.init(this);
@@ -53,6 +49,7 @@ public final class RogueSmpCore extends JavaPlugin {
     // Load data from files, databases, etc
     public void loadData() {
         ItemRegistry.getInstance().loadFromFile();
+        EntityRegistry.getInstance().loadFromFile();
         GemRegistry.getInstance().loadFromFile();
         BlockStorage.getInstance().loadFromFile();
     }
@@ -72,12 +69,14 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
+        registerListener(new EntityListener(EntityManager.getInstance(), EntityRegistry.getInstance()));
     }
 
     //Register CommandAPICommand
     public void initCommands() {
         ItemBrowser.registerCommand();
         EffectManager.registerCommand();
+        EntityRegistry.registerCommand();
     }
 
     @Override

@@ -3,12 +3,13 @@ package com.roguesmp.entity.spell;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.SpellCastEvent;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -109,9 +110,9 @@ public abstract class Spell implements Cloneable {
 
     }
 
-    public void nearbyPlayerDeath(PlayerDeathEvent event) {
-
-    }
+//    public void nearbyPlayerDeath(PlayerDeathEvent event) {
+//
+//    }
 
     @FunctionalInterface
     public interface GetSpellTargets<V extends Entity> {
@@ -120,7 +121,7 @@ public abstract class Spell implements Cloneable {
 
     @FunctionalInterface
     public interface SpellParamReader {
-        @NotNull Spell fromParams(Map<String, Object> params);
+        @NotNull Spell fromParams(@Nullable Map<String, Object> params, LivingEntity owner);
     }
 
 }

@@ -1,6 +1,9 @@
 package com.roguesmp.entity;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,10 +19,19 @@ public class EntityManager {
         if (smpEntity == null) return;
         smpEntity.unload();
         spawnedEntities.remove(entity.getUniqueId());
+        Bukkit.getLogger().info("Removed entity");
     }
 
-    public void load(SmpEntity smpEntity) {
+    public void register(SmpEntity smpEntity) {
         spawnedEntities.put(smpEntity.entity.getUniqueId(), smpEntity);
+    }
+
+    public @Nullable SmpEntity getSmpEntity(LivingEntity living) {
+        return spawnedEntities.get(living.getUniqueId());
+    }
+
+    public boolean isRegistered(LivingEntity living) {
+        return spawnedEntities.containsKey(living.getUniqueId());
     }
 
     public static void init() {

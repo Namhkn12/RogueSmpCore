@@ -57,7 +57,6 @@ public class SpeedBuffEffect extends SmpEffect {
                 AttributeModifier modifier = new AttributeModifier(Keys.of(modifierId), value, AttributeModifier.Operation.MULTIPLY_SCALAR_1);
                 speedInstance.addTransientModifier(modifier);
             }
-            entity.sendMessage("GAINED " + value);
         }
     }
 
@@ -68,7 +67,6 @@ public class SpeedBuffEffect extends SmpEffect {
             if (speedInstance != null) {
                 speedInstance.removeModifier(Keys.of(modifierId));
             }
-            entity.sendMessage("EXPIRED " + value);
         }
     }
 

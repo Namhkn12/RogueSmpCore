@@ -48,8 +48,10 @@ public class EntityEquipment {
         // Wipe attribute modifiers, the attribute is handled using the entity base attribute
         itemStack.setData(DataComponentTypes.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.itemAttributes().build());
         // It's possible to add custom armor trim via datapacks
-        TrimMaterial trimMaterial1 = RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_MATERIAL).get(NamespacedKey.minecraft(trimMaterial));
-        TrimPattern trimPattern1 = RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN).get(NamespacedKey.minecraft(trimPattern));
+        TrimMaterial trimMaterial1 = null;
+        TrimPattern trimPattern1 = null;
+        if (trimMaterial != null) trimMaterial1 = RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_MATERIAL).get(NamespacedKey.minecraft(trimMaterial));
+        if (trimPattern != null) trimPattern1 = RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN).get(NamespacedKey.minecraft(trimPattern));
         if (trimMaterial1 != null && trimPattern1 != null) {
             itemStack.setData(DataComponentTypes.TRIM, ItemArmorTrim.itemArmorTrim(new ArmorTrim(trimMaterial1, trimPattern1)));
         }

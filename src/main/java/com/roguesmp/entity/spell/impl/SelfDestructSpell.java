@@ -1,9 +1,9 @@
 package com.roguesmp.entity.spell.impl;
 
 import com.roguesmp.entity.spell.Spell;
-import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDeathEvent;
 
 import java.util.Map;
@@ -30,12 +30,13 @@ public class SelfDestructSpell extends Spell {
     @Override
     public void onDeath(EntityDeathEvent event) {
         event.setDeathSound(Sound.ENTITY_GENERIC_EXPLODE);
-        Particle.EXPLOSION.builder().receivers(10).color(Color.RED).count(particleCount).spawn();
+        Particle.EXPLOSION.builder().location(event.getEntity().getLocation()).receivers(10).count(particleCount).spawn();
     }
 
-    public static SelfDestructSpell readParam(Map<String, Object> data) {
-        Integer count = (Integer) data.get("particleCount");
+    public static SelfDestructSpell readParam(Map<String, Object> data, LivingEntity owner) {
+        if (data == null) return new SelfDestructSpell(DEFAULT_COUNT);
+        Long count = (Long) data.get("particleCount"); //Gson quirk that make whole number return as Long
         if (count == null) return new SelfDestructSpell(DEFAULT_COUNT);
-        return new SelfDestructSpell(count);
+        return new SelfDestructSpell(Math.toIntExact(count));
     }
 }

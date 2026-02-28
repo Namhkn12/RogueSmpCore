@@ -3,12 +3,16 @@ package com.roguesmp.entity;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.entity.spell.SpellManager;
+import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.SpellCastEvent;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,26 +28,26 @@ public class SmpEntity {
 
     public final LivingEntity entity;
     private final String id;
-    private final RogueSmpCore mPlugin;
+    private final RogueSmpCore plugin;
 
-    private int mDetectionRange;
-    public SpellManager mActiveSpells;
-    private List<Spell> mPassiveSpells;
-    private boolean mPreventSameSpellTwiceInARow;
-    private @Nullable BukkitRunnable mTaskPassive = null;
-    private @Nullable BukkitRunnable mTaskActive = null;
-    private boolean mUnloaded = false;
-    private int mNextActiveTimer = 0;
-    public boolean mDead = false;
-    private long mPassiveIntervalTicks;
-    private @Nullable BossBarManager mBossBar;
+    private int detectionRange;
+    public SpellManager activeSpells;
+    private List<Spell> passiveSpells;
+    private boolean preventSameSpellTwiceInARow;
+    private @Nullable BukkitRunnable taskPassive = null;
+    private @Nullable BukkitRunnable taskActive = null;
+    private boolean unloaded = false;
+    private int nextActiveTimer = 0;
+    public boolean dead = false;
+    private long passiveIntervalTicks;
+    private @Nullable BossBarManager bossBar;
 
-    protected SmpEntity(BaseEntity base, LivingEntity boss) {
-        this.mPlugin = RogueSmpCore.getInstance();
-        entity = boss;
+    public SmpEntity(BaseEntity base, LivingEntity entity) {
+        this.plugin = RogueSmpCore.getInstance();
+        this.entity = entity;
         id = base.getId();
-        mActiveSpells = SpellManager.EMPTY;
-        mPassiveSpells = Collections.emptyList();
+        activeSpells = SpellManager.EMPTY;
+        passiveSpells = Collections.emptyList();
     }
 
     public void changePhase(SpellManager activeSpells,
@@ -58,24 +62,24 @@ public class SmpEntity {
             phaseAction.accept(entity);
         }
         if (spellDelay > 0) {
-            if (mTaskActive != null) {
-                mTaskActive.cancel();
-                mTaskActive = getSpellCastRunnable();
-                mTaskActive.runTaskTimer(mPlugin, spellDelay, 2L);
+            if (taskActive != null) {
+                taskActive.cancel();
+                taskActive = getSpellCastRunnable();
+                taskActive.runTaskTimer(plugin, spellDelay, 2L);
             }
-            if (mTaskPassive != null) {
-                mTaskPassive.cancel();
-                mTaskPassive = getPassiveSpellCastRunnable();
-                mTaskPassive.runTaskTimer(mPlugin, spellDelay, mPassiveIntervalTicks);
+            if (taskPassive != null) {
+                taskPassive.cancel();
+                taskPassive = getPassiveSpellCastRunnable();
+                taskPassive.runTaskTimer(plugin, spellDelay, passiveIntervalTicks);
             }
         }
-        mActiveSpells.cancelAll(true);
-        mActiveSpells = activeSpells;
-        mPassiveSpells = passiveSpells;
+        this.activeSpells.cancelAll(true);
+        this.activeSpells = activeSpells;
+        this.passiveSpells = passiveSpells;
     }
 
     public void changePassivePhase(List<Spell> passiveSpells) {
-        mPassiveSpells = passiveSpells;
+        this.passiveSpells = passiveSpells;
     }
 
     public void startSpell(Spell activeSpell, int detectionRange) {
@@ -116,18 +120,18 @@ public class SmpEntity {
     public void startSpell(SpellManager activeSpells, List<Spell> passiveSpells,
                            int detectionRange, @Nullable BossBarManager bossBar, long spellDelay,
                            long passiveIntervalTicks, boolean preventSameSpellTwiceInARow) {
-        mDetectionRange = detectionRange;
-        mBossBar = bossBar;
-        mActiveSpells = activeSpells;
-        mPassiveSpells = passiveSpells;
-        mPreventSameSpellTwiceInARow = preventSameSpellTwiceInARow;
+        this.detectionRange = detectionRange;
+        this.bossBar = bossBar;
+        this.activeSpells = activeSpells;
+        this.passiveSpells = passiveSpells;
+        this.preventSameSpellTwiceInARow = preventSameSpellTwiceInARow;
 
-        mPassiveIntervalTicks = passiveIntervalTicks;
-        mTaskPassive = getPassiveSpellCastRunnable();
-        mTaskPassive.runTaskTimer(mPlugin, 1, mPassiveIntervalTicks);
+        this.passiveIntervalTicks = passiveIntervalTicks;
+        taskPassive = getPassiveSpellCastRunnable();
+        taskPassive.runTaskTimer(plugin, 1, this.passiveIntervalTicks);
 
-        mTaskActive = getSpellCastRunnable();
-        mTaskActive.runTaskTimer(mPlugin, spellDelay, 2L);
+        taskActive = getSpellCastRunnable();
+        taskActive.runTaskTimer(plugin, spellDelay, 2L);
     }
 
     private BukkitRunnable getPassiveSpellCastRunnable() {
@@ -136,29 +140,29 @@ public class SmpEntity {
 
             @Override
             public void run() {
-                if (mBossBar != null && !mDead) {
-                    mBossBar.update();
+                if (bossBar != null && !dead) {
+                    bossBar.update();
                 }
 
-                mMissingTicks += mPassiveIntervalTicks;
+                mMissingTicks += passiveIntervalTicks;
                 if (mMissingTicks > 100) {
                     mMissingTicks = 0;
-                    /* Check if somehow the boss entity is missing even though this is still running */
+                    /* Check if somehow the entity is missing even though this is still running */
                     if (isEntityMissing()) {
-                        handleMissingBoss();
+                        handleMissingEntity();
                         cancel();
                         return;
                     }
                 }
 
                 /* Don't run abilities if players aren't present */
-                if (mDetectionRange > 0 && PlayerUtils.playersInRange(entity.getLocation(), mDetectionRange, true).isEmpty()) {
+                if (detectionRange > 0 && PlayerUtils.playersInRange(entity.getLocation(), detectionRange, true).isEmpty()) {
                     return;
                 }
 
-                if (mPassiveSpells != null) {
-                    for (Spell spell : mPassiveSpells) {
-                            spell.run();
+                if (passiveSpells != null) {
+                    for (Spell spell : passiveSpells) {
+                        spell.run();
                     }
                 }
             }
@@ -167,48 +171,48 @@ public class SmpEntity {
 
     private BukkitRunnable getSpellCastRunnable() {
         return new BukkitRunnable() {
-            private boolean mDisabled = true;
-            private int mMissingTicks = 0;
+            private boolean disabled = true;
+            private int missingTicks = 0;
 
             @Override
             public void run() {
-                mNextActiveTimer -= 2;
-                mMissingTicks += 2;
+                nextActiveTimer -= 2;
+                missingTicks += 2;
 
-                if (mNextActiveTimer > 0) {
+                if (nextActiveTimer > 0) {
                     // Still waiting for the current spell to finish
                     return;
                 }
 
-                if (mMissingTicks > 100) {
-                    mMissingTicks = 0;
-                    /* Check if somehow the boss entity is missing even though this is still running */
+                if (missingTicks > 100) {
+                    missingTicks = 0;
+                    /* Check if somehow the entity is missing even though this is still running */
                     if (isEntityMissing()) {
-                        handleMissingBoss();
+                        handleMissingEntity();
                         cancel();
                         return;
                     }
                 }
 
                 /* Don't progress if players aren't present */
-                if (mDetectionRange > 0 && PlayerUtils.playersInRange(entity.getLocation(), mDetectionRange, true).isEmpty()) {
-                    if (!mDisabled) {
+                if (detectionRange > 0 && PlayerUtils.playersInRange(entity.getLocation(), detectionRange, true).isEmpty()) {
+                    if (!disabled) {
                         /* Cancel all the spells just in case they were activated */
-                        mDisabled = true;
+                        disabled = true;
 
-                        mActiveSpells.cancelAll();
+                        activeSpells.cancelAll();
                     }
                     return;
                 }
 
                 /* Some spells might have been run - so when this next deactivates they need to be cancelled */
-                mDisabled = false;
+                disabled = false;
 
                 // Run the next spell and store how long before the next spell can run
-                mNextActiveTimer = mActiveSpells.runNextSpell(mPreventSameSpellTwiceInARow);
+                nextActiveTimer = activeSpells.runNextSpell(preventSameSpellTwiceInARow);
 
                 // The event goes after the spell casts.
-                Spell spell = mActiveSpells.getLastCastedSpell();
+                Spell spell = activeSpells.getLastCastedSpell();
                 if (spell != null) {
                     SpellCastEvent event = new SpellCastEvent(entity, SmpEntity.this, spell);
                     Bukkit.getPluginManager().callEvent(event);
@@ -218,15 +222,13 @@ public class SmpEntity {
         };
     }
 
-    private void handleMissingBoss() {
-        RogueSmpCore.LOGGER.warn("Boss {} is missing{} but still registered as an active boss. It has been removed and untracked via the fallback system.", id, entity.isValid() ? " (but valid)" : "");
+    private void handleMissingEntity() {
+        RogueSmpCore.LOGGER.warn("Entity {} is missing{} but still registered as an active SmpEntity. It has been removed and untracked via the fallback system.", id, entity.isValid() ? " (but valid)" : "");
         EntityManager.getInstance().unload(entity);
-        // usb: this is triggering when it shouldn't, don't remove bosses if they might be persistant
-        // mBoss.remove();
     }
 
     public void forceCastRandomSpell() {
-        List<Spell> spells = mActiveSpells.getSpells();
+        List<Spell> spells = activeSpells.getSpells();
         if (!spells.isEmpty()) {
             Spell spell = spells.get(Utils.RANDOM.nextInt(spells.size()));
             forceCastSpell(spell.getClass());
@@ -234,13 +236,13 @@ public class SmpEntity {
     }
 
     public void forceCastSpell(Class<? extends Spell> spell) {
-        mNextActiveTimer = mActiveSpells.forceCastSpell(spell);
-        Spell sp = mActiveSpells.getLastCastedSpell();
+        nextActiveTimer = activeSpells.forceCastSpell(spell);
+        Spell sp = activeSpells.getLastCastedSpell();
         if (sp != null) {
             SpellCastEvent event = new SpellCastEvent(entity, this, sp);
             Bukkit.getPluginManager().callEvent(event);
         } else {
-            RogueSmpCore.LOGGER.warn("Warning: Boss '{}' attempted to force cast '{}' but boss does not have this spell!", id, spell.toString());
+            RogueSmpCore.LOGGER.warn("Warning: Entity '{}' attempted to force cast '{}' but entity does not have this spell!", id, spell.toString());
         }
     }
 
@@ -248,10 +250,10 @@ public class SmpEntity {
         return id;
     }
 
-    /* Check if somehow the boss entity is missing even though this is still running */
+    /* Check if somehow the entity is missing even though this is still running */
     private boolean isEntityMissing() {
-        Location bossLoc = entity.getLocation();
-        if (!bossLoc.isWorldLoaded() || !bossLoc.getChunk().isLoaded()) {
+        Location entityLocation = entity.getLocation();
+        if (!entityLocation.isWorldLoaded() || !entityLocation.getChunk().isLoaded() || !entity.isValid()) {
             return true;
         }
         return false;
@@ -259,22 +261,89 @@ public class SmpEntity {
 
     public void unload() {
         /* Even if we unload twice, really cancel these tasks */
-        if (mTaskPassive != null && !mTaskPassive.isCancelled()) {
-            mTaskPassive.cancel();
+        if (taskPassive != null && !taskPassive.isCancelled()) {
+            taskPassive.cancel();
         }
-        if (mTaskActive != null && !mTaskActive.isCancelled()) {
-            mTaskActive.cancel();
+        if (taskActive != null && !taskActive.isCancelled()) {
+            taskActive.cancel();
         }
 
         /* Make sure we don't accidentally call the main unload sequence twice */
-        if (!mUnloaded) {
-            mUnloaded = true;
+        if (!unloaded) {
+            unloaded = true;
 
-            mActiveSpells.cancelAll();
+            activeSpells.cancelAll();
 
-            if (mBossBar != null) {
-                mBossBar.remove();
+            if (bossBar != null) {
+                bossBar.remove();
             }
         }
     }
+
+    public void onDamage(DamageEvent event) {
+        activeSpells.getSpells().forEach(spell -> {
+            spell.onDamage(event);
+        });
+        passiveSpells.forEach(spell -> {
+            spell.onDamage(event);
+        });
+    }
+
+    /*
+     * Entity was hurt
+     */
+    public void onHurt(DamageEvent event) {
+        activeSpells.getSpells().forEach(spell -> {
+            spell.onHurt(event);
+        });
+        passiveSpells.forEach(spell -> {
+            spell.onHurt(event);
+        });
+    }
+
+    public void onDeath(EntityDeathEvent event) {
+        activeSpells.getSpells().forEach(spell -> {
+            spell.onDeath(event);
+        });
+        passiveSpells.forEach(spell -> {
+            spell.onDeath(event);
+        });
+    }
+
+    /*
+     * Entity shot a projectile
+     */
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+        activeSpells.getSpells().forEach(spell -> {
+            spell.onProjectileLaunch(event);
+        });
+        passiveSpells.forEach(spell -> {
+            spell.onProjectileLaunch(event);
+        });
+    }
+
+    /*
+     * Entity-shot projectile hit something
+     */
+    public void onProjectileHit(ProjectileHitEvent event) {
+        activeSpells.getSpells().forEach(spell -> {
+            spell.onProjectileHit(event);
+        });
+        passiveSpells.forEach(spell -> {
+            spell.onProjectileHit(event);
+        });
+    }
+
+    public void onCastSpell(SpellCastEvent event) {
+        activeSpells.getSpells().forEach(spell -> {
+            spell.onCastSpell(event);
+        });
+        passiveSpells.forEach(spell -> {
+            spell.onCastSpell(event);
+        });
+    }
+
+//    public void nearbyPlayerDeath(PlayerDeathEvent event) {
+//
+//    }
 }
