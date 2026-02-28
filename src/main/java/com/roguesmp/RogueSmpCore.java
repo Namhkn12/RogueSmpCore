@@ -4,20 +4,12 @@ import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.effect.EffectManager;
+import com.roguesmp.entity.EntityManager;
 import com.roguesmp.gui.ItemBrowser;
-import com.roguesmp.listener.BlockListener;
-import com.roguesmp.listener.GuiListener;
-import com.roguesmp.registry.BlockRegistry;
-import com.roguesmp.registry.GemRegistry;
-import com.roguesmp.registry.ItemRegistry;
-import com.roguesmp.listener.DamageListener;
-import com.roguesmp.listener.EffectListener;
-import com.roguesmp.listener.GuiListener;
-import com.roguesmp.listener.PlayerListener;
+import com.roguesmp.integration.PlaceholderAPIIntegration;
+import com.roguesmp.listener.*;
 import com.roguesmp.player.PlayerManager;
-import com.roguesmp.registry.GemRegistry;
-import com.roguesmp.registry.ItemRegistry;
-import com.roguesmp.registry.ModifierRegistry;
+import com.roguesmp.registry.*;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
@@ -31,13 +23,21 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Init whatever here, called before initListeners
     public void init() {
+        new PlaceholderAPIIntegration(this).register();
+
         ComponentKeys.loadClass();
 
         PlayerManager.init(this);
+        EffectManager.init(this);
         BlockManager.init(this);
+
+        //Entity
+        EntityManager.init();
+        EntityRegistry.init(this);
 
         BlockRegistry.init(this);
         ModifierRegistry.init(this);
+
         ItemRegistry.init(this);
         GemRegistry.init(this);
 
@@ -49,6 +49,7 @@ public final class RogueSmpCore extends JavaPlugin {
     // Load data from files, databases, etc
     public void loadData() {
         ItemRegistry.getInstance().loadFromFile();
+        EntityRegistry.getInstance().loadFromFile();
         GemRegistry.getInstance().loadFromFile();
         BlockStorage.getInstance().loadFromFile();
     }
@@ -68,11 +69,14 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
+        registerListener(new EntityListener(EntityManager.getInstance(), EntityRegistry.getInstance()));
     }
 
     //Register CommandAPICommand
     public void initCommands() {
         ItemBrowser.registerCommand();
+        EffectManager.registerCommand();
+        EntityRegistry.registerCommand();
     }
 
     @Override

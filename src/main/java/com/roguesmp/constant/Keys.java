@@ -17,4 +17,6 @@ public class Keys {
     public static final NamespacedKey ITEM_ID = of("id");
 
     public static final NamespacedKey APPLIED_GEM = of("gem");
+
+    public static final NamespacedKey MOB_ID = of("id");
 }

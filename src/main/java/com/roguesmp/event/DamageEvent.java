@@ -10,6 +10,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Custom damage event for more control
@@ -18,7 +19,7 @@ public class DamageEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
 
     private final Entity victim;
-    private final Entity damager;
+    private final @Nullable Entity damager;
     private final double initialDamage;
     private final DamageType damageType;
 
@@ -47,7 +48,7 @@ public class DamageEvent extends Event implements Cancellable {
     private double finalDamage = 0;
     private double finalDef = 0;
 
-    public DamageEvent(Entity victim, Entity damager, double initialDamage, DamageType damageType) {
+    public DamageEvent(Entity victim, @Nullable Entity damager, double initialDamage, DamageType damageType) {
         this.victim = victim;
         this.damager = damager;
         this.initialDamage = initialDamage;
@@ -155,7 +156,7 @@ public class DamageEvent extends Event implements Cancellable {
         return victim;
     }
 
-    public Entity getDamager() {
+    public @Nullable Entity getDamager() {
         return damager;
     }
 
