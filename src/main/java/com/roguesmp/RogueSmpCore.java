@@ -39,7 +39,6 @@ public final class RogueSmpCore extends JavaPlugin {
         ModifierRegistry.init(this);
 
         ItemRegistry.init(this);
-        GemRegistry.init(this);
 
         BlockStorage.init(this, BlockManager.getInstance());
 
@@ -50,14 +49,12 @@ public final class RogueSmpCore extends JavaPlugin {
     public void loadData() {
         ItemRegistry.getInstance().loadFromFile();
         EntityRegistry.getInstance().loadFromFile();
-        GemRegistry.getInstance().loadFromFile();
         BlockStorage.getInstance().loadFromFile();
     }
 
     //Run on onDisable
     public void saveData() {
         ItemRegistry.getInstance().saveToFile(true);
-        GemRegistry.getInstance().saveToFile(true);
         BlockStorage.getInstance().saveToFile(true);
     }
 

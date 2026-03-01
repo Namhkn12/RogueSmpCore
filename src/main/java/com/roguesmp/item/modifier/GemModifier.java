@@ -4,6 +4,7 @@ import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.EquipAttributeComponent;
+import com.roguesmp.item.component.impl.GemDataComponent;
 import com.roguesmp.item.component.impl.GemSocketComponent;
 import com.roguesmp.player.SmpPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -20,8 +21,10 @@ public class GemModifier implements ItemModifier {
         EquipAttributeComponent equipAttributeComponent = smpItem.getComponent(ComponentKeys.ATTRIBUTE);
         if (equipAttributeComponent == null) return;
 
-        gemSocketComponent.getActiveGem().forEach(gemData -> {
-            Map<Attributes, Double> attributeMap = gemData.getAttributes().get(equipAttributeComponent.getSlot());
+        gemSocketComponent.getActiveGem().forEach(baseItem -> {
+            GemDataComponent gemDataComponent = baseItem.getComponent(ComponentKeys.GEM_DATA);
+            if (gemDataComponent == null) return;
+            Map<Attributes, Double> attributeMap = gemDataComponent.getAttributes().get(equipAttributeComponent.getSlot());
             if (attributeMap == null) return;
             equipAttributeComponent.addModifier(attributeMap);
         });

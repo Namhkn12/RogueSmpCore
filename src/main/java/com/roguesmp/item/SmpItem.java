@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 public class SmpItem {
     private final BaseItem baseItem;
     private ItemStack itemStack;
-    private boolean loadedModifier;
+    private boolean loadedModifier = false;
 
     private final Map<String, ItemComponent> componentMap = new HashMap<>();
 
