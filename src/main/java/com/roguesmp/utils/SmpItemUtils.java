@@ -5,9 +5,7 @@ import com.roguesmp.constant.Keys;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.GemSocketComponent;
-import com.roguesmp.item.gem.GemData;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.registry.GemRegistry;
 import com.roguesmp.registry.ItemRegistry;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -34,9 +32,13 @@ public class SmpItemUtils {
             return null;
         }
         gemIds.forEach(s -> {
-            GemData gemData = GemRegistry.getInstance().getGemData(s);
-            if (gemData == null) return;
-            if (!gemSocketComponent.addGem(gemData)) {
+            BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(s);
+            if (baseItem == null) return;
+            if (baseItem.getComponent(ComponentKeys.GEM_DATA) == null) {
+                player.getPlayer().sendMessage("Gem cannot be added. (NOT_A_GEM)");
+                return;
+            }
+            if (!gemSocketComponent.addGem(baseItem)) {
                 player.getPlayer().sendMessage("Cannot add gem. (NOT_ENOUGH_SLOT)");
             }
         });
