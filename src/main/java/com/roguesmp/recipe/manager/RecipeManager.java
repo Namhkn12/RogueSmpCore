@@ -38,4 +38,8 @@ public class RecipeManager {
         if (recipeId == null) return null;
         return recipeMap.get(recipeId);
     }
+
+    public static List<MachineRecipe> getMachineRecipesForMachine(String id){
+        return machineRecipes.getOrDefault(id, new ArrayList<>());
+    }
 }

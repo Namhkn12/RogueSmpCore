@@ -3,6 +3,9 @@ package com.roguesmp.registry;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
+import com.roguesmp.block.impl.blocks.EnergyNode;
+import com.roguesmp.block.impl.generator.passive.SolarPanel;
+import com.roguesmp.block.impl.machine.ElectricSteelFurnace;
 import com.roguesmp.block.impl.machine.SteelFurnace;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.item.BaseItem;
@@ -28,13 +31,19 @@ public class BlockRegistry {
 
     private void setup(){
         BlockManager.registerBlockType("steel_furnace", SteelFurnace::new);
+        BlockManager.registerBlockType("electric_steel_furnace", ElectricSteelFurnace::new);
+        BlockManager.registerBlockType("energy_node", EnergyNode::new);
+        BlockManager.registerBlockType("solar_panel", SolarPanel::new);
 
         registerDataMap();
     }
 
     private void registerDataMap(){
         dataMap.put("steel_furnace", new SteelFurnace());
-        dataMap.put("steel_block", new SmpBlock(new BaseItem("steel_block", Material.IRON_BLOCK, Map.of("name", new NameComponent("Khối thép"))), true));
+        dataMap.put("steel_block", new SmpBlock(ItemRegistry.getInstance().getBaseItem("steel_block"), true));
+        dataMap.put("electric_steel_furnace", new ElectricSteelFurnace());
+        dataMap.put("energy_node", new EnergyNode());
+        dataMap.put("solar_panel", new SolarPanel());
     }
 
     public void registerMachineRecipes(){

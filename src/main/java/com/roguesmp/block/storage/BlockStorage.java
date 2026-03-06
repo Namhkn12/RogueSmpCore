@@ -4,8 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.block.IEnergyStorage;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
+import com.roguesmp.block.impl.blocks.EnergyNode;
+import com.roguesmp.block.impl.type.ProcessingMachine;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.constant.TransferMode;
 import com.roguesmp.dto.BlockSaveData;
@@ -180,9 +183,23 @@ public class BlockStorage {
                                 machine.getGui().getInventory().setItem(entry.getKey(), entry.getValue());
                             }
 
-                            // Cập nhật lại giao diện (% hiển thị)
-                            if(machine.isProgressing() && machine.getCurrentRecipe() != null) {
-                                machine.setPercent((machine.getProgress() * 100) / machine.getCurrentRecipe().getBaseProcessTime());
+                            //Phục hồi điện nếu máy có điện
+                            if (block instanceof IEnergyStorage energyMachine) {
+                                energyMachine.setEnergy(data.storedEnergy);
+                            }
+
+                            //Phục hồi connections của energy node
+                            if(block instanceof EnergyNode node){
+                                for(String connectedNode: data.linkedNodes){
+                                    node.addConnection(Utils.stringToLocation(connectedNode));
+                                }
+                            }
+
+                            if(machine instanceof ProcessingMachine processingMachine){
+                                // Cập nhật lại giao diện (% hiển thị)
+                                if(machine.isProgressing() && machine.getCurrentRecipe() != null) {
+                                    processingMachine.setPercent((machine.getProgress() * 100) / machine.getCurrentRecipe().getBaseProcessTime());
+                                }
                             }
                         }
                     }

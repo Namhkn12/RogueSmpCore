@@ -47,10 +47,33 @@ public class ItemRegistry {
 
         dataMap.put("steel_ingot", new BaseItem("steel_ingot", Material.IRON_INGOT, Map.of("name", new NameComponent("Thép"))));
         dataMap.put("condensed_steel", new BaseItem("condensed_steel", Material.NETHERITE_INGOT, Map.of("name", new NameComponent("Thép đặc"))));
-
-        BlockRegistry.getInstance().getRegistry().forEach((id, machine) -> {
-            dataMap.put(id, machine.getItem());
-        });
+        dataMap.put("steel_block", new BaseItem("steel_block", Material.IRON_BLOCK, Map.of("name", new NameComponent("Khối thép"))));
+        dataMap.put("steel_furnace", new BaseItem("steel_furnace", Material.IRON_BLOCK, Map.of("name", new NameComponent("Lò nung thép"))));
+        dataMap.put("solar_panel", new BaseItem("solar_panel", Material.DAYLIGHT_DETECTOR,
+                Map.of("name", new NameComponent("Pin mặt trời"),
+                        "description", new DescriptionComponent(List.of(
+                                "<white>Chỉ hoạt động vào ban ngày",
+                                "<white>Sản xuất: 20<yellow>e<white>/s",
+                                "<white>Buffer: 500<yellow>e"
+                        )))
+        ));
+        dataMap.put("energy_node", new BaseItem("energy_node", Material.CONDUIT,
+                Map.of("name", new NameComponent("Nút năng lượng"),
+                        "description", new DescriptionComponent(List.of(
+                                "<white>Truyền điện giữa các máy",
+                                "<white>Buffer: 5000<yellow>e",
+                                "<white>Mức truyền: 100<yellow>e<white>/s"
+                        )))
+        ));
+        dataMap.put("wrench", new BaseItem("wrench", Material.STICK,
+                Map.of("name", new NameComponent("Cờ lê"),
+                        "description", new DescriptionComponent(List.of(
+                                "<yellow>Chuột phải để nối 2 nút điện với nhau",
+                                "<yellow>Shift - Chuột phải để phá custom block nhanh",
+                                "<yellow>Shift - Chuột trái để gỡ toàn bộ kết nối của nút điện"
+                        )))
+        ));
+        dataMap.put("electric_steel_furnace", new BaseItem("electric_steel_furnace", Material.BLAST_FURNACE, Map.of("name", new NameComponent("Lò nung thép điện"))));
     }
 
     public @Nullable BaseItem getBaseItem(@NotNull String id) {

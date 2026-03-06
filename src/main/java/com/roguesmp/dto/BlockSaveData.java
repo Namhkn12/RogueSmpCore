@@ -1,16 +1,22 @@
 package com.roguesmp.dto;
 
 import com.roguesmp.annotation.GsonIgnore;
+import com.roguesmp.block.IEnergyStorage;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
+import com.roguesmp.block.impl.blocks.EnergyNode;
+import com.roguesmp.block.impl.type.PassiveGenerator;
 import com.roguesmp.constant.TransferMode;
+import com.roguesmp.gui.MachineGui;
 import com.roguesmp.utils.InventoryBase64;
+import com.roguesmp.utils.Utils;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BlockSaveData {
@@ -25,6 +31,10 @@ public class BlockSaveData {
     public String inventoryBase64;
     public String currentRecipeId;
     public Map<BlockFace, TransferMode> sideConfigs;
+    public int storedEnergy;
+
+    // Chỉ dành cho Energy Node
+    public List<String> linkedNodes;
 
     // Biến này chỉ dùng lúc code, KHÔNG LƯU VÀO JSON
     @GsonIgnore
@@ -53,21 +63,36 @@ public class BlockSaveData {
 
             // Hàm chuyển Map Item thành Base64 bằng Paper API (như đã bàn ở trên)
             // Lấy từ gui.getInputSlots() và gui.getOutputSlots()
-            this.inventoryBase64 = InventoryBase64.itemMapToBase64(getMachineItems(machine));
+            if(!(machine instanceof PassiveGenerator) && machine.getGui() != null){
+                this.inventoryBase64 = InventoryBase64.itemMapToBase64(getMachineItems(machine));
+            }
+
+            if(block instanceof IEnergyStorage energyMachine){
+                this.storedEnergy = energyMachine.getEnergy();
+            }
+            else{
+                this.storedEnergy = 0;
+            }
+
+            if(block instanceof EnergyNode node){
+                this.linkedNodes = node.getConnections().stream().map(Utils::locationToString).toList();
+            }
         } else {
             this.isMachine = false;
         }
+
     }
 
     // Helper lọc đồ
     private Map<Integer, org.bukkit.inventory.ItemStack> getMachineItems(SmpMachine machine) {
         Map<Integer, org.bukkit.inventory.ItemStack> map = new HashMap<>();
         org.bukkit.inventory.Inventory inv = machine.getGui().getInventory();
+        MachineGui machineGui = (MachineGui) machine.getGui();
 
-        for (int slot : machine.getGui().getInputSlots()) {
+        for (int slot : machineGui.getInputSlots()) {
             if (inv.getItem(slot) != null) map.put(slot, inv.getItem(slot));
         }
-        for (int slot : machine.getGui().getOutputSlots()) {
+        for (int slot : machineGui.getOutputSlots()) {
             if (inv.getItem(slot) != null) map.put(slot, inv.getItem(slot));
         }
         return map;

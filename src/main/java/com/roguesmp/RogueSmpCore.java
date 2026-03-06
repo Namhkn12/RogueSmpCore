@@ -35,10 +35,9 @@ public final class RogueSmpCore extends JavaPlugin {
         EntityManager.init();
         EntityRegistry.init(this);
 
+        ItemRegistry.init(this);
         BlockRegistry.init(this);
         ModifierRegistry.init(this);
-
-        ItemRegistry.init(this);
 
         BlockStorage.init(this, BlockManager.getInstance());
 
@@ -62,6 +61,7 @@ public final class RogueSmpCore extends JavaPlugin {
     public void initListeners() {
         registerListener(new GuiListener());
         registerListener(new BlockListener());
+        registerListener(new WrenchListener());
 
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance()));
