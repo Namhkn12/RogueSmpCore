@@ -66,6 +66,7 @@ public class PlaceholderAPIIntegration extends PlaceholderExpansion {
                     RogueSmpCore.LOGGER.warn("Failed to find integer after 'effect_' on tab list");
                 }
             }
+            return null;
         }
         return null;
     }

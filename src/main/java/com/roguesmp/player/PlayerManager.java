@@ -1,9 +1,11 @@
 package com.roguesmp.player;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.utils.Utils;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import javax.annotation.Nullable;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -11,7 +13,9 @@ import java.util.UUID;
 public class PlayerManager {
     private static PlayerManager INSTANCE = null;
 
-    private static final int PERIOD = 5;
+    public static final String FOLDER = "player_data";
+
+    public static final int PERIOD = 5;
 
     private final RogueSmpCore plugin;
     private final Map<UUID, SmpPlayer> players;
@@ -28,10 +32,10 @@ public class PlayerManager {
                 ticks += PERIOD;
                 boolean twoHz = ticks % 10 == 0;
                 boolean oneHz = ticks % 20 == 0;
+                ticks = 0;
 
                 for (SmpPlayer player : players.values()) {
-                    player.getActiveEnchants().forEach((enchants, integer) -> enchants.getEnchant().tick(player, integer, twoHz, oneHz));
-                    player.getActiveAttributes().forEach((attributes, aDouble) -> attributes.getAttribute().tick(player, aDouble, twoHz, oneHz));
+                    player.tick(twoHz, oneHz);
                 }
             }
         }.runTaskTimer(this.plugin, 0, PERIOD);
@@ -41,12 +45,30 @@ public class PlayerManager {
         return players.getOrDefault(uuid, null);
     }
 
-    public void addPlayer(UUID uuid) {
+    public void loadPlayer(UUID uuid) {
         players.put(uuid, new SmpPlayer(uuid));
+
+        Utils.runAsync(() -> {
+
+        });
     }
 
-    public void removePlayer(UUID uuid) {
+    public void unloadPlayer(UUID uuid) {
         players.remove(uuid);
+    }
+
+    private void loadPlayerAbilities() {
+
+    }
+
+    private void savePlayerAbilities(UUID playerId) {
+        File folder = new File(plugin.getDataFolder(), FOLDER);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
+        File playerFile = new File(folder, playerId.toString() + ".json");
+
     }
 
     public static PlayerManager getInstance() {

@@ -4,6 +4,7 @@ import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.constant.Enchants;
 import com.roguesmp.constant.EquipSlot;
+import com.roguesmp.event.DamageEvent;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.EnchantComponent;
 import com.roguesmp.item.component.impl.EquipAttributeComponent;
@@ -12,6 +13,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrowableProjectile;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
@@ -25,11 +28,13 @@ import java.util.UUID;
 public class PlayerProjectile {
     // Arrow entity uuid
     private final UUID uuid;
+    private final SmpPlayer smpPlayer;
     private final Map<Enchants, Integer> activeEnchants = new EnumMap<>(Enchants.class);
     private final Map<Attributes, Double> activeAttributes = new EnumMap<>(Attributes.class);
 
     public PlayerProjectile(SmpPlayer player, Projectile projectile, Map<Enchants, Integer> snapshotEnchant, Map<Attributes, Double> snapshotAttribute) {
         this.uuid = projectile.getUniqueId();
+        this.smpPlayer = player;
         this.activeEnchants.putAll(snapshotEnchant);
         this.activeAttributes.putAll(snapshotAttribute);
         SmpItem smpItem = null;
@@ -71,6 +76,33 @@ public class PlayerProjectile {
                 }
             });
         }
+    }
+
+    public void onDamageEntity(DamageEvent event) {
+        activeEnchants.forEach((enchants, integer) -> {
+            enchants.getEnchant().onDamageEntity(event, integer, smpPlayer);
+        });
+        activeAttributes.forEach((attributes, aDouble) -> {
+            attributes.getAttribute().onDamageEntity(event, aDouble, smpPlayer);
+        });
+    }
+
+    public void onProjectileHit(ProjectileHitEvent event) {
+        activeEnchants.forEach((enchants, integer) -> {
+            enchants.getEnchant().onProjectileHit(event, integer, smpPlayer);
+        });
+        activeAttributes.forEach((attributes, aDouble) -> {
+            attributes.getAttribute().onProjectileHit(event, aDouble, smpPlayer);
+        });
+    }
+
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+        activeEnchants.forEach((enchants, integer) -> {
+            enchants.getEnchant().onProjectileLaunch(event, integer, smpPlayer);
+        });
+        activeAttributes.forEach((attributes, aDouble) -> {
+            attributes.getAttribute().onProjectileLaunch(event, aDouble, smpPlayer);
+        });
     }
 
     public Map<Enchants, Integer> getActiveEnchants() {

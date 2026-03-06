@@ -6,6 +6,7 @@ import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.gui.ItemBrowser;
+import com.roguesmp.gui.ability.AbilityLoadoutGui;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.listener.*;
 import com.roguesmp.player.PlayerManager;
@@ -74,6 +75,8 @@ public final class RogueSmpCore extends JavaPlugin {
         ItemBrowser.registerCommand();
         EffectManager.registerCommand();
         EntityRegistry.registerCommand();
+
+        AbilityLoadoutGui.register();
     }
 
     @Override

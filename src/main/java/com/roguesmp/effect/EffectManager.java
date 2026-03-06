@@ -63,9 +63,9 @@ public class EffectManager {
             public void run() {
 
                 mTicks += PERIOD;
-                boolean fourHz = mTicks % 5 == 0;
                 boolean twoHz = mTicks % 10 == 0;
                 boolean oneHz = mTicks % 20 == 0;
+                mTicks = 0;
 
                 var entryIterator = allEffects.entrySet().iterator();
                 while (entryIterator.hasNext()) {
@@ -90,7 +90,7 @@ public class EffectManager {
 
                         var effectIterator = effects.descendingIterator();
                         SmpEffect currentActiveEffect = effects.getLast(); //Only last effect (highest magnitude) is active
-                        currentActiveEffect.onTick(entity, oneHz, twoHz, fourHz);
+                        currentActiveEffect.onTick(entity, oneHz, twoHz);
                         boolean currentEffectRemoved = false;
                         while (effectIterator.hasNext()) {
                             SmpEffect effect = effectIterator.next();
