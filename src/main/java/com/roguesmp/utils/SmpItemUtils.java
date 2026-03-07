@@ -28,18 +28,18 @@ public class SmpItemUtils {
         SmpItem smpItem = new SmpItem(itemStack);
         GemSocketComponent gemSocketComponent = smpItem.getComponent(ComponentKeys.GEM_SOCKET);
         if (gemSocketComponent == null) {
-            player.getPlayer().sendMessage("Cannot add gem to this item. (NO_GEM_COMPONENT)");
+            player.getBukkitPlayer().sendMessage("Cannot add gem to this item. (NO_GEM_COMPONENT)");
             return null;
         }
         gemIds.forEach(s -> {
             BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(s);
             if (baseItem == null) return;
             if (baseItem.getComponent(ComponentKeys.GEM_DATA) == null) {
-                player.getPlayer().sendMessage("Gem cannot be added. (NOT_A_GEM)");
+                player.getBukkitPlayer().sendMessage("Gem cannot be added. (NOT_A_GEM)");
                 return;
             }
             if (!gemSocketComponent.addGem(baseItem)) {
-                player.getPlayer().sendMessage("Cannot add gem. (NOT_ENOUGH_SLOT)");
+                player.getBukkitPlayer().sendMessage("Cannot add gem. (NOT_ENOUGH_SLOT)");
             }
         });
 

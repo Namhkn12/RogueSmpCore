@@ -11,6 +11,7 @@ import java.util.List;
 public class ComponentKeys {
 
     public static final ComponentKey<NameComponent> ITEM_NAME;
+    public static final ComponentKey<StackSizeComponent> STACK_SIZE;
     public static final ComponentKey<EnchantComponent> ENCHANT;
     public static final ComponentKey<EquipAttributeComponent> ATTRIBUTE;
     public static final ComponentKey<DurabilityComponent> DURABILITY;
@@ -21,6 +22,8 @@ public class ComponentKeys {
     static {
         ITEM_NAME = ItemComponentCodecRegistry.register("name",
                 ComponentCodec.singleArg(String.class, NameComponent::new, NameComponent::value));
+        STACK_SIZE = ItemComponentCodecRegistry.register("stack_size",
+                ComponentCodec.singleArg(Integer.class, StackSizeComponent::new, StackSizeComponent::size));
         ENCHANT = ItemComponentCodecRegistry.register("enchant", EnchantComponent.class);
         ATTRIBUTE = ItemComponentCodecRegistry.register("attribute", EquipAttributeComponent.class);
         DURABILITY = ItemComponentCodecRegistry.register("durability",

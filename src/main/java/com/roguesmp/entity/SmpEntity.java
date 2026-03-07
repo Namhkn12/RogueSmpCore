@@ -64,14 +64,14 @@ public class SmpEntity {
         if (spellDelay > 0) {
             if (taskActive != null) {
                 taskActive.cancel();
-                taskActive = getSpellCastRunnable();
-                taskActive.runTaskTimer(plugin, spellDelay, 2L);
             }
+            taskActive = getSpellCastRunnable();
+            taskActive.runTaskTimer(plugin, spellDelay, 2L);
             if (taskPassive != null) {
                 taskPassive.cancel();
-                taskPassive = getPassiveSpellCastRunnable();
-                taskPassive.runTaskTimer(plugin, spellDelay, passiveIntervalTicks);
             }
+            taskPassive = getPassiveSpellCastRunnable();
+            taskPassive.runTaskTimer(plugin, spellDelay, passiveIntervalTicks);
         }
         this.activeSpells.cancelAll(true);
         this.activeSpells = activeSpells;
@@ -127,11 +127,15 @@ public class SmpEntity {
         this.preventSameSpellTwiceInARow = preventSameSpellTwiceInARow;
 
         this.passiveIntervalTicks = passiveIntervalTicks;
-        taskPassive = getPassiveSpellCastRunnable();
-        taskPassive.runTaskTimer(plugin, 1, this.passiveIntervalTicks);
+        if (passiveSpells != null && !passiveSpells.isEmpty()) {
+            taskPassive = getPassiveSpellCastRunnable();
+            taskPassive.runTaskTimer(plugin, 1, this.passiveIntervalTicks);
+        }
 
-        taskActive = getSpellCastRunnable();
-        taskActive.runTaskTimer(plugin, spellDelay, 2L);
+        if (activeSpells != null && !activeSpells.isEmpty()) {
+            taskActive = getSpellCastRunnable();
+            taskActive.runTaskTimer(plugin, spellDelay, 2L);
+        }
     }
 
     private BukkitRunnable getPassiveSpellCastRunnable() {

@@ -45,17 +45,17 @@ public class Explosive implements SmpEnchant {
 
     @Override
     public void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
-        player.getPlayer().sendMessage("Damage! " + level);
+        player.getBukkitPlayer().sendMessage("Damage! " + level);
     }
 
     @Override
     public void onProjectileLaunch(ProjectileLaunchEvent event, int level, @NotNull SmpPlayer player) {
-        Player player1 = player.getPlayer();
+        Player player1 = player.getBukkitPlayer();
         player1.playSound(player1 , Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f);
     }
 
     @Override
     public void onProjectileHit(ProjectileHitEvent event, int level, @NotNull SmpPlayer player) {
-        player.getPlayer().sendMessage("EXPLODE! " + level);
+        player.getBukkitPlayer().sendMessage("EXPLODE! " + level);
     }
 }

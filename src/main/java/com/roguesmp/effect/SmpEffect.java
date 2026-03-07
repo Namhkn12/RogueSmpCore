@@ -134,7 +134,7 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
         KEEP_ON_DEATH,
     }
 
-    public void onTick(Entity entity, boolean oneHz, boolean twoHz, boolean fourHz) {
+    public void onTick(Entity entity, boolean oneHz, boolean twoHz) {
 
     }
 
