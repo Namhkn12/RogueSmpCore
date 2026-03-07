@@ -2,6 +2,7 @@ package com.roguesmp.listener;
 
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.utils.DamageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -18,19 +19,27 @@ public class DamageListener implements Listener {
         if (event instanceof EntityDamageByEntityEvent entityDamageByEntityEvent) {
             Entity damager = entityDamageByEntityEvent.getDamager();
             Entity victim = event.getEntity();
-            DamageType damageType = DamageType.getType(event.getCause());
-            DamageEvent damageEvent = new DamageEvent(victim, damager, event.getDamage(), damageType);
-            damageEvent.setCritical(entityDamageByEntityEvent.isCritical());
 
+            DamageEvent.Metadata metadata = DamageUtils.nextMetadata;
+            DamageEvent damageEvent;
+            if (metadata != null) { // Damage caused by plugin via DamageUtils
+                damageEvent = new DamageEvent(victim, damager, event.getDamage(), metadata);
+                DamageUtils.nextMetadata = null;
+            } else {
+                DamageType damageType = DamageType.getType(event.getCause());
+                damageEvent = new DamageEvent(victim, damager, event.getDamage(), new DamageEvent.Metadata(damageType));
+            }
+
+            damageEvent.setCritical(entityDamageByEntityEvent.isCritical());
             Bukkit.getPluginManager().callEvent(damageEvent);
 
             event.setCancelled(damageEvent.isCancelled());
             event.setDamage(damageEvent.getFinalDamage());
 
             if (damager instanceof Player player) {
-                player.sendMessage(damageEvent.getFinalDamage() + " " + damageType);
+                player.sendMessage(damageEvent.getFinalDamage() + " " + damageEvent.getDamageType());
             } else if (damager instanceof Projectile projectile && projectile.getShooter() instanceof Player player) {
-                player.sendMessage(damageEvent.getFinalDamage() + " " + damageType);
+                player.sendMessage(damageEvent.getFinalDamage() + " " + damageEvent.getDamageType());
             }
         }
 

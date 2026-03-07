@@ -18,12 +18,36 @@ import org.jetbrains.annotations.Nullable;
 public class DamageEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
 
+    public static class Metadata {
+        private final @Nullable String mobSpellId;
+        private final @Nullable String abilityId;
+        private DamageType damageType;
+
+        public Metadata(DamageType damageType) {
+            this(damageType, null, null);
+        }
+
+        public Metadata(@Nullable String abilityId, DamageType damageType) {
+            this(damageType, null, abilityId);
+        }
+
+        public Metadata(DamageType damageType, @Nullable String mobSpellId) {
+            this(damageType, mobSpellId, null);
+        }
+
+        public Metadata(DamageType damageType, @Nullable String mobSpellId, @Nullable String abilityId) {
+            this.mobSpellId = mobSpellId;
+            this.abilityId = abilityId;
+            this.damageType = damageType;
+        }
+    }
+
     private final Entity victim;
     private final @Nullable Entity damager;
     private final double initialDamage;
-    private final DamageType damageType;
+    private final Metadata metadata;
 
-    private boolean needUpdate = false; // For recalculating dmg value
+    private boolean needUpdate = true; // For recalculating dmg value
 
     private boolean ignoreIframe;
     private boolean isCancelled;
@@ -48,11 +72,11 @@ public class DamageEvent extends Event implements Cancellable {
     private double finalDamage = 0;
     private double finalDef = 0;
 
-    public DamageEvent(Entity victim, @Nullable Entity damager, double initialDamage, DamageType damageType) {
+    public DamageEvent(Entity victim, @Nullable Entity damager, double initialDamage, @NotNull Metadata metadata) {
         this.victim = victim;
         this.damager = damager;
         this.initialDamage = initialDamage;
-        this.damageType = damageType;
+        this.metadata = metadata;
     }
 
     public void addDamageModifier(double value, DamageOperation operation) {
@@ -81,7 +105,6 @@ public class DamageEvent extends Event implements Cancellable {
 
     private double calculateFinalDamage() {
         if (!needUpdate) return finalDamage;
-        needUpdate = false;
         double base = (baseOverride >= 0) ? baseOverride : initialDamage;
 
         finalDamage = base + addBase;
@@ -90,7 +113,7 @@ public class DamageEvent extends Event implements Cancellable {
         finalDamage *= moreFinal;
 
         // Vanilla mechanics
-        if (damager instanceof Player bukkitPlayer) {
+        if (metadata.damageType == DamageType.MELEE && damager instanceof Player bukkitPlayer) {
             finalDamage *= getMeleeCooldownMultiplier(bukkitPlayer);
             if (isCritical) finalDamage *= 1.5;
         } else if (damager instanceof AbstractArrow arrow && !(arrow instanceof Trident)) {
@@ -104,12 +127,12 @@ public class DamageEvent extends Event implements Cancellable {
             finalDamage = applyDefense(finalDamage, totalDef);
         }
 
+        needUpdate = false;
         return finalDamage;
     }
 
     private double calculateFinalDefense() {
         if (!needUpdate) return finalDef;
-        needUpdate = false;
         finalDef = baseDef + addBaseDef;
         finalDef *= (1 + increaseBaseDef);
         finalDef *= moreBaseDef;
@@ -173,7 +196,7 @@ public class DamageEvent extends Event implements Cancellable {
     }
 
     public DamageType getDamageType() {
-        return damageType;
+        return metadata.damageType;
     }
 
     public static HandlerList getHandlerList() {

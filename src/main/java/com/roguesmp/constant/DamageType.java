@@ -5,7 +5,9 @@ import org.bukkit.event.entity.EntityDamageEvent;
 
 public enum DamageType {
     MELEE,
+    MELEE_ABILITY,
     PROJECTILE,
+    PROJECTILE_ABILITY,
     MAGIC,
     THORNS,
     BLAST,
@@ -38,5 +40,13 @@ public enum DamageType {
                 yield OTHER;
             }
         };
+    }
+
+    public static boolean isMeleeDamage(DamageType type) {
+        return type == MELEE || type == MELEE_ABILITY;
+    }
+
+    public static boolean isProjectileDamage(DamageType type) {
+        return type == PROJECTILE || type == PROJECTILE_ABILITY;
     }
 }
