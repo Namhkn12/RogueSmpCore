@@ -2,6 +2,8 @@ package com.roguesmp.integration;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.effect.DisplayableEffect;
+import com.roguesmp.player.PlayerManager;
+import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.kyori.adventure.text.Component;
@@ -67,6 +69,15 @@ public class PlaceholderAPIIntegration extends PlaceholderExpansion {
                 }
             }
             return null;
+        }
+
+        if (params.startsWith("player_")) {
+            if (params.startsWith("player_level")) {
+                SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player.getUniqueId());
+                if (smpPlayer == null) return null;
+                int level = smpPlayer.getPlayerData().getLevel();
+                return "["+level+"] ";
+            }
         }
         return null;
     }

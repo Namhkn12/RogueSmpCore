@@ -35,7 +35,7 @@ public class AbilityLoadoutGui extends BaseGui {
     public void setup() {
         AbilityLoadout loadout = player.getAbilityLoadout();
         Map<AbilityTrigger, Ability> equipped = loadout.getEquippedAbilities();
-        Map<String, Ability> passives = loadout.getPassiveAbilities();
+        List<Ability> passives = loadout.getPassiveAbilities();
 
         for (AbilityTrigger trigger : AbilityTrigger.values()) {
             Ability ability = equipped.get(trigger);

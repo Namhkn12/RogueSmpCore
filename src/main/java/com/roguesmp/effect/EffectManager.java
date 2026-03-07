@@ -65,7 +65,7 @@ public class EffectManager {
                 mTicks += PERIOD;
                 boolean twoHz = mTicks % 10 == 0;
                 boolean oneHz = mTicks % 20 == 0;
-                mTicks = 0;
+                if (mTicks >= 20) mTicks = 0;
 
                 var entryIterator = allEffects.entrySet().iterator();
                 while (entryIterator.hasNext()) {

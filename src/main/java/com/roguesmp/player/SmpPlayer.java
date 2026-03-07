@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.*;
 
 public class SmpPlayer {
+
     private final UUID uuid;
     private final Map<Enchants, Integer> activeEnchants;
     private final Map<Attributes, Double> activeAttributes;
@@ -44,6 +45,15 @@ public class SmpPlayer {
         this(player.getUniqueId());
     }
 
+    public void loadData() {
+        PlayerData playerData = getPlayerData();
+        abilityLoadout.loadData(playerData);
+    }
+
+    public void saveData() {
+        PlayerData playerData = getPlayerData();
+        abilityLoadout.saveData(playerData);
+    }
 
     public void updateSlotStat(Player player, EquipSlot slot, @Nullable SmpItem oldItem, @Nullable SmpItem newItem) {
         activeAttributes.forEach((attributes, aDouble) -> {
@@ -128,6 +138,14 @@ public class SmpPlayer {
         return abilityLoadout;
     }
 
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public PlayerData getPlayerData() {
+        return PlayerDataManager.getInstance().getData(uuid);
+    }
+
     public @Nullable Player getBukkitPlayer() {
         return Bukkit.getPlayer(uuid);
     }
@@ -169,9 +187,6 @@ public class SmpPlayer {
         event.setCancelled(true);
     }
 
-    /**
-     * Called when player melee damage entity, projectile is handled in {@link PlayerProjectile}
-     */
     public void onDamageEntity(DamageEvent event) {
         if (event.getDamager() instanceof Projectile projectile && projectile.getShooter() instanceof Player player) {
             // Player damage an entity with projectile

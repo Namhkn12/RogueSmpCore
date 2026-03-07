@@ -9,6 +9,7 @@ import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.gui.ability.AbilityLoadoutGui;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.listener.*;
+import com.roguesmp.player.PlayerDataManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.registry.*;
 import org.bukkit.event.Listener;
@@ -26,9 +27,11 @@ public final class RogueSmpCore extends JavaPlugin {
     public void init() {
         new PlaceholderAPIIntegration(this).register();
 
+        PlayerDataManager.init();
+
         ComponentKeys.loadClass();
 
-        PlayerManager.init(this);
+        PlayerManager.init(this, PlayerDataManager.getInstance());
         EffectManager.init(this);
         BlockManager.init(this);
 

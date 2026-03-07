@@ -1,21 +1,61 @@
 package com.roguesmp.player;
 
-import com.roguesmp.player.data.AbilityLevelPair;
+import com.roguesmp.annotation.GsonIgnore;
+import com.roguesmp.constant.AbilityTrigger;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * A class that hold player-related data
  */
 public class PlayerData {
-    private final UUID uuid;
-    private final String lastKnownName;
-    private final List<AbilityLevelPair> unlockedAnilities;
 
-    public PlayerData(UUID uuid, String lastKnownName, List<AbilityLevelPair> unlockedAnilities) {
+    @GsonIgnore
+    private boolean dirty = true;
+
+    private final UUID uuid;
+    private int level;
+    private Map<String, Integer> unlockedAbilities = new HashMap<>();
+    private Map<AbilityTrigger, String> equippedAbilities = new EnumMap<>(AbilityTrigger.class);
+    private List<String> passiveAbilities = new ArrayList<>();
+
+    public PlayerData(UUID uuid) {
         this.uuid = uuid;
-        this.lastKnownName = lastKnownName;
-        this.unlockedAnilities = unlockedAnilities;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public Map<String, Integer> getUnlockedAbilities() {
+        return unlockedAbilities;
+    }
+
+    public void setUnlockedAbilities(Map<String, Integer> unlockedAbilities) {
+        this.unlockedAbilities = unlockedAbilities;
+    }
+
+    public List<String> getPassiveAbilities() {
+        return passiveAbilities;
+    }
+
+    public void setPassiveAbilities(List<String> passiveAbilities) {
+        this.passiveAbilities = passiveAbilities;
+    }
+
+    public Map<AbilityTrigger, String> getEquippedAbilities() {
+        return equippedAbilities;
+    }
+
+    public void setEquippedAbilities(Map<AbilityTrigger, String> equippedAbilities) {
+        this.equippedAbilities = equippedAbilities;
     }
 }
