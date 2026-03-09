@@ -1,28 +1,26 @@
 package com.roguesmp.dungeon.instance;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 public class DungeonInstance {
     private UUID uuid;
     private long startTime;
-    private String partyId;
+    private UUID partyId;
     private String dungeonId;
-    private String regionId;
+    private UUID regionId;
     private List<String> roomIds;
     private boolean status;
 
     public DungeonInstance() {
     }
 
-    public DungeonInstance(UUID uuid, long startTime, String partyId, String dungeonId, String regionId, List<String> roomIds, boolean status) {
+    public DungeonInstance(UUID uuid, long startTime, UUID partyId, String dungeonId, UUID regionId, boolean status) {
         this.uuid = uuid;
         this.startTime = startTime;
         this.partyId = partyId;
         this.dungeonId = dungeonId;
         this.regionId = regionId;
-        this.roomIds = roomIds;
         this.status = status;
     }
 
@@ -42,11 +40,11 @@ public class DungeonInstance {
         this.startTime = startTime;
     }
 
-    public String getPartyId() {
+    public UUID getPartyId() {
         return partyId;
     }
 
-    public void setPartyId(String partyId) {
+    public void setPartyId(UUID partyId) {
         this.partyId = partyId;
     }
 
@@ -58,20 +56,12 @@ public class DungeonInstance {
         this.dungeonId = dungeonId;
     }
 
-    public String getRegionId() {
+    public UUID getRegionId() {
         return regionId;
     }
 
-    public void setRegionId(String regionId) {
+    public void setRegionId(UUID regionId) {
         this.regionId = regionId;
-    }
-
-    public List<String> getRoomIds() {
-        return roomIds;
-    }
-
-    public void setRoomIds(List<String> roomIds) {
-        this.roomIds = roomIds;
     }
 
     public boolean isStatus() {

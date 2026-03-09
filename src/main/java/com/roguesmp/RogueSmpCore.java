@@ -1,10 +1,11 @@
 package com.roguesmp;
 
 import com.roguesmp.constant.ComponentKeys;
-import com.roguesmp.dungeon.DungeonManager;
-import com.roguesmp.dungeon.party.PartyManager;
-import com.roguesmp.dungeon.room.RoomManager;
-import com.roguesmp.dungeon.schemeta.SchemetaManager;
+import com.roguesmp.dungeon.DungeonRegistry;
+import com.roguesmp.dungeon.manager.DungeonManager;
+import com.roguesmp.dungeon.manager.PartyManager;
+import com.roguesmp.dungeon.manager.RoomManager;
+import com.roguesmp.dungeon.manager.SchemetaManager;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.listener.GuiListener;
 import com.roguesmp.registry.GemRegistry;
@@ -29,10 +30,12 @@ public final class RogueSmpCore extends JavaPlugin {
         GemRegistry.init(this);
 
         PlayerManager.init(this);
-        PartyManager.init();
-        SchemetaManager.init(this);
-        RoomManager.init(this);
-        DungeonManager.init(this);
+
+        DungeonRegistry.startUp();
+//        PartyManager.init();
+//        SchemetaManager.init(this);
+//        RoomManager.init(this);
+//        DungeonManager.init(this);
     }
 
     // Load data from files, databases, etc
@@ -56,10 +59,10 @@ public final class RogueSmpCore extends JavaPlugin {
     //Register CommandAPICommand
     public void initCommands() {
         ItemBrowser.registerCommand();
-        PartyManager.getInstance().registerCommands();
-        SchemetaManager.getInstance().registerCommands();
-        RoomManager.getInstance().registerCommand();
-        DungeonManager.getInstance().registerCommand();
+//        PartyManager.getInstance().registerCommands();
+//        SchemetaManager.getInstance().registerCommands();
+//        RoomManager.getInstance().registerCommand();
+//        DungeonManager.getInstance().registerCommand();
     }
 
     @Override
