@@ -33,22 +33,22 @@ public class SchemetaRepository implements ISchemetaRepository {
 
     @Override
     public List<Schemeta> loadAll() {
-        List<Schemeta> result = new ArrayList<>();
+        List<Schemeta> schemetas = new ArrayList<>();
 
         File[] files = schemetaFolder.listFiles((dir, name) -> name.endsWith(DungeonConfig.JSON_TYPE));
-        if (files == null) return result;
+        if (files == null) return schemetas;
 
         for (File file : files) {
             try (Reader reader = Files.newBufferedReader(file.toPath())) {
                 Schemeta schemeta = gson.fromJson(reader, Schemeta.class);
                 if (schemeta != null && schemeta.getSchemId() != null) {
-                    result.add(schemeta);
+                    schemetas.add(schemeta);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return result;
+        return schemetas;
     }
 
     @Override
