@@ -18,7 +18,12 @@ public class DungeonRepository implements IDungeonRepository {
     private Gson gson;
 
     public DungeonRepository(Gson gson) {
+        this.gson = gson;
         this.dungeonFolder = new File(RogueSmpCore.getInstance().getDataFolder(), DungeonConfig.getDungeonTemplateFolder());
+
+        if (!dungeonFolder.exists()) {
+            dungeonFolder.mkdirs();
+        }
     }
 
     @Override

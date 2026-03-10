@@ -1,21 +1,38 @@
 package com.roguesmp.dungeon.data;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Dungeon {
     private String dgId;
     private String dgName;
     private String dgDescription;
-    private List<Room> dgRooms;
+    private Map<String, Node> nodes;
 
     public Dungeon() {
     }
 
-    public Dungeon(String dgId, String dgName, String dgDescription, List<Room> dgRooms) {
+    public Dungeon(String dgId, String dgName, String dgDescription) {
         this.dgId = dgId;
         this.dgName = dgName;
         this.dgDescription = dgDescription;
-        this.dgRooms = dgRooms;
+        this.nodes = createDefaultNodes();
+    }
+
+    private Map<String, Node> createDefaultNodes() {
+        Map<String, Node> defaultNodes = new LinkedHashMap<>();
+
+        defaultNodes.put("start", new Node(
+                "start", "Start Node", "BEACON",
+                1.0, 1, List.of()
+        ));
+        defaultNodes.put("end", new Node(
+                "end", "End Node", "END_PORTAL_FRAME",
+                1.0, 1, List.of()
+        ));
+
+        return defaultNodes;
     }
 
     public String getDgId() {
@@ -42,11 +59,11 @@ public class Dungeon {
         this.dgDescription = dgDescription;
     }
 
-    public List<Room> getDgRooms() {
-        return dgRooms;
+    public Map<String, Node> getDgRooms() {
+        return nodes;
     }
 
-    public void setDgRooms(List<Room> dgRooms) {
-        this.dgRooms = dgRooms;
+    public void setDgRooms(Map<String, Node> nodes) {
+        this.nodes = nodes;
     }
 }

@@ -20,10 +20,10 @@ public class SchemetaManager {
         this.repository = repository;
 
         //init data
-        init();
+        load();
     }
 
-    public void init() {
+    public void load() {
         schemetas.clear();
         repository.loadAll().forEach(s -> schemetas.put(s.getSchemId(), s));
         ConsoleLogger.info("Load " + schemetas.size() + " schemeta file");

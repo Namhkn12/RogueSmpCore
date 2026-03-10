@@ -22,30 +22,11 @@ public class DungeonCommand {
                 .withSubcommand(
                         new CommandAPICommand("start")
                                 .executes((sender, args) -> {
-                                    DungeonInstanceManager dungeonInstanceManager = DungeonInstanceManager.getInstance();
-                                    PartyManager partyManager = PartyManager.getInstance();
-                                    // RegionManager re
-                                    Player player = (Player) sender;
-                                    //check for party
-                                    Party party = partyManager.getParty(player);
-                                    if(party == null) {
-                                        // -> party null
-                                        return;
-                                    }
-                                    //check for dungeon
-                                    String demoDungeonId = "";
-                                    // dungeonInstanceManager.createDungeonInstance(party.getPartyId(), demoDungeonId)
-                                    //run dungeon
                                 })
                 )
                 .withSubcommand(
                         new CommandAPICommand("ui")
                                 .executes((sender, args) -> {
-                                    //change logic : allow npc use the command for player who interact
-                                    Player player = (Player) sender;
-                                    //check for party
-                                    //check for dungeon
-                                    //open dungeon ui
                                 })
                 )
                 .withSubcommand(
@@ -63,24 +44,6 @@ public class DungeonCommand {
                                 .withArguments(new StringArgument("description"))
                                 .executesPlayer((player, args) -> {
 
-                                    String name = (String) args.get("name");
-                                    String description = (String) args.get("description");
-
-                                    Dungeon dungeon = DungeonManager.getInstance().create(
-                                            name,
-                                            description,
-                                            new ArrayList<>(List.of(new Room(
-                                                    "roomiddemo",
-                                                    "roomnamedemo",
-                                                    RoomType.START,
-                                                    List.of("schemiddemo")
-                                                    )
-                                                )
-                                            )
-                                    );
-
-                                    player.sendMessage("§aDungeon created!");
-                                    player.sendMessage("§7ID: §e" + dungeon.getDgId());
                                 })
                 )
                 .executes((sender, args) -> {
