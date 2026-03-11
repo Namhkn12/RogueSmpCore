@@ -65,7 +65,7 @@ public abstract class Ability {
     public void onCooldownRefreshed() {
         Player bukkitPlayer = smpPlayer.getBukkitPlayer();
         bukkitPlayer.playSound(Sound.sound(SoundEventKeys.ITEM_TRIDENT_RETURN, Sound.Source.PLAYER, 1f, Utils.RANDOM.nextFloat(0.6f, 1.4f)));
-        bukkitPlayer.sendActionBar(getAbilityInfo().getDisplayText().append(Component.text(" đã hồi chiêu", NamedTextColor.YELLOW)));
+        bukkitPlayer.sendActionBar(getAbilityInfo().displayText().append(Component.text(" đã hồi chiêu", NamedTextColor.YELLOW)));
 
     }
 

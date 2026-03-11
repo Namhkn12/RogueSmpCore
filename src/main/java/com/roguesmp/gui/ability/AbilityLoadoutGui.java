@@ -8,46 +8,94 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.player.ability.AbilityLoadout;
+import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class AbilityLoadoutGui extends BaseGui {
 
-    private static final List<Integer> abilitySlot = List.of(10, 11, 12, 13, 14, 15, 16);
-    private static final ItemStack noAbilItem = ItemStack.of(Material.STRING);
+    private static final List<Integer> ACTIVE_SLOTS = List.of(10, 11, 12, 13, 14, 15, 16);
+
+    private static final List<Integer> PASSIVE_SLOTS = List.of(28,29,30,31,32,33,34,37,38,39,40,41,42,43);
+
+    private final ItemStack noAbilItem;
+    private final ItemStack filler;
 
     private final SmpPlayer player;
 
     public AbilityLoadoutGui(SmpPlayer player) {
         super(Component.text("Bộ kĩ năng"), 6);
         this.player = player;
+
+        noAbilItem = ItemStack.of(Material.GRAY_DYE);
+        noAbilItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Ô kĩ năng trống", NamedTextColor.GRAY));
+        noAbilItem.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(Component.text("Click để chọn kĩ năng...", NamedTextColor.GRAY))));
+
+        filler = ItemStack.of(Material.MAGENTA_STAINED_GLASS_PANE);
+        filler.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
     }
 
     @Override
     public void setup() {
-        AbilityLoadout loadout = player.getAbilityLoadout();
-        Map<AbilityTrigger, Ability> equipped = loadout.getEquippedAbilities();
-        List<Ability> passives = loadout.getPassiveAbilities();
+        setupActiveSlots();
+        setupPassiveAbilities();
 
-        for (AbilityTrigger trigger : AbilityTrigger.values()) {
-            Ability ability = equipped.get(trigger);
-            ItemStack result;
-            if (ability != null) {
+        fillEmpty(filler);
+    }
+
+    private void setupActiveSlots() {
+        var loadout = player.getAbilityLoadout();
+
+        for (AbilityTrigger abilityTrigger : AbilityTrigger.values()) {
+            if (abilityTrigger == AbilityTrigger.PASSIVE) continue;
+            int slot = ACTIVE_SLOTS.get(abilityTrigger.ordinal());
+            Ability ability = loadout.getActiveAbilities().get(abilityTrigger);
+            ItemStack item;
+            if (ability == null) {
+                item = noAbilItem;
+            } else {
                 AbilityInfo<?> info = ability.getAbilityInfo();
-                result = info.getDisplayItem().clone();
-                result.setData(DataComponentTypes.ITEM_NAME, info.getDisplayText());
-                result.setData(DataComponentTypes.LORE, ItemLore.lore(Collections.singletonList(info.getDescriptionProvider().apply(player, ability.getLevel()))));
-            } else result = noAbilItem;
-            int pos = abilitySlot.get(trigger.ordinal());
-            this.addButton(pos, result, ClickHandler.noAction());
+                item = ItemStack.of(info.displayIcon());
+                item.setData(DataComponentTypes.ITEM_NAME, info.displayText());
+                int level = player.getPlayerData().getUnlockedAbilities().getOrDefault(info.id(), 1);
+                item.setData(DataComponentTypes.LORE, ItemLore.lore(info.descriptionProvider().apply(player, level)));
+            }
+
+            addButton(slot, item, click -> {
+                click.setCancelled(true);
+                click.getWhoClicked().sendMessage(Component.text("Chọn ability để gắn vào slot " + abilityTrigger));
+                Utils.runLater(() -> new AbilityEquipGui(player, abilityTrigger).showInventory(click.getWhoClicked()));
+            });
+        }
+    }
+
+    private void setupPassiveAbilities() {
+        AbilityLoadout loadout = player.getAbilityLoadout();
+        List<Ability> passives = loadout.getPassiveAbilities();
+        for (int i = 0; i < PASSIVE_SLOTS.size(); i++) {
+            int slot = PASSIVE_SLOTS.get(i);
+            if (i < passives.size()) {
+                Ability ability = passives.get(i);
+                AbilityInfo<?> info = ability.getAbilityInfo();
+                ItemStack item = ItemStack.of(info.displayIcon());
+                item.setData(DataComponentTypes.ITEM_NAME, info.displayText());
+                int level = player.getPlayerData().getUnlockedAbilities().getOrDefault(info.id(), 1);
+                item.setData(DataComponentTypes.LORE, ItemLore.lore(info.descriptionProvider().apply(player, level)));
+                addButton(slot, item, click -> {
+                    click.setCancelled(true);
+                    setup();
+                });
+            } else {
+                addButton(slot, noAbilItem, ClickHandler.openGui(new AbilityEquipGui(player, AbilityTrigger.PASSIVE)));
+            }
         }
     }
 
