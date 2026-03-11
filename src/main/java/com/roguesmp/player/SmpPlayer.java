@@ -45,14 +45,8 @@ public class SmpPlayer {
         this(player.getUniqueId());
     }
 
-    public void loadData() {
-        PlayerData playerData = getPlayerData();
+    public void loadData(PlayerData playerData) {
         abilityLoadout.loadData(playerData);
-    }
-
-    public void saveData() {
-        PlayerData playerData = getPlayerData();
-        abilityLoadout.saveData(playerData);
     }
 
     public void updateSlotStat(Player player, EquipSlot slot, @Nullable SmpItem oldItem, @Nullable SmpItem newItem) {

@@ -5,7 +5,6 @@ import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.player.ability.impl.GravityBomb;
 import com.roguesmp.registry.AbilityRegistry;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -26,7 +25,7 @@ public class AbilityLoadout {
     public AbilityLoadout(SmpPlayer smpPlayer) {
         this.smpPlayer = smpPlayer;
 
-        equipActiveAbility(AbilityTrigger.SWAP, GravityBomb.INFO.getFactory().apply(smpPlayer, 2));
+//        equipActiveAbility(AbilityTrigger.SWAP, GravityBomb.INFO.getFactory().apply(smpPlayer, 2));
     }
 
     public boolean cast(AbilityTrigger trigger) {
@@ -39,16 +38,20 @@ public class AbilityLoadout {
         return true;
     }
 
-    public void equipActiveAbility(AbilityTrigger trigger, Ability ability) {
+    public void equipActive(AbilityTrigger trigger, Ability ability) {
         equippedAbilities.put(trigger, ability);
     }
 
-    public void removeActiveAbility(AbilityTrigger trigger) {
+    public void removeActive(AbilityTrigger trigger) {
         equippedAbilities.remove(trigger);
     }
 
-    public void addPassiveAbility(Ability ability) {
+    public void equipPassive(Ability ability) {
         passiveAbilities.add(ability);
+    }
+
+    public void removePassive(String id) {
+        passiveAbilities.removeIf(a -> a.getAbilityInfo().id().equals(id));
     }
 
     public void loadData(PlayerData data) {
@@ -59,7 +62,7 @@ public class AbilityLoadout {
             int level = pairs.getOrDefault(s, 1);
             Ability ability = AbilityRegistry.createInstance(s, smpPlayer, level);
             if (ability != null) {
-                equipActiveAbility(trigger, ability);
+                equipActive(trigger, ability);
             }
         });
 
@@ -68,30 +71,16 @@ public class AbilityLoadout {
             int level = pairs.getOrDefault(s, 1);
             Ability ability = AbilityRegistry.createInstance(s, smpPlayer, level);
             if (ability != null) {
-                addPassiveAbility(ability);
+                equipPassive(ability);
             }
         });
-    }
-
-    public void saveData(PlayerData data) {
-        Map<AbilityTrigger, String> equippedIds = new HashMap<>();
-        equippedAbilities.forEach((trigger, ability) -> {
-            equippedIds.put(trigger, ability.getAbilityInfo().getId());
-        });
-        data.setEquippedAbilities(equippedIds);
-
-        List<String> passives = new ArrayList<>();
-        passiveAbilities.forEach(ability -> {
-            passives.add(ability.getAbilityInfo().getId());
-        });
-        data.setPassiveAbilities(passives);
     }
 
     public SmpPlayer getSmpPlayer() {
         return smpPlayer;
     }
 
-    public Map<AbilityTrigger, Ability> getEquippedAbilities() {
+    public Map<AbilityTrigger, Ability> getActiveAbilities() {
         return equippedAbilities;
     }
 

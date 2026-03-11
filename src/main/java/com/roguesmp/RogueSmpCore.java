@@ -6,6 +6,7 @@ import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.gui.ItemBrowser;
+import com.roguesmp.gui.ability.AbilityCatalogue;
 import com.roguesmp.gui.ability.AbilityLoadoutGui;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.listener.*;
@@ -60,6 +61,8 @@ public final class RogueSmpCore extends JavaPlugin {
     public void saveData() {
         ItemRegistry.getInstance().saveToFile(true);
         BlockStorage.getInstance().saveToFile(true);
+
+        PlayerManager.getInstance().onDisable();
     }
 
     // Register Listener here
@@ -80,6 +83,7 @@ public final class RogueSmpCore extends JavaPlugin {
         EntityRegistry.registerCommand();
 
         AbilityLoadoutGui.register();
+        AbilityCatalogue.register();
     }
 
     @Override
