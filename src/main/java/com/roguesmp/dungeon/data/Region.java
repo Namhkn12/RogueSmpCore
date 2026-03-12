@@ -44,7 +44,7 @@ public class Region {
     public void setRegionPoint(Location regionPoint) {
         this.regionPoint = regionPoint;
     }
-    
+
     public boolean isStatus() {
         return status;
     }

@@ -10,10 +10,6 @@ public class RegionManager {
 
     private final Map<UUID, Region> regions = new HashMap<>();
 
-    /* ==============================
-       CRUD CƠ BẢN
-       ============================== */
-
     public void createRegion(Region region) {
         if (region == null || region.getRegionId() == null) return;
         regions.put(region.getRegionId(), region);
@@ -35,10 +31,6 @@ public class RegionManager {
         regions.clear();
     }
 
-    /* ==============================
-       STATUS CONTROL
-       ============================== */
-
     public void setRegionStatus(UUID regionId, boolean status) {
         Region region = regions.get(regionId);
         if (region != null) {
@@ -51,55 +43,9 @@ public class RegionManager {
         return region != null && region.isStatus();
     }
 
-    /* ==============================
-       WORLD FILTER
-       ============================== */
-
     public List<Region> getRegionsByWorld(String worldName) {
         return regions.values().stream()
                 .filter(r -> r.getWorldName().equalsIgnoreCase(worldName))
                 .collect(Collectors.toList());
-    }
-
-    /* ==============================
-       LOCATION CHECK
-       ============================== */
-
-    public Region getRegionAt(Location location) {
-        if (location == null || location.getWorld() == null) return null;
-
-        for (Region region : regions.values()) {
-            if (!region.isStatus()) continue;
-            if (!region.getWorldName().equalsIgnoreCase(location.getWorld().getName())) continue;
-
-            if (region.getRegionBox() != null &&
-                    region.getRegionBox().contains(location.toVector())) {
-                return region;
-            }
-        }
-        return null;
-    }
-
-    public boolean isInsideRegion(Location location) {
-        return getRegionAt(location) != null;
-    }
-
-    public Region getActiveRegionAt(Location location) {
-        if (location == null || location.getWorld() == null) return null;
-
-        for (Region region : regions.values()) {
-            if (!region.isStatus()) continue;
-            if (!region.getWorldName().equalsIgnoreCase(location.getWorld().getName())) continue;
-
-            if (region.getActiveBox() != null &&
-                    region.getActiveBox().contains(location.toVector())) {
-                return region;
-            }
-        }
-        return null;
-    }
-
-    public boolean isInsideActiveRegion(Location location) {
-        return getActiveRegionAt(location) != null;
     }
 }
