@@ -1,7 +1,9 @@
 package com.roguesmp.dungeon.controller;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.dungeon.controller.response.ControllerResponse;
 import com.roguesmp.dungeon.data.Dungeon;
+import com.roguesmp.dungeon.instance.DungeonInstance;
 import com.roguesmp.dungeon.manager.DungeonManager;
 import com.roguesmp.dungeon.manager.DungeonInstanceManager;
 import com.roguesmp.dungeon.data.Party;
@@ -14,6 +16,8 @@ import com.roguesmp.dungeon.manager.RoomManager;
 import com.roguesmp.dungeon.constraint.RoomType;
 import com.roguesmp.dungeon.data.Schemeta;
 import com.roguesmp.dungeon.manager.SchemetaManager;
+import com.roguesmp.dungeon.service.IDungeonService;
+import com.roguesmp.dungeon.service.IInstanceService;
 import com.roguesmp.dungeon.service.IPartyService;
 import com.roguesmp.dungeon.service.ISchemetaService;
 import com.roguesmp.dungeon.service.impl.PartyService;
@@ -34,15 +38,26 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class DungeonController {
 
+    private final IPartyService partyService;
+    private final IDungeonService dungeonService;
+    private final ISchemetaService schemetaService;
+    private final IInstanceService instanceService;
+
     //api create new instance dungeon
+    public ControllerResponse<DungeonInstance> generateDungeon(String template, Player player){
+        if(!partyService.isOwner(player)) return ControllerResponse.failure("You do not in a party");
+        if(dungeonService.getDungeonById(template).isEmpty()) return ControllerResponse.failure("Cannot find dungeon template");
+        Optional<Party> party = partyService.getPartyByPlayer(player);
+        Optional<Dungeon> dungeon = dungeonService.getDungeonById(template);
+
+        instanceService.createDungeonInstance(dungeon.get().getDgName(), party.get().getPartyId(), )
+
+    }
 
     //api start an instance dungeon
 

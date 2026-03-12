@@ -59,11 +59,11 @@ public class Dungeon {
         this.dgDescription = dgDescription;
     }
 
-    public Map<String, Node> getDgRooms() {
+    public Map<String, Node> getNodes() {
         return nodes;
     }
 
-    public void setDgRooms(Map<String, Node> nodes) {
+    public void setNodes(Map<String, Node> nodes) {
         this.nodes = nodes;
     }
 }

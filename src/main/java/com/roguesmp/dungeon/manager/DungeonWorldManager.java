@@ -1,6 +1,7 @@
 package com.roguesmp.dungeon.manager;
 
 import com.roguesmp.dungeon.data.Region;
+import org.bukkit.Location;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,12 +20,12 @@ public class DungeonWorldManager {
         // add to Map
     }
 
-    public Region getRegionSlotForDungeon(){
+    public Location getRegionSlotForDungeon(){
         //check dungeonWorldManager to get RegionManager instance
         //check is full slot in regionManager
         //if have slot => create new region by regionManager
         //if all not => generate new dungeon world and assign new RegionManager then create new region
         //return region
-        return new Region();
+        return new Location();
     }
 }

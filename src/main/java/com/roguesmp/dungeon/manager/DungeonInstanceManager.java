@@ -9,88 +9,47 @@ import java.lang.reflect.Type;
 import java.util.*;
 import com.google.gson.reflect.TypeToken;
 import com.roguesmp.dungeon.instance.DungeonInstance;
+import com.roguesmp.dungeon.instance.NodeInstance;
+import org.bukkit.Location;
+import org.bukkit.util.BoundingBox;
 
 public class DungeonInstanceManager {
 
-    private static DungeonInstanceManager INSTANCE = null;
-    private final Map<String, DungeonInstance> dgInstances = new HashMap<>();
-    private final File file;
+    private final Map<UUID, DungeonInstance> dgInstances = new HashMap<>();
     private final Gson gson;
-    private final RogueSmpCore plugin;
 
     public void init(RogueSmpCore plugin){
-        if(INSTANCE == null){
-            INSTANCE = new DungeonInstanceManager(plugin);
-        }
     }
 
-    public static DungeonInstanceManager getInstance(){
-        return INSTANCE;
-    }
-
-    public DungeonInstanceManager(RogueSmpCore plugin) {
-        this.plugin = plugin;
-
-        File folder = new File(plugin.getDataFolder(), "dungeons");
-        if (!folder.exists()) folder.mkdirs();
-
-        this.file = new File(folder, "dungeon_instances.json");
-
-        this.gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .create();
+    public DungeonInstanceManager(Gson gson) {
+        this.gson = gson;
     }
 
     public void load() {
-        if (!file.exists()) {
-            plugin.getLogger().info("No dungeon instance file found.");
-            return;
-        }
-
-        try (Reader reader = new FileReader(file)) {
-
-            Type type = new TypeToken<Map<String, DungeonInstance>>() {}.getType();
-            Map<String, DungeonInstance> loaded = gson.fromJson(reader, type);
-
-            if (loaded != null) {
-                dgInstances.clear();
-                dgInstances.putAll(loaded);
-            }
-
-            plugin.getLogger().info("Loaded " + dgInstances.size() + " dungeon instances.");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // load instance from file - restore instance after server close
     }
 
     public void save() {
-        try (Writer writer = new FileWriter(file)) {
-            gson.toJson(dgInstances, writer);
-            plugin.getLogger().info("Saved " + dgInstances.size() + " dungeon instances.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // save instance
     }
 
-    public DungeonInstance createDungeonInstance(
-            UUID partyId,
+    public DungeonInstance createInstance(
             String dungeonId,
-            UUID regionId
+            UUID partyId,
+            Location location
     ) {
 
-        UUID uuid = UUID.randomUUID();
 
         DungeonInstance instance = new DungeonInstance(
-                uuid,
-                System.currentTimeMillis(),
-                partyId,
                 dungeonId,
-                regionId,
-                true
+                partyId,
+                System.currentTimeMillis(),
+                location,
+                true,
+                0.0
         );
 
-        dgInstances.put(uuid.toString(), instance);
+        dgInstances.put(instance.getUuid(), instance);
 
         return instance;
     }

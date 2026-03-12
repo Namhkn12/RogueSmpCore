@@ -6,6 +6,7 @@ import com.roguesmp.dungeon.service.IPartyService;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -180,5 +181,10 @@ public class PartyService implements IPartyService {
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public Optional<Party> getPartyByPlayer(Player player){
+        return partyManager.findByPlayer(player.getUniqueId());
     }
 }

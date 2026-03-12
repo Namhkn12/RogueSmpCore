@@ -1,27 +1,38 @@
 package com.roguesmp.dungeon.instance;
 
+import org.bukkit.Location;
+import org.bukkit.util.BoundingBox;
+
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
 public class DungeonInstance {
     private UUID uuid;
+    private String dungeon;
+    private UUID party;
     private long startTime;
-    private UUID partyId;
-    private String dungeonId;
-    private UUID regionId;
-    private List<String> roomIds;
-    private boolean status;
+    private Location location;
+    private BoundingBox region;
+    private LinkedHashMap<String, NodeInstance> nodes;
+    private RoomInstance activeRoom;
+    private boolean isPlaying;
+    private double score;
 
-    public DungeonInstance() {
+    public DungeonInstance(String dungeon, UUID party, long startTime, Location location, boolean isPlaying, double score) {
+        this.uuid = UUID.randomUUID();
+        this.dungeon = dungeon;
+        this.party = party;
+        this.startTime = startTime;
+        this.location = location;
+        this.region = region;
+        this.nodes = nodes;
+        this.activeRoom = activeRoom;
+        this.isPlaying = isPlaying;
+        this.score = score;
     }
 
-    public DungeonInstance(UUID uuid, long startTime, UUID partyId, String dungeonId, UUID regionId, boolean status) {
-        this.uuid = uuid;
-        this.startTime = startTime;
-        this.partyId = partyId;
-        this.dungeonId = dungeonId;
-        this.regionId = regionId;
-        this.status = status;
+    public DungeonInstance() {
     }
 
     public UUID getUuid() {
@@ -32,6 +43,22 @@ public class DungeonInstance {
         this.uuid = uuid;
     }
 
+    public String getDungeon() {
+        return dungeon;
+    }
+
+    public void setDungeon(String dungeon) {
+        this.dungeon = dungeon;
+    }
+
+    public UUID getParty() {
+        return party;
+    }
+
+    public void setParty(UUID party) {
+        this.party = party;
+    }
+
     public long getStartTime() {
         return startTime;
     }
@@ -40,35 +67,51 @@ public class DungeonInstance {
         this.startTime = startTime;
     }
 
-    public UUID getPartyId() {
-        return partyId;
+    public Location getLocation() {
+        return location;
     }
 
-    public void setPartyId(UUID partyId) {
-        this.partyId = partyId;
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
-    public String getDungeonId() {
-        return dungeonId;
+    public BoundingBox getRegion() {
+        return region;
     }
 
-    public void setDungeonId(String dungeonId) {
-        this.dungeonId = dungeonId;
+    public void setRegion(BoundingBox region) {
+        this.region = region;
     }
 
-    public UUID getRegionId() {
-        return regionId;
+    public LinkedHashMap<String, NodeInstance> getNodes() {
+        return nodes;
     }
 
-    public void setRegionId(UUID regionId) {
-        this.regionId = regionId;
+    public void setNodes(LinkedHashMap<String, NodeInstance> nodes) {
+        this.nodes = nodes;
     }
 
-    public boolean isStatus() {
-        return status;
+    public RoomInstance getActiveRoom() {
+        return activeRoom;
     }
 
-    public void setStatus(boolean status) {
-        this.status = status;
+    public void setActiveRoom(RoomInstance activeRoom) {
+        this.activeRoom = activeRoom;
+    }
+
+    public boolean isPlaying() {
+        return isPlaying;
+    }
+
+    public void setPlaying(boolean playing) {
+        isPlaying = playing;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
     }
 }

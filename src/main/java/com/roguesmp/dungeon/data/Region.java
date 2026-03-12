@@ -9,8 +9,6 @@ public class Region {
     private UUID regionId;
     private String worldName;
     private Location regionPoint;
-    private BoundingBox regionBox;
-    private BoundingBox activeBox;
     private boolean status;
 
     public Region() {
@@ -20,8 +18,6 @@ public class Region {
         this.regionId = regionId;
         this.worldName = worldName;
         this.regionPoint = regionPoint;
-        this.regionBox = regionBox;
-        this.activeBox = activeBox;
         this.status = status;
     }
 
@@ -48,23 +44,7 @@ public class Region {
     public void setRegionPoint(Location regionPoint) {
         this.regionPoint = regionPoint;
     }
-
-    public BoundingBox getRegionBox() {
-        return regionBox;
-    }
-
-    public void setRegionBox(BoundingBox regionBox) {
-        this.regionBox = regionBox;
-    }
-
-    public BoundingBox getActiveBox() {
-        return activeBox;
-    }
-
-    public void setActiveBox(BoundingBox activeBox) {
-        this.activeBox = activeBox;
-    }
-
+    
     public boolean isStatus() {
         return status;
     }

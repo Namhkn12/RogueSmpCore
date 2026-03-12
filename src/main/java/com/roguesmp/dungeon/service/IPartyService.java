@@ -1,6 +1,9 @@
 package com.roguesmp.dungeon.service;
 
+import com.roguesmp.dungeon.data.Party;
 import org.bukkit.entity.Player;
+
+import java.util.Optional;
 
 public interface IPartyService {
 
@@ -21,4 +24,6 @@ public interface IPartyService {
     boolean isInParty(Player player);
 
     boolean isOwner(Player player);
+
+    Optional<Party> getPartyByPlayer(Player player);
 }
