@@ -1,45 +1,23 @@
 package com.roguesmp.dungeon.controller;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.dungeon.adapter.LocationAdapter;
 import com.roguesmp.dungeon.controller.response.ControllerResponse;
 import com.roguesmp.dungeon.data.Dungeon;
-import com.roguesmp.dungeon.instance.DungeonInstance;
-import com.roguesmp.dungeon.manager.DungeonManager;
-import com.roguesmp.dungeon.manager.DungeonInstanceManager;
 import com.roguesmp.dungeon.data.Party;
-import com.roguesmp.dungeon.manager.PartyManager;
-import com.roguesmp.dungeon.manager.DungeonWorldManager;
 import com.roguesmp.dungeon.data.Region;
-import com.roguesmp.dungeon.manager.RegionManager;
-import com.roguesmp.dungeon.data.Room;
-import com.roguesmp.dungeon.manager.RoomManager;
-import com.roguesmp.dungeon.constraint.RoomType;
-import com.roguesmp.dungeon.data.Schemeta;
-import com.roguesmp.dungeon.manager.SchemetaManager;
-import com.roguesmp.dungeon.service.IDungeonService;
-import com.roguesmp.dungeon.service.IInstanceService;
-import com.roguesmp.dungeon.service.IPartyService;
-import com.roguesmp.dungeon.service.ISchemetaService;
-import com.roguesmp.dungeon.service.impl.PartyService;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
-import com.sk89q.worldedit.function.operation.Operation;
-import com.sk89q.worldedit.function.operation.Operations;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.session.ClipboardHolder;
+import com.roguesmp.dungeon.instance.DungeonInstance;
+import com.roguesmp.dungeon.instance.NodeInstance;
+import com.roguesmp.dungeon.instance.RegionInstance;
+import com.roguesmp.dungeon.service.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class DungeonController {
 
@@ -47,21 +25,135 @@ public class DungeonController {
     private final IDungeonService dungeonService;
     private final ISchemetaService schemetaService;
     private final IInstanceService instanceService;
+    private final IRegionService regionService;
 
-    //api create new instance dungeon
-    public ControllerResponse<DungeonInstance> generateDungeon(String template, Player player){
-        if(!partyService.isOwner(player)) return ControllerResponse.failure("You do not in a party");
-        if(dungeonService.getDungeonById(template).isEmpty()) return ControllerResponse.failure("Cannot find dungeon template");
-        Optional<Party> party = partyService.getPartyByPlayer(player);
-        Optional<Dungeon> dungeon = dungeonService.getDungeonById(template);
-
-        instanceService.createDungeonInstance(dungeon.get().getDgName(), party.get().getPartyId(), )
-
+    public DungeonController(IPartyService partyService, IDungeonService dungeonService,
+                             ISchemetaService schemetaService, IInstanceService instanceService,
+                             IRegionService regionService) {
+        this.partyService = partyService;
+        this.dungeonService = dungeonService;
+        this.schemetaService = schemetaService;
+        this.instanceService = instanceService;
+        this.regionService = regionService;
     }
 
-    //api start an instance dungeon
+    // -------------------------------------------------------------------------
+    // API: Tạo instance dungeon
+    // -------------------------------------------------------------------------
 
-    //api next room
+    public ControllerResponse<DungeonInstance> generateDungeon(String template, Player player) {
+        if (!partyService.isOwner(player))
+            return ControllerResponse.failure("You are not the party owner");
+        if (dungeonService.getDungeonById(template).isEmpty())
+            return ControllerResponse.failure("Cannot find dungeon template");
 
-    //api call when player do event -> check objective
+        Optional<Party> party = partyService.getPartyByPlayer(player);
+        Optional<Dungeon> dungeon = dungeonService.getDungeonById(template);
+        Optional<Region> region = regionService.acquireRegion();
+
+        if (party.isEmpty())  return ControllerResponse.failure("Party not found");
+        if (region.isEmpty()) return ControllerResponse.failure("No region available");
+
+        // Kiểm tra party chưa có dungeon đang chạy
+        if (instanceService.hasActiveInstance(party.get().getPartyId()))
+            return ControllerResponse.failure("Your party already has an active dungeon");
+
+        RegionInstance regionInstance = new RegionInstance(
+                region.get().getId(),
+                region.get().getWorldName(),
+                region.get().getRegionPoint()
+        );
+
+        DungeonInstance instance = instanceService.createDungeonInstance(
+                dungeon.get().getDgId(),
+                party.get().getPartyId(),
+                regionInstance
+        );
+
+        return ControllerResponse.success("GG", instance);
+    }
+
+    // -------------------------------------------------------------------------
+    // API: Bắt đầu dungeon — paste start room rồi tp party
+    // -------------------------------------------------------------------------
+
+    public ControllerResponse<Void> startDungeon(DungeonInstance instance) {
+
+        RegionInstance region = instance.getRegion();
+        UUID partyId = instance.getParty();
+
+        // Lấy NodeInstance đầu tiên (start node)
+        Map<UUID, NodeInstance> nodes = instance.getNodes();
+        if (nodes == null || nodes.isEmpty())
+            return ControllerResponse.failure("Dungeon has no rooms");
+
+        NodeInstance startNode = nodes.values().iterator().next();
+        if (startNode.getSchemetas() == null || startNode.getSchemetas().isEmpty())
+            return ControllerResponse.failure("Start room has no schematic");
+
+        String schemetaId = startNode.getSchemetas().get(0);
+        Location pasteLocation = region.getLocation();
+
+        // Paste schematic vào region
+        try {
+            schemetaService.pasteSchematic(schemetaId, pasteLocation);
+        } catch (Exception e) {
+            RogueSmpCore.getInstance().getLogger().severe(
+                    "[DungeonController] Failed to paste schematic: " + schemetaId + "|" + pasteLocation
+            );
+            return ControllerResponse.failure("Failed to build dungeon room");
+        }
+
+        // Xóa start node khỏi queue vì đã dùng
+        nodes.remove(startNode.getId());
+
+        // Tp tất cả member trong party đến location region
+        Optional<Party> party = partyService.getPartyById(instance.getParty());
+
+        if (party.isPresent()) {
+            for (UUID memberId : party.get().getMembers()) {
+                Player member = Bukkit.getPlayer(memberId);
+                if (member != null && member.isOnline()) {
+                    member.teleport(pasteLocation);
+                    member.sendMessage("§aDungeon bắt đầu! Chúc may mắn.");
+                }
+            }
+        }
+
+        // Lưu lại state sau khi remove start node
+        instanceService.saveInstance(partyId);
+
+        return ControllerResponse.success(null);
+    }
+
+    // -------------------------------------------------------------------------
+    // API: Next room (TODO)
+    // -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
+    // API: Check objective (TODO)
+    // -------------------------------------------------------------------------
+
+    // ---- TEMP DEBUG ----
+    private void debugSaveInstance(DungeonInstance instance) {
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(Location.class, new LocationAdapter())
+                .create();
+        File file = new File(
+                RogueSmpCore.getInstance().getDataFolder(),
+                "debug_instance_" + instance.getUuid() + ".json"
+        );
+        try (Writer writer = new FileWriter(file)) {
+            gson.toJson(instance, writer);
+            RogueSmpCore.getInstance().getLogger().info(
+                    "[DEBUG] Instance saved to: " + file.getAbsolutePath()
+            );
+        } catch (IOException e) {
+            RogueSmpCore.getInstance().getLogger().severe(
+                    "[DEBUG] Failed to save instance: " + e.getMessage()
+            );
+        }
+    }
+    // ---- END TEMP DEBUG ----
 }

@@ -4,10 +4,11 @@ import com.roguesmp.dungeon.data.Party;
 import org.bukkit.entity.Player;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IPartyService {
 
-    void createParty(Player owner);
+    Party createParty(Player owner);
 
     void disbandParty(Player owner);
 
@@ -26,4 +27,6 @@ public interface IPartyService {
     boolean isOwner(Player player);
 
     Optional<Party> getPartyByPlayer(Player player);
+
+    Optional<Party> getPartyById(UUID partyId);
 }

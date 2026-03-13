@@ -1,29 +1,39 @@
 package com.roguesmp.dungeon.instance;
 
 import java.util.List;
+import java.util.UUID;
 
 public class NodeInstance {
-    private String key;
+    private UUID id;
+    private String nodeKey;
     private String name;
     private String icon;
-    private List<String> schemeta;
+    private List<String> schemetas;
 
-    public NodeInstance(String key, String name, String icon, List<String> schemeta) {
-        this.key = key;
+    public NodeInstance() {}
+
+    public NodeInstance(UUID id, String nodeKey, String name, String icon, List<String> schemetas) {
+        this.id = id;
+        this.nodeKey = nodeKey;
         this.name = name;
         this.icon = icon;
-        this.schemeta = schemeta;
+        this.schemetas = schemetas;
     }
 
-    public NodeInstance() {
+    public UUID getId() {
+        return id;
     }
 
-    public String getKey() {
-        return key;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public String getNodeKey() {
+        return nodeKey;
+    }
+
+    public void setNodeKey(String nodeKey) {
+        this.nodeKey = nodeKey;
     }
 
     public String getName() {
@@ -42,11 +52,11 @@ public class NodeInstance {
         this.icon = icon;
     }
 
-    public List<String> getSchemeta() {
-        return schemeta;
+    public List<String> getSchemetas() {
+        return schemetas;
     }
 
-    public void setSchemeta(List<String> schemeta) {
-        this.schemeta = schemeta;
+    public void setSchemetas(List<String> schemetas) {
+        this.schemetas = schemetas;
     }
 }

@@ -1,55 +1,44 @@
 package com.roguesmp.dungeon.data;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.util.BoundingBox;
 
 import java.util.UUID;
 
 public class Region {
-    private UUID regionId;
+    private UUID id;
     private String worldName;
-    private Location regionPoint;
-    private boolean status;
+    private double x;
+    private double y;
+    private double z;
+    private boolean status; // false = available, true = occupied
 
-    public Region() {
-    }
+    public Region() {}
 
-    public Region(UUID regionId, String worldName, Location regionPoint, BoundingBox regionBox, BoundingBox activeBox, boolean status) {
-        this.regionId = regionId;
+    public Region(UUID id, String worldName, double x, double y, double z) {
+        this.id = id;
         this.worldName = worldName;
-        this.regionPoint = regionPoint;
-        this.status = status;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.status = false;
     }
 
-    public UUID getRegionId() {
-        return regionId;
-    }
-
-    public void setRegionId(UUID regionId) {
-        this.regionId = regionId;
-    }
-
-    public String getWorldName() {
-        return worldName;
-    }
-
-    public void setWorldName(String worldName) {
-        this.worldName = worldName;
-    }
-
+    // Location không serialize được với Gson nên dùng primitive
     public Location getRegionPoint() {
-        return regionPoint;
+        return new Location(Bukkit.getWorld(worldName), x, y, z);
     }
 
-    public void setRegionPoint(Location regionPoint) {
-        this.regionPoint = regionPoint;
-    }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public boolean isStatus() {
-        return status;
-    }
+    public String getWorldName() { return worldName; }
+    public void setWorldName(String worldName) { this.worldName = worldName; }
 
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public double getZ() { return z; }
+
+    public boolean isStatus() { return status; }
+    public void setStatus(boolean status) { this.status = status; }
 }

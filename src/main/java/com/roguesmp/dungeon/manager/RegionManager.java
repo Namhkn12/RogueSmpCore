@@ -1,51 +1,113 @@
 package com.roguesmp.dungeon.manager;
 
+import com.roguesmp.dungeon.data.DungeonWorld;
 import com.roguesmp.dungeon.data.Region;
-import org.bukkit.Location;
+import com.roguesmp.dungeon.repository.IRegionRepository;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
+/**
+ * Quản lý state in-memory của tất cả DungeonWorld và Region.
+ * Không gọi trực tiếp từ bên ngoài — dùng RegionService.
+ */
 public class RegionManager {
 
-    private final Map<UUID, Region> regions = new HashMap<>();
+    private final IRegionRepository repository;
 
-    public void createRegion(Region region) {
-        if (region == null || region.getRegionId() == null) return;
-        regions.put(region.getRegionId(), region);
+    // key = worldName
+    private final Map<String, DungeonWorld> worldMap = new LinkedHashMap<>();
+
+    // flat index để lookup region theo id mà không cần duyệt worldMap
+    private final Map<UUID, Region> regionIndex = new HashMap<>();
+
+    public RegionManager(IRegionRepository repository) {
+        this.repository = repository;
+
+        loadAll();
     }
 
-    public void removeRegion(UUID regionId) {
-        regions.remove(regionId);
-    }
+    // -------------------------------------------------------------------------
+    // Load / Save
+    // -------------------------------------------------------------------------
 
-    public Region getRegion(UUID regionId) {
-        return regions.get(regionId);
-    }
+    /**
+     * Gọi khi server start — load toàn bộ từ file rồi build index
+     */
+    public void loadAll() {
+        worldMap.clear();
+        regionIndex.clear();
 
-    public Collection<Region> getAllRegions() {
-        return regions.values();
-    }
-
-    public void clear() {
-        regions.clear();
-    }
-
-    public void setRegionStatus(UUID regionId, boolean status) {
-        Region region = regions.get(regionId);
-        if (region != null) {
-            region.setStatus(status);
+        List<DungeonWorld> worlds = repository.loadAll();
+        for (DungeonWorld world : worlds) {
+            worldMap.put(world.getWorldName(), world);
+            world.getRegions().forEach((id, region) -> regionIndex.put(id, region));
         }
     }
 
-    public boolean isRegionActive(UUID regionId) {
-        Region region = regions.get(regionId);
-        return region != null && region.isStatus();
+    /**
+     * Gọi khi server close — ghi toàn bộ xuống file
+     */
+    public void saveAll() {
+        worldMap.values().forEach(repository::save);
     }
 
-    public List<Region> getRegionsByWorld(String worldName) {
-        return regions.values().stream()
-                .filter(r -> r.getWorldName().equalsIgnoreCase(worldName))
-                .collect(Collectors.toList());
+    /**
+     * Ghi 1 world cụ thể (dùng sau khi thêm region mới)
+     */
+    public void saveWorld(String worldName) {
+        DungeonWorld world = worldMap.get(worldName);
+        if (world != null) {
+            repository.save(world);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // World operations
+    // -------------------------------------------------------------------------
+
+    public void addWorld(DungeonWorld world) {
+        worldMap.put(world.getWorldName(), world);
+        repository.save(world);
+    }
+
+    public Optional<DungeonWorld> getWorld(String worldName) {
+        return Optional.ofNullable(worldMap.get(worldName));
+    }
+
+    public Collection<DungeonWorld> getAllWorlds() {
+        return Collections.unmodifiableCollection(worldMap.values());
+    }
+
+    // -------------------------------------------------------------------------
+    // Region operations
+    // -------------------------------------------------------------------------
+
+    public void addRegion(String worldName, Region region) {
+        DungeonWorld world = worldMap.get(worldName);
+        if (world == null) return;
+        world.getRegions().put(region.getId(), region);
+        regionIndex.put(region.getId(), region);
+    }
+
+    public Optional<Region> getRegionById(UUID regionId) {
+        return Optional.ofNullable(regionIndex.get(regionId));
+    }
+
+    /**
+     * Tìm region available đầu tiên trong 1 world
+     */
+    public Optional<Region> findAvailableRegion(String worldName) {
+        DungeonWorld world = worldMap.get(worldName);
+        if (world == null) return Optional.empty();
+
+        return world.getRegions().values()
+                .stream()
+                .filter(r -> !r.isStatus()) // false = available
+                .findFirst();
+    }
+
+    public int getRegionCount(String worldName) {
+        DungeonWorld world = worldMap.get(worldName);
+        return world == null ? 0 : world.getRegions().size();
     }
 }

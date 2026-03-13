@@ -1,5 +1,7 @@
 package com.roguesmp.dungeon.controller;
 
+import com.roguesmp.dungeon.controller.response.ControllerResponse;
+import com.roguesmp.dungeon.data.Party;
 import com.roguesmp.dungeon.service.IPartyService;
 import com.roguesmp.dungeon.task.PartyInviteTask;
 import org.bukkit.entity.Player;
@@ -21,12 +23,17 @@ public class PartyController {
         this.inviteTask = inviteTask;
     }
 
-    public void createParty(Player player) {
-        partyService.createParty(player);
+    public ControllerResponse<Void> createParty(Player player) {
+        Party party = partyService.createParty(player);
+        if(party == null){
+            return ControllerResponse.failure("Không thể tạo party");
+        }
+        return ControllerResponse.success("Đã tạo party thành công");
     }
 
-    public void disbandParty(Player player) {
+    public ControllerResponse<Void> disbandParty(Player player) {
         partyService.disbandParty(player);
+        return ControllerResponse.success("Đã giải tán party");
     }
 
     public void invitePlayer(Player player, Player target) {

@@ -2,7 +2,7 @@ package com.roguesmp.dungeon.repository.impl;
 
 import com.google.gson.Gson;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.dungeon.constraint.DungeonConfig;
+import com.roguesmp.dungeon.constraint.FolderConfig;
 import com.roguesmp.dungeon.data.Dungeon;
 import com.roguesmp.dungeon.repository.IDungeonRepository;
 
@@ -19,7 +19,7 @@ public class DungeonRepository implements IDungeonRepository {
 
     public DungeonRepository(Gson gson) {
         this.gson = gson;
-        this.dungeonFolder = new File(RogueSmpCore.getInstance().getDataFolder(), DungeonConfig.getDungeonTemplateFolder());
+        this.dungeonFolder = new File(RogueSmpCore.getInstance().getDataFolder(), FolderConfig.getDungeonTemplateFolder());
 
         if (!dungeonFolder.exists()) {
             dungeonFolder.mkdirs();
@@ -30,7 +30,7 @@ public class DungeonRepository implements IDungeonRepository {
     public List<Dungeon> loadAll() {
         List<Dungeon> dungeons = new ArrayList<>();
 
-        File[] files = dungeonFolder.listFiles(((dir, name) -> name.endsWith(DungeonConfig.JSON_TYPE)));
+        File[] files = dungeonFolder.listFiles(((dir, name) -> name.endsWith(FolderConfig.JSON_TYPE)));
         if(files == null) return dungeons;
 
         for (File file : files){
@@ -48,7 +48,7 @@ public class DungeonRepository implements IDungeonRepository {
 
     @Override
     public void save(Dungeon dungeon) {
-        File file = new File(dungeonFolder, dungeon.getDgId() + DungeonConfig.JSON_TYPE);
+        File file = new File(dungeonFolder, dungeon.getDgId() + FolderConfig.JSON_TYPE);
         try (Writer writer = new FileWriter(file, StandardCharsets.UTF_8)){
             gson.toJson(dungeon, writer);
         }catch (Exception e){
@@ -58,6 +58,6 @@ public class DungeonRepository implements IDungeonRepository {
 
     @Override
     public boolean delete(String id) {
-        return new File(dungeonFolder, id + DungeonConfig.JSON_TYPE).delete();
+        return new File(dungeonFolder, id + FolderConfig.JSON_TYPE).delete();
     }
 }

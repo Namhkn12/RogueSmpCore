@@ -18,9 +18,6 @@ public class DungeonService implements IDungeonService {
 
     @Override
     public Dungeon createDungeon(String name) {
-        //validateName(name);
-        //validateDescription(description);
-
         return dungeonManager.create(name);
     }
 

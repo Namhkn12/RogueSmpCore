@@ -2,10 +2,6 @@ package com.roguesmp;
 
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.dungeon.DungeonRegistry;
-import com.roguesmp.dungeon.manager.DungeonManager;
-import com.roguesmp.dungeon.manager.PartyManager;
-import com.roguesmp.dungeon.manager.RoomManager;
-import com.roguesmp.dungeon.manager.SchemetaManager;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.listener.GuiListener;
 import com.roguesmp.registry.GemRegistry;
@@ -31,7 +27,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         PlayerManager.init(this);
 
-        DungeonRegistry.startUp();
+        DungeonRegistry.onEnable();
 //        PartyManager.init();
 //        SchemetaManager.init(this);
 //        RoomManager.init(this);

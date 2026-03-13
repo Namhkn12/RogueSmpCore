@@ -2,7 +2,7 @@ package com.roguesmp.dungeon.constraint;
 import java.io.File;
 import java.util.List;
 
-public final class DungeonConfig {
+public final class FolderConfig {
 
     public static final String JSON_TYPE = ".json";
     public static final String SCHEM_TYPE = ".schem";
@@ -12,7 +12,22 @@ public final class DungeonConfig {
     public static final String SCHEMETA_FOLDER = "schemeta";
     public static final String DUNGEON_TEMPLATE_FOLDER = "dungeon_template";
     public static final String RUNTIME_FOLDER = "runtime";
+    public static final String PARTY_FOLDER = "party";
     public static final String REGION_FOLDER = "region";
+
+    public static String getRegionFolder() {
+        return buildFolderPath(List.of(
+                MAIN_FOLDER,
+                REGION_FOLDER
+        ));
+    }
+
+    public static String getPartyFolder() {
+        return buildFolderPath(List.of(
+                MAIN_FOLDER,
+                PARTY_FOLDER
+        ));
+    }
 
     public static String getSchematicFolder() {
         return buildFolderPath(List.of(
@@ -35,9 +50,16 @@ public final class DungeonConfig {
         ));
     }
 
+    public static String getRuntimeFolder(){
+        return buildFolderPath(List.of(
+                MAIN_FOLDER,
+                RUNTIME_FOLDER
+        ));
+    }
+
     private static String buildFolderPath(List<String> folders) {
         return String.join(File.separator, folders);
     }
 
-    private DungeonConfig() {}
+    private FolderConfig() {}
 }
