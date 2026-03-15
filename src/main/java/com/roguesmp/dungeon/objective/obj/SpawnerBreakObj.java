@@ -9,9 +9,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 
 public class SpawnerBreakObj implements IObjective {
-    private final int requiredCount;
+    private int requiredCount = 0;
     private int brokenCount = 0;
     private boolean completed = false;
+
+    public SpawnerBreakObj() {
+        this.requiredCount = 0;
+    }
 
     public SpawnerBreakObj(ObjectiveData data) {
         Object raw = data.getParams().get("count");

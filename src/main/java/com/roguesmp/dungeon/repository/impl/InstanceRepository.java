@@ -4,9 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.adapter.LocationAdapter;
+import com.roguesmp.dungeon.adapter.ObjectiveAdapter;
 import com.roguesmp.dungeon.constraint.FolderConfig;
 import com.roguesmp.dungeon.constraint.PrefixConfig;
 import com.roguesmp.dungeon.instance.DungeonInstance;
+import com.roguesmp.dungeon.objective.IObjective;
 import com.roguesmp.dungeon.repository.IInstanceRepository;
 import com.roguesmp.dungeon.ultis.ConsoleLogger;
 import org.bukkit.Location;
@@ -26,6 +28,7 @@ public class InstanceRepository implements IInstanceRepository {
         this.gson = new GsonBuilder()
                 .setPrettyPrinting()
                 .registerTypeAdapter(Location.class, new LocationAdapter())
+                .registerTypeAdapter(IObjective.class, new ObjectiveAdapter())
                 .create();
 
         this.runtimeFolder = new File(
