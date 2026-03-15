@@ -3,6 +3,7 @@ package com.roguesmp;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.dungeon.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.gui.ItemBrowser;
@@ -44,9 +45,12 @@ public final class RogueSmpCore extends JavaPlugin {
 
         ItemRegistry.init(this);
 
+        PlayerManager.init(this);
+        
         BlockStorage.init(this, BlockManager.getInstance());
-
         BlockRegistry.getInstance().registerMachineRecipes();
+        //dungeon register
+        DungeonRegistry.onEnable();
     }
 
     // Load data from files, databases, etc
@@ -98,13 +102,14 @@ public final class RogueSmpCore extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
         saveData();
+        DungeonRegistry.onDisable();
     }
 
     public static RogueSmpCore getInstance() {
         return INSTANCE;
     }
 
-    private void registerListener(Listener listener) {
+    public void registerListener(Listener listener) {
         this.getServer().getPluginManager().registerEvents(listener, this);
     }
 }
