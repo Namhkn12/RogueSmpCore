@@ -2,13 +2,12 @@ package com.roguesmp.dungeon.instance;
 
 import org.bukkit.util.BoundingBox;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class DungeonInstance {
     private UUID uuid;
     private String dungeon;
+    private int minRoomToEnd;
     private UUID party;
     private long startTime;
     private RegionInstance region;
@@ -16,14 +15,14 @@ public class DungeonInstance {
     private Map<UUID, NodeInstance> nodes;      // UUID = NodeInstance.id
     private Map<UUID, Integer> nextRooms;       // UUID match nodes, Integer = slot UI
     private RoomInstance activeRoom;
-    private List<String> completedRooms;        // ordered, dùng cho checkpoint khi restart
+    private List<RoomInstance> completedRooms;        // ordered, dùng cho checkpoint khi restart
     private boolean isPlaying;
     private double score;
 
     public DungeonInstance() {}
 
     public DungeonInstance(UUID uuid, String dungeon, UUID party,
-                           RegionInstance region, Map<UUID, NodeInstance> nodes) {
+                           RegionInstance region, Map<UUID, NodeInstance> nodes, int minRoomToEnd) {
         this.uuid = uuid;
         this.dungeon = dungeon;
         this.party = party;
@@ -32,6 +31,10 @@ public class DungeonInstance {
         this.startTime = System.currentTimeMillis();
         this.isPlaying = true;
         this.score = 0;
+        this.completedRooms = new ArrayList<>();
+        this.activeRoom = null;
+        this.nextRooms = new HashMap<>();
+        this.minRoomToEnd = minRoomToEnd;
     }
 
     public UUID getUuid() {
@@ -106,11 +109,11 @@ public class DungeonInstance {
         this.activeRoom = activeRoom;
     }
 
-    public List<String> getCompletedRooms() {
+    public List<RoomInstance> getCompletedRooms() {
         return completedRooms;
     }
 
-    public void setCompletedRooms(List<String> completedRooms) {
+    public void setCompletedRooms(List<RoomInstance> completedRooms) {
         this.completedRooms = completedRooms;
     }
 
@@ -128,5 +131,13 @@ public class DungeonInstance {
 
     public void setScore(double score) {
         this.score = score;
+    }
+
+    public int getMinRoomToEnd() {
+        return minRoomToEnd;
+    }
+
+    public void setMinRoomToEnd(int minRoomToEnd) {
+        this.minRoomToEnd = minRoomToEnd;
     }
 }

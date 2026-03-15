@@ -8,11 +8,11 @@ public class NodeInstance {
     private String nodeKey;
     private String name;
     private String icon;
-    private List<String> schemetas;
+    private String schemetas;
 
     public NodeInstance() {}
 
-    public NodeInstance(UUID id, String nodeKey, String name, String icon, List<String> schemetas) {
+    public NodeInstance(UUID id, String nodeKey, String name, String icon, String schemetas) {
         this.id = id;
         this.nodeKey = nodeKey;
         this.name = name;
@@ -52,11 +52,11 @@ public class NodeInstance {
         this.icon = icon;
     }
 
-    public List<String> getSchemetas() {
+    public String getSchemetas() {
         return schemetas;
     }
 
-    public void setSchemetas(List<String> schemetas) {
+    public void setSchemetas(String schemetas) {
         this.schemetas = schemetas;
     }
 }

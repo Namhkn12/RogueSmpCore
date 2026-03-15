@@ -18,6 +18,7 @@ import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.util.BoundingBox;
 
 import java.io.*;
 import java.util.List;
@@ -84,7 +85,7 @@ public class SchemetaService implements ISchemetaService {
     }
 
     @Override
-    public void pasteSchematic(String id, Location location) throws Exception {
+    public BoundingBox pasteSchematic(String id, Location location) throws Exception {
         Schemeta schemeta = schemetaManager.get(id);
         if (schemeta == null) throw new IllegalArgumentException("Schemeta not found: " + id);
 
@@ -101,6 +102,22 @@ public class SchemetaService implements ISchemetaService {
                     .build();
 
             Operations.complete(operation);
+
+            // Tính BoundingBox từ clipboard dimensions + paste location
+            Region region = clipboard.getRegion();
+            BlockVector3 min = region.getMinimumPoint();
+            BlockVector3 max = region.getMaximumPoint();
+            BlockVector3 origin = clipboard.getOrigin();
+
+            // offset so với origin của schematic
+            double offsetX = location.getX() - origin.x();
+            double offsetY = location.getY() - origin.y();
+            double offsetZ = location.getZ() - origin.z();
+
+            return new BoundingBox(
+                    min.x() + offsetX, min.y() + offsetY, min.z() + offsetZ,
+                    max.x() + offsetX, max.y() + offsetY, max.z() + offsetZ
+            );
         }
     }
 

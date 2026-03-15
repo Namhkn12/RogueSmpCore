@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon.manager;
 
+import com.roguesmp.dungeon.constraint.PrefixConfig;
 import com.roguesmp.dungeon.data.Dungeon;
 import com.roguesmp.dungeon.data.Room;
 import com.roguesmp.dungeon.repository.IDungeonRepository;
@@ -25,13 +26,13 @@ public class DungeonManager {
     public void load() {
         dungeons.clear();
         dungeonRepository.loadAll().forEach(d -> dungeons.put(d.getDgId(), d));
-        ConsoleLogger.info("Load " + dungeons.size() + " dungeon template file");
+        ConsoleLogger.info(PrefixConfig.DUNGEON,"Load " + dungeons.size() + " dungeon template file");
     }
 
     /** Create a new dungeon, persist it, and put it in cache. */
     public Dungeon create(String name) {
         String dgId = PREFIX + "_" + TimeId.generateTimeId();
-        Dungeon dungeon = new Dungeon(dgId, name, "");
+        Dungeon dungeon = new Dungeon(dgId, name, "", 0);
 
         dungeons.put(dgId, dungeon);
         dungeonRepository.save(dungeon);

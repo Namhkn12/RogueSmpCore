@@ -8,7 +8,6 @@ import java.util.*;
 
 /**
  * Quản lý state in-memory của tất cả DungeonWorld và Region.
- * Không gọi trực tiếp từ bên ngoài — dùng RegionService.
  */
 public class RegionManager {
 
@@ -25,10 +24,6 @@ public class RegionManager {
 
         loadAll();
     }
-
-    // -------------------------------------------------------------------------
-    // Load / Save
-    // -------------------------------------------------------------------------
 
     /**
      * Gọi khi server start — load toàn bộ từ file rồi build index
@@ -61,10 +56,6 @@ public class RegionManager {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // World operations
-    // -------------------------------------------------------------------------
-
     public void addWorld(DungeonWorld world) {
         worldMap.put(world.getWorldName(), world);
         repository.save(world);
@@ -77,10 +68,6 @@ public class RegionManager {
     public Collection<DungeonWorld> getAllWorlds() {
         return Collections.unmodifiableCollection(worldMap.values());
     }
-
-    // -------------------------------------------------------------------------
-    // Region operations
-    // -------------------------------------------------------------------------
 
     public void addRegion(String worldName, Region region) {
         DungeonWorld world = worldMap.get(worldName);

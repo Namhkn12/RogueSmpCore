@@ -3,6 +3,7 @@ package com.roguesmp.dungeon.service;
 import com.roguesmp.dungeon.data.Schemeta;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.util.BoundingBox;
 
 import java.util.List;
 
@@ -12,5 +13,5 @@ public interface ISchemetaService {
     Schemeta getSchemeta(String id);
     List<Schemeta> getSchemetaList();
     List<String> getSchemetaIdList();
-    void pasteSchematic(String id, Location location) throws Exception;
+    BoundingBox pasteSchematic(String id, Location location) throws Exception;
 }

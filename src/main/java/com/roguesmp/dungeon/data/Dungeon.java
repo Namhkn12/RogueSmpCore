@@ -8,16 +8,18 @@ public class Dungeon {
     private String dgId;
     private String dgName;
     private String dgDescription;
+    private int minRoomToEnd;
     private Map<String, Node> nodes;
 
     public Dungeon() {
     }
 
-    public Dungeon(String dgId, String dgName, String dgDescription) {
+    public Dungeon(String dgId, String dgName, String dgDescription, int minRoomToEnd) {
         this.dgId = dgId;
         this.dgName = dgName;
         this.dgDescription = dgDescription;
         this.nodes = createDefaultNodes();
+        this.minRoomToEnd = minRoomToEnd;
     }
 
     private Map<String, Node> createDefaultNodes() {
@@ -65,5 +67,13 @@ public class Dungeon {
 
     public void setNodes(Map<String, Node> nodes) {
         this.nodes = nodes;
+    }
+
+    public int getMinRoomToEnd() {
+        return minRoomToEnd;
+    }
+
+    public void setMinRoomToEnd(int minRoomToEnd) {
+        this.minRoomToEnd = minRoomToEnd;
     }
 }

@@ -6,4 +6,5 @@ public final class WorldConfig {
     public static final int MAX_WORLD_PER_SERVER = 5;
     public static final int DISTANCE_BETWEEN_REGION = 1000;
     public static final int GRID_WIDTH = 5;
+    public static final double REGION_Y = 64;
 }

@@ -25,17 +25,17 @@ public class PartyService implements IPartyService {
     @Override
     public Party createParty(Player owner) {
         if (partyManager.isInParty(owner.getUniqueId())) {
-            owner.sendMessage(MCStringBuilder.of().red("Tạo party không thành công").build());
+            owner.sendMessage(MCStringBuilder.red("Tạo party không thành công"));
             return null;
         }
-        owner.sendMessage(MCStringBuilder.of().green("Tạo thành công").build());
+        owner.sendMessage(MCStringBuilder.green("Tạo thành công"));
         return partyManager.createParty(owner.getUniqueId());
     }
 
     @Override
     public void disbandParty(Player owner) {
         if (!partyManager.isOwner(owner.getUniqueId())) {
-            owner.sendMessage(MCStringBuilder.of().red("Bạn không phải chủ party").build());
+            owner.sendMessage(MCStringBuilder.red("Bạn không phải chủ party"));
             return;
         }
 
@@ -46,7 +46,7 @@ public class PartyService implements IPartyService {
         for (UUID memberId : party.getMembers()) {
             Player member = Bukkit.getPlayer(memberId);
             if (member != null) {
-                member.sendMessage(MCStringBuilder.of().yellow("Party đã bị giải tán").build());
+                member.sendMessage(MCStringBuilder.yellow("Party đã bị giải tán"));
             }
         }
 
@@ -56,12 +56,12 @@ public class PartyService implements IPartyService {
     @Override
     public void joinParty(Player player, Player owner) {
         if (partyManager.isInParty(player.getUniqueId())) {
-            player.sendMessage(MCStringBuilder.of().yellow("Bạn đang ở trong party khác").build());
+            player.sendMessage(MCStringBuilder.yellow("Bạn đang ở trong party khác"));
             return;
         }
 
         if (!partyManager.isOwner(owner.getUniqueId())) {
-            player.sendMessage(MCStringBuilder.of().yellow("Người này không phải chủ party").build());
+            player.sendMessage(MCStringBuilder.yellow("Người này không phải chủ party"));
             return;
         }
 
@@ -69,23 +69,23 @@ public class PartyService implements IPartyService {
         if (party == null) return;
 
         if (party.getMembers().size() >= party.getSize()) {
-            player.sendMessage(MCStringBuilder.of().yellow("Party đã đầy").build());
+            player.sendMessage(MCStringBuilder.yellow("Party đã đầy"));
             return;
         }
 
         partyManager.addMember(party.getPartyId(), player.getUniqueId());
-        player.sendMessage(MCStringBuilder.of().green("Bạn đã tham gia party").build());
+        player.sendMessage(MCStringBuilder.green("Bạn đã tham gia party"));
     }
 
     @Override
     public void leaveParty(Player player) {
         if (!partyManager.isInParty(player.getUniqueId())) {
-            player.sendMessage(MCStringBuilder.of().yellow("Bạn không ở trong party nào").build());
+            player.sendMessage(MCStringBuilder.yellow("Bạn không ở trong party nào"));
             return;
         }
 
         if (partyManager.isOwner(player.getUniqueId())) {
-            player.sendMessage(MCStringBuilder.of().yellow("Hãy dùng lệnh disband để giải tán").build());
+            player.sendMessage(MCStringBuilder.yellow("Hãy dùng lệnh disband để giải tán"));
             return;
         }
 
@@ -93,18 +93,18 @@ public class PartyService implements IPartyService {
         if (party == null) return;
 
         partyManager.removeMember(party.getPartyId(), player.getUniqueId());
-        player.sendMessage(MCStringBuilder.of().green("Bạn đã rời party").build());
+        player.sendMessage(MCStringBuilder.green("Bạn đã rời party"));
     }
 
     @Override
     public void kickMember(Player owner, Player target) {
         if (!partyManager.isOwner(owner.getUniqueId())) {
-            owner.sendMessage(MCStringBuilder.of().yellow("Bạn không phải chủ party").build());
+            owner.sendMessage(MCStringBuilder.yellow("Bạn không phải chủ party"));
             return;
         }
 
         if (owner.getUniqueId().equals(target.getUniqueId())) {
-            owner.sendMessage(MCStringBuilder.of().yellow("Bạn không thể tự kick chính mình").build());
+            owner.sendMessage(MCStringBuilder.yellow("Bạn không thể tự kick chính mình"));
             return;
         }
 
@@ -112,19 +112,19 @@ public class PartyService implements IPartyService {
         if (party == null) return;
 
         if (!party.getMembers().contains(target.getUniqueId())) {
-            owner.sendMessage(MCStringBuilder.of().yellow("Người này không thuộc party của bạn").build());
+            owner.sendMessage(MCStringBuilder.yellow("Người này không thuộc party của bạn"));
             return;
         }
 
         partyManager.removeMember(party.getPartyId(), target.getUniqueId());
-        owner.sendMessage(MCStringBuilder.of().yellow("§aĐã kick " + target.getName() + " khỏi party.").build());
-        target.sendMessage(MCStringBuilder.of().yellow("Bạn đã bị buộc rời party").build());
+        owner.sendMessage(MCStringBuilder.yellow("§aĐã kick " + target.getName() + " khỏi party."));
+        target.sendMessage(MCStringBuilder.yellow("Bạn đã bị buộc rời party"));
     }
 
     @Override
     public void transferOwnership(Player currentOwner, Player newOwner) {
         if (!partyManager.isOwner(currentOwner.getUniqueId())) {
-            currentOwner.sendMessage("§cBạn không phải chủ party!");
+            currentOwner.sendMessage(MCStringBuilder.yellow("Bạn không phải chủ party"));
             return;
         }
 
@@ -132,13 +132,13 @@ public class PartyService implements IPartyService {
         if (party == null) return;
 
         if (!party.getMembers().contains(newOwner.getUniqueId())) {
-            currentOwner.sendMessage("§cNgười này không ở trong party của bạn!");
+            currentOwner.sendMessage(MCStringBuilder.yellow("Người này không ở trong party của bạn"));
             return;
         }
 
         partyManager.transferOwner(party.getPartyId(), newOwner.getUniqueId());
-        currentOwner.sendMessage("§aĐã chuyển quyền chủ party cho " + newOwner.getName() + ".");
-        newOwner.sendMessage("§aBạn đã trở thành chủ party!");
+        currentOwner.sendMessage(MCStringBuilder.yellow("Đã chuyển quyền chủ party cho " + newOwner.getName() + "."));
+        newOwner.sendMessage(MCStringBuilder.yellow("Bạn đã trở thành chủ party"));
     }
 
     @Override
@@ -156,31 +156,26 @@ public class PartyService implements IPartyService {
         Party party = partyManager.findByPlayer(player.getUniqueId()).orElse(null);
 
         if (party == null) {
-            return "§cBạn không ở trong party nào.";
+            return MCStringBuilder.yellow("Bạn không ở trong party nào.");
         }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("§a=== Thông tin Party ===\n");
-
         Player leader = Bukkit.getPlayer(party.getOwner());
-        sb.append("§fLeader: ")
-                .append(leader != null ? leader.getName() : "§7(Offline)")
-                .append("\n");
+        String leaderName = leader != null ? leader.getName() : MCStringBuilder.gray("(Offline)");
 
-        sb.append("§fThành viên (")
-                .append(party.getMembers().size())
-                .append("/")
-                .append(party.getSize())
-                .append("):\n");
+        MCStringBuilder sb = MCStringBuilder.of()
+                .appendGreen("=== Thông tin Party ===").newLine()
+                .appendWhite("Leader: ").appendWhite(leaderName).newLine()
+                .appendWhite("Thành viên (")
+                .appendGold(party.getMembers().size() + "/" + party.getSize())
+                .appendWhite("):").newLine();
 
         for (UUID memberId : party.getMembers()) {
             Player member = Bukkit.getPlayer(memberId);
-            sb.append(" §7- §f")
-                    .append(member != null ? member.getName() : "§7(Offline)")
-                    .append("\n");
+            String memberName = member != null ? member.getName() : MCStringBuilder.gray("(Offline)");
+            sb.appendGray(" - ").appendWhite(memberName).newLine();
         }
 
-        return sb.toString();
+        return sb.build();
     }
 
     @Override
@@ -191,5 +186,10 @@ public class PartyService implements IPartyService {
     @Override
     public Optional<Party> getPartyById(UUID partyId) {
         return partyManager.findById(partyId);
+    }
+
+    @Override
+    public void savePartyToFile() {
+        partyManager.saveAll();
     }
 }

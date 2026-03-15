@@ -77,13 +77,14 @@ public final class RogueSmpCore extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
         saveData();
+        DungeonRegistry.onDisable();
     }
 
     public static RogueSmpCore getInstance() {
         return INSTANCE;
     }
 
-    private void registerListener(Listener listener) {
+    public void registerListener(Listener listener) {
         this.getServer().getPluginManager().registerEvents(listener, this);
     }
 }

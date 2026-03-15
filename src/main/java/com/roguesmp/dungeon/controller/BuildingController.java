@@ -3,6 +3,7 @@ package com.roguesmp.dungeon.controller;
 import com.roguesmp.dungeon.service.ISchemetaService;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.util.BoundingBox;
 
 import java.util.List;
 
@@ -18,8 +19,8 @@ public class BuildingController {
         schemetaService.createSchemeta(executor, schemName);
     }
 
-    public void buildSchematicById(String schemetaId, Location location) throws Exception {
-        schemetaService.pasteSchematic(schemetaId, location);
+    public BoundingBox buildSchematicById(String schemetaId, Location location) throws Exception {
+        return schemetaService.pasteSchematic(schemetaId, location);
     }
 
     public List<String> getSchematicIdList(){

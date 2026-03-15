@@ -65,7 +65,7 @@ public class PartyManager {
         for (UUID memberId : party.getMembers()) {
             playerIndex.remove(memberId);
         }
-        repository.delete(partyId); // xóa file luôn
+        repository.delete(partyId);
     }
 
     public void addMember(UUID partyId, UUID playerId) {

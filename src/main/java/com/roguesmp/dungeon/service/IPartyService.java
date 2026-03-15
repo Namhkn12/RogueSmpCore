@@ -29,4 +29,7 @@ public interface IPartyService {
     Optional<Party> getPartyByPlayer(Player player);
 
     Optional<Party> getPartyById(UUID partyId);
+
+    void savePartyToFile();
+
 }

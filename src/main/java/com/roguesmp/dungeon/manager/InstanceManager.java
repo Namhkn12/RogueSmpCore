@@ -13,16 +13,12 @@ public class InstanceManager {
 
     private final IInstanceRepository repository;
 
-    // key = partyId
     private final Map<UUID, DungeonInstance> instances = new LinkedHashMap<>();
 
     public InstanceManager(IInstanceRepository repository) {
         this.repository = repository;
+        loadAll();
     }
-
-    // -------------------------------------------------------------------------
-    // Lifecycle
-    // -------------------------------------------------------------------------
 
     /**
      * Load tất cả instance từ file khi server restart
@@ -40,10 +36,6 @@ public class InstanceManager {
     public void saveAll() {
         instances.values().forEach(repository::save);
     }
-
-    // -------------------------------------------------------------------------
-    // CRUD
-    // -------------------------------------------------------------------------
 
     /**
      * Thêm instance mới vào memory và ghi file ngay
@@ -70,10 +62,6 @@ public class InstanceManager {
             repository.save(instance);
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Lookup
-    // -------------------------------------------------------------------------
 
     public Optional<DungeonInstance> getByParty(UUID partyId) {
         return Optional.ofNullable(instances.get(partyId));

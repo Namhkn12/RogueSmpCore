@@ -23,6 +23,11 @@ public class PartyController {
         this.inviteTask = inviteTask;
     }
 
+    public ControllerResponse<Party> getPartyByPlayer(Player player){
+        Party party = partyService.getPartyByPlayer(player).orElse(null);
+        return ControllerResponse.success("Lấy party từ người chơi thành công", party);
+    }
+
     public ControllerResponse<Void> createParty(Player player) {
         Party party = partyService.createParty(player);
         if(party == null){

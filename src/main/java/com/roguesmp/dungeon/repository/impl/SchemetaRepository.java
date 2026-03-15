@@ -66,11 +66,6 @@ public class SchemetaRepository implements ISchemetaRepository {
     }
 
     @Override
-    public File getSchematicFolder() {
-        return schematicFolder;
-    }
-
-    @Override
     public void saveSchem(String name, Clipboard clipboard) throws IOException {
         File schemFile = new File(schematicFolder, name + FolderConfig.SCHEM_TYPE);
         try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_SCHEMATIC

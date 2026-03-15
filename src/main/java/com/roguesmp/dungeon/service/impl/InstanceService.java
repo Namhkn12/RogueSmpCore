@@ -13,6 +13,7 @@ import com.roguesmp.dungeon.service.IInstanceService;
 import java.util.*;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class InstanceService implements IInstanceService {
 
@@ -24,34 +25,24 @@ public class InstanceService implements IInstanceService {
         this.instanceManager = instanceManager;
     }
 
-    // -------------------------------------------------------------------------
-    // Lifecycle
-    // -------------------------------------------------------------------------
-
-    @Override
-    public void onServerStart() {
-        instanceManager.loadAll();
-    }
-
     @Override
     public void onServerStop() {
         instanceManager.saveAll();
     }
 
-    // -------------------------------------------------------------------------
-    // Instance management
-    // -------------------------------------------------------------------------
-
     @Override
-    public DungeonInstance createDungeonInstance(String dungeonId, UUID party, RegionInstance region) {
-        Map<UUID, NodeInstance> nodes = rollNodeData(dungeonId);
+    public DungeonInstance createDungeonInstance(Dungeon dungeon, UUID party, RegionInstance region) {
+        Map<UUID, NodeInstance> nodes = rollNodeData(dungeon.getDgId());
+        int minToEndSetting = dungeon.getMinRoomToEnd();
+        int minToEnd = minToEndSetting == 0 ? nodes.size() * 2/3 : minToEndSetting;
 
         DungeonInstance instance = new DungeonInstance(
                 UUID.randomUUID(),
-                dungeonId,
+                dungeon.getDgId(),
                 party,
                 region,
-                nodes
+                nodes,
+                minToEnd
         );
 
         instanceManager.add(instance);
@@ -78,33 +69,68 @@ public class InstanceService implements IInstanceService {
         return instanceManager.hasActiveInstance(partyId);
     }
 
-    // -------------------------------------------------------------------------
-    // Next rooms
-    // -------------------------------------------------------------------------
+    private static final List<Integer> VALID_SLOTS = List.of(
+            1, 2, 3, 5, 6, 7,
+            10, 11, 12, 14, 15, 16,
+            19, 20, 21, 23, 24, 25,
+            28, 29, 30, 32, 33, 34,
+            37, 38, 39, 41, 42, 43
+    );
+    private static final int END_SLOT = 4;
 
     @Override
-    public void rollNextRooms(DungeonInstance instance, int nextRoomCount) {
+    public void rollNextRooms(DungeonInstance instance) {
         Map<UUID, NodeInstance> remaining = instance.getNodes();
-        if (remaining == null || remaining.isEmpty()) return;
-
-        Map<UUID, Integer> nextRooms = new LinkedHashMap<>();
-
-        // Lấy tối đa nextRoomCount node từ nodes còn lại
-        List<UUID> keys = new ArrayList<>(remaining.keySet());
-        int count = Math.min(nextRoomCount, keys.size());
-
-        // Shuffle để không luôn lấy theo thứ tự cố định
-        Collections.shuffle(keys);
-
-        Set<Integer> usedSlots = new HashSet<>();
-        for (int i = 0; i < count; i++) {
-            UUID nodeId = keys.get(i);
-            int slot = rollUniqueSlot(usedSlots);
-            usedSlots.add(slot);
-            nextRooms.put(nodeId, slot);
+        if (remaining == null || remaining.isEmpty()) {
+            instance.setNextRooms(new HashMap<>());
+            return;
         }
 
-        instance.setNextRooms(nextRooms);
+        int completedCount = instance.getCompletedRooms() == null ? 0 : instance.getCompletedRooms().size();
+
+        // lấy minRoomsToEnd từ dungeon instance
+        int minRooms = instance.getMinRoomToEnd();
+
+        boolean canRollEnd = completedCount >= minRooms;
+
+        // chỉ còn end → bắt buộc roll end dù chưa đủ điều kiện
+        boolean onlyEndLeft = remaining.values().stream()
+                .allMatch(n -> n.getNodeKey().equals("end"));
+
+        List<UUID> pool = remaining.entrySet().stream()
+                .filter(e -> onlyEndLeft || canRollEnd || !e.getValue().getNodeKey().equals("end"))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        if (pool.isEmpty()) {
+            instance.setNextRooms(new HashMap<>());
+            return;
+        }
+
+        Collections.shuffle(pool);
+        int count = ThreadLocalRandom.current().nextInt(1, Math.max(1, (int) Math.floor(pool.size() * 2.0 / 3.0)) + 1);
+
+        instance.setNextRooms(pickSlots(pool.subList(0, Math.min(count, pool.size())), remaining));
+    }
+
+    private Map<UUID, Integer> pickSlots(List<UUID> pool, Map<UUID, NodeInstance> remaining) {
+        List<Integer> available = new ArrayList<>(VALID_SLOTS);
+        Collections.shuffle(available);
+
+        Map<UUID, Integer> result = new LinkedHashMap<>();
+
+        for (UUID nodeId : pool) {
+            boolean isEnd = remaining.get(nodeId).getNodeKey().equals("end");
+            if (isEnd) {
+                result.put(nodeId, END_SLOT);
+                continue;
+            }
+            if (!available.isEmpty()) {
+                result.put(nodeId, available.remove(0));
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -126,10 +152,6 @@ public class InstanceService implements IInstanceService {
 
         return selected;
     }
-
-    // -------------------------------------------------------------------------
-    // Roll node data
-    // -------------------------------------------------------------------------
 
     /**
      * Roll toàn bộ nodes từ dungeon template theo thứ tự:
@@ -178,35 +200,44 @@ public class InstanceService implements IInstanceService {
         List<RoomEntry> pool = node.getRooms();
 
         if (pool == null || pool.isEmpty()) {
-            // Không có room nào trong pool → tạo NodeInstance rỗng
             for (int i = 0; i < node.getNumber(); i++) {
                 result.add(new NodeInstance(
                         UUID.randomUUID(),
                         node.getKey(),
                         node.getName(),
                         node.getIcon(),
-                        new ArrayList<>()
+                        null
                 ));
             }
             return result;
         }
 
-        double totalWeight = pool.stream()
-                .mapToDouble(RoomEntry::getWeight)
-                .sum();
+        // Copy pool để loại dần schemeta đã chọn
+        List<RoomEntry> remaining = new ArrayList<>(pool);
 
         for (int i = 0; i < node.getNumber(); i++) {
-            List<String> schemetas = new ArrayList<>();
+            if (remaining.isEmpty()) break;
+
+            double totalWeight = remaining.stream()
+                    .mapToDouble(RoomEntry::getWeight)
+                    .sum();
+
+            String schemetas = null;
             double roll = ThreadLocalRandom.current().nextDouble(totalWeight);
             double cumulative = 0;
 
-            for (RoomEntry entry : pool) {
+            RoomEntry chosen = null;
+            for (RoomEntry entry : remaining) {
                 cumulative += entry.getWeight();
                 if (roll <= cumulative) {
-                    schemetas.add(entry.getFile());
+                    schemetas = entry.getFile();
+                    chosen = entry;
                     break;
                 }
             }
+
+            // Loại schemeta đã chọn khỏi pool
+            if (chosen != null) remaining.remove(chosen);
 
             result.add(new NodeInstance(
                     UUID.randomUUID(),
@@ -218,20 +249,5 @@ public class InstanceService implements IInstanceService {
         }
 
         return result;
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    /**
-     * Roll 1 số nguyên dương unique chưa dùng, dùng cho slot UI
-     */
-    private int rollUniqueSlot(Set<Integer> usedSlots) {
-        int slot;
-        do {
-            slot = ThreadLocalRandom.current().nextInt(1, 100);
-        } while (usedSlots.contains(slot));
-        return slot;
     }
 }

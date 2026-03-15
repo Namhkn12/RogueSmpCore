@@ -1,11 +1,11 @@
 package com.roguesmp.dungeon.manager;
 
+import com.roguesmp.dungeon.constraint.PrefixConfig;
 import com.roguesmp.dungeon.data.Schemeta;
 import com.roguesmp.dungeon.repository.ISchemetaRepository;
 import com.roguesmp.dungeon.ultis.ConsoleLogger;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +26,7 @@ public class SchemetaManager {
     public void load() {
         schemetas.clear();
         repository.loadAll().forEach(s -> schemetas.put(s.getSchemId(), s));
-        ConsoleLogger.info("Load " + schemetas.size() + " schemeta file");
+        ConsoleLogger.info(PrefixConfig.SCHEMETA, "Load " + schemetas.size() + " schemeta file");
     }
 
     public void register(Schemeta schemeta) throws IOException {

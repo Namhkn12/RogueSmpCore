@@ -29,7 +29,6 @@ public class DungeonRepository implements IDungeonRepository {
     @Override
     public List<Dungeon> loadAll() {
         List<Dungeon> dungeons = new ArrayList<>();
-
         File[] files = dungeonFolder.listFiles(((dir, name) -> name.endsWith(FolderConfig.JSON_TYPE)));
         if(files == null) return dungeons;
 

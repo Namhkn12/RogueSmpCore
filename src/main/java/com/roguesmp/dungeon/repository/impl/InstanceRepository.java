@@ -5,8 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.adapter.LocationAdapter;
 import com.roguesmp.dungeon.constraint.FolderConfig;
+import com.roguesmp.dungeon.constraint.PrefixConfig;
 import com.roguesmp.dungeon.instance.DungeonInstance;
 import com.roguesmp.dungeon.repository.IInstanceRepository;
+import com.roguesmp.dungeon.ultis.ConsoleLogger;
 import org.bukkit.Location;
 
 import java.io.*;
@@ -74,6 +76,7 @@ public class InstanceRepository implements IInstanceRepository {
                 if (instance != null) {
                     result.add(instance);
                 }
+                ConsoleLogger.info(PrefixConfig.WHEN_THE_DUNGEON_ARISE, "Đã load " + result.size() + "instance");
             } catch (IOException e) {
                 RogueSmpCore.getInstance().getLogger().log(
                         Level.SEVERE,

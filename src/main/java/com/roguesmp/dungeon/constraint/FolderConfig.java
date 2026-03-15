@@ -15,6 +15,9 @@ public final class FolderConfig {
     public static final String PARTY_FOLDER = "party";
     public static final String REGION_FOLDER = "region";
 
+    public static final String DUNGEON_WORLD_FILE = "dungeon_";
+
+
     public static String getRegionFolder() {
         return buildFolderPath(List.of(
                 MAIN_FOLDER,

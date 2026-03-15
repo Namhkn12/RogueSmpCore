@@ -1,7 +1,10 @@
 package com.roguesmp.dungeon.actor.command;
 
+import com.roguesmp.dungeon.actor.ui.NextRoomGui;
 import com.roguesmp.dungeon.controller.DungeonController;
+import com.roguesmp.dungeon.controller.PartyController;
 import com.roguesmp.dungeon.controller.response.ControllerResponse;
+import com.roguesmp.dungeon.data.Party;
 import com.roguesmp.dungeon.instance.DungeonInstance;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.StringArgument;
@@ -10,9 +13,11 @@ import org.bukkit.entity.Player;
 public class DungeonCommand {
 
     private final DungeonController dungeonController;
+    private final PartyController partyController;
 
-    public DungeonCommand(DungeonController dungeonController) {
+    public DungeonCommand(DungeonController dungeonController, PartyController partyController) {
         this.dungeonController = dungeonController;
+        this.partyController = partyController;
     }
 
     public void register() {
