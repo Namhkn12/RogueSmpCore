@@ -38,12 +38,19 @@ public class ItemRegistry {
                                         Map.of(Enchants.GREED, 4)
                                 ),
                                 "attribute", new EquipAttributeComponent(
-                                        Map.of(Attributes.SPEED_FLAT, 0.05d, Attributes.PHYSICAL_DAMAGE_BASE, 4d), EquipSlot.MAINHAND))));
+                                        Map.of(Attributes.SPEED_FLAT, 0.05d, Attributes.MELEE_DAMAGE_BASE, 4d), EquipSlot.MAINHAND))));
 
         dataMap.put("fallback_item",
                 new BaseItem("fallback_item", Material.REDSTONE_BLOCK,
                         Map.of("name", new NameComponent("<red>ERROR"),
                                 "description", new DescriptionComponent(List.of("<b><red><!i>Something went wrong if you see this item.")))));
+
+        dataMap.put("steel_ingot", new BaseItem("steel_ingot", Material.IRON_INGOT, Map.of("name", new NameComponent("Thép"))));
+        dataMap.put("condensed_steel", new BaseItem("condensed_steel", Material.NETHERITE_INGOT, Map.of("name", new NameComponent("Thép đặc"))));
+
+        BlockRegistry.getInstance().getRegistry().forEach((id, machine) -> {
+            dataMap.put(id, machine.getItem());
+        });
     }
 
     public @Nullable BaseItem getBaseItem(@NotNull String id) {
@@ -127,6 +134,5 @@ public class ItemRegistry {
 
         plugin.getLogger().info("Loaded item registry (" + dataMap.size() + " entries)");
     }
-
 
 }

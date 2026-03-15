@@ -1,24 +1,29 @@
 package com.roguesmp.player;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.utils.Utils;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Handle runtime player instances, ticking them
+ */
 public class PlayerManager {
     private static PlayerManager INSTANCE = null;
 
-    private static final int PERIOD = 5;
+    public static final int PERIOD = 5;
 
     private final RogueSmpCore plugin;
+    private final PlayerDataManager dataManager;
     private final Map<UUID, SmpPlayer> players;
 
-    private PlayerManager(RogueSmpCore plugin) {
+    private PlayerManager(RogueSmpCore plugin, PlayerDataManager dataManager) {
         this.plugin = plugin;
+        this.dataManager = dataManager;
         players = new HashMap<>();
 
         new BukkitRunnable() {
@@ -29,12 +34,10 @@ public class PlayerManager {
                 ticks += PERIOD;
                 boolean twoHz = ticks % 10 == 0;
                 boolean oneHz = ticks % 20 == 0;
+                if (ticks >= 20) ticks = 0;
 
-                for (Map.Entry<UUID, SmpPlayer> entry : players.entrySet()) {
-                    SmpPlayer player = entry.getValue();
-
-                    player.getActiveEnchants().forEach((enchants, integer) -> enchants.getEnchant().tick(player, integer, twoHz, oneHz));
-                    player.getActiveAttributes().forEach((attributes, aDouble) -> attributes.getAttribute().tick(player, aDouble, twoHz, oneHz));
+                for (SmpPlayer player : players.values()) {
+                    player.tick(twoHz, oneHz);
                 }
             }
         }.runTaskTimer(this.plugin, 0, PERIOD);
@@ -44,11 +47,26 @@ public class PlayerManager {
         return players.getOrDefault(uuid, null);
     }
 
-    public void addPlayer(UUID uuid) {
-        players.put(uuid, new SmpPlayer(uuid));
+    public void loadPlayer(UUID uuid) {
+        Utils.runAsync(() -> {
+            PlayerData playerData = dataManager.loadPlayerData(uuid);
+            Utils.runLater(() -> {
+                dataManager.registerData(playerData);
+                SmpPlayer smpPlayer = new SmpPlayer(uuid);
+                players.put(uuid, smpPlayer);
+                smpPlayer.loadData();
+            });
+        });
     }
 
-    public void removePlayer(UUID uuid) {
+    public void unloadPlayer(UUID uuid) {
+        SmpPlayer smpPlayer = players.get(uuid);
+        if (smpPlayer == null) return;
+        smpPlayer.saveData();
+        Utils.runAsync(() -> {
+            dataManager.savePlayerData(uuid);
+            Utils.runLater(() -> dataManager.unregisterData(uuid));
+        });
         players.remove(uuid);
     }
 
@@ -59,7 +77,7 @@ public class PlayerManager {
         return INSTANCE;
     }
 
-    public static void init(RogueSmpCore core) {
-        INSTANCE = new PlayerManager(core);
+    public static void init(RogueSmpCore core, PlayerDataManager dataManager) {
+        INSTANCE = new PlayerManager(core, dataManager);
     }
 }

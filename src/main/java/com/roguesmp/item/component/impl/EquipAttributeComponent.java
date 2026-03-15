@@ -32,7 +32,7 @@ public class EquipAttributeComponent implements ItemComponent {
         return slot;
     }
 
-    public double getBaseValue(Attributes attribute) {
+    public double getValue(Attributes attribute) {
         return attributes.getOrDefault(attribute, 0d);
     }
 

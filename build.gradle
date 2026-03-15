@@ -12,6 +12,11 @@ repositories {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
     }
+    maven { url 'https://jitpack.io' }
+    maven {
+        url = 'https://repo.extendedclip.com/releases/'
+    }
+}
 
     maven {
         name = "enginehub"
@@ -22,6 +27,9 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
     compileOnly("dev.jorel:commandapi-paper-core:11.1.0")
     compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit:2.13.1")
+    compileOnly('com.github.NEZNAMY:TAB-API:5.5.0')
+    compileOnly('me.clip:placeholderapi:2.12.2')
+    implementation('org.apache.commons:commons-math3:3.6.1')
 }
 
 tasks {

@@ -1,9 +1,6 @@
 package com.roguesmp.utils;
 
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.annotation.GsonIgnore;
@@ -34,6 +31,7 @@ public class Utils {
                     return false;
                 }
             })
+            .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
             .setPrettyPrinting()
             .disableHtmlEscaping()
             .create();
@@ -63,6 +61,15 @@ public class Utils {
                 runnable.run();
             }
         }.runTaskAsynchronously(RogueSmpCore.getInstance());
+    }
+
+    public static void runAsync(Runnable runnable, int delay, int period) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                runnable.run();
+            }
+        }.runTaskTimerAsynchronously(RogueSmpCore.getInstance(), delay, period);
     }
 
     public static Component fromString(String miniMessage) {
@@ -115,6 +122,20 @@ public class Utils {
         }
 
         return sb.toString();
+    }
+
+    public static String intToMinuteAndSeconds(int i) {
+        int minutes = i / 60;
+        int seconds = i % 60;
+        if (seconds < 10) {
+            return minutes + ":0" + seconds;
+        } else {
+            return minutes + ":" + seconds;
+        }
+    }
+
+    public static String toString(Component component) {
+        return MiniMessage.miniMessage().serialize(component);
     }
 
 }

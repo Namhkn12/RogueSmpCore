@@ -2,7 +2,6 @@ package com.roguesmp.gui;
 
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.PlayerManager;
-import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.SmpItemUtils;
@@ -25,7 +24,6 @@ import java.util.Map;
 
 public class ItemBrowser extends BaseGui {
     private final List<Map.Entry<String, BaseItem>> entries;
-    private final SmpPlayer player;
 
     private final ItemStack filler = ItemStackUtils.hideTooltip(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE));
     private final ItemStack nextPage = ItemStack.of(Material.ARROW);
@@ -36,10 +34,8 @@ public class ItemBrowser extends BaseGui {
     private final int totalPages;
     private int currentPage = 0;
 
-    public ItemBrowser(SmpPlayer smpPlayer) {
+    public ItemBrowser() {
         super(Utils.fromString("Item Browser"), 6);
-
-        this.player = smpPlayer;
 
         entries = new ArrayList<>(ItemRegistry.getInstance().getRegistry().entrySet());
         entries.sort(Map.Entry.comparingByKey());
@@ -80,7 +76,7 @@ public class ItemBrowser extends BaseGui {
         var pageEntries = getPage(currentPage);
         int i = 9;
         for (var entry : pageEntries) {
-            ItemStack itemStack = entry.getValue().generateItemStack(player, 1);
+            ItemStack itemStack = entry.getValue().generateItemStack(null, 1);
             this.addButton(i, itemStack, event -> {
                 event.getWhoClicked().getInventory().addItem(itemStack);
                 event.setCancelled(true);
@@ -121,7 +117,7 @@ public class ItemBrowser extends BaseGui {
                 )
                 .withSubcommand(new CommandAPICommand("view")
                         .executesPlayer((player, commandArguments) -> {
-                            new ItemBrowser(PlayerManager.getInstance().getSmpPlayer(player.getUniqueId())).showInventory(player);
+                            new ItemBrowser().showInventory(player);
                         })
                 )
                 .withSubcommand(new CommandAPICommand("modify")
@@ -129,6 +125,10 @@ public class ItemBrowser extends BaseGui {
                         .executesPlayer((player, commandArguments) -> {
                             ItemStack res = SmpItemUtils.addGem(player.getEquipment().getItemInMainHand(), PlayerManager.getInstance().getSmpPlayer(player.getUniqueId()), List.of((String) commandArguments.get("add_gem_id")));
                             player.getEquipment().setItemInMainHand(res);
+                        }))
+                .withSubcommand(new CommandAPICommand("reload") // WILL CAUSE THE SERVER TO FREEZE
+                        .executesPlayer((player1, commandArguments) -> {
+                            Utils.runLater(() -> ItemRegistry.getInstance().loadFromFile());
                         }))
                 .register();
     }

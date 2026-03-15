@@ -4,8 +4,7 @@ import com.roguesmp.attribute.SmpAttribute;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.constant.DamageType;
-import com.roguesmp.context.DamageContext;
-import com.roguesmp.damage.DamageModifier;
+import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -17,30 +16,33 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class PhysicalDamageBase implements SmpAttribute {
+public class ProjectileDamageBase implements SmpAttribute {
     @Override
     public @NotNull String getId() {
-        return "physical_damage_base";
+        return "projectile_damage_base";
     }
 
     @Override
     public @NotNull Attributes getEnumConstant() {
-        return Attributes.PHYSICAL_DAMAGE_BASE;
+        return Attributes.PROJECTILE_DAMAGE_BASE;
     }
 
     @Override
     public @NotNull String getSimpleName() {
-        return "Sát thương vật lý";
+        return "Sát thương tầm xa";
     }
 
     @Override
-    public @NotNull List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
+    public @Nullable List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
         Component res = Component.text(" " + Utils.formatDecimal(value) + " " + getSimpleName(), NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false);
         return List.of(res);
     }
 
     @Override
-    public void onDamageEntity(DamageContext context, double value, SmpPlayer player) {
-        context.addDamageModifier(new DamageModifier(getId(), value, DamageType.PHYSICAL, DamageOperation.ADDITIVE));
+    public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
+        if (event.getDamageType() == DamageType.PROJECTILE) {
+            event.addDamageModifier(value, DamageOperation.BASE);
+        }
+
     }
 }

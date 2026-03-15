@@ -6,8 +6,6 @@ import com.roguesmp.constant.Keys;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.ItemComponent;
-import com.roguesmp.item.gem.GemData;
-import com.roguesmp.registry.GemRegistry;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -26,7 +24,7 @@ public class GemSocketComponent implements ItemComponent {
     private final int amount;
 
     @GsonIgnore
-    private final List<GemData> activeGem = new ArrayList<>();
+    private final List<BaseItem> activeGem = new ArrayList<>();
     @GsonIgnore
     private final List<String> appliedGem = new ArrayList<>(); //For old gem data (for removal in case we change socket count)
 
@@ -38,20 +36,21 @@ public class GemSocketComponent implements ItemComponent {
         return amount;
     }
 
-    public boolean addGem(@NotNull GemData gemData) {
+    public boolean addGem(@NotNull BaseItem baseItem) {
         if (activeGem.size() >= amount) return false;
-        activeGem.add(gemData);
-        appliedGem.add(gemData.getId());
+        if (baseItem.getComponent(ComponentKeys.GEM_DATA) == null) return false;
+        activeGem.add(baseItem);
+        appliedGem.add(baseItem.getId());
         return true;
     }
 
-    public boolean removeGem(@NotNull GemData gemData) {
-        activeGem.remove(gemData);
-        appliedGem.remove(gemData.getId());
+    public boolean removeGem(@NotNull BaseItem baseItem) {
+        activeGem.remove(baseItem);
+        appliedGem.remove(baseItem.getId());
         return true;
     }
 
-    public List<GemData> getActiveGem() {
+    public List<BaseItem> getActiveGem() {
         return activeGem;
     }
 
@@ -60,9 +59,9 @@ public class GemSocketComponent implements ItemComponent {
         List<String> appliedGemIds = pdc.get(Keys.APPLIED_GEM, ListPersistentDataType.LIST.strings());
         if (appliedGemIds == null) return;
         appliedGemIds.forEach(s -> {
-             GemData gemData = GemRegistry.getInstance().getGemData(s);
-             if (gemData == null) return;
-             addGem(gemData);
+             BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(s);
+             if (baseItem == null) return;
+             addGem(baseItem);
         });
     }
 
@@ -86,23 +85,18 @@ public class GemSocketComponent implements ItemComponent {
         return Component.text("Còn "+ (totalSlots - occupiedSlots) + " ô ngọc trống", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false);
     }
 
-    private static List<Component> buildGemLine(List<GemData> gemDataList) {
+    private static List<Component> buildGemLine(List<BaseItem> baseItemList) {
         List<Component> res = new ArrayList<>();
         res.add(Component.text("Ngọc đã khảm:", NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, false));
 
-        gemDataList.forEach(gemData1 -> {
+        baseItemList.forEach(baseItem -> {
             Component gemLine = Component.text("- ", NamedTextColor.DARK_GRAY);
 
-            BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(gemData1.getIconId());
-            if (baseItem == null) {
-                gemLine = gemLine.append(Component.text(gemData1.getId()));
+            NameComponent name = baseItem.getComponent(ComponentKeys.ITEM_NAME);
+            if (name == null) {
+                gemLine = gemLine.append(Component.text(baseItem.getId()));
             } else {
-                NameComponent name = baseItem.getComponent(ComponentKeys.ITEM_NAME);
-                if (name == null) {
-                    gemLine = gemLine.append(Component.text(gemData1.getId()));
-                } else {
-                    gemLine = gemLine.append(Utils.fromString(name.value()).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
-                }
+                gemLine = gemLine.append(Utils.fromString(name.value()).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
             }
 
             res.add(gemLine);
