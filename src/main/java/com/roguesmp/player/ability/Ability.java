@@ -28,10 +28,21 @@ public abstract class Ability {
         this.level = level;
     }
 
+    /**
+     * Cast the ability, cooldown should also be handled in this method via {@link #setCooldownTick(int)}
+     */
     public abstract void cast();
 
+    /**
+     * Get the {@link AbilityInfo} of this ability, every ability should have a static field of this
+     * @return {@link AbilityInfo}
+     */
     public abstract @NotNull AbilityInfo<? extends Ability> getAbilityInfo();
 
+    /**
+     * Get the current cooldown of this ability
+     * @return Cooldown in ticks
+     */
     public int getCooldownTick() {
         return cooldownTick;
     }
@@ -44,6 +55,11 @@ public abstract class Ability {
         this.cooldownTick = cooldownTick;
     }
 
+    /**
+     * Reduce cooldown by an amount
+     * @param reduction The amount of ticks to reduce
+     * @return Whether the ability should be off cooldown
+     */
     public boolean tickCooldown(int reduction) {
         if (cooldownTick <= 0) return false;
         cooldownTick -= reduction;
@@ -62,6 +78,9 @@ public abstract class Ability {
         return smpPlayer;
     }
 
+    /**
+     * Used to notify the player that the ability is off cooldown
+     */
     public void onCooldownRefreshed() {
         Player bukkitPlayer = smpPlayer.getBukkitPlayer();
         bukkitPlayer.playSound(Sound.sound(SoundEventKeys.ITEM_TRIDENT_RETURN, Sound.Source.PLAYER, 1f, Utils.RANDOM.nextFloat(0.6f, 1.4f)));

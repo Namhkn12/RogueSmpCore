@@ -13,7 +13,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.util.RayTraceResult;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,7 +59,6 @@ public class GravityBomb extends Ability {
         world.playSound(loc, Sound.ENTITY_WARDEN_SONIC_CHARGE, SoundCategory.PLAYERS, 1.5f, 1.2f);
 
         List<LivingEntity> mobs = new Hitbox.SphereHitbox(loc, 12).getHitMobs();
-        mobs.removeIf(mob -> mob instanceof Player);
 
         for (LivingEntity mob : mobs) {
             DamageUtils.damage(mob, getSmpPlayer().getBukkitPlayer(), 100, new DamageEvent.Metadata(ID, DamageType.PROJECTILE_ABILITY));

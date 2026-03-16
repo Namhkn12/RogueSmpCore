@@ -5,6 +5,7 @@ import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,7 @@ public class EntityUtils {
     }
 
     /**
-     * Returns a List of LivingEntity objects in the bounding box with the specified dimensions.
+     * Returns a List of LivingEntity excluding Players objects in the bounding box with the specified dimensions.
      *
      * @param loc       Location representing center of the bounding box
      * @param rx        distance from center to faces perpendicular to x-axis
@@ -28,6 +29,6 @@ public class EntityUtils {
      */
     public static List<LivingEntity> getNearbyMobs(Location loc, double rx, double ry, double rz, Predicate<LivingEntity> predicate) {
         return new ArrayList<>(loc.getWorld().getNearbyLivingEntities(loc, rx, ry, rz,
-                entity -> entity.isValid() && predicate.test(entity)));
+                entity -> entity.isValid() && !(entity instanceof Player) && predicate.test(entity)));
     }
 }

@@ -51,13 +51,9 @@ public class PlayerManager {
     public void loadPlayer(UUID uuid) {
         SmpPlayer smpPlayer = new SmpPlayer(uuid);
         players.put(uuid, smpPlayer);
-        Utils.runAsync(() -> {
-            PlayerData playerData = dataManager.loadPlayerData(uuid);
-            Utils.runLater(() -> {
-                dataManager.cacheData(playerData);
-                smpPlayer.loadData(playerData);
-            });
-        });
+        PlayerData playerData = dataManager.getData(uuid);
+        if (playerData == null) return;
+        smpPlayer.loadData(playerData);
     }
 
     public void unloadPlayer(UUID uuid) {

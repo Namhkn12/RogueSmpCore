@@ -13,6 +13,7 @@ import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -87,10 +88,7 @@ public class AbilityCatalogue extends BaseGui {
             ItemStack display;
             if (isUnlocked) {
                 int level = unlocked.get(info.id());
-                display = ItemStack.of(info.displayIcon());
-                List<Component> description = info.descriptionProvider().apply(smpPlayer, level);
-                display.setData(DataComponentTypes.ITEM_NAME, info.displayText().append(Component.text(" [Lv." + level + "]")));
-                display.setData(DataComponentTypes.LORE, ItemLore.lore(description));
+                display = info.createInfoItem(smpPlayer, level);
             } else {
                 display = notUnlockedItem.clone();
                 display.setData(DataComponentTypes.ITEM_NAME, info.displayText());
@@ -134,6 +132,23 @@ public class AbilityCatalogue extends BaseGui {
                     if (smpPlayer == null) return;
                     new AbilityCatalogue(smpPlayer).showInventory(player1);
                 })
+                .withSubcommand(new CommandAPICommand("loadout")
+                        .executesPlayer((player, commandArguments) -> {
+                            SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player.getUniqueId());
+                            if (smpPlayer == null) return;
+                            new AbilityLoadoutGui(smpPlayer).showInventory(player);
+                        }))
+                .withSubcommand(new CommandAPICommand("catalogue")
+                        .executesPlayer((player, commandArguments) -> {
+                            SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player.getUniqueId());
+                            if (smpPlayer == null) return;
+                            new AbilityCatalogue(smpPlayer).showInventory(player);
+                        }))
                 .register(RogueSmpCore.getInstance());
+    }
+
+    @Override
+    public void onClickBottomInventory(InventoryClickEvent event) {
+        event.setCancelled(true);
     }
 }

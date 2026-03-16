@@ -10,8 +10,11 @@ import com.roguesmp.registry.AbilityRegistry;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -23,101 +26,154 @@ public class AbilityEquipGui extends BaseGui {
 
     private static final int MAX_PASSIVE = 14;
 
+    private static final int[] ABILITY_SLOTS = {
+            10,11,12,13,14,15,16,
+            19,20,21,22,23,24,25,
+            28,29,30,31,32,33,34,
+            37,38,39,40,41,42,43
+    };
+
     private final SmpPlayer smpPlayer;
     private final AbilityTrigger trigger;
     private final List<AbilityInfo<?>> abilities = new ArrayList<>();
+    private final PlayerData data;
+
+    private final ItemStack border;
+
+    private int page = 0;
 
     public AbilityEquipGui(SmpPlayer smpPlayer, AbilityTrigger trigger) {
-        super(Component.text("Chọn kĩ năng: " + trigger.name(), NamedTextColor.GREEN), 6);
+        super(Component.text("Chọn kĩ năng Trigger: ").append(trigger.simpleName()), 6);
 
         this.smpPlayer = smpPlayer;
         this.trigger = trigger;
+        this.data = smpPlayer.getPlayerData();
+
+        border = ItemStack.of(Material.PURPLE_STAINED_GLASS_PANE);
+        border.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
 
         loadAbilities();
-        sortAbilities();
+
     }
 
     private void loadAbilities() {
-        PlayerData data = smpPlayer.getPlayerData();
-        data.getUnlockedAbilities().forEach((id, lvl) -> {
-            AbilityInfo<?> info = AbilityRegistry.getInfo(id);
-            if (info == null) return;
-            if (trigger == AbilityTrigger.PASSIVE) {
-                if (info.trigger() == AbilityTrigger.PASSIVE) abilities.add(info);
-            } else {
-                if (info.trigger() == trigger) abilities.add(info);
-            }
-        });
-    }
 
-    private void sortAbilities() {
-        PlayerData data = smpPlayer.getPlayerData();
-        if (trigger == AbilityTrigger.PASSIVE) {
-            List<String> passives = data.getPassiveAbilities();
-            abilities.sort((a, b) -> {
-                boolean aEq = passives.contains(a.id());
-                boolean bEq = passives.contains(b.id());
-                if (aEq && !bEq) return -1;
-                if (!aEq && bEq) return 1;
-                return 0;
-            });
-        } else {
-            String equipped = data.getEquippedAbilities().get(trigger);
-            abilities.sort((a, b) -> {
-                if (a.id().equals(equipped)) return -1;
-                if (b.id().equals(equipped)) return 1;
-                return 0;
-            });
+        List<AbilityInfo<?>> equipped = new ArrayList<>();
+        List<AbilityInfo<?>> others = new ArrayList<>();
+
+        String equippedActive = data.getEquippedAbilities().get(trigger);
+        List<String> passives = data.getPassiveAbilities();
+        Map<String, Integer> unlocked = data.getUnlockedAbilities();
+        for (AbilityInfo<?> info : AbilityRegistry.getAll()) {
+            if (info.trigger() != trigger) continue;
+            if (!unlocked.containsKey(info.id())) continue;
+            boolean isEquipped;
+            if (trigger == AbilityTrigger.PASSIVE) {
+                isEquipped = passives.contains(info.id());
+            } else {
+                isEquipped = info.id().equals(equippedActive);
+            }
+            if (isEquipped) {
+                equipped.add(info);
+            } else {
+                others.add(info);
+            }
         }
+
+        abilities.clear();
+        abilities.addAll(equipped);
+        abilities.addAll(others);
     }
 
     @Override
     public void setup() {
-        PlayerData data = smpPlayer.getPlayerData();
+        addBorders();
+
         Map<String, Integer> unlocked = data.getUnlockedAbilities();
 
-        int slot = 10;
-        for (AbilityInfo<?> info : abilities) {
+        int start = page * ABILITY_SLOTS.length;
+        int end = Math.min(start + ABILITY_SLOTS.length, abilities.size());
+
+        int index = 0;
+
+        for (int i = start; i < end; i++) {
+            AbilityInfo<?> info = abilities.get(i);
             int level = unlocked.get(info.id());
+
             ItemStack item = ItemStack.of(info.displayIcon());
             item.setData(DataComponentTypes.ITEM_NAME, info.displayText());
-            List<Component> lore = buildLore(info, level);
+            boolean equipped = isAbilityEquipped(info);
+            List<Component> lore = buildLore(info, level, equipped);
             item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+            if (equipped) {
+                item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+            }
+
+            int slot = ABILITY_SLOTS[index++];
 
             addButton(slot, item, event -> {
                 event.setCancelled(true);
                 handleClick(event, info, level);
             });
-
-            slot++;
-            if (slot % 9 == 8) slot += 2;
         }
+
+        setupPagination();
 
         fillEmpty();
     }
 
-    private List<Component> buildLore(AbilityInfo<?> info, int level) {
-        PlayerData data = smpPlayer.getPlayerData();
-        List<Component> lore = new ArrayList<>();
-        boolean equipped;
-        if (trigger == AbilityTrigger.PASSIVE) {
-            equipped = data.getPassiveAbilities().contains(info.id());
-        } else {
-            equipped = info.id().equals(data.getEquippedAbilities().get(trigger));
+    private void setupPagination() {
+        int maxPage = (abilities.size() - 1) / ABILITY_SLOTS.length;
+
+        if (page > 0) {
+            ItemStack prev = ItemStack.of(Material.ARROW);
+            prev.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang trước", NamedTextColor.YELLOW));
+
+            addButton(48, prev, e -> {
+                page = page - 1;
+                setup();
+            });
         }
+
+        if (page < maxPage) {
+
+            ItemStack next = ItemStack.of(Material.ARROW);
+            next.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang sau", NamedTextColor.YELLOW));
+
+            addButton(50, next, e -> {
+                page = page + 1;
+                setup();
+            });
+        }
+    }
+
+    private void addBorders() {
+        for (int i = 0; i < 9; i++) {
+            addButton(i, border, ClickHandler.noAction());
+            addButton(45 + i, border, ClickHandler.noAction());
+        }
+
+        for (int row = 1; row < 5; row++) {
+            addButton(row * 9, border, ClickHandler.noAction());
+            addButton(row * 9 + 8, border, ClickHandler.noAction());
+        }
+    }
+
+    private List<Component> buildLore(AbilityInfo<?> info, int level, boolean equipped) {
+        List<Component> lore = new ArrayList<>();
         if (equipped) {
-            lore.add(Component.text("✔ Đang trang bị", NamedTextColor.GREEN));
+            lore.add(Component.text("✔ Đang trang bị", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
         }
         lore.addAll(info.descriptionProvider().apply(smpPlayer, level));
 
         if (trigger == AbilityTrigger.PASSIVE) {
             lore.add(Component.empty());
-            lore.add(Component.text("Click để trang bị/hủy trang bị", NamedTextColor.YELLOW));
+            lore.add(Component.text("Click để trang bị/hủy trang bị", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
             lore.add(Component.text(
                     "Đã chọn: "
                             + data.getPassiveAbilities().size()
                             + "/" + MAX_PASSIVE,
-                    NamedTextColor.GRAY));
+                    NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
         }
 
         return lore;
@@ -135,7 +191,7 @@ public class AbilityEquipGui extends BaseGui {
     private void handlePassiveClick(InventoryClickEvent event, AbilityInfo<?> info, int level, PlayerData data) {
         List<String> passives = data.getPassiveAbilities();
         if (passives.contains(info.id())) {
-            passives.remove(info.id());
+            data.removePassiveAbility(info.id());
             smpPlayer.getAbilityLoadout().removePassive(info.id());
             event.getWhoClicked().sendMessage(Component.text("Đã bỏ kĩ năng ").append(info.displayText()));
         } else {
@@ -145,13 +201,13 @@ public class AbilityEquipGui extends BaseGui {
                                 + MAX_PASSIVE + " kĩ năng nội tại!", NamedTextColor.RED));
                 return;
             }
-            passives.add(info.id());
+            data.equipPassiveAbility(info.id());
             Ability ability = info.factory().apply(smpPlayer, level);
             smpPlayer.getAbilityLoadout().equipPassive(ability);
             event.getWhoClicked().sendMessage(Component.text("Đã thêm kĩ năng ").append(info.displayText()));
         }
 
-        Utils.runLater(() -> new AbilityEquipGui(smpPlayer, trigger).showInventory(event.getWhoClicked()));
+        setup();
     }
 
     private void handleActiveClick(InventoryClickEvent event, AbilityInfo<?> info, int level, PlayerData data) {
@@ -160,7 +216,7 @@ public class AbilityEquipGui extends BaseGui {
         if (info.id().equals(equippedId)) {
             // Unequip
             smpPlayer.getAbilityLoadout().removeActive(trigger);
-            data.getEquippedAbilities().remove(trigger);
+            data.removeActiveAbility(trigger);
 
             event.getWhoClicked().sendMessage(Component.text("Đã bỏ trang bị ").append(info.displayText()));
 
@@ -168,11 +224,26 @@ public class AbilityEquipGui extends BaseGui {
             // Equip
             Ability ability = info.factory().apply(smpPlayer, level);
             smpPlayer.getAbilityLoadout().equipActive(trigger, ability);
-            data.getEquippedAbilities().put(trigger, info.id());
+            data.equipActiveAbility(trigger, info.id());
 
             event.getWhoClicked().sendMessage(Component.text("Đã trang bị ").append(info.displayText()));
         }
 
-        Utils.runLater(() -> new AbilityEquipGui(smpPlayer, trigger).showInventory(event.getWhoClicked()));
+        Utils.runLater(() -> new AbilityLoadoutGui(smpPlayer).showInventory(event.getWhoClicked()));
+    }
+
+    private boolean isAbilityEquipped(AbilityInfo<?> info) {
+        boolean equipped;
+        if (trigger == AbilityTrigger.PASSIVE) {
+            equipped = data.getPassiveAbilities().contains(info.id());
+        } else {
+            equipped = info.id().equals(data.getEquippedAbilities().get(trigger));
+        }
+        return equipped;
+    }
+
+    @Override
+    public void onClickBottomInventory(InventoryClickEvent event) {
+        event.setCancelled(true);
     }
 }

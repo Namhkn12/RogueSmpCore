@@ -21,7 +21,7 @@ public enum AbilityTrigger {
         this.keybind = keybind;
     }
 
-    public Component translate() {
+    public Component simpleName() {
         return Utils.fromString(keybind);
     }
 }
