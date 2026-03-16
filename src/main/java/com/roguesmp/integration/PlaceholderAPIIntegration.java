@@ -79,6 +79,31 @@ public class PlaceholderAPIIntegration extends PlaceholderExpansion {
                 return "["+level+"] ";
             }
         }
+
+//        if (params.startsWith("ability_")) {
+//            if (params.startsWith("ability_cooldown_")) {
+//                SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player.getUniqueId());
+//                if (smpPlayer == null) return "";
+//
+//                String triggerName = params.substring("ability_cooldown_".length()).toUpperCase();
+//                AbilityTrigger trigger;
+//                try {
+//                    trigger = AbilityTrigger.valueOf(triggerName);
+//                } catch (IllegalArgumentException ex) {
+//                    return "";
+//                }
+//
+//                Ability ability = smpPlayer.getAbilityLoadout().getActiveAbilities().get(trigger);
+//                if (ability == null) return "";
+//
+//                if (!ability.isOnCooldown()) {
+//                    return Utils.toString(ability.getAbilityInfo().displayText().append(Component.text(": Ready", NamedTextColor.GREEN)));
+//                }
+//
+//                double seconds = ability.getCooldownTick() / 20.0;
+//                return Utils.toString(ability.getAbilityInfo().displayText().append(Component.text(": " + String.format("%.1fs", seconds), NamedTextColor.GREEN)));
+//            }
+//        }
         return null;
     }
 }

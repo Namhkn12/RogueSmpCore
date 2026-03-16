@@ -7,13 +7,12 @@ import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.SpellCastEvent;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -34,8 +33,8 @@ public class SmpEntity {
     public SpellManager activeSpells;
     private List<Spell> passiveSpells;
     private boolean preventSameSpellTwiceInARow;
-    private @Nullable BukkitRunnable taskPassive = null;
-    private @Nullable BukkitRunnable taskActive = null;
+    private @Nullable ScheduledTask taskPassive = null;
+    private @Nullable ScheduledTask taskActive = null;
     private boolean unloaded = false;
     private int nextActiveTimer = 0;
     public boolean dead = false;
@@ -65,13 +64,23 @@ public class SmpEntity {
             if (taskActive != null) {
                 taskActive.cancel();
             }
-            taskActive = getSpellCastRunnable();
-            taskActive.runTaskTimer(plugin, spellDelay, 2L);
+            taskActive = entity.getScheduler().runAtFixedRate(
+                    plugin,
+                    task -> runActiveSpellTask(),
+                    null,
+                    spellDelay,
+                    2L
+            );
             if (taskPassive != null) {
                 taskPassive.cancel();
             }
-            taskPassive = getPassiveSpellCastRunnable();
-            taskPassive.runTaskTimer(plugin, spellDelay, passiveIntervalTicks);
+            taskPassive = entity.getScheduler().runAtFixedRate(
+                    plugin,
+                    task -> runPassiveSpellTask(),
+                    null,
+                    1L,
+                    passiveIntervalTicks
+            );
         }
         this.activeSpells.cancelAll(true);
         this.activeSpells = activeSpells;
@@ -128,107 +137,64 @@ public class SmpEntity {
 
         this.passiveIntervalTicks = passiveIntervalTicks;
         if (passiveSpells != null && !passiveSpells.isEmpty()) {
-            taskPassive = getPassiveSpellCastRunnable();
-            taskPassive.runTaskTimer(plugin, 1, this.passiveIntervalTicks);
+            taskPassive = entity.getScheduler().runAtFixedRate(
+                    plugin,
+                    task -> runPassiveSpellTask(),
+                    this::unload,
+                    1L,
+                    passiveIntervalTicks
+            );
         }
 
         if (activeSpells != null && !activeSpells.isEmpty()) {
-            taskActive = getSpellCastRunnable();
-            taskActive.runTaskTimer(plugin, spellDelay, 2L);
+            taskActive = entity.getScheduler().runAtFixedRate(
+                    plugin,
+                    task -> runActiveSpellTask(),
+                    this::unload,
+                    spellDelay,
+                    2L
+            );
         }
     }
 
-    private BukkitRunnable getPassiveSpellCastRunnable() {
-        return new BukkitRunnable() {
-            private long mMissingTicks = 0;
-
-            @Override
-            public void run() {
-                if (bossBar != null && !dead) {
-                    bossBar.update();
-                }
-
-                mMissingTicks += passiveIntervalTicks;
-                if (mMissingTicks > 100) {
-                    mMissingTicks = 0;
-                    /* Check if somehow the entity is missing even though this is still running */
-                    if (isEntityMissing()) {
-                        handleMissingEntity();
-                        cancel();
-                        return;
-                    }
-                }
-
-                /* Don't run abilities if players aren't present */
-                if (detectionRange > 0 && PlayerUtils.playersInRange(entity.getLocation(), detectionRange, true).isEmpty()) {
-                    return;
-                }
-
-                if (passiveSpells != null) {
-                    for (Spell spell : passiveSpells) {
-                        spell.run();
-                    }
-                }
+    private void runPassiveSpellTask() {
+        if (bossBar != null && !dead) {
+            bossBar.update();
+        }
+        if (detectionRange > 0 && PlayerUtils.playersInRange(entity.getLocation(), detectionRange, true).isEmpty()) {
+            return;
+        }
+        if (passiveSpells != null) {
+            for (Spell spell : passiveSpells) {
+                spell.run();
             }
-        };
+        }
     }
 
-    private BukkitRunnable getSpellCastRunnable() {
-        return new BukkitRunnable() {
-            private boolean disabled = true;
-            private int missingTicks = 0;
+    private boolean activeDisabled = true;
 
-            @Override
-            public void run() {
-                nextActiveTimer -= 2;
-                missingTicks += 2;
+    private void runActiveSpellTask() {
+        nextActiveTimer -= 2;
 
-                if (nextActiveTimer > 0) {
-                    // Still waiting for the current spell to finish
-                    return;
-                }
-
-                if (missingTicks > 100) {
-                    missingTicks = 0;
-                    /* Check if somehow the entity is missing even though this is still running */
-                    if (isEntityMissing()) {
-                        handleMissingEntity();
-                        cancel();
-                        return;
-                    }
-                }
-
-                /* Don't progress if players aren't present */
-                if (detectionRange > 0 && PlayerUtils.playersInRange(entity.getLocation(), detectionRange, true).isEmpty()) {
-                    if (!disabled) {
-                        /* Cancel all the spells just in case they were activated */
-                        disabled = true;
-
-                        activeSpells.cancelAll();
-                    }
-                    return;
-                }
-
-                /* Some spells might have been run - so when this next deactivates they need to be cancelled */
-                disabled = false;
-
-                // Run the next spell and store how long before the next spell can run
-                nextActiveTimer = activeSpells.runNextSpell(preventSameSpellTwiceInARow);
-
-                // The event goes after the spell casts.
-                Spell spell = activeSpells.getLastCastedSpell();
-                if (spell != null) {
-                    SpellCastEvent event = new SpellCastEvent(entity, SmpEntity.this, spell);
-                    Bukkit.getPluginManager().callEvent(event);
-                }
-
+        if (nextActiveTimer > 0) {
+            return;
+        }
+        if (detectionRange > 0 && PlayerUtils.playersInRange(entity.getLocation(), detectionRange, true).isEmpty()) {
+            if (!activeDisabled) {
+                activeDisabled = true;
+                activeSpells.cancelAll();
             }
-        };
-    }
 
-    private void handleMissingEntity() {
-        RogueSmpCore.LOGGER.warn("Entity {} is missing{} but still registered as an active SmpEntity. It has been removed and untracked via the fallback system.", id, entity.isValid() ? " (but valid)" : "");
-        EntityManager.getInstance().unload(entity);
+            return;
+        }
+
+        activeDisabled = false;
+        nextActiveTimer = activeSpells.runNextSpell(preventSameSpellTwiceInARow);
+        Spell spell = activeSpells.getLastCastedSpell();
+        if (spell != null) {
+            SpellCastEvent event = new SpellCastEvent(entity, this, spell);
+            Bukkit.getPluginManager().callEvent(event);
+        }
     }
 
     public void forceCastRandomSpell() {
@@ -254,21 +220,12 @@ public class SmpEntity {
         return id;
     }
 
-    /* Check if somehow the entity is missing even though this is still running */
-    private boolean isEntityMissing() {
-        Location entityLocation = entity.getLocation();
-        if (!entityLocation.isWorldLoaded() || !entityLocation.getChunk().isLoaded() || !entity.isValid()) {
-            return true;
-        }
-        return false;
-    }
-
     public void unload() {
-        /* Even if we unload twice, really cancel these tasks */
-        if (taskPassive != null && !taskPassive.isCancelled()) {
+        if (taskPassive != null) {
             taskPassive.cancel();
         }
-        if (taskActive != null && !taskActive.isCancelled()) {
+
+        if (taskActive != null) {
             taskActive.cancel();
         }
 

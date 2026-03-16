@@ -1,23 +1,23 @@
 package com.roguesmp.gui.ability;
 
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.AbilityTrigger;
 import com.roguesmp.gui.BaseGui;
-import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.player.ability.AbilityLoadout;
 import com.roguesmp.utils.Utils;
-import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AbilityLoadoutGui extends BaseGui {
@@ -28,6 +28,8 @@ public class AbilityLoadoutGui extends BaseGui {
 
     private final ItemStack noAbilItem;
     private final ItemStack filler;
+    private final ItemStack activeHeader;
+    private final ItemStack passiveHeader;
 
     private final SmpPlayer player;
 
@@ -41,6 +43,23 @@ public class AbilityLoadoutGui extends BaseGui {
 
         filler = ItemStack.of(Material.MAGENTA_STAINED_GLASS_PANE);
         filler.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
+
+        activeHeader = ItemStack.of(Material.DIAMOND_SWORD);
+        activeHeader.setData(DataComponentTypes.ITEM_NAME,
+                Component.text("Kĩ năng chủ động", NamedTextColor.GREEN));
+        activeHeader.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
+                Component.text("Kích hoạt dùng các Trigger", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC,false),
+                Component.text("Chuột trái/Chuột phải v.v...", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+        )));
+
+        passiveHeader = ItemStack.of(Material.BEACON);
+        passiveHeader.setData(DataComponentTypes.ITEM_NAME,
+                Component.text("Kĩ năng bị động", NamedTextColor.LIGHT_PURPLE));
+
+        passiveHeader.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
+                Component.text("Luôn kích hoạt hoặc cần một số điều kiện đặc biệt để kích hoạt", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
+                Component.text("Đã trang bị: " + player.getPlayerData().getPassiveAbilities().size() + "/14", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false)
+        )));
     }
 
     @Override
@@ -49,6 +68,16 @@ public class AbilityLoadoutGui extends BaseGui {
         setupPassiveAbilities();
 
         fillEmpty(filler);
+
+        ItemStack divider = ItemStack.of(Material.BLACK_STAINED_GLASS_PANE);
+        divider.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
+
+        for (int i = 18; i <= 26; i++) {
+            addItem(i, divider);
+        }
+
+        addItem(4, activeHeader);
+        addItem(22, passiveHeader);
     }
 
     private void setupActiveSlots() {
@@ -66,12 +95,18 @@ public class AbilityLoadoutGui extends BaseGui {
                 item = ItemStack.of(info.displayIcon());
                 item.setData(DataComponentTypes.ITEM_NAME, info.displayText());
                 int level = player.getPlayerData().getUnlockedAbilities().getOrDefault(info.id(), 1);
-                item.setData(DataComponentTypes.LORE, ItemLore.lore(info.descriptionProvider().apply(player, level)));
+
+                List<Component> lore = new ArrayList<>();
+                lore.addAll(info.descriptionProvider().apply(player, level));
+                lore.add(Component.empty());
+                lore.add(Component.text("Click để chọn kĩ năng cho trigger ").append(abilityTrigger.simpleName()).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY));
+
+                item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
             }
 
             addButton(slot, item, click -> {
                 click.setCancelled(true);
-                click.getWhoClicked().sendMessage(Component.text("Chọn ability để gắn vào slot " + abilityTrigger));
+                click.getWhoClicked().sendMessage(Component.text("Chọn ability để gắn vào trigger " + abilityTrigger));
                 Utils.runLater(() -> new AbilityEquipGui(player, abilityTrigger).showInventory(click.getWhoClicked()));
             });
         }
@@ -89,23 +124,15 @@ public class AbilityLoadoutGui extends BaseGui {
                 item.setData(DataComponentTypes.ITEM_NAME, info.displayText());
                 int level = player.getPlayerData().getUnlockedAbilities().getOrDefault(info.id(), 1);
                 item.setData(DataComponentTypes.LORE, ItemLore.lore(info.descriptionProvider().apply(player, level)));
-                addButton(slot, item, click -> {
-                    click.setCancelled(true);
-                    setup();
-                });
+                addButton(slot, item, ClickHandler.openGui(new AbilityEquipGui(player, AbilityTrigger.PASSIVE)));
             } else {
                 addButton(slot, noAbilItem, ClickHandler.openGui(new AbilityEquipGui(player, AbilityTrigger.PASSIVE)));
             }
         }
     }
 
-    public static void register() {
-        new CommandAPICommand("loadout")
-                .executesPlayer((player1, commandArguments) -> {
-                    SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player1.getUniqueId());
-                    if (smpPlayer == null) return;
-                    new AbilityLoadoutGui(smpPlayer).showInventory(player1);
-                })
-                .register(RogueSmpCore.getInstance());
+    @Override
+    public void onClickBottomInventory(InventoryClickEvent event) {
+        event.setCancelled(true);
     }
 }

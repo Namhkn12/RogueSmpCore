@@ -1,11 +1,15 @@
 package com.roguesmp.player.ability;
 
 import com.roguesmp.constant.AbilityTrigger;
+import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.AbilityRegistry;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -16,7 +20,7 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import java.util.*;
 
 public class AbilityLoadout {
-    public static final int MAX_PASSIVE_ABILITY = 5;
+    public static final int MAX_PASSIVE_ABILITY = 14;
 
     private final SmpPlayer smpPlayer;
     private final Map<AbilityTrigger, Ability> equippedAbilities = new EnumMap<>(AbilityTrigger.class);
@@ -32,10 +36,12 @@ public class AbilityLoadout {
         Ability ability = equippedAbilities.get(trigger);
         if (ability == null) return false;
         if (!ability.isOnCooldown()) {
+            smpPlayer.getBukkitPlayer().sendActionBar(Component.text("Kích hoạt kĩ năng ", NamedTextColor.YELLOW).append(ability.getAbilityInfo().displayText()));
             ability.cast();
+            Bukkit.getPluginManager().callEvent(new AbilityCastEvent(smpPlayer, ability));
             return true;
         }
-        return true;
+        return false;
     }
 
     public void equipActive(AbilityTrigger trigger, Ability ability) {
@@ -47,6 +53,10 @@ public class AbilityLoadout {
     }
 
     public void equipPassive(Ability ability) {
+        for (Ability ability1 : passiveAbilities) {
+            // If already equipped, ignore
+            if (ability1.getAbilityInfo().id().equals(ability.getAbilityInfo().id())) return;
+        }
         passiveAbilities.add(ability);
     }
 
