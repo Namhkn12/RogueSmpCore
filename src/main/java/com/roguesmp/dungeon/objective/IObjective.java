@@ -2,7 +2,6 @@ package com.roguesmp.dungeon.objective;
 
 import com.roguesmp.dungeon.data.Party;
 import com.roguesmp.dungeon.instance.DungeonInstance;
-import com.roguesmp.dungeon.instance.RoomInstance;
 
 public interface IObjective {
     void start(DungeonInstance instance, Party party);    // gọi khi room bắt đầu
