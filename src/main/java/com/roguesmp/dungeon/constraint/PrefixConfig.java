@@ -7,4 +7,6 @@ public class PrefixConfig {
     public static final String TEMPLATE = "[Template]";
     public static final String REGION = "[Region]";
     public static final String SCHEMETA = "[Schemeta]";
+    public static final String SPAWNER = "[Spawner]";
+
 }

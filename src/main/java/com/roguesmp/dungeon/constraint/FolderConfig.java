@@ -14,8 +14,16 @@ public final class FolderConfig {
     public static final String RUNTIME_FOLDER = "runtime";
     public static final String PARTY_FOLDER = "party";
     public static final String REGION_FOLDER = "region";
+    public static final String SPAWNER_TEMPLATE_FOLDER = "spawner_template";
 
     public static final String DUNGEON_WORLD_FILE = "dungeon_";
+
+    public static String getSpawnerTemplateFolder(){
+        return buildFolderPath(List.of(
+                MAIN_FOLDER,
+                SPAWNER_TEMPLATE_FOLDER
+        ));
+    }
 
 
     public static String getRegionFolder() {
