@@ -5,7 +5,5 @@ import org.bukkit.util.Vector;
 import java.util.List;
 
 public interface ParticleShape {
-
-    List<Vector> getPoints();
-
+    List<Vector> getPoints(int tick);
 }

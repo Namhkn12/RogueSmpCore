@@ -136,6 +136,7 @@ public class BaseEntity {
 
         living.setAI(!noAi);
         living.setPersistent(persistent);
+        living.setRemoveWhenFarAway(!persistent);
         living.setCustomNameVisible(true);
         living.customName(Utils.fromString(displayName));
         PersistentDataContainer pdc = living.getPersistentDataContainer();
