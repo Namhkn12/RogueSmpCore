@@ -1,13 +1,10 @@
 package com.roguesmp.dungeon.actor.listener;
 
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import com.roguesmp.dungeon.controller.SpawnerController;
+import com.roguesmp.dungeon.controller.response.ControllerResponse;
+import com.roguesmp.dungeon.ultis.ConsoleLogger;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Marker;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -17,33 +14,20 @@ import org.bukkit.event.world.EntitiesLoadEvent;
 
 public class SpawnerListener implements Listener {
 
+    private final SpawnerController spawnerController;
+
+    public SpawnerListener(SpawnerController spawnerController) {
+        this.spawnerController = spawnerController;
+    }
+
     @EventHandler
     public void onSpawnerPlace(BlockPlaceEvent event){
-        if(event.getBlock().getType() == Material.SPAWNER){
-            Block spawner = event.getBlock();
-            World world = spawner.getWorld();
-            // check block có psd ko - lấy ra
-            // đặt 1 entity marker lên trên
-            Location loc = spawner.getLocation().add(0.5, 0, 0.5);
-
-            Marker marker = world.spawn(loc, Marker.class, entity -> {
-                entity.setPersistent(true);
-                entity.setInvulnerable(true);
-            });
-
-        }
+        spawnerController.placeSpawnerAction(event);
     }
 
     @EventHandler
     public void onMarkerLoad(EntitiesLoadEvent event){
-        if(event.getWorld().getName().contains("dungeon_")) return;
-        for (Entity e : event.getEntities()){
-            if(e.getType() == EntityType.MARKER){
-                //check psd id
-                //load data into block below
-            }
-        }
-
+        spawnerController.spawnerMarkerLoad(event);
     }
 
     @EventHandler

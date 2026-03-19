@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntitySnapshot;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EquipmentSlot;
@@ -79,7 +80,7 @@ public class BaseEntity {
     }
 
     /**
-     * Get the entity with equipments, name, etc., but no spells. Useful for spawners creation
+     * Get the entity/snapshot with equipments, name, etc., but no spells. Useful for spawners creation
      * @param location location
      * @return The created entity
      */
@@ -93,6 +94,18 @@ public class BaseEntity {
             throw new RuntimeException("EntityType must be a living entity!");
         }
         return living;
+    }
+
+    public EntitySnapshot spawnOnlyEquipmentSnapshot(Location location) {
+        Entity entity = location.getWorld().createEntity(location, this.getEntityType().getEntityClass());
+        processEntity(entity);
+        if (!(entity instanceof LivingEntity living)) {
+            RogueSmpCore.LOGGER.warn("EntityType must be a living entity!");
+            throw new RuntimeException("EntityType must be a living entity!");
+        }
+        EntitySnapshot snapshot = living.createSnapshot();
+        living.remove();
+        return snapshot;
     }
 
     /**

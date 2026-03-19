@@ -1,6 +1,7 @@
 package com.roguesmp.dungeon.repository.impl;
 
 import com.google.gson.Gson;
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.constraint.FolderConfig;
 import com.roguesmp.dungeon.data.Spawner;
 import com.roguesmp.dungeon.repository.ISpawnerRepository;

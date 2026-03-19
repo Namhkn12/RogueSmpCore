@@ -15,7 +15,10 @@ public class ProtectorSpawner implements IBehavior {
 
     public ProtectorSpawner(BehaviorData data) {
         this.data = data;
-        this.requireBreak = data.get("protector", 3);
+        Object raw = data.getParams().get("protector");
+        if (raw != null) {
+            this.requireBreak = ((Number) raw).intValue();
+        }
     }
 
     @Override

@@ -16,6 +16,7 @@ public class SpawnerManager {
 
     public SpawnerManager(ISpawnerRepository spawnerRepository) {
         this.spawnerRepository = spawnerRepository;
+        load();
     }
 
     public void load(){
