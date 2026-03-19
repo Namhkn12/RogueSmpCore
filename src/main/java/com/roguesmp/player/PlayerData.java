@@ -2,13 +2,14 @@ package com.roguesmp.player;
 
 import com.roguesmp.annotation.GsonIgnore;
 import com.roguesmp.constant.AbilityTrigger;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 
 /**
  * A class that hold player-related data
  */
-public class PlayerData {
+public class PlayerData{
 
     @GsonIgnore
     private boolean dirty = true;
@@ -23,6 +24,16 @@ public class PlayerData {
         this.uuid = uuid;
     }
 
+    // Clone constructor
+    public PlayerData(PlayerData other) {
+        this.uuid = other.uuid;
+        this.level = other.level;
+        this.unlockedAbilities = new HashMap<>(other.unlockedAbilities);
+        this.equippedAbilities = new EnumMap<>(other.equippedAbilities);
+        this.passiveAbilities = new ArrayList<>(other.passiveAbilities);
+        this.dirty = other.dirty;
+    }
+
     public UUID getUuid() {
         return uuid;
     }
@@ -35,24 +46,42 @@ public class PlayerData {
         this.level = level;
     }
 
-    public Map<String, Integer> getUnlockedAbilities() {
-        return unlockedAbilities;
+    public @Unmodifiable Map<String, Integer> getUnlockedAbilities() {
+        return Collections.unmodifiableMap(unlockedAbilities);
     }
 
     public void setUnlockedAbilities(Map<String, Integer> unlockedAbilities) {
         this.unlockedAbilities = unlockedAbilities;
     }
 
-    public List<String> getPassiveAbilities() {
-        return passiveAbilities;
+    public @Unmodifiable List<String> getPassiveAbilities() {
+        return Collections.unmodifiableList(passiveAbilities);
+    }
+
+    public void equipPassiveAbility(String abilityId) {
+        if (!passiveAbilities.contains(abilityId)) {
+            passiveAbilities.add(abilityId);
+        }
+    }
+
+    public void removePassiveAbility(String abilityId) {
+        passiveAbilities.remove(abilityId);
     }
 
     public void setPassiveAbilities(List<String> passiveAbilities) {
         this.passiveAbilities = passiveAbilities;
     }
 
-    public Map<AbilityTrigger, String> getEquippedAbilities() {
-        return equippedAbilities;
+    public @Unmodifiable Map<AbilityTrigger, String> getEquippedAbilities() {
+        return Collections.unmodifiableMap(equippedAbilities);
+    }
+
+    public void equipActiveAbility(AbilityTrigger trigger, String abilityId) {
+        equippedAbilities.put(trigger, abilityId);
+    }
+
+    public void removeActiveAbility(AbilityTrigger trigger) {
+        equippedAbilities.remove(trigger);
     }
 
     public void setEquippedAbilities(Map<AbilityTrigger, String> equippedAbilities) {

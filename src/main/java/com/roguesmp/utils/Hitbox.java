@@ -1,5 +1,6 @@
 package com.roguesmp.utils;
 
+import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -133,9 +134,9 @@ public abstract class Hitbox {
 
         @Override
         public boolean intersects(BoundingBox bbox) {
-            double distX = Math.max(bbox.getMinX() - mCenter.getX(), mCenter.getX() - bbox.getMaxX());
-            double distY = Math.max(bbox.getMinY() - mCenter.getY(), mCenter.getY() - bbox.getMaxY());
-            double distZ = Math.max(bbox.getMinZ() - mCenter.getZ(), mCenter.getZ() - bbox.getMaxZ());
+            double distX = FastMath.max(bbox.getMinX() - mCenter.getX(), mCenter.getX() - bbox.getMaxX());
+            double distY = FastMath.max(bbox.getMinY() - mCenter.getY(), mCenter.getY() - bbox.getMaxY());
+            double distZ = FastMath.max(bbox.getMinZ() - mCenter.getZ(), mCenter.getZ() - bbox.getMaxZ());
             double distSquared = (distX > 0 ? distX * distX : 0) + (distY > 0 ? distY * distY : 0) + (distZ > 0 ? distZ * distZ : 0);
             return distSquared <= mRadiusSquared;
         }
@@ -185,13 +186,13 @@ public abstract class Hitbox {
                 return false;
             }
             double sizeX = bbox.getWidthX();
-            int stepsX = 1 + (int) Math.ceil(sizeX / mAccuracy);
+            int stepsX = 1 + (int) FastMath.ceil(sizeX / mAccuracy);
             double stepX = stepsX == 1 ? 0 : sizeX / (stepsX - 1);
             double sizeY = bbox.getHeight();
-            int stepsY = 1 + (int) Math.ceil(sizeY / mAccuracy);
+            int stepsY = 1 + (int) FastMath.ceil(sizeY / mAccuracy);
             double stepY = stepsY == 1 ? 0 : sizeY / (stepsY - 1);
             double sizeZ = bbox.getWidthX();
-            int stepsZ = 1 + (int) Math.ceil(sizeZ / mAccuracy);
+            int stepsZ = 1 + (int) FastMath.ceil(sizeZ / mAccuracy);
             double stepZ = stepsZ == 1 ? 0 : sizeZ / (stepsZ - 1);
             Vector test = new Vector();
             for (int x = 0; x < stepsX; x++) {
@@ -266,7 +267,7 @@ public abstract class Hitbox {
      */
     public static ApproximateFreeformHitbox approximateCone(Location start, double radius, double halfAngleRad) {
         double radiusSquared = radius * radius;
-        double cosAngle = halfAngleRad >= Math.PI ? -1 : Math.cos(halfAngleRad);
+        double cosAngle = halfAngleRad >= FastMath.PI ? -1 : FastMath.cos(halfAngleRad);
         Vector direction = start.getDirection();
         Vector startVector = start.toVector();
         return new ApproximateFreeformHitbox(start.getWorld(),
@@ -287,7 +288,7 @@ public abstract class Hitbox {
      */
     public static ApproximateFreeformHitbox approximateCylinderSegment(Location baseCenter, double height, double radius, double halfAngleRad) {
         double radiusSquared = radius * radius;
-        double baseYaw = Math.toRadians(baseCenter.getYaw() + 90); // +90 as Bukkit yaw starts at the Z axis, not X
+        double baseYaw = FastMath.toRadians(baseCenter.getYaw() + 90); // +90 as Bukkit yaw starts at the Z axis, not X
         Vector baseCenterVector = baseCenter.toVector();
         return new ApproximateFreeformHitbox(baseCenter.getWorld(),
                 new BoundingBox(baseCenter.getX() - radius, baseCenter.getY(), baseCenter.getZ() - radius,
@@ -295,7 +296,7 @@ public abstract class Hitbox {
                 test -> test.getY() >= baseCenterVector.getY()
                         && test.getY() <= baseCenterVector.getY() + height
                         && test.clone().setY(baseCenterVector.getY()).distanceSquared(baseCenterVector) <= radiusSquared
-                        && Math.abs(MathUtils.normalizeAngle(Math.atan2(test.getZ() - baseCenterVector.getZ(), test.getX() - baseCenterVector.getX()) - baseYaw, 0)) <= halfAngleRad
+                        && FastMath.abs(MathUtils.normalizeAngle(FastMath.atan2(test.getZ() - baseCenterVector.getZ(), test.getX() - baseCenterVector.getX()) - baseYaw, 0)) <= halfAngleRad
         );
     }
 
@@ -311,7 +312,7 @@ public abstract class Hitbox {
     public static ApproximateFreeformHitbox approximateHollowCylinderSegment(Location baseCenter, double height, double radiusInner, double radiusOuter, double halfAngleRad) {
         double radiusOuterSquared = radiusOuter * radiusOuter;
         double radiusInnerSquared = radiusInner * radiusInner;
-        double baseYaw = Math.toRadians(baseCenter.getYaw() + 90); // +90 as Bukkit yaw starts at the Z axis, not X
+        double baseYaw = FastMath.toRadians(baseCenter.getYaw() + 90); // +90 as Bukkit yaw starts at the Z axis, not X
         Vector baseCenterVector = baseCenter.toVector();
         return new ApproximateFreeformHitbox(baseCenter.getWorld(),
                 new BoundingBox(baseCenter.getX() - radiusOuter, baseCenter.getY(), baseCenter.getZ() - radiusOuter,
@@ -320,7 +321,7 @@ public abstract class Hitbox {
                         && test.getY() <= baseCenterVector.getY() + height
                         && test.clone().setY(baseCenterVector.getY()).distanceSquared(baseCenterVector) <= radiusOuterSquared
                         && test.clone().setY(baseCenterVector.getY()).distanceSquared(baseCenterVector) >= radiusInnerSquared
-                        && Math.abs(MathUtils.normalizeAngle(Math.atan2(test.getZ() - baseCenterVector.getZ(), test.getX() - baseCenterVector.getX()) - baseYaw, 0)) <= halfAngleRad
+                        && FastMath.abs(MathUtils.normalizeAngle(FastMath.atan2(test.getZ() - baseCenterVector.getZ(), test.getX() - baseCenterVector.getX()) - baseYaw, 0)) <= halfAngleRad
         );
     }
 
@@ -356,7 +357,7 @@ public abstract class Hitbox {
                         if (0 <= position && position <= length) {
                             return distance <= radius;
                         } else {
-                            double d = Math.min(position, length - position); // distance after either end, negative
+                            double d = FastMath.min(position, length - position); // distance after either end, negative
                             return distance * distance + d * d <= radius * radius;
                         }
                     }
@@ -447,14 +448,14 @@ public abstract class Hitbox {
     public abstract World getWorld();
 
     /**
-     * Gets a modifiable list of mobs that are hit by this hitbox.
+     * Gets a modifiable list of mobs (excluding Players) that are hit by this hitbox.
      */
     public List<LivingEntity> getHitMobs() {
         return getHitMobs(null);
     }
 
     /**
-     * Gets a modifiable list of mobs that are hit by this hitbox. The provided mob is excluded from the list.
+     * Gets a modifiable list of mobs (excluding Players) that are hit by this hitbox. The provided mob is excluded from the list.
      */
     public List<LivingEntity> getHitMobs(@Nullable LivingEntity exclude) {
         BoundingBox boundingBox = getBoundingBox();

@@ -7,12 +7,15 @@ import com.roguesmp.dungeon.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.gui.ItemBrowser;
-import com.roguesmp.gui.ability.AbilityLoadoutGui;
+import com.roguesmp.gui.ability.AbilityCatalogue;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.listener.*;
 import com.roguesmp.player.PlayerDataManager;
 import com.roguesmp.player.PlayerManager;
-import com.roguesmp.registry.*;
+import com.roguesmp.registry.BlockRegistry;
+import com.roguesmp.registry.EntityRegistry;
+import com.roguesmp.registry.ItemRegistry;
+import com.roguesmp.registry.ModifierRegistry;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
@@ -62,6 +65,8 @@ public final class RogueSmpCore extends JavaPlugin {
     public void saveData() {
         ItemRegistry.getInstance().saveToFile(true);
         BlockStorage.getInstance().saveToFile(true);
+
+        PlayerManager.getInstance().onDisable();
     }
 
     // Register Listener here
@@ -70,7 +75,7 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new BlockListener());
 
         registerListener(new DamageListener());
-        registerListener(new PlayerListener(PlayerManager.getInstance()));
+        registerListener(new PlayerListener(PlayerManager.getInstance(), PlayerDataManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
         registerListener(new EntityListener(EntityManager.getInstance(), EntityRegistry.getInstance()));
     }
@@ -81,7 +86,7 @@ public final class RogueSmpCore extends JavaPlugin {
         EffectManager.registerCommand();
         EntityRegistry.registerCommand();
 
-        AbilityLoadoutGui.register();
+        AbilityCatalogue.register();
     }
 
     @Override

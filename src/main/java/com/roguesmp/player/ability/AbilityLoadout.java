@@ -1,12 +1,15 @@
 package com.roguesmp.player.ability;
 
 import com.roguesmp.constant.AbilityTrigger;
+import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.player.ability.impl.GravityBomb;
 import com.roguesmp.registry.AbilityRegistry;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -17,7 +20,7 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import java.util.*;
 
 public class AbilityLoadout {
-    public static final int MAX_PASSIVE_ABILITY = 5;
+    public static final int MAX_PASSIVE_ABILITY = 14;
 
     private final SmpPlayer smpPlayer;
     private final Map<AbilityTrigger, Ability> equippedAbilities = new EnumMap<>(AbilityTrigger.class);
@@ -26,29 +29,39 @@ public class AbilityLoadout {
     public AbilityLoadout(SmpPlayer smpPlayer) {
         this.smpPlayer = smpPlayer;
 
-        equipActiveAbility(AbilityTrigger.SWAP, GravityBomb.INFO.getFactory().apply(smpPlayer, 2));
+//        equipActiveAbility(AbilityTrigger.SWAP, GravityBomb.INFO.getFactory().apply(smpPlayer, 2));
     }
 
     public boolean cast(AbilityTrigger trigger) {
         Ability ability = equippedAbilities.get(trigger);
         if (ability == null) return false;
         if (!ability.isOnCooldown()) {
+            smpPlayer.getBukkitPlayer().sendActionBar(Component.text("Kích hoạt kĩ năng ", NamedTextColor.YELLOW).append(ability.getAbilityInfo().displayText()));
             ability.cast();
+            Bukkit.getPluginManager().callEvent(new AbilityCastEvent(smpPlayer, ability));
             return true;
         }
-        return true;
+        return false;
     }
 
-    public void equipActiveAbility(AbilityTrigger trigger, Ability ability) {
+    public void equipActive(AbilityTrigger trigger, Ability ability) {
         equippedAbilities.put(trigger, ability);
     }
 
-    public void removeActiveAbility(AbilityTrigger trigger) {
+    public void removeActive(AbilityTrigger trigger) {
         equippedAbilities.remove(trigger);
     }
 
-    public void addPassiveAbility(Ability ability) {
+    public void equipPassive(Ability ability) {
+        for (Ability ability1 : passiveAbilities) {
+            // If already equipped, ignore
+            if (ability1.getAbilityInfo().id().equals(ability.getAbilityInfo().id())) return;
+        }
         passiveAbilities.add(ability);
+    }
+
+    public void removePassive(String id) {
+        passiveAbilities.removeIf(a -> a.getAbilityInfo().id().equals(id));
     }
 
     public void loadData(PlayerData data) {
@@ -59,7 +72,7 @@ public class AbilityLoadout {
             int level = pairs.getOrDefault(s, 1);
             Ability ability = AbilityRegistry.createInstance(s, smpPlayer, level);
             if (ability != null) {
-                equipActiveAbility(trigger, ability);
+                equipActive(trigger, ability);
             }
         });
 
@@ -68,30 +81,16 @@ public class AbilityLoadout {
             int level = pairs.getOrDefault(s, 1);
             Ability ability = AbilityRegistry.createInstance(s, smpPlayer, level);
             if (ability != null) {
-                addPassiveAbility(ability);
+                equipPassive(ability);
             }
         });
-    }
-
-    public void saveData(PlayerData data) {
-        Map<AbilityTrigger, String> equippedIds = new HashMap<>();
-        equippedAbilities.forEach((trigger, ability) -> {
-            equippedIds.put(trigger, ability.getAbilityInfo().getId());
-        });
-        data.setEquippedAbilities(equippedIds);
-
-        List<String> passives = new ArrayList<>();
-        passiveAbilities.forEach(ability -> {
-            passives.add(ability.getAbilityInfo().getId());
-        });
-        data.setPassiveAbilities(passives);
     }
 
     public SmpPlayer getSmpPlayer() {
         return smpPlayer;
     }
 
-    public Map<AbilityTrigger, Ability> getEquippedAbilities() {
+    public Map<AbilityTrigger, Ability> getActiveAbilities() {
         return equippedAbilities;
     }
 

@@ -28,7 +28,7 @@ public abstract class Spell implements Cloneable {
      * Cancels all currently running tasks (tasks in activeRunnables)
      * <p>
      * To use this functionality, user needs to add every BukkitRunnable created to activeRunnables,
-     * and then remove them from activeRunnables when they are finished
+     * and also remove them from activeRunnables when they are finished
      */
     public void cancel() {
         /*

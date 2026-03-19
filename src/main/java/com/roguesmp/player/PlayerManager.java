@@ -2,6 +2,7 @@ package com.roguesmp.player;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.utils.Utils;
+import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import javax.annotation.Nullable;
@@ -48,26 +49,28 @@ public class PlayerManager {
     }
 
     public void loadPlayer(UUID uuid) {
-        Utils.runAsync(() -> {
-            PlayerData playerData = dataManager.loadPlayerData(uuid);
-            Utils.runLater(() -> {
-                dataManager.registerData(playerData);
-                SmpPlayer smpPlayer = new SmpPlayer(uuid);
-                players.put(uuid, smpPlayer);
-                smpPlayer.loadData();
-            });
-        });
+        SmpPlayer smpPlayer = new SmpPlayer(uuid);
+        players.put(uuid, smpPlayer);
+        PlayerData playerData = dataManager.getData(uuid);
+        if (playerData == null) return;
+        smpPlayer.loadData(playerData);
     }
 
     public void unloadPlayer(UUID uuid) {
         SmpPlayer smpPlayer = players.get(uuid);
         if (smpPlayer == null) return;
-        smpPlayer.saveData();
-        Utils.runAsync(() -> {
-            dataManager.savePlayerData(uuid);
-            Utils.runLater(() -> dataManager.unregisterData(uuid));
-        });
+        PlayerData playerData = dataManager.removeCachedData(uuid);
         players.remove(uuid);
+        Utils.runAsync(() -> dataManager.savePlayerData(playerData));
+    }
+
+    public void onDisable() {
+        Bukkit.getServer().getOnlinePlayers().forEach(player -> {
+            SmpPlayer smpPlayer = players.get(player.getUniqueId());
+            if (smpPlayer == null) return;
+            PlayerData playerData = dataManager.removeCachedData(smpPlayer.getUuid());
+            dataManager.savePlayerData(playerData);
+        });
     }
 
     public static PlayerManager getInstance() {

@@ -22,23 +22,17 @@ public class PlayerDataManager {
 
     }
 
-    public void saveAllPlayers() {
-        RogueSmpCore.LOGGER.info("Saving data for {} players...", playerDataCache.size());
-        playerDataCache.forEach((uuid, data) -> savePlayerData(uuid));
-    }
-
-    public void registerData(PlayerData data) {
+    public void cacheData(PlayerData data) {
         playerDataCache.put(data.getUuid(), data);
     }
 
-    public void unregisterData(UUID uuid) {
-        playerDataCache.remove(uuid);
+    public PlayerData removeCachedData(UUID uuid) {
+        return playerDataCache.remove(uuid);
     }
 
-    public void savePlayerData(UUID uuid) {
-        RogueSmpCore.LOGGER.info("Saving player data (uuid: {})", uuid);
-        PlayerData data = playerDataCache.get(uuid);
+    public void savePlayerData(PlayerData data) {
         if (data == null) return;
+
 
         File folder = new File(RogueSmpCore.getInstance().getDataFolder(), FOLDER);
         if (!folder.exists()) {
@@ -49,7 +43,7 @@ public class PlayerDataManager {
 
         try (Writer writer = new FileWriter(file)) {
             Utils.GSON.toJson(data, writer);
-            RogueSmpCore.LOGGER.info("Player data saved");
+            RogueSmpCore.LOGGER.info("Player data saved (uuid: {})", data.getUuid());
         } catch (IOException e) {
             e.printStackTrace();
         }
