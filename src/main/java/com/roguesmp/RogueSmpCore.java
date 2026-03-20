@@ -3,15 +3,19 @@ package com.roguesmp;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.dungeon.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.gui.ItemBrowser;
-import com.roguesmp.gui.ability.AbilityLoadoutGui;
+import com.roguesmp.gui.ability.AbilityCatalogue;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.listener.*;
 import com.roguesmp.player.PlayerDataManager;
 import com.roguesmp.player.PlayerManager;
-import com.roguesmp.registry.*;
+import com.roguesmp.registry.BlockRegistry;
+import com.roguesmp.registry.EntityRegistry;
+import com.roguesmp.registry.ItemRegistry;
+import com.roguesmp.registry.ModifierRegistry;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
@@ -44,8 +48,9 @@ public final class RogueSmpCore extends JavaPlugin {
         ModifierRegistry.init(this);
 
         BlockStorage.init(this, BlockManager.getInstance());
-
         BlockRegistry.getInstance().registerMachineRecipes();
+        //dungeon register
+        DungeonRegistry.onEnable();
     }
 
     // Load data from files, databases, etc
@@ -59,6 +64,8 @@ public final class RogueSmpCore extends JavaPlugin {
     public void saveData() {
         ItemRegistry.getInstance().saveToFile(true);
         BlockStorage.getInstance().saveToFile(true);
+
+        PlayerManager.getInstance().onDisable();
     }
 
     // Register Listener here
@@ -68,7 +75,7 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new WrenchListener());
 
         registerListener(new DamageListener());
-        registerListener(new PlayerListener(PlayerManager.getInstance()));
+        registerListener(new PlayerListener(PlayerManager.getInstance(), PlayerDataManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
         registerListener(new EntityListener(EntityManager.getInstance(), EntityRegistry.getInstance()));
     }
@@ -79,7 +86,7 @@ public final class RogueSmpCore extends JavaPlugin {
         EffectManager.registerCommand();
         EntityRegistry.registerCommand();
 
-        AbilityLoadoutGui.register();
+        AbilityCatalogue.register();
     }
 
     @Override
@@ -98,13 +105,14 @@ public final class RogueSmpCore extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
         saveData();
+        DungeonRegistry.onDisable();
     }
 
     public static RogueSmpCore getInstance() {
         return INSTANCE;
     }
 
-    private void registerListener(Listener listener) {
+    public void registerListener(Listener listener) {
         this.getServer().getPluginManager().registerEvents(listener, this);
     }
 }

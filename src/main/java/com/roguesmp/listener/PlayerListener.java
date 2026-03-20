@@ -3,9 +3,12 @@ package com.roguesmp.listener;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.item.SmpItem;
+import com.roguesmp.player.PlayerData;
+import com.roguesmp.player.PlayerDataManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.ItemStackUtils;
+import com.roguesmp.utils.Utils;
 import io.papermc.paper.event.entity.EntityEquipmentChangedEvent;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -19,12 +22,23 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.*;
 
+import java.util.UUID;
+
 public class PlayerListener implements Listener {
 
     private final PlayerManager playerManager;
+    private final PlayerDataManager playerDataManager;
 
-    public PlayerListener(PlayerManager playerManager) {
+    public PlayerListener(PlayerManager playerManager, PlayerDataManager playerDataManager) {
         this.playerManager = playerManager;
+        this.playerDataManager = playerDataManager;
+    }
+
+    @EventHandler
+    public void onPlayerPreJoin(AsyncPlayerPreLoginEvent event) {
+        UUID uuid = event.getUniqueId();
+        PlayerData playerData = playerDataManager.loadPlayerData(uuid);
+        Utils.runLater(() -> playerDataManager.cacheData(playerData));
     }
 
     @EventHandler

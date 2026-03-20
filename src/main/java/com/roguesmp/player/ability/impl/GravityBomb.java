@@ -1,5 +1,6 @@
 package com.roguesmp.player.ability.impl;
 
+import com.roguesmp.constant.AbilityTrigger;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
@@ -12,8 +13,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,10 +23,11 @@ public class GravityBomb extends Ability {
     public static final List<Integer> DAMAGES = List.of(10, 20, 30, 40);
     public static final AbilityInfo<GravityBomb> INFO = new AbilityInfo.Builder<GravityBomb>()
             .id(ID)
-            .descriptionProvider((smpPlayer1, integer) -> Component.text("Thả bom trọng lực, gây " + DAMAGES.get(integer - 1) + "sát thương", NamedTextColor.BLUE).decoration(TextDecoration.ITALIC, false))
-            .displayText(Component.text("Gravity bomb", NamedTextColor.BLUE))
-            .displayItem(ItemStack.of(Material.TNT))
+            .descriptionProvider((smpPlayer1, integer) -> List.of(Component.text("Thả bom trọng lực, gây " + DAMAGES.get(integer - 1) + " sát thương", NamedTextColor.BLUE).decoration(TextDecoration.ITALIC, false)))
+            .displayText(Component.text("Gravity Bomb", NamedTextColor.BLUE))
+            .displayIcon(Material.TNT)
             .factory(GravityBomb::new)
+            .trigger(AbilityTrigger.SWAP)
             .build();
 
     public GravityBomb(SmpPlayer player, int level) {
@@ -59,7 +59,6 @@ public class GravityBomb extends Ability {
         world.playSound(loc, Sound.ENTITY_WARDEN_SONIC_CHARGE, SoundCategory.PLAYERS, 1.5f, 1.2f);
 
         List<LivingEntity> mobs = new Hitbox.SphereHitbox(loc, 12).getHitMobs();
-        mobs.removeIf(mob -> mob instanceof Player);
 
         for (LivingEntity mob : mobs) {
             DamageUtils.damage(mob, getSmpPlayer().getBukkitPlayer(), 100, new DamageEvent.Metadata(ID, DamageType.PROJECTILE_ABILITY));
