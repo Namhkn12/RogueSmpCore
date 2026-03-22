@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.adapter.UUIDTypeAdapter;
-import com.roguesmp.dungeon.constraint.FolderConfig;
+import com.roguesmp.dungeon.constant.DataConfig;
 import com.roguesmp.dungeon.data.Party;
 import com.roguesmp.dungeon.repository.IPartyRepository;
 
@@ -19,7 +19,7 @@ public class PartyRepository implements IPartyRepository {
     public PartyRepository() {
         this.partyFolder = new File(
                 RogueSmpCore.getInstance().getDataFolder(),
-                FolderConfig.getPartyFolder()
+                DataConfig.getPartyFolder()
         );
         this.partyFolder.mkdirs();
         this.gson = new GsonBuilder()
@@ -47,7 +47,7 @@ public class PartyRepository implements IPartyRepository {
     @Override
     public Collection<Party> loadAll() {
         File[] files = partyFolder.listFiles(
-                (dir, name) -> name.endsWith(FolderConfig.JSON_TYPE)
+                (dir, name) -> name.endsWith(DataConfig.JSON_TYPE)
         );
         if (files == null) return Collections.emptyList();
 
@@ -64,6 +64,6 @@ public class PartyRepository implements IPartyRepository {
     }
 
     private File getFile(UUID partyId) {
-        return new File(partyFolder, partyId + FolderConfig.JSON_TYPE);
+        return new File(partyFolder, DataConfig.PARTY_FILE + partyId + DataConfig.JSON_TYPE);
     }
 }

@@ -1,10 +1,10 @@
 package com.roguesmp.dungeon.service.impl;
 
-import com.roguesmp.dungeon.constraint.FolderConfig;
+import com.roguesmp.dungeon.constant.DataConfig;
 import com.roguesmp.dungeon.data.Schemeta;
 import com.roguesmp.dungeon.manager.SchemetaManager;
 import com.roguesmp.dungeon.service.ISchemetaService;
-import com.roguesmp.dungeon.ultis.TimeId;
+import com.roguesmp.dungeon.utils.TimeId;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
@@ -42,7 +42,7 @@ public class SchemetaService implements ISchemetaService {
         Schemeta schemeta = new Schemeta();
         schemeta.setSchemId(String.join("_", PREFIX, TimeId.generateTimeId()));
         schemeta.setSchemName(name);
-        schemeta.setSchematic(String.join(File.separator, List.of(FolderConfig.getSchematicFolder(), name)) + FolderConfig.SCHEM_TYPE);
+        schemeta.setSchematic(String.join(File.separator, List.of(DataConfig.getSchematicFolder(), name)) + DataConfig.SCHEM_TYPE);
 
         schemetaManager.register(schemeta);
         return schemeta;

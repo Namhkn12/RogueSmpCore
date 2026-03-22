@@ -11,11 +11,11 @@ public interface ISpawnerService {
     //create template
     void createSpawnerTemplate(String name);
     //create instance from template
-    void createSpawnerInstance(UUID id, String spawnerId);
+    void createSpawnerInstance(String id, String spawnerId);
     //get list template
     List<Spawner> getListSpawnerTemplate();
     //get instance by id
-    SpawnerInstance getSpawnerInstance(UUID id);
+    SpawnerInstance getSpawnerInstance(String iid);
 
     void applyTemplateToSpawner(String template, CreatureSpawner spawner);
 }

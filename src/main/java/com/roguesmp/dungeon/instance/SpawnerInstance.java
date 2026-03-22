@@ -7,25 +7,25 @@ import java.util.Map;
 import java.util.UUID;
 
 public class SpawnerInstance {
-        private UUID id;
+        private String iid;
         private String templateId;
         private List<IBehavior> behaviors;
 
         public SpawnerInstance() {
         }
 
-        public SpawnerInstance(UUID id, String templateId, List<IBehavior> behaviors) {
-                this.id = id;
+        public SpawnerInstance(String iid, String templateId, List<IBehavior> behaviors) {
+                this.iid = iid;
                 this.templateId = templateId;
                 this.behaviors = behaviors;
         }
 
-        public UUID getId() {
-                return id;
+        public String getId() {
+                return iid;
         }
 
-        public void setId(UUID id) {
-                this.id = id;
+        public void setId(String iid) {
+                this.iid = iid;
         }
 
         public String getTemplateId() {

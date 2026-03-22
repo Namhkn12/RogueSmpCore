@@ -1,11 +1,12 @@
 package com.roguesmp.dungeon.repository;
 
 import com.roguesmp.dungeon.data.Spawner;
+import com.roguesmp.dungeon.dto.DataResult;
 
 import java.util.Map;
 
 public interface ISpawnerRepository {
-    Map<String, Spawner> loadAll();
+    DataResult<Map<String, Spawner>> loadAll();
     Spawner save(Spawner spawner);
-    boolean delete(String id);
+    Boolean delete(String id);
 }

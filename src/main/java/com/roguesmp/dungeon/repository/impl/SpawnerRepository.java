@@ -1,16 +1,17 @@
 package com.roguesmp.dungeon.repository.impl;
 
 import com.google.gson.Gson;
-import com.roguesmp.RogueSmpCore;
-import com.roguesmp.dungeon.constraint.FolderConfig;
+import com.google.gson.JsonParseException;
+import com.roguesmp.dungeon.constant.DataConfig;
 import com.roguesmp.dungeon.data.Spawner;
+import com.roguesmp.dungeon.dto.DataResult;
+import com.roguesmp.dungeon.exception.impl.data.DataDeleteException;
+import com.roguesmp.dungeon.exception.impl.data.DataLoadException;
+import com.roguesmp.dungeon.exception.impl.data.DataSaveException;
 import com.roguesmp.dungeon.repository.ISpawnerRepository;
 import org.bukkit.plugin.Plugin;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
@@ -20,43 +21,60 @@ public class SpawnerRepository implements ISpawnerRepository {
     private final Gson gson;
 
     public SpawnerRepository(Plugin plugin, Gson gson) {
-        this.spawnerFolder = new File(plugin.getDataFolder(), FolderConfig.getSpawnerTemplateFolder());
+        this.spawnerFolder = new File(plugin.getDataFolder(), DataConfig.getSpawnerTemplateFolder());
         this.gson = gson;
+
+        if (!spawnerFolder.exists()) {
+            spawnerFolder.mkdirs();
+        }
     }
 
     @Override
-    public Map<String, Spawner> loadAll() {
+    public DataResult<Map<String, Spawner>> loadAll() {
         Map<String, Spawner> spawnerMap = new HashMap<>();
-        File[] files =  spawnerFolder.listFiles(((dir, name) -> name.endsWith(FolderConfig.JSON_TYPE)));
-        if(files == null) return spawnerMap;
+        List<String> errors = new ArrayList<>();
+        if (!spawnerFolder.exists() || !spawnerFolder.isDirectory()) {
+            throw new DataLoadException(spawnerFolder.getName(), null);
+        }
 
-        for(File file : files){
-            try(Reader reader = Files.newBufferedReader(file.toPath())){
+        File[] files = spawnerFolder.listFiles((dir, name) -> name.endsWith(DataConfig.JSON_TYPE));
+        if (files == null) return new DataResult<>(spawnerMap, errors);
+
+        for (File file : files) {
+            try (Reader reader = Files.newBufferedReader(file.toPath())) {
                 Spawner spawner = gson.fromJson(reader, Spawner.class);
-                if(spawner != null && spawner.getId() != null){
+                if (spawner != null && spawner.getId() != null) {
                     spawnerMap.put(spawner.getId(), spawner);
+                } else {
+                    errors.add("Invalid data in file: " + file.getName());
                 }
-            }catch (Exception e){
-                e.printStackTrace();
+            } catch (JsonParseException | IOException e) {
+                errors.add(file.getName() + " - " + e.getMessage());
             }
         }
-        return spawnerMap;
+        return new DataResult<>(spawnerMap, errors);
     }
 
     @Override
     public Spawner save(Spawner spawner) {
-        File file = new File(spawnerFolder, spawner.getId() + FolderConfig.JSON_TYPE);
+        File file = new File(spawnerFolder, DataConfig.SPAWNER_TEMPLATE_FILE + spawner.getId() + DataConfig.JSON_TYPE);
         try (Writer writer = new FileWriter(file, StandardCharsets.UTF_8)){
             gson.toJson(spawner, writer);
             return spawner;
-        }catch (Exception e){
-            e.printStackTrace();
+        }catch (IOException e){
+            throw new DataSaveException(file.getName(), e);
         }
-        return null;
     }
 
     @Override
-    public boolean delete(String id) {
-        return new File(spawnerFolder, id + FolderConfig.JSON_TYPE).delete();
+    public Boolean delete(String id) {
+        File file = new File(spawnerFolder, id + DataConfig.JSON_TYPE);
+
+        if (!file.exists()) return false;
+
+        if (!file.delete()) {
+            throw new DataDeleteException(file.getName(), null);
+        }
+        return true;
     }
 }

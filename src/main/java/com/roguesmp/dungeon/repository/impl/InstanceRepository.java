@@ -5,12 +5,13 @@ import com.google.gson.GsonBuilder;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.adapter.LocationAdapter;
 import com.roguesmp.dungeon.adapter.ObjectiveAdapter;
-import com.roguesmp.dungeon.constraint.FolderConfig;
-import com.roguesmp.dungeon.constraint.PrefixConfig;
+import com.roguesmp.dungeon.constant.DataConfig;
+import com.roguesmp.dungeon.constant.PrefixConfig;
 import com.roguesmp.dungeon.instance.DungeonInstance;
 import com.roguesmp.dungeon.objective.IObjective;
 import com.roguesmp.dungeon.repository.IInstanceRepository;
-import com.roguesmp.dungeon.ultis.ConsoleLogger;
+import com.roguesmp.dungeon.utils.ConsoleLogger;
+import com.roguesmp.dungeon.utils.Log4Craft;
 import org.bukkit.Location;
 
 import java.io.*;
@@ -33,7 +34,7 @@ public class InstanceRepository implements IInstanceRepository {
 
         this.runtimeFolder = new File(
                 RogueSmpCore.getInstance().getDataFolder(),
-                FolderConfig.getRuntimeFolder()
+                DataConfig.getRuntimeFolder()
         );
 
         if (!runtimeFolder.exists()) {
@@ -68,7 +69,7 @@ public class InstanceRepository implements IInstanceRepository {
     public List<DungeonInstance> loadAll() {
         List<DungeonInstance> result = new ArrayList<>();
         File[] files = runtimeFolder.listFiles(
-                (dir, name) -> name.endsWith(FolderConfig.JSON_TYPE)
+                (dir, name) -> name.endsWith(DataConfig.JSON_TYPE)
         );
 
         if (files == null) return result;
@@ -79,20 +80,16 @@ public class InstanceRepository implements IInstanceRepository {
                 if (instance != null) {
                     result.add(instance);
                 }
-                ConsoleLogger.info(PrefixConfig.WHEN_THE_DUNGEON_ARISE, "Đã load " + result.size() + "instance");
+                Log4Craft.success("Restore instance to cache: " + result.size() + " instance");
             } catch (IOException e) {
-                RogueSmpCore.getInstance().getLogger().log(
-                        Level.SEVERE,
-                        "Failed to load instance file: " + file.getName(), e
-                );
+                Log4Craft.fire("Failed to load instance file: " + file.getName(), e);
             }
         }
-
         return result;
     }
 
     // tên file = partyId.json
     private File getFile(UUID partyId) {
-        return new File(runtimeFolder, partyId + FolderConfig.JSON_TYPE);
+        return new File(runtimeFolder, DataConfig.DUNGEON_INSTANCE_FILE + partyId + DataConfig.JSON_TYPE);
     }
 }

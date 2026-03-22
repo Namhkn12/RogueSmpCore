@@ -8,7 +8,6 @@ import com.roguesmp.dungeon.instance.SpawnerInstance;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class SpawnerInstanceManager {
@@ -17,7 +16,7 @@ public class SpawnerInstanceManager {
      * key : marker entity id
      * value : spawner instance data
      * */
-    private final Map<UUID, SpawnerInstance> spawnerInstances = new HashMap<>();
+    private final Map<String, SpawnerInstance> spawnerInstances = new HashMap<>();
 
     public SpawnerInstanceManager() {
     }
@@ -26,11 +25,11 @@ public class SpawnerInstanceManager {
         spawnerInstances.put(instance.getId(), instance);
     }
 
-    public SpawnerInstance getInstance(UUID id){
+    public SpawnerInstance getInstance(String id){
         return spawnerInstances.get(id);
     }
 
-    public SpawnerInstance createInstance(UUID markerId, Spawner spawner){
+    public SpawnerInstance createInstance(String markerId, Spawner spawner){
         SpawnerInstance instance = new SpawnerInstance();
         instance.setId(markerId);
         instance.setTemplateId(spawner.getId());
@@ -42,7 +41,7 @@ public class SpawnerInstanceManager {
         return instance;
     }
 
-    public boolean removeInstance(UUID id){
+    public boolean removeInstance(String id){
         return spawnerInstances.remove(id) != null;
     }
 }

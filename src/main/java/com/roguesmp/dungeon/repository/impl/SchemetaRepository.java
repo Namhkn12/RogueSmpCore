@@ -2,7 +2,7 @@ package com.roguesmp.dungeon.repository.impl;
 
 import com.google.gson.Gson;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.dungeon.constraint.FolderConfig;
+import com.roguesmp.dungeon.constant.DataConfig;
 import com.roguesmp.dungeon.data.Schemeta;
 import com.roguesmp.dungeon.repository.ISchemetaRepository;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
@@ -23,8 +23,8 @@ public class SchemetaRepository implements ISchemetaRepository {
     private final Gson gson;
 
     public SchemetaRepository(Gson gson) {
-        this.schematicFolder = new File(RogueSmpCore.getInstance().getDataFolder(), FolderConfig.getSchematicFolder());
-        this.schemetaFolder = new File(RogueSmpCore.getInstance().getDataFolder(), FolderConfig.getSchemetaFolder());
+        this.schematicFolder = new File(RogueSmpCore.getInstance().getDataFolder(), DataConfig.getSchematicFolder());
+        this.schemetaFolder = new File(RogueSmpCore.getInstance().getDataFolder(), DataConfig.getSchemetaFolder());
         this.gson = gson;
 
         if (!schematicFolder.exists()) schematicFolder.mkdirs();
@@ -35,7 +35,7 @@ public class SchemetaRepository implements ISchemetaRepository {
     public List<Schemeta> loadAll() {
         List<Schemeta> schemetas = new ArrayList<>();
 
-        File[] files = schemetaFolder.listFiles((dir, name) -> name.endsWith(FolderConfig.JSON_TYPE));
+        File[] files = schemetaFolder.listFiles((dir, name) -> name.endsWith(DataConfig.JSON_TYPE));
         if (files == null) return schemetas;
 
         for (File file : files) {
@@ -53,7 +53,7 @@ public class SchemetaRepository implements ISchemetaRepository {
 
     @Override
     public void save(Schemeta schemeta) throws IOException {
-        File file = new File(schemetaFolder, schemeta.getSchemId() + FolderConfig.JSON_TYPE);
+        File file = new File(schemetaFolder, DataConfig.SCHEMETA_FILE + schemeta.getSchemId() + DataConfig.JSON_TYPE);
         try (Writer writer = new FileWriter(file, StandardCharsets.UTF_8)) {
             gson.toJson(schemeta, writer);
         }
@@ -61,13 +61,12 @@ public class SchemetaRepository implements ISchemetaRepository {
 
     @Override
     public void delete(String id) {
-        new File(schemetaFolder, id + FolderConfig.JSON_TYPE).delete();
-        //new File(schemFolder, id + ".schem").delete();
+        new File(schemetaFolder, id + DataConfig.JSON_TYPE).delete();
     }
 
     @Override
     public void saveSchem(String name, Clipboard clipboard) throws IOException {
-        File schemFile = new File(schematicFolder, name + FolderConfig.SCHEM_TYPE);
+        File schemFile = new File(schematicFolder, name + DataConfig.SCHEM_TYPE);
         try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_SCHEMATIC
                 .getWriter(new FileOutputStream(schemFile))) {
             writer.write(clipboard);
@@ -76,7 +75,7 @@ public class SchemetaRepository implements ISchemetaRepository {
 
     @Override
     public Clipboard loadSchem(String name) throws IOException {
-        File schemFile = new File(schematicFolder, name + FolderConfig.SCHEM_TYPE);
+        File schemFile = new File(schematicFolder, name + DataConfig.SCHEM_TYPE);
         try (ClipboardReader reader = BuiltInClipboardFormat.SPONGE_SCHEMATIC
                 .getReader(new FileInputStream(schemFile))) {
             return reader.read();

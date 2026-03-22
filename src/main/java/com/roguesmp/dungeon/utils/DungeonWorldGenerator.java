@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.ultis;
+package com.roguesmp.dungeon.utils;
 
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.generator.WorldInfo;

@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.constraint;
+package com.roguesmp.dungeon.constant;
 
 public final class WorldConfig {
     public static final int MAX_REGION_PER_WORLD = 30;

@@ -1,6 +1,6 @@
 package com.roguesmp.dungeon.data;
 
-import com.roguesmp.dungeon.constraint.RoomType;
+import com.roguesmp.dungeon.constant.RoomType;
 
 import java.util.List;
 

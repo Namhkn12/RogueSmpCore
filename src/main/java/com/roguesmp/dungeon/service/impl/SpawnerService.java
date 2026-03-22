@@ -1,20 +1,21 @@
 package com.roguesmp.dungeon.service.impl;
 
 import com.roguesmp.dungeon.data.Spawner;
+import com.roguesmp.dungeon.exception.impl.InvalidInputException;
+import com.roguesmp.dungeon.exception.impl.spawner.InstanceException;
 import com.roguesmp.dungeon.instance.SpawnerInstance;
 import com.roguesmp.dungeon.manager.SpawnerInstanceManager;
 import com.roguesmp.dungeon.manager.SpawnerManager;
 import com.roguesmp.dungeon.service.ISpawnerService;
-import com.roguesmp.dungeon.ultis.ConsoleLogger;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.registry.EntityRegistry;
+import org.apache.commons.math3.exception.NullArgumentException;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.spawner.SpawnerEntry;
 import org.bukkit.entity.EntitySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class SpawnerService implements ISpawnerService {
 
@@ -28,29 +29,17 @@ public class SpawnerService implements ISpawnerService {
 
     @Override
     public void createSpawnerTemplate(String name) {
-        Spawner spawner = spawnerManager.create(name);
-        if(spawner != null){
-            //log success
-            return;
-        }
-        //log false
+        spawnerManager.create(name);
     }
 
     @Override
-    public void createSpawnerInstance(UUID id, String spawnerId) {
+    public void createSpawnerInstance(String id, String spawnerId) {
         Spawner spawner = spawnerManager.get(spawnerId);
-        if(spawner == null) {
-            //log fail
-            ConsoleLogger.info("[CreateInstance]", "Không lấy đc template");
-            return;
-        }
         SpawnerInstance instance = instanceManager.createInstance(id, spawner);
-        if(instance != null){
-            instanceManager.addInstance(instance);
-            //log success
-            return;
+        if (instance == null) {
+            throw new InstanceException(id);
         }
-        //log fail
+        instanceManager.addInstance(instance);
     }
 
     @Override
@@ -59,18 +48,18 @@ public class SpawnerService implements ISpawnerService {
     }
 
     @Override
-    public SpawnerInstance getSpawnerInstance(UUID id) {
+    public SpawnerInstance getSpawnerInstance(String id) {
         return instanceManager.getInstance(id);
     }
 
     @Override
-    public void applyTemplateToSpawner(String template, CreatureSpawner spawner) {
-        Spawner sp = spawnerManager.get(template);
-        if(spawner == null || sp == null){
-            //log
-            ConsoleLogger.info("[templateToInstance]", "Stop apply template");
-            return;
+    public void applyTemplateToSpawner(String templateId, CreatureSpawner spawner) {
+        Spawner sp = spawnerManager.get(templateId);
+
+        if (spawner == null) {
+            throw new InvalidInputException(CreatureSpawner.class.getName(), "cannot be null",null);
         }
+
         spawner.setDelay(sp.getDelay());
         spawner.setSpawnRange(sp.getSpawnRange());
         spawner.setMaxNearbyEntities(sp.getMaxNearBy());
@@ -84,14 +73,7 @@ public class SpawnerService implements ISpawnerService {
 
         sp.getMobs().forEach((mobId, weight) -> {
             BaseEntity baseEntity = EntityRegistry.getInstance().getBaseEntity(mobId);
-            ConsoleLogger.info("[Instance]", "Bắt đầu tạo entity với mob id " + mobId);
-
-            if (baseEntity == null) {
-                //log
-                ConsoleLogger.info("[Instance]", "Khoong taoj duoc base entity");
-
-                return;
-            }
+            if (baseEntity == null) return;
 
             EntitySnapshot snapshot = baseEntity.spawnOnlyEquipmentSnapshot(spawner.getLocation());
             if (snapshot == null) return;
@@ -100,7 +82,6 @@ public class SpawnerService implements ISpawnerService {
 
         spawner.setPotentialSpawns(entries);
         spawner.update();
-        ConsoleLogger.info("[Marker]", "Apply thành công");
 
     }
 }

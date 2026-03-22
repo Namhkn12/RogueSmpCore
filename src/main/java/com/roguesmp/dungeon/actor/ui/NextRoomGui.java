@@ -6,7 +6,6 @@ import com.roguesmp.dungeon.controller.PartyController;
 import com.roguesmp.dungeon.data.Party;
 import com.roguesmp.dungeon.dto.NextRoom;
 import com.roguesmp.dungeon.instance.DungeonInstance;
-import com.roguesmp.dungeon.objective.IObjective;
 import com.roguesmp.gui.BaseGui;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;

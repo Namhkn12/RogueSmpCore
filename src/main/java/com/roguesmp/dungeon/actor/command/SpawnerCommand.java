@@ -1,6 +1,6 @@
 package com.roguesmp.dungeon.actor.command;
 
-import com.roguesmp.dungeon.ultis.NameSpaceKeys;
+import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import dev.jorel.commandapi.CommandAPICommand;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -21,7 +21,7 @@ public class SpawnerCommand {
                                     ItemMeta meta = item.getItemMeta();
 
                                     meta.displayName(Component.text("Test Spawner"));
-                                    meta.getPersistentDataContainer().set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, templateId);
+                                    meta.getPersistentDataContainer().set(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING, templateId);
 
                                     item.setItemMeta(meta);
                                     player.getInventory().addItem(item);

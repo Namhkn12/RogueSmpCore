@@ -3,6 +3,7 @@ package com.roguesmp.dungeon.manager;
 import com.roguesmp.dungeon.data.DungeonWorld;
 import com.roguesmp.dungeon.data.Region;
 import com.roguesmp.dungeon.repository.IRegionRepository;
+import com.roguesmp.dungeon.utils.Log4Craft;
 
 import java.util.*;
 
@@ -43,6 +44,7 @@ public class RegionManager {
      * Gọi khi server close — ghi toàn bộ xuống file
      */
     public void saveAll() {
+        Log4Craft.info("Start save all dungeon worlds: " + worldMap.size());
         worldMap.values().forEach(repository::save);
     }
 

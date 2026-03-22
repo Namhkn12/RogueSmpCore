@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.constraint;
+package com.roguesmp.dungeon.constant;
 
 public class PrefixConfig {
     public static final String WHEN_THE_DUNGEON_ARISE = "[WTDA]";

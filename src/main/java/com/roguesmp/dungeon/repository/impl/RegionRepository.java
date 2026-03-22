@@ -2,10 +2,11 @@ package com.roguesmp.dungeon.repository.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.roguesmp.dungeon.constraint.FolderConfig;
+import com.roguesmp.dungeon.constant.DataConfig;
 import com.roguesmp.dungeon.data.DungeonWorld;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.repository.IRegionRepository;
+import com.roguesmp.dungeon.utils.Log4Craft;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class RegionRepository implements IRegionRepository {
         // dungeon/region/ relative to plugin data folder
         this.regionFolder = new File(
                 RogueSmpCore.getInstance().getDataFolder(),
-                FolderConfig.getRegionFolder()
+                DataConfig.getRegionFolder()
         );
 
         if (!regionFolder.exists()) {
@@ -38,7 +39,7 @@ public class RegionRepository implements IRegionRepository {
     public List<DungeonWorld> loadAll() {
         List<DungeonWorld> result = new ArrayList<>();
         File[] files = regionFolder.listFiles(
-                (dir, name) -> name.endsWith(FolderConfig.JSON_TYPE)
+                (dir, name) -> name.endsWith(DataConfig.JSON_TYPE)
         );
 
         if (files == null) return result;
@@ -66,10 +67,7 @@ public class RegionRepository implements IRegionRepository {
         try (Writer writer = new FileWriter(file)) {
             gson.toJson(dungeonWorld, writer);
         } catch (IOException e) {
-            RogueSmpCore.getInstance().getLogger().log(
-                    Level.SEVERE,
-                    "Failed to save region file for world: " + dungeonWorld.getWorldName(), e
-            );
+            Log4Craft.fire("Failed to save region file for world: " + dungeonWorld.getWorldName(), e);
         }
     }
 
@@ -101,6 +99,6 @@ public class RegionRepository implements IRegionRepository {
 
     // tên file = worldName.json
     private File getFile(String worldName) {
-        return new File(regionFolder, worldName + FolderConfig.JSON_TYPE);
+        return new File(regionFolder, DataConfig.REGION_INSTANCE_FILE + worldName + DataConfig.JSON_TYPE);
     }
 }

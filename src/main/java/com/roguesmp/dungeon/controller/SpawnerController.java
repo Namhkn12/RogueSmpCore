@@ -1,16 +1,18 @@
 package com.roguesmp.dungeon.controller;
 
-import com.roguesmp.dungeon.controller.response.ControllerResponse;
-import com.roguesmp.dungeon.controller.response.Rsc;
+import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
+import com.roguesmp.dungeon.dto.ActionResult;
+import com.roguesmp.dungeon.exception.BaseException;
+import com.roguesmp.dungeon.exception.GlobalException;
+import com.roguesmp.dungeon.exception.impl.spawner.SpawnerNotFoundException;
+import com.roguesmp.dungeon.instance.SpawnerInstance;
 import com.roguesmp.dungeon.service.ISpawnerService;
-import com.roguesmp.dungeon.ultis.ConsoleLogger;
-import com.roguesmp.dungeon.ultis.NameSpaceKeys;
+import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -36,84 +38,151 @@ public class SpawnerController {
         this.plugin = plugin;
     }
 
-    public ControllerResponse<Void> placeSpawnerAction(BlockPlaceEvent event){
-        if(event.getBlock().getType() != Material.SPAWNER) return ControllerResponse.failure("Không phải spawner");
+    public ActionResult<Void> placeSpawnerAction(BlockPlaceEvent event){
+        if(event.getBlock().getType() != Material.SPAWNER) return ActionResult.invalid(null);
         ItemStack item = event.getItemInHand();
         ItemMeta meta = item.getItemMeta();
-        ConsoleLogger.info("XXX", "1");
 
         if(meta == null){
-            ConsoleLogger.info("XXX", "Không tìm thấy meta in hand");
-            return ControllerResponse.response(Rsc.NOT_FOUND);
+            return ActionResult.failed("Meta data is null");
         }
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        NamespacedKey key = NameSpaceKeys.SPAWNER_IID_KEY;
+        NamespacedKey key = NameSpaceKeys.SPAWNER_TID_KEY;
         if(!pdc.has(key, PersistentDataType.STRING)){
-            ConsoleLogger.info("XXX", "Không phải spawner custom");
-            return ControllerResponse.failure("Không phải spawner custom");
+            return ActionResult.failed("Spawner placed does not contain template");
         }
         String templateId = pdc.get(key, PersistentDataType.STRING);
-        Block spawner = event.getBlock();
-        World world = spawner.getWorld();
-        Location loc = spawner.getLocation().clone().add(0.5, 0, 0.5);
-        ConsoleLogger.info("XXX", "Bắt đầu tạo marker");
+
+        Block block = event.getBlock();
+        CreatureSpawner spawner = (CreatureSpawner) block.getState();
+        World world = block.getWorld();
+        Location loc = block.getLocation().clone().add(0.5, 0, 0.5);
 
         Marker marker = world.spawn(loc, Marker.class, entity -> {
             entity.setPersistent(true);
             entity.setInvulnerable(true);
-
-            // set PDC templateId vào marker
-            NamespacedKey markerKey = NameSpaceKeys.SPAWNER_IID_KEY;
-            entity.getPersistentDataContainer().set(markerKey, PersistentDataType.STRING, templateId);
+            entity.getPersistentDataContainer().set(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING, templateId);
         });
 
-        spawnerService.createSpawnerInstance(marker.getUniqueId(), templateId);
-        ConsoleLogger.info("XXX", "Tạo marker kết thúc");
-
-        return ControllerResponse.response(Rsc.SUCCESS);
+        try {
+            String iid = marker.getUniqueId().toString();
+            spawnerService.createSpawnerInstance(iid, templateId);
+            spawner.getPersistentDataContainer().set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, iid);
+            spawner.update();
+            return ActionResult.ok("Spawner applied data successfully");
+        } catch (SpawnerNotFoundException e) {
+            marker.remove();
+            return ActionResult.failed("Spawner template not found: " + templateId);
+        } catch (BaseException e) {
+            marker.remove();
+            GlobalException.handle(e);
+            return ActionResult.failed("System error, cannot apply custom spawner data");
+        }
     }
 
-    public ControllerResponse<Void> spawnerBreakAction(BlockBreakEvent event){
-        return ControllerResponse.success("");
-    }
-
-    public ControllerResponse<Void> spawnerSpawnAction(SpawnerSpawnEvent event){
-        return ControllerResponse.success("");
-    }
-
-    public ControllerResponse<Void> spawnerMarkerLoad(EntitiesLoadEvent event){
+    public ActionResult<Void> spawnerAddToWorld(EntityAddToWorldEvent event){
         if(!event.getWorld().getName().startsWith("dungeon_"))
-            return ControllerResponse.response(Rsc.NOT_FOUND);
-//        ConsoleLogger.info("[Marker]", "Marker load start");
+            return ActionResult.invalid("This action can");
+        Entity entity = event.getEntity();
+        if(!(entity instanceof Marker marker))
+            return ActionResult.invalid("Entity is not instance of Marker");
+        NamespacedKey nsp = NameSpaceKeys.SPAWNER_TID_KEY;
+        PersistentDataContainer pdc = entity.getPersistentDataContainer();
 
-        for (Entity e : event.getEntities()){
-            if(e.getType() == EntityType.MARKER){
-                //check psd id
-                ConsoleLogger.info("[Marker]", "Tìm thấy 1 marker");
+        String templateId = pdc.get(nsp, PersistentDataType.STRING);
+        Block blockBelow = entity.getLocation().getBlock();
 
-                NamespacedKey nsp = NameSpaceKeys.SPAWNER_IID_KEY;
-                PersistentDataContainer pdc = e.getPersistentDataContainer();
+        if (blockBelow.getType() != Material.SPAWNER) {
+            entity.remove();
+            return ActionResult.invalid("Spawner block is not found");
+        }
+
+        try {
+            String iid = UUID.randomUUID().toString();
+            CreatureSpawner creatureSpawner = (CreatureSpawner) blockBelow.getState();
+            creatureSpawner.getPersistentDataContainer().set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, iid);
+            creatureSpawner.update();
+
+            spawnerService.createSpawnerInstance(iid, templateId);
+            spawnerService.applyTemplateToSpawner(templateId, creatureSpawner);
+            return ActionResult.ok("Spawner custom applied successfully");
+        } catch (SpawnerNotFoundException e) {
+            return ActionResult.failed("Spawner custom applied fail");
+        } catch (BaseException e) {
+            GlobalException.handle(e);
+            return ActionResult.failed("System error");
+        }
+    }
+
+    public ActionResult<Void> spawnerBreakAction(BlockBreakEvent event){
+        String worldName = event.getPlayer().getWorld().getName();
+        if(!worldName.startsWith("dungeon_")){
+            return ActionResult.invalid("This action cannot be executed in this world");
+        }
+        if(!(event.getBlock().getState() instanceof CreatureSpawner spawner)) {
+            return ActionResult.invalid("This block is not spawner block");
+        }
+
+        PersistentDataContainer pcd = spawner.getPersistentDataContainer();
+
+        boolean hasKey = pcd.has(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING);
+        if (hasKey) return ActionResult.failed("This spawner is not custom spawner");
+
+        String iid = pcd.get(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING);
+        try {
+            SpawnerInstance instance = spawnerService.getSpawnerInstance(iid);
+            instance.getBehaviors().forEach(behavior -> event.setCancelled(!behavior.onBreak(event)));
+            return ActionResult.ok("Spawner break event passed");
+        } catch (SpawnerNotFoundException e) {
+            return ActionResult.failed("Spawner instance was not found");
+        } catch (BaseException e) {
+            GlobalException.handle(e);
+            return ActionResult.failed("System error");
+        }
+    }
+
+    public ActionResult<Void> spawnerSpawnAction(SpawnerSpawnEvent event){
+        return ActionResult.ok("");
+    }
+
+    public ActionResult<Void> spawnerMarkerLoad(EntitiesLoadEvent event){
+        if(!event.getWorld().getName().startsWith("dungeon_"))
+            return ActionResult.invalid("This action cannot be executed in this world");
+
+        for (Entity entity : event.getEntities()){
+            if(entity.getType() == EntityType.MARKER){
+                NamespacedKey nsp = NameSpaceKeys.SPAWNER_TID_KEY;
+                PersistentDataContainer pdc = entity.getPersistentDataContainer();
 
                 if(pdc.has(nsp, PersistentDataType.STRING)){
-                    ConsoleLogger.info("[Marker]", "Bắt đầu apply data to spawner");
+                    try{
+                        String templateId = pdc.get(nsp, PersistentDataType.STRING);
 
-                    String templateId = pdc.get(nsp, PersistentDataType.STRING);
+                        Block blockBelow = entity.getLocation().getBlock();
 
-                    Block blockBelow = e.getLocation().getBlock();
-
-                    if (blockBelow.getType() != Material.SPAWNER) {
-                        ConsoleLogger.info("[Marker]", "Block bên dưới ko phải spawner");
-                        e.remove();
-                        return ControllerResponse.response(Rsc.BAD_REQUEST);
+                        if (blockBelow.getType() != Material.SPAWNER) {
+                            entity.remove();
+                            continue;
+                        }
+                        NamespacedKey iidKey = NameSpaceKeys.SPAWNER_IID_KEY;
+                        String iid;
+                        if (pdc.has(iidKey, PersistentDataType.STRING)) {
+                            iid = pdc.get(iidKey, PersistentDataType.STRING);
+                        } else {
+                            iid = UUID.randomUUID().toString();
+                            entity.getPersistentDataContainer().set(iidKey, PersistentDataType.STRING, iid);
+                        }
+                        CreatureSpawner creatureSpawner = (CreatureSpawner) blockBelow.getState();
+                        creatureSpawner.getPersistentDataContainer().set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, iid);
+                        creatureSpawner.update();
+                        spawnerService.createSpawnerInstance(iid, templateId);
+                        spawnerService.applyTemplateToSpawner(templateId, creatureSpawner);
+                    } catch (BaseException e){
+                        GlobalException.handle(e);
                     }
-                    CreatureSpawner creatureSpawner = (CreatureSpawner) blockBelow.getState();
-                    spawnerService.createSpawnerInstance(UUID.randomUUID(), templateId);
-                    ConsoleLogger.info("[Marker]", "Create Instance fnishhhh");
-
-                    spawnerService.applyTemplateToSpawner(templateId, creatureSpawner);
                 }
             }
         }
-        return ControllerResponse.response(Rsc.SUCCESS);
+        return ActionResult.ok("Marker entity all loaded");
     }
 }
