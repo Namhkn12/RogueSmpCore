@@ -1,18 +1,11 @@
 package com.roguesmp.dungeon.controller;
 
-import com.roguesmp.dungeon.controller.response.ControllerResponse;
+import com.roguesmp.dungeon.dto.ActionResult;
 import com.roguesmp.dungeon.data.Party;
 import com.roguesmp.dungeon.service.IPartyService;
 import com.roguesmp.dungeon.task.PartyInviteTask;
 import org.bukkit.entity.Player;
 
-/**
- * Nhận request từ PartyCommand, orchestrate các service liên quan.
- * Không chứa business logic — chỉ delegate xuống service.
- *
- * Khi cần gọi thêm service khác (vd: DungeonService, StatService...),
- * inject vào đây thay vì vào command.
- */
 public class PartyController {
 
     private final IPartyService partyService;
@@ -23,22 +16,22 @@ public class PartyController {
         this.inviteTask = inviteTask;
     }
 
-    public ControllerResponse<Party> getPartyByPlayer(Player player){
+    public ActionResult<Party> getPartyByPlayer(Player player){
         Party party = partyService.getPartyByPlayer(player).orElse(null);
-        return ControllerResponse.success("Lấy party từ người chơi thành công", party);
+        return ActionResult.ok("Got party info from player successfully", party);
     }
 
-    public ControllerResponse<Void> createParty(Player player) {
+    public ActionResult<Void> createParty(Player player) {
         Party party = partyService.createParty(player);
         if(party == null){
-            return ControllerResponse.failure("Không thể tạo party");
+            return ActionResult.failed("Party created fail");
         }
-        return ControllerResponse.success("Đã tạo party thành công");
+        return ActionResult.ok("Party created successfully");
     }
 
-    public ControllerResponse<Void> disbandParty(Player player) {
+    public ActionResult<Void> disbandParty(Player player) {
         partyService.disbandParty(player);
-        return ControllerResponse.success("Đã giải tán party");
+        return ActionResult.ok("Party disbanded");
     }
 
     public void invitePlayer(Player player, Player target) {

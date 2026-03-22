@@ -1,14 +1,11 @@
 package com.roguesmp.dungeon.actor.command;
 
-import com.roguesmp.dungeon.actor.ui.NextRoomGui;
 import com.roguesmp.dungeon.controller.DungeonController;
 import com.roguesmp.dungeon.controller.PartyController;
-import com.roguesmp.dungeon.controller.response.ControllerResponse;
-import com.roguesmp.dungeon.data.Party;
+import com.roguesmp.dungeon.dto.ActionResult;
 import com.roguesmp.dungeon.instance.DungeonInstance;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.StringArgument;
-import org.bukkit.entity.Player;
 
 public class DungeonCommand {
 
@@ -26,7 +23,7 @@ public class DungeonCommand {
                         new CommandAPICommand("start")
                                 .executesPlayer((player, args) -> {
                                     String templateId = "dungeon_20260310231827";
-                                    ControllerResponse<DungeonInstance> instance = dungeonController.generateDungeon(templateId, player);
+                                    ActionResult<DungeonInstance> instance = dungeonController.generateDungeon(templateId, player);
                                     dungeonController.startDungeon(instance.getData());
                                 })
                 )

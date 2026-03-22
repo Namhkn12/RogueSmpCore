@@ -1,9 +1,10 @@
 package com.roguesmp.dungeon.manager;
 
-import com.roguesmp.dungeon.constraint.PrefixConfig;
+import com.roguesmp.dungeon.constant.PrefixConfig;
 import com.roguesmp.dungeon.data.Party;
 import com.roguesmp.dungeon.repository.IPartyRepository;
-import com.roguesmp.dungeon.ultis.ConsoleLogger;
+import com.roguesmp.dungeon.utils.ConsoleLogger;
+import com.roguesmp.dungeon.utils.Log4Craft;
 
 import java.util.*;
 
@@ -35,7 +36,7 @@ public class PartyManager {
                 playerIndex.put(memberId, party.getPartyId());
             }
         }
-        ConsoleLogger.info(PrefixConfig.PARTY," Loaded party to memory: " + parties.size());
+        Log4Craft.success("Loaded party to cache: " + parties.size() + " party");
     }
 
     // Gọi khi server stop — save từng party một
@@ -43,8 +44,7 @@ public class PartyManager {
         for (Party party : partyMap.values()) {
             repository.save(party);
         }
-        ConsoleLogger.info(PrefixConfig.PARTY," Save party to file: " + partyMap.size());
-
+        Log4Craft.success("Saved party to file: " + partyMap.size() + " party");
     }
 
     public Party createParty(UUID ownerId) {
@@ -58,7 +58,6 @@ public class PartyManager {
         return party;
     }
 
-    // Thêm delete khi disband
     public void disbandParty(UUID partyId) {
         Party party = partyMap.remove(partyId);
         if (party == null) return;

@@ -1,9 +1,10 @@
 package com.roguesmp.dungeon.manager;
 
-import com.roguesmp.dungeon.constraint.PrefixConfig;
+import com.roguesmp.dungeon.constant.PrefixConfig;
 import com.roguesmp.dungeon.data.Schemeta;
 import com.roguesmp.dungeon.repository.ISchemetaRepository;
-import com.roguesmp.dungeon.ultis.ConsoleLogger;
+import com.roguesmp.dungeon.utils.ConsoleLogger;
+import com.roguesmp.dungeon.utils.Log4Craft;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 
 import java.io.IOException;
@@ -19,14 +20,13 @@ public class SchemetaManager {
     public SchemetaManager(ISchemetaRepository repository) {
         this.repository = repository;
 
-        //init data
         load();
     }
 
     public void load() {
         schemetas.clear();
         repository.loadAll().forEach(s -> schemetas.put(s.getSchemId(), s));
-        ConsoleLogger.info(PrefixConfig.SCHEMETA, "Load " + schemetas.size() + " schemeta file");
+        Log4Craft.success("Loaded schemeta to cache: " + schemetas.size() + " party");
     }
 
     public void register(Schemeta schemeta) throws IOException {

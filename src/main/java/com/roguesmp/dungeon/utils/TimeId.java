@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.ultis;
+package com.roguesmp.dungeon.utils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

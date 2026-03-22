@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.constraint;
+package com.roguesmp.dungeon.constant;
 
 public enum RoomType {
     START("start", "Phòng bắt đầu của dungeon"),

@@ -1,12 +1,14 @@
-package com.roguesmp.dungeon.constraint;
+package com.roguesmp.dungeon.constant;
 import java.io.File;
 import java.util.List;
 
-public final class FolderConfig {
+public final class DataConfig {
 
+    //file type
     public static final String JSON_TYPE = ".json";
     public static final String SCHEM_TYPE = ".schem";
 
+    //folder name constant
     public static final String MAIN_FOLDER = "dungeon";
     public static final String SCHEMATIC_FOLDER = "schematic";
     public static final String SCHEMETA_FOLDER = "schemeta";
@@ -14,9 +16,22 @@ public final class FolderConfig {
     public static final String RUNTIME_FOLDER = "runtime";
     public static final String PARTY_FOLDER = "party";
     public static final String REGION_FOLDER = "region";
+    public static final String SPAWNER_TEMPLATE_FOLDER = "spawner_template";
 
-    public static final String DUNGEON_WORLD_FILE = "dungeon_";
+    //file name prefix constant
+    public static final String DUNGEON_TEMPLATE_FILE = "dungeon_";
+    public static final String DUNGEON_INSTANCE_FILE = "di_";
+    public static final String REGION_INSTANCE_FILE = "region_";
+    public static final String SCHEMETA_FILE = "schemeta_";
+    public static final String SPAWNER_TEMPLATE_FILE = "spawner_";
+    public static final String PARTY_FILE = "party_";
 
+    public static String getSpawnerTemplateFolder(){
+        return buildFolderPath(List.of(
+                MAIN_FOLDER,
+                SPAWNER_TEMPLATE_FOLDER
+        ));
+    }
 
     public static String getRegionFolder() {
         return buildFolderPath(List.of(
@@ -64,5 +79,5 @@ public final class FolderConfig {
         return String.join(File.separator, folders);
     }
 
-    private FolderConfig() {}
+    private DataConfig() {}
 }

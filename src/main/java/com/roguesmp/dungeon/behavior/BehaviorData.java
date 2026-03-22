@@ -13,12 +13,6 @@ public class BehaviorData {
         this.params = params;
     }
 
-    public <T> T get(String key, T defaultValue){
-        Object value = params.get(key);
-        if(value == null) return defaultValue;
-        return (T) value;
-    }
-
     public String getType() { return type; }
     public Map<String, Object> getParams() { return params; }
     public void setType(String type) { this.type = type; }

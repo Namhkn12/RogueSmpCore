@@ -1,17 +1,16 @@
 package com.roguesmp.dungeon.manager;
 
-import com.roguesmp.dungeon.constraint.PrefixConfig;
+import com.roguesmp.dungeon.constant.DataConfig;
+import com.roguesmp.dungeon.constant.PrefixConfig;
 import com.roguesmp.dungeon.data.Dungeon;
-import com.roguesmp.dungeon.data.Room;
 import com.roguesmp.dungeon.repository.IDungeonRepository;
-import com.roguesmp.dungeon.ultis.ConsoleLogger;
-import com.roguesmp.dungeon.ultis.TimeId;
+import com.roguesmp.dungeon.utils.ConsoleLogger;
+import com.roguesmp.dungeon.utils.Log4Craft;
+import com.roguesmp.dungeon.utils.TimeId;
 
 import java.util.*;
 
 public class DungeonManager {
-
-    private static final String PREFIX = "dungeon";
 
     private final Map<String, Dungeon> dungeons = new HashMap<>();
     private final IDungeonRepository dungeonRepository;
@@ -26,12 +25,12 @@ public class DungeonManager {
     public void load() {
         dungeons.clear();
         dungeonRepository.loadAll().forEach(d -> dungeons.put(d.getDgId(), d));
-        ConsoleLogger.info(PrefixConfig.DUNGEON,"Load " + dungeons.size() + " dungeon template file");
+        Log4Craft.info("Loaded " +  dungeons.size() + " dungeon template data");
     }
 
     /** Create a new dungeon, persist it, and put it in cache. */
     public Dungeon create(String name) {
-        String dgId = PREFIX + "_" + TimeId.generateTimeId();
+        String dgId = DataConfig.DUNGEON_TEMPLATE_FILE + TimeId.generateTimeId();
         Dungeon dungeon = new Dungeon(dgId, name, "", 0);
 
         dungeons.put(dgId, dungeon);

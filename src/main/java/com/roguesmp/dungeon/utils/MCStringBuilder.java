@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.ultis;
+package com.roguesmp.dungeon.utils;
 
 /**
  * Fluent Minecraft chat string builder with color/format constants and static shortcuts.
