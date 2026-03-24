@@ -153,6 +153,11 @@ public class InstanceService implements IInstanceService {
         return selected;
     }
 
+    @Override
+    public Map<UUID, DungeonInstance> getAllInstances() {
+        return instanceManager.getInstancesMap();
+    }
+
     /**
      * Roll toàn bộ nodes từ dungeon template theo thứ tự:
      * start (100%) → middle nodes (theo chance) → end (100%)

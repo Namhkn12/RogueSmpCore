@@ -93,7 +93,7 @@ public class SpawnerController {
         Block blockBelow = entity.getLocation().getBlock();
 
         if (blockBelow.getType() != Material.SPAWNER) {
-            entity.remove();
+            //entity.remove();
             return ActionResult.invalid("Spawner block is not found");
         }
 

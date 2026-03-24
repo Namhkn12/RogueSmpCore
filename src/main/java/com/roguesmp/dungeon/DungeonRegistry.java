@@ -7,14 +7,29 @@ import com.roguesmp.dungeon.actor.command.*;
 import com.roguesmp.dungeon.actor.listener.NextDoorListener;
 import com.roguesmp.dungeon.actor.listener.ObjectiveListener;
 import com.roguesmp.dungeon.actor.listener.SpawnerListener;
+import com.roguesmp.dungeon.adapter.LocationAdapter;
+import com.roguesmp.dungeon.adapter.ObjectiveAdapter;
+import com.roguesmp.dungeon.adapter.UUIDTypeAdapter;
 import com.roguesmp.dungeon.controller.*;
+import com.roguesmp.dungeon.expansion.DungeonExpansion;
 import com.roguesmp.dungeon.manager.*;
+import com.roguesmp.dungeon.objective.IObjective;
+import com.roguesmp.dungeon.presentation.EffectManager;
+import com.roguesmp.dungeon.presentation.PresentationManager;
+import com.roguesmp.dungeon.presentation.ScreenMessManager;
+import com.roguesmp.dungeon.presentation.SoundManager;
+import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.repository.*;
 import com.roguesmp.dungeon.repository.impl.*;
+import com.roguesmp.dungeon.schedule.DungeonTickTask;
 import com.roguesmp.dungeon.service.*;
 import com.roguesmp.dungeon.service.impl.*;
 import com.roguesmp.dungeon.task.PartyInviteTask;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.plugin.Plugin;
+
+import java.util.UUID;
 
 public class DungeonRegistry {
 
@@ -22,25 +37,45 @@ public class DungeonRegistry {
     private static IRegionService regionService;
     private static IPartyService partyService;
 
-    public static void onEnable() {
+    public static void onEnable(Plugin plugin) {
         // --- Infrastructure ---
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(Location.class, new LocationAdapter())
+                .registerTypeAdapter(IObjective.class, new ObjectiveAdapter())
+                .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
+                .setPrettyPrinting()
+                .create();
+
+        // --- ScoreBoard ---
+        DungeonExpansion papiExpansion = new DungeonExpansion();
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            papiExpansion.register();
+        }
+        ScoreBoardManager scoreBoardManager = new ScoreBoardManager(papiExpansion);
+
+
+        // --- Present ---
+        SoundManager soundManager = new SoundManager(plugin);
+        EffectManager effectManager = new EffectManager(plugin);
+        ScreenMessManager screenMessManager = new ScreenMessManager(plugin);
+        PresentationManager presentationManager = new PresentationManager(soundManager, effectManager, screenMessManager);
+
+        DungeonPresenter dungeonPresenter = new DungeonPresenter(presentationManager);
 
         // --- Repository ---
         ISchemetaRepository schemetaRepository = new SchemetaRepository(gson);
         IDungeonRepository dungeonRepository = new DungeonRepository(gson);
-        IRegionRepository regionRepository = new RegionRepository();
-        IPartyRepository partyRepository = new PartyRepository();
-        IInstanceRepository instanceRepository = new InstanceRepository();
+        IRegionRepository regionRepository = new RegionRepository(gson);
+        IPartyRepository partyRepository = new PartyRepository(gson);
+        IInstanceRepository instanceRepository = new InstanceRepository(gson);
         ISpawnerRepository spawnerRepository = new SpawnerRepository(RogueSmpCore.getInstance(), gson);
-
 
         // --- Manager ---
         SchemetaManager schemetaManager = new SchemetaManager(schemetaRepository);
         DungeonManager dungeonManager = new DungeonManager(dungeonRepository);
         RegionManager regionManager = new RegionManager(regionRepository);
         PartyManager partyManager = new PartyManager(partyRepository);
-        InstanceManager instanceManager = new InstanceManager(instanceRepository);
+        InstanceManager instanceManager = new InstanceManager(instanceRepository, scoreBoardManager);
         SpawnerManager spawnerManager = new SpawnerManager(spawnerRepository);
         SpawnerInstanceManager spawnerInstanceManager = new SpawnerInstanceManager();
 
@@ -57,8 +92,12 @@ public class DungeonRegistry {
         BuildingController buildingController = new BuildingController(schemetaService);
         TemplateController templateController = new TemplateController(dungeonService);
         PartyController partyController = new PartyController(partyService,partyInviteTask);
-        DungeonController dungeonController = new DungeonController(partyService, dungeonService, schemetaService, instanceService, regionService);
+        DungeonController dungeonController = new DungeonController(partyService, dungeonService, schemetaService, instanceService, regionService, scoreBoardManager, dungeonPresenter);
         SpawnerController spawnerController = new SpawnerController(spawnerService, RogueSmpCore.getInstance());
+
+        //Task
+        new DungeonTickTask(scoreBoardManager, instanceService)
+                .runTaskTimer(RogueSmpCore.getInstance(), 0L, 20L);
 
         // --- Command ---
         new SchemetaCommand(buildingController).register();

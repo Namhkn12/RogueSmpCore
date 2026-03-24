@@ -16,16 +16,13 @@ public class PartyRepository implements IPartyRepository {
     private final File partyFolder;
     private final Gson gson;
 
-    public PartyRepository() {
+    public PartyRepository(Gson gson) {
         this.partyFolder = new File(
                 RogueSmpCore.getInstance().getDataFolder(),
                 DataConfig.getPartyFolder()
         );
         this.partyFolder.mkdirs();
-        this.gson = new GsonBuilder()
-                .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
-                .setPrettyPrinting()
-                .create();
+        this.gson = gson;
     }
 
     @Override

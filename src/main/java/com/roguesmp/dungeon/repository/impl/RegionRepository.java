@@ -19,10 +19,8 @@ public class RegionRepository implements IRegionRepository {
     private final Gson gson;
     private final File regionFolder;
 
-    public RegionRepository() {
-        this.gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .create();
+    public RegionRepository(Gson gson) {
+        this.gson = gson;
 
         // dungeon/region/ relative to plugin data folder
         this.regionFolder = new File(

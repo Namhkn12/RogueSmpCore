@@ -12,11 +12,13 @@ import java.util.*;
 public class InstanceManager {
 
     private final IInstanceRepository repository;
+    private final ScoreBoardManager scoreBoardManager;
 
     private final Map<UUID, DungeonInstance> instances = new LinkedHashMap<>();
 
-    public InstanceManager(IInstanceRepository repository) {
+    public InstanceManager(IInstanceRepository repository, ScoreBoardManager scoreBoardManager) {
         this.repository = repository;
+        this.scoreBoardManager = scoreBoardManager;
         loadAll();
     }
 
@@ -25,7 +27,10 @@ public class InstanceManager {
      */
     public void loadAll() {
         instances.clear();
-        repository.loadAll().forEach(instance ->
+        repository.loadAll((instance, room, obj) -> {
+            instance.setScore(instance.getScore() + obj.getScore());
+            scoreBoardManager.onScoreChanged(instance);
+        }).forEach(instance ->
                 instances.put(instance.getParty(), instance)
         );
     }
@@ -67,8 +72,8 @@ public class InstanceManager {
         return Optional.ofNullable(instances.get(partyId));
     }
 
-    public Collection<DungeonInstance> getAll() {
-        return Collections.unmodifiableCollection(instances.values());
+    public Map<UUID, DungeonInstance> getInstancesMap() {
+        return instances;
     }
 
     public boolean hasActiveInstance(UUID partyId) {

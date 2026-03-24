@@ -6,17 +6,18 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.adapter.LocationAdapter;
 import com.roguesmp.dungeon.adapter.ObjectiveAdapter;
 import com.roguesmp.dungeon.constant.DataConfig;
-import com.roguesmp.dungeon.constant.PrefixConfig;
 import com.roguesmp.dungeon.instance.DungeonInstance;
+import com.roguesmp.dungeon.instance.RoomInstance;
 import com.roguesmp.dungeon.objective.IObjective;
+import com.roguesmp.dungeon.objective.ObjectiveRestoreCallback;
 import com.roguesmp.dungeon.repository.IInstanceRepository;
-import com.roguesmp.dungeon.utils.ConsoleLogger;
 import com.roguesmp.dungeon.utils.Log4Craft;
 import org.bukkit.Location;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -25,12 +26,8 @@ public class InstanceRepository implements IInstanceRepository {
     private final Gson gson;
     private final File runtimeFolder;
 
-    public InstanceRepository() {
-        this.gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .registerTypeAdapter(Location.class, new LocationAdapter())
-                .registerTypeAdapter(IObjective.class, new ObjectiveAdapter())
-                .create();
+    public InstanceRepository(Gson gson) {
+        this.gson = gson;
 
         this.runtimeFolder = new File(
                 RogueSmpCore.getInstance().getDataFolder(),
@@ -66,7 +63,7 @@ public class InstanceRepository implements IInstanceRepository {
     }
 
     @Override
-    public List<DungeonInstance> loadAll() {
+    public List<DungeonInstance> loadAll(ObjectiveRestoreCallback onComplete) {
         List<DungeonInstance> result = new ArrayList<>();
         File[] files = runtimeFolder.listFiles(
                 (dir, name) -> name.endsWith(DataConfig.JSON_TYPE)
@@ -78,6 +75,7 @@ public class InstanceRepository implements IInstanceRepository {
             try (Reader reader = new FileReader(file)) {
                 DungeonInstance instance = gson.fromJson(reader, DungeonInstance.class);
                 if (instance != null) {
+                    restoreObjectives(instance, onComplete);
                     result.add(instance);
                 }
                 Log4Craft.success("Restore instance to cache: " + result.size() + " instance");
@@ -86,6 +84,18 @@ public class InstanceRepository implements IInstanceRepository {
             }
         }
         return result;
+    }
+
+    private void restoreObjectives(DungeonInstance instance, ObjectiveRestoreCallback onComplete) {
+        RoomInstance activeRoom = instance.getActiveRoom();
+        if (activeRoom == null || activeRoom.getObjective() == null) return;
+
+        activeRoom.getObjective().forEach(obj -> {
+            obj.start(completed -> {
+                activeRoom.setCompleted(true);
+                onComplete.onObjectiveComplete(instance, activeRoom, obj);
+            });
+        });
     }
 
     // tên file = partyId.json

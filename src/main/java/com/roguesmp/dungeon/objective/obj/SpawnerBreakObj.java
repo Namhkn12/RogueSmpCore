@@ -1,17 +1,18 @@
 package com.roguesmp.dungeon.objective.obj;
 
-import com.roguesmp.dungeon.data.Party;
-import com.roguesmp.dungeon.instance.DungeonInstance;
 import com.roguesmp.dungeon.objective.IObjective;
+import com.roguesmp.dungeon.objective.ObjectiveCompleteCallBack;
 import com.roguesmp.dungeon.objective.ObjectiveData;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+
+import java.util.List;
+import java.util.Map;
 
 public class SpawnerBreakObj implements IObjective {
     private int requiredCount = 0;
     private int brokenCount = 0;
     private boolean completed = false;
+    private transient ObjectiveCompleteCallBack onComplete;
 
     public SpawnerBreakObj() {
         this.requiredCount = 0;
@@ -23,44 +24,24 @@ public class SpawnerBreakObj implements IObjective {
     }
 
     @Override
-    public void start(DungeonInstance instance, Party party) {
-        party.getMembers().forEach(m -> {
-            Player p = Bukkit.getPlayer(m);
-            if(p != null){
-                p.sendMessage("Mục tiêu: phá " + requiredCount + " spawner");
-            }
-        });
+    public void start(ObjectiveCompleteCallBack onComplete) {
+        this.onComplete = onComplete;
     }
 
     @Override
     public void process() {
-        // SpawnerBreak không cần tick, để trống
-        // Các objective như timer countdown sẽ dùng cái này
+        // không cần tick
     }
 
-    public void onSpawnerBreak(BlockBreakEvent e, DungeonInstance instance, Party party) {
+    public void onSpawnerBreak(BlockBreakEvent e) {
+        if (completed) return;
+
         brokenCount++;
-        party.getMembers().forEach(m -> {
-            Player p = Bukkit.getPlayer(m);
-            if(p != null){
-                p.sendMessage("Đã phá spawner :" + brokenCount + "/" + requiredCount);
-            }
-        });
+
         if (brokenCount >= requiredCount) {
             completed = true;
-            end(instance, party);
+            onComplete.onComplete(this);
         }
-    }
-
-    @Override
-    public void end(DungeonInstance instance, Party party) {
-        instance.getActiveRoom().setCompleted(true);
-        party.getMembers().forEach(m -> {
-            Player p = Bukkit.getPlayer(m);
-            if(p != null){
-                p.sendMessage("Mục tiêu dungeon đã hoàn thành, hãy đi đến phòng tiếp theo");
-            }
-        });
     }
 
     @Override
@@ -68,6 +49,38 @@ public class SpawnerBreakObj implements IObjective {
 
     @Override
     public ObjectiveData getData() {
-        return null;
+        return new ObjectiveData("spawner_break", Map.of("count", requiredCount));
+    }
+
+    @Override
+    public int getScore() { return 20; }
+
+    @Override
+    public String getProgressMessage() {
+        return "Đã phá spawner: " + brokenCount + "/" + requiredCount;
+    }
+
+    @Override
+    public String getStartMessage() {
+        return "Mục tiêu hãy phá " + requiredCount + " spawner";
+    }
+
+    @Override
+    public List<String> getLineForUI() {
+        return List.of(
+                "☠ Phá spawner",
+                brokenCount + "/" + requiredCount + (completed ? " ✓" : "")
+        );
+    }
+
+    @Override
+    public Map<String, Object> exportProgress() {
+        return Map.of("brokenCount", brokenCount, "completed", completed);
+    }
+
+    @Override
+    public void importProgress(Map<String, Object> progress) {
+        this.brokenCount = ((Number) progress.get("brokenCount")).intValue();
+        this.completed = (Boolean) progress.get("completed");
     }
 }
