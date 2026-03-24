@@ -17,7 +17,8 @@ public class DungeonInstance {
     private RoomInstance activeRoom;
     private List<RoomInstance> completedRooms;        // ordered, dùng cho checkpoint khi restart
     private boolean isPlaying;
-    private double score;
+    private int score;
+    private long endTime;
 
     public DungeonInstance() {}
 
@@ -35,6 +36,7 @@ public class DungeonInstance {
         this.activeRoom = null;
         this.nextRooms = new HashMap<>();
         this.minRoomToEnd = minRoomToEnd;
+        this.endTime = System.currentTimeMillis() + (20 * 60 * 1000);
     }
 
     public UUID getUuid() {
@@ -125,11 +127,11 @@ public class DungeonInstance {
         isPlaying = playing;
     }
 
-    public double getScore() {
+    public int getScore() {
         return score;
     }
 
-    public void setScore(double score) {
+    public void setScore(int score) {
         this.score = score;
     }
 
@@ -139,5 +141,22 @@ public class DungeonInstance {
 
     public void setMinRoomToEnd(int minRoomToEnd) {
         this.minRoomToEnd = minRoomToEnd;
+    }
+
+    public long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
+    }
+
+    public int getRemainingSeconds() {
+        long remaining = endTime - System.currentTimeMillis();
+        return (int) Math.max(0, remaining / 1000);
+    }
+
+    public boolean isExpired() {
+        return System.currentTimeMillis() >= endTime;
     }
 }

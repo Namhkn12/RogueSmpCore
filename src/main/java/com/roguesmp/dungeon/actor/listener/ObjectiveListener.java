@@ -6,12 +6,14 @@ import com.roguesmp.dungeon.data.Party;
 import com.roguesmp.dungeon.instance.DungeonInstance;
 import com.roguesmp.dungeon.instance.RoomInstance;
 import com.roguesmp.dungeon.objective.obj.SpawnerBreakObj;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import java.util.UUID;
 
 public class ObjectiveListener implements Listener {
 
@@ -31,20 +33,17 @@ public class ObjectiveListener implements Listener {
         Location loc = e.getBlock().getLocation();
 
         Party party = partyController.getPartyByPlayer(player).getData();
-        // tìm dungeon instance của player này
         DungeonInstance dungeon = dungeonController.getInstanceByParty(party.getPartyId()).getData();
         if (dungeon == null) return;
 
         RoomInstance room = dungeon.getActiveRoom();
         if (room == null) return;
 
-        // check block có trong room không
         if (!room.getRoomBounds().contains(loc.toVector())) return;
 
-        // delegate xuống objective
         room.getObjective().forEach(obj -> {
             if (obj instanceof SpawnerBreakObj spawnerObj) {
-                spawnerObj.onSpawnerBreak(e, dungeon, party);
+                spawnerObj.onSpawnerBreak(e);
             }
         });
     }

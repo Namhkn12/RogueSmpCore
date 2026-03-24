@@ -5,6 +5,8 @@ import com.roguesmp.dungeon.controller.DungeonController;
 import com.roguesmp.dungeon.controller.PartyController;
 import com.roguesmp.dungeon.data.Party;
 import com.roguesmp.dungeon.dto.NextRoom;
+import com.roguesmp.dungeon.exception.BaseException;
+import com.roguesmp.dungeon.exception.GlobalException;
 import com.roguesmp.dungeon.instance.DungeonInstance;
 import com.roguesmp.gui.BaseGui;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -128,11 +130,6 @@ public class NextRoomGui extends BaseGui {
                 }catch (Exception e){
                     e.printStackTrace();
                 }
-                Party party = partyController.getPartyByPlayer((Player) event.getWhoClicked()).getData();
-                instance.getActiveRoom().getObjective().forEach(oj -> {
-                    oj.start(instance, party);
-                });
-
             });
         }
     }

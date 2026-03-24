@@ -5,6 +5,8 @@ import com.roguesmp.dungeon.instance.DungeonInstance;
 import com.roguesmp.dungeon.instance.NodeInstance;
 import com.roguesmp.dungeon.instance.RegionInstance;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,4 +45,6 @@ public interface IInstanceService {
      * Player chọn room từ UI — xóa khỏi nextRooms + nodes, trả về NodeInstance được chọn
      */
     NodeInstance selectNextRoom(DungeonInstance instance, UUID nodeInstanceId);
+
+    Map<UUID, DungeonInstance> getAllInstances();
 }
