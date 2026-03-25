@@ -21,6 +21,7 @@ import com.roguesmp.dungeon.presentation.PresentationManager;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.service.*;
 import com.roguesmp.dungeon.utils.DungeonEcho;
+import com.roguesmp.dungeon.utils.Log4Craft;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -88,6 +89,8 @@ public class DungeonController {
         if (nodes == null || nodes.isEmpty())
             return ActionResult.failed("Dungeon has no rooms");
 
+        /*Warning*/
+        /*Search start node in instance (need to fallback if start node was not found)*/
         NodeInstance startNode = nodes.values().stream()
                 .filter(n -> "start".equals(n.getNodeKey()))
                 .findFirst()
@@ -95,30 +98,25 @@ public class DungeonController {
         if (startNode == null)
             return ActionResult.failed("Start node not found");
 
-        // Paste schematic
+        /*Paste schematic*/
         try {
             schemetaService.pasteSchematic(startNode.getSchemetas(), region.getLocation());
         } catch (Exception e) {
-            RogueSmpCore.getInstance().getLogger().severe(
-                    "[DungeonController] Failed to paste schematic: " + startNode.getSchemetas()
-            );
+            Log4Craft.fire("Failed to paste schematic: " + startNode.getSchemetas(), e);
             return ActionResult.failed("Failed to build dungeon room");
         }
 
-        // Set activeRoom — fix null check ở selectNextRoom sau này
+        /*Set active room*/
         RoomInstance startRoom = new RoomInstance(startNode, null, null, true, null);
         instance.setActiveRoom(startRoom);
 
-        // Remove start node khỏi pool rồi roll nextRooms
+        /*Remove start node then roll next rooms*/
         nodes.remove(startNode.getId());
         instanceService.rollNextRooms(instance);
         Dungeon template = dungeonService.getDungeonById(instance.getDungeon()).orElse(null);
 
-        // Teleport party
-        // bind instance vào manager
+        /*Scoreboard*/
         scoreBoardManager.bind(instance);
-
-        // init board cho từng member online
         Optional<Party> party = partyService.getPartyById(partyId);
         if (party.isPresent()) {
             List<DungeonScoreBoard.PartyMember> members = buildPartyMembers(party.get());
@@ -128,14 +126,15 @@ public class DungeonController {
                 Player member = Bukkit.getPlayer(memberId);
                 if (member != null && member.isOnline()) {
                     member.teleport(region.getLocation());
-//                    DungeonEcho.success(member, "Dungeon bắt đầu! Chúc may mắn.");
                     dungeonPresenter.onEnterDungeon(member, template.getDgName());
-                    scoreBoardManager.createBoard(member, slot, members, instance, template); // ← thêm
+                    /*Build scoreboard*/
+                    scoreBoardManager.createBoard(member, slot, members, instance, template);
                 }
-                slot++; // tăng slot kể cả offline để giữ đúng index
+                slot++;
             }
         }
 
+        /*Save the instance for the first time*/
         instanceService.saveInstance(partyId);
         return ActionResult.ok("Dungeon start successfully");
     }
