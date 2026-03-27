@@ -25,6 +25,7 @@ import com.roguesmp.dungeon.schedule.DungeonTickTask;
 import com.roguesmp.dungeon.service.*;
 import com.roguesmp.dungeon.service.impl.*;
 import com.roguesmp.dungeon.task.PartyInviteTask;
+import com.roguesmp.registry.ItemRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
@@ -37,7 +38,7 @@ public class DungeonRegistry {
     private static IRegionService regionService;
     private static IPartyService partyService;
 
-    public static void onEnable(Plugin plugin) {
+    public static void onEnable(Plugin plugin, ItemRegistry itemRegistry) {
         // --- Infrastructure ---
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(Location.class, new LocationAdapter())
@@ -68,7 +69,8 @@ public class DungeonRegistry {
         IRegionRepository regionRepository = new RegionRepository(gson);
         IPartyRepository partyRepository = new PartyRepository(gson);
         IInstanceRepository instanceRepository = new InstanceRepository(gson);
-        ISpawnerRepository spawnerRepository = new SpawnerRepository(RogueSmpCore.getInstance(), gson);
+        ISpawnerRepository spawnerRepository = new SpawnerRepository(plugin, gson);
+        ILootTableRepository lootTableRepository = new LootTableRepository(plugin, gson);
 
         // --- Manager ---
         SchemetaManager schemetaManager = new SchemetaManager(schemetaRepository);
@@ -78,6 +80,7 @@ public class DungeonRegistry {
         InstanceManager instanceManager = new InstanceManager(instanceRepository, scoreBoardManager);
         SpawnerManager spawnerManager = new SpawnerManager(spawnerRepository);
         SpawnerInstanceManager spawnerInstanceManager = new SpawnerInstanceManager();
+        LootTableManager lootTableManager = new LootTableManager(lootTableRepository);
 
         // --- Service ---
         ISchemetaService schemetaService = new SchemetaService(schemetaManager);
@@ -87,6 +90,7 @@ public class DungeonRegistry {
         instanceService = new InstanceService(dungeonManager, instanceManager);
         PartyInviteTask partyInviteTask = new PartyInviteTask(partyService);
         ISpawnerService spawnerService = new SpawnerService(spawnerManager, spawnerInstanceManager);
+        ILootService lootService = new LootService(lootTableManager, itemRegistry);
         DungeonFlowService dungeonFlowService = new DungeonFlowService(partyService, dungeonPresenter, instanceService);
 
         // --- Controller ---

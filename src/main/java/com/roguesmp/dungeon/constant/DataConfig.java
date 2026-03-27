@@ -25,6 +25,14 @@ public final class DataConfig {
     public static final String SCHEMETA_FILE = "schemeta_";
     public static final String SPAWNER_TEMPLATE_FILE = "spawner_";
     public static final String PARTY_FILE = "party_";
+    public static final String LOOTABLE_FILE = "loot_";
+
+    public static String getLootTableFolder(){
+        return buildFolderPath(List.of(
+                MAIN_FOLDER,
+                LOOTABLE_FILE
+        ));
+    }
 
     public static String getSpawnerTemplateFolder(){
         return buildFolderPath(List.of(
