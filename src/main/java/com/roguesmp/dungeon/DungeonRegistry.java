@@ -8,12 +8,12 @@ import com.roguesmp.dungeon.actor.listener.NextDoorListener;
 import com.roguesmp.dungeon.actor.listener.ObjectiveListener;
 import com.roguesmp.dungeon.actor.listener.SpawnerListener;
 import com.roguesmp.dungeon.adapter.LocationAdapter;
-import com.roguesmp.dungeon.adapter.ObjectiveAdapter;
+import com.roguesmp.dungeon.adapter.ObjectiveAdapter_;
 import com.roguesmp.dungeon.adapter.UUIDTypeAdapter;
 import com.roguesmp.dungeon.controller.*;
 import com.roguesmp.dungeon.expansion.DungeonExpansion;
 import com.roguesmp.dungeon.manager.*;
-import com.roguesmp.dungeon.objective.IObjective;
+import com.roguesmp.dungeon.objective_.IObjective;
 import com.roguesmp.dungeon.presentation.EffectManager;
 import com.roguesmp.dungeon.presentation.PresentationManager;
 import com.roguesmp.dungeon.presentation.ScreenMessManager;
@@ -41,7 +41,7 @@ public class DungeonRegistry {
         // --- Infrastructure ---
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(Location.class, new LocationAdapter())
-                .registerTypeAdapter(IObjective.class, new ObjectiveAdapter())
+                .registerTypeAdapter(IObjective.class, new ObjectiveAdapter_())
                 .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
                 .setPrettyPrinting()
                 .create();
@@ -87,12 +87,13 @@ public class DungeonRegistry {
         instanceService = new InstanceService(dungeonManager, instanceManager);
         PartyInviteTask partyInviteTask = new PartyInviteTask(partyService);
         ISpawnerService spawnerService = new SpawnerService(spawnerManager, spawnerInstanceManager);
+        DungeonFlowService dungeonFlowService = new DungeonFlowService(partyService, dungeonPresenter, instanceService);
 
         // --- Controller ---
         BuildingController buildingController = new BuildingController(schemetaService);
         TemplateController templateController = new TemplateController(dungeonService);
         PartyController partyController = new PartyController(partyService,partyInviteTask);
-        DungeonController dungeonController = new DungeonController(partyService, dungeonService, schemetaService, instanceService, regionService, scoreBoardManager, dungeonPresenter);
+        DungeonController dungeonController = new DungeonController(partyService, dungeonService, schemetaService, instanceService, regionService, scoreBoardManager, dungeonPresenter, dungeonFlowService);
         SpawnerController spawnerController = new SpawnerController(spawnerService, RogueSmpCore.getInstance());
 
         //Task

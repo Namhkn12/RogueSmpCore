@@ -2,7 +2,7 @@ package com.roguesmp.dungeon.schedule;
 
 import com.roguesmp.dungeon.instance.RoomInstance;
 import com.roguesmp.dungeon.manager.ScoreBoardManager;
-import com.roguesmp.dungeon.objective.IObjective;
+import com.roguesmp.dungeon.objective_.IObjective;
 import com.roguesmp.dungeon.service.IInstanceService;
 import org.bukkit.scheduler.BukkitRunnable;
 

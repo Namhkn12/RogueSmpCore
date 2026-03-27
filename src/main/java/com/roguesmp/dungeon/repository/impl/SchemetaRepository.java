@@ -53,7 +53,7 @@ public class SchemetaRepository implements ISchemetaRepository {
 
     @Override
     public void save(Schemeta schemeta) throws IOException {
-        File file = new File(schemetaFolder, DataConfig.SCHEMETA_FILE + schemeta.getSchemId() + DataConfig.JSON_TYPE);
+        File file = new File(schemetaFolder,  schemeta.getSchemId() + DataConfig.JSON_TYPE);
         try (Writer writer = new FileWriter(file, StandardCharsets.UTF_8)) {
             gson.toJson(schemeta, writer);
         }

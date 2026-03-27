@@ -55,4 +55,18 @@ public class DungeonPresenter {
 
                 .play(player, presentation);
     }
+
+    public void onCompleteDungeon(Player player) {
+        new PresentationSequence()
+
+                .addSound(DungeonSound.of(Sound.BLOCK_BEACON_ACTIVATE, 1f, 1.2f))
+                .addScreen(
+                        ScreenMessage.title(
+                                "&a&lCHÚC MỪNG",
+                                "&7Bạn đã vượt qua hầm ngục"
+                        )
+                )
+
+                .play(player, presentation);
+    }
 }

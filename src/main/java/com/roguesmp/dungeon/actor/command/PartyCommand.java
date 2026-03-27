@@ -8,6 +8,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.profile.PlayerProfile;
 
+import java.util.Collection;
+
 public class PartyCommand {
 
     private final PartyController partyController;
@@ -36,11 +38,19 @@ public class PartyCommand {
                         new CommandAPICommand("invite")
                                 .withArguments(new PlayerProfileArgument("target"))
                                 .executesPlayer((player, args) -> {
-                                    PlayerProfile profile = (PlayerProfile) args.get("target");
+                                    @SuppressWarnings("unchecked")
+                                    Collection<PlayerProfile> profiles = (Collection<PlayerProfile>) args.get("target");
+
+                                    if (profiles == null || profiles.isEmpty()) {
+                                        player.sendMessage("§cKhông tìm thấy player!");
+                                        return;
+                                    }
+
+                                    PlayerProfile profile = profiles.iterator().next();
                                     Player target = Bukkit.getPlayer(profile.getUniqueId());
 
                                     if (target == null) {
-                                        player.sendMessage("§cPlayer is not online!");
+                                        player.sendMessage("§cPlayer không online!");
                                         return;
                                     }
 
