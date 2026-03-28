@@ -4,6 +4,7 @@ import com.roguesmp.dungeon.exception.BaseException;
 
 public class InstanceException extends BaseException {
     public InstanceException(String tid) {
-        super("Failed to create spawner instance from template: " + tid);
+        super("Failed to create spawner instance from template: " + tid,
+                "Khong the tao spawner instance tu template: " + tid);
     }
 }

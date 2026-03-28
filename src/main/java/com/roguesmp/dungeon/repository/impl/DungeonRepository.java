@@ -4,7 +4,10 @@ import com.google.gson.Gson;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.constant.DataConfig;
 import com.roguesmp.dungeon.data.Dungeon;
+import com.roguesmp.dungeon.exception.impl.data.DataDeleteException;
+import com.roguesmp.dungeon.exception.impl.data.DataSaveException;
 import com.roguesmp.dungeon.repository.IDungeonRepository;
+import com.roguesmp.dungeon.utils.Log4Craft;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -39,7 +42,7 @@ public class DungeonRepository implements IDungeonRepository {
                     dungeons.add(dungeon);
                 }
             }catch (Exception e){
-                e.printStackTrace();
+                Log4Craft.fire("Failed to load dungeon template: " + file.getName(), e);
             }
         }
         return dungeons;
@@ -51,12 +54,17 @@ public class DungeonRepository implements IDungeonRepository {
         try (Writer writer = new FileWriter(file, StandardCharsets.UTF_8)){
             gson.toJson(dungeon, writer);
         }catch (Exception e){
-            e.printStackTrace();
+            throw new DataSaveException(file.getName(), e);
         }
     }
 
     @Override
     public boolean delete(String id) {
-        return new File(dungeonFolder, DataConfig.DUNGEON_TEMPLATE_FILE + id + DataConfig.JSON_TYPE).delete();
+        File file = new File(dungeonFolder, id + DataConfig.JSON_TYPE);
+        if (!file.exists()) return false;
+        if (!file.delete()) {
+            throw new DataDeleteException(file.getName(), null);
+        }
+        return true;
     }
 }

@@ -6,7 +6,10 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.adapter.UUIDTypeAdapter;
 import com.roguesmp.dungeon.constant.DataConfig;
 import com.roguesmp.dungeon.data.Party;
+import com.roguesmp.dungeon.exception.impl.data.DataDeleteException;
+import com.roguesmp.dungeon.exception.impl.data.DataSaveException;
 import com.roguesmp.dungeon.repository.IPartyRepository;
+import com.roguesmp.dungeon.utils.Log4Craft;
 
 import java.io.*;
 import java.util.*;
@@ -31,14 +34,16 @@ public class PartyRepository implements IPartyRepository {
         try (Writer writer = new FileWriter(file)) {
             gson.toJson(party, writer);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new DataSaveException(file.getName(), e);
         }
     }
 
     @Override
     public void delete(UUID partyId) {
         File file = getFile(partyId);
-        if (file.exists()) file.delete();
+        if (file.exists() && !file.delete()) {
+            throw new DataDeleteException(file.getName(), null);
+        }
     }
 
     @Override
@@ -54,7 +59,7 @@ public class PartyRepository implements IPartyRepository {
                 Party party = gson.fromJson(reader, Party.class);
                 if (party != null) result.add(party);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log4Craft.fire("Failed to load party file: " + file.getName(), e);
             }
         }
         return result;

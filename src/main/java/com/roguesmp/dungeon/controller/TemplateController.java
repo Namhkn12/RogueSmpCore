@@ -3,6 +3,8 @@ package com.roguesmp.dungeon.controller;
 import com.roguesmp.dungeon.dto.ActionResult;
 import com.roguesmp.dungeon.data.Dungeon;
 import com.roguesmp.dungeon.data.Room;
+import com.roguesmp.dungeon.exception.BaseException;
+import com.roguesmp.dungeon.exception.GlobalException;
 import com.roguesmp.dungeon.service.IDungeonService;
 
 import java.util.List;
@@ -20,8 +22,9 @@ public class TemplateController {
         try {
             Dungeon dungeon = dungeonService.createDungeon(name);
             return ActionResult.ok("Dungeon template created: " + dungeon.getDgId(), dungeon);
-        } catch (IllegalArgumentException e) {
-            return ActionResult.failed(e.getMessage());
+        } catch (BaseException e) {
+            GlobalException.handle(e);
+            return ActionResult.failed(e.getUserMessage());
         }
     }
 

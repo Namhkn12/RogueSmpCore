@@ -52,9 +52,11 @@ public class DungeonManager {
     /** Remove a dungeon from cache and storage. */
     public boolean delete(String dgId) {
         if (!dungeons.containsKey(dgId)) return false;
-
-        dungeons.remove(dgId);
-        return dungeonRepository.delete(dgId);
+        if(dungeonRepository.delete(dgId)){
+            dungeons.remove(dgId);
+            return true;
+        }
+        return false;
     }
 
     public List<String> getDungeonIdList() {

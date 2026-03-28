@@ -8,6 +8,8 @@ import com.roguesmp.dungeon.data.Region;
 import com.roguesmp.dungeon.data.Schemeta;
 import com.roguesmp.dungeon.dto.DungeonScoreBoard;
 import com.roguesmp.dungeon.dto.NextRoom;
+import com.roguesmp.dungeon.exception.BaseException;
+import com.roguesmp.dungeon.exception.GlobalException;
 import com.roguesmp.dungeon.instance.DungeonInstance;
 import com.roguesmp.dungeon.instance.NodeInstance;
 import com.roguesmp.dungeon.instance.RegionInstance;
@@ -18,7 +20,6 @@ import com.roguesmp.dungeon.objective_.param.ObjectiveData;
 import com.roguesmp.dungeon.objective_.ObjectiveFactory;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.service.*;
-import com.roguesmp.dungeon.utils.Log4Craft;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -100,8 +101,11 @@ public class DungeonController {
         /*Paste schematic*/
         try {
             schemetaService.pasteSchematic(startNode.getSchemetas(), region.getLocation());
+        } catch (BaseException e) {
+            GlobalException.handle(e);
+            return ActionResult.failed("Failed to build dungeon room");
         } catch (Exception e) {
-            Log4Craft.fire("Failed to paste schematic: " + startNode.getSchemetas(), e);
+            GlobalException.handleUnexpected("start dungeon: paste schematic", e);
             return ActionResult.failed("Failed to build dungeon room");
         }
 

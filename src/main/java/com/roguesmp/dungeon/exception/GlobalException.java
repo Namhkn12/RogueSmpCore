@@ -7,20 +7,27 @@ import org.bukkit.entity.Player;
 public class GlobalException {
 
     public static void handle(BaseException e) {
-        Log4Craft.fire("WDA - Exception: " + e.getMessage(), e);
-        if (e.getCause() != null) {
-            Log4Craft.error("Caused by: " + e.getCause().getMessage());
-        }
+        Log4Craft.fire("Dungeon exception: " + e.getMessage(), e);
     }
 
-    public static void handleUnexpected(String context, Exception e) {
-        Log4Craft.error("Unexpected error at [" + context + "]: " + e.getMessage());
-        e.printStackTrace();
+    public static void handleUnexpected(String context, Throwable e) {
+        Log4Craft.fire("Unexpected error at [" + context + "]: " + e.getMessage(), e);
+    }
+
+    public static void notify(Player player, BaseException e) {
+        if (player == null) return;
+        DungeonEcho.error(player, e.getUserMessage());
     }
 
     public static void handleAndNotify(BaseException e, Player player) {
         handle(e);
-        player.sendMessage(": " + e.getMessage());
-        DungeonEcho.error(player, "System error: " + e.getMessage());
+        notify(player, e);
+    }
+
+    public static void handleAndNotifyUnexpected(String context, Throwable e, Player player, String userMessage) {
+        handleUnexpected(context, e);
+        if (player != null) {
+            DungeonEcho.error(player, userMessage);
+        }
     }
 }

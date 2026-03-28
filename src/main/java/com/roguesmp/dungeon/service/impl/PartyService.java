@@ -43,7 +43,7 @@ public class PartyService implements IPartyService {
         for (UUID memberId : party.getMembers()) {
             Player member = Bukkit.getPlayer(memberId);
             if (member != null) {
-                DungeonEcho.warn(owner, "Nhóm đã bị giải tán");
+                DungeonEcho.warn(member, "Nhóm đã bị giải tán");
             }
         }
 

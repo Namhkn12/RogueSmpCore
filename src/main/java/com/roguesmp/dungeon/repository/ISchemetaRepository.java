@@ -3,8 +3,6 @@ package com.roguesmp.dungeon.repository;
 import com.roguesmp.dungeon.data.Schemeta;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 public interface ISchemetaRepository {
@@ -16,7 +14,7 @@ public interface ISchemetaRepository {
     /**
      * Lưu 1 schemeta xuống file
      */
-    void save(Schemeta schemeta) throws IOException;
+    void save(Schemeta schemeta);
 
     /**
      * Xóa 1 file schemeta
@@ -26,10 +24,10 @@ public interface ISchemetaRepository {
     /**
      * Lưu 1 schemeta cùng schematic
      */
-    void saveSchem(String name, Clipboard clipboard) throws IOException;
+    void saveSchem(String name, Clipboard clipboard);
 
     /**
      * Load 1 schemeta, trả về clipboard, dùng để paste công trình
      */
-    Clipboard loadSchem(String name) throws IOException;
+    Clipboard loadSchem(String name);
 }
