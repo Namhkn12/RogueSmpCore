@@ -5,6 +5,22 @@ import org.bukkit.util.Vector;
 
 public class VectorUtils {
 
+    /**
+     * Rotates a vector using Euler angles (Yaw, Pitch, and Roll) in a specific sequence.
+     * <p>
+     * The rotation follows a fixed-axis sequence:
+     * <ol>
+     * <li><b>Yaw (Y-axis):</b> Rotates the vector in the horizontal plane.</li>
+     * <li><b>Pitch (X-axis):</b> Rotates the vector in the vertical plane.</li>
+     * <li><b>Roll (Z-axis):</b> Rotates the vector around its forward-facing axis.</li>
+     * </ol>
+     *
+     * @param v     The original {@link Vector} to be rotated.
+     * @param yaw   The rotation angle around the Y-axis in degrees.
+     * @param pitch The rotation angle around the X-axis in degrees.
+     * @param roll  The rotation angle around the Z-axis in degrees.
+     * @return A new {@link Vector} representing the coordinates after all three rotations.
+     */
     public static Vector rotate(Vector v, double yaw, double pitch, double roll) {
 
         double yawRad = FastMath.toRadians(yaw);
@@ -39,6 +55,19 @@ public class VectorUtils {
         return new Vector(x2, y2, z2);
     }
 
+    /**
+     * Rotates a vector around a custom arbitrary axis using Rodrigues' Rotation Formula.
+     * <p>
+     * This method allows for precise rotation around any direction vector in 3D space,
+     * rather than being limited to the world X, Y, or Z axes.
+     *
+     * @param vector The original {@link Vector} to be rotated.
+     * @param axis   The direction {@link Vector} defining the axis of rotation.
+     * This vector will be normalized internally.
+     * @param angle  The amount of rotation in <b>radians</b>.
+     * @return A new {@link Vector} representing the rotated position.
+     * @see <a href="https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula">Rodrigues' Rotation Formula</a>
+     */
     public static Vector rotateAroundAxis(Vector vector, Vector axis, double angle) {
 
         // Normalize axis
@@ -64,5 +93,16 @@ public class VectorUtils {
         double newZ = w * dot * (1 - cos) + z * cos + (-v * x + u * y) * sin;
 
         return new Vector(newX, newY, newZ);
+    }
+
+    public static Vector rotateYAxis(Vector vector, double angle) {
+        // Standard rotation uses radians
+        double sin = FastMath.sin(angle);
+        double cos = FastMath.cos(angle);
+
+        double x = vector.getX() * cos + vector.getZ() * sin;
+        double z = vector.getZ() * cos - vector.getX() * sin;
+
+        return vector.setX(x).setZ(z);
     }
 }

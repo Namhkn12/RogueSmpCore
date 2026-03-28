@@ -6,12 +6,14 @@ import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.EnchantComponent;
 import com.roguesmp.item.component.impl.EquipAttributeComponent;
 import com.roguesmp.player.ability.AbilityLoadout;
+import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -128,6 +130,18 @@ public class SmpPlayer {
         return Collections.unmodifiableMap(activeAttributes);
     }
 
+    public Map<Enchants, Integer> getActiveEnchantsCopy() {
+        Map<Enchants, Integer> map = new EnumMap<>(Enchants.class);
+        map.putAll(activeEnchants);
+        return map;
+    }
+
+    public Map<Attributes, Double> getActiveAttributesCopy() {
+        Map<Attributes, Double> map = new EnumMap<>(Attributes.class);
+        map.putAll(activeAttributes);
+        return map;
+    }
+
     public AbilityLoadout getAbilityLoadout() {
         return abilityLoadout;
     }
@@ -156,10 +170,10 @@ public class SmpPlayer {
         return projectiles.remove(uuid);
     }
 
-    public void tick(boolean twoHz, boolean oneHz) {
-        activeEnchants.forEach((enchants, integer) -> enchants.getEnchant().tick(this, integer, twoHz, oneHz));
-        activeAttributes.forEach((attributes, aDouble) -> attributes.getAttribute().tick(this, aDouble, twoHz, oneHz));
-        abilityLoadout.tick(oneHz, twoHz);
+    public void tick(int periodIncrement) {
+        activeEnchants.forEach((enchants, integer) -> enchants.getEnchant().tick(this, periodIncrement, integer));
+        activeAttributes.forEach((attributes, aDouble) -> attributes.getAttribute().tick(this, periodIncrement, aDouble));
+        abilityLoadout.tick(periodIncrement);
     }
 
     public void onInteract(PlayerInteractEvent event) {
@@ -167,8 +181,8 @@ public class SmpPlayer {
         Player player = event.getPlayer();
         if (action.isLeftClick()) {
             if (player.isSneaking()) abilityLoadout.cast(AbilityTrigger.SHIFT_LEFT_CLICK);
-            else abilityLoadout.cast(AbilityTrigger.LEFT_CLICK);
         } else if (action.isRightClick()) {
+            if (ItemStackUtils.isUsable(player.getEquipment().getItemInMainHand())) return;
             if (player.isSneaking()) abilityLoadout.cast(AbilityTrigger.SHIFT_RIGHT_CLICK);
             else abilityLoadout.cast(AbilityTrigger.RIGHT_CLICK);
         }
@@ -261,6 +275,16 @@ public class SmpPlayer {
             attributes.getAttribute().onBlockBreak(event, aDouble, this);
         });
         abilityLoadout.onBlockBreak(event);
+    }
+
+    public void onCombust(EntityCombustEvent event) {
+        activeEnchants.forEach((enchants, integer) -> {
+            enchants.getEnchant().onCombust(event, integer, this);
+        });
+        activeAttributes.forEach((attributes, aDouble) -> {
+            attributes.getAttribute().onCombust(event, aDouble, this);
+        });
+        abilityLoadout.onCombust(event);
     }
 
     public void onProjectileHit(ProjectileHitEvent event) {

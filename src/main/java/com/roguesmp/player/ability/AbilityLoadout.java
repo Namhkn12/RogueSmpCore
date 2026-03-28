@@ -11,11 +11,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 
@@ -98,63 +100,78 @@ public class AbilityLoadout {
         return passiveAbilities;
     }
 
-    public void tick(boolean twoHz, boolean oneHz) {
-        equippedAbilities.forEach((trigger, ability) -> {
-            if (ability.tickCooldown(PlayerManager.PERIOD)) {
-                ability.onCooldownRefreshed();
-            }
-            ability.tick(twoHz, oneHz);
-        });
+    /**
+     * Return a list of all equipped abilities, with passive first and active last. The order of active is the same as AbilityTrigger enum
+     * @return An unmodifiable list containing all equipped abilities
+     */
+    public @Unmodifiable List<Ability> getAbilities() {
+        List<Ability> abilities = new ArrayList<>(passiveAbilities);
+        abilities.addAll(equippedAbilities.values());
+        return List.copyOf(abilities);
+    }
+
+    public void tick(int periodIncrement) {
         passiveAbilities.forEach((ability) -> {
             if (ability.tickCooldown(PlayerManager.PERIOD)) {
                 ability.onCooldownRefreshed();
             }
-            ability.tick(twoHz, oneHz);
+            ability.tick(periodIncrement);
+        });
+        equippedAbilities.forEach((trigger, ability) -> {
+            if (ability.tickCooldown(PlayerManager.PERIOD)) {
+                ability.onCooldownRefreshed();
+            }
+            ability.tick(periodIncrement);
         });
     }
 
     public void onDamageEntity(DamageEvent event) {
-        equippedAbilities.forEach((trigger, ability) -> ability.onDamageEntity(event));
         passiveAbilities.forEach((ability) -> ability.onDamageEntity(event));
+        equippedAbilities.forEach((trigger, ability) -> ability.onDamageEntity(event));
     }
 
     public void onKillEntity(EntityDeathEvent event) {
-        equippedAbilities.forEach((trigger, ability) -> ability.onKillEntity(event));
         passiveAbilities.forEach((ability) -> ability.onKillEntity(event));
+        equippedAbilities.forEach((trigger, ability) -> ability.onKillEntity(event));
     }
 
     public void onHurt(DamageEvent event) {
-        equippedAbilities.forEach((trigger, ability) -> ability.onHurt(event));
         passiveAbilities.forEach((ability) -> ability.onHurt(event));
+        equippedAbilities.forEach((trigger, ability) -> ability.onHurt(event));
     }
 
     public void onHurtFatal(DamageEvent event) {
-        equippedAbilities.forEach((trigger, ability) -> ability.onHurtFatal(event));
         passiveAbilities.forEach((ability) -> ability.onHurtFatal(event));
+        equippedAbilities.forEach((trigger, ability) -> ability.onHurtFatal(event));
     }
 
     public void onConsume(PlayerItemConsumeEvent event) {
-        equippedAbilities.forEach((trigger, ability) -> ability.onConsume(event));
         passiveAbilities.forEach((ability) -> ability.onConsume(event));
+        equippedAbilities.forEach((trigger, ability) -> ability.onConsume(event));
     }
 
     public void onExpChange(PlayerExpChangeEvent event) {
-        equippedAbilities.forEach((trigger, ability) -> ability.onExpChange(event));
         passiveAbilities.forEach((ability) -> ability.onExpChange(event));
+        equippedAbilities.forEach((trigger, ability) -> ability.onExpChange(event));
     }
 
     public void onBlockBreak(BlockBreakEvent event) {
-        equippedAbilities.forEach((trigger, ability) -> ability.onBlockBreak(event));
         passiveAbilities.forEach((ability) -> ability.onBlockBreak(event));
+        equippedAbilities.forEach((trigger, ability) -> ability.onBlockBreak(event));
+    }
+
+    public void onCombust(EntityCombustEvent event) {
+        passiveAbilities.forEach((ability) -> ability.onCombust(event));
+        equippedAbilities.forEach((trigger, ability) -> ability.onCombust(event));
     }
 
     public void onProjectileHit(ProjectileHitEvent event) {
-        equippedAbilities.forEach((trigger, ability) -> ability.onProjectileHit(event));
         passiveAbilities.forEach((ability) -> ability.onProjectileHit(event));
+        equippedAbilities.forEach((trigger, ability) -> ability.onProjectileHit(event));
     }
 
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
-        equippedAbilities.forEach((trigger, ability) -> ability.onProjectileLaunch(event));
         passiveAbilities.forEach((ability) -> ability.onProjectileLaunch(event));
+        equippedAbilities.forEach((trigger, ability) -> ability.onProjectileLaunch(event));
     }
 }

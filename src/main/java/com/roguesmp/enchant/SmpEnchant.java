@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -42,7 +43,7 @@ public interface SmpEnchant {
 
     }
 
-    default void tick(@NotNull SmpPlayer player, int level, boolean twoHz, boolean oneHz) {
+    default void tick(@NotNull SmpPlayer player, int periodIncrement, int level) {
 
     }
 
@@ -71,6 +72,10 @@ public interface SmpEnchant {
     }
 
     default void onBlockBreak(BlockBreakEvent event, int level, @NotNull SmpPlayer player) {
+
+    }
+
+    default void onCombust(EntityCombustEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 

@@ -1,7 +1,7 @@
 package com.roguesmp.entity.spell.impl;
 
 import com.roguesmp.effect.EffectManager;
-import com.roguesmp.effect.impl.SpeedBuffEffect;
+import com.roguesmp.effect.impl.SpeedEffect;
 import com.roguesmp.entity.spell.Spell;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -21,7 +21,7 @@ public class SlowAuraSpell extends Spell {
     public void run() {
         Collection<Player> players = owner.getLocation().getNearbyPlayers(5);
         players.forEach(player -> {
-            EffectManager.getInstance().addEffect(player, "slow_aura_spell", new SpeedBuffEffect(100, -0.3, "slow_aura_spell"));
+            EffectManager.getInstance().addEffect(player, "slow_aura_spell", new SpeedEffect(100, -0.3, "slow_aura_spell"));
         });
 
     }

@@ -11,6 +11,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -47,7 +48,7 @@ public interface SmpAttribute {
 //        player.getAttribute(Attribute.ATTACK_DAMAGE).removeModifier(MODIFIER_ID);
     }
 
-    default void tick(@NotNull SmpPlayer player, double value, boolean twoHz, boolean oneHz) {
+    default void tick(@NotNull SmpPlayer player, int periodIncrement, double value) {
 
     }
 
@@ -76,6 +77,10 @@ public interface SmpAttribute {
     }
 
     default void onBlockBreak(BlockBreakEvent event, double value, @NotNull SmpPlayer player) {
+
+    }
+
+    default void onCombust(EntityCombustEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 

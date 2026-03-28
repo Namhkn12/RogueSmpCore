@@ -13,6 +13,16 @@ public class DamageUtils {
     public static void damage(@NotNull LivingEntity victim, @Nullable Entity damager, double damage, DamageEvent.Metadata metadata) {
         if (!victim.isValid()) return;
         nextMetadata = metadata;
-        victim.damage(damage, damager);
+        boolean bypassIFrame = metadata.isIgnoreIframe();
+
+        int originalIFrame = victim.getNoDamageTicks();
+        double originalLastDamage = victim.getLastDamage();
+        if (bypassIFrame) {
+            victim.setNoDamageTicks(0);
+            victim.damage(damage, damager);
+
+            victim.setNoDamageTicks(originalIFrame);
+            victim.setLastDamage(originalLastDamage);
+        } else victim.damage(damage, damager);
     }
 }

@@ -4,8 +4,10 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.EnumSet;
 import java.util.List;
 
 public class ItemStackUtils {
@@ -27,4 +29,16 @@ public class ItemStackUtils {
         stack.setData(DataComponentTypes.ITEM_NAME, component);
     }
 
+    public static final EnumSet<Material> usableItems = EnumSet.of(
+            Material.BOW,
+            Material.CROSSBOW,
+            Material.TRIDENT,
+            Material.SHIELD,
+            Material.FISHING_ROD,
+            Material.FIREWORK_ROCKET
+            );
+    public static boolean isUsable(ItemStack itemStack) {
+        if (itemStack.hasData(DataComponentTypes.CONSUMABLE)) return true;
+        return usableItems.contains(itemStack.getType());
+    }
 }

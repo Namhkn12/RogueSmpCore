@@ -7,6 +7,8 @@ import com.roguesmp.annotation.GsonIgnore;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.item.component.serialize.ComponentMapCodec;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -90,6 +92,17 @@ public class Utils {
             components.add(MiniMessage.miniMessage().deserialize(miniMessage));
         }
         return components;
+    }
+
+    /**
+     * Return a non-italic Component
+     */
+    public static Component text(String text, TextColor color) {
+        return Component.text(text, color).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
+    }
+
+    public static Component text(String text) {
+        return Component.text(text).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
     }
 
     public static String formatDecimal(double value) {

@@ -33,12 +33,10 @@ public class PlayerManager {
             @Override
             public void run() {
                 ticks += PERIOD;
-                boolean twoHz = ticks % 10 == 0;
-                boolean oneHz = ticks % 20 == 0;
                 if (ticks >= 20) ticks = 0;
 
                 for (SmpPlayer player : players.values()) {
-                    player.tick(twoHz, oneHz);
+                    player.tick(PERIOD);
                 }
             }
         }.runTaskTimer(this.plugin, 0, PERIOD);

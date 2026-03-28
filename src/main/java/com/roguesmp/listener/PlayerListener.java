@@ -17,9 +17,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 
 import java.util.UUID;
@@ -154,6 +152,16 @@ public class PlayerListener implements Listener {
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
         if (smpPlayer == null) return;
         smpPlayer.onBlockBreak(event);
+    }
+
+    @EventHandler
+    public void onCombust(EntityCombustEvent event) {
+        if (event instanceof EntityCombustByEntityEvent entityCombustByEntityEvent) {
+            SmpPlayer smpPlayer = playerManager.getSmpPlayer(entityCombustByEntityEvent.getEntity().getUniqueId());
+            if (smpPlayer == null) return;
+            smpPlayer.onCombust(event);
+        }
+
     }
 
     @EventHandler

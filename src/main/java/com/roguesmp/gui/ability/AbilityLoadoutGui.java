@@ -89,7 +89,11 @@ public class AbilityLoadoutGui extends BaseGui {
             Ability ability = loadout.getActiveAbilities().get(abilityTrigger);
             ItemStack item;
             if (ability == null) {
-                item = noAbilItem;
+                ItemStack clone = noAbilItem.clone();
+                List<Component> lore = new ArrayList<>(clone.getData(DataComponentTypes.LORE).lines());
+                lore.add(Utils.text("Trigger: ", NamedTextColor.GRAY).append(abilityTrigger.simpleName().color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
+                clone.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+                item = clone;
             } else {
                 AbilityInfo<?> info = ability.getAbilityInfo();
                 item = ItemStack.of(info.displayIcon());
@@ -103,6 +107,9 @@ public class AbilityLoadoutGui extends BaseGui {
 
                 item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
             }
+
+            item.unsetData(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+            item.unsetData(DataComponentTypes.FIREWORKS);
 
             addButton(slot, item, click -> {
                 click.setCancelled(true);
@@ -123,10 +130,22 @@ public class AbilityLoadoutGui extends BaseGui {
                 ItemStack item = ItemStack.of(info.displayIcon());
                 item.setData(DataComponentTypes.ITEM_NAME, info.displayText());
                 int level = player.getPlayerData().getUnlockedAbilities().getOrDefault(info.id(), 1);
-                item.setData(DataComponentTypes.LORE, ItemLore.lore(info.descriptionProvider().apply(player, level)));
+
+                List<Component> lore = info.descriptionProvider().apply(player, level);
+                lore.add(Utils.text("Click để thay đổi", NamedTextColor.GRAY));
+                item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+
+                item.unsetData(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+                item.unsetData(DataComponentTypes.FIREWORKS);
+
                 addButton(slot, item, ClickHandler.openGui(new AbilityEquipGui(player, AbilityTrigger.PASSIVE)));
             } else {
-                addButton(slot, noAbilItem, ClickHandler.openGui(new AbilityEquipGui(player, AbilityTrigger.PASSIVE)));
+                ItemStack clone = noAbilItem.clone();
+
+                clone.unsetData(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+                clone.unsetData(DataComponentTypes.FIREWORKS);
+
+                addButton(slot, clone, ClickHandler.openGui(new AbilityEquipGui(player, AbilityTrigger.PASSIVE)));
             }
         }
     }
