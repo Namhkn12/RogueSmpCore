@@ -2,6 +2,7 @@ package com.roguesmp.registry;
 
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.effect.impl.DamageIncreaseEffect;
+import com.roguesmp.effect.impl.ResistanceEffect;
 import com.roguesmp.effect.impl.SpeedEffect;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,5 +26,6 @@ public class EffectCodecRegistry {
     static {
         register(SpeedEffect.EFFECT_ID, SpeedEffect.class);
         register(DamageIncreaseEffect.ID, DamageIncreaseEffect.class);
+        register(ResistanceEffect.ID, ResistanceEffect.class);
     }
 }
