@@ -2,6 +2,7 @@ package com.roguesmp.event;
 
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.constant.DamageType;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -22,9 +23,17 @@ public class DamageEvent extends Event implements Cancellable {
         private final @Nullable String mobSpellId;
         private final @Nullable String abilityId;
         private DamageType damageType;
+        private boolean ignoreIframe;
 
         public Metadata(DamageType damageType) {
             this(damageType, null, null);
+        }
+
+        public Metadata(@Nullable String mobSpellId, @Nullable String abilityId, DamageType damageType, boolean ignoreIframe) {
+            this.mobSpellId = mobSpellId;
+            this.abilityId = abilityId;
+            this.damageType = damageType;
+            this.ignoreIframe = ignoreIframe;
         }
 
         public Metadata(@Nullable String abilityId, DamageType damageType) {
@@ -36,9 +45,11 @@ public class DamageEvent extends Event implements Cancellable {
         }
 
         public Metadata(DamageType damageType, @Nullable String mobSpellId, @Nullable String abilityId) {
-            this.mobSpellId = mobSpellId;
-            this.abilityId = abilityId;
-            this.damageType = damageType;
+            this(mobSpellId, abilityId, damageType, false);
+        }
+
+        public boolean isIgnoreIframe() {
+            return ignoreIframe;
         }
     }
 
@@ -49,7 +60,6 @@ public class DamageEvent extends Event implements Cancellable {
 
     private boolean needUpdate = true; // For recalculating dmg value
 
-    private boolean ignoreIframe;
     private boolean isCancelled;
     private boolean isCritical;
 
@@ -115,7 +125,7 @@ public class DamageEvent extends Event implements Cancellable {
         // Vanilla mechanics
         if (metadata.damageType == DamageType.MELEE && damager instanceof Player bukkitPlayer) {
             finalDamage *= getMeleeCooldownMultiplier(bukkitPlayer);
-            if (isCritical) finalDamage *= 1.5;
+            if (isCritical && bukkitPlayer.getAttribute(Attribute.ATTACK_DAMAGE).getValue() <= 1d) finalDamage *= 1.5;
         } else if (damager instanceof AbstractArrow arrow && !(arrow instanceof Trident)) {
             finalDamage *= getArrowVelocityMultiplier(arrow);
         }
@@ -164,6 +174,15 @@ public class DamageEvent extends Event implements Cancellable {
     @Override
     public void setCancelled(boolean cancelled) {
         isCancelled = cancelled;
+    }
+
+    public boolean isIgnoreIframe() {
+        return metadata.ignoreIframe;
+    }
+
+    public DamageEvent setIgnoreIframe(boolean ignoreIframe) {
+        metadata.ignoreIframe = ignoreIframe;
+        return this;
     }
 
     @Override

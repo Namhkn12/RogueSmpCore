@@ -79,23 +79,6 @@ public class BaseEntity {
         return new SmpEntity(this, living);
     }
 
-    /**
-     * Get the entity/snapshot with equipments, name, etc., but no spells. Useful for spawners creation
-     * @param location location
-     * @return The created entity
-     */
-    public LivingEntity spawnOnlyEquipment(Location location) {
-        Entity entity = location.getWorld().createEntity(location, this.getEntityType().getEntityClass());
-        processEntity(entity);
-        // Remove since we don't actually need it in the world
-        entity.remove();
-        if (!(entity instanceof LivingEntity living)) {
-            RogueSmpCore.LOGGER.warn("EntityType must be a living entity!");
-            throw new RuntimeException("EntityType must be a living entity!");
-        }
-        return living;
-    }
-
     public EntitySnapshot spawnOnlyEquipmentSnapshot(Location location) {
         Entity entity = location.getWorld().createEntity(location, this.getEntityType().getEntityClass());
         processEntity(entity);

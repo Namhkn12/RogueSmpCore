@@ -17,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.persistence.PersistentDataType;
 
 public class EntityListener implements Listener {
@@ -110,6 +111,12 @@ public class EntityListener implements Listener {
     @EventHandler
     public void onCastSpell(SpellCastEvent event) {
         event.getSmpEntity().onCastSpell(event);
+    }
+
+    // Yes, disable slime split since it's annoying to handle
+    @EventHandler
+    public void onSplit(SlimeSplitEvent event) {
+        event.setCancelled(true);
     }
 
 }

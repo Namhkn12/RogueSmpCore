@@ -3,6 +3,7 @@ package com.roguesmp.effect.impl;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.SmpEffect;
+import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.DoubleArgument;
 import dev.jorel.commandapi.arguments.IntegerArgument;
@@ -16,19 +17,19 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
-public class SpeedBuffEffect extends SmpEffect {
+public class SpeedEffect extends SmpEffect {
     public static final String EFFECT_ID = "speed_buff";
 
     private final double value;
     private final String modifierId;
 
-    public SpeedBuffEffect(int duration, double value, DeathBehavior behavior, String modifierId) {
+    public SpeedEffect(int duration, double value, DeathBehavior behavior, String modifierId) {
         super(duration, EFFECT_ID, behavior);
         this.value = value;
         this.modifierId = modifierId;
     }
 
-    public SpeedBuffEffect(int duration, double value, String modifierId) {
+    public SpeedEffect(int duration, double value, String modifierId) {
         super(duration, EFFECT_ID);
         this.value = value;
         this.modifierId = modifierId;
@@ -46,7 +47,7 @@ public class SpeedBuffEffect extends SmpEffect {
 
     @Override
     public @Nullable Component getDisplay() {
-        return Component.text("+" + value + " tốc chạy", NamedTextColor.GREEN);
+        return Component.text("+" + Utils.formatDecimal(value * 100) + "% tốc chạy", NamedTextColor.GREEN);
     }
 
     @Override
@@ -84,7 +85,7 @@ public class SpeedBuffEffect extends SmpEffect {
                     String modifierId = (String) args.get("modifierId");
                     String source = (String) args.get("source");
 
-                    EffectManager.getInstance().addEffect(player, source, new SpeedBuffEffect(duration, value, modifierId));
+                    EffectManager.getInstance().addEffect(player, source, new SpeedEffect(duration, value, modifierId));
                 });
     }
 }

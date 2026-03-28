@@ -31,4 +31,15 @@ public class EntityUtils {
         return new ArrayList<>(loc.getWorld().getNearbyLivingEntities(loc, rx, ry, rz,
                 entity -> entity.isValid() && !(entity instanceof Player) && predicate.test(entity)));
     }
+
+    public static void healPercent(LivingEntity living, double percentToHeal) {
+        double maxHp = getMaxHealth(living);
+        double toHeal = maxHp * (percentToHeal / 100);
+        living.heal(toHeal);
+    }
+
+    public static double getAttributeOrDefault(Attributable entity, Attribute attribute, double def) {
+        AttributeInstance attr = entity.getAttribute(attribute);
+        return attr == null ? def : attr.getValue();
+    }
 }

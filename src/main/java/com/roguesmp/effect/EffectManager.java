@@ -3,7 +3,7 @@ package com.roguesmp.effect;
 import com.google.gson.*;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.effect.impl.DamageIncreaseEffect;
-import com.roguesmp.effect.impl.SpeedBuffEffect;
+import com.roguesmp.effect.impl.SpeedEffect;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.registry.EffectCodecRegistry;
 import com.roguesmp.utils.Utils;
@@ -126,7 +126,7 @@ public class EffectManager {
         new CommandAPICommand("smpeffect")
                 .withSubcommand(new CommandAPICommand("add")
                         .withSubcommand(DamageIncreaseEffect.registerCommand())
-                        .withSubcommand(SpeedBuffEffect.registerCommand()))
+                        .withSubcommand(SpeedEffect.registerCommand()))
 
                 .register();
     }
@@ -252,6 +252,7 @@ public class EffectManager {
 
     public void onDamage(DamageEvent event) {
         Entity le = event.getDamager();
+        if (le == null) return;
         Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(le.getUniqueId());
         if (effectMap == null) return;
         effectMap.forEach((s, smpEffects) -> {

@@ -3,10 +3,11 @@ package com.roguesmp.listener;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.utils.DamageUtils;
+import com.roguesmp.utils.EntityUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -19,6 +20,21 @@ public class DamageListener implements Listener {
         if (event instanceof EntityDamageByEntityEvent entityDamageByEntityEvent) {
             Entity damager = entityDamageByEntityEvent.getDamager();
             Entity victim = event.getEntity();
+            if (damager instanceof Player && victim instanceof Player) {
+                event.setCancelled(true);
+                return;
+            }
+            if (damager instanceof Projectile projectile) {
+                if (projectile.getShooter() instanceof Player) {
+                    if (victim instanceof Player) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                } else if (projectile.getShooter() instanceof LivingEntity living) {
+                    double projectileDamage = EntityUtils.getAttributeOrDefault(living, Attribute.ATTACK_DAMAGE, 0);
+                    event.setDamage(projectileDamage);
+                }
+            }
 
             DamageEvent.Metadata metadata = DamageUtils.nextMetadata;
             DamageEvent damageEvent;
@@ -41,6 +57,14 @@ public class DamageListener implements Listener {
             } else if (damager instanceof Projectile projectile && projectile.getShooter() instanceof Player player) {
                 player.sendMessage(damageEvent.getFinalDamage() + " " + damageEvent.getDamageType());
             }
+        } else {
+            Entity victim = event.getEntity();
+            DamageType damageType = DamageType.getType(event.getCause());
+            DamageEvent damageEvent = new DamageEvent(victim, null, event.getDamage(), new DamageEvent.Metadata(damageType));
+
+            Bukkit.getPluginManager().callEvent(damageEvent);
+            event.setCancelled(damageEvent.isCancelled());
+            event.setDamage(damageEvent.getFinalDamage());
         }
 
     }
