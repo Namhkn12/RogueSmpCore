@@ -4,6 +4,7 @@ import com.roguesmp.dungeon.controller.DungeonController;
 import com.roguesmp.dungeon.controller.PartyController;
 import com.roguesmp.dungeon.dto.ActionResult;
 import com.roguesmp.dungeon.instance.DungeonInstance;
+import com.roguesmp.dungeon.utils.Log4Craft;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.StringArgument;
 
@@ -23,8 +24,12 @@ public class DungeonCommand {
                         new CommandAPICommand("start")
                                 .executesPlayer((player, args) -> {
                                     String templateId = "dungeon_20260310231827";
-                                    ActionResult<DungeonInstance> instance = dungeonController.generateDungeon(templateId, player);
-                                    dungeonController.startDungeon(instance.getData());
+                                    ActionResult<Void> result = dungeonController.handleRequestDungeon(templateId, player);
+                                    if(result.isOk()){
+                                        Log4Craft.info(result.getMessage());
+                                    }else {
+                                        Log4Craft.error(result.getMessage());
+                                    }
                                 })
                 )
                 .withSubcommand(

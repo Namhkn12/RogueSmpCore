@@ -95,13 +95,13 @@ public class DungeonRegistry {
         ISpawnerService spawnerService = new SpawnerService(spawnerManager, spawnerInstanceManager);
         ILootService lootService = new LootService(lootTableManager, itemRegistry);
         IDungeonRewardService rewardService = new DungeonRewardService(lootService, instanceService, partyService, dungeonService);
-        DungeonFlowService dungeonFlowService = new DungeonFlowService(partyService, dungeonPresenter, instanceService);
+        IDungeonFlowService dungeonFlowService = new DungeonFlowService(partyService, instanceService, dungeonService, schemetaService, regionService, scoreBoardManager, dungeonPresenter);
 
         // --- Controller ---
         BuildingController buildingController = new BuildingController(schemetaService);
         TemplateController templateController = new TemplateController(dungeonService);
         PartyController partyController = new PartyController(partyService,partyInviteTask);
-        DungeonController dungeonController = new DungeonController(partyService, dungeonService, schemetaService, instanceService, regionService, scoreBoardManager, dungeonPresenter, dungeonFlowService);
+        DungeonController dungeonController = new DungeonController(partyService, schemetaService, instanceService, scoreBoardManager, dungeonPresenter, dungeonFlowService);
         SpawnerController spawnerController = new SpawnerController(spawnerService, RogueSmpCore.getInstance());
         DungeonTreasureController treasureController = new DungeonTreasureController(rewardService);
 

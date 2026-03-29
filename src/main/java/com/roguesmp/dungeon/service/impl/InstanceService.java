@@ -33,6 +33,9 @@ public class InstanceService implements IInstanceService {
     @Override
     public DungeonInstance createDungeonInstance(Dungeon dungeon, UUID party, RegionInstance region) {
         Map<UUID, NodeInstance> nodes = rollNodeData(dungeon.getDgId());
+        if(nodes.isEmpty()){
+            return null;
+        }
         int minToEndSetting = dungeon.getMinRoomToEnd();
         int minToEnd = minToEndSetting == 0 ? nodes.size() * 2/3 : minToEndSetting;
 
