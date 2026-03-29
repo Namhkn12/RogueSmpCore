@@ -107,9 +107,7 @@ public class IgneousRune extends Ability {
                 // Detection Phase (Only after preparation)
                 if (ticks > PREPARE_TIME) {
                     double detectionRadius = 2.0;
-                    List<LivingEntity> enemies = loc.getNearbyLivingEntities(detectionRadius).stream()
-                            .filter(e -> !(e instanceof Player) && e.isValid())
-                            .toList();
+                    List<LivingEntity> enemies = EntityUtils.getNearbyMobs(loc, detectionRadius, 1, detectionRadius, living -> true);
 
                     if (!enemies.isEmpty()) {
                         detonate(loc, caster);
@@ -123,7 +121,7 @@ public class IgneousRune extends Ability {
     }
 
     private void drawRuneCircle(Location loc, int ticks, int prepareTime) {
-        double radius = 1.5;
+        double radius = 3;
 
         // --- PHASE 1: FORMATION ---
         if (ticks <= prepareTime) {

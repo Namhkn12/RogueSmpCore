@@ -95,9 +95,10 @@ public class GravityBomb extends Ability {
                 }
 
                 if (!grenade.isValid() || physicsItem.isOnGround() || tick > 120 || grenade.isInLava() || hasCollidedWithEnemy(grenade)) {
+                    Location location = grenade.getLocation();
                     grenade.remove();
                     physicsItem.remove();
-                    explode(grenade.getLocation(), damage, radius);
+                    explode(location, damage, radius);
                     this.cancel();
                     return;
                 }

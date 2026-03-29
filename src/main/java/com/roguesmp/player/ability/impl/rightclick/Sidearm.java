@@ -76,7 +76,7 @@ public class Sidearm extends Ability {
         double range = 20.0; // Slightly buffed range
 
         RayTraceResult result = p.getWorld().rayTrace(eye, direction, range,
-                FluidCollisionMode.NEVER, true, 0.5, (e) -> !e.equals(p) && e instanceof LivingEntity);
+                FluidCollisionMode.NEVER, true, 0.5, (e) -> !(e instanceof Player) && e instanceof LivingEntity);
 
         Location endPoint = (result != null) ? result.getHitPosition().toLocation(p.getWorld())
                 : eye.clone().add(direction.clone().multiply(range));
