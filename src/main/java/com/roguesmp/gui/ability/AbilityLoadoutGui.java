@@ -24,7 +24,7 @@ public class AbilityLoadoutGui extends BaseGui {
 
     private static final List<Integer> ACTIVE_SLOTS = List.of(10, 11, 12, 13, 14, 15, 16);
 
-    private static final List<Integer> PASSIVE_SLOTS = List.of(28,29,30,31,32,33,34,37,38,39,40,41,42,43);
+    private static final List<Integer> PASSIVE_SLOTS = List.of(28,29,30,31,32,33,34);
 
     private final ItemStack noAbilItem;
     private final ItemStack filler;
@@ -131,7 +131,7 @@ public class AbilityLoadoutGui extends BaseGui {
                 item.setData(DataComponentTypes.ITEM_NAME, info.displayText());
                 int level = player.getPlayerData().getUnlockedAbilities().getOrDefault(info.id(), 1);
 
-                List<Component> lore = info.descriptionProvider().apply(player, level);
+                List<Component> lore = new ArrayList<>(info.descriptionProvider().apply(player, level));
                 lore.add(Utils.text("Click để thay đổi", NamedTextColor.GRAY));
                 item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
 

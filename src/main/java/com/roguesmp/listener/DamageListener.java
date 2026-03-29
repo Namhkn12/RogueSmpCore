@@ -31,6 +31,8 @@ public class DamageListener implements Listener {
                         return;
                     }
                 } else if (projectile.getShooter() instanceof LivingEntity living) {
+                    // Wither, skeleton, blaze, snow golem, etc... will use their attack damage attribute as projectil damage
+                    // for easier entity creation
                     double projectileDamage = EntityUtils.getAttributeOrDefault(living, Attribute.ATTACK_DAMAGE, 0);
                     event.setDamage(projectileDamage);
                 }

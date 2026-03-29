@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class AbilityEquipGui extends BaseGui {
 
-    private static final int MAX_PASSIVE = 14;
+    private static final int MAX_PASSIVE = 7;
 
     private static final int[] ABILITY_SLOTS = {
             10,11,12,13,14,15,16,
@@ -145,6 +145,10 @@ public class AbilityEquipGui extends BaseGui {
                 setup();
             });
         }
+
+        ItemStack returnGui = ItemStack.of(Material.WRITTEN_BOOK);
+        returnGui.setData(DataComponentTypes.ITEM_NAME, Component.text("Quay về Loadout", NamedTextColor.GREEN));
+        addButton(5, 0, returnGui, ClickHandler.openGui(new AbilityLoadoutGui(smpPlayer)));
     }
 
     private void addBorders() {
