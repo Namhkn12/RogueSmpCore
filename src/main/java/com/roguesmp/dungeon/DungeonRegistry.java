@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.actor.command.*;
+import com.roguesmp.dungeon.actor.command.LootTableCommand;
+import com.roguesmp.dungeon.actor.listener.LootTableListener;
 import com.roguesmp.dungeon.actor.listener.NextDoorListener;
 import com.roguesmp.dungeon.actor.listener.ObjectiveListener;
 import com.roguesmp.dungeon.actor.listener.SpawnerListener;
@@ -81,6 +83,7 @@ public class DungeonRegistry {
         SpawnerManager spawnerManager = new SpawnerManager(spawnerRepository);
         SpawnerInstanceManager spawnerInstanceManager = new SpawnerInstanceManager();
         LootTableManager lootTableManager = new LootTableManager(lootTableRepository);
+        lootTableManager.reload();
 
         // --- Service ---
         ISchemetaService schemetaService = new SchemetaService(schemetaManager);
@@ -91,6 +94,7 @@ public class DungeonRegistry {
         PartyInviteTask partyInviteTask = new PartyInviteTask(partyService);
         ISpawnerService spawnerService = new SpawnerService(spawnerManager, spawnerInstanceManager);
         ILootService lootService = new LootService(lootTableManager, itemRegistry);
+        IDungeonRewardService rewardService = new DungeonRewardService(lootService, instanceService, partyService, dungeonService);
         DungeonFlowService dungeonFlowService = new DungeonFlowService(partyService, dungeonPresenter, instanceService);
 
         // --- Controller ---
@@ -99,6 +103,7 @@ public class DungeonRegistry {
         PartyController partyController = new PartyController(partyService,partyInviteTask);
         DungeonController dungeonController = new DungeonController(partyService, dungeonService, schemetaService, instanceService, regionService, scoreBoardManager, dungeonPresenter, dungeonFlowService);
         SpawnerController spawnerController = new SpawnerController(spawnerService, RogueSmpCore.getInstance());
+        DungeonTreasureController treasureController = new DungeonTreasureController(rewardService);
 
         //Task
         new DungeonTickTask(scoreBoardManager, instanceService)
@@ -110,6 +115,7 @@ public class DungeonRegistry {
         new PartyCommand(partyController).register();
         new DungeonCommand(dungeonController, partyController).register();
         new SpawnerCommand().register();
+        new LootTableCommand(lootService).register();
 
         // --- Listener ---
         Bukkit.getPluginManager().registerEvents(
@@ -124,6 +130,11 @@ public class DungeonRegistry {
 
         Bukkit.getPluginManager().registerEvents(
                 new SpawnerListener(spawnerController),
+                RogueSmpCore.getInstance()
+        );
+
+        Bukkit.getPluginManager().registerEvents(
+                new LootTableListener(treasureController),
                 RogueSmpCore.getInstance()
         );
 

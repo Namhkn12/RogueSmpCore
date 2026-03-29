@@ -139,4 +139,20 @@ public final class LootRules {
             return Math.max(0, tier) * modifierPerTier;
         }
     }
+
+    public static class DungeonScoreRule implements LootRule {
+        private final int score;
+        private final double multiplierPerPoint;
+
+        public DungeonScoreRule(int score, double multiplierPerPoint) {
+            this.score = score;
+            this.multiplierPerPoint = multiplierPerPoint;
+        }
+
+        @Override
+        public double evaluate(LootContext context) {
+            return Math.max(0, score) * multiplierPerPoint;
+        }
+    }
+
 }

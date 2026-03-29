@@ -98,7 +98,11 @@ public class InstanceService implements IInstanceService {
                 .allMatch(n -> n.getNodeKey().equals("end"));
 
         List<UUID> pool = remaining.entrySet().stream()
-                .filter(e -> onlyEndLeft || canRollEnd || !e.getValue().getNodeKey().equals("end"))
+                .filter(e ->
+                        // bỏ qua reward
+                        !e.getValue().getNodeKey().startsWith("reward") &&
+                                (onlyEndLeft || canRollEnd || !e.getValue().getNodeKey().equals("end"))
+                )
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toCollection(ArrayList::new));
 

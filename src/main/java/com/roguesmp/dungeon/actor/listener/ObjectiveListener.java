@@ -10,6 +10,7 @@ import com.roguesmp.dungeon.objective_.ievento.IBlockBreakObjective;
 import com.roguesmp.dungeon.objective_.ievento.IEntityDeadObjective;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -46,6 +47,8 @@ public class ObjectiveListener implements Listener {
     @EventHandler
     public void onMobKill(EntityDeathEvent e){
         //check world
+        LivingEntity entity = e.getEntity();
+        if(entity.getKiller() == null) return;
         DungeonContext ctx = resolve(e.getEntity().getKiller(), e.getEntity().getLocation());
         if (ctx == null) return;
 

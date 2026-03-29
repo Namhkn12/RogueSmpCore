@@ -31,7 +31,7 @@ public class DungeonManager {
     /** Create a new dungeon, persist it, and put it in cache. */
     public Dungeon create(String name) {
         String dgId = DataConfig.DUNGEON_TEMPLATE_FILE + TimeId.generateTimeId();
-        Dungeon dungeon = new Dungeon(dgId, name, "", 0);
+        Dungeon dungeon = new Dungeon(dgId, name, "", 0, "");
 
         dungeons.put(dgId, dungeon);
         dungeonRepository.save(dungeon);

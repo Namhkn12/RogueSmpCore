@@ -1,13 +1,20 @@
 package com.roguesmp.dungeon.actor.command;
 
+import com.roguesmp.dungeon.constant.DungeonDoorType;
 import com.roguesmp.dungeon.controller.BuildingController;
 import com.roguesmp.dungeon.exception.BaseException;
 import com.roguesmp.dungeon.exception.GlobalException;
 import com.roguesmp.dungeon.exception.impl.schemeta.SchemetaNotFoundException;
 import com.roguesmp.dungeon.exception.impl.schemeta.SelectionNotFoundException;
+import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 public class SchemetaCommand {
 
@@ -60,6 +67,31 @@ public class SchemetaCommand {
                                                 "schemeta paste command", e, player, "Khong the paste schemeta");
                                     }
                                 })
+                )
+                .withSubcommand(
+                        new CommandAPICommand("give")
+                                .withSubcommand(
+                                        new CommandAPICommand("next_door").executesPlayer((player, args) -> {
+                                            ItemStack item = new ItemStack(Material.VAULT);
+                                            ItemMeta meta = item.getItemMeta();
+                                            meta.displayName(Component.text("Next Door"));
+                                            meta.getPersistentDataContainer().set(NameSpaceKeys.NEXT_DOOR_KEY, PersistentDataType.STRING, DungeonDoorType.NEXTDOOR.getType());
+                                            item.setItemMeta(meta);
+                                            player.getInventory().addItem(item);
+                                            player.sendMessage("Give Next Door");
+                                        })
+                                )
+                                .withSubcommand(
+                                        new CommandAPICommand("end_door").executesPlayer((player, args) -> {
+                                            ItemStack item = new ItemStack(Material.LODESTONE);
+                                            ItemMeta meta = item.getItemMeta();
+                                            meta.displayName(Component.text("End Door"));
+                                            meta.getPersistentDataContainer().set(NameSpaceKeys.END_DOOR_KEY, PersistentDataType.STRING, DungeonDoorType.ENDDOOR.getType());
+                                            item.setItemMeta(meta);
+                                            player.getInventory().addItem(item);
+                                            player.sendMessage("Give End Door");
+                                        })
+                                )
                 )
                 .register();
     }

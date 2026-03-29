@@ -17,6 +17,8 @@ public final class DataConfig {
     public static final String PARTY_FOLDER = "party";
     public static final String REGION_FOLDER = "region";
     public static final String SPAWNER_TEMPLATE_FOLDER = "spawner_template";
+    public static final String LOOTABLE_FOLDER = "loottable";
+
 
     //file name prefix constant
     public static final String DUNGEON_TEMPLATE_FILE = "dungeon_";
@@ -30,7 +32,7 @@ public final class DataConfig {
     public static String getLootTableFolder(){
         return buildFolderPath(List.of(
                 MAIN_FOLDER,
-                LOOTABLE_FILE
+                LOOTABLE_FOLDER
         ));
     }
 

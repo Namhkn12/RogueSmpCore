@@ -50,8 +50,20 @@ public class DungeonFlowService implements IDungeonFlowService {
                     }
                 })
         );
+        //TO DO
+        //chỉnh thời gian lên 10p cuối để player nhận thưởng ở cổng cuối cùng
+    }
 
-        // cleanup instance
+    private void finishDungeonProcess(DungeonInstance dungeon){
+        partyService.getPartyById(dungeon.getParty()).ifPresent(p ->
+                p.getMembers().forEach(id -> {
+                    Player player = Bukkit.getPlayer(id);
+                    if (player != null) {
+                        //tp ve the gioi cu
+                    }
+                })
+        );
+
         instanceService.endDungeonInstance(dungeon.getParty());
     }
 }

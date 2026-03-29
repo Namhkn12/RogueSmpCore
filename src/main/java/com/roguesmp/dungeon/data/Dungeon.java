@@ -10,16 +10,18 @@ public class Dungeon {
     private String dgDescription;
     private int minRoomToEnd;
     private Map<String, Node> nodes;
+    private String lootTableId;
 
     public Dungeon() {
     }
 
-    public Dungeon(String dgId, String dgName, String dgDescription, int minRoomToEnd) {
+    public Dungeon(String dgId, String dgName, String dgDescription, int minRoomToEnd, String lootTableId) {
         this.dgId = dgId;
         this.dgName = dgName;
         this.dgDescription = dgDescription;
         this.nodes = createDefaultNodes();
         this.minRoomToEnd = minRoomToEnd;
+        this.lootTableId = lootTableId;
     }
 
     private Map<String, Node> createDefaultNodes() {
@@ -31,6 +33,10 @@ public class Dungeon {
         ));
         defaultNodes.put("end", new Node(
                 "end", "End Node", "END_PORTAL_FRAME",
+                1.0, 1, List.of()
+        ));
+        defaultNodes.put("reward", new Node(
+                "reward", "Reward Node", "CHEST",
                 1.0, 1, List.of()
         ));
 
@@ -75,5 +81,13 @@ public class Dungeon {
 
     public void setMinRoomToEnd(int minRoomToEnd) {
         this.minRoomToEnd = minRoomToEnd;
+    }
+
+    public String getLootTableId() {
+        return lootTableId;
+    }
+
+    public void setLootTableId(String lootTableId) {
+        this.lootTableId = lootTableId;
     }
 }
