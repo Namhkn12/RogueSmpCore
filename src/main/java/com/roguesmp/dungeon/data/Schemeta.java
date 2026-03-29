@@ -1,7 +1,6 @@
 package com.roguesmp.dungeon.data;
 
-import com.roguesmp.dungeon.objective.IObjective;
-import com.roguesmp.dungeon.objective.ObjectiveData;
+import com.roguesmp.dungeon.objective_.param.ObjectiveData;
 
 import java.util.List;
 

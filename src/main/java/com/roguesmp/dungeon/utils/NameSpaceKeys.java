@@ -8,4 +8,10 @@ public class NameSpaceKeys {
             new NamespacedKey(RogueSmpCore.getInstance(), "spawner_iid");
     public static final NamespacedKey SPAWNER_TID_KEY =
             new NamespacedKey(RogueSmpCore.getInstance(), "spawner_tid");
+    public static final NamespacedKey REWARD_CID_KEY =
+            new NamespacedKey(RogueSmpCore.getInstance(), "reward_cid");
+    public static final NamespacedKey NEXT_DOOR_KEY =
+            new NamespacedKey(RogueSmpCore.getInstance(), "next_door");
+    public static final NamespacedKey END_DOOR_KEY =
+            new NamespacedKey(RogueSmpCore.getInstance(), "end_door");
 }

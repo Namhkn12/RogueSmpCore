@@ -1,13 +1,13 @@
 package com.roguesmp.dungeon.instance;
 
-import com.roguesmp.dungeon.objective.IObjective;
+import com.roguesmp.dungeon.objective_.IObjective;
 import org.bukkit.Location;
 import org.bukkit.util.BoundingBox;
 
 import java.util.List;
 
 public class RoomInstance {
-    private NodeInstance activeNode;//
+    private NodeInstance node;//
     private BoundingBox roomBounds; // bọc lại room
     private List<IObjective> objective; // mục tiêu đang thực hiện
     private boolean completed; // trạng thái của room
@@ -16,20 +16,20 @@ public class RoomInstance {
     public RoomInstance() {
     }
 
-    public RoomInstance(NodeInstance activeNode, BoundingBox roomBounds, List<IObjective> objective, boolean completed, Location checkpoint) {
-        this.activeNode = activeNode;
+    public RoomInstance(NodeInstance node, BoundingBox roomBounds, List<IObjective> objective, boolean completed, Location checkpoint) {
+        this.node = node;
         this.roomBounds = roomBounds;
         this.objective = objective;
         this.completed = completed;
         this.checkpoint = checkpoint;
     }
 
-    public NodeInstance getActiveNode() {
-        return activeNode;
+    public NodeInstance getNode() {
+        return node;
     }
 
-    public void setActiveNode(NodeInstance activeNode) {
-        this.activeNode = activeNode;
+    public void setNode(NodeInstance node) {
+        this.node = node;
     }
 
     public BoundingBox getRoomBounds() {

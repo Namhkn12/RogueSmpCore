@@ -31,7 +31,7 @@ public class DungeonManager {
     /** Create a new dungeon, persist it, and put it in cache. */
     public Dungeon create(String name) {
         String dgId = DataConfig.DUNGEON_TEMPLATE_FILE + TimeId.generateTimeId();
-        Dungeon dungeon = new Dungeon(dgId, name, "", 0);
+        Dungeon dungeon = new Dungeon(dgId, name, "", 0, "");
 
         dungeons.put(dgId, dungeon);
         dungeonRepository.save(dungeon);
@@ -52,9 +52,11 @@ public class DungeonManager {
     /** Remove a dungeon from cache and storage. */
     public boolean delete(String dgId) {
         if (!dungeons.containsKey(dgId)) return false;
-
-        dungeons.remove(dgId);
-        return dungeonRepository.delete(dgId);
+        if(dungeonRepository.delete(dgId)){
+            dungeons.remove(dgId);
+            return true;
+        }
+        return false;
     }
 
     public List<String> getDungeonIdList() {

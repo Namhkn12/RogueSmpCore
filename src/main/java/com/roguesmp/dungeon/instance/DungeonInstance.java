@@ -19,6 +19,8 @@ public class DungeonInstance {
     private boolean isPlaying;
     private int score;
     private long endTime;
+    private boolean completed;
+    private int rewardRoomCount;
 
     public DungeonInstance() {}
 
@@ -37,6 +39,8 @@ public class DungeonInstance {
         this.nextRooms = new HashMap<>();
         this.minRoomToEnd = minRoomToEnd;
         this.endTime = System.currentTimeMillis() + (20 * 60 * 1000);
+        this.completed = false;
+        this.rewardRoomCount = 1;
     }
 
     public UUID getUuid() {
@@ -158,5 +162,21 @@ public class DungeonInstance {
 
     public boolean isExpired() {
         return System.currentTimeMillis() >= endTime;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+
+    public int getRewardRoomCount() {
+        return rewardRoomCount;
+    }
+
+    public void setRewardRoomCount(int rewardRoomCount) {
+        this.rewardRoomCount = rewardRoomCount;
     }
 }

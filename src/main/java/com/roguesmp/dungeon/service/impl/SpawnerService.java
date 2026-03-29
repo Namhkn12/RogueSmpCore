@@ -9,7 +9,6 @@ import com.roguesmp.dungeon.manager.SpawnerManager;
 import com.roguesmp.dungeon.service.ISpawnerService;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.registry.EntityRegistry;
-import org.apache.commons.math3.exception.NullArgumentException;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.spawner.SpawnerEntry;
 import org.bukkit.entity.EntitySnapshot;
@@ -57,7 +56,7 @@ public class SpawnerService implements ISpawnerService {
         Spawner sp = spawnerManager.get(templateId);
 
         if (spawner == null) {
-            throw new InvalidInputException(CreatureSpawner.class.getName(), "cannot be null",null);
+            throw new InvalidInputException(CreatureSpawner.class.getName(), "cannot be null");
         }
 
         spawner.setDelay(sp.getDelay());

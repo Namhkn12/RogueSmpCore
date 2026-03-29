@@ -68,7 +68,7 @@ public class SpawnerRepository implements ISpawnerRepository {
 
     @Override
     public Boolean delete(String id) {
-        File file = new File(spawnerFolder, id + DataConfig.JSON_TYPE);
+        File file = new File(spawnerFolder, DataConfig.SPAWNER_TEMPLATE_FILE + id + DataConfig.JSON_TYPE);
 
         if (!file.exists()) return false;
 

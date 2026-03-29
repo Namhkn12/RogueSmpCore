@@ -7,7 +7,7 @@ import com.roguesmp.dungeon.dto.DungeonScoreBoard;
 import com.roguesmp.dungeon.expansion.DungeonExpansion;
 import com.roguesmp.dungeon.instance.DungeonInstance;
 import com.roguesmp.dungeon.instance.RoomInstance;
-import com.roguesmp.dungeon.objective.IObjective;
+import com.roguesmp.dungeon.objective_.IObjective;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -59,7 +59,7 @@ public class ScoreBoardManager {
             RoomInstance room = instance.getActiveRoom();
             if (room != null && room.getObjective() != null) {
                 List<List<String>> objectiveLines = room.getObjective().stream()
-                        .map(IObjective::getLineForUI)
+                        .map(IObjective::getMessageScoreBoard)
                         .toList();
                 renderer.updateObjectives(objectiveLines);
             }

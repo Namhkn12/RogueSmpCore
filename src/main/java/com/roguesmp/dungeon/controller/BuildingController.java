@@ -15,11 +15,11 @@ public class BuildingController {
         this.schemetaService = schemetaService;
     }
 
-    public void createNewSchematic(Player executor, String schemName) throws Exception {
+    public void createNewSchematic(Player executor, String schemName) {
         schemetaService.createSchemeta(executor, schemName);
     }
 
-    public BoundingBox buildSchematicById(String schemetaId, Location location) throws Exception {
+    public BoundingBox buildSchematicById(String schemetaId, Location location) {
         return schemetaService.pasteSchematic(schemetaId, location);
     }
 

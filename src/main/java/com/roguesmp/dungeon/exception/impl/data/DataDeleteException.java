@@ -4,6 +4,6 @@ import com.roguesmp.dungeon.exception.BaseException;
 
 public class DataDeleteException extends BaseException {
     public DataDeleteException(String fileName, Throwable cause) {
-        super("Fail to delete file: " + fileName, cause);
+        super("Fail to delete file: " + fileName, "Khong the xoa du lieu: " + fileName, cause);
     }
 }

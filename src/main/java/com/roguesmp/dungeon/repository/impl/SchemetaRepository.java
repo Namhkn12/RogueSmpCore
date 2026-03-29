@@ -4,7 +4,11 @@ import com.google.gson.Gson;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.constant.DataConfig;
 import com.roguesmp.dungeon.data.Schemeta;
+import com.roguesmp.dungeon.exception.impl.data.DataDeleteException;
+import com.roguesmp.dungeon.exception.impl.data.DataLoadException;
+import com.roguesmp.dungeon.exception.impl.data.DataSaveException;
 import com.roguesmp.dungeon.repository.ISchemetaRepository;
+import com.roguesmp.dungeon.utils.Log4Craft;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
@@ -45,40 +49,52 @@ public class SchemetaRepository implements ISchemetaRepository {
                     schemetas.add(schemeta);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log4Craft.fire("Failed to load schemeta file: " + file.getName(), e);
             }
         }
         return schemetas;
     }
 
     @Override
-    public void save(Schemeta schemeta) throws IOException {
-        File file = new File(schemetaFolder, DataConfig.SCHEMETA_FILE + schemeta.getSchemId() + DataConfig.JSON_TYPE);
+    public void save(Schemeta schemeta) {
+        File file = new File(schemetaFolder,  schemeta.getSchemId() + DataConfig.JSON_TYPE);
         try (Writer writer = new FileWriter(file, StandardCharsets.UTF_8)) {
             gson.toJson(schemeta, writer);
+        } catch (IOException e) {
+            throw new DataSaveException(file.getName(), e);
         }
     }
 
     @Override
     public void delete(String id) {
-        new File(schemetaFolder, id + DataConfig.JSON_TYPE).delete();
-    }
-
-    @Override
-    public void saveSchem(String name, Clipboard clipboard) throws IOException {
-        File schemFile = new File(schematicFolder, name + DataConfig.SCHEM_TYPE);
-        try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_SCHEMATIC
-                .getWriter(new FileOutputStream(schemFile))) {
-            writer.write(clipboard);
+        File file = new File(schemetaFolder, id + DataConfig.JSON_TYPE);
+        if (file.exists() && !file.delete()) {
+            throw new DataDeleteException(file.getName(), null);
         }
     }
 
     @Override
-    public Clipboard loadSchem(String name) throws IOException {
+    public void saveSchem(String name, Clipboard clipboard) {
         File schemFile = new File(schematicFolder, name + DataConfig.SCHEM_TYPE);
+        try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_SCHEMATIC
+                .getWriter(new FileOutputStream(schemFile))) {
+            writer.write(clipboard);
+        } catch (IOException e) {
+            throw new DataSaveException(schemFile.getName(), e);
+        }
+    }
+
+    @Override
+    public Clipboard loadSchem(String name) {
+        File schemFile = new File(schematicFolder, name + DataConfig.SCHEM_TYPE);
+        if (!schemFile.exists()) {
+            throw new DataLoadException(schemFile.getName(), null);
+        }
         try (ClipboardReader reader = BuiltInClipboardFormat.SPONGE_SCHEMATIC
                 .getReader(new FileInputStream(schemFile))) {
             return reader.read();
+        } catch (IOException e) {
+            throw new DataLoadException(schemFile.getName(), e);
         }
     }
 

@@ -1,6 +1,5 @@
 package com.roguesmp.dungeon.controller;
 
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.actor.scoreboard.MemberStatus;
 import com.roguesmp.dungeon.dto.ActionResult;
 import com.roguesmp.dungeon.data.Dungeon;
@@ -9,18 +8,18 @@ import com.roguesmp.dungeon.data.Region;
 import com.roguesmp.dungeon.data.Schemeta;
 import com.roguesmp.dungeon.dto.DungeonScoreBoard;
 import com.roguesmp.dungeon.dto.NextRoom;
+import com.roguesmp.dungeon.exception.BaseException;
+import com.roguesmp.dungeon.exception.GlobalException;
 import com.roguesmp.dungeon.instance.DungeonInstance;
 import com.roguesmp.dungeon.instance.NodeInstance;
 import com.roguesmp.dungeon.instance.RegionInstance;
 import com.roguesmp.dungeon.instance.RoomInstance;
 import com.roguesmp.dungeon.manager.ScoreBoardManager;
-import com.roguesmp.dungeon.objective.IObjective;
-import com.roguesmp.dungeon.objective.ObjectiveData;
-import com.roguesmp.dungeon.objective.ObjectiveFactory;
-import com.roguesmp.dungeon.presentation.PresentationManager;
+import com.roguesmp.dungeon.objective_.IObjective;
+import com.roguesmp.dungeon.objective_.param.ObjectiveData;
+import com.roguesmp.dungeon.objective_.ObjectiveFactory;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.service.*;
-import com.roguesmp.dungeon.utils.DungeonEcho;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -35,10 +34,11 @@ public class DungeonController {
     private final IRegionService regionService;
     private final ScoreBoardManager scoreBoardManager;
     private final DungeonPresenter dungeonPresenter;
+    private final IDungeonFlowService dungeonFlowService;
 
     public DungeonController(IPartyService partyService, IDungeonService dungeonService,
                              ISchemetaService schemetaService, IInstanceService instanceService,
-                             IRegionService regionService, ScoreBoardManager scoreBoardManager, DungeonPresenter dungeonPresenter) {
+                             IRegionService regionService, ScoreBoardManager scoreBoardManager, DungeonPresenter dungeonPresenter, IDungeonFlowService dungeonFlowService) {
         this.partyService = partyService;
         this.dungeonService = dungeonService;
         this.schemetaService = schemetaService;
@@ -46,6 +46,7 @@ public class DungeonController {
         this.regionService = regionService;
         this.scoreBoardManager = scoreBoardManager;
         this.dungeonPresenter = dungeonPresenter;
+        this.dungeonFlowService = dungeonFlowService;
     }
 
     public ActionResult<DungeonInstance> generateDungeon(String template, Player player) {
@@ -88,6 +89,8 @@ public class DungeonController {
         if (nodes == null || nodes.isEmpty())
             return ActionResult.failed("Dungeon has no rooms");
 
+        /*Warning*/
+        /*Search start node in instance (need to fallback if start node was not found)*/
         NodeInstance startNode = nodes.values().stream()
                 .filter(n -> "start".equals(n.getNodeKey()))
                 .findFirst()
@@ -95,30 +98,28 @@ public class DungeonController {
         if (startNode == null)
             return ActionResult.failed("Start node not found");
 
-        // Paste schematic
+        /*Paste schematic*/
         try {
             schemetaService.pasteSchematic(startNode.getSchemetas(), region.getLocation());
+        } catch (BaseException e) {
+            GlobalException.handle(e);
+            return ActionResult.failed("Failed to build dungeon room");
         } catch (Exception e) {
-            RogueSmpCore.getInstance().getLogger().severe(
-                    "[DungeonController] Failed to paste schematic: " + startNode.getSchemetas()
-            );
+            GlobalException.handleUnexpected("start dungeon: paste schematic", e);
             return ActionResult.failed("Failed to build dungeon room");
         }
 
-        // Set activeRoom — fix null check ở selectNextRoom sau này
+        /*Set active room*/
         RoomInstance startRoom = new RoomInstance(startNode, null, null, true, null);
         instance.setActiveRoom(startRoom);
 
-        // Remove start node khỏi pool rồi roll nextRooms
+        /*Remove start node then roll next rooms*/
         nodes.remove(startNode.getId());
         instanceService.rollNextRooms(instance);
         Dungeon template = dungeonService.getDungeonById(instance.getDungeon()).orElse(null);
 
-        // Teleport party
-        // bind instance vào manager
+        /*Scoreboard*/
         scoreBoardManager.bind(instance);
-
-        // init board cho từng member online
         Optional<Party> party = partyService.getPartyById(partyId);
         if (party.isPresent()) {
             List<DungeonScoreBoard.PartyMember> members = buildPartyMembers(party.get());
@@ -128,14 +129,15 @@ public class DungeonController {
                 Player member = Bukkit.getPlayer(memberId);
                 if (member != null && member.isOnline()) {
                     member.teleport(region.getLocation());
-//                    DungeonEcho.success(member, "Dungeon bắt đầu! Chúc may mắn.");
                     dungeonPresenter.onEnterDungeon(member, template.getDgName());
-                    scoreBoardManager.createBoard(member, slot, members, instance, template); // ← thêm
+                    /*Build scoreboard*/
+                    scoreBoardManager.createBoard(member, slot, members, instance, template);
                 }
-                slot++; // tăng slot kể cả offline để giữ đúng index
+                slot++;
             }
         }
 
+        /*Save the instance for the first time*/
         instanceService.saveInstance(partyId);
         return ActionResult.ok("Dungeon start successfully");
     }
@@ -194,20 +196,28 @@ public class DungeonController {
         Optional<Party> party = partyService.getPartyById(dungeonInstance.getParty());
 
         objectives.forEach(obj -> {
-            // callback
-            obj.start(completedObj -> {
-                roomInstance.setCompleted(true);
+            obj.callBack(completedObj -> {
                 dungeonInstance.setScore(dungeonInstance.getScore() + completedObj.getScore());
                 scoreBoardManager.onScoreChanged(dungeonInstance);
-                party.get().getMembers().forEach(playerId -> {
-                    Player member = Bukkit.getPlayer(playerId);
-                    dungeonPresenter.onCompleteRoom(member);
-                });
+
+                boolean allCompleted = roomInstance.getObjective().stream()
+                        .allMatch(IObjective::isCompleted);
+
+                if (allCompleted) {
+                    roomInstance.setCompleted(true);
+                    party.get().getMembers().forEach(playerId -> {
+                        Player member = Bukkit.getPlayer(playerId);
+                        dungeonPresenter.onCompleteRoom(member);
+                    });
+
+                    dungeonFlowService.onRoomCompleted(dungeonInstance, roomInstance);
+                }
             });
+            obj.start();
 
             party.ifPresent(p -> p.getMembers().forEach(memberId -> {
                 Player member = Bukkit.getPlayer(memberId);
-                if (member != null) member.sendMessage(obj.getStartMessage());
+                if (member != null) member.sendMessage(obj.getMessage());
             }));
         });
 

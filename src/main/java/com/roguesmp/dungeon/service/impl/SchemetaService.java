@@ -2,6 +2,9 @@ package com.roguesmp.dungeon.service.impl;
 
 import com.roguesmp.dungeon.constant.DataConfig;
 import com.roguesmp.dungeon.data.Schemeta;
+import com.roguesmp.dungeon.exception.impl.schemeta.SchemetaNotFoundException;
+import com.roguesmp.dungeon.exception.impl.schemeta.SchemetaOperationException;
+import com.roguesmp.dungeon.exception.impl.schemeta.SelectionNotFoundException;
 import com.roguesmp.dungeon.manager.SchemetaManager;
 import com.roguesmp.dungeon.service.ISchemetaService;
 import com.roguesmp.dungeon.utils.TimeId;
@@ -20,7 +23,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 
-import java.io.*;
+import java.io.File;
 import java.util.List;
 
 public class SchemetaService implements ISchemetaService {
@@ -33,7 +36,7 @@ public class SchemetaService implements ISchemetaService {
     }
 
     @Override
-    public Schemeta createSchemeta(Player player, String name) throws Exception {
+    public Schemeta createSchemeta(Player player, String name) {
         Region region = getSelection(player);
         Clipboard clipboard = copyRegion(region, player);
 
@@ -48,7 +51,7 @@ public class SchemetaService implements ISchemetaService {
         return schemeta;
     }
 
-    private Clipboard copyRegion(Region region, Player player) throws Exception {
+    private Clipboard copyRegion(Region region, Player player) {
         BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
         clipboard.setOrigin(BukkitAdapter.asBlockVector(player.getLocation()));
 
@@ -60,6 +63,8 @@ public class SchemetaService implements ISchemetaService {
             copy.setCopyingEntities(true);
             copy.setCopyingBiomes(true);
             Operations.complete(copy);
+        } catch (Exception e) {
+            throw new SchemetaOperationException("copy region", e);
         }
         return clipboard;
     }
@@ -85,9 +90,9 @@ public class SchemetaService implements ISchemetaService {
     }
 
     @Override
-    public BoundingBox pasteSchematic(String id, Location location) throws Exception {
+    public BoundingBox pasteSchematic(String id, Location location) {
         Schemeta schemeta = schemetaManager.get(id);
-        if (schemeta == null) throw new IllegalArgumentException("Schemeta not found: " + id);
+        if (schemeta == null) throw new SchemetaNotFoundException(id);
 
         Clipboard clipboard = schemetaManager.loadSchem(schemeta.getSchemName());
 
@@ -118,13 +123,19 @@ public class SchemetaService implements ISchemetaService {
                     min.x() + offsetX, min.y() + offsetY, min.z() + offsetZ,
                     max.x() + offsetX, max.y() + offsetY, max.z() + offsetZ
             );
+        } catch (Exception e) {
+            throw new SchemetaOperationException("paste schematic: " + id, e);
         }
     }
 
-    private Region getSelection(Player player) throws Exception {
-        LocalSession session = WorldEdit.getInstance()
-                .getSessionManager()
-                .get(BukkitAdapter.adapt(player));
-        return session.getSelection(session.getSelectionWorld());
+    private Region getSelection(Player player) {
+        try {
+            LocalSession session = WorldEdit.getInstance()
+                    .getSessionManager()
+                    .get(BukkitAdapter.adapt(player));
+            return session.getSelection(session.getSelectionWorld());
+        } catch (Exception e) {
+            throw new SelectionNotFoundException(e);
+        }
     }
 }
