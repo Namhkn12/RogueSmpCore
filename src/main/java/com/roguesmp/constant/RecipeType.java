@@ -6,5 +6,7 @@ public enum RecipeType {
     @SerializedName("crafting")
     CRAFTING,
     @SerializedName("processing")
-    PROCESSING
+    PROCESSING,
+    @SerializedName("energy")
+    ENERGY
 }

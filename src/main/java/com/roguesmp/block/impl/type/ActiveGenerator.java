@@ -1,10 +1,9 @@
 package com.roguesmp.block.impl.type;
 
-import com.roguesmp.block.impl.SmpMachine;
-import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.gui.ActiveGeneratorGui;
+import com.roguesmp.gui.BaseGui;
 import com.roguesmp.gui.MachineGui;
 import com.roguesmp.item.BaseItem;
-import com.roguesmp.item.component.impl.NameComponent;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -17,28 +16,27 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ProcessingMachine extends SmpMachine {
+public abstract class ActiveGenerator extends Generator {
 
     private final int GUI_ROWS = 3;
 
-    public ProcessingMachine(BaseItem baseItem, Material progressDisplay) {
+    public ActiveGenerator(BaseItem baseItem, Material progressDisplay) {
         super(baseItem, progressDisplay);
+
+        ((ActiveGeneratorGui) gui).setEnergy(getEnergy(), getMaxEnergy());
     }
 
-    public abstract void registerRecipes();
-    public abstract int getEnergyPerSec();
-
     @Override
-    protected MachineGui createGui() {
-        return new MachineGui(this, getMachineName().value(), GUI_ROWS) {
+    protected BaseGui createGui() {
+        return new ActiveGeneratorGui(this, getMachineName().value(), GUI_ROWS) {
             @Override
             public int[] getInputSlots() {
-                return new int[]{19, 20};
+                return new int[]{19,20};
             }
 
             @Override
             public int[] getOutputSlots() {
-                return new int[]{24, 25};
+                return new int[]{24,25};
             }
 
             @Override
@@ -48,8 +46,17 @@ public abstract class ProcessingMachine extends SmpMachine {
         };
     }
 
+    @Override
+    public void generate(Location loc) {
+        int energy = receiveEnergy(getGenerationRate(), false);
+
+        ((ActiveGeneratorGui) gui).setEnergy(getEnergy(), getMaxEnergy());
+    }
+
+    public abstract void registerRecipes();
+
     public void setPercent(int percent) {
-        MachineGui machineGui = (MachineGui) gui;
+        ActiveGeneratorGui machineGui = (ActiveGeneratorGui) gui;
         if(!isProgressing){
             machineGui.setProcessingDefault();
         }
@@ -71,7 +78,7 @@ public abstract class ProcessingMachine extends SmpMachine {
     public void onBlockBreak(BlockBreakEvent event) {
         super.onBlockBreak(event);
 
-        MachineGui machineGui = (MachineGui) gui;
+        ActiveGeneratorGui machineGui = (ActiveGeneratorGui) gui;
 
         int[] inputSlots = machineGui.getInputSlots();
         int[] outputSlots = machineGui.getOutputSlots();
@@ -92,4 +99,5 @@ public abstract class ProcessingMachine extends SmpMachine {
             loc.getWorld().dropItemNaturally(loc, item);
         });
     }
+
 }

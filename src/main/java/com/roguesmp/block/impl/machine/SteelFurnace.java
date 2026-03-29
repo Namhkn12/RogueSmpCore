@@ -1,7 +1,6 @@
 package com.roguesmp.block.impl.machine;
 
 import com.roguesmp.block.impl.type.ProcessingMachine;
-import com.roguesmp.constant.Items;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.recipe.impl.MachineRecipe;
@@ -16,12 +15,12 @@ import java.util.Map;
 public class SteelFurnace extends ProcessingMachine {
 
     public SteelFurnace() {
-        super(new BaseItem(
-                "steel_furnace",
-                Material.IRON_BLOCK,
-                Map.of("name", new NameComponent("Lò nung thép"))
-        ), Material.FLINT_AND_STEEL);
+        super(ItemRegistry.getInstance().getBaseItem("steel_furnace"), Material.FLINT_AND_STEEL);
+    }
 
+    @Override
+    public int getEnergyPerSec() {
+        return 0;
     }
 
     @Override

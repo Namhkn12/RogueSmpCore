@@ -4,6 +4,7 @@ import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.constant.TransferMode;
+import com.roguesmp.gui.MachineGui;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -53,8 +54,9 @@ public class MachineTransferUtils {
             if (targetSmp instanceof SmpMachine) {
                 SmpMachine targetMachine = (SmpMachine) targetSmp;
                 targetInv = targetMachine.getGui().getInventory();
-                targetInputSlots = targetMachine.getGui().getInputSlots();
-                targetOutputSlots = targetMachine.getGui().getOutputSlots();
+                MachineGui machineGui = (MachineGui) targetMachine.getGui();
+                targetInputSlots = machineGui.getInputSlots();
+                targetOutputSlots = machineGui.getOutputSlots();
             } else if (targetBlock.getState() instanceof Container) {
                 targetInv = ((Container) targetBlock.getState()).getInventory();
             }
@@ -77,7 +79,7 @@ public class MachineTransferUtils {
         Inventory sourceInv = sourceMachine.getGui().getInventory();
         int startIndex = pushRoundRobinMap.getOrDefault(sourceMachine, 0);
 
-        for (int slot : sourceMachine.getGui().getOutputSlots()) {
+        for (int slot : ( (MachineGui) sourceMachine.getGui()).getOutputSlots()) {
             ItemStack item = sourceInv.getItem(slot);
             if (item == null || item.getType().isAir()) continue;
 
@@ -121,7 +123,7 @@ public class MachineTransferUtils {
     // --- LOGIC PULL VÀ SMART PULL ---
     private static void doPull(SmpMachine destMachine, List<TargetInfo> targets, boolean isSmart) {
         Inventory destInv = destMachine.getGui().getInventory();
-        int[] destInputSlots = destMachine.getGui().getInputSlots();
+        int[] destInputSlots =  ((MachineGui) destMachine.getGui()).getInputSlots();
 
         for (TargetInfo target : targets) {
             Inventory sourceInv = target.inv;

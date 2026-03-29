@@ -1,48 +1,46 @@
 package com.roguesmp.block.impl;
 
 import com.roguesmp.block.SmpBlock;
+import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.constant.TransferMode;
-import com.roguesmp.gui.MachineGui;
+import com.roguesmp.gui.BaseGui;
 import com.roguesmp.item.BaseItem;
+import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.recipe.BaseRecipe;
 import com.roguesmp.recipe.impl.MachineRecipe;
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public abstract class SmpMachine extends SmpBlock {
 
-    private final MachineGui gui;
+    protected final BaseGui gui;
     private int progress = 0;
-    private boolean isProgressing = false;
-    private final Material progressDisplay;
-    private MachineRecipe currentRecipe = null;
+    protected boolean isProgressing = false;
+    protected Material progressDisplay;
+    private BaseRecipe currentRecipe = null;
     private final Map<BlockFace, TransferMode>  sideConfigs = new HashMap<>();
     public static final BlockFace[] FACES = {
             BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST
     };
 
-    public SmpMachine(BaseItem baseItem, Material progressDisplay) {
+    public SmpMachine(BaseItem baseItem){
         super(baseItem);
         this.gui = createGui();
 
         for(BlockFace face: FACES){
             sideConfigs.put(face, TransferMode.NONE);
         }
+    }
+
+    public SmpMachine(BaseItem baseItem, Material progressDisplay) {
+        this(baseItem);
 
         ItemStack item = ItemStack.of(progressDisplay);
         if(item.hasData(DataComponentTypes.MAX_DAMAGE) && !item.hasData(DataComponentTypes.UNBREAKABLE)){
@@ -54,11 +52,13 @@ public abstract class SmpMachine extends SmpBlock {
 
     }
 
-    protected abstract MachineGui createGui();
+    protected abstract BaseGui createGui();
 
     public abstract void registerRecipes();
 
-    public MachineGui getGui() {return this.gui;}
+    public abstract void setPercent(int percent);
+
+    public BaseGui getGui() {return this.gui;}
 
     public void setProgress(int progress) {this.progress = progress;}
 
@@ -68,27 +68,9 @@ public abstract class SmpMachine extends SmpBlock {
 
     public void setProgressing(boolean progressing) {isProgressing = progressing;}
 
-    public void setCurrentRecipe(MachineRecipe recipe) {this.currentRecipe = recipe;}
+    public void setCurrentRecipe(BaseRecipe recipe) {this.currentRecipe = recipe;}
 
-    public MachineRecipe getCurrentRecipe() {return this.currentRecipe;}
-
-    public void setPercent(int percent) {
-        if(!isProgressing){
-            gui.setProcessingDefault();
-        }
-        else{
-            ItemStack processing = ItemStack.of(progressDisplay);
-            int maxDamage = processing.getData(DataComponentTypes.MAX_DAMAGE);
-            int currentDamage = maxDamage - (maxDamage * percent / 100);
-
-            // (Tùy chọn) Chốt chặn an toàn để tránh bị lỗi hiển thị nếu percent tính sai
-            currentDamage = Math.max(0, Math.min(currentDamage, maxDamage));
-            processing.setData(DataComponentTypes.DAMAGE, currentDamage);
-            processing.setData(DataComponentTypes.ITEM_NAME, Component.text(percent + "%").color(NamedTextColor.GREEN));
-
-            gui.setProcessing(processing);
-        }
-    }
+    public BaseRecipe getCurrentRecipe() {return this.currentRecipe;}
 
     public TransferMode getTransferMode(BlockFace face){
         return sideConfigs.getOrDefault(face, TransferMode.NONE);
@@ -102,10 +84,11 @@ public abstract class SmpMachine extends SmpBlock {
         return sideConfigs;
     }
 
+    protected NameComponent getMachineName() {return getItem().getComponent(ComponentKeys.ITEM_NAME);}
+
     @Override
     public void onBlockInteract(PlayerInteractEvent event) {
         boolean isSneaking = event.getPlayer().isSneaking();
-        ItemStack getItemInHand = event.getItem();
         Action action = event.getAction();
 
         if(action.isRightClick() && !isSneaking){
@@ -114,27 +97,4 @@ public abstract class SmpMachine extends SmpBlock {
         }
     }
 
-    @Override
-    public void onBlockBreak(BlockBreakEvent event) {
-        super.onBlockBreak(event);
-
-        int[] inputSlots = gui.getInputSlots();
-        int[] outputSlots = gui.getOutputSlots();
-        Inventory inv = gui.getInventory();
-        Location loc = event.getBlock().getLocation();
-
-        List<ItemStack> itemsToDrop = new ArrayList<>();
-        for(int i: inputSlots){
-            ItemStack item = inv.getItem(i);
-            if(item != null) itemsToDrop.add(item);
-        }
-        for(int i: outputSlots){
-            ItemStack item = inv.getItem(i);
-            if(item != null) itemsToDrop.add(item);
-        }
-
-        itemsToDrop.forEach(item -> {
-            loc.getWorld().dropItemNaturally(loc, item);
-        });
-    }
 }

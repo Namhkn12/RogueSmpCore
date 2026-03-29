@@ -10,6 +10,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.math.BigDecimal;
@@ -149,6 +152,49 @@ public class Utils {
 
     public static String toString(Component component) {
         return MiniMessage.miniMessage().serialize(component);
+    }
+
+    public static String locationToString(Location loc){
+        if(loc == null || loc.getWorld()==null){
+            return null;
+        }
+
+        return loc.getWorld().getName() + ";" +
+                loc.getX() + ";" +
+                loc.getY() + ";" +
+                loc.getZ() + ";";
+    }
+
+    public static Location stringToLocation(String s){
+        if(s == null || s.trim().isEmpty()){
+            return null;
+        }
+
+        String[] parts = s.split(";");
+
+        if(parts.length >=4){
+            try{
+                World world = Bukkit.getWorld(parts[0]);
+                if(world == null){
+                    Bukkit.getLogger().warning("Cannot found world: " + parts[0] + " when parsing location!");
+                    return null;
+                }
+
+                double x = Double.parseDouble(parts[1]);
+                double y = Double.parseDouble(parts[2]);
+                double z = Double.parseDouble(parts[3]);
+
+                float yaw = parts.length > 4 ? Float.parseFloat(parts[4]) : 0f;
+                float pitch = parts.length > 5 ? Float.parseFloat(parts[5]) : 0f;
+
+                return new Location(world, x, y, z, yaw, pitch);
+            }
+            catch(NumberFormatException e){
+                Bukkit.getLogger().severe("Lỗi định dạng số khi parse Location: " + s);
+            }
+        }
+
+        return null;
     }
 
 }

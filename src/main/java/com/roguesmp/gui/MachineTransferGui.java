@@ -25,14 +25,12 @@ public class MachineTransferGui extends BaseGui{
             BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH,
             BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST
     };
-    private final BaseGui previous;
     private final SmpMachine machine;
     private final int row;
 
-    public MachineTransferGui(SmpMachine machine, BaseGui previous) {
+    public MachineTransferGui(SmpMachine machine) {
         super(Utils.fromString("Cài đặt"), 4);
         this.row = 4;
-        this.previous = previous;
         this.machine = machine;
 
         itemDecoration();

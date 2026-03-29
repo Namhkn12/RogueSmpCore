@@ -47,10 +47,48 @@ public class ItemRegistry {
 
         dataMap.put("steel_ingot", new BaseItem("steel_ingot", Material.IRON_INGOT, Map.of("name", new NameComponent("Thép"))));
         dataMap.put("condensed_steel", new BaseItem("condensed_steel", Material.NETHERITE_INGOT, Map.of("name", new NameComponent("Thép đặc"))));
-
-        BlockRegistry.getInstance().getRegistry().forEach((id, machine) -> {
-            dataMap.put(id, machine.getItem());
-        });
+        dataMap.put("steel_block", new BaseItem("steel_block", Material.IRON_BLOCK, Map.of("name", new NameComponent("Khối thép"))));
+        dataMap.put("steel_furnace", new BaseItem("steel_furnace", Material.IRON_BLOCK, Map.of("name", new NameComponent("Lò nung thép"))));
+        dataMap.put("solar_panel", new BaseItem("solar_panel", Material.DAYLIGHT_DETECTOR,
+                Map.of("name", new NameComponent("Pin mặt trời"),
+                        "description", new DescriptionComponent(List.of(
+                                "<white><!i>Chỉ hoạt động vào ban ngày",
+                                "<white><!i>Sản xuất: 20<yellow><!i>e<white><!i>/s",
+                                "<white><!i>Buffer: 500<yellow>e",
+                                "<white><!i>Mức truyền: 20<yellow><!i>e<white><!i>/s"
+                        )))
+        ));
+        dataMap.put("energy_node", new BaseItem("energy_node", Material.CONDUIT,
+                Map.of("name", new NameComponent("Nút năng lượng"),
+                        "description", new DescriptionComponent(List.of(
+                                "<white><!i>Truyền điện giữa các máy",
+                                "<white><!i>Buffer: 5000<yellow><!i>e",
+                                "<white><!i>Mức truyền: 100<yellow><!i>e<white><!i>/s"
+                        )))
+        ));
+        dataMap.put("wrench", new BaseItem("wrench", Material.STICK,
+                Map.of("name", new NameComponent("Cờ lê"),
+                        "description", new DescriptionComponent(List.of(
+                                "<yellow><!i>Chuột phải để nối 2 nút điện với nhau",
+                                "<yellow><!i>Shift - Chuột phải để phá custom block nhanh",
+                                "<yellow><!i>Shift - Chuột trái để gỡ toàn bộ kết nối của nút điện"
+                        )), "stack_size", new StackSizeComponent(1))
+        ));
+        dataMap.put("electric_steel_furnace", new BaseItem("electric_steel_furnace", Material.BLAST_FURNACE,
+                Map.of("name", new NameComponent("Lò nung thép điện"),
+                        "description", new DescriptionComponent(List.of(
+                                "<white><!i>Mức tiêu thụ điện: 20<yellow><!i>e<white><!i>/s"
+                        )))
+        ));
+        dataMap.put("coal_generator", new BaseItem("coal_generator", Material.BLACK_STAINED_GLASS,
+                Map.of("name", new NameComponent("Máy phát điện bằng than"),
+                        "description", new DescriptionComponent(List.of(
+                                "<yellow><!i> Sử dụng chất đốt để phát điện",
+                                "<white><!i>Sản xuất: 50<yellow><!i>e<white><!i>/s",
+                                "<white><!i>Buffer: 5000<yellow>e",
+                                "<white><!i>Mức truyền: 100<yellow><!i>e<white><!i>/s"
+                        )))
+        ));
     }
 
     public @Nullable BaseItem getBaseItem(@NotNull String id) {
