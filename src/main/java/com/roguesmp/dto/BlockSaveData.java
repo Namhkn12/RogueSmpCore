@@ -1,19 +1,21 @@
 package com.roguesmp.dto;
 
 import com.roguesmp.annotation.GsonIgnore;
-import com.roguesmp.block.IEnergyStorage;
+import com.roguesmp.block.impl.interfaces.IEnergyStorage;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.block.impl.blocks.EnergyNode;
+import com.roguesmp.block.impl.interfaces.IHaveInputOutput;
+import com.roguesmp.block.impl.type.ActiveGenerator;
 import com.roguesmp.block.impl.type.PassiveGenerator;
+import com.roguesmp.block.impl.type.ProcessingMachine;
 import com.roguesmp.constant.TransferMode;
+import com.roguesmp.gui.ActiveGeneratorGui;
 import com.roguesmp.gui.MachineGui;
 import com.roguesmp.utils.InventoryBase64;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
-import org.bukkit.inventory.ItemStack;
-import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -87,14 +89,22 @@ public class BlockSaveData {
     private Map<Integer, org.bukkit.inventory.ItemStack> getMachineItems(SmpMachine machine) {
         Map<Integer, org.bukkit.inventory.ItemStack> map = new HashMap<>();
         org.bukkit.inventory.Inventory inv = machine.getGui().getInventory();
-        MachineGui machineGui = (MachineGui) machine.getGui();
 
-        for (int slot : machineGui.getInputSlots()) {
+        int[] inputSlots = new int[0];
+        int[] outputSlots = new int[0];
+
+        if(machine instanceof IHaveInputOutput inputOutput) {
+            inputSlots = inputOutput.getInputSlots();
+            outputSlots = inputOutput.getOutputSlots();
+        }
+
+        for (int slot : inputSlots) {
             if (inv.getItem(slot) != null) map.put(slot, inv.getItem(slot));
         }
-        for (int slot : machineGui.getOutputSlots()) {
+        for (int slot : outputSlots) {
             if (inv.getItem(slot) != null) map.put(slot, inv.getItem(slot));
         }
+
         return map;
     }
 }

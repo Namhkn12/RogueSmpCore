@@ -4,6 +4,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.block.impl.blocks.EnergyNode;
+import com.roguesmp.block.impl.generator.active.CoalGenerator;
 import com.roguesmp.block.impl.generator.passive.SolarPanel;
 import com.roguesmp.block.impl.machine.ElectricSteelFurnace;
 import com.roguesmp.block.impl.machine.SteelFurnace;
@@ -34,6 +35,7 @@ public class BlockRegistry {
         BlockManager.registerBlockType("electric_steel_furnace", ElectricSteelFurnace::new);
         BlockManager.registerBlockType("energy_node", EnergyNode::new);
         BlockManager.registerBlockType("solar_panel", SolarPanel::new);
+        BlockManager.registerBlockType("coal_generator", CoalGenerator::new);
 
         registerDataMap();
     }
@@ -44,6 +46,7 @@ public class BlockRegistry {
         dataMap.put("electric_steel_furnace", new ElectricSteelFurnace());
         dataMap.put("energy_node", new EnergyNode());
         dataMap.put("solar_panel", new SolarPanel());
+        dataMap.put("coal_generator", new CoalGenerator());
     }
 
     public void registerMachineRecipes(){

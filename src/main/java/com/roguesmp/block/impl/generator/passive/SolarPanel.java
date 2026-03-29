@@ -11,6 +11,7 @@ public class SolarPanel extends PassiveGenerator {
 
     private final int GENERATION_RATE = 20;
     private final int TRANSFER_RATE = 20;
+    private final int MAX_ENERGY = 500;
 
     public SolarPanel(){
         super(ItemRegistry.getInstance().getBaseItem("solar_panel"));
@@ -48,7 +49,7 @@ public class SolarPanel extends PassiveGenerator {
 
     @Override
     public int getMaxEnergy() {
-        return 500;
+        return MAX_ENERGY;
     }
 
     @Override
@@ -56,4 +57,6 @@ public class SolarPanel extends PassiveGenerator {
         return TRANSFER_RATE;
     }
 
+    @Override
+    public void setPercent(int percent) {}
 }

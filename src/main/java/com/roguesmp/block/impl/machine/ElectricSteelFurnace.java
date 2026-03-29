@@ -1,9 +1,8 @@
 package com.roguesmp.block.impl.machine;
 
-import com.roguesmp.block.IEnergyStorage;
+import com.roguesmp.block.impl.interfaces.IEnergyStorage;
 import com.roguesmp.block.impl.type.ProcessingMachine;
 import com.roguesmp.gui.MachineGui;
-import com.roguesmp.item.BaseItem;
 import com.roguesmp.recipe.impl.MachineRecipe;
 import com.roguesmp.recipe.manager.RecipeManager;
 import com.roguesmp.registry.ItemRegistry;

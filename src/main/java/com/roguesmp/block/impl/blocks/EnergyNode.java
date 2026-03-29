@@ -1,6 +1,6 @@
 package com.roguesmp.block.impl.blocks;
 
-import com.roguesmp.block.IEnergyStorage;
+import com.roguesmp.block.impl.interfaces.IEnergyStorage;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.block.manager.BlockManager;
@@ -13,7 +13,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -60,6 +59,11 @@ public class EnergyNode extends SmpMachine implements IEnergyStorage {
 
     @Override
     public void registerRecipes() {}
+
+    @Override
+    public void setPercent(int percent) {
+
+    }
 
     @Override
     public void onBlockInteract(PlayerInteractEvent event) {

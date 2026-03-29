@@ -2,14 +2,14 @@ package com.roguesmp.gui;
 
 import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.recipe.BaseRecipe;
+import com.roguesmp.recipe.impl.EnergyRecipe;
 import com.roguesmp.recipe.impl.MachineRecipe;
 import com.roguesmp.utils.ItemStackUtils;
+import com.roguesmp.utils.Pair;
 import com.roguesmp.utils.Utils;
-import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -86,54 +86,62 @@ public class RecipeBrowserGui extends BaseGui {
         for (int i = startIndex; i < endIndex; i++) {
             BaseRecipe recipe = recipes.get(i);
 
-            ItemStack displayItem = createRecipeDisplayItem(recipe);
+            Pair<ItemStack, Boolean> displayItem = createRecipeDisplayItem(recipe);
 
-            this.addButton(slot, displayItem, event -> {
-                event.setCancelled(true);
-            });
+            this.addButton(slot, displayItem.getFirst(), displayItem.getSecond() ? event -> {
+                ItemStack icon = new ItemStack(Material.BARRIER);
+
+                if (!recipe.getOutputs().isEmpty()) {
+                    icon = recipe.getOutputs().get(0).clone();
+                }
+
+                RecipeViewerGui gui = new RecipeViewerGui(this, machine.getGui(), recipe, icon);
+
+                gui.showInventory(event.getWhoClicked());
+            } : ClickHandler.noAction());
             slot++;
         }
     }
 
-    private ItemStack createRecipeDisplayItem(BaseRecipe recipe) {
-        // Lấy sản phẩm đầu tiên làm Icon đại diện
-        ItemStack icon;
-        if (!recipe.getOutputs().isEmpty()) {
-            icon = recipe.getOutputs().get(0).clone();
-        } else {
-            icon = new ItemStack(Material.BARRIER); // Fallback nếu recipe lỗi
-        }
-
+    private Pair<ItemStack, Boolean> createRecipeDisplayItem(BaseRecipe recipe) {
         //Lore
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Cần: ", NamedTextColor.GOLD));
 
-        for(ItemStack input: recipe.getInputs()){
-            String itemName = PlainTextComponentSerializer.plainText().serialize(input.getData(DataComponentTypes.ITEM_NAME));
-            Component itemNameComponent = Component.text(" " + itemName, NamedTextColor.WHITE);
-            lore.add(Component.text(input.getAmount() + "x", NamedTextColor.YELLOW)
-                    .append(itemNameComponent)
-                    .decoration(TextDecoration.ITALIC, false));
-        }
+        //Icon
+        ItemStack icon = new ItemStack(Material.BARRIER);
 
-        lore.add(Component.text("Ra: ", NamedTextColor.GOLD));
-        for(ItemStack output: recipe.getOutputs()){
-            String itemName = PlainTextComponentSerializer.plainText().serialize(output.getData(DataComponentTypes.ITEM_NAME));
-            Component itemNameComponent = Component.text(" " + itemName, NamedTextColor.WHITE);
-            lore.add(Component.text(output.getAmount() + "x", NamedTextColor.YELLOW)
-                    .append(itemNameComponent)
-                    .decoration(TextDecoration.ITALIC, false));
-        }
+        //Have click action
+        boolean haveClickAction = false;
 
-        lore.add(Component.empty());
         if(recipe instanceof MachineRecipe machineRecipe){
-            lore.add(Component.text("Thời gian chế tạo cơ bản: ", NamedTextColor.WHITE)
-                    .append(Component.text(machineRecipe.getBaseProcessTime() + "s", NamedTextColor.YELLOW))
+
+            haveClickAction = true;
+
+            if (!recipe.getOutputs().isEmpty()) {
+                icon = recipe.getOutputs().get(0).clone();
+            } else {
+                icon = new ItemStack(Material.BARRIER); // Fallback nếu recipe lỗi
+            }
+
+            lore.add(Component.text("Click để xem công thức", NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false));
+        }
+        if(recipe instanceof EnergyRecipe energyRecipe){
+
+            haveClickAction = false;
+
+            if (!recipe.getInputs().isEmpty()) {
+                icon = recipe.getInputs().get(0).clone();
+            } else {
+                icon = new ItemStack(Material.BARRIER); // Fallback nếu recipe lỗi
+            }
+
+            lore.add(Component.text("Thời gian đốt: ", NamedTextColor.WHITE)
+                    .append(Component.text(energyRecipe.getBaseProcessTime() + "s", NamedTextColor.YELLOW))
                     .decoration(TextDecoration.ITALIC, false));
         }
 
         ItemStackUtils.setLore(icon, lore);
 
-        return icon;
+        return new Pair<>(icon, haveClickAction);
     }
 }

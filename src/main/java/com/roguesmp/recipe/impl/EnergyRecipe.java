@@ -5,21 +5,19 @@ import com.roguesmp.recipe.BaseRecipe;
 import com.roguesmp.recipe.IProcessableRecipe;
 
 import javax.annotation.Nonnegative;
-import javax.annotation.Nullable;
 
-public class MachineRecipe extends BaseRecipe implements IProcessableRecipe {
-
+public class EnergyRecipe extends BaseRecipe implements IProcessableRecipe {
     private final String machineId;
     private final int baseProcessTime;
     private int energyPerSec;
 
-    public MachineRecipe(String id, String machineId, int baseProcessTime) {
-        super(id, RecipeType.PROCESSING);
+    public EnergyRecipe(String id, String machineId, int baseProcessTime) {
+        super(id, RecipeType.ENERGY);
         this.machineId = machineId;
         this.baseProcessTime = baseProcessTime;
     }
 
-    public MachineRecipe(String id, String machineId, @Nonnegative int baseProcessTime, @Nonnegative int energyPerSec){
+    public EnergyRecipe(String id, String machineId, @Nonnegative int baseProcessTime, @Nonnegative int energyPerSec){
         this(id, machineId, baseProcessTime);
         this.energyPerSec = energyPerSec;
     }

@@ -12,10 +12,7 @@ import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.listener.*;
 import com.roguesmp.player.PlayerDataManager;
 import com.roguesmp.player.PlayerManager;
-import com.roguesmp.registry.BlockRegistry;
-import com.roguesmp.registry.EntityRegistry;
-import com.roguesmp.registry.ItemRegistry;
-import com.roguesmp.registry.ModifierRegistry;
+import com.roguesmp.registry.*;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
@@ -46,6 +43,7 @@ public final class RogueSmpCore extends JavaPlugin {
         ItemRegistry.init(this);
         BlockRegistry.init(this);
         ModifierRegistry.init(this);
+        VanillaCraftingRecipeRegistry.init(this);
 
         BlockStorage.init(this, BlockManager.getInstance());
         BlockRegistry.getInstance().registerMachineRecipes();

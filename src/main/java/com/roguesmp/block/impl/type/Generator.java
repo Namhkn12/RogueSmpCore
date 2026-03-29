@@ -1,13 +1,11 @@
 package com.roguesmp.block.impl.type;
 
-import com.roguesmp.block.IEnergyStorage;
+import com.roguesmp.block.impl.interfaces.IEnergyStorage;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.block.manager.BlockManager;
-import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.item.BaseItem;
-import com.roguesmp.item.component.impl.NameComponent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -31,6 +29,7 @@ public abstract class Generator extends SmpMachine implements IEnergyStorage {
     @Override public void setEnergy(int energy) {this.energy = Math.max(0, Math.min(energy, MAX_ENERGY));}
     @Override public int getMaxEnergy() {return MAX_ENERGY;}
     public abstract int getTransferRate();
+    public abstract int getGenerationRate();
 
     public abstract void generate(Location loc);
 

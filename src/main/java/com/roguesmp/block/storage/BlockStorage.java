@@ -1,10 +1,8 @@
 package com.roguesmp.block.storage;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.block.IEnergyStorage;
+import com.roguesmp.block.impl.interfaces.IEnergyStorage;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.block.impl.blocks.EnergyNode;
@@ -13,6 +11,7 @@ import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.constant.TransferMode;
 import com.roguesmp.dto.BlockSaveData;
 import com.roguesmp.recipe.BaseRecipe;
+import com.roguesmp.recipe.IProcessableRecipe;
 import com.roguesmp.recipe.impl.MachineRecipe;
 import com.roguesmp.recipe.manager.RecipeManager;
 import com.roguesmp.utils.InventoryBase64;
@@ -22,7 +21,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -198,7 +196,11 @@ public class BlockStorage {
                             if(machine instanceof ProcessingMachine processingMachine){
                                 // Cập nhật lại giao diện (% hiển thị)
                                 if(machine.isProgressing() && machine.getCurrentRecipe() != null) {
-                                    processingMachine.setPercent((machine.getProgress() * 100) / machine.getCurrentRecipe().getBaseProcessTime());
+                                    BaseRecipe currentRecipe = machine.getCurrentRecipe();
+                                    if(!(currentRecipe instanceof IProcessableRecipe processableRecipe)){
+                                        return;
+                                    }
+                                    processingMachine.setPercent((machine.getProgress() * 100) / processableRecipe.getBaseProcessTime());
                                 }
                             }
                         }

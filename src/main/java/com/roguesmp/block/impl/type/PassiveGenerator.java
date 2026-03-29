@@ -19,9 +19,7 @@ public abstract class PassiveGenerator extends Generator {
     }
 
     @Override
-    public void registerRecipes() {
-
-    }
+    public void registerRecipes() {}
 
     public abstract int getGenerationRate();
 

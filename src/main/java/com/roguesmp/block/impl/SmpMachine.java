@@ -6,6 +6,7 @@ import com.roguesmp.constant.TransferMode;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.impl.NameComponent;
+import com.roguesmp.recipe.BaseRecipe;
 import com.roguesmp.recipe.impl.MachineRecipe;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import org.bukkit.Material;
@@ -23,7 +24,7 @@ public abstract class SmpMachine extends SmpBlock {
     private int progress = 0;
     protected boolean isProgressing = false;
     protected Material progressDisplay;
-    private MachineRecipe currentRecipe = null;
+    private BaseRecipe currentRecipe = null;
     private final Map<BlockFace, TransferMode>  sideConfigs = new HashMap<>();
     public static final BlockFace[] FACES = {
             BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST
@@ -55,6 +56,8 @@ public abstract class SmpMachine extends SmpBlock {
 
     public abstract void registerRecipes();
 
+    public abstract void setPercent(int percent);
+
     public BaseGui getGui() {return this.gui;}
 
     public void setProgress(int progress) {this.progress = progress;}
@@ -65,9 +68,9 @@ public abstract class SmpMachine extends SmpBlock {
 
     public void setProgressing(boolean progressing) {isProgressing = progressing;}
 
-    public void setCurrentRecipe(MachineRecipe recipe) {this.currentRecipe = recipe;}
+    public void setCurrentRecipe(BaseRecipe recipe) {this.currentRecipe = recipe;}
 
-    public MachineRecipe getCurrentRecipe() {return this.currentRecipe;}
+    public BaseRecipe getCurrentRecipe() {return this.currentRecipe;}
 
     public TransferMode getTransferMode(BlockFace face){
         return sideConfigs.getOrDefault(face, TransferMode.NONE);

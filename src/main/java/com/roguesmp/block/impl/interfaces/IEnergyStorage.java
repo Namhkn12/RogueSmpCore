@@ -1,4 +1,4 @@
-package com.roguesmp.block;
+package com.roguesmp.block.impl.interfaces;
 
 public interface IEnergyStorage {
     int getEnergy();

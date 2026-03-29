@@ -7,23 +7,21 @@ import com.roguesmp.recipe.impl.MachineRecipe;
 import com.roguesmp.recipe.manager.RecipeManager;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.Utils;
-import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
 import java.util.List;
 
-public abstract class MachineGui extends BaseGui implements IHaveInputOutput{
+public abstract class ActiveGeneratorGui extends BaseGui implements IHaveInputOutput {
 
     private final ItemStack INPUT_FILLER = ItemStackUtils.hideTooltip(ItemStack.of(Material.BLUE_STAINED_GLASS_PANE));
     private final ItemStack OUTPUT_FILLER = ItemStackUtils.hideTooltip(ItemStack.of(Material.ORANGE_STAINED_GLASS_PANE));
     private final ItemStack PROCESSING_FILLER = ItemStackUtils.hideTooltip(ItemStack.of(Material.GRAY_STAINED_GLASS_PANE));
     private final ItemStack SETTING_FILLER = ItemStackUtils.hideTooltip(ItemStack.of(Material.GREEN_STAINED_GLASS_PANE));
-//    private final ItemStack upgrade = ItemStack.of(Material.ITEM_FRAME);
+    //    private final ItemStack upgrade = ItemStack.of(Material.ITEM_FRAME);
     private final ItemStack RECIPE_BROWSER = ItemStack.of(Material.ENCHANTED_BOOK);
     private final ItemStack SETTINGS = ItemStack.of(Material.NETHER_STAR);
     private final ItemStack ENERGY_VIEW = ItemStack.of(Material.REDSTONE_BLOCK);
@@ -41,7 +39,7 @@ public abstract class MachineGui extends BaseGui implements IHaveInputOutput{
      *           the first row is automatically the settings row,
      *           the rest belongs to the machine itself
      */
-    public MachineGui(SmpMachine machine, String name, int row) {
+    public ActiveGeneratorGui(SmpMachine machine, String name, int row) {
         super(Utils.fromString(name), row+1);
         this.row = row + 1;
         this.name = name;
@@ -128,20 +126,12 @@ public abstract class MachineGui extends BaseGui implements IHaveInputOutput{
     public void setEnergy(int energy, int maxEnergy){
         Component e = Component.text("e", NamedTextColor.YELLOW);
 
-        // 1. Clone item để không bị ghi đè lên item gốc của class
         ItemStack displayIcon = ENERGY_VIEW.clone();
 
-        // 2. Sửa lore trên item đã clone
         ItemStackUtils.setLore(displayIcon,
                 List.of(Component.text(energy + " / " + maxEnergy).color(NamedTextColor.WHITE).append(e).decoration(TextDecoration.ITALIC, false))
         );
 
-        // 3. Cập nhật vào ButtonMap (để lần sau mở lại vẫn thấy)
         this.addButton(energySlot, displayIcon, ClickHandler.noAction());
-
-        // 4. ÉP CẬP NHẬT TRỰC TIẾP LÊN GUI ĐANG MỞ (Quan trọng nhất)
-        if (this.getInventory() != null) {
-            this.getInventory().setItem(energySlot, displayIcon);
-        }
     }
 }
