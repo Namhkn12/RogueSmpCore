@@ -18,6 +18,7 @@ import com.roguesmp.player.ability.impl.shiftrightclick.Flamestrike;
 import com.roguesmp.player.ability.impl.shiftswap.VolcanicMeteor;
 import com.roguesmp.player.ability.impl.swap.FlameSpirit;
 import com.roguesmp.player.ability.impl.swap.GravityBomb;
+import dev.jorel.commandapi.CommandAPICommand;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 

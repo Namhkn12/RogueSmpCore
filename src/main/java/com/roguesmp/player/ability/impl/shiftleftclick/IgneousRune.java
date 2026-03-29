@@ -100,7 +100,7 @@ public class IgneousRune extends Ability {
 
                 // Arming Flash
                 if (ticks == PREPARE_TIME) {
-                    world.spawnParticle(Particle.FLASH, loc, 1);
+                    world.spawnParticle(Particle.FLASH, loc, 1, Color.GRAY);
                     world.playSound(loc, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.8f, 2.0f);
                 }
 
