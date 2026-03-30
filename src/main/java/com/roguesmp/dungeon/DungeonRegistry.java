@@ -101,7 +101,7 @@ public class DungeonRegistry {
         BuildingController buildingController = new BuildingController(schemetaService);
         TemplateController templateController = new TemplateController(dungeonService);
         PartyController partyController = new PartyController(partyService,partyInviteTask);
-        DungeonController dungeonController = new DungeonController(partyService, schemetaService, instanceService, scoreBoardManager, dungeonPresenter, dungeonFlowService);
+        DungeonController dungeonController = new DungeonController(instanceService, dungeonFlowService);
         SpawnerController spawnerController = new SpawnerController(spawnerService, RogueSmpCore.getInstance());
         DungeonTreasureController treasureController = new DungeonTreasureController(rewardService);
 

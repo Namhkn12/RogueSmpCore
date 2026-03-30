@@ -5,17 +5,11 @@ import com.roguesmp.dungeon.instance.SpawnerInstance;
 import org.bukkit.block.CreatureSpawner;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface ISpawnerService {
-    //create template
-    void createSpawnerTemplate(String name);
-    //create instance from template
-    void createSpawnerInstance(String id, String spawnerId);
-    //get list template
-    List<Spawner> getListSpawnerTemplate();
-    //get instance by id
-    SpawnerInstance getSpawnerInstance(String iid);
-
-    void applyTemplateToSpawner(String template, CreatureSpawner spawner);
+    void createTemplate(String name);
+    void createInstance(String iid, String templateId);
+    List<Spawner> getTemplates();
+    SpawnerInstance getInstance(String iid);
+    void applyTemplate(String templateId, CreatureSpawner spawner);
 }

@@ -4,7 +4,7 @@ import com.roguesmp.dungeon.utils.filterchain.EventFilter;
 import org.bukkit.Material;
 import org.bukkit.event.block.BlockBreakEvent;
 
-public class BlockFilters {
+public class BlockBreakFilters {
 
     public static EventFilter<BlockBreakEvent> blockType(Material material) {
         return event -> event.getBlock().getType() == material;
@@ -17,4 +17,5 @@ public class BlockFilters {
     public static EventFilter<BlockBreakEvent> hasDropItems() {
         return BlockBreakEvent::isDropItems;
     }
+
 }

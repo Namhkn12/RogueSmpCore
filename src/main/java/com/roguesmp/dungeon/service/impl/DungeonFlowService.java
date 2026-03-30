@@ -5,8 +5,9 @@ import com.roguesmp.dungeon.constant.RoomType;
 import com.roguesmp.dungeon.data.Dungeon;
 import com.roguesmp.dungeon.data.Party;
 import com.roguesmp.dungeon.data.Region;
-import com.roguesmp.dungeon.dto.ActionResult;
+import com.roguesmp.dungeon.data.Schemeta;
 import com.roguesmp.dungeon.dto.DungeonScoreBoard;
+import com.roguesmp.dungeon.dto.NextRoom;
 import com.roguesmp.dungeon.exception.BaseException;
 import com.roguesmp.dungeon.exception.GlobalException;
 import com.roguesmp.dungeon.instance.DungeonInstance;
@@ -14,6 +15,9 @@ import com.roguesmp.dungeon.instance.NodeInstance;
 import com.roguesmp.dungeon.instance.RegionInstance;
 import com.roguesmp.dungeon.instance.RoomInstance;
 import com.roguesmp.dungeon.manager.ScoreBoardManager;
+import com.roguesmp.dungeon.objective_.IObjective;
+import com.roguesmp.dungeon.objective_.ObjectiveFactory;
+import com.roguesmp.dungeon.objective_.param.ObjectiveData;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.service.*;
 import com.roguesmp.dungeon.utils.DungeonEcho;
@@ -21,6 +25,7 @@ import com.roguesmp.dungeon.utils.Log4Craft;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
@@ -159,8 +164,74 @@ public class DungeonFlowService implements IDungeonFlowService {
     }
 
     @Override
-    public void onOpenNextRoom() {
+    public List<NextRoom> onOpenDoorGui(DungeonInstance instance) {
+        Map<UUID, Integer> nextRoomInstance = instance.getNextRooms();
+        Map<UUID, NodeInstance> nodePools = instance.getNodes();
 
+        if (nextRoomInstance == null || nextRoomInstance.isEmpty())
+            return new ArrayList<>();
+
+        List<NextRoom> nextRooms = new ArrayList<>();
+        nextRoomInstance.forEach((ri, i) -> {
+            NodeInstance nodeInstance = nodePools.get(ri);
+            if (nodeInstance == null) return; // fallback: bỏ qua node lỗi, cần sử lý sau
+            nextRooms.add(new NextRoom(nodeInstance, i));
+        });
+
+        return nextRooms;
+    }
+
+    @Override
+    public RoomInstance onOpenNextRoom(@NonNull DungeonInstance dungeonInstance, @NonNull NodeInstance selectNode) {
+        String schemetaId = selectNode.getSchemetas();
+        Schemeta schemeta = schemetaService.getSchemeta(schemetaId);
+
+        List<IObjective> objectives = new ArrayList<>();
+        List<ObjectiveData> objectiveData = schemeta.getObjectives();
+        if (objectiveData != null && !objectiveData.isEmpty()) {
+            objectiveData.forEach(oj -> objectives.add(ObjectiveFactory.create(oj)));
+        }
+
+        RoomInstance roomInstance = new RoomInstance(selectNode, null, objectives, objectives.isEmpty(), null);
+
+        Optional<Party> party = partyService.getPartyById(dungeonInstance.getParty());
+        if(party.isEmpty()) return null;
+
+        objectives.forEach(obj -> {
+            obj.callBack(completedObj -> {
+                dungeonInstance.setScore(dungeonInstance.getScore() + completedObj.getScore());
+                scoreBoardManager.onScoreChanged(dungeonInstance);
+
+                boolean allCompleted = roomInstance.getObjective().stream()
+                        .allMatch(IObjective::isCompleted);
+
+                if (allCompleted) {
+                    roomInstance.setCompleted(true);
+                    party.get().getMembers().forEach(playerId -> {
+                        Player member = Bukkit.getPlayer(playerId);
+                        dungeonPresenter.onCompleteRoom(member);
+                    });
+
+                    onRoomCompleted(dungeonInstance, roomInstance);
+                }
+            });
+            obj.start();
+
+            party.ifPresent(p -> p.getMembers().forEach(memberId -> {
+                Player member = Bukkit.getPlayer(memberId);
+                if (member != null) member.sendMessage(obj.getMessage());
+            }));
+        });
+
+        dungeonInstance.getCompletedRooms().add(dungeonInstance.getActiveRoom());
+        dungeonInstance.setActiveRoom(roomInstance);
+        dungeonInstance.getNodes().remove(selectNode.getId());
+        instanceService.rollNextRooms(dungeonInstance);
+        party.get().getMembers().forEach(playerId -> {
+            Player member = Bukkit.getPlayer(playerId);
+            dungeonPresenter.onOpenDoor(member);
+        });
+        return dungeonInstance.getActiveRoom();
     }
 
     @Override
