@@ -4,8 +4,11 @@ import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.roguesmp.dungeon.controller.SpawnerController;
 import com.roguesmp.dungeon.dto.ActionResult;
 import com.roguesmp.dungeon.utils.NameSpaceKeys;
+import com.roguesmp.dungeon.utils.PdcUtil;
 import com.roguesmp.dungeon.utils.filterchain.FilterChain;
+import com.roguesmp.dungeon.utils.filterchain.impl.BlockBreakFilters;
 import com.roguesmp.dungeon.utils.filterchain.impl.BlockPlaceFilters;
+import com.roguesmp.dungeon.utils.filterchain.impl.EntityFilters;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Marker;
@@ -17,6 +20,8 @@ import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Optional;
 
 public class SpawnerListener implements Listener {
 
@@ -35,24 +40,33 @@ public class SpawnerListener implements Listener {
                 .build().test(event);
         if (!passes) return;
 
-        String templateId = event.getItemInHand()
-                .getItemMeta()
-                .getPersistentDataContainer()
-                .get(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING);
+        String templateId = PdcUtil.getOrDefault(
+                event.getItemInHand(),
+                NameSpaceKeys.SPAWNER_TID_KEY,
+                PersistentDataType.STRING,
+                "unknown"
+        );
 
         spawnerController.handleSpawnerPlace(event.getBlock(), templateId);
     }
 
     @EventHandler
     public void onSpawnerAddToWorld(EntityAddToWorldEvent event) {
+        boolean filter = FilterChain.of(EntityAddToWorldEvent.class)
+                .require(EntityFilters.entityType(Marker.class))
+                .build()
+                .test(event);
+        if(!filter) return;
         Entity entity = event.getEntity();
-        if (!(entity instanceof Marker marker)) return;
 
-        PersistentDataContainer pdc = entity.getPersistentDataContainer();
-        if (!pdc.has(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING)) return;
+        String templateId = PdcUtil.getOrDefault(
+                entity,
+                NameSpaceKeys.SPAWNER_TID_KEY,
+                PersistentDataType.STRING,
+                "unkown"
+        );
 
-        String templateId = pdc.get(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING);
-        spawnerController.handleSpawnerAppear(marker, templateId);
+        spawnerController.handleSpawnerAppear((Marker) entity, templateId);
     }
 
     @EventHandler
@@ -63,8 +77,13 @@ public class SpawnerListener implements Listener {
 
     @EventHandler
     public void onSpawnerBreak(BlockBreakEvent event) {
-        if (!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
-        if (event.getBlock().getType() != Material.SPAWNER) return;
-        spawnerController.handleSpawnerBreak(event.getBlock(), event);
+        boolean filter = FilterChain.of(BlockBreakEvent.class)
+                        .require(BlockBreakFilters.blockType(Material.SPAWNER))
+                                .require(BlockBreakFilters.inWorld("dungeon_"))
+                                        .build()
+                                                .test(event);
+        if(!filter) return;
+        boolean shouldCancel = spawnerController.handleSpawnerBreak(event.getBlock()).getData() || false;
+        event.setCancelled(shouldCancel);
     }
 }

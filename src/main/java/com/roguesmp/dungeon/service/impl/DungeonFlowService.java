@@ -246,7 +246,12 @@ public class DungeonFlowService implements IDungeonFlowService {
     }
 
     @Override
-    public void onFinishDungeon() {
+    public void onFinishDungeon(DungeonInstance instance) {
+
+    }
+
+    @Override
+    public void onPlayerLeftDungeon(Player player) {
 
     }
 
@@ -255,16 +260,21 @@ public class DungeonFlowService implements IDungeonFlowService {
 
         dungeon.setCompleted(true);
 
+        dungeon.setEndTime(System.currentTimeMillis() + 300_000L);
+
         partyService.getPartyById(dungeon.getParty()).ifPresent(p ->
                 p.getMembers().forEach(id -> {
                     Player player = Bukkit.getPlayer(id);
                     if (player != null) {
                         dungeonPresenter.onCompleteDungeon(player);
+                        DungeonEcho.success(player, "Hầm ngục sẽ sụp đổ sau 5 phút, hãy nhanh chóng thu thập chiến lợi phẩm và quay về");
                     }
                 })
         );
-        //TO DO
-        //chỉnh thời gian lên 10p cuối để player nhận thưởng ở cổng cuối cùng
+
+        // Cập nhật scoreboard để hiển thị thời gian 10:00 mới
+        scoreBoardManager.onScoreChanged(dungeon);
+
     }
 
     private void finishDungeonProcess(DungeonInstance dungeon){

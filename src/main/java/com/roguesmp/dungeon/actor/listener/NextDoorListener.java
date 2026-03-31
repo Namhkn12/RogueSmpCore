@@ -109,16 +109,15 @@ public class NextDoorListener implements Listener {
 
         // TODO: xử lý thoát dungeon — teleport về lobby, trao thưởng, cleanup instance...
         Location baseLoc = instance.getRegion().getLocation();
-        int offsetY = instance.getRewardRoomCount() * 50;
-        Location buildLoc = baseLoc.clone().add(0, offsetY, 0);
+        int rewardCount = instance.getRewardRoomCount();
+        Location buildLoc = baseLoc.clone().add(0, rewardCount * 50, 0);
 
         buildingController.buildSchematicById(
                 "schemeta_20260329202750",
                 buildLoc
         );
-
+        instance.setRewardRoomCount(++rewardCount);
         player.teleport(buildLoc);
-        player.sendMessage("§aBạn đã hoàn thành dungeon!");
     }
 
     private void spawnEndGateway(Block doorBlock, Player player) {

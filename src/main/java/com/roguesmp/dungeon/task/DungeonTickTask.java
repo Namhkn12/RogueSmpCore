@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.schedule;
+package com.roguesmp.dungeon.task;
 
 import com.roguesmp.dungeon.instance.RoomInstance;
 import com.roguesmp.dungeon.manager.ScoreBoardManager;

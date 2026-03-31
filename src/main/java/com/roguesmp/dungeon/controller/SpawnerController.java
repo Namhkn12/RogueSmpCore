@@ -1,6 +1,7 @@
 package com.roguesmp.dungeon.controller;
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
+import com.roguesmp.dungeon.behavior.IBehavior;
 import com.roguesmp.dungeon.dto.ActionResult;
 import com.roguesmp.dungeon.exception.BaseException;
 import com.roguesmp.dungeon.exception.GlobalException;
@@ -8,6 +9,7 @@ import com.roguesmp.dungeon.exception.impl.spawner.SpawnerNotFoundException;
 import com.roguesmp.dungeon.instance.SpawnerInstance;
 import com.roguesmp.dungeon.service.ISpawnerService;
 import com.roguesmp.dungeon.utils.NameSpaceKeys;
+import com.roguesmp.dungeon.utils.PdcUtil;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
@@ -69,25 +71,24 @@ public class SpawnerController {
             Bukkit.getScheduler().runTaskLater(plugin, () -> retryRegisterSpawner(marker, templateId), 10L);
             return ActionResult.invalid("Spawner block not ready, scheduled retry");
         }
-        return registerSpawner(marker, blockBelow, templateId);
+        return registerSpawner(blockBelow, templateId);
     }
 
-    public ActionResult<Void> handleSpawnerBreak(Block block, BlockBreakEvent event) {
+    public ActionResult<Boolean> handleSpawnerBreak(Block block) {
         if (!(block.getState() instanceof CreatureSpawner spawner))
             return ActionResult.invalid("Not a spawner block");
 
         PersistentDataContainer pdc = spawner.getPersistentDataContainer();
         if (!pdc.has(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING))
-            return ActionResult.failed("Not a custom spawner");
+            return ActionResult.invalid("Not a custom spawner");
 
         String iid = pdc.get(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING);
         try {
             SpawnerInstance instance = spawnerService.getInstance(iid);
             boolean shouldCancel = instance.getBehaviors().stream()
-                    .map(b -> b.onBreak(event))
+                    .map(IBehavior::onBreak)
                     .anyMatch(broken -> !broken);
-            event.setCancelled(shouldCancel);
-            return ActionResult.ok("Spawner break handled");
+            return ActionResult.ok("Spawner break handled", shouldCancel);
         } catch (SpawnerNotFoundException e) {
             return ActionResult.failed("Spawner instance not found");
         } catch (BaseException e) {
@@ -130,7 +131,7 @@ public class SpawnerController {
         return ActionResult.ok("Markers loaded");
     }
 
-    private ActionResult<Void> registerSpawner(Marker marker, Block block, String templateId) {
+    private ActionResult<Void> registerSpawner(Block block, String templateId) {
         try {
             String iid = UUID.randomUUID().toString();
             CreatureSpawner creatureSpawner = (CreatureSpawner) block.getState();
@@ -154,6 +155,6 @@ public class SpawnerController {
             marker.remove();
             return;
         }
-        registerSpawner(marker, blockBelow, templateId);
+        registerSpawner(blockBelow, templateId);
     }
 }

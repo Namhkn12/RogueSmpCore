@@ -15,5 +15,6 @@ public interface IDungeonFlowService {
     List<NextRoom> onOpenDoorGui(DungeonInstance instance);
     RoomInstance onOpenNextRoom(@NotNull DungeonInstance dungeonInstance,@NotNull NodeInstance selectNode);
     void onRoomCompleted(DungeonInstance dungeon, RoomInstance room);
-    void onFinishDungeon();
+    void onFinishDungeon(DungeonInstance instance);
+    void onPlayerLeftDungeon(Player player);
 }

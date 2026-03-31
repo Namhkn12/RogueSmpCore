@@ -23,7 +23,7 @@ import com.roguesmp.dungeon.presentation.SoundManager;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.repository.*;
 import com.roguesmp.dungeon.repository.impl.*;
-import com.roguesmp.dungeon.schedule.DungeonTickTask;
+import com.roguesmp.dungeon.task.DungeonTickTask;
 import com.roguesmp.dungeon.service.*;
 import com.roguesmp.dungeon.service.impl.*;
 import com.roguesmp.dungeon.task.PartyInviteTask;

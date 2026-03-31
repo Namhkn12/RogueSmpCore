@@ -6,6 +6,6 @@ import org.bukkit.event.entity.SpawnerSpawnEvent;
 public interface IBehavior {
     boolean onSpawn(SpawnerSpawnEvent event);
     void onTick();
-    boolean onBreak(BlockBreakEvent event);
+    boolean onBreak();
     BehaviorData getData();
 }
