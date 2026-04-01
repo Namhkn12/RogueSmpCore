@@ -1,9 +1,7 @@
 package com.roguesmp.dungeon.manager;
 
-import com.roguesmp.dungeon.constant.PrefixConfig;
 import com.roguesmp.dungeon.data.Schemeta;
 import com.roguesmp.dungeon.repository.ISchemetaRepository;
-import com.roguesmp.dungeon.utils.ConsoleLogger;
 import com.roguesmp.dungeon.utils.Log4Craft;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 
