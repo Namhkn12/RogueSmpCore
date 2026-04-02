@@ -27,6 +27,7 @@ public class DataFolderConfig {
 
     //file name prefix constant
     public static final String DUNGEON_TEMPLATE_FILE = "dungeon_";
+    public static final String ROOM_TEMPLATE_FILE = "room_";
     public static final String DUNGEON_INSTANCE_FILE = "di_";
     public static final String REGION_INSTANCE_FILE = "region_";
     public static final String SCHEMETA_FILE = "schemeta_";
