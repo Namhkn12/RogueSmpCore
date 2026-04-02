@@ -10,6 +10,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -44,11 +45,18 @@ public class AttackSpeedBase implements SmpAttribute {
 
     @Override
     public void addVanillaAttribute(Player player, double value) {
-        player.getAttribute(Attribute.ATTACK_SPEED).addTransientModifier(new AttributeModifier(MODIFIER_KEY, value - 4, AttributeModifier.Operation.ADD_NUMBER));
+        AttributeInstance ai = player.getAttribute(Attribute.ATTACK_SPEED);
+        if (ai != null) {
+            ai.removeModifier(MODIFIER_KEY);
+            ai.addTransientModifier(new AttributeModifier(MODIFIER_KEY, value - 4, AttributeModifier.Operation.ADD_NUMBER));
+        }
     }
 
     @Override
     public void removeVanillaAttribute(Player player) {
-        player.getAttribute(Attribute.ATTACK_SPEED).removeModifier(MODIFIER_KEY);
+        AttributeInstance ai = player.getAttribute(Attribute.ATTACK_SPEED);
+        if (ai != null) {
+            ai.removeModifier(MODIFIER_KEY);
+        }
     }
 }

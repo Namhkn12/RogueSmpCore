@@ -75,17 +75,17 @@ public class SpeedEffect extends SmpEffect {
         return new CommandAPICommand("speed")
                 .withArguments(
                         new IntegerArgument("duration"),
-                        new DoubleArgument("value"),
+                        new DoubleArgument("percent"),
                         new StringArgument("modifierId"),
                         new StringArgument("source")
                 )
                 .executesPlayer((player, args) -> {
                     int duration = (Integer) args.get("duration");
-                    double value = (Double) args.get("value");
+                    double value = (Double) args.get("percent");
                     String modifierId = (String) args.get("modifierId");
                     String source = (String) args.get("source");
 
-                    EffectManager.getInstance().addEffect(player, source, new SpeedEffect(duration, value, modifierId));
+                    EffectManager.getInstance().addEffect(player, source, new SpeedEffect(duration, value / 100, modifierId));
                 });
     }
 }

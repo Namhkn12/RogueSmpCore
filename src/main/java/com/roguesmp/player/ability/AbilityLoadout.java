@@ -2,6 +2,7 @@ package com.roguesmp.player.ability;
 
 import com.roguesmp.constant.AbilityTrigger;
 import com.roguesmp.event.AbilityCastEvent;
+import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
@@ -11,10 +12,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityCombustEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.jetbrains.annotations.Unmodifiable;
@@ -160,9 +158,20 @@ public class AbilityLoadout {
         equippedAbilities.forEach((trigger, ability) -> ability.onBlockBreak(event));
     }
 
+    /**
+     * Called when player is put on fire
+     */
     public void onCombust(EntityCombustEvent event) {
         passiveAbilities.forEach((ability) -> ability.onCombust(event));
         equippedAbilities.forEach((trigger, ability) -> ability.onCombust(event));
+    }
+
+    /**
+     * Called when player put other entities on fire (including projectiles...)
+     */
+    public void onCombustEntity(EntityCombustByEntityEvent event) {
+        passiveAbilities.forEach((ability) -> ability.onCombustEntity(event));
+        equippedAbilities.forEach((trigger, ability) -> ability.onCombustEntity(event));
     }
 
     public void onProjectileHit(ProjectileHitEvent event) {
@@ -173,5 +182,10 @@ public class AbilityLoadout {
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
         passiveAbilities.forEach((ability) -> ability.onProjectileLaunch(event));
         equippedAbilities.forEach((trigger, ability) -> ability.onProjectileLaunch(event));
+    }
+
+    public void onConsumeArrow(ArrowConsumeEvent event) {
+        passiveAbilities.forEach(ability -> ability.onConsumeArrow(event));
+        equippedAbilities.forEach((trigger, ability) -> ability.onConsumeArrow(event));
     }
 }

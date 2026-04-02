@@ -1,24 +1,24 @@
 package com.roguesmp.listener;
 
 import com.roguesmp.constant.EquipSlot;
+import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.item.SmpItem;
-import com.roguesmp.player.PlayerData;
-import com.roguesmp.player.PlayerDataManager;
-import com.roguesmp.player.PlayerManager;
-import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.player.*;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.event.entity.EntityEquipmentChangedEvent;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import io.papermc.paper.event.entity.EntityLoadCrossbowEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
@@ -96,6 +96,7 @@ public class PlayerListener implements Listener {
             SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
             if (smpPlayer == null) return;
             smpPlayer.onHurt(event);
+            return;
         }
 
         if (damager instanceof Projectile projectile && projectile.getShooter() instanceof Player player) {
@@ -156,10 +157,34 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onCombust(EntityCombustEvent event) {
-        if (event instanceof EntityCombustByEntityEvent entityCombustByEntityEvent) {
-            SmpPlayer smpPlayer = playerManager.getSmpPlayer(entityCombustByEntityEvent.getEntity().getUniqueId());
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getEntity().getUniqueId());
+        if (smpPlayer == null) return;
+        smpPlayer.onCombust(event);
+    }
+
+    @EventHandler
+    public void onCombustEntity(EntityCombustByEntityEvent event) {
+        Entity combuster = event.getCombuster();
+        Entity combustee = event.getEntity();
+        if (combuster instanceof Player player) {
+            if (combustee instanceof Player) {
+                event.setCancelled(true);
+                return;
+            }
+            SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
             if (smpPlayer == null) return;
-            smpPlayer.onCombust(event);
+            smpPlayer.onCombustEntity(event);
+            return;
+        }
+        if (combuster instanceof Projectile projectile && projectile.getShooter() instanceof Player player) {
+            if (combustee instanceof Player) {
+                event.setCancelled(true);
+                return;
+            }
+            SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
+            if (smpPlayer == null) return;
+            smpPlayer.onCombustEntity(event);
+
         }
 
     }
@@ -180,5 +205,30 @@ public class PlayerListener implements Listener {
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
         if (smpPlayer == null) return;
         smpPlayer.onProjectileLaunch(event);
+    }
+
+    @EventHandler
+    public void onConsumeArrow(ArrowConsumeEvent event) {
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
+        if (smpPlayer == null) return;
+        smpPlayer.onConsumeArrow(event);
+    }
+
+    @EventHandler
+    public void onShootBow(EntityShootBowEvent event) {
+        if (event.getEntity() instanceof Player player
+                && event.getBow() != null
+                && event.getProjectile() instanceof AbstractArrow arrow
+                && arrow.getPickupStatus() == AbstractArrow.PickupStatus.ALLOWED) {
+            ArrowConsumeEvent arrowConsumeEvent = new ArrowConsumeEvent(player, event.getConsumable());
+            Bukkit.getPluginManager().callEvent(arrowConsumeEvent);
+            if (arrowConsumeEvent.isCancelled()) {
+                ItemStack consumable = event.getConsumable();
+                if (consumable == null) return;
+                player.getInventory().addItem(consumable.clone());
+                arrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
+                player.updateInventory();
+            }
+        }
     }
 }

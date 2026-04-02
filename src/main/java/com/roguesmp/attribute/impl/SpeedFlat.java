@@ -7,6 +7,7 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public class SpeedFlat implements SmpAttribute {
 
-    public static NamespacedKey MODIFIER_ID = new NamespacedKey("smp","speed");
+    public static NamespacedKey MODIFIER_ID = new NamespacedKey("smp","speed_flat");
 
     @Override
     public @NotNull String getId() {
@@ -40,11 +41,18 @@ public class SpeedFlat implements SmpAttribute {
 
     @Override
     public void addVanillaAttribute(Player player, double value) {
-        player.getAttribute(Attribute.MOVEMENT_SPEED).addTransientModifier(new AttributeModifier(MODIFIER_ID, value, AttributeModifier.Operation.ADD_NUMBER));
+        AttributeInstance ai = player.getAttribute(Attribute.MOVEMENT_SPEED);
+        if (ai != null) {
+            ai.removeModifier(MODIFIER_ID);
+            ai.addTransientModifier(new AttributeModifier(MODIFIER_ID, value, AttributeModifier.Operation.ADD_NUMBER));
+        }
     }
 
     @Override
     public void removeVanillaAttribute(Player player) {
-        player.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(MODIFIER_ID);
+        AttributeInstance ai = player.getAttribute(Attribute.MOVEMENT_SPEED);
+        if (ai != null) {
+            ai.removeModifier(MODIFIER_ID);
+        }
     }
 }

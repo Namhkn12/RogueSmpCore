@@ -1,7 +1,5 @@
 package com.roguesmp.constant;
 
-import com.roguesmp.utils.Utils;
-import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,10 +9,10 @@ import java.util.Map;
 public enum EquipSlot {
     MAINHAND(EquipmentSlotGroup.MAINHAND, "<!i><gray>Khi trang bị tay chính:", "mainhand"),
     OFFHAND(EquipmentSlotGroup.OFFHAND, "<!i><gray>Khi trang bị tay phụ:", "offhand"),
-    HEAD(EquipmentSlotGroup.HEAD, "<!i><gray>Khi trang bị ở nón:", "head"),
+    HEAD(EquipmentSlotGroup.HEAD, "<!i><gray>Khi trang bị ở đầu:", "head"),
     CHEST(EquipmentSlotGroup.CHEST, "<!i><gray>Khi trang bị ở ngực:", "chest"),
-    LEGS(EquipmentSlotGroup.LEGS, "<!i><gray>Khi trang bị ở quần:", "legs"),
-    FEET(EquipmentSlotGroup.FEET, "<!i><gray>Khi trang bị ở giày:", "feet"),
+    LEGS(EquipmentSlotGroup.LEGS, "<!i><gray>Khi trang bị ở chân:", "legs"),
+    FEET(EquipmentSlotGroup.FEET, "<!i><gray>Khi trang bị ở bàn chân:", "feet"),
     PROJECTILE(null, "<!i><gray>Khi bắn:", "projectile");
 
     private static final Map<EquipmentSlotGroup, EquipSlot> vanillaToSlot = new HashMap<>();

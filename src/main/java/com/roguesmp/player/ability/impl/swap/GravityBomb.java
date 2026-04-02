@@ -76,6 +76,7 @@ public class GravityBomb extends Ability {
         ItemStack itemStack = ItemStack.of(Material.GUNPOWDER);
 
         grenade.setSize(1);
+        grenade.setSilent(true);
         physicsItem.setItemStack(itemStack);
         physicsItem.setCanPlayerPickup(false);
         physicsItem.setCanMobPickup(false);
@@ -95,9 +96,10 @@ public class GravityBomb extends Ability {
                 }
 
                 if (!grenade.isValid() || physicsItem.isOnGround() || tick > 120 || grenade.isInLava() || hasCollidedWithEnemy(grenade)) {
+                    Location location = grenade.getLocation();
                     grenade.remove();
                     physicsItem.remove();
-                    explode(grenade.getLocation(), damage, radius);
+                    explode(location, damage, radius);
                     this.cancel();
                     return;
                 }

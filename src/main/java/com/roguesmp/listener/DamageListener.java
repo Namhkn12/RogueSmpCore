@@ -6,7 +6,6 @@ import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.EntityUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,7 +29,7 @@ public class DamageListener implements Listener {
                         event.setCancelled(true);
                         return;
                     }
-                } else if (projectile.getShooter() instanceof LivingEntity living) {
+                } else if (projectile.getShooter() instanceof LivingEntity living && !(projectile.getShooter() instanceof Player)) {
                     // Wither, skeleton, blaze, snow golem, etc... will use their attack damage attribute as projectil damage
                     // for easier entity creation
                     double projectileDamage = EntityUtils.getAttributeOrDefault(living, Attribute.ATTACK_DAMAGE, 0);

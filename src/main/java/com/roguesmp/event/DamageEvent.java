@@ -3,10 +3,8 @@ package com.roguesmp.event;
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.constant.DamageType;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Trident;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -124,10 +122,7 @@ public class DamageEvent extends Event implements Cancellable {
 
         // Vanilla mechanics
         if (metadata.damageType == DamageType.MELEE && damager instanceof Player bukkitPlayer) {
-            finalDamage *= getMeleeCooldownMultiplier(bukkitPlayer);
             if (isCritical && bukkitPlayer.getAttribute(Attribute.ATTACK_DAMAGE).getValue() <= 1d) finalDamage *= 1.5;
-        } else if (damager instanceof AbstractArrow arrow && !(arrow instanceof Trident)) {
-            finalDamage *= getArrowVelocityMultiplier(arrow);
         }
 
         finalDamage += addFinal;
@@ -149,17 +144,6 @@ public class DamageEvent extends Event implements Cancellable {
         finalDef *= moreFinalDef;
         finalDef += addFinalDef;
         return finalDef;
-    }
-
-    private static double getMeleeCooldownMultiplier(Player player) {
-        float p = player.getAttackCooldown();
-        return 0.2 + 0.8 * p * p;
-    }
-
-    private static double getArrowVelocityMultiplier(AbstractArrow arrow) {
-        double speedSq = arrow.getVelocity().lengthSquared();
-        double fullChargeThreshold = 8; // ~2.84
-        return Math.clamp(speedSq / fullChargeThreshold, 0.2, 1.0);
     }
 
     private static double applyDefense(double damage, double defense) {

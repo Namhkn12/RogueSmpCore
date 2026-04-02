@@ -103,6 +103,6 @@ public class VectorUtils {
         double x = vector.getX() * cos + vector.getZ() * sin;
         double z = vector.getZ() * cos - vector.getX() * sin;
 
-        return vector.setX(x).setZ(z);
+        return vector.clone().setX(x).setZ(z);
     }
 }

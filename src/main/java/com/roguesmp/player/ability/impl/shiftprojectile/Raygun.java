@@ -80,7 +80,7 @@ public class Raygun extends Ability {
         spawnLaserBeam(start, end);
 
         // 3. Impact Logic
-        if (ray != null && ray.getHitEntity() instanceof LivingEntity victim) {
+        if (ray != null && !(ray.getHitEntity() instanceof Player) && ray.getHitEntity() instanceof LivingEntity victim) {
             DamageUtils.damage(victim, p, damage, new DamageEvent.Metadata(ID, DamageType.PROJECTILE_ABILITY));
             playImpactEffects(end, victim);
         }

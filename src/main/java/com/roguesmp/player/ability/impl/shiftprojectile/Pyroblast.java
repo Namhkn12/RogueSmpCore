@@ -63,7 +63,7 @@ public class Pyroblast extends Ability {
 
     @Override
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
-        if (isOnCooldown() || (event.getEntity().getShooter() instanceof Player player && player.isSneaking())) return;
+        if (isOnCooldown() || (event.getEntity().getShooter() instanceof Player player && !player.isSneaking())) return;
 
         Projectile proj = event.getEntity();
         castPyroblast(proj);

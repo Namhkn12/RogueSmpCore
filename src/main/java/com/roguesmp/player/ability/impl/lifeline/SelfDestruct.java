@@ -62,6 +62,7 @@ public class SelfDestruct extends Ability {
 
     @Override
     public void onHurtFatal(DamageEvent event) {
+        if (isOnCooldown()) return;
         event.setCancelled(true);
         if (event.getVictim() instanceof Player player) {
             EntityUtils.healPercent(player, 50);

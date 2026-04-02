@@ -6,11 +6,11 @@ import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ComponentKey;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.item.lore.LoreBuilder;
+import com.roguesmp.item.modifier.ItemModifier;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.registry.ModifierRegistry;
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -85,7 +85,8 @@ public class SmpItem {
         ItemStack result = ItemStack.of(baseItem.getBase(), stackAmount);
 
         result.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Set.of(DataComponentTypes.ENCHANTMENTS, DataComponentTypes.ATTRIBUTE_MODIFIERS)).build());
-        result.setData(DataComponentTypes.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.itemAttributes().build());
+        result.unsetData(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+//        result.setData(DataComponentTypes.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.itemAttributes().build());
 
         PersistentDataContainerView oldData = itemStack.getPersistentDataContainer();
         LoreBuilder loreBuilder = new LoreBuilder();
@@ -115,9 +116,9 @@ public class SmpItem {
 
     public void applyModifiers(@Nullable SmpPlayer player) {
         if (loadedModifier) return;
-        ModifierRegistry.getInstance().getModifiers().forEach((itemModifierType, itemModifier) -> {
+        for (ItemModifier itemModifier : ModifierRegistry.getModifiers()) {
             itemModifier.collectAndApply(this, player);
-        });
+        }
         loadedModifier = true;
     }
 

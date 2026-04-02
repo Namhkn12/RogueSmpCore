@@ -7,6 +7,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.utils.DamageUtils;
+import com.roguesmp.utils.Hitbox;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.VectorUtils;
 import net.kyori.adventure.text.Component;

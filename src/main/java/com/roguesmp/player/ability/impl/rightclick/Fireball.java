@@ -8,6 +8,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.utils.DamageUtils;
+import com.roguesmp.utils.EntityUtils;
 import com.roguesmp.utils.Hitbox;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -127,12 +128,9 @@ public class Fireball extends Ability {
         world.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1.2f, 1.1f);
 
         // 2. Damage & Knockback Logic
-        List<Entity> targets = loc.getNearbyEntities(radius, radius, radius).stream()
-                .filter(e -> e instanceof LivingEntity && !e.equals(p))
-                .toList();
+        List<LivingEntity> targets = EntityUtils.getNearbyMobs(loc, radius, radius, radius, living -> true);
 
-        for (Entity e : targets) {
-            LivingEntity victim = (LivingEntity) e;
+        for (LivingEntity victim : targets) {
             DamageUtils.damage(victim, p, damage, new DamageEvent.Metadata(ID, DamageType.MAGIC));
 
             // Scaled fire duration

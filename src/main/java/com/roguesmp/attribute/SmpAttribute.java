@@ -1,9 +1,11 @@
 package com.roguesmp.attribute;
 
 import com.roguesmp.constant.Attributes;
+import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
+import io.papermc.paper.event.entity.EntityKnockbackEvent;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -11,10 +13,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityCombustEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +32,7 @@ public interface SmpAttribute {
     @Nullable List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc);
 
     /**
-     * Add attribute on equip, must implement both add and remove method
+     * Add attribute on equip, remove existing modifier before adding new one!
      */
     default void addVanillaAttribute(Player player, double value) {
 //        Example:
@@ -80,7 +79,17 @@ public interface SmpAttribute {
 
     }
 
+    /**
+     * Called when player is put on fire
+     */
     default void onCombust(EntityCombustEvent event, double value, @NotNull SmpPlayer player) {
+
+    }
+
+    /**
+     * Called when player put other entities (not player) on fire (including projectiles...)
+     */
+    default void onCombustEntity(EntityCombustByEntityEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 
@@ -89,6 +98,10 @@ public interface SmpAttribute {
     }
 
     default void onProjectileLaunch(ProjectileLaunchEvent event, double value, @NotNull SmpPlayer player) {
+
+    }
+
+    default void onConsumeArrow(ArrowConsumeEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 
