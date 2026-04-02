@@ -1,5 +1,6 @@
 package com.roguesmp.player.ability;
 
+import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
@@ -12,10 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityCombustEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.jetbrains.annotations.NotNull;
@@ -129,7 +127,17 @@ public abstract class Ability {
 
     }
 
+    /**
+     * Called when player is put on fire (either from block, entity, etc...)
+     */
     public void onCombust(EntityCombustEvent event) {
+
+    }
+
+    /**
+     * Called when player put other entities on fire (directly hit, or from arrow, etc.,...)
+     */
+    public void onCombustEntity(EntityCombustByEntityEvent event) {
 
     }
 
@@ -138,6 +146,10 @@ public abstract class Ability {
     }
 
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
+
+    }
+
+    public void onConsumeArrow(ArrowConsumeEvent event) {
 
     }
 

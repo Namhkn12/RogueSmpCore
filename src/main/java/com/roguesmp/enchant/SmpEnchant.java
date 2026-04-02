@@ -1,7 +1,9 @@
 package com.roguesmp.enchant;
 
+import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.Enchants;
 import com.roguesmp.constant.EquipSlot;
+import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
@@ -9,18 +11,18 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityCombustEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface SmpEnchant {
@@ -37,10 +39,18 @@ public interface SmpEnchant {
     @NotNull Set<EquipSlot> getActiveSlots();
 
     /**
-     * Called the first time this enchant is added to an item, for putting default/starter data for use in stacking enchants, etc...
+     * Called when this enchant is added to an item, for putting default/starter data for use in stacking enchants, etc...
      */
-    default void attachDefaultData(PersistentDataContainer pdc) {
+    default void attachData(PersistentDataContainer pdc) {
 
+    }
+
+    default void attachVanillaEnchant(Map<Enchantment, Integer> currentVanillaEnchants, int level) {
+
+    }
+
+    default @NotNull Map<Attributes, Double> provideAttributes(int level) {
+        return Collections.emptyMap();
     }
 
     default void tick(@NotNull SmpPlayer player, int periodIncrement, int level) {
@@ -75,7 +85,17 @@ public interface SmpEnchant {
 
     }
 
+    /**
+     * Called when player is put on fire
+     */
     default void onCombust(EntityCombustEvent event, int level, @NotNull SmpPlayer player) {
+
+    }
+
+    /**
+     * Called when player put other entities (not player) on fire (including projectiles)
+     */
+    default void onCombustEntity(EntityCombustByEntityEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 
@@ -87,7 +107,15 @@ public interface SmpEnchant {
 
     }
 
+    default void onConsumeArrow(ArrowConsumeEvent event, int level, @NotNull SmpPlayer player) {
+
+    }
+
     default List<Component> defaultLoreProvider(int level) {
         return List.of(Component.text(getSimpleName() + " " + Utils.toRoman(level), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+    }
+
+    default List<Component> defaultNegativeLoreProvider(int level) {
+        return List.of(Component.text(getSimpleName() + " " + Utils.toRoman(level), NamedTextColor.RED).decoration(TextDecoration.ITALIC, false));
     }
 }

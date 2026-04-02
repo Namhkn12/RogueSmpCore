@@ -91,9 +91,10 @@ public class Dodging extends Ability {
         }
     }
 
+    @Override
     public void onProjectileHit(ProjectileHitEvent event) {
         Player p = smpPlayer.getBukkitPlayer();
-        if (!event.getHitEntity().equals(p)) return;
+        if (event.getHitEntity() == null || !(event.getHitEntity().getUniqueId().equals(p.getUniqueId()))) return;
 
         Projectile proj = event.getEntity();
 

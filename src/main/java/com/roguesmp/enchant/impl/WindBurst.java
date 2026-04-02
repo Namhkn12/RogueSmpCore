@@ -1,0 +1,42 @@
+package com.roguesmp.enchant.impl;
+
+import com.roguesmp.constant.Enchants;
+import com.roguesmp.constant.EquipSlot;
+import com.roguesmp.enchant.SmpEnchant;
+import com.roguesmp.event.DamageEvent;
+import com.roguesmp.player.SmpPlayer;
+import io.papermc.paper.persistence.PersistentDataContainerView;
+import net.kyori.adventure.text.Component;
+import org.bukkit.enchantments.Enchantment;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public class WindBurst implements SmpEnchant {
+
+    @Override public @NotNull String getId() { return "wind_burst"; }
+    @Override public @NotNull Enchants getEnumConstant() { return Enchants.WIND_BURST; }
+    @Override public @NotNull String getSimpleName() { return "Phong bộc"; }
+
+    @Override
+    public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
+        return defaultLoreProvider(level);
+    }
+
+    @Override public @NotNull Set<EquipSlot> getActiveSlots() {
+        return EnumSet.of(EquipSlot.MAINHAND);
+    }
+
+    @Override public void attachVanillaEnchant(Map<Enchantment, Integer> vanillaMap, int level) {
+        vanillaMap.put(Enchantment.WIND_BURST, level);
+    }
+
+    @Override
+    public void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
+        // Would like to simulate it to allow using on other Material if possible, but not sure how
+    }
+}

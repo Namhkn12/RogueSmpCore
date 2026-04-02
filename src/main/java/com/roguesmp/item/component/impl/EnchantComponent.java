@@ -2,9 +2,13 @@ package com.roguesmp.item.component.impl;
 
 import com.roguesmp.annotation.GsonIgnore;
 import com.roguesmp.constant.Enchants;
+import com.roguesmp.context.ItemDataContext;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ItemComponent;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ItemEnchantments;
 import net.kyori.adventure.text.Component;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -62,8 +66,17 @@ public class EnchantComponent implements ItemComponent {
     @Override
     public void save(PersistentDataContainer pdc) {
         enchants.forEach((enchants1, integer) -> {
-            enchants1.getEnchant().attachDefaultData(pdc);
+            enchants1.getEnchant().attachData(pdc);
         });
+    }
+
+    @Override
+    public void modifyStack(ItemDataContext context) {
+        Map<Enchantment, Integer> enchantMap = new HashMap<>();
+        enchants.forEach((enchants1, integer) -> enchants1.getEnchant().attachVanillaEnchant(enchantMap, integer));
+        if (!enchantMap.isEmpty()) {
+            context.newStack().setData(DataComponentTypes.ENCHANTMENTS, ItemEnchantments.itemEnchantments(enchantMap));
+        }
     }
 
     public record Modifier(int priority, Map<Enchants, Integer> modifiers){}

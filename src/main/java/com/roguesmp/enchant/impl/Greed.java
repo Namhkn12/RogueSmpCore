@@ -56,7 +56,7 @@ public class Greed implements SmpEnchant {
     }
 
     @Override
-    public void attachDefaultData(PersistentDataContainer pdc) {
+    public void attachData(PersistentDataContainer pdc) {
         Integer stack = pdc.get(DATA_KEY, PersistentDataType.INTEGER);
         if (stack == null) pdc.set(DATA_KEY, PersistentDataType.INTEGER, 0);
     }

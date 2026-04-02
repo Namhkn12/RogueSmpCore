@@ -42,7 +42,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         ItemRegistry.init(this);
         BlockRegistry.init(this);
-        ModifierRegistry.init(this);
+
         VanillaCraftingRecipeRegistry.init(this);
 
         BlockStorage.init(this, BlockManager.getInstance());

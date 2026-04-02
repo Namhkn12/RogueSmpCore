@@ -76,6 +76,7 @@ public class GravityBomb extends Ability {
         ItemStack itemStack = ItemStack.of(Material.GUNPOWDER);
 
         grenade.setSize(1);
+        grenade.setSilent(true);
         physicsItem.setItemStack(itemStack);
         physicsItem.setCanPlayerPickup(false);
         physicsItem.setCanMobPickup(false);

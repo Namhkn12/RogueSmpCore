@@ -11,6 +11,7 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +41,13 @@ public class MeleeDamageBase implements SmpAttribute {
 
     @Override
     public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
-        if (event.getDamageType() == DamageType.MELEE) event.addDamageModifier(value, DamageOperation.BASE);
+        if (event.getDamageType() == DamageType.MELEE) {
+            event.addDamageModifier(value * getMeleeCooldownMultiplier(player.getBukkitPlayer()), DamageOperation.BASE);
+        }
+    }
+
+    private static double getMeleeCooldownMultiplier(Player player) {
+        float p = player.getAttackCooldown();
+        return 0.2 + 0.8 * p * p;
     }
 }

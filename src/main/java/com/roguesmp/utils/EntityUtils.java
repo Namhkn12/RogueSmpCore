@@ -4,8 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,5 +40,18 @@ public class EntityUtils {
     public static double getAttributeOrDefault(Attributable entity, Attribute attribute, double def) {
         AttributeInstance attr = entity.getAttribute(attribute);
         return attr == null ? def : attr.getValue();
+    }
+
+    public static boolean isAquatic(Entity entity) {
+        return entity instanceof WaterMob || entity instanceof Guardian || entity instanceof Turtle;
+    }
+
+    public static boolean isArthropod(Entity entity) {
+        return entity instanceof Spider || entity instanceof Silverfish || entity instanceof Endermite || entity instanceof Bee;
+    }
+
+    public static boolean isUndead(Entity entity) {
+        return entity instanceof AbstractSkeleton || entity instanceof Zombie ||
+                entity instanceof Wither || entity instanceof Phantom;
     }
 }

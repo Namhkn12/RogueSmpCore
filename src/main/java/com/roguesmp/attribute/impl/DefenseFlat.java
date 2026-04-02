@@ -3,6 +3,7 @@ package com.roguesmp.attribute.impl;
 import com.roguesmp.attribute.SmpAttribute;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.DamageOperation;
+import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
@@ -14,9 +15,14 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public class DefenseFlat implements SmpAttribute {
+
+    public static Set<DamageType> protectedType = EnumSet.of(DamageType.MELEE, DamageType.MELEE_ABILITY, DamageType.PROJECTILE, DamageType.PROJECTILE_ABILITY, DamageType.MAGIC, DamageType.BLAST);
+
     @Override
     public @NotNull String getId() {
         return "defense_flat";
@@ -46,6 +52,8 @@ public class DefenseFlat implements SmpAttribute {
 
     @Override
     public void onHurt(DamageEvent event, double value, @NotNull SmpPlayer player) {
-        event.addDefenseModifier(value, DamageOperation.ADD_BASE);
+        if (protectedType.contains(event.getDamageType())) {
+            event.addDefenseModifier(value, DamageOperation.ADD_BASE);
+        }
     }
 }

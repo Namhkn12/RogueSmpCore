@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrowableProjectile;
+import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.Nullable;
@@ -26,8 +27,8 @@ import java.util.UUID;
  * For tracking projectiles (snapshot stat,...)
  */
 public class PlayerProjectile {
-    // Arrow entity uuid
-    private final UUID uuid;
+
+    private final UUID uuid; // Arrow entity uuid
     private final SmpPlayer smpPlayer;
     private final Map<Enchants, Integer> activeEnchants = new EnumMap<>(Enchants.class);
     private final Map<Attributes, Double> activeAttributes = new EnumMap<>(Attributes.class);
@@ -102,6 +103,15 @@ public class PlayerProjectile {
         });
         activeAttributes.forEach((attributes, aDouble) -> {
             attributes.getAttribute().onProjectileLaunch(event, aDouble, smpPlayer);
+        });
+    }
+
+    public void onCombustEntity(EntityCombustByEntityEvent event) {
+        activeEnchants.forEach((enchants, integer) -> {
+            enchants.getEnchant().onCombustEntity(event, integer, smpPlayer);
+        });
+        activeAttributes.forEach((attributes, aDouble) -> {
+            attributes.getAttribute().onCombustEntity(event, aDouble, smpPlayer);
         });
     }
 
