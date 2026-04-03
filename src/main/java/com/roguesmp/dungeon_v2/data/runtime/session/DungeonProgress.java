@@ -1,7 +1,17 @@
 package com.roguesmp.dungeon_v2.data.runtime.session;
 
+import com.roguesmp.dungeon_v2.data.runtime.RoomInstance;
+import com.roguesmp.dungeon_v2.helper.SerializableLocation;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Mutable gameplay progress of a dungeon run.
+ * Mutable progress state of one dungeon run.
+ *
+ * roomSequence   — thứ tự roomId được roll lúc tạo instance.
+ * clearedRoomIds — history các room đã hoàn thành.
+ * currentRoom    — room đang active, chứa objectiveStates để restore.
  */
 public class DungeonProgress {
 
@@ -9,63 +19,69 @@ public class DungeonProgress {
 
     private int clearedRooms;
     private int minimumRooms;
-    private String currentRoomId;
     private Status status;
 
+    private int score;
+    private SerializableLocation checkpoint;
+    private RoomInstance currentRoom;
+    private List<String> roomSequence;
+    private List<String> clearedRoomIds;
+
     public DungeonProgress() {
+        this.status = Status.IN_PROGRESS;
+        this.roomSequence = new ArrayList<>();
+        this.clearedRoomIds = new ArrayList<>();
     }
 
-    public static DungeonProgress create(int minimumRooms) {
-        DungeonProgress progress = new DungeonProgress();
-        progress.clearedRooms = 0;
-        progress.minimumRooms = minimumRooms;
-        progress.status = Status.IN_PROGRESS;
-        return progress;
+    public DungeonProgress(int minimumRooms, List<String> roomSequence) {
+        this();
+        this.minimumRooms = minimumRooms;
+        this.roomSequence = new ArrayList<>(roomSequence);
+    }
+
+    /**
+     * Đánh dấu currentRoom là xong, đưa vào history, tăng counter.
+     */
+    public void markCurrentRoomCleared() {
+        if (currentRoom == null) return;
+        currentRoom.setCompleted(true);
+        clearedRoomIds.add(currentRoom.getRoomId());
+        clearedRooms++;
     }
 
     public boolean isBossUnlocked() {
         return clearedRooms >= minimumRooms;
     }
 
-    public boolean isFinished() {
-        return status == Status.COMPLETED
-                || status == Status.FAILED
-                || status == Status.ABANDONED;
+    public int getClearedRooms() { return clearedRooms; }
+    public void setClearedRooms(int clearedRooms) { this.clearedRooms = clearedRooms; }
+
+    public int getMinimumRooms() { return minimumRooms; }
+    public void setMinimumRooms(int minimumRooms) { this.minimumRooms = minimumRooms; }
+
+    public Status getStatus() { return status; }
+    public void setStatus(Status status) { this.status = status; }
+
+    public RoomInstance getCurrentRoom() { return currentRoom; }
+    public void setCurrentRoom(RoomInstance currentRoom) { this.currentRoom = currentRoom; }
+
+    public List<String> getRoomSequence() { return roomSequence; }
+    public void setRoomSequence(List<String> roomSequence) { this.roomSequence = roomSequence; }
+
+    public List<String> getClearedRoomIds() { return clearedRoomIds; }
+    public void setClearedRoomIds(List<String> clearedRoomIds) { this.clearedRoomIds = clearedRoomIds; }
+
+    public int getScore() {
+        return score;
+    }
+    public void setScore(int score) {
+        this.score = score;
     }
 
-    public void incrementClearedRooms() {
-        clearedRooms++;
+    public SerializableLocation getCheckpoint() {
+        return checkpoint;
     }
-
-    public int getClearedRooms() {
-        return clearedRooms;
-    }
-
-    public void setClearedRooms(int clearedRooms) {
-        this.clearedRooms = clearedRooms;
-    }
-
-    public int getMinimumRooms() {
-        return minimumRooms;
-    }
-
-    public void setMinimumRooms(int minimumRooms) {
-        this.minimumRooms = minimumRooms;
-    }
-
-    public String getCurrentRoomId() {
-        return currentRoomId;
-    }
-
-    public void setCurrentRoomId(String currentRoomId) {
-        this.currentRoomId = currentRoomId;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setCheckpoint(SerializableLocation checkpoint) {
+        this.checkpoint = checkpoint;
     }
 }

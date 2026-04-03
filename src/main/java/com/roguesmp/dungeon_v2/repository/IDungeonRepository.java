@@ -7,5 +7,5 @@ import java.util.List;
 public interface IDungeonRepository {
     List<Dungeon> loadAll();
     boolean delete(String id);
-    boolean save(Dungeon dungeon);
+    Dungeon save(Dungeon dungeon);
 }

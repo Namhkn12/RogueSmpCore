@@ -59,14 +59,14 @@ public class DungeonRepository implements IDungeonRepository {
     }
 
     @Override
-    public boolean save(Dungeon dungeon) {
+    public Dungeon save(Dungeon dungeon) {
         File file = new File(dungeonTemplateFolder, dungeon.getId() + DataConfig.JSON_TYPE);
         try (Writer writer = new FileWriter(file, StandardCharsets.UTF_8)){
             gson.toJson(dungeon, writer);
         }catch (Exception e){
             throw new DataSaveException(file.getName(), e);
         }
-        return true;
+        return dungeon;
     }
 
     private File toFile(String id) {
