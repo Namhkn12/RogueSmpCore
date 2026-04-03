@@ -29,6 +29,10 @@ public abstract class BaseRecipe {
         return this;
     }
 
+    /**
+     * Add a new ItemStack as output
+     * Note: the first item added to output is considered as main output
+    */
     public BaseRecipe addOutput(ItemStack item){
         this.outputs.add(item);
         return this;

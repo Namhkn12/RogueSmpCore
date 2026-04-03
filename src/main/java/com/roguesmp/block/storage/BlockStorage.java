@@ -6,6 +6,7 @@ import com.roguesmp.block.impl.interfaces.IEnergyStorage;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.block.impl.blocks.EnergyNode;
+import com.roguesmp.block.impl.interfaces.IHaveLockedRecipe;
 import com.roguesmp.block.impl.type.ProcessingMachine;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.constant.TransferMode;
@@ -164,8 +165,8 @@ public class BlockStorage {
                             if (data.currentRecipeId != null && !data.currentRecipeId.isEmpty()) {
                                 BaseRecipe savedRecipe = RecipeManager.getRecipe(data.currentRecipeId);
 
-                                if (savedRecipe instanceof MachineRecipe) {
-                                    machine.setCurrentRecipe((MachineRecipe) savedRecipe);
+                                if (savedRecipe != null) {
+                                    machine.setCurrentRecipe(savedRecipe);
                                 } else {
                                     // Đề phòng trường hợp Admin xóa mất recipe đó khỏi code/config
                                     plugin.getLogger().warning("Không tìm thấy Recipe ID '" + data.currentRecipeId + "' cho máy tại " + loc.toString() + ". Máy sẽ bị dừng.");
@@ -202,6 +203,11 @@ public class BlockStorage {
                                     }
                                     processingMachine.setPercent((machine.getProgress() * 100) / processableRecipe.getBaseProcessTime());
                                 }
+                            }
+
+                            //Phục hồi locked recipe nếu block đó có
+                            if(machine instanceof IHaveLockedRecipe mLockedRecipe){
+                                mLockedRecipe.setLockedRecipe(RecipeManager.getRecipe(data.lockedRecipeId));
                             }
                         }
                     }

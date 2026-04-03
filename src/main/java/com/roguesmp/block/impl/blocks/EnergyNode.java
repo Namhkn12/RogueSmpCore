@@ -67,25 +67,7 @@ public class EnergyNode extends SmpMachine implements IEnergyStorage {
 
     @Override
     public void onBlockInteract(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        ItemStack wrench = ItemRegistry.getInstance().getBaseItem("wrench").generateItemStack(1);
 
-        // Tránh bị trùng lặp với WrenchListener
-        if (event.getItem() != null && event.getItem().isSimilar(wrench) && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
-            return;
-        }
-
-        event.setCancelled(true); // Ngăn không cho đặt block nếu đang cầm đồ trên tay
-
-        if (player.isSneaking()) {
-            // SHIFT + CHUỘT PHẢI: Bơm full điện vào Node để test
-            this.setEnergy(this.getMaxEnergy());
-            player.sendMessage("§a[Debug] Đã bơm đầy điện (5000) vào Nút điện này!");
-        } else {
-            // CHUỘT PHẢI THƯỜNG: Xem số điện hiện tại
-            player.sendMessage("§e[Debug] Năng lượng của Node: §b" + getEnergy() + " / " + getMaxEnergy() + " e");
-            player.sendMessage("§7[Debug] Đang nối tới " + getConnections().size() + " Node khác.");
-        }
     }
 
     @Override

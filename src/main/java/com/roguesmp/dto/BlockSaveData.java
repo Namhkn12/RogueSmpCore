@@ -5,17 +5,16 @@ import com.roguesmp.block.impl.interfaces.IEnergyStorage;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.block.impl.blocks.EnergyNode;
-import com.roguesmp.block.impl.interfaces.IHaveInputOutput;
-import com.roguesmp.block.impl.type.ActiveGenerator;
+import com.roguesmp.block.impl.interfaces.IHaveLockedRecipe;
+import com.roguesmp.gui.interfaces.IHaveInputOutput;
 import com.roguesmp.block.impl.type.PassiveGenerator;
-import com.roguesmp.block.impl.type.ProcessingMachine;
 import com.roguesmp.constant.TransferMode;
-import com.roguesmp.gui.ActiveGeneratorGui;
-import com.roguesmp.gui.MachineGui;
 import com.roguesmp.utils.InventoryBase64;
 import com.roguesmp.utils.Utils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +31,7 @@ public class BlockSaveData {
     public boolean isProgressing;
     public String inventoryBase64;
     public String currentRecipeId;
+    public String lockedRecipeId;
     public Map<BlockFace, TransferMode> sideConfigs;
     public int storedEnergy;
 
@@ -79,6 +79,10 @@ public class BlockSaveData {
             if(block instanceof EnergyNode node){
                 this.linkedNodes = node.getConnections().stream().map(Utils::locationToString).toList();
             }
+
+            if(block instanceof IHaveLockedRecipe mLockedRecipe){
+                this.lockedRecipeId = mLockedRecipe.getLockedRecipe() != null ? mLockedRecipe.getLockedRecipe().getId() : null;
+            }
         } else {
             this.isMachine = false;
         }
@@ -93,16 +97,18 @@ public class BlockSaveData {
         int[] inputSlots = new int[0];
         int[] outputSlots = new int[0];
 
-        if(machine instanceof IHaveInputOutput inputOutput) {
+        if(machine.getGui() instanceof IHaveInputOutput inputOutput) {
             inputSlots = inputOutput.getInputSlots();
             outputSlots = inputOutput.getOutputSlots();
         }
 
         for (int slot : inputSlots) {
-            if (inv.getItem(slot) != null) map.put(slot, inv.getItem(slot));
+            ItemStack item = inv.getItem(slot);
+            if (item != null && !item.getType().isAir()) map.put(slot, inv.getItem(slot));
         }
         for (int slot : outputSlots) {
-            if (inv.getItem(slot) != null) map.put(slot, inv.getItem(slot));
+            ItemStack item = inv.getItem(slot);
+            if (item != null && !item.getType().isAir()) map.put(slot, inv.getItem(slot));
         }
 
         return map;

@@ -48,17 +48,17 @@ public class ElectricSteelFurnace extends ProcessingMachine implements IEnergySt
     public void registerRecipes() {
         ItemRegistry instance = ItemRegistry.getInstance();
 
-        RecipeManager.register(new MachineRecipe("steel_ingot", getItem().getId(), 30)
+        RecipeManager.register(new MachineRecipe("electric_steel_ingot", getItem().getId(), 30)
                 .addInput(List.of(ItemStack.of(Material.IRON_INGOT, 1), ItemStack.of(Material.COAL, 16)))
                 .addOutput(instance.getBaseItem("steel_ingot").generateItemStack(1))
         );
 
-        RecipeManager.register(new MachineRecipe("steel_block", getItem().getId(), 30 * 9)
+        RecipeManager.register(new MachineRecipe("electric_steel_block", getItem().getId(), 30 * 9)
                 .addInput(List.of(ItemStack.of(Material.IRON_BLOCK, 1), ItemStack.of(Material.COAL_BLOCK, 16)))
                 .addOutput(instance.getBaseItem("steel_block").generateItemStack(1))
         );
 
-        RecipeManager.register(new MachineRecipe("condensed_steel", getItem().getId(), 30 * 9)
+        RecipeManager.register(new MachineRecipe("electric_condensed_steel", getItem().getId(), 30 * 9)
                 .addInput(List.of(instance.getBaseItem("steel_ingot").generateItemStack(1), ItemStack.of(Material.COAL_BLOCK, 16)))
                 .addOutput(instance.getBaseItem("condensed_steel").generateItemStack(1))
         );

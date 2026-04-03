@@ -1,4 +1,4 @@
-package com.roguesmp.block.impl.interfaces;
+package com.roguesmp.gui.interfaces;
 
 public interface IHaveInputOutput {
     int[] getInputSlots();

@@ -37,6 +37,7 @@ public class SolarPanel extends PassiveGenerator {
             isNotRunning(genGui);
             return;
         }
+
         long time = block.getWorld().getTime();
         boolean isDayTime = time >=0 && time < 12000;
         boolean isRaining = block.getWorld().hasStorm();
