@@ -1,10 +1,13 @@
 package com.roguesmp.block.impl.type;
 
 import com.roguesmp.block.impl.SmpMachine;
+import com.roguesmp.block.impl.interfaces.IHaveLockedRecipe;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.gui.MachineGui;
+import com.roguesmp.gui.interfaces.IHaveBlueprint;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.impl.NameComponent;
+import com.roguesmp.recipe.BaseRecipe;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -14,15 +17,30 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ProcessingMachine extends SmpMachine {
+public abstract class ProcessingMachine extends SmpMachine implements IHaveLockedRecipe {
 
     private final int GUI_ROWS = 3;
+    private BaseRecipe lockedRecipe = null;
 
     public ProcessingMachine(BaseItem baseItem, Material progressDisplay) {
         super(baseItem, progressDisplay);
+    }
+
+    @Override
+    public void setLockedRecipe(@Nullable  BaseRecipe lockedRecipe) {
+        this.lockedRecipe = lockedRecipe;
+        if(gui instanceof IHaveBlueprint gBlueprint){
+            gBlueprint.setBlueprintItem(lockedRecipe);
+        }
+    }
+
+    @Override
+    public @Nullable BaseRecipe getLockedRecipe() {
+        return lockedRecipe;
     }
 
     public abstract void registerRecipes();

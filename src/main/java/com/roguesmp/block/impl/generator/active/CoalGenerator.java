@@ -29,7 +29,7 @@ public class CoalGenerator extends ActiveGenerator {
 
         for(Map.Entry<Material, Integer> burnable: Burnable.getAllBurnableItems().entrySet()){
             if(burnable.getKey() != Material.LAVA_BUCKET){
-                RecipeManager.register(new EnergyRecipe(burnable.getKey().name(), getItem().getId(), (int) Math.ceil(burnable.getValue().doubleValue() / 200))
+                RecipeManager.register(new EnergyRecipe("coal_generator_" + burnable.getKey().name(), getItem().getId(), (int) Math.ceil(burnable.getValue().doubleValue() / 200))
                         .addInput(ItemStack.of(burnable.getKey(), 1))
                 );
             }

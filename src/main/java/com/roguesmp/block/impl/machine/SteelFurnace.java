@@ -27,17 +27,17 @@ public class SteelFurnace extends ProcessingMachine {
     public void registerRecipes(){
         ItemRegistry instance = ItemRegistry.getInstance();
 
-        RecipeManager.register(new MachineRecipe("steel_ingot", getItem().getId(), 120)
+        RecipeManager.register(new MachineRecipe("furnace_steel_ingot", getItem().getId(), 120)
                 .addInput(List.of(ItemStack.of(Material.IRON_INGOT, 1), ItemStack.of(Material.COAL, 16)))
                 .addOutput(instance.getBaseItem("steel_ingot").generateItemStack(1))
         );
 
-        RecipeManager.register(new MachineRecipe("steel_block", getItem().getId(), 120 * 9)
+        RecipeManager.register(new MachineRecipe("furnace_steel_block", getItem().getId(), 120 * 9)
                 .addInput(List.of(ItemStack.of(Material.IRON_BLOCK, 1), ItemStack.of(Material.COAL_BLOCK, 16)))
                 .addOutput(instance.getBaseItem("steel_block").generateItemStack(1))
         );
 
-        RecipeManager.register(new MachineRecipe("condensed_steel", getItem().getId(), 120 * 9)
+        RecipeManager.register(new MachineRecipe("furnace_condensed_steel", getItem().getId(), 120 * 9)
                 .addInput(List.of(instance.getBaseItem("steel_ingot").generateItemStack(1), ItemStack.of(Material.COAL_BLOCK, 16)))
                 .addOutput(instance.getBaseItem("condensed_steel").generateItemStack(1))
         );

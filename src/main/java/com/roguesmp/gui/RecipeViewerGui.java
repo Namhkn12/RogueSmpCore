@@ -4,7 +4,6 @@ import com.roguesmp.recipe.BaseRecipe;
 import com.roguesmp.recipe.impl.MachineRecipe;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.Utils;
-import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -12,11 +11,10 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.List;
-
 public class RecipeViewerGui extends BaseGui {
 
     private final ItemStack SETTING_FILLER = ItemStackUtils.hideTooltip(ItemStack.of(Material.GREEN_STAINED_GLASS_PANE));
+    private final ItemStack PROCESSING_FILLER = ItemStackUtils.hideTooltip(ItemStack.of(Material.GRAY_STAINED_GLASS_PANE));
     private final ItemStack BACK_BTN = ItemStack.of(Material.ARROW);
 
     private BaseGui machineGui;
@@ -53,6 +51,9 @@ public class RecipeViewerGui extends BaseGui {
                     default -> {
                         if(cell < 9) {
                             addButton(cell, SETTING_FILLER, ClickHandler.noAction());
+                        }
+                        else if (cell == 13){
+                            addButton(cell, PROCESSING_FILLER, ClickHandler.noAction());
                         }
                         else {
                             addButton(cell, machineGui.getInventory().getItem(cell), ClickHandler.noAction());

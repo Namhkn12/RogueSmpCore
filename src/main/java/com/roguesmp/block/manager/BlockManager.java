@@ -5,7 +5,8 @@ import com.roguesmp.block.impl.interfaces.IEnergyStorage;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.block.impl.blocks.EnergyNode;
-import com.roguesmp.block.impl.interfaces.IHaveInputOutput;
+import com.roguesmp.block.impl.interfaces.IHaveLockedRecipe;
+import com.roguesmp.gui.interfaces.IHaveInputOutput;
 import com.roguesmp.block.impl.type.ActiveGenerator;
 import com.roguesmp.block.impl.type.Generator;
 import com.roguesmp.block.impl.type.PassiveGenerator;
@@ -87,6 +88,33 @@ public class BlockManager {
                 inputSlots = mGui.getInputSlots();
             }
 
+            // =================================================================
+            // NHÁNH 1: MÁY ĐANG Ở CHẾ ĐỘ KHÓA CÔNG THỨC (BLUEPRINT)
+            // =================================================================
+            BaseRecipe lockedRecipe = null;
+
+            // Kiểm tra xem máy này có hỗ trợ tính năng Blueprint không
+            if (machine instanceof IHaveLockedRecipe blueprintMachine) {
+                lockedRecipe = blueprintMachine.getLockedRecipe();
+            }
+
+            if (lockedRecipe != null) {
+                // Máy đã bị khóa công thức -> Chỉ kiểm tra duy nhất công thức này
+                if (RecipeUtils.matches(inv, inputSlots, lockedRecipe.getInputs())) {
+                    machine.setCurrentRecipe(lockedRecipe);
+                } else {
+                    // CHỐT CHẶN AN TOÀN: Có bản vẽ nhưng không đủ/đúng nguyên liệu
+                    // -> Ép máy dừng ngay lập tức, không cho phép quét tự do!
+                    machine.setProgressing(false);
+                    machine.setProgress(0);
+                }
+
+                return; // KẾT THÚC HÀM TẠI ĐÂY (Không chạy phần code bên dưới nữa)
+            }
+
+            // =================================================================
+            // NHÁNH 2: MÁY Ở CHẾ ĐỘ QUÉT TỰ DO (Không có bản vẽ)
+            // =================================================================
             BaseRecipe foundRecipe = RecipeManager.findRecipe(machineId, inv, inputSlots);
 
             // KIỂM TRA SỰ TƯƠNG THÍCH GIỮA MÁY VÀ LOẠI CÔNG THỨC
@@ -99,7 +127,6 @@ public class BlockManager {
             else {
                 machine.setProgressing(false);
                 machine.setProgress(0);
-                return;
             }
         }
     }
@@ -117,15 +144,38 @@ public class BlockManager {
             outputSlots = mGui.getOutputSlots();
         }
 
-        BaseRecipe foundRecipe = RecipeManager.findRecipe(machineId, inv, inputSlots);
+        BaseRecipe foundRecipe = null;
 
+        // =================================================================
+        // BƯỚC 1: XÁC ĐỊNH CÔNG THỨC ĐƯỢC PHÉP CHẠY (KHÓA VS TỰ DO)
+        // =================================================================
+        if (machine instanceof IHaveLockedRecipe blueprintMachine && blueprintMachine.getLockedRecipe() != null) {
+            // NHÁNH 1: MÁY BỊ KHÓA
+            BaseRecipe lockedRecipe = blueprintMachine.getLockedRecipe();
+
+            // Chỉ chấp nhận foundRecipe nếu nguyên liệu trong rương khớp với nguyên liệu của bản vẽ
+            if (RecipeUtils.matches(inv, inputSlots, lockedRecipe.getInputs())) {
+                foundRecipe = lockedRecipe;
+            } else {
+                // Có khóa nhưng nguyên liệu đưa vào không đúng/không đủ -> Ép máy đứng im
+                return;
+            }
+        } else {
+            // NHÁNH 2: MÁY QUÉT TỰ DO
+            foundRecipe = RecipeManager.findRecipe(machineId, inv, inputSlots);
+        }
+
+
+        // =================================================================
+        // BƯỚC 2: KIỂM TRA ĐIỀU KIỆN ĐỂ BẮT ĐẦU CHẠY
+        // =================================================================
         if (foundRecipe != null) {
             // Phân loại: Đúng loại máy mới được chạy đúng loại công thức
             boolean isProcessingMatch = (machine instanceof ProcessingMachine && foundRecipe.getType() == RecipeType.PROCESSING);
             boolean isEnergyMatch = (machine instanceof ActiveGenerator && foundRecipe.getType() == RecipeType.ENERGY);
 
             if (isProcessingMatch || isEnergyMatch) {
-                // 1. Kiểm tra đầu ra có đủ chỗ không (Dùng chung vì EnergyRecipe có thể có output như Xô Không)
+                // 1. Kiểm tra đầu ra có đủ chỗ không
                 boolean haveEnoughOutputSlots = RecipeUtils.canFitInSlots(inv, outputSlots, foundRecipe.getOutputs());
 
                 // 2. Phân nhánh logic năng lượng

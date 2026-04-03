@@ -1,9 +1,8 @@
 package com.roguesmp.gui;
 
 import com.roguesmp.block.impl.SmpMachine;
-import com.roguesmp.block.impl.interfaces.IHaveInputOutput;
+import com.roguesmp.gui.interfaces.IHaveInputOutput;
 import com.roguesmp.recipe.BaseRecipe;
-import com.roguesmp.recipe.impl.MachineRecipe;
 import com.roguesmp.recipe.manager.RecipeManager;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.Utils;
