@@ -1,11 +1,15 @@
 package com.roguesmp.utils;
 
+import com.roguesmp.constant.Keys;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
+import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -40,5 +44,13 @@ public class ItemStackUtils {
     public static boolean isUsable(ItemStack itemStack) {
         if (itemStack.hasData(DataComponentTypes.CONSUMABLE)) return true;
         return usableItems.contains(itemStack.getType());
+    }
+
+    /**
+     * Get this ItemStack's id
+     */
+    public static @Nullable String getId(ItemStack itemStack) {
+        PersistentDataContainerView pdc = itemStack.getPersistentDataContainer();
+        return pdc.get(Keys.ITEM_ID, PersistentDataType.STRING);
     }
 }

@@ -133,7 +133,7 @@ public class DamageEvent extends Event implements Cancellable {
         }
 
         needUpdate = false;
-        return finalDamage;
+        return Math.max(0, finalDamage); // Prevent negative damage
     }
 
     private double calculateFinalDefense() {
@@ -147,7 +147,7 @@ public class DamageEvent extends Event implements Cancellable {
     }
 
     private static double applyDefense(double damage, double defense) {
-        double C = 15d;
+        final double C = 15d;
         return damage * (C / (C + defense));
     }
 

@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 /**
- * Represent items with modifiers applied (in-game items)
+ * Represent our custom items
  */
 public class SmpItem {
     private final BaseItem baseItem;
@@ -34,6 +34,9 @@ public class SmpItem {
 
     private final Map<String, ItemComponent> componentMap = new HashMap<>();
 
+    /**
+     * Create an SmpItem instance, and load base data from {@link BaseItem} and pdc. To fully update the components, call {@link SmpItem#applyModifiers(SmpPlayer)}
+     */
     public SmpItem(@NotNull ItemStack itemStack) {
         this.itemStack = itemStack.clone();
         PersistentDataContainerView pdc = itemStack.getPersistentDataContainer();
@@ -48,6 +51,9 @@ public class SmpItem {
         }
     }
 
+    /**
+     * Create an SmpItem instance, and load base data from {@link BaseItem}. To fully update the components, call {@link SmpItem#applyModifiers(SmpPlayer)}
+     */
     public SmpItem(@NotNull BaseItem baseItem) {
         this.baseItem = baseItem;
         this.itemStack = ItemStack.of(baseItem.getBase());
@@ -72,14 +78,23 @@ public class SmpItem {
         return (T) componentMap.put(key.id(), component);
     }
 
-    public ItemStack getInputItemStack() {
+    /**
+     * Return the itemStack for this SmpItem, might be stale
+     */
+    public ItemStack getItemStack() {
         return itemStack;
     }
 
+    /**
+     * Apply modifiers and generate the ItemStack
+     */
     public ItemStack generateItemStack(int stackAmount) {
         return generateItemStack(null, stackAmount);
     }
 
+    /**
+     * Apply modifiers and generate the ItemStack
+     */
     public ItemStack generateItemStack(@Nullable SmpPlayer player, int stackAmount) {
         if (baseItem == null) return itemStack;
         ItemStack result = ItemStack.of(baseItem.getBase(), stackAmount);

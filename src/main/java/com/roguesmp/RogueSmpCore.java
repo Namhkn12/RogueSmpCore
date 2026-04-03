@@ -68,9 +68,9 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Register Listener here
     public void initListeners() {
+        registerListener(new ItemInteractionListener());
         registerListener(new GuiListener());
         registerListener(new BlockListener());
-        registerListener(new WrenchListener());
 
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance(), PlayerDataManager.getInstance()));

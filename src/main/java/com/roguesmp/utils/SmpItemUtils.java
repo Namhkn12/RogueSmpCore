@@ -19,7 +19,7 @@ import java.util.List;
 public class SmpItemUtils {
 
     public static @Nullable BaseItem getBaseItem(ItemStack itemStack) {
-        String id = itemStack.getPersistentDataContainer().get(Keys.ITEM_ID, PersistentDataType.STRING);
+        String id = ItemStackUtils.getId(itemStack);
         if (id == null) return null;
         return ItemRegistry.getInstance().getBaseItem(id);
     }
