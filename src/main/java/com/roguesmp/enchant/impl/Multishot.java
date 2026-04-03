@@ -56,6 +56,7 @@ public class Multishot implements SmpEnchant {
                 Projectile shotProjectile = (Projectile) spawnLoc.getWorld().spawn(spawnLoc, primary.getType().getEntityClass(), entity -> {
                     Projectile projectile = (Projectile) entity;
                     projectile.setVelocity(spreadVelocity);
+                    projectile.setFireTicks(primary.getFireTicks());
 
                     if (primary instanceof AbstractArrow arrow && entity instanceof AbstractArrow sideArrow) {
                         sideArrow.setCritical(arrow.isCritical());

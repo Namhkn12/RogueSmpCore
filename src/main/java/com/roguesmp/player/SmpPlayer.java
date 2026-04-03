@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
@@ -20,6 +21,7 @@ import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -178,10 +180,11 @@ public class SmpPlayer {
     public void onInteract(PlayerInteractEvent event) {
         Action action = event.getAction();
         Player player = event.getPlayer();
+        if (event.getHand() != EquipmentSlot.HAND) return;
         if (action.isLeftClick()) {
             if (player.isSneaking()) abilityLoadout.cast(AbilityTrigger.SHIFT_LEFT_CLICK);
         } else if (action.isRightClick()) {
-            if (ItemStackUtils.isUsable(player.getEquipment().getItemInMainHand())) return;
+            if (!activeAttributes.containsKey(Attributes.MELEE_DAMAGE_BASE)) return; //A hack to make sure only "weapon" can be casted with...
             if (player.isSneaking()) abilityLoadout.cast(AbilityTrigger.SHIFT_RIGHT_CLICK);
             else abilityLoadout.cast(AbilityTrigger.RIGHT_CLICK);
         }

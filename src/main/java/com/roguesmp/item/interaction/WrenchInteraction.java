@@ -1,4 +1,4 @@
-package com.roguesmp.listener;
+package com.roguesmp.item.interaction;
 
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.blocks.EnergyNode;
@@ -10,7 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -18,22 +17,19 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
-public class WrenchListener implements Listener {
+public class WrenchInteraction implements ItemInteraction {
+
     private final BlockManager manager;
     private final Map<UUID, Location> linkingState = new HashMap<>();
     private final Map<UUID, Long> pendingClearConfirmations = new HashMap<>();
 
-    public WrenchListener(){
+    public WrenchInteraction(){
         manager = BlockManager.getInstance();
     }
 
-    @EventHandler
-    public void onWrenchUse(PlayerInteractEvent event){
+    @Override
+    public void onInteract(PlayerInteractEvent event){
         Player player = event.getPlayer();
-        ItemStack wrench = ItemRegistry.getInstance().getBaseItem("wrench").generateItemStack(1);
-
-        // 1. Kiểm tra xem người chơi có đang cầm cờ lê hợp lệ không
-        if(event.getItem() == null || !event.getItem().isSimilar(wrench)) return;
 
         Block clickedBlockVanilla = event.getClickedBlock();
         if(clickedBlockVanilla == null) return;
