@@ -90,17 +90,15 @@ public class PartyManager {
         return partyMap.get(partyId);
     }
 
-    public Optional<Party> findById(UUID partyId) {
-        return Optional.ofNullable(partyMap.get(partyId));
+    public Party findById(UUID partyId) {
+        return partyMap.get(partyId);
     }
 
     public boolean isInParty(UUID playerId) {
         return playerIndex.containsKey(playerId);
     }
 
-//    public boolean isOwner(UUID playerId) {
-//        return findByPlayer(playerId)
-//                .map(party -> party.().equals(playerId))
-//                .orElse(false);
-//    }
+    public boolean checkIsOwner(UUID playerId) {
+        return findByPlayer(playerId).isOwner(playerId);
+    }
 }

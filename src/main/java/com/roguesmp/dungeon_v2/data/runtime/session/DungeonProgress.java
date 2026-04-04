@@ -24,19 +24,20 @@ public class DungeonProgress {
     private int score;
     private SerializableLocation checkpoint;
     private RoomInstance currentRoom;
-    private List<String> roomSequence;
+    private List<String> roomPool;
+    private List<String> nextRooms;
     private List<String> clearedRoomIds;
 
     public DungeonProgress() {
         this.status = Status.IN_PROGRESS;
-        this.roomSequence = new ArrayList<>();
+        this.roomPool = new ArrayList<>();
         this.clearedRoomIds = new ArrayList<>();
     }
 
     public DungeonProgress(int minimumRooms, List<String> roomSequence) {
         this();
         this.minimumRooms = minimumRooms;
-        this.roomSequence = new ArrayList<>(roomSequence);
+        this.roomPool = new ArrayList<>(roomSequence);
     }
 
     /**
@@ -65,8 +66,8 @@ public class DungeonProgress {
     public RoomInstance getCurrentRoom() { return currentRoom; }
     public void setCurrentRoom(RoomInstance currentRoom) { this.currentRoom = currentRoom; }
 
-    public List<String> getRoomSequence() { return roomSequence; }
-    public void setRoomSequence(List<String> roomSequence) { this.roomSequence = roomSequence; }
+    public List<String> getRoomPool() { return roomPool; }
+    public void setRoomPool(List<String> roomPool) { this.roomPool = roomPool; }
 
     public List<String> getClearedRoomIds() { return clearedRoomIds; }
     public void setClearedRoomIds(List<String> clearedRoomIds) { this.clearedRoomIds = clearedRoomIds; }

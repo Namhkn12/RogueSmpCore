@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon_v2.service;
 
+import com.roguesmp.dungeon_v2.data.definition.Dungeon;
 import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_v2.dto.DungeonConfig;
 import org.bukkit.entity.Player;
@@ -10,7 +11,7 @@ public interface IDungeonService {
 
     DungeonInstance startDungeon(Player player, DungeonConfig config);
 
-    List<String> rollNextRooms(DungeonInstance instance);
+    List<String> rollRoomPool(Dungeon dungeon);
 
     void chooseRoom(DungeonInstance instance, String chosen);
 }

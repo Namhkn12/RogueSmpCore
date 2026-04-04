@@ -30,12 +30,12 @@ public class PartyService implements IPartyService {
 
     @Override
     public void disbandParty(Player owner) {
-        if (!partyManager.isOwner(owner.getUniqueId())) {
+        if (!partyManager.checkIsOwner(owner.getUniqueId())) {
             DungeonEcho.error(owner, "Bạn không phải chủ nhóm");
             return;
         }
 
-        Party party = partyManager.findByPlayer(owner.getUniqueId()).orElse(null);
+        Party party = partyManager.findByPlayer(owner.getUniqueId());
         if (party == null) return;
 
         for (UUID memberId : party.getMembers()) {
@@ -55,12 +55,12 @@ public class PartyService implements IPartyService {
             return;
         }
 
-        if (!partyManager.isOwner(owner.getUniqueId())) {
+        if (!partyManager.checkIsOwner(owner.getUniqueId())) {
             DungeonEcho.warn(player, "Người này không phải chủ nhóm");
             return;
         }
 
-        Party party = partyManager.findByPlayer(owner.getUniqueId()).orElse(null);
+        Party party = partyManager.findByPlayer(owner.getUniqueId());
         if (party == null) return;
 
         if (party.getMembers().size() >= party.getMaxSize()) {
@@ -79,12 +79,12 @@ public class PartyService implements IPartyService {
             return;
         }
 
-        if (partyManager.isOwner(player.getUniqueId())) {
+        if (partyManager.checkIsOwner(player.getUniqueId())) {
             DungeonEcho.warn(player, "Hãy dùng lệnh /disband để giải tán");
             return;
         }
 
-        Party party = partyManager.findByPlayer(player.getUniqueId()).orElse(null);
+        Party party = partyManager.findByPlayer(player.getUniqueId());
         if (party == null) return;
 
         partyManager.removeMember(party.getPartyId(), player.getUniqueId());
@@ -93,7 +93,7 @@ public class PartyService implements IPartyService {
 
     @Override
     public void kickMember(Player owner, Player target) {
-        if (!partyManager.isOwner(owner.getUniqueId())) {
+        if (!partyManager.checkIsOwner(owner.getUniqueId())) {
             DungeonEcho.error(owner, "Bạn không phải chủ nhóm");
             return;
         }
@@ -103,7 +103,7 @@ public class PartyService implements IPartyService {
             return;
         }
 
-        Party party = partyManager.findByPlayer(owner.getUniqueId()).orElse(null);
+        Party party = partyManager.findByPlayer(owner.getUniqueId());
         if (party == null) return;
 
         if (!party.getMembers().contains(target.getUniqueId())) {
@@ -118,12 +118,12 @@ public class PartyService implements IPartyService {
 
     @Override
     public void transferOwnership(Player currentOwner, Player newOwner) {
-        if (!partyManager.isOwner(currentOwner.getUniqueId())) {
+        if (!partyManager.checkIsOwner(currentOwner.getUniqueId())) {
             DungeonEcho.error(currentOwner,"Bạn không phải chủ nhóm");
             return;
         }
 
-        Party party = partyManager.findByPlayer(currentOwner.getUniqueId()).orElse(null);
+        Party party = partyManager.findByPlayer(currentOwner.getUniqueId());
         if (party == null) return;
 
         if (!party.getMembers().contains(newOwner.getUniqueId())) {
@@ -143,12 +143,12 @@ public class PartyService implements IPartyService {
 
     @Override
     public boolean isOwner(Player player) {
-        return partyManager.isOwner(player.getUniqueId());
+        return partyManager.checkIsOwner(player.getUniqueId());
     }
 
     @Override
     public String buildPartyInfo(Player player) {
-        Party party = partyManager.findByPlayer(player.getUniqueId()).orElse(null);
+        Party party = partyManager.findByPlayer(player.getUniqueId());
 
         if (party == null) {
             return MCStringBuilder.yellow("Bạn không ở trong nhóm nào.");
