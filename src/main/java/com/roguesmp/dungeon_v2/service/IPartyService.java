@@ -3,6 +3,7 @@ package com.roguesmp.dungeon_v2.service;
 import com.roguesmp.dungeon_v2.data.runtime.Party;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface IPartyService {
@@ -30,5 +31,7 @@ public interface IPartyService {
     Party getPartyById(UUID partyId);
 
     void savePartyToFile();
+
+    List<Player> getOnlineMembers(Party party);
 
 }

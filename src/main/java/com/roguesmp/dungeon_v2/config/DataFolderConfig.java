@@ -9,16 +9,17 @@ public class DataFolderConfig {
     public static final String SCHEM_TYPE = ".schem";
 
     //folder name constant
-    public static final String MAIN_FOLDER = "dungeon";
+    public static final String MAIN_FOLDER = "dungeon_v2";
     public static final String TEMPLATE_FOLDER = "template";
     public static final String RUNTIME_FOLDER = "runtime";
+
+    public static final String LOOTABLE_FOLDER = "loottable";
 
     public static final String DUNGEON_TEMPLATE_FOLDER = "dungeon_template";
     public static final String ROOM_FOLDER = "room_template";
     public static final String SCHEMETA_FOLDER = "schemeta";
     public static final String SCHEMATIC_FOLDER = "schematic";
     public static final String SPAWNER_TEMPLATE_FOLDER = "spawner_template";
-    public static final String LOOTABLE_FOLDER = "loottable";
 
     public static final String PARTY_FOLDER = "party";
     public static final String REGION_FOLDER = "region";
@@ -26,14 +27,14 @@ public class DataFolderConfig {
 
 
     //file name prefix constant
-    public static final String DUNGEON_TEMPLATE_FILE = "dungeon_";
-    public static final String ROOM_TEMPLATE_FILE = "room_";
-    public static final String DUNGEON_INSTANCE_FILE = "di_";
-    public static final String REGION_INSTANCE_FILE = "region_";
-    public static final String SCHEMETA_FILE = "schemeta_";
-    public static final String SPAWNER_TEMPLATE_FILE = "spawner_";
-    public static final String PARTY_FILE = "party_";
-    public static final String LOOTABLE_FILE = "loot_";
+    public static final String DUNGEON_TEMPLATE_FILE = "dungeon";
+    public static final String ROOM_TEMPLATE_FILE = "room";
+    public static final String DUNGEON_INSTANCE_FILE = "di";
+    public static final String REGION_INSTANCE_FILE = "region";
+    public static final String SCHEMETA_FILE = "schemeta";
+    public static final String SPAWNER_TEMPLATE_FILE = "spawner";
+    public static final String PARTY_FILE = "party";
+    public static final String LOOTABLE_FILE = "loot";
 
     public static String getRoomTemplateFolder(){
         return buildFolderPath(List.of(

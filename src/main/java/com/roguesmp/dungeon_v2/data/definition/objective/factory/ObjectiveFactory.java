@@ -26,12 +26,12 @@ public final class ObjectiveFactory {
             case MonsterHunter.TYPE -> {
                 MonsterHunter objective = new MonsterHunter();
                 objective.setRequire(getRequiredCount(config, 10));
-                objective.setTargetIds(config.getStringListParam("targets"));
+                objective.setTargetId(config.getStringParam("target", ""));
                 yield objective;
             }
             case ItemCollector.TYPE -> {
                 ItemCollector objective = new ItemCollector();
-                objective.setRequire(config.getIntMapParam("require"));
+                objective.setRequire(config.getIntParam("require", 1));
                 yield objective;
             }
             default -> throw new IllegalArgumentException("Unknown objective type: " + config.getType());

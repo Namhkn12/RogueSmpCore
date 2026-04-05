@@ -3,11 +3,12 @@ package com.roguesmp.dungeon_v2.service.impl;
 import com.roguesmp.dungeon_v2.data.runtime.Party;
 import com.roguesmp.dungeon_v2.manager.PartyManager;
 import com.roguesmp.dungeon_v2.service.IPartyService;
-import com.roguesmp.dungeon_v2.utils_.DungeonEcho;
-import com.roguesmp.dungeon_v2.utils_.MCStringBuilder;
+import com.roguesmp.dungeon_v2.utils.DungeonEcho;
+import com.roguesmp.dungeon_v2.utils.MCStringBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.UUID;
 
 public class PartyService implements IPartyService {
@@ -186,5 +187,13 @@ public class PartyService implements IPartyService {
     @Override
     public void savePartyToFile() {
         partyManager.saveAll();
+    }
+
+    @Override
+    public List<Player> getOnlineMembers(Party party) {
+        return party.getMembers().stream()
+                .map(Bukkit::getPlayer)
+                .filter(p -> p != null && p.isOnline())
+                .toList();
     }
 }

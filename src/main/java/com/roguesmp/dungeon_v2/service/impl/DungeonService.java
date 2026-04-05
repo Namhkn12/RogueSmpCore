@@ -1,56 +1,31 @@
 package com.roguesmp.dungeon_v2.service.impl;
 
 import com.roguesmp.dungeon_v2.data.definition.Dungeon;
+import com.roguesmp.dungeon_v2.data.definition.room.Room;
 import com.roguesmp.dungeon_v2.data.definition.room.RoomEntry;
 import com.roguesmp.dungeon_v2.data.definition.room.RoomPool;
+import com.roguesmp.dungeon_v2.data.definition.room.RoomType;
 import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
-import com.roguesmp.dungeon_v2.data.runtime.Party;
-import com.roguesmp.dungeon_v2.dto.DungeonConfig;
 import com.roguesmp.dungeon_v2.manager.DungeonManager;
-import com.roguesmp.dungeon_v2.manager.InstanceManager;
 import com.roguesmp.dungeon_v2.manager.RoomManager;
 import com.roguesmp.dungeon_v2.service.IDungeonService;
-import com.roguesmp.dungeon_v2.service.IInstanceService;
-import com.roguesmp.dungeon_v2.service.IPartyService;
-import com.roguesmp.dungeon_v2.utils_.Log4Craft_;
-import com.roguesmp.dungeon_v2.utils_.Razdon;
-import org.bukkit.entity.Player;
-
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
+import com.roguesmp.dungeon_v2.utils.Razdon;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DungeonService implements IDungeonService {
 
     private final RoomManager roomManager;
     private final DungeonManager dungeonManager;
-    private final IInstanceService instanceService;
-    private final IPartyService partyService;
     private final Log4Craft_ logger;
 
-    public DungeonService(RoomManager roomManager, DungeonManager dungeonManager, IInstanceService instanceService, IPartyService partyService, Log4Craft_ logger) {
+    public DungeonService(RoomManager roomManager, DungeonManager dungeonManager, Log4Craft_ logger) {
         this.roomManager = roomManager;
         this.dungeonManager = dungeonManager;
-        this.instanceService = instanceService;
-        this.partyService = partyService;
         this.logger = logger;
-    }
-
-    @Override
-    public DungeonInstance startDungeon(Player player, DungeonConfig config) {
-        /*Get dungeon*/
-        Dungeon dungeon = dungeonManager.get(config.did());
-        if(dungeon == null){
-            logger.error(this.getClass(), "Couldn't found dungeon with id " + config.did());
-            return null;
-        }
-        /*Check party*/
-        Party party = partyService.getPartyByPlayer(player);
-        if(party == null){
-            logger.error(this.getClass(), "Couldn't found party. Please create a party before join dungeon!");
-            return null;
-        }
-        /*Create instance*/
-        return instanceService.createDungeonInstance(dungeon, party);
     }
 
     @Override
@@ -81,6 +56,27 @@ public class DungeonService implements IDungeonService {
         }
 
         return result;
+    }
+
+    @Override
+    public List<String> rollNextRoomFromPool(List<String> pool, int minimum, int completedRooms) {
+        if (pool == null || pool.isEmpty()) return List.of();
+
+        List<String> eligible = pool.stream()
+                .filter(roomId -> {
+                    Room room = roomManager.get(roomId);
+                    if (room == null) return false;
+                    if (room.getType() == RoomType.BOSS && completedRooms < minimum) return false;
+                    return true;
+                })
+                .collect(Collectors.toList());
+
+        if (eligible.isEmpty()) return List.of();
+
+        Collections.shuffle(eligible);
+
+        int count = Razdon.getInstance().nextIntInRange(1, 4);
+        return eligible.subList(0, Math.min(count, eligible.size()));
     }
 
     @Override

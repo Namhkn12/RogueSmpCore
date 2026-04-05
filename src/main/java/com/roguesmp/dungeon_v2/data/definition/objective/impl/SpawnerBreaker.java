@@ -1,17 +1,19 @@
 package com.roguesmp.dungeon_v2.data.definition.objective.impl;
 
 import com.roguesmp.dungeon_v2.data.definition.objective.BaseObjective;
+import com.roguesmp.dungeon_v2.data.definition.objective.IDisplayable;
 import com.roguesmp.dungeon_v2.data.definition.objective.IProgressable;
 import com.roguesmp.dungeon_v2.data.definition.objective.event.IBlockBreakAware;
 import org.bukkit.Material;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Objective completed after a number of spawners have been broken.
  */
-public class SpawnerBreaker extends BaseObjective implements IProgressable, IBlockBreakAware {
+public class SpawnerBreaker extends BaseObjective implements IProgressable, IDisplayable, IBlockBreakAware {
     public static final String TYPE = "spawner_breaker";
 
     private int require = 3;
@@ -73,5 +75,13 @@ public class SpawnerBreaker extends BaseObjective implements IProgressable, IBlo
         super.deserialize(data);
         this.require = data.get("require") instanceof Number number ? number.intValue() : 3;
         this.count = data.get("count") instanceof Number number ? number.intValue() : 0;
+    }
+
+    @Override
+    public List<String> getScoreBoardLine() {
+        String progress = completed
+                ? "§a✔ Break Spawners §f" + require + "§7/§f" + require
+                : "§7Break Spawners §f" + count + "§7/§f" + require;
+        return List.of(progress);
     }
 }

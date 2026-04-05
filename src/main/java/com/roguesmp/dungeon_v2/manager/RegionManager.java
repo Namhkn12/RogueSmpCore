@@ -5,7 +5,7 @@ import com.roguesmp.dungeon_v2.data.definition.DungeonWorld;
 import com.roguesmp.dungeon_v2.data.runtime.Region;
 import com.roguesmp.dungeon_v2.data.runtime.RegionStatus;
 import com.roguesmp.dungeon_v2.repository.IRegionRepository;
-import com.roguesmp.dungeon_v2.utils_.Log4Craft_;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 
 import java.util.*;
 
@@ -67,10 +67,13 @@ public class RegionManager {
         repository.save(world);
     }
 
-    public Optional<DungeonWorld> getWorld(String worldName) {
-        return Optional.ofNullable(worldMap.get(worldName));
+    public DungeonWorld getWorld(String worldName) {
+        return worldMap.get(worldName);
     }
 
+    public Region getRegionById(UUID regionId) {
+        return regionIndex.get(regionId);
+    }
     public Collection<DungeonWorld> getAllWorlds() {
         return Collections.unmodifiableCollection(worldMap.values());
     }
@@ -82,21 +85,17 @@ public class RegionManager {
         regionIndex.put(region.getId(), region);
     }
 
-    public Optional<Region> getRegionById(UUID regionId) {
-        return Optional.ofNullable(regionIndex.get(regionId));
-    }
-
     /**
      * Tìm region available đầu tiên trong 1 world
      */
-    public Optional<Region> findAvailableRegion(String worldName) {
+    public Region findAvailableRegion(String worldName) {
         DungeonWorld world = worldMap.get(worldName);
-        if (world == null) return Optional.empty();
+        if (world == null) return null;
 
         return world.getRegions().values()
                 .stream()
                 .filter(r -> r.getStatus() == RegionStatus.AVAILABLE)
-                .findFirst();
+                .findFirst().orElse(null);
     }
 
     public int getRegionCount(String worldName) {

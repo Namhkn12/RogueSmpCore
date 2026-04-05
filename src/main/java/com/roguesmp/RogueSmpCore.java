@@ -48,7 +48,9 @@ public final class RogueSmpCore extends JavaPlugin {
         BlockStorage.init(this, BlockManager.getInstance());
         BlockRegistry.getInstance().registerMachineRecipes();
         //dungeon register
-        DungeonRegistry.onEnable(this, ItemRegistry.getInstance());
+        //DungeonRegistry.onEnable(this, ItemRegistry.getInstance());
+        //dungeon register v2
+        com.roguesmp.dungeon_v2.DungeonRegistry.onEnable(this, ItemRegistry.getInstance());
     }
 
     // Load data from files, databases, etc
@@ -103,7 +105,7 @@ public final class RogueSmpCore extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
         saveData();
-        DungeonRegistry.onDisable();
+//        DungeonRegistry.onDisable();
     }
 
     public static RogueSmpCore getInstance() {

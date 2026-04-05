@@ -8,7 +8,7 @@ import com.roguesmp.dungeon_v2.exception.impl.data.DataDeleteException;
 import com.roguesmp.dungeon_v2.exception.impl.data.DataLoadException;
 import com.roguesmp.dungeon_v2.exception.impl.data.DataSaveException;
 import com.roguesmp.dungeon_v2.repository.IRoomRepository;
-import com.roguesmp.dungeon_v2.utils_.Log4Craft_;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;
@@ -34,7 +34,7 @@ public class RoomRepository implements IRoomRepository {
     @Override
     public List<Room> loadAll() {
         List<Room> rooms = new ArrayList<>();
-        if(!dataFolder.exists() || dataFolder.isDirectory()){
+        if(!dataFolder.exists() || !dataFolder.isDirectory()){
             throw new DataLoadException(dataFolder.getName(), null);
         }
 

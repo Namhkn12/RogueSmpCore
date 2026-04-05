@@ -34,7 +34,7 @@ public class ProtectorSpawner implements IBehavior {
     @Override
     public boolean onBreak() {
         brokenCount++;
-        event.getPlayer().sendMessage("Spawner đang được bảo vệ : " + brokenCount + "/" + requireBreak + " lần đập");
+//        event.getPlayer().sendMessage("Spawner đang được bảo vệ : " + brokenCount + "/" + requireBreak + " lần đập");
         return brokenCount == requireBreak;
     }
 

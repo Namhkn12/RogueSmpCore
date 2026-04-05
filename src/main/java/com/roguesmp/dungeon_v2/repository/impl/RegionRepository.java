@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.roguesmp.dungeon_v2.config.DataFolderConfig;
 import com.roguesmp.dungeon_v2.data.definition.DungeonWorld;
 import com.roguesmp.dungeon_v2.repository.IRegionRepository;
-import com.roguesmp.dungeon_v2.utils_.Log4Craft_;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;

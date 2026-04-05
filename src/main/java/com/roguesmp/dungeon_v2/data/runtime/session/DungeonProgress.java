@@ -32,6 +32,7 @@ public class DungeonProgress {
         this.status = Status.IN_PROGRESS;
         this.roomPool = new ArrayList<>();
         this.clearedRoomIds = new ArrayList<>();
+        this.clearedRooms = 0;
     }
 
     public DungeonProgress(int minimumRooms, List<String> roomSequence) {

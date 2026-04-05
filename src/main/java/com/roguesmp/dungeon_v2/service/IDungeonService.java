@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface IDungeonService {
 
-    DungeonInstance startDungeon(Player player, DungeonConfig config);
-
     List<String> rollRoomPool(Dungeon dungeon);
+
+    List<String> rollNextRoomFromPool(List<String> pool, int minium, int completed);
 
     void chooseRoom(DungeonInstance instance, String chosen);
 }

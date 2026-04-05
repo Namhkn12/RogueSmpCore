@@ -2,7 +2,7 @@ package com.roguesmp.dungeon_v2.manager;
 
 import com.roguesmp.dungeon_v2.data.definition.spawner.Spawner;
 import com.roguesmp.dungeon_v2.repository.ISpawnerRepository;
-import com.roguesmp.dungeon_v2.utils_.Log4Craft_;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 
 import java.util.HashMap;
 import java.util.List;

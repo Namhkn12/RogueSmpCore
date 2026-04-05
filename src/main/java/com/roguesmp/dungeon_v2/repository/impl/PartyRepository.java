@@ -6,7 +6,7 @@ import com.roguesmp.dungeon_v2.data.runtime.Party;
 import com.roguesmp.dungeon_v2.exception.impl.data.DataDeleteException;
 import com.roguesmp.dungeon_v2.exception.impl.data.DataSaveException;
 import com.roguesmp.dungeon_v2.repository.IPartyRepository;
-import com.roguesmp.dungeon_v2.utils_.Log4Craft_;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;

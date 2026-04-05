@@ -1,6 +1,5 @@
 package com.roguesmp.dungeon_v2.manager;
 
-import com.roguesmp.dungeon.manager.ScoreBoardManager;
 import com.roguesmp.dungeon_v2.data.definition.objective.PersistableObjective;
 import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_v2.data.runtime.RoomInstance;

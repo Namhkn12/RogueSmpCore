@@ -1,7 +1,5 @@
 package com.roguesmp.dungeon_v2.service.impl;
 
-
-
 import com.roguesmp.dungeon.utils.DungeonWorldGenerator;
 import com.roguesmp.dungeon_v2.config.DataFolderConfig;
 import com.roguesmp.dungeon_v2.config.WorldConfig;
@@ -10,12 +8,10 @@ import com.roguesmp.dungeon_v2.data.runtime.Region;
 import com.roguesmp.dungeon_v2.data.runtime.RegionStatus;
 import com.roguesmp.dungeon_v2.manager.RegionManager;
 import com.roguesmp.dungeon_v2.service.IRegionService;
-import com.roguesmp.dungeon_v2.utils_.Log4Craft_;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
-
-import java.util.Optional;
 import java.util.UUID;
 
 public class RegionService implements IRegionService {
@@ -35,25 +31,30 @@ public class RegionService implements IRegionService {
     }
 
     @Override
-    public Optional<Region> acquireRegion() {
+    public Region acquireRegion() {
         if (!Bukkit.isPrimaryThread()) {
             throw new IllegalStateException("acquireRegion() must be called from main thread");
         }
 
         for (DungeonWorld world : manager.getAllWorlds()) {
-            Optional<Region> region = tryAcquireFromWorld(world);
-            if (region.isPresent()) return region;
+            Region region = tryAcquireFromWorld(world);
+            if (region != null) return region;
         }
 
         if (manager.getAllWorlds().size() >= WorldConfig.MAX_WORLD_PER_SERVER) {
             logger.info(this.getClass(),"All dungeon worlds are full. Cannot create more.");
-            return Optional.empty();
+            return null;
         }
 
         DungeonWorld newWorld = createNewWorld();
-        if (newWorld == null) return Optional.empty();
+        if (newWorld == null) return null;
 
         return tryAcquireFromWorld(newWorld);
+    }
+
+    @Override
+    public Region getRegionById(UUID reid) {
+        return manager.getRegionById(reid);
     }
 
     @Override
@@ -62,24 +63,24 @@ public class RegionService implements IRegionService {
         manager.saveWorld(region.getWorldName());
     }
 
-    private Optional<Region> tryAcquireFromWorld(DungeonWorld world) {
-        Optional<Region> available = manager.findAvailableRegion(world.getWorldName());
-        if (available.isPresent()) {
-            available.get().setStatus(RegionStatus.OCCUPIED);
+    private Region tryAcquireFromWorld(DungeonWorld world) {
+        Region available = manager.findAvailableRegion(world.getWorldName());
+        if (available != null) {
+            available.setStatus(RegionStatus.OCCUPIED);
             manager.saveWorld(world.getWorldName());
             return available;
         }
 
         int count = manager.getRegionCount(world.getWorldName());
         if (count >= WorldConfig.MAX_REGION_PER_WORLD) {
-            return Optional.empty();
+            return null;
         }
 
         Region newRegion = createRegion(world.getWorldName(), count);
         manager.addRegion(world.getWorldName(), newRegion);
         newRegion.setStatus(RegionStatus.AVAILABLE);
         manager.saveWorld(world.getWorldName());
-        return Optional.of(newRegion);
+        return newRegion;
     }
 
     /**

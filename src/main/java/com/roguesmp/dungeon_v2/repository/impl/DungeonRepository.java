@@ -7,7 +7,7 @@ import com.roguesmp.dungeon.exception.impl.data.DataSaveException;
 import com.roguesmp.dungeon_v2.config.DataFolderConfig;
 import com.roguesmp.dungeon_v2.data.definition.Dungeon;
 import com.roguesmp.dungeon_v2.repository.IDungeonRepository;
-import com.roguesmp.dungeon_v2.utils_.Log4Craft;
+import com.roguesmp.dungeon_v2.utils.Log4Craft;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;

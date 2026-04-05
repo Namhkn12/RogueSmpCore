@@ -1,5 +1,10 @@
 package com.roguesmp.dungeon_v2.service;
 
-public interface IRoomService {
+import com.roguesmp.dungeon_v2.data.definition.room.Room;
+import com.roguesmp.dungeon_v2.data.definition.room.RoomType;
 
+import java.util.List;
+
+public interface IRoomService {
+    Room getRoomByRoomType(List<String> pool, RoomType roomType);
 }

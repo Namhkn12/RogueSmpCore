@@ -1,71 +1,49 @@
 package com.roguesmp.dungeon_v2.data.definition.objective.impl;
 
 import com.roguesmp.dungeon_v2.data.definition.objective.BaseObjective;
+import com.roguesmp.dungeon_v2.data.definition.objective.IDisplayable;
+import com.roguesmp.dungeon_v2.data.definition.objective.IProgressable;
 import com.roguesmp.dungeon_v2.data.definition.objective.event.IItemCollectAware;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Objective completed when all required item counts are collected.
  */
-public class ItemCollector extends BaseObjective implements IItemCollectAware {
+public class ItemCollector extends BaseObjective implements IDisplayable, IProgressable, IItemCollectAware {
 
     public static final String TYPE = "item_collector";
 
-    private Map<String, Integer> require = new LinkedHashMap<>();
-    private Map<String, Integer> progress = new LinkedHashMap<>();
+    private String targetItemId;
+    private int require = 1;
+    private int count;
 
-    public ItemCollector() {
-    }
+    public ItemCollector() {}
 
-    public Map<String, Integer> getRequire() {
-        return require;
-    }
+    public String getTargetItemId() { return targetItemId; }
+    public void setTargetItemId(String targetItemId) { this.targetItemId = targetItemId; }
 
-    public void setRequire(Map<String, Integer> require) {
-        this.require = require != null ? new LinkedHashMap<>(require) : new LinkedHashMap<>();
-    }
+    public int getRequire() { return require; }
+    public void setRequire(int require) { this.require = require; }
 
-    public Map<String, Integer> getProgressMap() {
-        return progress;
-    }
-
-    public void setProgress(Map<String, Integer> progress) {
-        this.progress = progress != null ? new LinkedHashMap<>(progress) : new LinkedHashMap<>();
-    }
+    public int getCount() { return count; }
+    public void setCount(int count) { this.count = count; }
 
     @Override
-    public void start() {
-    }
+    public void start() {}
 
     @Override
-    public void finish() {
-    }
+    public void finish() {}
 
     @Override
     public void onItemCollected(String itemId, int amount) {
-        if (!require.containsKey(itemId)) {
-            return;
-        }
+        if (targetItemId != null && !targetItemId.equals(itemId)) return;
+        if (completed) return;
 
-        int current = progress.getOrDefault(itemId, 0);
-        int need = require.get(itemId);
-        int newValue = Math.min(current + amount, need);
-        progress.put(itemId, newValue);
-
-        checkComplete();
-    }
-
-    private void checkComplete() {
-        for (Map.Entry<String, Integer> entry : require.entrySet()) {
-            int current = progress.getOrDefault(entry.getKey(), 0);
-            if (current < entry.getValue()) {
-                return;
-            }
-        }
-
-        if (!completed) {
+        count = Math.min(count + amount, require);
+        if (count >= require) {
             complete();
         }
     }
@@ -74,29 +52,34 @@ public class ItemCollector extends BaseObjective implements IItemCollectAware {
     public Map<String, Object> serialize() {
         Map<String, Object> data = new LinkedHashMap<>(super.serialize());
         data.put("type", TYPE);
-        data.put("require", new LinkedHashMap<>(require));
-        data.put("progress", new LinkedHashMap<>(progress));
+        data.put("target", targetItemId);
+        data.put("require", require);
+        data.put("count", count);
         return data;
     }
 
     @Override
     public void deserialize(Map<String, Object> data) {
         super.deserialize(data);
-        setRequire(readIntMap(data.get("require")));
-        setProgress(readIntMap(data.get("progress")));
+        this.targetItemId = data.get("target") instanceof String s ? s : null;
+        this.require = data.get("require") instanceof Number n ? n.intValue() : 1;
+        this.count = data.get("count") instanceof Number n ? n.intValue() : 0;
     }
 
-    private Map<String, Integer> readIntMap(Object rawValue) {
-        Map<String, Integer> values = new LinkedHashMap<>();
-        if (!(rawValue instanceof Map<?, ?> rawMap)) {
-            return values;
-        }
+    @Override
+    public List<String> getScoreBoardLine() {
+        String label = targetItemId == null ? "Collect Items" : "Collect " + targetItemId;
+        String line = completed
+                ? "§a✔ " + label + " §f" + require + "§7/§f" + require
+                : "§7" + label + " §f" + count + "§7/§f" + require;
+        return List.of(line);
+    }
 
-        for (Map.Entry<?, ?> entry : rawMap.entrySet()) {
-            if (entry.getKey() instanceof String key && entry.getValue() instanceof Number value) {
-                values.put(key, value.intValue());
-            }
+    @Override
+    public void progress() {
+        count++;
+        if (count >= require && !completed) {
+            complete();
         }
-        return values;
     }
 }

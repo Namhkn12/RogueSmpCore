@@ -15,6 +15,7 @@ public class Party {
     private List<UUID> members;
     private int maxSize;
     private boolean locked;
+    private UUID instanceId;
 
     public Party() {
         this.members = new ArrayList<>();
@@ -26,6 +27,7 @@ public class Party {
         this.members = new ArrayList<>(List.of(owner));
         this.maxSize = maxSize;
         this.locked = false;
+        this.instanceId = null;
     }
 
     public boolean addMember(UUID playerId) {
@@ -114,6 +116,14 @@ public class Party {
 
     public void setLocked(boolean locked) {
         this.locked = locked;
+    }
+
+    public UUID getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(UUID instanceId) {
+        this.instanceId = instanceId;
     }
 
     @Deprecated

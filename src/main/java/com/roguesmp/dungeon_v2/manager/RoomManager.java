@@ -2,7 +2,7 @@ package com.roguesmp.dungeon_v2.manager;
 
 import com.roguesmp.dungeon_v2.data.definition.room.Room;
 import com.roguesmp.dungeon_v2.repository.IRoomRepository;
-import com.roguesmp.dungeon_v2.utils_.Log4Craft_;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,5 +39,9 @@ public class RoomManager {
         if(saved == null) return null;
         cache.put(saved.getId(), saved);
         return saved;
+    }
+
+    public Room get(String rid){
+        return cache.get(rid);
     }
 }

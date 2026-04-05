@@ -1,6 +1,7 @@
 package com.roguesmp.dungeon_v2.data.definition.objective.impl;
 
 import com.roguesmp.dungeon_v2.data.definition.objective.BaseObjective;
+import com.roguesmp.dungeon_v2.data.definition.objective.IDisplayable;
 import com.roguesmp.dungeon_v2.data.definition.objective.IProgressable;
 import com.roguesmp.dungeon_v2.data.definition.objective.event.IEntityKillAware;
 
@@ -12,13 +13,13 @@ import java.util.Map;
 /**
  * Objective completed after killing a target number of matching mobs.
  */
-public class MonsterHunter extends BaseObjective implements IProgressable, IEntityKillAware {
+public class MonsterHunter extends BaseObjective implements IProgressable, IDisplayable, IEntityKillAware {
 
     public static final String TYPE = "monster_hunter";
 
     private int require = 1;
     private int count;
-    private List<String> targetIds = new ArrayList<>();
+    private String targetId;
 
     public MonsterHunter() {
     }
@@ -39,13 +40,9 @@ public class MonsterHunter extends BaseObjective implements IProgressable, IEnti
         this.count = count;
     }
 
-    public List<String> getTargetIds() {
-        return targetIds;
-    }
+    public String getTargetId() { return targetId; }
 
-    public void setTargetIds(List<String> targetIds) {
-        this.targetIds = targetIds != null ? new ArrayList<>(targetIds) : new ArrayList<>();
-    }
+    public void setTargetId(String targetId) { this.targetId = targetId; }
 
     @Override
     public void start() {
@@ -71,7 +68,7 @@ public class MonsterHunter extends BaseObjective implements IProgressable, IEnti
     }
 
     private boolean isValidTarget(String mobId) {
-        return targetIds.isEmpty() || targetIds.contains(mobId);
+        return targetId == null || targetId.equals(mobId);
     }
 
     @Override
@@ -80,23 +77,24 @@ public class MonsterHunter extends BaseObjective implements IProgressable, IEnti
         data.put("type", TYPE);
         data.put("require", require);
         data.put("count", count);
-        data.put("targets", new ArrayList<>(targetIds));
+        data.put("target", targetId);
         return data;
     }
 
     @Override
     public void deserialize(Map<String, Object> data) {
         super.deserialize(data);
-        this.require = data.get("require") instanceof Number number ? number.intValue() : 1;
-        this.count = data.get("count") instanceof Number number ? number.intValue() : 0;
-        this.targetIds = new ArrayList<>();
-        Object rawTargets = data.get("targets");
-        if (rawTargets instanceof List<?> list) {
-            for (Object item : list) {
-                if (item instanceof String value) {
-                    this.targetIds.add(value);
-                }
-            }
-        }
+        this.require = data.get("require") instanceof Number n ? n.intValue() : 1;
+        this.count = data.get("count") instanceof Number n ? n.intValue() : 0;
+        this.targetId = data.get("target") instanceof String s ? s : null;
+    }
+
+    @Override
+    public List<String> getScoreBoardLine() {
+        String label = targetId == null ? "Kill Mobs" : "Kill " + targetId;
+        String progress = completed
+                ? "§a✔ " + label + " §f" + require + "§7/§f" + require
+                : "§7" + label + " §f" + count + "§7/§f" + require;
+        return List.of(progress);
     }
 }

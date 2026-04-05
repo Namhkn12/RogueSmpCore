@@ -8,7 +8,7 @@ import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_v2.data.runtime.RoomInstance;
 import com.roguesmp.dungeon_v2.data.runtime.session.DungeonProgress;
 import com.roguesmp.dungeon_v2.repository.IInstanceRepository;
-import com.roguesmp.dungeon_v2.utils_.Log4Craft_;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import org.bukkit.plugin.Plugin;
 import java.io.*;
 import java.util.ArrayList;

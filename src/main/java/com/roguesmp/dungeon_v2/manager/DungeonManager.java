@@ -2,7 +2,7 @@ package com.roguesmp.dungeon_v2.manager;
 
 import com.roguesmp.dungeon_v2.data.definition.Dungeon;
 import com.roguesmp.dungeon_v2.repository.IDungeonRepository;
-import com.roguesmp.dungeon_v2.utils_.Log4Craft_;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 
 import java.util.HashMap;
 import java.util.Map;

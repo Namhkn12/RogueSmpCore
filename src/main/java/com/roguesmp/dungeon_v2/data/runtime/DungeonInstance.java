@@ -8,7 +8,6 @@ import com.roguesmp.dungeon_v2.data.runtime.session.DungeonTimer;
  * Root runtime aggregate for a single active dungeon run.
  */
 public class DungeonInstance {
-    private RegionInstance region;
     private DungeonSession session;
     private DungeonProgress progress;
     private DungeonTimer timer;
@@ -16,19 +15,10 @@ public class DungeonInstance {
     public DungeonInstance() {
     }
 
-    public DungeonInstance(RegionInstance region, DungeonSession session, DungeonProgress progress, DungeonTimer timer) {
-        this.region = region;
+    public DungeonInstance(DungeonSession session, DungeonProgress progress, DungeonTimer timer) {
         this.session = session;
         this.progress = progress;
         this.timer = timer;
-    }
-
-    public RegionInstance getRegion() {
-        return region;
-    }
-
-    public void setRegion(RegionInstance region) {
-        this.region = region;
     }
 
     public DungeonSession getSession() {
