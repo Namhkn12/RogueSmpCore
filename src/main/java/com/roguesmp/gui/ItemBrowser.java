@@ -1,5 +1,6 @@
 package com.roguesmp.gui;
 
+import com.roguesmp.constant.Enchants;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.registry.ItemRegistry;
@@ -120,12 +121,29 @@ public class ItemBrowser extends BaseGui {
                             new ItemBrowser().showInventory(player);
                         })
                 )
-                .withSubcommand(new CommandAPICommand("modify")
+                .withSubcommand(new CommandAPICommand("gem")
                         .withArguments(new StringArgument("add_gem_id"))
                         .executesPlayer((player, commandArguments) -> {
                             ItemStack res = SmpItemUtils.addGem(player.getEquipment().getItemInMainHand(), PlayerManager.getInstance().getSmpPlayer(player.getUniqueId()), List.of((String) commandArguments.get("add_gem_id")));
                             player.getEquipment().setItemInMainHand(res);
                         }))
+                .withSubcommand(new CommandAPICommand("enchant")
+                        .withArguments(new StringArgument("enchant_id"), new IntegerArgument("level"))
+                        .executesPlayer((player, commandArguments) -> {
+                            Enchants enchants = Enchants.fromId((String) commandArguments.get("enchant_id"));
+                            if (enchants == null) {
+                                player.sendMessage("Cannot find enchant id");
+                                return;
+                            }
+                            int level = (int) commandArguments.get("level");
+                            if (level <= 0) {
+                                player.sendMessage("Level must be positive integer");
+                                return;
+                            }
+                            ItemStack res = SmpItemUtils.addEnchant(player.getEquipment().getItemInMainHand(), PlayerManager.getInstance().getSmpPlayer(player.getUniqueId()), Map.of(enchants, level));
+                            player.getEquipment().setItemInMainHand(res);
+                        })
+                )
                 .withSubcommand(new CommandAPICommand("reload") // WILL CAUSE THE SERVER TO FREEZE
                         .executesPlayer((player1, commandArguments) -> {
                             Utils.runLater(() -> ItemRegistry.getInstance().loadFromFile());

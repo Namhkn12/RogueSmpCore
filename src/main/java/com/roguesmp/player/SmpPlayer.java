@@ -3,17 +3,18 @@ package com.roguesmp.player;
 import com.roguesmp.constant.*;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
+import com.roguesmp.item.component.impl.ConsumableComponent;
 import com.roguesmp.item.component.impl.EnchantComponent;
 import com.roguesmp.item.component.impl.EquipAttributeComponent;
 import com.roguesmp.player.ability.AbilityLoadout;
-import com.roguesmp.utils.ItemStackUtils;
+import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
-import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
@@ -22,6 +23,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -67,7 +69,7 @@ public class SmpPlayer {
                     if (activeSlot.contains(slot)) {
                         activeEnchants.merge(enchants, -integer, (integer1, integer2) -> {
                             int res = integer1 + integer2;
-                            if (res == 0) return null;
+                            if (res <= 0) return null; //If enchant is not positive then remove it
                             return res;
                         });
                     }
@@ -98,7 +100,7 @@ public class SmpPlayer {
                     if (activeSlot.contains(slot)) {
                         activeEnchants.merge(enchants, integer, (integer1, integer2) -> {
                             int res = integer1 + integer2;
-                            if (res == 0) return null;
+                            if (res <= 0) return null;
                             return res;
                         });
                     }
@@ -257,6 +259,20 @@ public class SmpPlayer {
             enchants.getEnchant().onConsume(event, integer, this);
         });
         abilityLoadout.onConsume(event);
+
+        if (!event.isCancelled()) { //Handle Consumable component
+            ItemStack consumed = event.getItem();
+            BaseItem baseItem = SmpItemUtils.getBaseItem(consumed);
+            if (baseItem != null) {
+                SmpItem smpItem = new SmpItem(consumed);
+                smpItem.applyModifiers(this);
+
+                ConsumableComponent consumableComponent = smpItem.getComponent(ComponentKeys.CONSUMABLE);
+                if (consumableComponent != null) {
+                    consumableComponent.applyEffects(event.getPlayer());
+                }
+            }
+        }
     }
 
     public void onExpChange(PlayerExpChangeEvent event) {

@@ -18,6 +18,7 @@ public class ComponentKeys {
     public static final ComponentKey<DescriptionComponent> DESCRIPTION;
     public static final ComponentKey<GemSocketComponent> GEM_SOCKET;
     public static final ComponentKey<GemDataComponent> GEM_DATA;
+    public static final ComponentKey<ConsumableComponent> CONSUMABLE;
 
     static {
         ITEM_NAME = ItemComponentCodecRegistry.register("name",
@@ -33,6 +34,7 @@ public class ComponentKeys {
         GEM_SOCKET = ItemComponentCodecRegistry.register("socket",
                 ComponentCodec.singleArg(Integer.class, GemSocketComponent::new, GemSocketComponent::getSocketCount));
         GEM_DATA = ItemComponentCodecRegistry.register("gem_data", GemDataComponent.class);
+        CONSUMABLE = ItemComponentCodecRegistry.register("consumable", new ConsumableComponent.Codec());
     }
 
     public static void loadClass() {

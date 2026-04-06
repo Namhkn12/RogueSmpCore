@@ -8,6 +8,7 @@ import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.gui.ability.AbilityCatalogue;
+import com.roguesmp.gui.enchant.EnchantingGui;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.listener.*;
 import com.roguesmp.player.PlayerDataManager;
@@ -85,6 +86,7 @@ public final class RogueSmpCore extends JavaPlugin {
         EntityRegistry.registerCommand();
 
         AbilityCatalogue.register();
+        EnchantingGui.registerCommand();
     }
 
     @Override
