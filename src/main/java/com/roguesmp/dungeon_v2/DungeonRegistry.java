@@ -92,7 +92,7 @@ public class DungeonRegistry {
 
         /*Controller*/
         PartyController partyController = new PartyController(partyService, inviteTask);
-        DungeonFlowController flowController = new DungeonFlowController(instanceService, partyService, regionService, scoreBoardManager,dungeonManager, dungeonPresenter);
+        DungeonFlowController flowController = new DungeonFlowController(instanceService, instanceManager, partyService, regionService, scoreBoardManager,dungeonManager, dungeonPresenter);
         SchemetaController schemetaController = new SchemetaController(schemetaService, schematicService);
         /*Command*/
         // --- Command ---

@@ -86,4 +86,12 @@ public class DungeonProgress {
     public void setCheckpoint(SerializableLocation checkpoint) {
         this.checkpoint = checkpoint;
     }
+
+    public List<String> getNextRooms() {
+        return nextRooms;
+    }
+
+    public void setNextRooms(List<String> nextRooms) {
+        this.nextRooms = nextRooms;
+    }
 }

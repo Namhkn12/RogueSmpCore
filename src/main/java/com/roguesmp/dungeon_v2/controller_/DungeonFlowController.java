@@ -1,10 +1,13 @@
 package com.roguesmp.dungeon_v2.controller_;
 
 import com.roguesmp.dungeon_v2.data.definition.Dungeon;
+import com.roguesmp.dungeon_v2.data.definition.room.Room;
 import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_v2.data.runtime.Party;
 import com.roguesmp.dungeon_v2.data.runtime.Region;
 import com.roguesmp.dungeon_v2.manager.DungeonManager;
+import com.roguesmp.dungeon_v2.manager.InstanceManager;
+import com.roguesmp.dungeon_v2.manager.RoomManager;
 import com.roguesmp.dungeon_v2.manager.ScoreBoardManager;
 import com.roguesmp.dungeon_v2.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon_v2.service.*;
@@ -12,23 +15,30 @@ import com.roguesmp.dungeon_v2.utils.Teleporter;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class DungeonFlowController {
 
     private final IInstanceService instanceService;
+    private final InstanceManager instanceManager;
     private final IPartyService partyService;
     private final IRegionService regionService;
     private final ScoreBoardManager scoreBoardManager;
     private final DungeonManager dungeonManager;
+    private final RoomManager roomManager;
     private final DungeonPresenter dungeonPresenter;
 
-    public DungeonFlowController(IInstanceService instanceService, IPartyService partyService,
+    public DungeonFlowController(IInstanceService instanceService, InstanceManager instanceManager, IPartyService partyService,
                                  IRegionService regionService, ScoreBoardManager scoreBoardManager,
-                                 DungeonManager dungeonManager, DungeonPresenter dungeonPresenter) {
+                                 DungeonManager dungeonManager, RoomManager roomManager, DungeonPresenter dungeonPresenter) {
         this.instanceService = instanceService;
+        this.instanceManager = instanceManager;
         this.partyService = partyService;
         this.regionService = regionService;
         this.scoreBoardManager = scoreBoardManager;
         this.dungeonManager = dungeonManager;
+        this.roomManager = roomManager;
         this.dungeonPresenter = dungeonPresenter;
     }
 
@@ -56,9 +66,17 @@ public class DungeonFlowController {
     }
 
     void handleOpenNextDoor(Block door, Player player){
-        //get instance by Player
+        /*Get instance by player*/
+        Party party = partyService.getPartyByPlayer(player);
+        DungeonInstance instance = instanceManager.get(party.getInstanceId());
+        /*Get next rooms*/
+        List<Room> nextRooms = instance.getProgress()
+                .getNextRooms()
+                .stream()
+                .map(roomManager::get)
+                .toList();
 
-        //openUI for player
+        /*Open next room select ui for player*/
         //when open update door logic and remove when close ui
     }
 
