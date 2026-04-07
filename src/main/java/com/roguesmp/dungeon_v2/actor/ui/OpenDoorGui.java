@@ -2,12 +2,14 @@ package com.roguesmp.dungeon_v2.actor.ui;
 
 import com.roguesmp.dungeon_v2.controller_.DungeonFlowController;
 import com.roguesmp.dungeon_v2.data.definition.room.Room;
+import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
 import com.roguesmp.gui.BaseGui;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -46,8 +48,8 @@ public class OpenDoorGui extends BaseGui {
     private final ItemStack connector;
     private final ItemStack playerIcon;
 
-    public OpenDoorGui(Component name, int row, Block door, List<Room> rooms, DungeonFlowController dungeonFlowController) {
-        super(name, row);
+    public OpenDoorGui( Block door, List<Room> rooms, DungeonFlowController dungeonFlowController) {
+        super(Component.text("Dungeon Door"), 5);
         this.door = door;
         this.rooms = rooms;
         this.dungeonFlowController = dungeonFlowController;
@@ -152,9 +154,10 @@ public class OpenDoorGui extends BaseGui {
             Room room = rooms.get(i);
             ItemStack roomItem = buildRoomItem(room);
             addButton(roomSlot, roomItem, event -> {
+                Player player = (Player) event.getWhoClicked();
                 event.setCancelled(true);
-                event.getWhoClicked().closeInventory();
-                dungeonFlowController.selectRoom(room);
+                player.closeInventory();
+                dungeonFlowController.handleSelectNextRoom(player, door, room);
             });
         }
     }
@@ -168,10 +171,10 @@ public class OpenDoorGui extends BaseGui {
     // -----------------------------------------------------------------------
 
     private ItemStack buildRoomItem(Room room) {
-        Material mat = parseMaterial(room.getIcon());
+        Material mat = parseMaterial(room.getType().getIconMaterial());
         ItemStack item = ItemStack.of(mat);
         item.setData(DataComponentTypes.ITEM_NAME,
-                net.kyori.adventure.text.Component.text(room.getName(),
+                net.kyori.adventure.text.Component.text(room.getId(),
                                 net.kyori.adventure.text.format.NamedTextColor.GOLD)
                         .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
         return item;

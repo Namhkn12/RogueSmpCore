@@ -42,7 +42,7 @@ public class DungeonFlowController {
         this.dungeonPresenter = dungeonPresenter;
     }
 
-    void handleStartDungeon(String did, Player player){
+    public void handleStartDungeon(String did, Player player){
         /*Prepare data*/
         Party party = partyService.getPartyByPlayer(player);
         if(party == null){
@@ -65,7 +65,7 @@ public class DungeonFlowController {
         });
     }
 
-    void handleOpenNextDoor(Block door, Player player){
+    public void handleOpenNextDoor(Block door, Player player){
         /*Get instance by player*/
         Party party = partyService.getPartyByPlayer(player);
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
@@ -80,13 +80,13 @@ public class DungeonFlowController {
         //when open update door logic and remove when close ui
     }
 
-    void handleSelectNextRoom(DungeonInstance instance, Block door, String rid){
+    public void handleSelectNextRoom(Player player, Block door, Room room){
         //this api will be call in UI
         //service do : in progress of instance
         //service do: paste room
     }
 
-    void handleEndUpDungeon(DungeonInstance instance){
+    public void handleEndUpDungeon(DungeonInstance instance){
         //update state of dungeon , when player left all, remove instance
     }
 }
