@@ -38,6 +38,7 @@ public class Multishot implements SmpEnchant {
 
     @Override
     public void onProjectileLaunch(ProjectileLaunchEvent event, int level, @NotNull SmpPlayer player) {
+        if (event.isCancelled()) return;
         Utils.runLater(() -> { //This whole block need to run a tick later so other buff can apply to the primary projectile
             Projectile primary = event.getEntity();
             Location spawnLoc = primary.getLocation();

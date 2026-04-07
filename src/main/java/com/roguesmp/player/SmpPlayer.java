@@ -9,8 +9,10 @@ import com.roguesmp.item.component.impl.ConsumableComponent;
 import com.roguesmp.item.component.impl.EnchantComponent;
 import com.roguesmp.item.component.impl.EquipAttributeComponent;
 import com.roguesmp.player.ability.AbilityLoadout;
+import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -35,6 +37,8 @@ public class SmpPlayer {
     private final Map<Enchants, Integer> activeEnchants;
     private final Map<Attributes, Double> activeAttributes;
 
+    private final Map<EquipSlot, SmpItem> slotCache = new EnumMap<>(EquipSlot.class);
+
     private final AbilityLoadout abilityLoadout;
 
     private final Map<UUID, PlayerProjectile> projectiles = new HashMap<>();
@@ -54,7 +58,10 @@ public class SmpPlayer {
         abilityLoadout.loadData(playerData);
     }
 
-    public void updateSlotStat(Player player, EquipSlot slot, @Nullable SmpItem oldItem, @Nullable SmpItem newItem) {
+    public void updateSlotStat(Player player, EquipSlot slot, @Nullable SmpItem newItem) {
+
+        SmpItem oldItem = slotCache.remove(slot);
+
         activeAttributes.forEach((attributes, aDouble) -> {
             attributes.getAttribute().removeVanillaAttribute(player);
         });
@@ -117,6 +124,8 @@ public class SmpPlayer {
                     }
                 });
             }
+
+            slotCache.put(slot, newItem);
         }
 
         activeAttributes.forEach((attributes, aDouble) -> {
@@ -161,6 +170,18 @@ public class SmpPlayer {
         return Bukkit.getPlayer(uuid);
     }
 
+    public void sendMessage(Component text) {
+        Player player = getBukkitPlayer();
+        if (player == null) return;
+        player.sendMessage(text);
+    }
+
+    public void sendMessage(String text) {
+        Player player = getBukkitPlayer();
+        if (player == null) return;
+        player.sendMessage(text);
+    }
+
     public @Nullable PlayerProjectile getProjectile(UUID uuid) {
         return projectiles.get(uuid);
     }
@@ -186,7 +207,10 @@ public class SmpPlayer {
         if (action.isLeftClick()) {
             if (player.isSneaking()) abilityLoadout.cast(AbilityTrigger.SHIFT_LEFT_CLICK);
         } else if (action.isRightClick()) {
-            if (!activeAttributes.containsKey(Attributes.MELEE_DAMAGE_BASE)) return; //A hack to make sure only "weapon" can be casted with...
+            // Is it a valid casting tool? (Not food, not a bow, etc.)
+            if (!ItemStackUtils.canBeCastedWith(event.getItem())) return;
+            // Does it have the required stats to be considered a 'weapon'?
+            if (!activeAttributes.containsKey(Attributes.MELEE_DAMAGE_BASE)) return;
             if (player.isSneaking()) abilityLoadout.cast(AbilityTrigger.SHIFT_RIGHT_CLICK);
             else abilityLoadout.cast(AbilityTrigger.RIGHT_CLICK);
         }

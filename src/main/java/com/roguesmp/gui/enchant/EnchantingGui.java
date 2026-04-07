@@ -20,6 +20,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -96,7 +97,15 @@ public class EnchantingGui extends BaseGui {
     }
 
     private void renderEnchantSelection() {
-        addItem(4, targetItem);
+        addButton(4, targetItem, event -> {
+            event.setCancelled(true);
+            this.page = 0; // Reset page
+            this.currentState = GuiState.INPUT;
+            Map<Integer, ItemStack> leftOver = event.getWhoClicked().getInventory().addItem(targetItem);
+            leftOver.values().forEach(item -> event.getWhoClicked().getWorld().dropItemNaturally(event.getWhoClicked().getLocation(), item));
+            this.targetItem = null;
+            setup();
+        });
 
         // Header separator
         for (int i = 9; i < 18; i++) {
@@ -110,9 +119,9 @@ public class EnchantingGui extends BaseGui {
             event.setCancelled(true);
             this.page = 0; // Reset page
             this.currentState = GuiState.INPUT;
-            this.targetItem = null;
             Map<Integer, ItemStack> leftOver = event.getWhoClicked().getInventory().addItem(targetItem);
             leftOver.values().forEach(item -> event.getWhoClicked().getWorld().dropItemNaturally(event.getWhoClicked().getLocation(), item));
+            this.targetItem = null;
             setup();
         });
 

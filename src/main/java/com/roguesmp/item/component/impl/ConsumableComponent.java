@@ -80,7 +80,7 @@ public class ConsumableComponent implements ItemComponent {
         for (SmpEffect smpEffect : effects) {
             Component display = smpEffect.getDisplay();
             if (display == null) continue;
-            lore.add(Component.space().append(display.decoration(TextDecoration.ITALIC, false)).append(Utils.text(" (" + Utils.intToMinuteAndSeconds(smpEffect.getDuration() / 20) +")")));
+            lore.add(Component.space().append(display.decoration(TextDecoration.ITALIC, false)).append(Utils.text(" (" + Utils.intToMinuteAndSeconds(smpEffect.getDuration() / 20) +")", NamedTextColor.GRAY)));
         }
 
         context.builder().putLines(5, lore);

@@ -63,12 +63,7 @@ public class PlayerListener implements Listener {
                     newItem = new SmpItem(equipmentChange.newItem());
                     player.getEquipment().setItem(equipmentSlot, newItem.generateItemStack(smpPlayer, equipmentChange.newItem().getAmount()));
                 }
-                SmpItem oldItem = null;
-                if (ItemStackUtils.isValidItem(equipmentChange.oldItem())) {
-                    oldItem = new SmpItem(equipmentChange.oldItem());
-                    oldItem.applyModifiers(smpPlayer);
-                }
-                smpPlayer.updateSlotStat(player, equipSlot, oldItem, newItem);
+                smpPlayer.updateSlotStat(player, equipSlot, newItem);
             }
         });
     }

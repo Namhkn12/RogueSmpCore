@@ -64,7 +64,8 @@ public class EnchantComponent implements ItemComponent {
     }
 
     /**
-     * Used to add temporary enchant data (such as a gem that give some enchant extra level). The added modifier will not be saved to ItemStack pdc
+     * Used to add temporary enchant data (such as a gem that give some enchant extra level). The added modifier will not be saved to ItemStack pdc <br>
+     * Can also be used to remove levels by using negative value for input
      */
     public void addModifier(Modifier modifier) {
 
@@ -75,7 +76,8 @@ public class EnchantComponent implements ItemComponent {
     }
 
     /**
-     * Add persistent enchants to this EnchantComponent. They will be saved into the ItemStack's pdc
+     * Add persistent enchants to this EnchantComponent. They will be saved into the ItemStack's pdc <br>
+     * Can also be used to remove levels by using negative values for input
      */
     public void addPersistentEnchant(Modifier modifier) {
         for (var entry : modifier.modifiers().entrySet()) {
