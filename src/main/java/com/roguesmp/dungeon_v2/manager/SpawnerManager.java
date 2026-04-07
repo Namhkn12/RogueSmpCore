@@ -16,6 +16,8 @@ public class SpawnerManager {
     public SpawnerManager(ISpawnerRepository spawnerRepository, Log4Craft_ logger) {
         this.spawnerRepository = spawnerRepository;
         this.logger = logger;
+
+        load();
     }
 
     public void load(){

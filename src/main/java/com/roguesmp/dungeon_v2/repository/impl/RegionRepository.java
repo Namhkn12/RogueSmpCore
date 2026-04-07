@@ -90,6 +90,6 @@ public class RegionRepository implements IRegionRepository {
 
     // tên file = worldName.json
     private File getFile(String worldName) {
-        return new File(regionFolder, DataFolderConfig.REGION_INSTANCE_FILE + worldName + DataFolderConfig.JSON_TYPE);
+        return new File(regionFolder, worldName + DataFolderConfig.JSON_TYPE);
     }
 }

@@ -2,11 +2,18 @@ package com.roguesmp.dungeon_v2;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.adapter.UUIDTypeAdapter;
+import com.roguesmp.dungeon_v2.actor.command.DungeonCommand;
+import com.roguesmp.dungeon_v2.actor.command.PartyCommand;
 import com.roguesmp.dungeon_v2.actor.command.SchemetaCommand;
+import com.roguesmp.dungeon_v2.actor.command.TemplateGenCommand;
+import com.roguesmp.dungeon_v2.actor.listener.DoorInteractListener;
+import com.roguesmp.dungeon_v2.actor.listener.SpawnerEventListener;
 import com.roguesmp.dungeon_v2.controller_.DungeonFlowController;
 import com.roguesmp.dungeon_v2.controller_.PartyController;
 import com.roguesmp.dungeon_v2.controller_.SchemetaController;
+import com.roguesmp.dungeon_v2.controller_.SpawnerEventController;
 import com.roguesmp.dungeon_v2.expansion.DungeonExpansion;
 import com.roguesmp.dungeon_v2.manager.*;
 import com.roguesmp.dungeon_v2.presentation.EffectManager;
@@ -19,6 +26,7 @@ import com.roguesmp.dungeon_v2.repository.impl.*;
 import com.roguesmp.dungeon_v2.service.*;
 import com.roguesmp.dungeon_v2.service.impl.*;
 import com.roguesmp.dungeon_v2.task.PartyInviteTask;
+import com.roguesmp.dungeon_v2.task.TaskScheduler;
 import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import com.roguesmp.registry.ItemRegistry;
 import org.bukkit.Bukkit;
@@ -35,6 +43,8 @@ public class DungeonRegistry {
         Gson gson = new GsonBuilder().registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
                 .setPrettyPrinting()
                 .create();
+        /*Scheduler*/
+        TaskScheduler taskScheduler = new TaskScheduler(plugin);
 
         /*ScoreBoard*/
         DungeonExpansion papiExpansion = new DungeonExpansion();
@@ -92,11 +102,38 @@ public class DungeonRegistry {
 
         /*Controller*/
         PartyController partyController = new PartyController(partyService, inviteTask);
-        DungeonFlowController flowController = new DungeonFlowController(instanceService, instanceManager, partyService, regionService, scoreBoardManager,dungeonManager, roomManager,dungeonPresenter);
+        DungeonFlowController flowController = new DungeonFlowController(
+                instanceService,
+                instanceManager,
+                partyService,
+                regionService,
+                scoreBoardManager,
+                dungeonManager,
+                roomManager,
+                roomService,
+                dungeonPresenter,
+                schematicService,
+                dungeonService
+        );
         SchemetaController schemetaController = new SchemetaController(schemetaService, schematicService);
+        SpawnerEventController spawnerController = new SpawnerEventController(spawnerService, spawnerManager, spawnerInstanceManager, taskScheduler);
         /*Command*/
-        // --- Command ---
+        new TemplateGenCommand().register();
         new SchemetaCommand(schemetaController, schemetaManager).register();
+        new PartyCommand(partyController).register();
+        new DungeonCommand(flowController).register();
+
+        /*Listener*/
+        Bukkit.getPluginManager().registerEvents(
+                new DoorInteractListener(flowController, instanceManager),
+                RogueSmpCore.getInstance()
+        );
+
+        Bukkit.getPluginManager().registerEvents(
+                new SpawnerEventListener(spawnerController),
+                RogueSmpCore.getInstance()
+        );
+
 
     }
 

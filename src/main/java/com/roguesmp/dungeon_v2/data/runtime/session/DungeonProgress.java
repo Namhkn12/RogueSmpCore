@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class DungeonProgress {
 
-    public enum Status { IN_PROGRESS, COMPLETED, FAILED, ABANDONED }
+    public enum Status { IN_PROGRESS, BOSS_DEFEATED, COMPLETED, FAILED }
 
     private int clearedRooms;
     private int minimumRooms;
@@ -48,6 +48,7 @@ public class DungeonProgress {
         if (currentRoom == null) return;
         currentRoom.setCompleted(true);
         clearedRoomIds.add(currentRoom.getRoomId());
+        roomPool.remove(currentRoom.getRoomId());
         clearedRooms++;
     }
 

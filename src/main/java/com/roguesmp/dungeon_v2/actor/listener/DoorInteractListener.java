@@ -1,13 +1,10 @@
 package com.roguesmp.dungeon_v2.actor.listener;
 
-
-import com.roguesmp.dungeon_v2.actor.ui.OpenDoorGui;
 import com.roguesmp.dungeon_v2.controller_.DungeonFlowController;
 import com.roguesmp.dungeon_v2.manager.InstanceManager;
 import com.roguesmp.dungeon_v2.utils.filterchain.EventFilter;
 import com.roguesmp.dungeon_v2.utils.filterchain.FilterChain;
 import com.roguesmp.dungeon_v2.utils.filterchain.impl.InteractFilters;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Vault;
@@ -16,8 +13,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-
-import java.util.List;
 
 public class DoorInteractListener implements Listener {
 
@@ -32,22 +27,13 @@ public class DoorInteractListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if(!VAULT_FILTER.test(event)) return;
-
-        Vault vault = (Vault) event.getClickedBlock();
         event.setCancelled(true);
 
-        if (!vault.getRewardedPlayers().isEmpty()) return;
-
+        Block block = event.getClickedBlock();
+        Vault vault = (Vault) block.getState();
         Player player = event.getPlayer();
 
-
-        /*Case: end room*/
-
-        /*Case: next room*/
-        vault.addRewardedPlayer(player.getUniqueId());
-        vault.update();
-
-        new OpenDoorGui(vault, List.of(""), dungeonFlowController);
+        dungeonFlowController.handleOpenNextDoor(vault.getBlock(), player);
     }
 
     @EventHandler

@@ -1,6 +1,7 @@
 package com.roguesmp.dungeon_v2.data.runtime;
 
 
+import com.roguesmp.dungeon_v2.data.definition.spawner.behavior.BehaviorPipeline;
 import com.roguesmp.dungeon_v2.data.definition.spawner.behavior.IBehavior;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 public class SpawnerInstance {
     private String iid;
     private String templateId;
-    private List<IBehavior> behaviors;
+    private BehaviorPipeline pipeline;
 
     public SpawnerInstance() {
     }
@@ -16,7 +17,7 @@ public class SpawnerInstance {
     public SpawnerInstance(String iid, String templateId, List<IBehavior> behaviors) {
         this.iid = iid;
         this.templateId = templateId;
-        this.behaviors = behaviors;
+        this.pipeline = new BehaviorPipeline(behaviors);
     }
 
     public String getId() {
@@ -35,11 +36,11 @@ public class SpawnerInstance {
         this.templateId = templateId;
     }
 
-    public List<IBehavior> getBehaviors() {
-        return behaviors;
+    public BehaviorPipeline getPipeline() {
+        return pipeline;
     }
 
-    public void setBehaviors(List<IBehavior> behaviors) {
-        this.behaviors = behaviors;
+    public List<IBehavior> getBehaviors() {
+        return pipeline.getBehaviors();
     }
 }

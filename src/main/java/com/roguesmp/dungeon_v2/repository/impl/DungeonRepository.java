@@ -46,7 +46,7 @@ public class DungeonRepository implements IDungeonRepository {
                 Log4Craft.fire("Failed to load dungeon file: " + file.getName(), e);
             }
         }
-        return List.of();
+        return dungeons;
     }
 
     @Override

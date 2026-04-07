@@ -36,19 +36,25 @@ public class DungeonService implements IDungeonService {
             if (pool.getRooms() == null || pool.getRooms().isEmpty()) continue;
 
             int count = pool.getMin() + Razdon.getInstance().nextInt(pool.getMax() - pool.getMin() + 1);
+            count = Math.min(count, pool.getRooms().size());
 
-            double totalWeight = pool.getRooms().stream()
-                    .mapToDouble(RoomEntry::getWeight)
-                    .sum();
+            List<RoomEntry> remaining = new ArrayList<>(pool.getRooms());
 
             for (int i = 0; i < count; i++) {
+                if (remaining.isEmpty()) break;
+
+                double totalWeight = remaining.stream()
+                        .mapToDouble(RoomEntry::getWeight)
+                        .sum();
+
                 double roll = Razdon.getInstance().nextDouble() * totalWeight;
                 double cumulative = 0;
 
-                for (RoomEntry entry : pool.getRooms()) {
+                for (RoomEntry entry : remaining) {
                     cumulative += entry.getWeight();
                     if (roll < cumulative) {
                         result.add(entry.getRoomId());
+                        remaining.remove(entry);
                         break;
                     }
                 }
@@ -66,8 +72,8 @@ public class DungeonService implements IDungeonService {
                 .filter(roomId -> {
                     Room room = roomManager.get(roomId);
                     if (room == null) return false;
-                    if (room.getType() == RoomType.BOSS && completedRooms < minimum) return false;
-                    return true;
+                    if (room.getType() == RoomType.TREASURE) return false;
+                    return room.getType() != RoomType.BOSS || completedRooms >= minimum;
                 })
                 .collect(Collectors.toList());
 

@@ -59,4 +59,12 @@ public class RoomInstance {
     public void setActiveObjectives(List<IObjective> activeObjectives) {
         this.activeObjectives = activeObjectives;
     }
+
+    public SerializableLocation getDoor() {
+        return door;
+    }
+
+    public void setDoor(SerializableLocation door) {
+        this.door = door;
+    }
 }

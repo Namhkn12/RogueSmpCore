@@ -24,14 +24,11 @@ public class SpawnerInstanceManager {
         return cache.get(siid);
     }
 
-    public SpawnerInstance create(String siid, Spawner spawner){
-        SpawnerInstance instance = new SpawnerInstance();
-        instance.setId(siid);
-        instance.setTemplateId(spawner.getId());
+    public SpawnerInstance create(String siid, Spawner spawner) {
         List<IBehavior> behaviors = spawner.getBehaviors().stream()
                 .map(BehaviorFactory::create)
                 .toList();
-        instance.setBehaviors(behaviors);
-        return instance;
+
+        return new SpawnerInstance(siid, spawner.getId(), behaviors);
     }
 }

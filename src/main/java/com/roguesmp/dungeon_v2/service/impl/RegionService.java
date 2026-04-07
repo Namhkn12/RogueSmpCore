@@ -78,7 +78,7 @@ public class RegionService implements IRegionService {
 
         Region newRegion = createRegion(world.getWorldName(), count);
         manager.addRegion(world.getWorldName(), newRegion);
-        newRegion.setStatus(RegionStatus.AVAILABLE);
+        newRegion.setStatus(RegionStatus.OCCUPIED);
         manager.saveWorld(world.getWorldName());
         return newRegion;
     }
@@ -98,7 +98,7 @@ public class RegionService implements IRegionService {
      * Tạo world dungeon mới với DungeonWorldGenerator (world trống)
      */
     private DungeonWorld createNewWorld() {
-        String worldName = DataFolderConfig.DUNGEON_TEMPLATE_FILE + UUID.randomUUID();
+        String worldName = String.join("_", DataFolderConfig.DUNGEON_TEMPLATE_FILE, UUID.randomUUID().toString());
         WorldCreator creator = new WorldCreator(worldName);
         creator.generator(new DungeonWorldGenerator());
 

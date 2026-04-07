@@ -53,6 +53,7 @@ public class InstanceService implements IInstanceService {
         /*Prepare dungeon session*/
         DungeonSession session = new DungeonSession();
         session.setSessionId(UUID.randomUUID());
+        session.setRegionId(region.getId());
         session.setDungeonId(dungeon.getId());
         session.setPartyId(party.getPartyId());
         session.setStartedAt(System.currentTimeMillis());
@@ -93,14 +94,6 @@ public class InstanceService implements IInstanceService {
             //fallback
             return;
         }
-        /*Remove spawn room from pool*/
-        pool.remove(spawn.getId());
-
-        List<String> nextRooms = dungeonService.rollNextRoomFromPool(pool,
-                instance.getProgress().getMinimumRooms(), instance.getProgress().getClearedRooms());
-
-        instance.getProgress().setRoomPool(pool);
-        /*Build spawn room*/
         BoundingBox area = schematicService.paste(spawn.getSchemetaId(), region.getRegionPoint());
         /*Set room instance state after build*/
         RoomInstance roomInstance = new RoomInstance(spawn.getId(), SerializableBounds.from(area));

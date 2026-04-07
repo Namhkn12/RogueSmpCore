@@ -3,17 +3,26 @@ package com.roguesmp.dungeon_v2.actor.ui;
 import com.roguesmp.dungeon_v2.controller_.DungeonFlowController;
 import com.roguesmp.dungeon_v2.data.definition.room.Room;
 import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
+import com.roguesmp.dungeon_v2.dto.SelectRoomCallback;
+import com.roguesmp.dungeon_v2.utils.filterchain.EventFilter;
+import com.roguesmp.dungeon_v2.utils.filterchain.FilterChain;
+import com.roguesmp.dungeon_v2.utils.filterchain.impl.InteractFilters;
 import com.roguesmp.gui.BaseGui;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Vault;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class OpenDoorGui extends BaseGui {
 
@@ -40,20 +49,18 @@ public class OpenDoorGui extends BaseGui {
 
     private final Block door;
     private final List<Room> rooms;
-    private final DungeonFlowController dungeonFlowController;
-
+    private final SelectRoomCallback selectRoomCallback;
     private final ItemStack border;
     private final ItemStack bounder;
     private final ItemStack filler;
     private final ItemStack connector;
     private final ItemStack playerIcon;
 
-    public OpenDoorGui( Block door, List<Room> rooms, DungeonFlowController dungeonFlowController) {
-        super(Component.text("Dungeon Door"), 5);
+    public OpenDoorGui( Block door, List<Room> rooms, SelectRoomCallback callback) {
+        super(Component.text("Dungeon Door"), 6);
         this.door = door;
         this.rooms = rooms;
-        this.dungeonFlowController = dungeonFlowController;
-
+        this.selectRoomCallback = callback;
         border    = makeHidden(ItemStack.of(Material.MAGENTA_STAINED_GLASS_PANE));
         filler    = makeHidden(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE));
         connector = makeHidden(ItemStack.of(Material.BLUE_STAINED_GLASS_PANE));
@@ -63,6 +70,7 @@ public class OpenDoorGui extends BaseGui {
 
     @Override
     public void setup() {
+
         // 1. Nền đen toàn bộ
         fillEmpty(filler);
 
@@ -76,9 +84,25 @@ public class OpenDoorGui extends BaseGui {
         placeConnectorsAndRooms();
     }
 
-    // -----------------------------------------------------------------------
-    // Border
-    // -----------------------------------------------------------------------
+    @Override
+    public void onOpenInventory(InventoryOpenEvent event) {
+        /*Set player id into vault*/
+        Vault vault = (Vault) door.getState();
+        Player player = (Player) event.getPlayer();
+        vault.addRewardedPlayer(player.getUniqueId());
+        vault.update();
+    }
+
+    @Override
+    public void onCloseInventory(InventoryCloseEvent event) {
+        /*Remove player id from vault*/
+        if (door.getState() instanceof Vault vault) {
+            for (UUID uuid : vault.getRewardedPlayers()) {
+                vault.removeRewardedPlayer(uuid);
+            }
+            vault.update();
+        }
+    }
 
     private void placeBorder() {
         for (int slot = 0; slot < TOTAL_SLOT; slot++) {
@@ -90,10 +114,6 @@ public class OpenDoorGui extends BaseGui {
             }
         }
     }
-
-    // -----------------------------------------------------------------------
-    // Connectors & Rooms
-    // -----------------------------------------------------------------------
 
     /**
      * Tuỳ số lượng rooms (0-3) mà vẽ đường connector và đặt room item.
@@ -157,7 +177,7 @@ public class OpenDoorGui extends BaseGui {
                 Player player = (Player) event.getWhoClicked();
                 event.setCancelled(true);
                 player.closeInventory();
-                dungeonFlowController.handleSelectNextRoom(player, door, room);
+                selectRoomCallback.onRoomSelect(player, door, room);
             });
         }
     }
@@ -165,10 +185,6 @@ public class OpenDoorGui extends BaseGui {
     private void placeConnector(int slot) {
         addButton(slot, connector, ClickHandler.noAction());
     }
-
-    // -----------------------------------------------------------------------
-    // Room item builder
-    // -----------------------------------------------------------------------
 
     private ItemStack buildRoomItem(Room room) {
         Material mat = parseMaterial(room.getType().getIconMaterial());
@@ -189,10 +205,6 @@ public class OpenDoorGui extends BaseGui {
             return Material.CHEST;
         }
     }
-
-    // -----------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------
 
     private ItemStack makeHidden(ItemStack item) {
         item.setData(DataComponentTypes.TOOLTIP_DISPLAY,
