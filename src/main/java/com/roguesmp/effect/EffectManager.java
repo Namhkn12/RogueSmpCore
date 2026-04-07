@@ -314,12 +314,9 @@ public class EffectManager {
                 for (SmpEffect effect : entry.getValue()) {
                     if (effect == null) continue;
                     // Convert effect directly to JsonObject
-                    JsonElement element = gson.toJsonTree(effect);
-                    if (!element.isJsonObject()) {
-                        RogueSmpCore.LOGGER.warn("Effect {} failed serialization for player {}", effect.getEffectID(), playerId);
-                        continue;
-                    }
-                    array.add(element.getAsJsonObject());
+                    JsonObject object = effect.serialize();
+                    object.addProperty("id", effect.getEffectID());
+                    array.add(object);
                 }
                 root.add(key, array);
             }
@@ -343,7 +340,6 @@ public class EffectManager {
         Map<String, NavigableSet<SmpEffect>> result = new HashMap<>();
 
         try (Reader reader = new FileReader(playerFile)) {
-            Gson gson = Utils.GSON;
             JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
             for (var entry : root.entrySet()) {
                 String key = entry.getKey();
@@ -352,20 +348,19 @@ public class EffectManager {
 
                 for (JsonElement element : array) {
                     JsonObject obj = element.getAsJsonObject();
-                    JsonElement idElement = obj.get("effectID");
+                    JsonElement idElement = obj.get("id");
                     if (idElement == null) {
                         RogueSmpCore.LOGGER.warn("Missing id in effect for player {}", playerId);
                         continue;
                     }
 
                     String id = idElement.getAsString();
-                    Class<? extends SmpEffect> clazz = EffectCodecRegistry.get(id);
-                    if (clazz == null) {
-                        RogueSmpCore.LOGGER.warn("Unknown effect id '{}' for player {}", id, playerId);
+                    EffectCodecRegistry.EffectDeserializer effectDeserializer = EffectCodecRegistry.get(id);
+                    if (effectDeserializer == null) {
+                        RogueSmpCore.LOGGER.warn("Effect id '{}' has no serializer, for player {}", id, playerId);
                         continue;
                     }
-
-                    SmpEffect effect = gson.fromJson(obj, clazz);
+                    SmpEffect effect = effectDeserializer.deserialize(obj);
                     effects.add(effect);
                 }
                 result.put(key, effects);

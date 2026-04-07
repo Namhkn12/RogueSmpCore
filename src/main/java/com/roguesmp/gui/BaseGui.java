@@ -182,6 +182,24 @@ public abstract class BaseGui implements InventoryHolder {
         return row * 9 + col;
     }
 
+    /**
+     * Calculate the row index from a given slot
+     * @param slot The slot index
+     * @return The row index (starting from 0)
+     */
+    public int getRow(int slot) {
+        return slot / 9;
+    }
+
+    /**
+     * Calculate the column index from a given slot
+     * @param slot The slot index
+     * @return The column index (starting from 0, 0-8)
+     */
+    public int getColumn(int slot) {
+        return slot % 9;
+    }
+
     @FunctionalInterface
     public interface ClickHandler {
         void onClick(InventoryClickEvent event);

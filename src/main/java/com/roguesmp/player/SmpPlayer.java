@@ -3,17 +3,20 @@ package com.roguesmp.player;
 import com.roguesmp.constant.*;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
+import com.roguesmp.item.component.impl.ConsumableComponent;
 import com.roguesmp.item.component.impl.EnchantComponent;
 import com.roguesmp.item.component.impl.EquipAttributeComponent;
 import com.roguesmp.player.ability.AbilityLoadout;
 import com.roguesmp.utils.ItemStackUtils;
+import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
-import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
@@ -22,6 +25,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -32,6 +36,8 @@ public class SmpPlayer {
     private final UUID uuid;
     private final Map<Enchants, Integer> activeEnchants;
     private final Map<Attributes, Double> activeAttributes;
+
+    private final Map<EquipSlot, SmpItem> slotCache = new EnumMap<>(EquipSlot.class);
 
     private final AbilityLoadout abilityLoadout;
 
@@ -52,7 +58,10 @@ public class SmpPlayer {
         abilityLoadout.loadData(playerData);
     }
 
-    public void updateSlotStat(Player player, EquipSlot slot, @Nullable SmpItem oldItem, @Nullable SmpItem newItem) {
+    public void updateSlotStat(Player player, EquipSlot slot, @Nullable SmpItem newItem) {
+
+        SmpItem oldItem = slotCache.remove(slot);
+
         activeAttributes.forEach((attributes, aDouble) -> {
             attributes.getAttribute().removeVanillaAttribute(player);
         });
@@ -67,7 +76,7 @@ public class SmpPlayer {
                     if (activeSlot.contains(slot)) {
                         activeEnchants.merge(enchants, -integer, (integer1, integer2) -> {
                             int res = integer1 + integer2;
-                            if (res == 0) return null;
+                            if (res <= 0) return null; //If enchant is not positive then remove it
                             return res;
                         });
                     }
@@ -98,7 +107,7 @@ public class SmpPlayer {
                     if (activeSlot.contains(slot)) {
                         activeEnchants.merge(enchants, integer, (integer1, integer2) -> {
                             int res = integer1 + integer2;
-                            if (res == 0) return null;
+                            if (res <= 0) return null;
                             return res;
                         });
                     }
@@ -115,6 +124,8 @@ public class SmpPlayer {
                     }
                 });
             }
+
+            slotCache.put(slot, newItem);
         }
 
         activeAttributes.forEach((attributes, aDouble) -> {
@@ -159,6 +170,18 @@ public class SmpPlayer {
         return Bukkit.getPlayer(uuid);
     }
 
+    public void sendMessage(Component text) {
+        Player player = getBukkitPlayer();
+        if (player == null) return;
+        player.sendMessage(text);
+    }
+
+    public void sendMessage(String text) {
+        Player player = getBukkitPlayer();
+        if (player == null) return;
+        player.sendMessage(text);
+    }
+
     public @Nullable PlayerProjectile getProjectile(UUID uuid) {
         return projectiles.get(uuid);
     }
@@ -184,7 +207,10 @@ public class SmpPlayer {
         if (action.isLeftClick()) {
             if (player.isSneaking()) abilityLoadout.cast(AbilityTrigger.SHIFT_LEFT_CLICK);
         } else if (action.isRightClick()) {
-            if (!activeAttributes.containsKey(Attributes.MELEE_DAMAGE_BASE)) return; //A hack to make sure only "weapon" can be casted with...
+            // Is it a valid casting tool? (Not food, not a bow, etc.)
+            if (!ItemStackUtils.canBeCastedWith(event.getItem())) return;
+            // Does it have the required stats to be considered a 'weapon'?
+            if (!activeAttributes.containsKey(Attributes.MELEE_DAMAGE_BASE)) return;
             if (player.isSneaking()) abilityLoadout.cast(AbilityTrigger.SHIFT_RIGHT_CLICK);
             else abilityLoadout.cast(AbilityTrigger.RIGHT_CLICK);
         }
@@ -257,6 +283,20 @@ public class SmpPlayer {
             enchants.getEnchant().onConsume(event, integer, this);
         });
         abilityLoadout.onConsume(event);
+
+        if (!event.isCancelled()) { //Handle Consumable component
+            ItemStack consumed = event.getItem();
+            BaseItem baseItem = SmpItemUtils.getBaseItem(consumed);
+            if (baseItem != null) {
+                SmpItem smpItem = new SmpItem(consumed);
+                smpItem.applyModifiers(this);
+
+                ConsumableComponent consumableComponent = smpItem.getComponent(ComponentKeys.CONSUMABLE);
+                if (consumableComponent != null) {
+                    consumableComponent.applyEffects(event.getPlayer());
+                }
+            }
+        }
     }
 
     public void onExpChange(PlayerExpChangeEvent event) {

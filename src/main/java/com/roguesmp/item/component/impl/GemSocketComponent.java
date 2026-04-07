@@ -26,7 +26,7 @@ public class GemSocketComponent implements ItemComponent {
     @GsonIgnore
     private final List<BaseItem> activeGem = new ArrayList<>();
     @GsonIgnore
-    private final List<String> appliedGem = new ArrayList<>(); //For old gem data (for removal in case we change socket count)
+    private final List<String> appliedGem = new ArrayList<>(); //For old gem data (for removal in case we change socket count, or the applied gem is no longer compatible)
 
     public GemSocketComponent(int amount) {
         this.amount = amount;
@@ -36,18 +36,24 @@ public class GemSocketComponent implements ItemComponent {
         return amount;
     }
 
-    public boolean addGem(@NotNull BaseItem baseItem) {
-        if (activeGem.size() >= amount) return false;
-        if (baseItem.getComponent(ComponentKeys.GEM_DATA) == null) return false;
-        activeGem.add(baseItem);
+    public void addGem(@NotNull BaseItem baseItem) {
         appliedGem.add(baseItem.getId());
-        return true;
+        activeGem.add(baseItem);
     }
 
-    public boolean removeGem(@NotNull BaseItem baseItem) {
-        activeGem.remove(baseItem);
-        appliedGem.remove(baseItem.getId());
-        return true;
+    public boolean canFitGem() {
+        return appliedGem.size() < amount;
+    }
+
+    /**
+     * Have to use string to handle removing gems that are no longer active
+     */
+    public void removeGem(@NotNull String baseItemId) {
+        BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(baseItemId);
+        if (baseItem != null) {
+            activeGem.removeIf(baseItem1 -> baseItem1.getId().equals(baseItemId));
+        }
+        appliedGem.remove(baseItemId);
     }
 
     public List<BaseItem> getActiveGem() {
@@ -67,6 +73,10 @@ public class GemSocketComponent implements ItemComponent {
 
     @Override
     public void save(PersistentDataContainer pdc) {
+        if (appliedGem.isEmpty()) {
+            pdc.remove(Keys.APPLIED_GEM);
+            return;
+        }
         pdc.set(Keys.APPLIED_GEM, ListPersistentDataType.LIST.strings(), appliedGem);
 
     }

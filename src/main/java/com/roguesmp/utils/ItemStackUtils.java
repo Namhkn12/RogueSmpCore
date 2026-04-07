@@ -33,21 +33,24 @@ public class ItemStackUtils {
         stack.setData(DataComponentTypes.ITEM_NAME, component);
     }
 
-    public static final EnumSet<Material> usableItems = EnumSet.of(
+    public static final EnumSet<Material> castBlockItems = EnumSet.of(
             Material.BOW,
             Material.CROSSBOW,
             Material.TRIDENT,
-            Material.SHIELD,
             Material.FISHING_ROD,
             Material.FIREWORK_ROCKET
             );
-    public static boolean isUsable(ItemStack itemStack) {
-        if (itemStack.hasData(DataComponentTypes.CONSUMABLE)) return true;
-        return usableItems.contains(itemStack.getType());
+    public static boolean canBeCastedWith(ItemStack itemStack) {
+        if (itemStack == null || itemStack.getType().isAir()) return false;
+
+        // Block items that have a specific "Right Click" mechanic
+        if (castBlockItems.contains(itemStack.getType())) return false;
+
+        return !itemStack.hasData(DataComponentTypes.CONSUMABLE);
     }
 
     /**
-     * Get this ItemStack's id
+     * Get the ItemStack's id
      */
     public static @Nullable String getId(ItemStack itemStack) {
         PersistentDataContainerView pdc = itemStack.getPersistentDataContainer();

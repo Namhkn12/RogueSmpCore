@@ -3,6 +3,10 @@ package com.roguesmp.constant;
 import com.google.gson.annotations.SerializedName;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.enchant.impl.*;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public enum Enchants {
     @SerializedName("fire_protection")
@@ -79,6 +83,8 @@ public enum Enchants {
     EXPLOSIVE(new Explosive())
     ;
 
+    private static final Map<String, Enchants> reverseMap = new HashMap<>();
+
     private final SmpEnchant enchant;
 
     Enchants(SmpEnchant enchant) {
@@ -87,5 +93,15 @@ public enum Enchants {
 
     public SmpEnchant getEnchant() {
         return enchant;
+    }
+
+    public static @Nullable Enchants fromId(String id) {
+        return reverseMap.get(id);
+    }
+
+    static {
+        for (Enchants enchants : Enchants.values()) {
+            reverseMap.put(enchants.getEnchant().getId(), enchants);
+        }
     }
 }

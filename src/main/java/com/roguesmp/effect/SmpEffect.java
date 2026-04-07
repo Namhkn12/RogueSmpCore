@@ -1,5 +1,6 @@
 package com.roguesmp.effect;
 
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.utils.Utils;
@@ -10,7 +11,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEffect {
+public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEffect, Cloneable {
 
     protected int duration;
     private final String effectID;
@@ -28,7 +29,7 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
     public SmpEffect(int duration, String effectID) {
         this.duration = duration;
         this.effectID = effectID;
-        this.deathBehavior = DeathBehavior.HALVES_ON_DEATH;
+        this.deathBehavior = DeathBehavior.REMOVE_ON_DEATH;
     }
 
     /**
@@ -44,7 +45,13 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
     public abstract boolean isPersistent();
 
     /**
-     * Effect name display, return null for no display
+     * The class must also have a deserialize method {@link com.roguesmp.registry.EffectCodecRegistry.EffectDeserializer} registered in {@link com.roguesmp.registry.EffectCodecRegistry} <br>
+     * The id field is automatically added so not need to add it
+     */
+    public abstract @NotNull JsonObject serialize();
+
+    /**
+     * Effect display, return null for no display
      * @return Component
      */
     @Override
@@ -123,6 +130,16 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
     @Override
     public int compareTo(@NotNull SmpEffect o) {
         return Double.compare(this.getMagnitude(), o.getMagnitude());
+    }
+
+    @Override
+    public SmpEffect clone() {
+        try {
+            // TODO: copy mutable state here, so the clone can't change the internals of the original
+            return (SmpEffect) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 
     public enum DeathBehavior {
