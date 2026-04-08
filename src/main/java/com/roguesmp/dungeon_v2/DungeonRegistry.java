@@ -9,11 +9,9 @@ import com.roguesmp.dungeon_v2.actor.command.PartyCommand;
 import com.roguesmp.dungeon_v2.actor.command.SchemetaCommand;
 import com.roguesmp.dungeon_v2.actor.command.TemplateGenCommand;
 import com.roguesmp.dungeon_v2.actor.listener.DoorInteractListener;
+import com.roguesmp.dungeon_v2.actor.listener.DungeonListener;
 import com.roguesmp.dungeon_v2.actor.listener.SpawnerEventListener;
-import com.roguesmp.dungeon_v2.controller_.DungeonFlowController;
-import com.roguesmp.dungeon_v2.controller_.PartyController;
-import com.roguesmp.dungeon_v2.controller_.SchemetaController;
-import com.roguesmp.dungeon_v2.controller_.SpawnerEventController;
+import com.roguesmp.dungeon_v2.controller_.*;
 import com.roguesmp.dungeon_v2.expansion.DungeonExpansion;
 import com.roguesmp.dungeon_v2.manager.*;
 import com.roguesmp.dungeon_v2.presentation.EffectManager;
@@ -113,10 +111,13 @@ public class DungeonRegistry {
                 roomService,
                 dungeonPresenter,
                 schematicService,
-                dungeonService
+                dungeonService,
+                taskScheduler
         );
         SchemetaController schemetaController = new SchemetaController(schemetaService, schematicService);
         SpawnerEventController spawnerController = new SpawnerEventController(spawnerService, spawnerManager, spawnerInstanceManager, taskScheduler);
+        PlayerActionController actionController = new PlayerActionController(instanceService, instanceManager, partyService);
+
         /*Command*/
         new TemplateGenCommand().register();
         new SchemetaCommand(schemetaController, schemetaManager).register();
@@ -133,6 +134,17 @@ public class DungeonRegistry {
                 new SpawnerEventListener(spawnerController),
                 RogueSmpCore.getInstance()
         );
+
+        Bukkit.getPluginManager().registerEvents(
+                new DungeonListener(actionController),
+                RogueSmpCore.getInstance()
+        );
+
+        /*Runtime tick: refresh scoreboard + monitor dungeon timeout (1s)*/
+        taskScheduler.runTimer(20L, 20L, () -> {
+            scoreBoardManager.tickUpdate();
+            flowController.handleDungeonTimerTick();
+        });
 
 
     }

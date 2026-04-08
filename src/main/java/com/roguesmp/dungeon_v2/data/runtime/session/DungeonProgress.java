@@ -47,8 +47,10 @@ public class DungeonProgress {
     public void markCurrentRoomCleared() {
         if (currentRoom == null) return;
         currentRoom.setCompleted(true);
-        clearedRoomIds.add(currentRoom.getRoomId());
-        roomPool.remove(currentRoom.getRoomId());
+        if (!clearedRoomIds.contains(currentRoom.getRoomId())) {
+            clearedRoomIds.add(currentRoom.getRoomId());
+        }
+        roomPool.removeIf(roomId -> roomId.equals(currentRoom.getRoomId()));
         clearedRooms++;
     }
 

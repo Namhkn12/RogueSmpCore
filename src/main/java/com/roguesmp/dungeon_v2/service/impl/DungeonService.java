@@ -13,7 +13,9 @@ import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import com.roguesmp.dungeon_v2.utils.Razdon;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DungeonService implements IDungeonService {
@@ -31,14 +33,18 @@ public class DungeonService implements IDungeonService {
     @Override
     public List<String> rollRoomPool(Dungeon dungeon) {
         List<String> result = new ArrayList<>();
+        Set<String> selectedRoomIds = new LinkedHashSet<>();
 
         for (RoomPool pool : dungeon.getPools()) {
             if (pool.getRooms() == null || pool.getRooms().isEmpty()) continue;
 
             int count = pool.getMin() + Razdon.getInstance().nextInt(pool.getMax() - pool.getMin() + 1);
-            count = Math.min(count, pool.getRooms().size());
+            List<RoomEntry> remaining = pool.getRooms().stream()
+                    .filter(entry -> entry != null && entry.getRoomId() != null && !entry.getRoomId().isBlank())
+                    .filter(entry -> !selectedRoomIds.contains(entry.getRoomId()))
+                    .collect(Collectors.toCollection(ArrayList::new));
 
-            List<RoomEntry> remaining = new ArrayList<>(pool.getRooms());
+            count = Math.min(count, remaining.size());
 
             for (int i = 0; i < count; i++) {
                 if (remaining.isEmpty()) break;
@@ -50,11 +56,14 @@ public class DungeonService implements IDungeonService {
                 double roll = Razdon.getInstance().nextDouble() * totalWeight;
                 double cumulative = 0;
 
-                for (RoomEntry entry : remaining) {
+                for (int index = 0; index < remaining.size(); index++) {
+                    RoomEntry entry = remaining.get(index);
                     cumulative += entry.getWeight();
                     if (roll < cumulative) {
-                        result.add(entry.getRoomId());
-                        remaining.remove(entry);
+                        String roomId = entry.getRoomId();
+                        selectedRoomIds.add(roomId);
+                        result.add(roomId);
+                        remaining.removeIf(e -> roomId.equals(e.getRoomId()));
                         break;
                     }
                 }
@@ -69,9 +78,11 @@ public class DungeonService implements IDungeonService {
         if (pool == null || pool.isEmpty()) return List.of();
 
         List<String> eligible = pool.stream()
+                .distinct()
                 .filter(roomId -> {
                     Room room = roomManager.get(roomId);
                     if (room == null) return false;
+                    if (room.getType() == RoomType.SPAWN) return false;
                     if (room.getType() == RoomType.TREASURE) return false;
                     return room.getType() != RoomType.BOSS || completedRooms >= minimum;
                 })

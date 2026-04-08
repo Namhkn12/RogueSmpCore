@@ -63,4 +63,8 @@ public class InstanceManager {
     public DungeonInstance remove(UUID ssid){
         return instances.remove(ssid);
     }
+
+    public List<DungeonInstance> getAll() {
+        return List.copyOf(instances.values());
+    }
 }

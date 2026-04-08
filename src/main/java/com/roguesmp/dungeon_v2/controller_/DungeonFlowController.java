@@ -20,6 +20,7 @@ import com.roguesmp.dungeon_v2.manager.RoomManager;
 import com.roguesmp.dungeon_v2.manager.ScoreBoardManager;
 import com.roguesmp.dungeon_v2.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon_v2.service.*;
+import com.roguesmp.dungeon_v2.task.TaskScheduler;
 import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.Teleporter;
 import org.bukkit.Bukkit;
@@ -47,10 +48,11 @@ public class DungeonFlowController {
     private final DungeonPresenter dungeonPresenter;
     private final ISchematicService schematicService;
     private final IDungeonService dungeonService;
+    private final TaskScheduler taskScheduler;
 
     public DungeonFlowController(IInstanceService instanceService, InstanceManager instanceManager, IPartyService partyService,
                                  IRegionService regionService, ScoreBoardManager scoreBoardManager,
-                                 DungeonManager dungeonManager, RoomManager roomManager, IRoomService roomService, DungeonPresenter dungeonPresenter, ISchematicService schematicService, IDungeonService dungeonService) {
+                                 DungeonManager dungeonManager, RoomManager roomManager, IRoomService roomService, DungeonPresenter dungeonPresenter, ISchematicService schematicService, IDungeonService dungeonService, TaskScheduler taskScheduler) {
         this.instanceService = instanceService;
         this.instanceManager = instanceManager;
         this.partyService = partyService;
@@ -62,6 +64,7 @@ public class DungeonFlowController {
         this.dungeonPresenter = dungeonPresenter;
         this.schematicService = schematicService;
         this.dungeonService = dungeonService;
+        this.taskScheduler = taskScheduler;
     }
 
     public void handleStartDungeon(String did, Player player){
@@ -105,8 +108,13 @@ public class DungeonFlowController {
 
         /*Roll next rooms nếu chưa có (tránh roll lại khi click nhiều lần)*/
         if(progress.getNextRooms() == null || progress.getNextRooms().isEmpty()){
+            String currentRoomId = progress.getCurrentRoom() != null ? progress.getCurrentRoom().getRoomId() : null;
+            List<String> candidatePool = progress.getRoomPool().stream()
+                    .filter(roomId -> currentRoomId == null || !currentRoomId.equals(roomId))
+                    .toList();
+
             List<String> nextRoomIds = dungeonService.rollNextRoomFromPool(
-                    progress.getRoomPool(),
+                    candidatePool,
                     progress.getMinimumRooms(),
                     progress.getClearedRooms()
             );
@@ -153,6 +161,22 @@ public class DungeonFlowController {
 
         /*Open the door*/
         roomService.openRoomDoor(doorLoc);
+        /*Close the door after 5 second and teleport player if they outside the bounding box*/
+        taskScheduler.runLater(100L, () -> {
+            List<Player> members = partyService.getOnlineMembers(party);
+            BoundingBox activeZone = roomInstance.getBounds().toBukkit();
+
+            for (Player member : members) {
+                if (!member.isOnline()) continue;
+
+                if (!activeZone.contains(member.getLocation().toVector())) {
+                    Location insideLoc = doorLoc.clone().add(0, 0, 1.5);
+                    member.teleport(insideLoc);
+                }
+            }
+
+            roomService.closeRoomDoor(doorLoc);
+        });
     }
 
     public void handleOpenTreasurePortal(Block door){
@@ -176,6 +200,31 @@ public class DungeonFlowController {
 
     }
 
+    public void handleDungeonTimerTick() {
+        for (DungeonInstance instance : instanceManager.getAll()) {
+            if (instance == null || instance.getTimer() == null || instance.getProgress() == null) continue;
+
+            DungeonProgress.Status status = instance.getProgress().getStatus();
+            if (status == DungeonProgress.Status.COMPLETED || status == DungeonProgress.Status.FAILED) continue;
+
+            if (!instance.getTimer().isExpired()) continue;
+            handleDungeonTimeExpired(instance);
+        }
+    }
+
+    /**
+     * Timeout hook. Default behavior marks run as FAILED and forwards to end handler.
+     * Bạn có thể đổi luồng cleanup/reward ở handleEndUpDungeon(...).
+     */
+    public void handleDungeonTimeExpired(DungeonInstance instance) {
+        if (instance == null || instance.getProgress() == null) return;
+        DungeonProgress.Status status = instance.getProgress().getStatus();
+        if (status == DungeonProgress.Status.COMPLETED || status == DungeonProgress.Status.FAILED) return;
+
+        instance.getProgress().setStatus(DungeonProgress.Status.FAILED);
+        handleEndUpDungeon(instance);
+    }
+
     private void checkRoomCompletion(RoomInstance room, List<IObjective> objectives, Party party) {
         boolean allDone = objectives.stream()
                 .filter(o -> o instanceof BaseObjective)
@@ -184,8 +233,9 @@ public class DungeonFlowController {
 
         if (allDone) {
             room.setCompleted(true);
-            // trigger mở cửa, next room, v.v.
-            DungeonEcho.success(Bukkit.getPlayer(party.getOwner()), "Hoan thanh nhien vu");
+            DungeonEcho.success(partyService.getOnlineMembers(party), "Room clear!");
+            /*Open the back door*/
+            roomService.openRoomDoor(room.getDoor().toBukkit());
         }
     }
 }
