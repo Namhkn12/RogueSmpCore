@@ -4,13 +4,21 @@ import com.google.gson.Gson;
 import com.roguesmp.dungeon_v2.config.DataFolderConfig;
 import com.roguesmp.dungeon_v2.data.definition.objective.IObjective;
 import com.roguesmp.dungeon_v2.data.definition.objective.factory.ObjectiveFactory;
+import com.roguesmp.dungeon_v2.data.definition.room.roomevent.RoomEvent;
+import com.roguesmp.dungeon_v2.data.definition.room.roomevent.factory.RoomEventFactory;
 import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_v2.data.runtime.RoomInstance;
 import com.roguesmp.dungeon_v2.data.runtime.session.DungeonProgress;
 import com.roguesmp.dungeon_v2.repository.IInstanceRepository;
 import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import org.bukkit.plugin.Plugin;
-import java.io.*;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +33,7 @@ public class InstanceRepository implements IInstanceRepository {
     public InstanceRepository(Plugin plugin, Gson gson, Log4Craft_ logger) {
         this.logger = logger;
         this.gson = gson;
-        this.dataFolder = new File(
-               plugin.getDataFolder(), DataFolderConfig.getDungeonSessionFolder()
-        );
+        this.dataFolder = new File(plugin.getDataFolder(), DataFolderConfig.getDungeonSessionFolder());
         if (!dataFolder.exists()) dataFolder.mkdirs();
     }
 
@@ -45,7 +51,7 @@ public class InstanceRepository implements IInstanceRepository {
     public void delete(UUID sessionId) {
         File file = getFile(sessionId);
         if (file.exists() && !file.delete()) {
-            logger.error(this.getClass(),"Failed to delete instance file: " + sessionId);
+            logger.error(this.getClass(), "Failed to delete instance file: " + sessionId);
         }
     }
 
@@ -59,7 +65,7 @@ public class InstanceRepository implements IInstanceRepository {
             try (Reader reader = new FileReader(file)) {
                 DungeonInstance instance = gson.fromJson(reader, DungeonInstance.class);
                 if (instance == null) continue;
-                restoreObjectives(instance);
+                restoreRoomRuntime(instance);
                 result.add(instance);
             } catch (IOException e) {
                 logger.error(this.getClass(), "Failed to load instance file: " + file.getName());
@@ -68,19 +74,27 @@ public class InstanceRepository implements IInstanceRepository {
         return result;
     }
 
-    /**
-     * Restore active objectives từ objectiveStates đã serialize.
-     * Không cần callback — ObjectiveFactory.restore() tự xử lý hoàn toàn.
-     */
-    private void restoreObjectives(DungeonInstance instance) {
+    private void restoreRoomRuntime(DungeonInstance instance) {
         DungeonProgress progress = instance.getProgress();
         if (progress == null) return;
 
         RoomInstance currentRoom = progress.getCurrentRoom();
         if (currentRoom == null) return;
 
-        List<Map<String, Object>> states = currentRoom.getObjectiveStates();
-        if (states == null || states.isEmpty()) return;
+        List<IObjective> restoredObjectives = restoreObjectives(currentRoom);
+        if (!restoredObjectives.isEmpty()) {
+            currentRoom.setActiveObjectives(restoredObjectives);
+        }
+
+        List<RoomEvent> restoredEvents = restoreRoomEvents(currentRoom);
+        if (!restoredEvents.isEmpty()) {
+            currentRoom.setActiveRoomEvents(restoredEvents);
+        }
+    }
+
+    private List<IObjective> restoreObjectives(RoomInstance room) {
+        List<Map<String, Object>> states = room.getObjectiveStates();
+        if (states == null || states.isEmpty()) return List.of();
 
         List<IObjective> restored = new ArrayList<>();
         for (Map<String, Object> state : states) {
@@ -90,8 +104,22 @@ public class InstanceRepository implements IInstanceRepository {
                 logger.warn(this.getClass(), "Failed to restore objective type: " + state.get("type"));
             }
         }
+        return restored;
+    }
 
-        currentRoom.setActiveObjectives(restored);
+    private List<RoomEvent> restoreRoomEvents(RoomInstance room) {
+        List<Map<String, Object>> states = room.getRoomEventStates();
+        if (states == null || states.isEmpty()) return List.of();
+
+        List<RoomEvent> restored = new ArrayList<>();
+        for (Map<String, Object> state : states) {
+            try {
+                restored.add(RoomEventFactory.restore(state));
+            } catch (Exception e) {
+                logger.warn(this.getClass(), "Failed to restore room event type: " + state.get("type"));
+            }
+        }
+        return restored;
     }
 
     private File getFile(UUID sessionId) {

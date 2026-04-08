@@ -7,6 +7,12 @@ import com.roguesmp.dungeon_v2.data.definition.objective.IObjective;
 import com.roguesmp.dungeon_v2.data.definition.objective.factory.ObjectiveConfig;
 import com.roguesmp.dungeon_v2.data.definition.objective.factory.ObjectiveFactory;
 import com.roguesmp.dungeon_v2.data.definition.room.Room;
+import com.roguesmp.dungeon_v2.data.definition.room.roomevent.BaseRoomEvent;
+import com.roguesmp.dungeon_v2.data.definition.room.roomevent.RoomEvent;
+import com.roguesmp.dungeon_v2.data.definition.room.roomevent.RoomEventContext;
+import com.roguesmp.dungeon_v2.data.definition.room.roomevent.RoomEventPhase;
+import com.roguesmp.dungeon_v2.data.definition.room.roomevent.factory.RoomEventConfig;
+import com.roguesmp.dungeon_v2.data.definition.room.roomevent.factory.RoomEventFactory;
 import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_v2.data.runtime.Party;
 import com.roguesmp.dungeon_v2.data.runtime.Region;
@@ -23,7 +29,6 @@ import com.roguesmp.dungeon_v2.service.*;
 import com.roguesmp.dungeon_v2.task.TaskScheduler;
 import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.Teleporter;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -33,7 +38,6 @@ import org.bukkit.util.BoundingBox;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DungeonFlowController {
 
@@ -80,6 +84,12 @@ public class DungeonFlowController {
         instanceManager.add(instance);
         /*Start instance*/
         instanceService.startDungeonInstance(instance);
+        bindCurrentRoomRuntime(instance, party);
+        RoomInstance startRoom = instance.getProgress().getCurrentRoom();
+        triggerRoomStart(startRoom);
+        if (startRoom != null && startRoom.isCompleted()) {
+            triggerRoomEnd(startRoom);
+        }
         Region region = regionService.getRegionById(instance.getSession().getRegionId());
         /*Teleport player to spawn room (region point)*/
         Teleporter.teleportAllByID(party.getMembers(), region.getRegionPoint());
@@ -140,24 +150,17 @@ public class DungeonFlowController {
         /*Build selected room*/
         BoundingBox area = schematicService.paste(room.getSchemetaId(), pasteLoc);
         RoomInstance roomInstance = new RoomInstance(room.getId(), SerializableBounds.from(area));
-        /*Prepare objective and set door location*/
-        List<IObjective> objs = new ArrayList<>();
-        for(ObjectiveConfig objConfig : room.getObjectives()){
-            IObjective obj = ObjectiveFactory.create(objConfig);
-            if(obj instanceof BaseObjective base){
-                base.setCallback(objective -> checkRoomCompletion(roomInstance, objs, party));
-            }
-            objs.add(obj);
-        }
-        roomInstance.setActiveObjectives(objs);
-        /*If room doesn't have a goal, mark it clear*/
-        roomInstance.setCompleted(objs.isEmpty());
+        setupRoomRuntime(room, roomInstance, party);
         roomInstance.setDoor(SerializableLocation.from(doorLoc));
 
         /*Mark current room cleared, set new room*/
         progress.markCurrentRoomCleared();
         progress.setCurrentRoom(roomInstance);
         progress.setNextRooms(null);
+        triggerRoomStart(roomInstance);
+        if (roomInstance.isCompleted()) {
+            triggerRoomEnd(roomInstance);
+        }
 
         /*Open the door*/
         roomService.openRoomDoor(doorLoc);
@@ -207,6 +210,12 @@ public class DungeonFlowController {
             DungeonProgress.Status status = instance.getProgress().getStatus();
             if (status == DungeonProgress.Status.COMPLETED || status == DungeonProgress.Status.FAILED) continue;
 
+            Party party = partyService.getPartyById(instance.getSession().getPartyId());
+            if (party != null) {
+                bindCurrentRoomRuntime(instance, party);
+            }
+            triggerRoomTick(instance.getProgress().getCurrentRoom());
+
             if (!instance.getTimer().isExpired()) continue;
             handleDungeonTimeExpired(instance);
         }
@@ -225,17 +234,97 @@ public class DungeonFlowController {
         handleEndUpDungeon(instance);
     }
 
-    private void checkRoomCompletion(RoomInstance room, List<IObjective> objectives, Party party) {
-        boolean allDone = objectives.stream()
+    private void bindCurrentRoomRuntime(DungeonInstance instance, Party party) {
+        if (instance == null || instance.getProgress() == null || party == null) return;
+        RoomInstance roomInstance = instance.getProgress().getCurrentRoom();
+        if (roomInstance == null) return;
+
+        Room roomTemplate = roomManager.get(roomInstance.getRoomId());
+        if (roomTemplate == null) return;
+
+        setupRoomRuntime(roomTemplate, roomInstance, party);
+    }
+
+    private void setupRoomRuntime(Room roomTemplate, RoomInstance roomInstance, Party party) {
+        prepareObjectives(roomTemplate, roomInstance, party);
+        prepareRoomEvents(roomTemplate, roomInstance, party);
+
+        boolean noObjectives = roomInstance.getActiveObjectives() == null || roomInstance.getActiveObjectives().isEmpty();
+        if (noObjectives) {
+            roomInstance.setCompleted(true);
+        }
+    }
+
+    private void prepareObjectives(Room roomTemplate, RoomInstance roomInstance, Party party) {
+        List<IObjective> objectives = roomInstance.getActiveObjectives();
+        if (objectives == null || objectives.isEmpty()) {
+            objectives = new ArrayList<>();
+            for (ObjectiveConfig config : roomTemplate.getObjectives()) {
+                objectives.add(ObjectiveFactory.create(config));
+            }
+            roomInstance.setActiveObjectives(objectives);
+        }
+
+        for (IObjective objective : objectives) {
+            if (objective instanceof BaseObjective baseObjective) {
+                baseObjective.setCallback(o -> checkRoomCompletion(roomInstance, party));
+            }
+        }
+    }
+
+    private void prepareRoomEvents(Room roomTemplate, RoomInstance roomInstance, Party party) {
+        List<RoomEvent> events = roomInstance.getActiveRoomEvents();
+        if (events == null || events.isEmpty()) {
+            events = new ArrayList<>();
+            for (RoomEventConfig config : roomTemplate.getRoomEvents()) {
+                events.add(RoomEventFactory.create(config));
+            }
+            roomInstance.setActiveRoomEvents(events);
+        }
+
+        for (RoomEvent event : events) {
+            if (event instanceof BaseRoomEvent baseEvent) {
+                baseEvent.setContext(new RoomEventContext(roomInstance, party, partyService));
+                baseEvent.setCallback((roomEvent, phase) -> onRoomEventCallback(roomEvent, phase, roomInstance, party));
+            }
+        }
+    }
+
+    private void triggerRoomStart(RoomInstance roomInstance) {
+        if (roomInstance == null || roomInstance.getActiveRoomEvents() == null) return;
+        roomInstance.getActiveRoomEvents().forEach(RoomEvent::onRoomStart);
+    }
+
+    private void triggerRoomTick(RoomInstance roomInstance) {
+        if (roomInstance == null || roomInstance.getActiveRoomEvents() == null) return;
+        roomInstance.getActiveRoomEvents().forEach(RoomEvent::onRoomPlay);
+    }
+
+    private void triggerRoomEnd(RoomInstance roomInstance) {
+        if (roomInstance == null || roomInstance.getActiveRoomEvents() == null) return;
+        roomInstance.getActiveRoomEvents().forEach(RoomEvent::onRoomEnd);
+    }
+
+    private void onRoomEventCallback(RoomEvent event, RoomEventPhase phase, RoomInstance roomInstance, Party party) {
+        // Hook for room-event side effects outside the event class itself.
+    }
+
+    private void checkRoomCompletion(RoomInstance room, Party party) {
+        if (room == null || room.getActiveObjectives() == null) return;
+
+        boolean allDone = room.getActiveObjectives().stream()
                 .filter(o -> o instanceof BaseObjective)
                 .map(o -> (BaseObjective) o)
                 .allMatch(BaseObjective::isCompleted);
 
         if (allDone) {
             room.setCompleted(true);
+            triggerRoomEnd(room);
             DungeonEcho.success(partyService.getOnlineMembers(party), "Room clear!");
             /*Open the back door*/
-            roomService.openRoomDoor(room.getDoor().toBukkit());
+            if (room.getDoor() != null) {
+                roomService.openRoomDoor(room.getDoor().toBukkit());
+            }
         }
     }
 }

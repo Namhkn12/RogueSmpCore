@@ -1,6 +1,7 @@
 package com.roguesmp.dungeon_v2.manager;
 
 import com.roguesmp.dungeon_v2.data.definition.objective.PersistableObjective;
+import com.roguesmp.dungeon_v2.data.definition.room.roomevent.PersistableRoomEvent;
 import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_v2.data.runtime.RoomInstance;
 import com.roguesmp.dungeon_v2.data.runtime.session.DungeonProgress;
@@ -32,27 +33,40 @@ public class InstanceManager {
 
     public void saveAll() {
         instances.forEach((uuid, instance) -> {
-            snapshotObjectives(instance);
+            snapshotRoomRuntime(instance);
             instanceRepository.save(instance);
         });
     }
 
-    private void snapshotObjectives(DungeonInstance instance) {
+    private void snapshotRoomRuntime(DungeonInstance instance) {
         DungeonProgress progress = instance.getProgress();
         if (progress == null) return;
 
         RoomInstance currentRoom = progress.getCurrentRoom();
-        if (currentRoom == null || currentRoom.getActiveObjectives() == null) return;
+        if (currentRoom == null) return;
 
-        List<Map<String, Object>> states = currentRoom.getActiveObjectives()
-                .stream()
-                .map(obj -> ((PersistableObjective) obj).serialize())
-                .toList();
-        currentRoom.setObjectiveStates(states);
+        if (currentRoom.getActiveObjectives() != null) {
+            List<Map<String, Object>> objectiveStates = currentRoom.getActiveObjectives()
+                    .stream()
+                    .filter(PersistableObjective.class::isInstance)
+                    .map(obj -> ((PersistableObjective) obj).serialize())
+                    .toList();
+            currentRoom.setObjectiveStates(objectiveStates);
+        }
+
+        if (currentRoom.getActiveRoomEvents() != null) {
+            List<Map<String, Object>> eventStates = currentRoom.getActiveRoomEvents()
+                    .stream()
+                    .filter(PersistableRoomEvent.class::isInstance)
+                    .map(event -> ((PersistableRoomEvent) event).serialize())
+                    .toList();
+            currentRoom.setRoomEventStates(eventStates);
+        }
     }
 
     public void add(DungeonInstance instance){
         instances.put(instance.getSession().getSessionId(), instance);
+        snapshotRoomRuntime(instance);
         instanceRepository.save(instance);
     }
 

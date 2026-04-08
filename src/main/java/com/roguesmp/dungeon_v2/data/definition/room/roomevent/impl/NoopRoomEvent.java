@@ -1,0 +1,13 @@
+package com.roguesmp.dungeon_v2.data.definition.room.roomevent.impl;
+
+import com.roguesmp.dungeon_v2.data.definition.room.roomevent.BaseRoomEvent;
+
+public class NoopRoomEvent extends BaseRoomEvent {
+
+    public static final String TYPE = "noop";
+
+    @Override
+    protected String getType() {
+        return TYPE;
+    }
+}
