@@ -10,6 +10,7 @@ import com.roguesmp.dungeon_v2.actor.command.SchemetaCommand;
 import com.roguesmp.dungeon_v2.actor.command.TemplateGenCommand;
 import com.roguesmp.dungeon_v2.actor.listener.DoorInteractListener;
 import com.roguesmp.dungeon_v2.actor.listener.DungeonListener;
+import com.roguesmp.dungeon_v2.actor.listener.LootTableListener;
 import com.roguesmp.dungeon_v2.actor.listener.SpawnerEventListener;
 import com.roguesmp.dungeon_v2.controller_.*;
 import com.roguesmp.dungeon_v2.expansion.DungeonExpansion;
@@ -72,6 +73,7 @@ public class DungeonRegistry {
         ISpawnerRepository spawnerRepository = new SpawnerRepository(plugin, gson);
         IPartyRepository partyRepository = new PartyRepository(plugin, gson, logger);
         IInstanceRepository instanceRepository = new InstanceRepository(plugin, gson, logger);
+        ILootTableRepository lootTableRepository = new LootTableRepository(plugin, gson);
 
         /*Manager*/
         SchemetaManager schemetaManager = new SchemetaManager(schemetaRepository, schematicRepository);
@@ -80,6 +82,7 @@ public class DungeonRegistry {
         RoomManager roomManager = new RoomManager(roomRepository, logger);
         DungeonManager dungeonManager = new DungeonManager(dungeonRepository, logger);
         SpawnerManager spawnerManager = new SpawnerManager(spawnerRepository, logger);
+        LootTableManager lootTableManager = new LootTableManager(lootTableRepository);
 
         SpawnerInstanceManager spawnerInstanceManager = new SpawnerInstanceManager();
         InstanceManager instanceManager = new InstanceManager(instanceRepository, scoreBoardManager);
@@ -94,6 +97,13 @@ public class DungeonRegistry {
         ISpawnerService spawnerService = new SpawnerService(spawnerManager, spawnerInstanceManager, logger);
         IInstanceService instanceService = new InstanceService(instanceManager,
                 dungeonManager, roomManager, regionService, dungeonService, partyService, roomService, schematicService);
+        ILootService lootService = new LootService(lootTableManager, ItemRegistry.getInstance());
+        IDungeonRewardService rewardService = new DungeonRewardService(
+                lootService,
+                partyService,
+                instanceManager,
+                dungeonManager
+                );
 
         /*Task*/
         PartyInviteTask inviteTask = new PartyInviteTask(plugin, partyService);
@@ -117,9 +127,10 @@ public class DungeonRegistry {
         SchemetaController schemetaController = new SchemetaController(schemetaService, schematicService);
         SpawnerEventController spawnerController = new SpawnerEventController(spawnerService, spawnerManager, spawnerInstanceManager, taskScheduler);
         PlayerActionController actionController = new PlayerActionController(instanceService, instanceManager, partyService);
+        DungeonTreasureController treasureController = new DungeonTreasureController(rewardService);
 
         /*Command*/
-        new TemplateGenCommand().register();
+        new TemplateGenCommand(lootService).register();
         new SchemetaCommand(schemetaController, schemetaManager).register();
         new PartyCommand(partyController).register();
         new DungeonCommand(flowController).register();
@@ -137,6 +148,11 @@ public class DungeonRegistry {
 
         Bukkit.getPluginManager().registerEvents(
                 new DungeonListener(actionController),
+                RogueSmpCore.getInstance()
+        );
+
+        Bukkit.getPluginManager().registerEvents(
+                new LootTableListener(treasureController),
                 RogueSmpCore.getInstance()
         );
 

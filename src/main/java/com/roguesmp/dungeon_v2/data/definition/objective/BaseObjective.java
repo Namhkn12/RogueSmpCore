@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon_v2.data.definition.objective;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -9,6 +10,7 @@ public abstract class BaseObjective implements IObjective, PersistableObjective 
 
     protected ObjCallback callback;
     protected boolean completed;
+    protected int score;
 
     public ObjCallback getCallback() {
         return callback;
@@ -26,6 +28,18 @@ public abstract class BaseObjective implements IObjective, PersistableObjective 
         this.completed = completed;
     }
 
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void addScore(int plus) {
+        this.score += plus;
+    }
+
+    public int getScore(){
+        return score;
+    }
+
     protected void complete() {
         this.completed = true;
         if (callback != null) {
@@ -35,11 +49,15 @@ public abstract class BaseObjective implements IObjective, PersistableObjective 
 
     @Override
     public Map<String, Object> serialize() {
-        return Map.of("completed", completed);
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("completed", completed);
+        data.put("score", score);
+        return data;
     }
 
     @Override
     public void deserialize(Map<String, Object> data) {
+        this.score = data.get("score") instanceof Number n ? n.intValue() : 0;
         this.completed = (boolean) data.getOrDefault("completed", false);
     }
 }

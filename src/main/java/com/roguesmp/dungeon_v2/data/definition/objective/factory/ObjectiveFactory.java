@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon_v2.data.definition.objective.factory;
 
+import com.roguesmp.dungeon_v2.data.definition.objective.BaseObjective;
 import com.roguesmp.dungeon_v2.data.definition.objective.IObjective;
 import com.roguesmp.dungeon_v2.data.definition.objective.PersistableObjective;
 import com.roguesmp.dungeon_v2.data.definition.objective.impl.ItemCollector;
@@ -17,26 +18,31 @@ public final class ObjectiveFactory {
     }
 
     public static IObjective create(ObjectiveConfig config) {
-        return switch (config.getType()) {
+        IObjective objective = switch (config.getType()) {
             case SpawnerBreaker.TYPE -> {
-                SpawnerBreaker objective = new SpawnerBreaker();
-                objective.setRequire(getRequiredCount(config, 3));
-                yield objective;
+                SpawnerBreaker obj = new SpawnerBreaker();
+                obj.setRequire(getRequiredCount(config, 3));
+                yield obj;
             }
             case MonsterHunter.TYPE -> {
-                MonsterHunter objective = new MonsterHunter();
-                objective.setRequire(getRequiredCount(config, 10));
-                objective.setTargetId(normalizeTarget(config.getStringParam("target", null)));
-                yield objective;
+                MonsterHunter obj = new MonsterHunter();
+                obj.setRequire(getRequiredCount(config, 10));
+                obj.setTargetId(normalizeTarget(config.getStringParam("target", null)));
+                yield obj;
             }
             case ItemCollector.TYPE -> {
-                ItemCollector objective = new ItemCollector();
-                objective.setRequire(config.getIntParam("require", 1));
-                objective.setTargetItemId(normalizeTarget(config.getStringParam("target", null)));
-                yield objective;
+                ItemCollector obj = new ItemCollector();
+                obj.setRequire(config.getIntParam("require", 1));
+                obj.setTargetItemId(normalizeTarget(config.getStringParam("target", null)));
+                yield obj;
             }
             default -> throw new IllegalArgumentException("Unknown objective type: " + config.getType());
         };
+
+        BaseObjective base = (BaseObjective) objective;
+        base.setScore(config.getIntParam("score", 0));
+
+        return objective;
     }
 
     public static IObjective restore(Map<String, Object> data) {

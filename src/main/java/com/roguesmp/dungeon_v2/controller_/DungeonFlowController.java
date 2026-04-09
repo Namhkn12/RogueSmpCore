@@ -116,7 +116,6 @@ public class DungeonFlowController {
         /*Check current room completed*/
         if(!progress.getCurrentRoom().isCompleted()) return;
 
-        /*Roll next rooms nếu chưa có (tránh roll lại khi click nhiều lần)*/
         if(progress.getNextRooms() == null || progress.getNextRooms().isEmpty()){
             String currentRoomId = progress.getCurrentRoom() != null ? progress.getCurrentRoom().getRoomId() : null;
             List<String> candidatePool = progress.getRoomPool().stream()
@@ -164,22 +163,24 @@ public class DungeonFlowController {
 
         /*Open the door*/
         roomService.openRoomDoor(doorLoc);
-        /*Close the door after 5 second and teleport player if they outside the bounding box*/
-        taskScheduler.runLater(100L, () -> {
-            List<Player> members = partyService.getOnlineMembers(party);
-            BoundingBox activeZone = roomInstance.getBounds().toBukkit();
+        /*Close the door after 5 seconds and teleport player if they outside the bounding box*/
+        if(!roomInstance.isCompleted()){
+            taskScheduler.runLater(100L, () -> {
+                List<Player> members = partyService.getOnlineMembers(party);
+                BoundingBox activeZone = roomInstance.getBounds().toBukkit();
 
-            for (Player member : members) {
-                if (!member.isOnline()) continue;
+                for (Player member : members) {
+                    if (!member.isOnline()) continue;
 
-                if (!activeZone.contains(member.getLocation().toVector())) {
-                    Location insideLoc = doorLoc.clone().add(0, 0, 1.5);
-                    member.teleport(insideLoc);
+                    if (!activeZone.contains(member.getLocation().toVector())) {
+                        Location insideLoc = doorLoc.clone().add(0, 0, -2);
+                        member.teleport(insideLoc);
+                    }
                 }
-            }
 
-            roomService.closeRoomDoor(doorLoc);
-        });
+                roomService.closeRoomDoor(doorLoc);
+            });
+        }
     }
 
     public void handleOpenTreasurePortal(Block door){
@@ -267,7 +268,16 @@ public class DungeonFlowController {
 
         for (IObjective objective : objectives) {
             if (objective instanceof BaseObjective baseObjective) {
-                baseObjective.setCallback(o -> checkRoomCompletion(roomInstance, party));
+                baseObjective.setCallback(o -> {
+                    DungeonInstance instance = instanceManager.get(party.getInstanceId());
+                    /*Plus score when finish*/
+                    int gained = baseObjective.getScore();
+                    instance.getProgress().setScore(
+                            instance.getProgress().getScore() + gained
+                    );
+                    /*Check room complete*/
+                    checkRoomCompletion(roomInstance, party);
+                });
             }
         }
     }

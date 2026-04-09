@@ -1,4 +1,4 @@
-﻿package com.roguesmp.dungeon_v2.actor.listener;
+package com.roguesmp.dungeon_v2.actor.listener;
 
 import com.roguesmp.dungeon_v2.controller_.PlayerActionController;
 import org.bukkit.Material;

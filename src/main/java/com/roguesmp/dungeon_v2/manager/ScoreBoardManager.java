@@ -36,15 +36,19 @@ public class ScoreBoardManager {
         if (renderer != null) renderer.destroy();
     }
 
+    /*Tick update: update scoreboard*/
     public void tickUpdate() {
         boards.forEach((playerId, renderer) -> {
+            /*Get dungeon instance*/
             DungeonInstance instance = playerInstance.get(playerId);
             if (instance == null) return;
-
+            /*Update timer*/
             renderer.updateTime(instance.getTimer().getRemainingSeconds());
+            /*Update score*/
             renderer.updateScore(instance.getProgress().getScore());
 
             RoomInstance room = instance.getProgress().getCurrentRoom();
+            /*Update objectives*/
             if (room != null && room.getActiveObjectives() != null) {
                 List<List<String>> objectiveLines = room.getActiveObjectives().stream()
                         .filter(obj -> obj instanceof IDisplayable)
