@@ -1,12 +1,18 @@
 package com.roguesmp.dungeon.actor.listener;
 
 import com.roguesmp.dungeon.actor.ui.NextRoomGui;
+import com.roguesmp.dungeon.constant.DataConfig;
+import com.roguesmp.dungeon.constant.PrefixConfig;
+import com.roguesmp.dungeon.constant.WorldConfig;
 import com.roguesmp.dungeon.controller.BuildingController;
 import com.roguesmp.dungeon.controller.DungeonController;
 import com.roguesmp.dungeon.controller.PartyController;
 import com.roguesmp.dungeon.data.Party;
 import com.roguesmp.dungeon.instance.DungeonInstance;
 import com.roguesmp.dungeon.utils.NameSpaceKeys;
+import com.roguesmp.dungeon.utils.filterchain.EventFilter;
+import com.roguesmp.dungeon.utils.filterchain.FilterChain;
+import com.roguesmp.dungeon.utils.filterchain.impl.InteractFilters;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -40,13 +46,9 @@ public class NextDoorListener implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-        if (event.getHand() != EquipmentSlot.HAND) return;
+        if(!VAULT_FILTER.test(event)) return;
 
-        Block block = event.getClickedBlock();
-        if (block == null) return;
-        if (!(block.getState() instanceof Vault vault)) return;
-        if (!block.getWorld().getName().startsWith("dungeon_")) return;
+        Vault vault = (Vault) event.getClickedBlock();
         event.setCancelled(true);
 
         if (!vault.getRewardedPlayers().isEmpty()) return;
@@ -68,21 +70,23 @@ public class NextDoorListener implements Listener {
         DungeonInstance instance = instanceResponse.getData();
         if (!instance.getActiveRoom().isCompleted()) return;
 
+        /*Case: end room*/
         if(instance.isCompleted()){
-            Location doorLoc = block.getLocation();
-            World world = block.getWorld();
+            Location doorLoc = vault.getLocation();
+            World world = vault.getWorld();
             for (int dx = -1; dx <= 1; dx++) {
-                for (int dy = -1; dy <= 1; dy++) {
+                for (int dy = -1; dy <= 2; dy++) {
                     world.getBlockAt(doorLoc.clone().add(dx, dy, 0)).setType(Material.NETHER_PORTAL);
                 }
             }
             return;
         }
 
+        /*Case: next room*/
         vault.addRewardedPlayer(player.getUniqueId());
         vault.update();
 
-        new NextRoomGui(instance, dungeonController, buildingController, partyController, block)
+        new NextRoomGui(instance, dungeonController, buildingController, partyController, vault.getBlock())
                 .showInventory(player);
     }
 
@@ -105,77 +109,17 @@ public class NextDoorListener implements Listener {
 
         // TODO: xử lý thoát dungeon — teleport về lobby, trao thưởng, cleanup instance...
         Location baseLoc = instance.getRegion().getLocation();
-        int offsetY = instance.getRewardRoomCount() * 50;
-        Location buildLoc = baseLoc.clone().add(0, offsetY, 0);
+        int rewardCount = instance.getRewardRoomCount();
+        Location buildLoc = baseLoc.clone().add(0, rewardCount * 50, 0);
 
         buildingController.buildSchematicById(
                 "schemeta_20260329202750",
                 buildLoc
         );
-
+        instance.setRewardRoomCount(++rewardCount);
         player.teleport(buildLoc);
-        player.sendMessage("§aBạn đã hoàn thành dungeon!");
     }
 
-//    @EventHandler
-//    public void onPlayerInteractWithEndDoor(PlayerInteractEvent e) {
-//        if (e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-//        if (e.getHand() != EquipmentSlot.HAND) return;
-//
-//        Block block = e.getClickedBlock();
-//        if (block == null) return;
-//
-//        if (block.getType() != Material.LODESTONE) return;
-//
-//        if (!block.getWorld().getName().startsWith("dungeon_")) return;
-//
-//        if (!(block.getState() instanceof TileState ts)) {
-//            return;
-//        }
-//
-//        e.getPlayer().sendMessage("Has END_DOOR_KEY: " + ts.getPersistentDataContainer().has(NameSpaceKeys.END_DOOR_KEY, PersistentDataType.STRING));
-//
-//        if (!ts.getPersistentDataContainer().has(NameSpaceKeys.END_DOOR_KEY, PersistentDataType.STRING)) return;
-//
-//        e.setCancelled(true);
-//        spawnEndGateway(block, e.getPlayer());
-//    }
-//
-//    @EventHandler
-//    public void onBlockPlace(BlockPlaceEvent e) {
-//        ItemStack inHand = e.getItemInHand();
-//        if (inHand.getItemMeta() == null) return;
-//
-//        PersistentDataContainer itemPdc = inHand.getItemMeta().getPersistentDataContainer();
-//        Block placed = e.getBlockPlaced();
-//        if (!(placed.getState() instanceof TileState ts)) return;
-//        PersistentDataContainer blockPdc = ts.getPersistentDataContainer();
-//
-//        if (itemPdc.has(NameSpaceKeys.NEXT_DOOR_KEY, PersistentDataType.STRING)) {
-//            blockPdc.set(NameSpaceKeys.NEXT_DOOR_KEY, PersistentDataType.STRING,
-//                    itemPdc.get(NameSpaceKeys.NEXT_DOOR_KEY, PersistentDataType.STRING));
-//            ts.update();
-//
-//        } else if (itemPdc.has(NameSpaceKeys.END_DOOR_KEY, PersistentDataType.STRING)) {
-//            blockPdc.set(NameSpaceKeys.END_DOOR_KEY, PersistentDataType.STRING,
-//                    itemPdc.get(NameSpaceKeys.END_DOOR_KEY, PersistentDataType.STRING));
-//            ts.update();
-//        }
-//    }
-//
-//    @EventHandler
-//    public void onBlockBreak(BlockBreakEvent e) {
-//        Block block = e.getBlock();
-//        if (!(block.getState() instanceof TileState ts)) return;
-//
-//        PersistentDataContainer pdc = ts.getPersistentDataContainer();
-//        if (pdc.has(NameSpaceKeys.NEXT_DOOR_KEY, PersistentDataType.STRING)
-//                || pdc.has(NameSpaceKeys.END_DOOR_KEY, PersistentDataType.STRING)) {
-//            e.setCancelled(true);
-//            e.getPlayer().sendMessage("§cKhông thể phá block này!");
-//        }
-//    }
-//
     private void spawnEndGateway(Block doorBlock, Player player) {
         Block center = doorBlock.getRelative(0, 1, 0);
         org.bukkit.util.Vector dir = player.getLocation().getDirection();
@@ -197,4 +141,13 @@ public class NextDoorListener implements Listener {
             }
         }
     }
+
+    private static final EventFilter<PlayerInteractEvent> VAULT_FILTER =
+            FilterChain.of(PlayerInteractEvent.class)
+                    .require(InteractFilters.rightClickBlock())
+                    .require(InteractFilters.mainHand())
+                    .require(InteractFilters.hasBlock())
+                    .require(InteractFilters.blockState(Vault.class))
+                    .require(InteractFilters.clickedBlockInWorld("dungeon_"))
+                    .build();
 }

@@ -127,7 +127,7 @@ public class NextRoomGui extends BaseGui {
                         }
                     }
                 } catch (RuntimeException e) {
-                    GlobalException.handleUnexpected("next room gui build room", e);
+                    GlobalException.handleUnexpected("Next room gui build room", e);
                 }
             });
         }

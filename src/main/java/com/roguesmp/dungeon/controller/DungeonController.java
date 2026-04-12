@@ -27,209 +27,33 @@ import java.util.*;
 
 public class DungeonController {
 
-    private final IPartyService partyService;
-    private final IDungeonService dungeonService;
-    private final ISchemetaService schemetaService;
     private final IInstanceService instanceService;
-    private final IRegionService regionService;
-    private final ScoreBoardManager scoreBoardManager;
-    private final DungeonPresenter dungeonPresenter;
     private final IDungeonFlowService dungeonFlowService;
 
-    public DungeonController(IPartyService partyService, IDungeonService dungeonService,
-                             ISchemetaService schemetaService, IInstanceService instanceService,
-                             IRegionService regionService, ScoreBoardManager scoreBoardManager, DungeonPresenter dungeonPresenter, IDungeonFlowService dungeonFlowService) {
-        this.partyService = partyService;
-        this.dungeonService = dungeonService;
-        this.schemetaService = schemetaService;
+    public DungeonController(IInstanceService instanceService, IDungeonFlowService dungeonFlowService) {
         this.instanceService = instanceService;
-        this.regionService = regionService;
-        this.scoreBoardManager = scoreBoardManager;
-        this.dungeonPresenter = dungeonPresenter;
         this.dungeonFlowService = dungeonFlowService;
     }
 
-    public ActionResult<DungeonInstance> generateDungeon(String template, Player player) {
-        if (!partyService.isOwner(player))
-            return ActionResult.failed("You are not the party owner");
-        Optional<Dungeon> dungeon = dungeonService.getDungeonById(template);
-        if (dungeon.isEmpty()) return ActionResult.failed("Cannot find dungeon template");
-
-        Optional<Party> party = partyService.getPartyByPlayer(player);
-        Optional<Region> region = regionService.acquireRegion();
-
-        if (party.isEmpty())  return ActionResult.failed("Party not found");
-        if (region.isEmpty()) return ActionResult.failed("No region available");
-
-        // Kiểm tra party chưa có dungeon đang chạy
-        if (instanceService.hasActiveInstance(party.get().getPartyId()))
-            return ActionResult.failed("Your party already has an active dungeon");
-
-        RegionInstance regionInstance = new RegionInstance(
-                region.get().getId(),
-                region.get().getWorldName(),
-                region.get().getRegionPoint()
-        );
-
-        DungeonInstance instance = instanceService.createDungeonInstance(
-                dungeon.get(),
-                party.get().getPartyId(),
-                regionInstance
-        );
-
-        return ActionResult.ok("Dungeon instance create successfully", instance);
-    }
-
-    public ActionResult<Void> startDungeon(DungeonInstance instance) {
-
-        RegionInstance region = instance.getRegion();
-        UUID partyId = instance.getParty();
-
-        Map<UUID, NodeInstance> nodes = instance.getNodes();
-        if (nodes == null || nodes.isEmpty())
-            return ActionResult.failed("Dungeon has no rooms");
-
-        /*Warning*/
-        /*Search start node in instance (need to fallback if start node was not found)*/
-        NodeInstance startNode = nodes.values().stream()
-                .filter(n -> "start".equals(n.getNodeKey()))
-                .findFirst()
-                .orElse(null);
-        if (startNode == null)
-            return ActionResult.failed("Start node not found");
-
-        /*Paste schematic*/
-        try {
-            schemetaService.pasteSchematic(startNode.getSchemetas(), region.getLocation());
-        } catch (BaseException e) {
-            GlobalException.handle(e);
-            return ActionResult.failed("Failed to build dungeon room");
-        } catch (Exception e) {
-            GlobalException.handleUnexpected("start dungeon: paste schematic", e);
-            return ActionResult.failed("Failed to build dungeon room");
+    public ActionResult<Void> handleRequestDungeon(String dungeonId, Player player){
+        DungeonInstance instance = dungeonFlowService.onGenerateDungeon(dungeonId, player);
+        if(instance == null){
+            //fallback - end dungeon
+            return ActionResult.failed("Dungeon instance is null! Generate failed");
         }
-
-        /*Set active room*/
-        RoomInstance startRoom = new RoomInstance(startNode, null, null, true, null);
-        instance.setActiveRoom(startRoom);
-
-        /*Remove start node then roll next rooms*/
-        nodes.remove(startNode.getId());
-        instanceService.rollNextRooms(instance);
-        Dungeon template = dungeonService.getDungeonById(instance.getDungeon()).orElse(null);
-
-        /*Scoreboard*/
-        scoreBoardManager.bind(instance);
-        Optional<Party> party = partyService.getPartyById(partyId);
-        if (party.isPresent()) {
-            List<DungeonScoreBoard.PartyMember> members = buildPartyMembers(party.get());
-
-            int slot = 0;
-            for (UUID memberId : party.get().getMembers()) {
-                Player member = Bukkit.getPlayer(memberId);
-                if (member != null && member.isOnline()) {
-                    member.teleport(region.getLocation());
-                    dungeonPresenter.onEnterDungeon(member, template.getDgName());
-                    /*Build scoreboard*/
-                    scoreBoardManager.createBoard(member, slot, members, instance, template);
-                }
-                slot++;
-            }
-        }
-
-        /*Save the instance for the first time*/
-        instanceService.saveInstance(partyId);
-        return ActionResult.ok("Dungeon start successfully");
-    }
-
-    // Trong startDungeon, sau khi teleport party
-    private List<DungeonScoreBoard.PartyMember> buildPartyMembers(Party party) {
-        List<DungeonScoreBoard.PartyMember> members = new ArrayList<>();
-        int slot = 0;
-
-        for (UUID memberId : party.getMembers()) {
-            Player member = Bukkit.getPlayer(memberId);
-            MemberStatus status = (member != null && member.isOnline())
-                    ? MemberStatus.ALIVE
-                    : MemberStatus.OFFLINE;
-
-            String displayName = member != null
-                    ? member.getName()
-                    : memberId.toString().substring(0, 8); // fallback nếu offline
-
-            members.add(new DungeonScoreBoard.PartyMember(displayName, status));
-            slot++;
-        }
-
-        return members;
+        boolean result = dungeonFlowService.onStartDungeon(instance);
+        if(!result) return ActionResult.failed("Cannot generate and start the dungeon");
+        return ActionResult.ok("Dungeon with id " + instance.getUuid() + " request by " + player.getName() + " started");
     }
 
     public ActionResult<List<NextRoom>> getNextRooms(DungeonInstance instance) {
-        Map<UUID, Integer> nextRoomInstance = instance.getNextRooms();
-        Map<UUID, NodeInstance> nodePools = instance.getNodes();
-
-        if (nextRoomInstance == null || nextRoomInstance.isEmpty())
-            return ActionResult.ok("Đã đi hết phòng dungeon", new ArrayList<>());
-
-        List<NextRoom> nextRooms = new ArrayList<>();
-        nextRoomInstance.forEach((ri, i) -> {
-            NodeInstance nodeInstance = nodePools.get(ri);
-            if (nodeInstance == null) return; // fallback: bỏ qua node lỗi, cần sử lý sau
-            nextRooms.add(new NextRoom(nodeInstance, i));
-        });
-
-        return ActionResult.ok("Lấy các phòng tiếp theo thành công", nextRooms);
+        List<NextRoom>  nextRooms = dungeonFlowService.onOpenDoorGui(instance);
+        return ActionResult.ok(nextRooms);
     }
 
     public ActionResult<RoomInstance> selectNextRoom(DungeonInstance dungeonInstance, NodeInstance selectNode) {
-        String schemetaId = selectNode.getSchemetas();
-        Schemeta schemeta = schemetaService.getSchemeta(schemetaId);
-
-        List<IObjective> objectives = new ArrayList<>();
-        List<ObjectiveData> objectiveData = schemeta.getObjectives();
-        if (objectiveData != null && !objectiveData.isEmpty()) {
-            objectiveData.forEach(oj -> objectives.add(ObjectiveFactory.create(oj)));
-        }
-
-        RoomInstance roomInstance = new RoomInstance(selectNode, null, objectives, objectives.isEmpty(), null);
-
-        Optional<Party> party = partyService.getPartyById(dungeonInstance.getParty());
-
-        objectives.forEach(obj -> {
-            obj.callBack(completedObj -> {
-                dungeonInstance.setScore(dungeonInstance.getScore() + completedObj.getScore());
-                scoreBoardManager.onScoreChanged(dungeonInstance);
-
-                boolean allCompleted = roomInstance.getObjective().stream()
-                        .allMatch(IObjective::isCompleted);
-
-                if (allCompleted) {
-                    roomInstance.setCompleted(true);
-                    party.get().getMembers().forEach(playerId -> {
-                        Player member = Bukkit.getPlayer(playerId);
-                        dungeonPresenter.onCompleteRoom(member);
-                    });
-
-                    dungeonFlowService.onRoomCompleted(dungeonInstance, roomInstance);
-                }
-            });
-            obj.start();
-
-            party.ifPresent(p -> p.getMembers().forEach(memberId -> {
-                Player member = Bukkit.getPlayer(memberId);
-                if (member != null) member.sendMessage(obj.getMessage());
-            }));
-        });
-
-        dungeonInstance.getCompletedRooms().add(dungeonInstance.getActiveRoom());
-        dungeonInstance.setActiveRoom(roomInstance);
-        dungeonInstance.getNodes().remove(selectNode.getId());
-        instanceService.rollNextRooms(dungeonInstance);
-        party.get().getMembers().forEach(playerId -> {
-            Player member = Bukkit.getPlayer(playerId);
-            dungeonPresenter.onOpenDoor(member);
-        });
-        return ActionResult.ok("Đã chọn room tiếp theo thành công", dungeonInstance.getActiveRoom());
+        RoomInstance roomInstance = dungeonFlowService.onOpenNextRoom(dungeonInstance, selectNode);
+        return ActionResult.ok(roomInstance);
     }
 
     public ActionResult<DungeonInstance> getInstanceByParty(UUID partyId){
