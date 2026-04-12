@@ -6,12 +6,10 @@ import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.impl.EquipAttributeComponent;
-import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
-import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import net.kyori.adventure.text.Component;
@@ -24,7 +22,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class EnchantingGui extends BaseGui {
 
@@ -49,7 +50,6 @@ public class EnchantingGui extends BaseGui {
 
     @Override
     public void setup() {
-        getInventory().clear();
         drawBackground();
 
         switch (currentState) {
@@ -70,26 +70,14 @@ public class EnchantingGui extends BaseGui {
     private void renderInput() {
 
         ItemStack glow = new ItemStack(Material.MAGENTA_STAINED_GLASS_PANE);
-        glow.setData(DataComponentTypes.ITEM_NAME, Component.text("Place Item Here", NamedTextColor.LIGHT_PURPLE));
+        glow.setData(DataComponentTypes.ITEM_NAME, Component.text("Chọn itemStack trong túi đồ", NamedTextColor.LIGHT_PURPLE));
 
-        addButton(INPUT_SLOT, null, event -> {
-            if (currentState == GuiState.INPUT && event.getSlot() == INPUT_SLOT) {
-                Utils.runLater(() -> {
-                    ItemStack item = getInventory().getItem(INPUT_SLOT);
-                    if (ItemStackUtils.isValidItem(item)) {
-                        this.page = 0;
-                        this.targetItem = item;
-                        this.currentState = GuiState.ENCHANT_SELECT;
-                        setup();
-                    }
-                });
-            }
-        });
+        addItem(INPUT_SLOT, glow);
 
         ItemStack info = new ItemStack(Material.KNOWLEDGE_BOOK);
         info.setData(DataComponentTypes.ITEM_NAME, Component.text("How to Enchant", NamedTextColor.GOLD));
         info.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
-                Component.text("1. Drop an item in the slot above", NamedTextColor.GRAY),
+                Component.text("1. Click an itemStack in your inventory", NamedTextColor.GRAY),
                 Component.text("2. Choose your ancient power", NamedTextColor.GRAY),
                 Component.text("3. Pay with your soul (XP)", NamedTextColor.GRAY)
         )));
@@ -173,9 +161,7 @@ public class EnchantingGui extends BaseGui {
 
         // Previous Page (Slot 48)
         if (page > 0) {
-            ItemStack prev = new ItemStack(Material.ARROW);
-            prev.setData(DataComponentTypes.ITEM_NAME, Component.text("← Trang trước", NamedTextColor.YELLOW));
-            addButton(48, prev, event -> {
+            addButton(48, PREV_PAGE_BUTTON, event -> {
                 event.setCancelled(true);
                 page--;
                 setup();
@@ -189,9 +175,7 @@ public class EnchantingGui extends BaseGui {
 
         // Next Page (Slot 50)
         if (endIndex < allEnchants.size()) {
-            ItemStack next = new ItemStack(Material.ARROW);
-            next.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang sau →", NamedTextColor.YELLOW));
-            addButton(50, next, event -> {
+            addButton(50, NEXT_PAGE_BUTTON, event -> {
                 event.setCancelled(true);
                 page++;
                 setup();
@@ -252,12 +236,28 @@ public class EnchantingGui extends BaseGui {
         Map<Enchants, Integer> data = new HashMap<>();
         data.put(selectedEnchant, level);
 
-        this.targetItem = SmpItemUtils.addEnchant(targetItem, smpPlayer, data);
+        this.targetItem = SmpItemUtils.addEnchant(targetItem, smpPlayer, data).itemStack();
 
         this.currentState = GuiState.ENCHANT_SELECT;
         setup();
         p.playSound(p.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1f, 0.8f);
         p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.2f);
+    }
+
+    @Override
+    public void onClickBottomInventory(InventoryClickEvent event) {
+        event.setCancelled(true);
+        if (currentState == GuiState.INPUT) {
+            ItemStack item = event.getCurrentItem();
+            if (ItemStackUtils.isValidItem(item)) {
+                this.page = 0;
+                this.targetItem = item;
+                this.currentState = GuiState.ENCHANT_SELECT;
+                smpPlayer.getBukkitPlayer().getInventory().setItem(event.getSlot(), null);
+                setup();
+            }
+
+        }
     }
 
     @Override
@@ -270,11 +270,4 @@ public class EnchantingGui extends BaseGui {
         }
     }
 
-    public static void registerCommand() {
-        new CommandAPICommand("smpenchant")
-                .executesPlayer((sender, args) -> {
-                    new EnchantingGui(PlayerManager.getInstance().getSmpPlayer(sender.getUniqueId())).showInventory(sender);
-                })
-                .register();
-    }
 }

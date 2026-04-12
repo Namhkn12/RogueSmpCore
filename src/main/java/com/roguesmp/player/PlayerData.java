@@ -76,6 +76,10 @@ public class PlayerData{
         return Collections.unmodifiableMap(equippedAbilities);
     }
 
+    public int getAbilityLevel(String abilityId) {
+        return unlockedAbilities.getOrDefault(abilityId, 0);
+    }
+
     public void equipActiveAbility(AbilityTrigger trigger, String abilityId) {
         equippedAbilities.put(trigger, abilityId);
     }

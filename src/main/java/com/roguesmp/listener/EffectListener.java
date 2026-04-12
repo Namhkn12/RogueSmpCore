@@ -22,7 +22,7 @@ public class EffectListener implements Listener {
 
     @EventHandler
     public void onDamage(DamageEvent event) {
-        effectManager.onDamage(event);
+        effectManager.handleDamageEvent(event);
     }
 
     @EventHandler

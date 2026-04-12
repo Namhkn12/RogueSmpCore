@@ -63,6 +63,10 @@ public class EnchantComponent implements ItemComponent {
         return Collections.unmodifiableMap(enchants);
     }
 
+    public @Unmodifiable Map<Enchants, Integer> getPersistentEnchants() {
+        return Collections.unmodifiableMap(persistentEnchants);
+    }
+
     /**
      * Used to add temporary enchant data (such as a gem that give some enchant extra level). The added modifier will not be saved to ItemStack pdc <br>
      * Can also be used to remove levels by using negative value for input
@@ -70,8 +74,16 @@ public class EnchantComponent implements ItemComponent {
     public void addModifier(Modifier modifier) {
 
         for (var entry : modifier.modifiers().entrySet()) {
-            modifierEnchants.merge(entry.getKey(), entry.getValue(), Integer::sum);
-            enchants.merge(entry.getKey(), entry.getValue(), Integer::sum);
+            modifierEnchants.merge(entry.getKey(), entry.getValue(), (integer, integer2) -> {
+                int sum = integer + integer2;
+                if (sum <= 0) return null;
+                return sum;
+            });
+            enchants.merge(entry.getKey(), entry.getValue(), (integer, integer2) -> {
+                int sum = integer + integer2;
+                if (sum <= 0) return null;
+                return sum;
+            });
         }
     }
 
@@ -83,9 +95,21 @@ public class EnchantComponent implements ItemComponent {
         for (var entry : modifier.modifiers().entrySet()) {
             Enchants key = entry.getKey();
             Integer level = entry.getValue();
-            modifierEnchants.merge(key, level, Integer::sum);
-            enchants.merge(key, level, Integer::sum);
-            persistentEnchants.merge(key, level, Integer::sum);
+            modifierEnchants.merge(key, level, (integer, integer2) -> {
+                int sum = integer + integer2;
+                if (sum <= 0) return null;
+                return sum;
+            });
+            enchants.merge(key, level, (integer, integer2) -> {
+                int sum = integer + integer2;
+                if (sum <= 0) return null;
+                return sum;
+            });
+            persistentEnchants.merge(key, level, (integer, integer2) -> {
+                int sum = integer + integer2;
+                if (sum <= 0) return null;
+                return sum;
+            });
         }
     }
 

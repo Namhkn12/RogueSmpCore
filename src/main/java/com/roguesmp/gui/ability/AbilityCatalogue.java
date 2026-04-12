@@ -12,6 +12,7 @@ import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -89,7 +90,7 @@ public class AbilityCatalogue extends BaseGui {
             ItemStack display;
             if (isUnlocked) {
                 int level = unlocked.get(info.id());
-                display = info.createInfoItem(smpPlayer, level);
+                display = createInfoItem(info, smpPlayer, level);
             } else {
                 display = notUnlockedItem.clone();
                 display.setData(DataComponentTypes.ITEM_NAME, info.displayText());
@@ -124,6 +125,24 @@ public class AbilityCatalogue extends BaseGui {
                 setup();
             });
         }
+    }
+
+    private static ItemStack createInfoItem(AbilityInfo<?> info, SmpPlayer smpPlayer, int level) {
+        ItemStack item = ItemStack.of(info.displayIcon());
+
+        item.setData(DataComponentTypes.ITEM_NAME, info.displayText());
+
+        List<Component> lore = new ArrayList<>();
+
+        lore.add(Component.text("Kích hoạt: ", NamedTextColor.GRAY).append(info.trigger().simpleName()).decoration(TextDecoration.ITALIC, false));
+        lore.add(Component.text("Cấp: " + level, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        lore.add(Component.empty());
+
+        lore.addAll(info.descriptionProvider().apply(smpPlayer, level));
+
+        item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+
+        return item;
     }
 
     public static void register() {

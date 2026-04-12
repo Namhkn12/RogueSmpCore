@@ -17,6 +17,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,10 +25,23 @@ import java.util.Map;
 public abstract class BaseGui implements InventoryHolder {
 
     protected static final ItemStack FILLER;
+    protected static final ItemStack FILLER_BLACK;
+    protected static final ItemStack NEXT_PAGE_BUTTON;
+    protected static final ItemStack PREV_PAGE_BUTTON;
 
     static {
         FILLER = ItemStack.of(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
         FILLER.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
+
+        FILLER_BLACK = ItemStack.of(Material.BLACK_STAINED_GLASS_PANE);
+        FILLER_BLACK.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
+
+        NEXT_PAGE_BUTTON = new ItemStack(Material.ARROW);
+        NEXT_PAGE_BUTTON.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang sau »"));
+
+        PREV_PAGE_BUTTON = new ItemStack(Material.ARROW);
+        PREV_PAGE_BUTTON.setData(DataComponentTypes.ITEM_NAME, Component.text("« Trang trước"));
+
     }
 
     private final Map<Integer, ClickHandler> handlerMap = new HashMap<>();
@@ -83,15 +97,15 @@ public abstract class BaseGui implements InventoryHolder {
     }
 
     /**
-     * Set an item in inventory without doing anything else
+     * Set an itemStack in inventory without doing anything else
      * @param slot slot
-     * @param itemStack the item
+     * @param itemStack the itemStack
      */
-    public void addItem(int slot, ItemStack itemStack) {
+    public void addItem(int slot, @Nullable ItemStack itemStack) {
         inventory.setItem(slot, itemStack);
     }
 
-    public void addButton(int row, int col, ItemStack displayItem, ClickHandler handler) {
+    public void addButton(int row, int col, @Nullable ItemStack displayItem, ClickHandler handler) {
         int slot = getSlot(row, col);
         inventory.setItem(slot, displayItem);
         handlerMap.put(slot, handler);
@@ -102,9 +116,17 @@ public abstract class BaseGui implements InventoryHolder {
         handlerMap.put(slot, clickHandler);
     }
 
-    public void addItem(int row, int col, ItemStack itemStack) {
+    public void addItem(int row, int col, @Nullable ItemStack itemStack) {
         int slot = getSlot(row, col);
         inventory.setItem(slot, itemStack);
+    }
+
+    /**
+     * Clear the inventory, including its button handler
+     */
+    public void clearUi() {
+        handlerMap.clear();
+        inventory.clear();
     }
 
     public void showInventory(Player player) {
@@ -146,7 +168,7 @@ public abstract class BaseGui implements InventoryHolder {
     }
 
     /**
-     * Called when user drag item, can be called from both top and bottom... Maybe buggy
+     * Called when user drag itemStack, can be called from both top and bottom... Maybe buggy
      */
     public void onDragInventory(InventoryDragEvent event) {
 

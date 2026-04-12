@@ -2,12 +2,16 @@ package com.roguesmp.listener;
 
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.utils.DamageDisplayUtils;
 import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.EntityUtils;
+import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -52,12 +56,6 @@ public class DamageListener implements Listener {
 
             event.setCancelled(damageEvent.isCancelled());
             event.setDamage(damageEvent.getFinalDamage());
-
-            if (damager instanceof Player player) {
-                player.sendMessage(damageEvent.getFinalDamage() + " " + damageEvent.getDamageType());
-            } else if (damager instanceof Projectile projectile && projectile.getShooter() instanceof Player player) {
-                player.sendMessage(damageEvent.getFinalDamage() + " " + damageEvent.getDamageType());
-            }
         } else {
             Entity victim = event.getEntity();
             DamageType damageType = DamageType.getType(event.getCause());
@@ -68,5 +66,22 @@ public class DamageListener implements Listener {
             event.setDamage(damageEvent.getFinalDamage());
         }
 
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void spawnDisplay(DamageEvent event) {
+        if (event.isCancelled()) return;
+        Entity victim = event.getVictim();
+
+        double offsetX = (Utils.RANDOM.nextDouble() - 0.5) * 0.8;
+        double offsetZ = (Utils.RANDOM.nextDouble() - 0.5) * 0.8;
+        Location spawnLoc = victim.getLocation().add(offsetX, 0.75, offsetZ);
+
+        DamageDisplayUtils.spawnDamageDisplay(
+                spawnLoc,
+                event.getFinalDamage(),
+                event.getDamageType(),
+                event.isCritical()
+        );
     }
 }

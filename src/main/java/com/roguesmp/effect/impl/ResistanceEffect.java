@@ -122,7 +122,7 @@ public class ResistanceEffect extends SmpEffect {
     }
 
     @Override
-    public void onDamage(DamageEvent event) {
+    public void onHurt(DamageEvent event) {
         if (allowedDamageType.contains(event.getDamageType())) {
             event.addDamageModifier(1 - value, DamageOperation.MORE_FINAL);
         }

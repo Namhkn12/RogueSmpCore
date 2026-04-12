@@ -13,6 +13,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.math.BigDecimal;
@@ -126,10 +127,9 @@ public class Utils {
      * @return String representation of that number using roman numeral
      */
     public static String toRoman(int num) {
+        if (num <= 0) return String.valueOf(num);
+
         StringBuilder sb = new StringBuilder();
-
-        if (num <= 0) return sb.append(num).toString();
-
         for (int i = 0; i < VALUES.length; i++) {
             while (num >= VALUES[i]) {
                 num -= VALUES[i];

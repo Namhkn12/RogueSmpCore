@@ -14,7 +14,6 @@ public enum DamageType {
     FIRE,
     FALL,
     AILMENT,
-    POISON,
     TRUE,
     OTHER;
 
@@ -30,8 +29,7 @@ public enum DamageType {
             case BLOCK_EXPLOSION, ENTITY_EXPLOSION -> BLAST;
             case FIRE, FIRE_TICK, HOT_FLOOR, LAVA -> FIRE;
             case FALL, FLY_INTO_WALL -> FALL;
-            case POISON -> POISON;
-            case WITHER -> AILMENT;
+            case POISON, WITHER -> AILMENT;
             case VOID, KILL, SUICIDE -> TRUE;
             // we should log an error on default, this makes porting easier since any new damage types added will
             // automatically lead to a stacktrace
