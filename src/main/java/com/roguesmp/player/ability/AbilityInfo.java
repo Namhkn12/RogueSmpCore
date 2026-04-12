@@ -2,16 +2,12 @@ package com.roguesmp.player.ability;
 
 import com.roguesmp.constant.AbilityTrigger;
 import com.roguesmp.player.SmpPlayer;
-import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.ItemLore;
+import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
 
 /**
@@ -19,33 +15,25 @@ import java.util.function.BiFunction;
  */
 public record AbilityInfo<T extends Ability>(String id, BiFunction<SmpPlayer, Integer, List<Component>> descriptionProvider,
                                              Component displayText, Material displayIcon,
-                                             BiFunction<SmpPlayer, Integer, T> factory, AbilityTrigger trigger) {
+                                             BiFunction<SmpPlayer, Integer, T> factory, AbilityTrigger trigger,
+                                             Map<Integer, List<UpgradeRequirement>> requirements) {
 
-    public ItemStack createInfoItem(SmpPlayer smpPlayer, int level) {
-        ItemStack item = ItemStack.of(displayIcon);
-
-        item.setData(DataComponentTypes.ITEM_NAME, displayText);
-
-        List<Component> lore = new ArrayList<>();
-
-        lore.add(Component.text("Kích hoạt: ", NamedTextColor.GRAY).append(trigger.simpleName()).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Cấp: " + level, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.empty());
-
-        lore.addAll(descriptionProvider.apply(smpPlayer, level));
-
-        item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
-
-        return item;
+    @Override
+    public @Unmodifiable Map<Integer, List<UpgradeRequirement>> requirements() {
+        return Collections.unmodifiableMap(requirements);
     }
 
     public static class Builder<T extends Ability> {
+        // Required fields
         private String id;
-        private BiFunction<SmpPlayer, Integer, List<Component>> descriptionProvider;
-        private Component displayText;
-        private Material displayIcon;
         private BiFunction<SmpPlayer, Integer, T> factory;
-        private AbilityTrigger trigger;
+
+        // Optional fields with sensible defaults
+        private BiFunction<SmpPlayer, Integer, List<Component>> descriptionProvider = (p, l) -> List.of();
+        private Component displayText = Component.text("Unknown Display");
+        private Material displayIcon = Material.BARRIER;
+        private AbilityTrigger trigger = AbilityTrigger.PASSIVE; // Or your preferred default
+        private Map<Integer, List<UpgradeRequirement>> requirements = new HashMap<>();
 
         public Builder<T> id(String id) {
             this.id = id;
@@ -77,8 +65,13 @@ public record AbilityInfo<T extends Ability>(String id, BiFunction<SmpPlayer, In
             return this;
         }
 
+        public Builder<T> requirements(Map<Integer, List<UpgradeRequirement>> requirements) {
+            this.requirements = requirements;
+            return this;
+        }
+
         public AbilityInfo<T> build() {
-            return new AbilityInfo<>(id, descriptionProvider, displayText, displayIcon, factory, trigger);
+            return new AbilityInfo<>(id, descriptionProvider, displayText, displayIcon, factory, trigger, requirements);
         }
     }
 }

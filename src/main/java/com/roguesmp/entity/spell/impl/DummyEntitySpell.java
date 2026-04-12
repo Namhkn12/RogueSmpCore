@@ -2,6 +2,7 @@ package com.roguesmp.entity.spell.impl;
 
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
@@ -28,19 +29,21 @@ public class DummyEntitySpell extends Spell {
 
     @Override
     public void onHurt(DamageEvent event) {
-        if (event.getVictim() instanceof LivingEntity living) {
-            AttributeInstance maxHp = living.getAttribute(Attribute.MAX_HEALTH);
-            if (maxHp != null) {
-                living.setHealth(maxHp.getBaseValue());
+        Utils.runLater(() -> {
+            if (event.getVictim() instanceof LivingEntity living) {
+                AttributeInstance maxHp = living.getAttribute(Attribute.MAX_HEALTH);
+                if (maxHp != null) {
+                    living.setHealth(maxHp.getBaseValue());
+                }
             }
-        }
-        if (event.getDamager() instanceof Player player) {
-            EntityEquipment equipment = player.getEquipment();
-            if (player.isSneaking() && equipment.getItemInMainHand().getType() == Material.AIR) {
-                event.getVictim().remove();
+            if (event.getDamager() instanceof Player player) {
+                EntityEquipment equipment = player.getEquipment();
+                if (player.isSneaking() && equipment.getItemInMainHand().getType() == Material.AIR) {
+                    event.getVictim().remove();
+                }
+                player.sendMessage(Component.text("Damage dealt: " + event.getFinalDamage(), NamedTextColor.RED));
             }
-            player.sendMessage(Component.text("Damage dealt: " + event.getFinalDamage(), NamedTextColor.RED));
-        }
+        });
     }
 
     public static DummyEntitySpell factory(@Nullable Map<String, Object> param, LivingEntity owner) {

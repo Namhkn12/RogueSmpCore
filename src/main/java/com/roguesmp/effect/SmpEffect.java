@@ -167,7 +167,11 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
 
     }
 
-    public void onDamage(DamageEvent event) {
+    public void onDamageEntity(DamageEvent event) {
+
+    }
+
+    public void onHurt(DamageEvent event) {
 
     }
 }

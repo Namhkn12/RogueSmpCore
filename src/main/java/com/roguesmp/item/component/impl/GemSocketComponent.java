@@ -12,11 +12,15 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.persistence.ListPersistentDataType;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class GemSocketComponent implements ItemComponent {
@@ -26,7 +30,7 @@ public class GemSocketComponent implements ItemComponent {
     @GsonIgnore
     private final List<BaseItem> activeGem = new ArrayList<>();
     @GsonIgnore
-    private final List<String> appliedGem = new ArrayList<>(); //For old gem data (for removal in case we change socket count, or the applied gem is no longer compatible)
+    private final List<String> appliedItem = new ArrayList<>(); //For old gem data (for removal in case we change socket count, or the applied gem is no longer compatible)
 
     public GemSocketComponent(int amount) {
         this.amount = amount;
@@ -37,27 +41,50 @@ public class GemSocketComponent implements ItemComponent {
     }
 
     public void addGem(@NotNull BaseItem baseItem) {
-        appliedGem.add(baseItem.getId());
+        appliedItem.add(baseItem.getId());
         activeGem.add(baseItem);
     }
 
     public boolean canFitGem() {
-        return appliedGem.size() < amount;
+        return appliedItem.size() < amount;
     }
 
     /**
-     * Have to use string to handle removing gems that are no longer active
+     * Have to use string to handle removing gems that are no longer fit
      */
     public void removeGem(@NotNull String baseItemId) {
         BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(baseItemId);
         if (baseItem != null) {
-            activeGem.removeIf(baseItem1 -> baseItem1.getId().equals(baseItemId));
+            Iterator<BaseItem> iterator = activeGem.iterator();
+            while (iterator.hasNext()) {
+                BaseItem gem = iterator.next();
+                if (gem.getId().equals(baseItemId)) {
+                    iterator.remove();
+                    break;
+                }
+            }
         }
-        appliedGem.remove(baseItemId);
+        appliedItem.remove(baseItemId);
     }
 
-    public List<BaseItem> getActiveGem() {
-        return activeGem;
+    /**
+     * Return a view of all the gem currently working/active on this itemStack
+     */
+    public @Unmodifiable List<BaseItem> getActiveGem() {
+        return Collections.unmodifiableList(activeGem);
+    }
+
+    /**
+     * Return a view of all items applied onto his itemStack (including non-gems/legacy itemStack/gems that are no longer compatible)
+     */
+    public @Unmodifiable List<BaseItem> getAppliedItem() {
+        List<BaseItem> applied = new ArrayList<>();
+        for (String s : appliedItem) {
+            BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(s);
+            if (baseItem == null) continue;
+            applied.add(baseItem);
+        }
+        return Collections.unmodifiableList(applied);
     }
 
     @Override
@@ -73,11 +100,11 @@ public class GemSocketComponent implements ItemComponent {
 
     @Override
     public void save(PersistentDataContainer pdc) {
-        if (appliedGem.isEmpty()) {
+        if (appliedItem.isEmpty()) {
             pdc.remove(Keys.APPLIED_GEM);
             return;
         }
-        pdc.set(Keys.APPLIED_GEM, ListPersistentDataType.LIST.strings(), appliedGem);
+        pdc.set(Keys.APPLIED_GEM, ListPersistentDataType.LIST.strings(), appliedItem);
 
     }
 

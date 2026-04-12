@@ -250,14 +250,28 @@ public class EffectManager {
         }
     }
 
-    public void onDamage(DamageEvent event) {
+    public void handleDamageEvent(DamageEvent event) {
         Entity le = event.getDamager();
-        if (le == null) return;
-        Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(le.getUniqueId());
-        if (effectMap == null) return;
-        effectMap.forEach((s, smpEffects) -> {
-            smpEffects.getLast().onDamage(event);
-        });
+        if (le != null) {
+            Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(le.getUniqueId());
+            if (effectMap != null) {
+                effectMap.forEach((s, smpEffects) -> {
+                    smpEffects.getLast().onDamageEntity(event);
+                });
+            }
+        }
+
+        Entity victim = event.getVictim();
+        if (victim != null) {
+            Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(victim.getUniqueId());
+            if (effectMap != null) {
+                effectMap.forEach((s, smpEffects) -> {
+                    smpEffects.getLast().onHurt(event);
+                });
+            }
+
+        }
+
     }
 
     public static void init(RogueSmpCore plugin) {
