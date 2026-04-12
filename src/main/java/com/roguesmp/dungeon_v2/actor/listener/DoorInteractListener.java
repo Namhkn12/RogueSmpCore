@@ -2,6 +2,7 @@ package com.roguesmp.dungeon_v2.actor.listener;
 
 import com.roguesmp.dungeon_v2.controller_.DungeonFlowController;
 import com.roguesmp.dungeon_v2.manager.InstanceManager;
+import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.filterchain.EventFilter;
 import com.roguesmp.dungeon_v2.utils.filterchain.FilterChain;
 import com.roguesmp.dungeon_v2.utils.filterchain.impl.InteractFilters;
@@ -12,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
 public class DoorInteractListener implements Listener {
@@ -35,6 +37,48 @@ public class DoorInteractListener implements Listener {
 
         dungeonFlowController.handleOpenNextDoor(vault.getBlock(), player);
     }
+
+    @EventHandler
+    public void onPlayerGetInRewardRoom(PlayerMoveEvent event) {
+        if (!event.hasChangedBlock()) return;
+
+        Player player = event.getPlayer();
+        String worldName = player.getWorld().getName();
+
+        if (!worldName.startsWith("dungeon_")) return;
+        if (player.getLocation().add(0, 1, 0).getBlock().getType() != Material.END_GATEWAY) return;
+
+        // xử lý
+        dungeonFlowController.handleGetIntoTreasurePortal(player);
+        DungeonEcho.success(player, " den phong nhan phan thương nào");
+    }
+
+    @EventHandler
+    public void onPlayerLeaveRewardRoom(PlayerMoveEvent event) {
+        if (!event.hasChangedBlock()) return;
+
+        Player player = event.getPlayer();
+        String worldName = player.getWorld().getName();
+
+        if (!worldName.startsWith("dungeon_")) return;
+        if (player.getLocation().getBlock().getType() != Material.END_PORTAL) return;
+
+        // xử lý
+        DungeonEcho.success(player, " roi");
+    }
+
+    @EventHandler
+    public void onCancelPlayerTeleportByPortal(PlayerTeleportEvent event) {
+        if (!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+
+        PlayerTeleportEvent.TeleportCause cause = event.getCause();
+        if (cause == PlayerTeleportEvent.TeleportCause.END_PORTAL
+                || cause == PlayerTeleportEvent.TeleportCause.NETHER_PORTAL
+                || cause == PlayerTeleportEvent.TeleportCause.END_GATEWAY) {
+            event.setCancelled(true);
+        }
+    }
+
 
     @EventHandler
     public void onPlayerEnterEndGateway(PlayerTeleportEvent e) {
@@ -64,28 +108,6 @@ public class DoorInteractListener implements Listener {
 //        );
 //        instance.setRewardRoomCount(++rewardCount);
 //        player.teleport(buildLoc);
-    }
-
-    private void spawnEndGateway(Block doorBlock, Player player) {
-        Block center = doorBlock.getRelative(0, 1, 0);
-        org.bukkit.util.Vector dir = player.getLocation().getDirection();
-        boolean facingZ = Math.abs(dir.getZ()) > Math.abs(dir.getX());
-
-        for (int da = -1; da <= 1; da++) {
-            for (int dy = -1; dy <= 1; dy++) {
-                Block portalBlock = facingZ
-                        ? center.getRelative(da, dy, 0)
-                        : center.getRelative(0, dy, da);
-
-                portalBlock.setType(Material.END_GATEWAY);
-
-                if (portalBlock.getState() instanceof org.bukkit.block.EndGateway gateway) {
-                    gateway.setExitLocation(portalBlock.getLocation());
-                    gateway.setAge(-9223372036854775808L);
-                    gateway.update();
-                }
-            }
-        }
     }
 
     private static final EventFilter<PlayerInteractEvent> VAULT_FILTER =

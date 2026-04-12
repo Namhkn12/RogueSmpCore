@@ -28,6 +28,10 @@ public class Teleporter {
         player.teleport(loc);
     }
 
+    public static void teleport(Player player, Location location){
+        player.teleport(location);
+    }
+
     public static void teleportAll(List<Player> players, Location location) {
         players.forEach(p -> p.teleport(location));
     }

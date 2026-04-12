@@ -2,6 +2,7 @@ package com.roguesmp.dungeon_v2.task;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 
 public class TaskScheduler {
 
@@ -37,5 +38,13 @@ public class TaskScheduler {
      */
     public void runTimer(long delayTicks, long periodTicks, Runnable task) {
         Bukkit.getScheduler().runTaskTimer(plugin, task, delayTicks, periodTicks);
+    }
+
+    public BukkitTask runTimerCancellable(long delayTicks, long periodTicks, Runnable task) {
+        return Bukkit.getScheduler().runTaskTimer(plugin, task, delayTicks, periodTicks);
+    }
+
+    public BukkitTask runLaterCancellable(long delayTicks, Runnable task) {
+        return Bukkit.getScheduler().runTaskLater(plugin, task, delayTicks);
     }
 }

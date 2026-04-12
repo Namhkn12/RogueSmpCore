@@ -6,6 +6,7 @@ import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_v2.data.runtime.RoomInstance;
 import com.roguesmp.dungeon_v2.data.runtime.session.DungeonProgress;
 import com.roguesmp.dungeon_v2.repository.IInstanceRepository;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,10 +19,12 @@ public class InstanceManager {
 
     private final IInstanceRepository instanceRepository;
     private final ScoreBoardManager scoreBoardManager;
+    private final Log4Craft_ logger;
 
-    public InstanceManager(IInstanceRepository instanceRepository, ScoreBoardManager scoreBoardManager) {
+    public InstanceManager(IInstanceRepository instanceRepository, ScoreBoardManager scoreBoardManager, Log4Craft_ logger) {
         this.instanceRepository = instanceRepository;
         this.scoreBoardManager = scoreBoardManager;
+        this.logger = logger;
 
         loadAll();
     }
@@ -75,6 +78,7 @@ public class InstanceManager {
     }
 
     public DungeonInstance remove(UUID ssid){
+        logger.info(this.getClass(), "Remove dungeon instance with id: " + ssid);
         return instances.remove(ssid);
     }
 

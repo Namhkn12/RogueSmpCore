@@ -47,6 +47,10 @@ public abstract class BaseObjective implements IObjective, PersistableObjective 
         }
     }
 
+    public CompletionScope getCompletionScope(){
+        return CompletionScope.ROOM;
+    }
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> data = new LinkedHashMap<>();

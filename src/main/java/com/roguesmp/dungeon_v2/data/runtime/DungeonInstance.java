@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon_v2.data.runtime;
 
+import com.roguesmp.dungeon_v2.data.runtime.session.DungeonPlayer;
 import com.roguesmp.dungeon_v2.data.runtime.session.DungeonProgress;
 import com.roguesmp.dungeon_v2.data.runtime.session.DungeonSession;
 import com.roguesmp.dungeon_v2.data.runtime.session.DungeonTimer;
@@ -10,14 +11,16 @@ import com.roguesmp.dungeon_v2.data.runtime.session.DungeonTimer;
 public class DungeonInstance {
     private DungeonSession session;
     private DungeonProgress progress;
+    private DungeonPlayer players;
     private DungeonTimer timer;
 
     public DungeonInstance() {
     }
 
-    public DungeonInstance(DungeonSession session, DungeonProgress progress, DungeonTimer timer) {
+    public DungeonInstance(DungeonSession session, DungeonProgress progress, DungeonPlayer players, DungeonTimer timer) {
         this.session = session;
         this.progress = progress;
+        this.players = players;
         this.timer = timer;
     }
 
@@ -43,5 +46,13 @@ public class DungeonInstance {
 
     public void setTimer(DungeonTimer timer) {
         this.timer = timer;
+    }
+
+    public DungeonPlayer getDungeonPlayers() {
+        return players;
+    }
+
+    public void setPlayers(DungeonPlayer players) {
+        this.players = players;
     }
 }

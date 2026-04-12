@@ -77,44 +77,62 @@ public class DungeonRewardService implements IDungeonRewardService {
     @Override
     public boolean onOpen(PlayerInteractEvent e) {
         if (e.getAction() != Action.RIGHT_CLICK_BLOCK) return false;
-        if(!e.hasBlock()) return false;
+        if (!e.hasBlock()) return false;
         Block block = e.getClickedBlock();
-        if(block == null || block.getType() !=  Material.CHEST) return false;
-        if(!block.getWorld().getName().startsWith("dungeon_")) return false;
-        if(!(block.getState() instanceof TileState tileState)) return false;
+        if (block == null || block.getType() != Material.CHEST) return false;
+        if (!block.getWorld().getName().startsWith("dungeon_")) return false;
+        if (!(block.getState() instanceof TileState tileState)) return false;
+
         PersistentDataContainer blockPdc = tileState.getPersistentDataContainer();
-        if(blockPdc.has(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING)){
-            e.setCancelled(true);
 
-            Player player = e.getPlayer();
+        boolean isDungeonChest = blockPdc.has(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING)
+                && blockPdc.get(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING).equals("dungeon");
+        boolean isLootChest = blockPdc.has(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING)
+                && !blockPdc.get(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING).equals("dungeon");
+
+        if (!isDungeonChest && !isLootChest) return false;
+
+        e.setCancelled(true);
+
+        Player player = e.getPlayer();
+
+        /*Loot table*/
+        String lootTableId;
+        LootContext ctx;
+
+        if (isDungeonChest) {
             Party party = partyService.getPartyByPlayer(player).orElse(null);
-            if(party == null) return false;
+            if (party == null) return false;
             DungeonInstance instance = instanceService.getInstance(party.getPartyId()).orElse(null);
-            if(instance == null) return false;
+            if (instance == null) return false;
             Dungeon dungeon = dungeonService.getDungeonById(instance.getDungeon()).orElse(null);
-            if(dungeon == null) return false;
+            if (dungeon == null) return false;
 
-            int totalScore = instance.getScore();
-            LootContext ctx = LootContext.builder()
-                    .addRule(new LootRules.DungeonScoreRule(totalScore, 0.01)) // 0.01 -> max score = 100
-                    // có thể stack thêm rule khác
-                    // .addRule(new LootRules.DungeonTier(instance.getTier(), 0.25))
+            lootTableId = dungeon.getLootTableId();
+            ctx = LootContext.builder()
+                    .addRule(new LootRules.DungeonScoreRule(instance.getScore(), 0.01))
                     .build();
-            Chest chest = (Chest) block.getState();
-            Inventory chestInventory = chest.getInventory();
-
-            blockPdc.remove(NameSpaceKeys.REWARD_CID_KEY);
-            tileState.update();
-
-            List<ItemStack> items = lootService.roll(dungeon.getLootTableId(), ctx);
-            chestInventory.clear();
-            for (ItemStack item : items) {
-                chestInventory.addItem(item);
-            }
-
-            player.openInventory(chestInventory);
-            return true;
+        } else {
+            /*Loot chest*/
+            lootTableId = blockPdc.get(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING);
+            ctx = LootContext.builder().build();
         }
-        return false;
+
+        /*Open and fill chest*/
+        Chest chest = (Chest) block.getState();
+        Inventory chestInventory = chest.getInventory();
+
+        blockPdc.remove(NameSpaceKeys.REWARD_CID_KEY);
+        tileState.update();
+
+        List<ItemStack> items = lootService.roll(lootTableId, ctx);
+        chestInventory.clear();
+        for (ItemStack item : items) {
+            chestInventory.addItem(item);
+        }
+
+        player.openInventory(chestInventory);
+        return true;
     }
+
 }

@@ -102,9 +102,6 @@ public class TemplateGenCommand {
                 .register();
     }
 
-    // -----------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------
 
     private void rollAndGive(Player player, String tableId, LootContext ctx) {
         if (!lootService.exists(tableId)) {

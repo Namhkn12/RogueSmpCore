@@ -75,7 +75,7 @@ public class NextDoorListener implements Listener {
             Location doorLoc = vault.getLocation();
             World world = vault.getWorld();
             for (int dx = -1; dx <= 1; dx++) {
-                for (int dy = -1; dy <= 1; dy++) {
+                for (int dy = -1; dy <= 2; dy++) {
                     world.getBlockAt(doorLoc.clone().add(dx, dy, 0)).setType(Material.NETHER_PORTAL);
                 }
             }

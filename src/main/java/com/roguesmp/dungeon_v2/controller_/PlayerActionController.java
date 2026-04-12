@@ -84,7 +84,7 @@ public class PlayerActionController {
     }
 
     public void handlePlayerDead(Player player){
-
+        /*TODO*/
     }
 
     public void handlePlayerReconnect(Player player){
@@ -92,7 +92,7 @@ public class PlayerActionController {
     }
 
     public void handlePlayerDisconnect(Player player){
-
+        /*TODO*/
     }
 
     private ActionContext resolveContext(Player player, org.bukkit.util.Vector actionPosition) {

@@ -27,12 +27,15 @@ public class DungeonProgress {
     private List<String> roomPool;
     private List<String> nextRooms;
     private List<String> clearedRoomIds;
+    private int finalRewardBuildCount;
+    private String treasureRoomId;
 
     public DungeonProgress() {
         this.status = Status.IN_PROGRESS;
         this.roomPool = new ArrayList<>();
         this.clearedRoomIds = new ArrayList<>();
         this.clearedRooms = 0;
+        finalRewardBuildCount = 0;
     }
 
     public DungeonProgress(int minimumRooms, List<String> roomSequence) {
@@ -96,5 +99,21 @@ public class DungeonProgress {
 
     public void setNextRooms(List<String> nextRooms) {
         this.nextRooms = nextRooms;
+    }
+
+    public int getFinalRewardBuildCount() {
+        return finalRewardBuildCount;
+    }
+
+    public void setFinalRewardBuildCount(int finalRewardBuildCount) {
+        this.finalRewardBuildCount = finalRewardBuildCount;
+    }
+
+    public String getTreasureRoomId() {
+        return treasureRoomId;
+    }
+
+    public void setTreasureRoomId(String treasureRoomId) {
+        this.treasureRoomId = treasureRoomId;
     }
 }

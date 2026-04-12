@@ -18,6 +18,8 @@ public class Dungeon {
     private boolean active;
     private int minimumRooms; // rooms required before boss access
     private List<RoomPool> pools;
+    private List<String> treasureRooms;
+    private List<String> bosses;
 
     public Dungeon() {
         this.pools = new ArrayList<>();
@@ -97,5 +99,21 @@ public class Dungeon {
 
     public void setPools(List<RoomPool> pools) {
         this.pools = pools != null ? new ArrayList<>(pools) : new ArrayList<>();
+    }
+
+    public List<String> getBosses() {
+        return bosses;
+    }
+
+    public void setBosses(List<String> bosses) {
+        this.bosses = bosses;
+    }
+
+    public List<String> getTreasureRooms() {
+        return treasureRooms;
+    }
+
+    public void setTreasureRooms(List<String> treasureRooms) {
+        this.treasureRooms = treasureRooms;
     }
 }

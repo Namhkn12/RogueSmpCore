@@ -3,6 +3,7 @@ package com.roguesmp.dungeon_v2.data.definition.objective.factory;
 import com.roguesmp.dungeon_v2.data.definition.objective.BaseObjective;
 import com.roguesmp.dungeon_v2.data.definition.objective.IObjective;
 import com.roguesmp.dungeon_v2.data.definition.objective.PersistableObjective;
+import com.roguesmp.dungeon_v2.data.definition.objective.impl.DemonSlayer;
 import com.roguesmp.dungeon_v2.data.definition.objective.impl.ItemCollector;
 import com.roguesmp.dungeon_v2.data.definition.objective.impl.MonsterHunter;
 import com.roguesmp.dungeon_v2.data.definition.objective.impl.SpawnerBreaker;
@@ -34,6 +35,12 @@ public final class ObjectiveFactory {
                 ItemCollector obj = new ItemCollector();
                 obj.setRequire(config.getIntParam("require", 1));
                 obj.setTargetItemId(normalizeTarget(config.getStringParam("target", null)));
+                yield obj;
+            }
+            case DemonSlayer.TYPE -> {
+                DemonSlayer obj = new DemonSlayer();
+                obj.setRequire(getRequiredCount(config, 1));
+                obj.setTargetId(normalizeTarget(config.getStringParam("target", null)));
                 yield obj;
             }
             default -> throw new IllegalArgumentException("Unknown objective type: " + config.getType());

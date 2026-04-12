@@ -14,6 +14,7 @@ import com.roguesmp.dungeon_v2.actor.listener.LootTableListener;
 import com.roguesmp.dungeon_v2.actor.listener.SpawnerEventListener;
 import com.roguesmp.dungeon_v2.controller_.*;
 import com.roguesmp.dungeon_v2.expansion.DungeonExpansion;
+import com.roguesmp.dungeon_v2.itemdisplay.impl.ChestOpenAnimation;
 import com.roguesmp.dungeon_v2.manager.*;
 import com.roguesmp.dungeon_v2.presentation.EffectManager;
 import com.roguesmp.dungeon_v2.presentation.PresentationManager;
@@ -85,7 +86,7 @@ public class DungeonRegistry {
         LootTableManager lootTableManager = new LootTableManager(lootTableRepository);
 
         SpawnerInstanceManager spawnerInstanceManager = new SpawnerInstanceManager();
-        InstanceManager instanceManager = new InstanceManager(instanceRepository, scoreBoardManager);
+        InstanceManager instanceManager = new InstanceManager(instanceRepository, scoreBoardManager, logger);
 
         /*Service*/
         ISchematicService schematicService = new SchematicService(schemetaManager);
@@ -102,7 +103,8 @@ public class DungeonRegistry {
                 lootService,
                 partyService,
                 instanceManager,
-                dungeonManager
+                dungeonManager,
+                new ChestOpenAnimation(plugin, taskScheduler)
                 );
 
         /*Task*/
@@ -128,6 +130,7 @@ public class DungeonRegistry {
         SpawnerEventController spawnerController = new SpawnerEventController(spawnerService, spawnerManager, spawnerInstanceManager, taskScheduler);
         PlayerActionController actionController = new PlayerActionController(instanceService, instanceManager, partyService);
         DungeonTreasureController treasureController = new DungeonTreasureController(rewardService);
+        BossRoomController bossRoomController = new BossRoomController(instanceManager, partyService, roomManager);
 
         /*Command*/
         new TemplateGenCommand(lootService).register();
@@ -142,7 +145,7 @@ public class DungeonRegistry {
         );
 
         Bukkit.getPluginManager().registerEvents(
-                new SpawnerEventListener(spawnerController),
+                new SpawnerEventListener(spawnerController, bossRoomController),
                 RogueSmpCore.getInstance()
         );
 

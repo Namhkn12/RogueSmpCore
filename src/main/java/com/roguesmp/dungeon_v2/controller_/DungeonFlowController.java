@@ -3,6 +3,7 @@ package com.roguesmp.dungeon_v2.controller_;
 import com.roguesmp.dungeon_v2.actor.ui.OpenDoorGui;
 import com.roguesmp.dungeon_v2.data.definition.Dungeon;
 import com.roguesmp.dungeon_v2.data.definition.objective.BaseObjective;
+import com.roguesmp.dungeon_v2.data.definition.objective.CompletionScope;
 import com.roguesmp.dungeon_v2.data.definition.objective.IObjective;
 import com.roguesmp.dungeon_v2.data.definition.objective.factory.ObjectiveConfig;
 import com.roguesmp.dungeon_v2.data.definition.objective.factory.ObjectiveFactory;
@@ -17,7 +18,9 @@ import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_v2.data.runtime.Party;
 import com.roguesmp.dungeon_v2.data.runtime.Region;
 import com.roguesmp.dungeon_v2.data.runtime.RoomInstance;
+import com.roguesmp.dungeon_v2.data.runtime.session.DungeonPlayer;
 import com.roguesmp.dungeon_v2.data.runtime.session.DungeonProgress;
+import com.roguesmp.dungeon_v2.data.runtime.session.PlayerStatus;
 import com.roguesmp.dungeon_v2.helper.SerializableBounds;
 import com.roguesmp.dungeon_v2.helper.SerializableLocation;
 import com.roguesmp.dungeon_v2.manager.DungeonManager;
@@ -29,6 +32,7 @@ import com.roguesmp.dungeon_v2.service.*;
 import com.roguesmp.dungeon_v2.task.TaskScheduler;
 import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.Teleporter;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -38,6 +42,8 @@ import org.bukkit.util.BoundingBox;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class DungeonFlowController {
 
@@ -163,8 +169,15 @@ public class DungeonFlowController {
 
         /*Open the door*/
         roomService.openRoomDoor(doorLoc);
+
+        /*Presenter*/
+        party.getMembers().forEach(playerId -> {
+            Player member = Bukkit.getPlayer(playerId);
+            dungeonPresenter.onOpenDoor(member);
+        });
+
         /*Close the door after 5 seconds and teleport player if they outside the bounding box*/
-        if(!roomInstance.isCompleted()){
+        if(!roomInstance.isCompleted() && room.getType().isCombat()){
             taskScheduler.runLater(100L, () -> {
                 List<Player> members = partyService.getOnlineMembers(party);
                 BoundingBox activeZone = roomInstance.getBounds().toBukkit();
@@ -188,20 +201,70 @@ public class DungeonFlowController {
         World world = doorLoc.getWorld();
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -2; dy <= 2; dy++) {
-                world.getBlockAt(doorLoc.clone().add(dx, dy, 0)).setType(Material.NETHER_PORTAL);
+                world.getBlockAt(doorLoc.clone().add(dx, dy, 0)).setType(Material.END_GATEWAY);
             }
         }
     }
 
+    public void handleGetIntoTreasurePortal(Player player){
+        Party party = partyService.getPartyByPlayer(player);
+        DungeonInstance instance = instanceManager.get(party.getInstanceId());
+        /*Paste treasure room for each player*/
+        Region region = regionService.getRegionById(instance.getSession().getRegionId());
+        Location location = region.getRegionPoint();
+        String treasureRoomId = instance.getProgress().getTreasureRoomId();
+        int space = 64;
+        int count = instance.getProgress().getFinalRewardBuildCount() + 1;
+        instance.getProgress().setFinalRewardBuildCount(count);
+        Room room = roomManager.get(treasureRoomId);
+        Location treasureSpawn = location.add(0, space*count, 0);
+        schematicService.paste(room.getSchemetaId(), treasureSpawn);
+        Teleporter.teleport(player, location.add(0, 1, 0));
+    }
+
+    public void handleLeaveDungeon(Player player){
+        Party party = partyService.getPartyByPlayer(player);
+        if(party == null){
+            DungeonEcho.warn(player, "Is you still in party?");
+            return;
+        }
+        DungeonInstance instance = instanceManager.get(party.getInstanceId());
+        if(instance == null){
+            DungeonEcho.warn(player, "Is your party still in dungeon?");
+            return;
+        }
+        /*TODO: implement GUI for confirming leave dungeon*/
+        /*Remove tracking player from dungeon instance*/
+        Map<UUID, PlayerStatus> players = instance.getDungeonPlayers().getPlayers();
+        players.remove(player.getUniqueId());
+        if(instance.getProgress().getStatus() == DungeonProgress.Status.IN_PROGRESS){
+            party.removeMember(player.getUniqueId());
+        }
+        Teleporter.teleport(player, SerializableLocation.from(new Location(Bukkit.getWorld("building"), 0, 0, 0)));
+        /*If all players in dungeon leave, remove dungeon instance*/
+        if(players.isEmpty()){
+            instanceService.removeDungeonInstance(instance);
+        }
+    }
+
     public void handleEndUpDungeon(DungeonInstance instance){
-        //TODO
-        //update state of dungeon , when player left all, remove instance
-
-        //end by time
-
-        //end by player
-
-
+        DungeonPlayer dungeonPlayer = instance.getDungeonPlayers();
+        dungeonPlayer.getPlayers().forEach((uuid, playerStatus) -> {
+            Player player = Bukkit.getPlayer(uuid);
+            if(player != null && playerStatus.getStatus() == PlayerStatus.Status.PLAYING){
+                /*Notice player that dungeon will be destroyed*/
+                if(instance.getProgress().getStatus() == DungeonProgress.Status.FAILED){
+                    DungeonEcho.warn(player, "The dungeon has collapsed! You barely escaped...");
+                } else {
+                    DungeonEcho.success(player, "The dungeon has been conquered! Glory to your party!");
+                }
+                /*Remove score board*/
+                scoreBoardManager.removeBoard(player);
+                /*Teleport player*/
+                Teleporter.teleport(player, SerializableLocation.from(new Location(Bukkit.getWorld("building"), 0, 0, 0)));
+            }
+        });
+        instanceService.removeDungeonInstance(instance);
     }
 
     public void handleDungeonTimerTick() {
@@ -233,6 +296,10 @@ public class DungeonFlowController {
 
         instance.getProgress().setStatus(DungeonProgress.Status.FAILED);
         handleEndUpDungeon(instance);
+    }
+
+    public void handleDungeonFinish(DungeonInstance instance){
+
     }
 
     private void bindCurrentRoomRuntime(DungeonInstance instance, Party party) {
@@ -276,7 +343,11 @@ public class DungeonFlowController {
                             instance.getProgress().getScore() + gained
                     );
                     /*Check room complete*/
-                    checkRoomCompletion(roomInstance, party);
+                    if (baseObjective.getCompletionScope() == CompletionScope.DUNGEON) {
+                        checkDungeonCompletion(instance, party);
+                    } else {
+                        checkRoomCompletion(roomInstance, party);
+                    }
                 });
             }
         }
@@ -335,6 +406,21 @@ public class DungeonFlowController {
             if (room.getDoor() != null) {
                 roomService.openRoomDoor(room.getDoor().toBukkit());
             }
+            /*Presenter*/
+            partyService.getOnlineMembers(party).forEach(dungeonPresenter::onCompleteRoom);
         }
+    }
+
+    private void checkDungeonCompletion(DungeonInstance instance, Party party) {
+        instance.getProgress().setStatus(DungeonProgress.Status.BOSS_DEFEATED);
+        /*Set the remaining time to 5 minute*/
+        long rewardWindowMs = 5 * 60 * 1000L;
+        long newEndTime = System.currentTimeMillis() + rewardWindowMs;
+        instance.getTimer().setEndTime(newEndTime);
+        /*Message to all players that the boss are defeated*/
+        //TODO
+        DungeonEcho.success(partyService.getOnlineMembers(party), "Boss defeated!!!");
+        /*Presenter*/
+        partyService.getOnlineMembers(party).forEach(dungeonPresenter::onCompleteDungeon);
     }
 }

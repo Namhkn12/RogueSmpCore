@@ -7,19 +7,20 @@ import com.roguesmp.dungeon_v2.data.definition.objective.factory.ObjectiveFactor
 import com.roguesmp.dungeon_v2.data.definition.room.Room;
 import com.roguesmp.dungeon_v2.data.definition.room.RoomType;
 import com.roguesmp.dungeon_v2.data.runtime.*;
-import com.roguesmp.dungeon_v2.data.runtime.session.DungeonProgress;
-import com.roguesmp.dungeon_v2.data.runtime.session.DungeonSession;
-import com.roguesmp.dungeon_v2.data.runtime.session.DungeonTimer;
+import com.roguesmp.dungeon_v2.data.runtime.session.*;
 import com.roguesmp.dungeon_v2.helper.SerializableBounds;
 import com.roguesmp.dungeon_v2.helper.SerializableLocation;
 import com.roguesmp.dungeon_v2.manager.DungeonManager;
 import com.roguesmp.dungeon_v2.manager.InstanceManager;
 import com.roguesmp.dungeon_v2.manager.RoomManager;
 import com.roguesmp.dungeon_v2.service.*;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
+import com.roguesmp.dungeon_v2.utils.Razdon;
 import org.bukkit.util.BoundingBox;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class InstanceService implements IInstanceService {
@@ -70,12 +71,27 @@ public class InstanceService implements IInstanceService {
         List<String> pool = dungeonService.rollRoomPool(dungeon);
         progress.setRoomPool(pool);
         progress.setMinimumRooms(dungeon.getMinimumRooms());
+        int randTreasureRoom = Razdon.getInstance().nextIntInRange(0, dungeon.getTreasureRooms().size()-1);
+        progress.setTreasureRoomId(dungeon.getTreasureRooms().get(randTreasureRoom));
+
+        /*Prepare dungeon player status*/
+        DungeonPlayer dungeonPlayer = new DungeonPlayer();
+        party.getMembers().forEach(pid -> {
+            PlayerStatus status = new PlayerStatus(
+                    0,
+                    PlayerStatus.Status.PLAYING,
+                    SerializableLocation.from(region.getRegionPoint().add(0, 1, 0))
+            );
+            dungeonPlayer.addPlayerStatus(pid, status);
+        });
 
         /*Set instance information*/
         instance.setSession(session);
         instance.setProgress(progress);
         instance.setTimer(timer);
+        instance.setPlayers(dungeonPlayer);
 
+        /*Set instance id to party info, make a faster way to lookup related instance*/
         party.setInstanceId(instance.getSession().getSessionId());
 
         return instance;
@@ -108,7 +124,9 @@ public class InstanceService implements IInstanceService {
 
     @Override
     public void removeDungeonInstance(DungeonInstance instance) {
-
+        Party party = partyService.getPartyById(instance.getSession().getPartyId());
+        if(party != null) party.setInstanceId(null);
+        instanceManager.remove(instance.getSession().getSessionId());
     }
 
     @Override
