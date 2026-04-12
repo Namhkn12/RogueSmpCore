@@ -39,7 +39,7 @@ public interface SmpEnchant {
     @NotNull Set<EquipSlot> getActiveSlots();
 
     /**
-     * Called when this enchant is added to an item, for putting default/starter data for use in stacking enchants, etc...
+     * Called when this enchant is added to an itemStack, for putting default/starter data for use in stacking enchants, etc...
      */
     default void attachData(PersistentDataContainer pdc) {
 

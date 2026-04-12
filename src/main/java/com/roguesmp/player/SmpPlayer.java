@@ -3,6 +3,7 @@ package com.roguesmp.player;
 import com.roguesmp.constant.*;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.gui.enchant.GrindstoneGui;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.ConsumableComponent;
@@ -14,6 +15,7 @@ import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -203,6 +205,11 @@ public class SmpPlayer {
     public void onInteract(PlayerInteractEvent event) {
         Action action = event.getAction();
         Player player = event.getPlayer();
+        if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.GRINDSTONE) {
+            new GrindstoneGui(this).showInventory(this.getBukkitPlayer());
+            event.setCancelled(true);
+            return;
+        }
         if (event.getHand() != EquipmentSlot.HAND) return;
         if (action.isLeftClick()) {
             if (player.isSneaking()) abilityLoadout.cast(AbilityTrigger.SHIFT_LEFT_CLICK);

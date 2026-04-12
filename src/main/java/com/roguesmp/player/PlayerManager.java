@@ -3,6 +3,7 @@ package com.roguesmp.player;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import javax.annotation.Nullable;
@@ -44,6 +45,10 @@ public class PlayerManager {
 
     public @Nullable SmpPlayer getSmpPlayer(UUID uuid) {
         return players.getOrDefault(uuid, null);
+    }
+
+    public @Nullable SmpPlayer getSmpPlayer(Player player) {
+        return getSmpPlayer(player.getUniqueId());
     }
 
     public void loadPlayer(UUID uuid) {

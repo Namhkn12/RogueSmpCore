@@ -40,6 +40,6 @@ public class KnockbackResistance implements SmpAttribute {
     }
 
     @Override public @NotNull List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
-        return defaultFlatLoreProvider(value);
+        return defaultPercentLoreProvider(value * 100);
     }
 }

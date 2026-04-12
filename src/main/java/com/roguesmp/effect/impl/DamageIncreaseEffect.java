@@ -68,7 +68,7 @@ public class DamageIncreaseEffect extends SmpEffect {
     }
 
     @Override
-    public void onDamage(DamageEvent event) {
+    public void onDamageEntity(DamageEvent event) {
         event.addDamageModifier(increaseValue, DamageOperation.ADD_FINAL);
     }
 

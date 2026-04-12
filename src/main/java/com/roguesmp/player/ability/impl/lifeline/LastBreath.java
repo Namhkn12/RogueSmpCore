@@ -9,6 +9,10 @@ import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
+import com.roguesmp.player.ability.upgrade.ExpRequirement;
+import com.roguesmp.player.ability.upgrade.ItemRequirement;
+import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
+import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.utils.EntityUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -22,7 +26,10 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LastBreath extends Ability {
     public static final String ID = "last_breath";
@@ -51,7 +58,7 @@ public class LastBreath extends Ability {
             ))
             .displayIcon(Material.DRAGON_BREATH)
             .factory(LastBreath::new)
-            .trigger(AbilityTrigger.LIFELINE) // Handled via damage listener logic
+            .trigger(AbilityTrigger.LIFELINE)
             .build();
 
     public LastBreath(SmpPlayer player, int level) {

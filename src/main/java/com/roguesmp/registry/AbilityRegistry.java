@@ -70,6 +70,10 @@ public class AbilityRegistry {
         return Collections.unmodifiableCollection(registry.values());
     }
 
+    public static void loadLevelRequirement() {
+
+    }
+
     private static void register(AbilityInfo<? extends Ability> info) {
         registry.put(info.id(), info);
     }
