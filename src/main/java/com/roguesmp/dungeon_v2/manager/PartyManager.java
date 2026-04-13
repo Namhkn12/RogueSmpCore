@@ -15,8 +15,8 @@ public class PartyManager {
     private static final int DEFAULT_PARTY_SIZE = 4;
 
     // In-memory cache — chuyển từ repo sang đây
-    private final Map<UUID, Party> partyMap = new HashMap<>();
-    private final Map<UUID, UUID> playerIndex = new HashMap<>();
+    private final Map<String, Party> partyMap = new HashMap<>();
+    private final Map<String, String> playerIndex = new HashMap<>();
 
     private final IPartyRepository repository;
     private final Log4Craft_ logger;
@@ -32,7 +32,7 @@ public class PartyManager {
         Collection<Party> parties = repository.loadAll();
         for (Party party : parties) {
             partyMap.put(party.getPartyId(), party);
-            for (UUID memberId : party.getMembers()) {
+            for (String memberId : party.getMembers()) {
                 playerIndex.put(memberId, party.getPartyId());
             }
         }
@@ -49,48 +49,48 @@ public class PartyManager {
 
     public Party createParty(UUID ownerId) {
         UUID partyId = UUID.randomUUID();
-        Party party = new Party(partyId, ownerId, DEFAULT_PARTY_SIZE);
-        partyMap.put(partyId, party);
-        playerIndex.put(ownerId, partyId);
+        Party party = new Party(partyId.toString(), ownerId.toString(), DEFAULT_PARTY_SIZE);
+        partyMap.put(partyId.toString(), party);
+        playerIndex.put(ownerId.toString(), partyId.toString());
         return party;
     }
 
-    public void disbandParty(UUID partyId) {
+    public void disbandParty(String partyId) {
         Party party = partyMap.remove(partyId);
         if (party == null) return;
-        for (UUID memberId : party.getMembers()) {
+        for (String memberId : party.getMembers()) {
             playerIndex.remove(memberId);
         }
         repository.delete(partyId);
     }
 
-    public void addMember(UUID partyId, UUID playerId) {
+    public void addMember(String partyId, String playerId) {
         Party party = partyMap.get(partyId);
         if (party == null) return;
-        party.getMembers().add(playerId);
+        party.addMember(playerId);
         playerIndex.put(playerId, partyId);
     }
 
-    public void removeMember(UUID partyId, UUID playerId) {
+    public void removeMember(String partyId, String playerId) {
         Party party = partyMap.get(partyId);
         if (party == null) return;
-        party.getMembers().remove(playerId);
+        party.removeMember(playerId);
         playerIndex.remove(playerId);
     }
 
-    public void transferOwner(UUID partyId, UUID newOwnerId) {
+    public void transferOwner(String partyId, String newOwnerId) {
         Party party = partyMap.get(partyId);
         if (party == null) return;
         party.setOwner(newOwnerId);
     }
 
     public Party findByPlayer(UUID playerId) {
-        UUID partyId = playerIndex.get(playerId);
+        String partyId = playerIndex.get(playerId.toString());
         if (partyId == null) return null;
         return partyMap.get(partyId);
     }
 
-    public Party findById(UUID partyId) {
+    public Party findById(String partyId) {
         return partyMap.get(partyId);
     }
 
@@ -99,6 +99,6 @@ public class PartyManager {
     }
 
     public boolean checkIsOwner(UUID playerId) {
-        return findByPlayer(playerId).isOwner(playerId);
+        return findByPlayer(playerId).isOwner(playerId.toString());
     }
 }

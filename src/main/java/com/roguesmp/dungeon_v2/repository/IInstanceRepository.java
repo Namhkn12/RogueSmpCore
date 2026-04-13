@@ -6,6 +6,6 @@ import java.util.UUID;
 
 public interface IInstanceRepository {
     void save(DungeonInstance instance);
-    void delete(UUID sessionId);
+    boolean delete(UUID sessionId);
     List<DungeonInstance> loadAll();
 }

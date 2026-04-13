@@ -48,11 +48,13 @@ public class InstanceRepository implements IInstanceRepository {
     }
 
     @Override
-    public void delete(UUID sessionId) {
+    public boolean delete(UUID sessionId) {
         File file = getFile(sessionId);
         if (file.exists() && !file.delete()) {
             logger.error(this.getClass(), "Failed to delete instance file: " + sessionId);
+            return false;
         }
+        return true;
     }
 
     @Override

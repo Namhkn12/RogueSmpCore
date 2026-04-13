@@ -31,4 +31,11 @@ public class SpawnerInstanceManager {
 
         return new SpawnerInstance(siid, spawner.getId(), behaviors);
     }
+
+    @Override
+    public String toString() {
+        return "SpawnerInstanceManager{" +
+                "cache=" + cache +
+                '}';
+    }
 }

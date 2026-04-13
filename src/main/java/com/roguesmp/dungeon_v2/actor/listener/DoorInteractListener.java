@@ -46,11 +46,9 @@ public class DoorInteractListener implements Listener {
         String worldName = player.getWorld().getName();
 
         if (!worldName.startsWith("dungeon_")) return;
-        if (player.getLocation().add(0, 1, 0).getBlock().getType() != Material.END_GATEWAY) return;
-
-        // xử lý
+        if (player.getLocation().add(0, 0, 0).getBlock().getType() != Material.END_GATEWAY) return;
+        /*Get into the treasure room*/
         dungeonFlowController.handleGetIntoTreasurePortal(player);
-        DungeonEcho.success(player, " den phong nhan phan thương nào");
     }
 
     @EventHandler
@@ -62,9 +60,6 @@ public class DoorInteractListener implements Listener {
 
         if (!worldName.startsWith("dungeon_")) return;
         if (player.getLocation().getBlock().getType() != Material.END_PORTAL) return;
-
-        // xử lý
-        DungeonEcho.success(player, " roi");
     }
 
     @EventHandler

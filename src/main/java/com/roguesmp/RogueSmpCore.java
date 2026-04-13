@@ -3,7 +3,7 @@ package com.roguesmp;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.constant.ComponentKeys;
-import com.roguesmp.dungeon.DungeonRegistry;
+import com.roguesmp.dungeon_v2.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.gui.ItemBrowser;
@@ -69,6 +69,7 @@ public final class RogueSmpCore extends JavaPlugin {
         BlockStorage.getInstance().saveToFile(true);
 
         PlayerManager.getInstance().onDisable();
+        DungeonRegistry.onDisable();
     }
 
     // Register Listener here

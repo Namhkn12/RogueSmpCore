@@ -63,9 +63,13 @@ public class SpawnerService implements ISpawnerService {
     }
 
     @Override
-    public void createInstance(String siid, String sid) {
+    public void createInstance(String sid, String siid) {
         Spawner spawner = spawnerManager.getById(sid);
+        if(spawner == null){
+            logger.error(this.getClass(), "Spawner template is null! Please check");
+        }
         SpawnerInstance instance = instanceManager.create(siid, spawner);
+        logger.sucess(this.getClass(), "Create spawner instance with siid: " + siid + " and sid: " + sid);
         if(instance == null){
             logger.error(this.getClass(), "Couldn't create spawner instance with siid " + siid);
             return;

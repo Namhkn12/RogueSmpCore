@@ -9,6 +9,8 @@ import com.roguesmp.dungeon_v2.manager.SpawnerInstanceManager;
 import com.roguesmp.dungeon_v2.manager.SpawnerManager;
 import com.roguesmp.dungeon_v2.service.ISpawnerService;
 import com.roguesmp.dungeon_v2.task.TaskScheduler;
+import com.roguesmp.dungeon_v2.utils.DungeonEcho;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import com.roguesmp.dungeon_v2.utils.NameSpaceKeys;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -31,12 +33,14 @@ public class SpawnerEventController {
     private final SpawnerManager spawnerManager;
     private final SpawnerInstanceManager spawnerInstanceManager;
     private final TaskScheduler taskScheduler;
+    private final Log4Craft_ logger;
 
-    public SpawnerEventController(ISpawnerService spawnerService, SpawnerManager spawnerManager, SpawnerInstanceManager spawnerInstanceManager, TaskScheduler taskScheduler) {
+    public SpawnerEventController(ISpawnerService spawnerService, SpawnerManager spawnerManager, SpawnerInstanceManager spawnerInstanceManager, TaskScheduler taskScheduler, Log4Craft_ logger) {
         this.spawnerService = spawnerService;
         this.spawnerManager = spawnerManager;
         this.spawnerInstanceManager = spawnerInstanceManager;
         this.taskScheduler = taskScheduler;
+        this.logger = logger;
     }
 
     public boolean handleSpawnerBreak(Block block, Player player){
@@ -44,13 +48,19 @@ public class SpawnerEventController {
             return true;
 
         PersistentDataContainer pdc = spawner.getPersistentDataContainer();
-        if (!pdc.has(com.roguesmp.dungeon.utils.NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING))
+        if (!pdc.has(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING))
             return true;
 
-        String iid = pdc.get(com.roguesmp.dungeon.utils.NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING);
+        String iid = pdc.get(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING);
         try {
             SpawnerInstance instance = spawnerInstanceManager.get(iid);
-            return instance.getPipeline().runBreak(player);
+            if (instance == null) return true;
+
+            boolean allowed = instance.getPipeline().runBreak(player);
+            if (allowed) {
+                spawnerInstanceManager.remove(iid);
+            }
+            return allowed;
         } catch (SpawnerNotFoundException e) {
             return true;
         } catch (BaseException e) {
@@ -60,6 +70,7 @@ public class SpawnerEventController {
     }
 
     public void handleSpawnerLoad(List<Entity> entities, String worldName){
+        if(!worldName.startsWith("dungeon_")) return;
         for (Entity entity : entities) {
             if (entity.getType() != EntityType.MARKER) continue;
 
@@ -67,7 +78,7 @@ public class SpawnerEventController {
             if (!pdc.has(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING)) continue;
 
             try {
-                String siid = pdc.get(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING);
+                String sid = pdc.get(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING);
                 Block blockBelow = entity.getLocation().getBlock();
 
                 if (blockBelow.getType() != Material.SPAWNER) {
@@ -75,33 +86,28 @@ public class SpawnerEventController {
                     continue;
                 }
 
-                String iid = pdc.has(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING)
-                        ? pdc.get(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING)
-                        : UUID.randomUUID().toString();
-
-                entity.getPersistentDataContainer().set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, iid);
-                CreatureSpawner creatureSpawner = (CreatureSpawner) blockBelow.getState();
-                creatureSpawner.getPersistentDataContainer().set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, iid);
-                creatureSpawner.update();
-
-                spawnerService.createInstance(iid, siid);
-                spawnerService.applyTemplate(siid, creatureSpawner);
+                registerSpawner(blockBelow, sid);
             } catch (BaseException e) {
                 GlobalException.handle(e);
             }
         }
     }
 
-    public void handleSpawnerAppear(Marker marker){
+    public void handleSpawnerAppear(Marker marker) {
         PersistentDataContainer pdc = marker.getPersistentDataContainer();
+        if (!pdc.has(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING)) return;
         String sid = pdc.get(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING);
-        if(sid == null || sid.isEmpty()) return;
-        Block block = marker.getLocation().getBlock();
-        if(block.getType() != Material.SPAWNER){
-            taskScheduler.runLater(10L, () -> retryRegisterSpawner(marker, sid));
-        }else{
+        if (sid == null || sid.isEmpty()) return;
+
+        taskScheduler.runLater(5L, () -> {
+            if (!marker.isValid()) return;
+            Block block = marker.getLocation().getBlock();
+            if (block.getType() != Material.SPAWNER) {
+                taskScheduler.runLater(10L, () -> retryRegisterSpawner(marker, sid));
+                return;
+            }
             registerSpawner(block, sid);
-        }
+        });
     }
 
     public void handleSpawnerSpawn(){
@@ -128,11 +134,20 @@ public class SpawnerEventController {
     /*Helper*/
     private void registerSpawner(Block block, String templateId) {
         try {
-            String iid = UUID.randomUUID().toString();
             CreatureSpawner creatureSpawner = (CreatureSpawner) block.getState();
-            creatureSpawner.getPersistentDataContainer().set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, iid);
-            creatureSpawner.update();
-            spawnerService.createInstance(iid, templateId);
+            PersistentDataContainer spawnerPdc = creatureSpawner.getPersistentDataContainer();
+
+            String iid;
+            if (spawnerPdc.has(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING)) {
+                iid = spawnerPdc.get(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING);
+                if (spawnerService.getInstance(iid) != null) return;
+            } else {
+                iid = UUID.randomUUID().toString();
+                spawnerPdc.set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, iid);
+                creatureSpawner.update();
+            }
+
+            spawnerService.createInstance(templateId, iid);
             spawnerService.applyTemplate(templateId, creatureSpawner);
         } catch (BaseException e) {
             GlobalException.handle(e);

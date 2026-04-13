@@ -1,6 +1,8 @@
 package com.roguesmp.dungeon_v2.actor.listener;
 
 import com.roguesmp.dungeon_v2.controller_.PlayerActionController;
+import com.roguesmp.dungeon_v2.task.TaskScheduler;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -10,13 +12,19 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class DungeonListener implements Listener {
 
     private final PlayerActionController actionController;
+    private final TaskScheduler taskScheduler;
 
-    public DungeonListener(PlayerActionController actionController) {
+    public DungeonListener(PlayerActionController actionController, TaskScheduler taskScheduler) {
         this.actionController = actionController;
+        this.taskScheduler = taskScheduler;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -43,6 +51,36 @@ public class DungeonListener implements Listener {
         if(event.isCancelled()) return;
         if(!(event.getEntity() instanceof Player player)) return;
         actionController.handlePlayerCollectItem(event.getItem().getItemStack(), player);
+    }
+
+    @EventHandler
+    public void onPlayerMoveInDeadMode(PlayerMoveEvent event){
+        if(!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        Player player = event.getPlayer();
+        if(player.getGameMode() != GameMode.SPECTATOR) return;
+
+        actionController.handlePlayerMoveInDeadMode(player);
+    }
+
+    @EventHandler
+    public void onPlayerReJoin(PlayerJoinEvent event){
+        Player player = event.getPlayer();
+        taskScheduler.runLater(2L, () -> {
+            actionController.handlePlayerReconnect(player);
+        });
+    }
+
+    @EventHandler
+    public void onPlayerDead(PlayerDeathEvent event){
+        if(!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        event.setCancelled(true);
+        actionController.handlePlayerDead(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerDisconnect(PlayerQuitEvent event){
+        if(!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        actionController.handlePlayerDisconnect(event.getPlayer());
     }
 
     //TODO

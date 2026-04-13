@@ -82,7 +82,7 @@ public class InstanceService implements IInstanceService {
                     PlayerStatus.Status.PLAYING,
                     SerializableLocation.from(region.getRegionPoint().add(0, 1, 0))
             );
-            dungeonPlayer.addPlayerStatus(pid, status);
+            dungeonPlayer.addPlayerStatus(UUID.fromString(pid), status);
         });
 
         /*Set instance information*/
@@ -92,7 +92,7 @@ public class InstanceService implements IInstanceService {
         instance.setPlayers(dungeonPlayer);
 
         /*Set instance id to party info, make a faster way to lookup related instance*/
-        party.setInstanceId(instance.getSession().getSessionId());
+        party.setInstanceId(instance.getSession().getSessionId().toString());
 
         return instance;
     }

@@ -31,7 +31,9 @@ public class InstanceManager {
 
     public void loadAll(){
         instances.clear();
-        instanceRepository.loadAll().forEach(instance -> instances.put(instance.getSession().getSessionId(), instance));
+        instanceRepository.loadAll().forEach(instance -> {
+            instances.put(instance.getSession().getSessionId(), instance);
+        });
     }
 
     public void saveAll() {
@@ -79,6 +81,7 @@ public class InstanceManager {
 
     public DungeonInstance remove(UUID ssid){
         logger.info(this.getClass(), "Remove dungeon instance with id: " + ssid);
+        instanceRepository.delete(ssid);
         return instances.remove(ssid);
     }
 

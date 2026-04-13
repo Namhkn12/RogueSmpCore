@@ -9,14 +9,14 @@ public class DungeonSession {
 
     private UUID sessionId;
     private String dungeonId;
-    private UUID partyId;
+    private String partyId;
     private UUID regionId;
     private long startedAt;
 
     public DungeonSession() {
     }
 
-    public static DungeonSession create(String dungeonId, UUID regionId, UUID partyId) {
+    public static DungeonSession create(String dungeonId, UUID regionId, String partyId) {
         DungeonSession session = new DungeonSession();
         session.sessionId = UUID.randomUUID();
         session.dungeonId = dungeonId;
@@ -42,11 +42,11 @@ public class DungeonSession {
         this.dungeonId = dungeonId;
     }
 
-    public UUID getPartyId() {
+    public String getPartyId() {
         return partyId;
     }
 
-    public void setPartyId(UUID partyId) {
+    public void setPartyId(String partyId) {
         this.partyId = partyId;
     }
 

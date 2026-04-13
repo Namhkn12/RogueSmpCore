@@ -10,18 +10,18 @@ import java.util.UUID;
  */
 public class Party {
 
-    private UUID partyId;
-    private UUID owner;
-    private List<UUID> members;
+    private String partyId;
+    private String owner;
+    private List<String> members;
     private int maxSize;
     private boolean locked;
-    private UUID instanceId;
+    private String instanceId;
 
     public Party() {
         this.members = new ArrayList<>();
     }
 
-    public Party(UUID partyId, UUID owner, int maxSize) {
+    public Party(String partyId, String owner, int maxSize) {
         this.partyId = partyId;
         this.owner = owner;
         this.members = new ArrayList<>(List.of(owner));
@@ -30,7 +30,7 @@ public class Party {
         this.instanceId = null;
     }
 
-    public boolean addMember(UUID playerId) {
+    public boolean addMember(String playerId) {
         if (isFull() || members.contains(playerId)) {
             return false;
         }
@@ -38,11 +38,11 @@ public class Party {
         return true;
     }
 
-    public boolean removeMember(UUID playerId) {
+    public boolean removeMember(String playerId) {
         return members.remove(playerId);
     }
 
-    public boolean transferOwnership(UUID newOwner) {
+    public boolean transferOwnership(String newOwner) {
         if (!members.contains(newOwner)) {
             return false;
         }
@@ -58,11 +58,11 @@ public class Party {
         this.locked = false;
     }
 
-    public boolean isMember(UUID playerId) {
+    public boolean isMember(String playerId) {
         return members.contains(playerId);
     }
 
-    public boolean isOwner(UUID playerId) {
+    public boolean isOwner(String playerId) {
         return owner != null && owner.equals(playerId);
     }
 
@@ -82,27 +82,27 @@ public class Party {
         return members.size();
     }
 
-    public UUID getPartyId() {
+    public String getPartyId() {
         return partyId;
     }
 
-    public void setPartyId(UUID partyId) {
+    public void setPartyId(String partyId) {
         this.partyId = partyId;
     }
 
-    public UUID getOwner() {
+    public String getOwner() {
         return owner;
     }
 
-    public void setOwner(UUID owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
     }
 
-    public List<UUID> getMembers() {
+    public List<String> getMembers() {
         return Collections.unmodifiableList(members);
     }
 
-    public void setMembers(List<UUID> members) {
+    public void setMembers(List<String> members) {
         this.members = members != null ? new ArrayList<>(members) : new ArrayList<>();
     }
 
@@ -118,11 +118,11 @@ public class Party {
         this.locked = locked;
     }
 
-    public UUID getInstanceId() {
+    public String getInstanceId() {
         return instanceId;
     }
 
-    public void setInstanceId(UUID instanceId) {
+    public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
     }
 

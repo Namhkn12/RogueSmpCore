@@ -7,6 +7,6 @@ import org.bukkit.block.CreatureSpawner;
 public interface ISpawnerService {
     void createSpawner(Spawner spawner);
     void applyTemplate(String sid, CreatureSpawner spawner);
-    void createInstance(String siid, String sid);
+    void createInstance(String sid, String siid);
     SpawnerInstance getInstance(String siid);
 }

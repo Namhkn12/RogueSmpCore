@@ -39,7 +39,7 @@ public class PartyService implements IPartyService {
         Party party = partyManager.findByPlayer(owner.getUniqueId());
         if (party == null) return;
 
-        for (UUID memberId : party.getMembers()) {
+        for (String memberId : party.getMembers()) {
             Player member = Bukkit.getPlayer(memberId);
             if (member != null) {
                 DungeonEcho.warn(member, "Nhóm đã bị giải tán");
@@ -69,7 +69,7 @@ public class PartyService implements IPartyService {
             return;
         }
 
-        partyManager.addMember(party.getPartyId(), player.getUniqueId());
+        partyManager.addMember(party.getPartyId(), player.getUniqueId().toString());
         DungeonEcho.success(player, "Bạn đã tham gia nhóm");
     }
 
@@ -88,7 +88,7 @@ public class PartyService implements IPartyService {
         Party party = partyManager.findByPlayer(player.getUniqueId());
         if (party == null) return;
 
-        partyManager.removeMember(party.getPartyId(), player.getUniqueId());
+        partyManager.removeMember(party.getPartyId(), player.getUniqueId().toString());
         DungeonEcho.success(player, "Bạn đã rời nhóm");
     }
 
@@ -112,7 +112,7 @@ public class PartyService implements IPartyService {
             return;
         }
 
-        partyManager.removeMember(party.getPartyId(), target.getUniqueId());
+        partyManager.removeMember(party.getPartyId(), target.getUniqueId().toString());
         DungeonEcho.success(owner, "Đã đuổi " + target.getName() + " khỏi party.");
         DungeonEcho.warn(owner, "Bạn đã bị buộc rời nhóm");
     }
@@ -131,7 +131,7 @@ public class PartyService implements IPartyService {
             DungeonEcho.error(currentOwner,"Người này không ở trong nhóm của bạn");
             return;
         }
-        partyManager.transferOwner(party.getPartyId(), newOwner.getUniqueId());
+        partyManager.transferOwner(party.getPartyId(), newOwner.getUniqueId().toString());
 
         DungeonEcho.success(currentOwner,"Đã chuyển quyền chủ nhóm cho " + newOwner.getName() + ".");
         DungeonEcho.success(newOwner, "Bạn đã trở thành chủ nhóm");
@@ -155,7 +155,7 @@ public class PartyService implements IPartyService {
             return MCStringBuilder.yellow("Bạn không ở trong nhóm nào.");
         }
 
-        Player leader = Bukkit.getPlayer(party.getOwner());
+        Player leader = Bukkit.getPlayer(UUID.fromString(party.getOwner()));
         String leaderName = leader != null ? leader.getName() : MCStringBuilder.gray("(Offline)");
 
         MCStringBuilder sb = MCStringBuilder.of()
@@ -165,8 +165,8 @@ public class PartyService implements IPartyService {
                 .appendGold(party.getMembers().size() + "/" + party.getMaxSize())
                 .appendWhite("):").newLine();
 
-        for (UUID memberId : party.getMembers()) {
-            Player member = Bukkit.getPlayer(memberId);
+        for (String memberId : party.getMembers()) {
+            Player member = Bukkit.getPlayer(UUID.fromString(memberId));
             String memberName = member != null ? member.getName() : MCStringBuilder.gray("(Offline)");
             sb.appendGray(" - ").appendWhite(memberName).newLine();
         }
@@ -180,7 +180,7 @@ public class PartyService implements IPartyService {
     }
 
     @Override
-    public Party getPartyById(UUID partyId) {
+    public Party getPartyById(String partyId) {
         return partyManager.findById(partyId);
     }
 
@@ -192,6 +192,7 @@ public class PartyService implements IPartyService {
     @Override
     public List<Player> getOnlineMembers(Party party) {
         return party.getMembers().stream()
+                .map(UUID::fromString)
                 .map(Bukkit::getPlayer)
                 .filter(p -> p != null && p.isOnline())
                 .toList();

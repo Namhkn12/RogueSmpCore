@@ -9,19 +9,31 @@ import com.roguesmp.dungeon_v2.data.definition.objective.event.IItemCollectAware
 import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_v2.data.runtime.Party;
 import com.roguesmp.dungeon_v2.data.runtime.RoomInstance;
+import com.roguesmp.dungeon_v2.data.runtime.session.PlayerStatus;
+import com.roguesmp.dungeon_v2.helper.SerializableLocation;
+import com.roguesmp.dungeon_v2.manager.DungeonManager;
 import com.roguesmp.dungeon_v2.manager.InstanceManager;
+import com.roguesmp.dungeon_v2.manager.ScoreBoardManager;
+import com.roguesmp.dungeon_v2.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon_v2.service.IInstanceService;
 import com.roguesmp.dungeon_v2.service.IPartyService;
+import com.roguesmp.dungeon_v2.task.TaskScheduler;
+import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.PdcUtil;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.BoundingBox;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class PlayerActionController {
@@ -29,11 +41,19 @@ public class PlayerActionController {
     private final IInstanceService instanceService;
     private final InstanceManager instanceManager;
     private final IPartyService partyService;
+    private final ScoreBoardManager scoreBoardManager;
+    private final DungeonManager dungeonManager;
+    private final TaskScheduler taskScheduler;
+    private final DungeonPresenter presenter;
 
-    public PlayerActionController(IInstanceService instanceService, InstanceManager instanceManager, IPartyService partyService) {
+    public PlayerActionController(IInstanceService instanceService, InstanceManager instanceManager, IPartyService partyService, ScoreBoardManager scoreBoardManager, DungeonManager dungeonManager, TaskScheduler taskScheduler, DungeonPresenter presenter) {
         this.instanceService = instanceService;
         this.instanceManager = instanceManager;
         this.partyService = partyService;
+        this.scoreBoardManager = scoreBoardManager;
+        this.dungeonManager = dungeonManager;
+        this.taskScheduler = taskScheduler;
+        this.presenter = presenter;
     }
 
     public void handlePlayerKillMob(LivingEntity entity, Player player){
@@ -84,15 +104,86 @@ public class PlayerActionController {
     }
 
     public void handlePlayerDead(Player player){
-        /*TODO*/
+        Party party = partyService.getPartyByPlayer(player);
+        if(party == null) return;
+        String iid = party.getInstanceId();
+        if(iid == null) return;
+        DungeonInstance instance = instanceManager.get(UUID.fromString(iid));
+
+        PlayerStatus playerStatus = instance.getDungeonPlayers().getPlayers().get(player.getUniqueId());
+        playerStatus.setCheckPoint(SerializableLocation.from(player.getLocation()));
+        /*Set player status is DEAD*/
+        playerStatus.setStatus(PlayerStatus.Status.DEAD);
+        playerStatus.upDead();
+        player.setGameMode(GameMode.SPECTATOR);
+        DungeonEcho.error(player, "You die! Wait for your teammates complete the room, you will be revived");
+        presenter.onPlayerDead(player, player.getLocation());
+    }
+
+    public void handlePlayerMoveInDeadMode(Player player){
+        Party party = partyService.getPartyByPlayer(player);
+        if(party == null) return;
+        String iid = party.getInstanceId();
+        if(iid == null) return;
+        DungeonInstance instance = instanceManager.get(UUID.fromString(iid));
+
+        BoundingBox bounder = instance.getProgress().getCurrentRoom().getBounds().toBukkit();
+
+        double shrink = 3;
+        double minX = bounder.getMinX() + shrink;
+        double maxX = bounder.getMaxX() - shrink;
+        double minY = bounder.getMinY() + shrink;
+        double maxY = bounder.getMaxY() - shrink;
+        double minZ = bounder.getMinZ() + shrink;
+        double maxZ = bounder.getMaxZ() - shrink;
+
+        Location loc = player.getLocation();
+
+        double clampedX = Math.max(minX, Math.min(maxX, loc.getX()));
+        double clampedZ = Math.max(minZ, Math.min(maxZ, loc.getZ()));
+        double clampedY = Math.max(minY, Math.min(maxY, loc.getY()));
+
+        if(clampedX != loc.getX() || clampedZ != loc.getZ() || clampedY != loc.getY()){
+            loc.setX(clampedX);
+            loc.setY(clampedY);
+            loc.setZ(clampedZ);
+            player.teleport(loc);
+        }
     }
 
     public void handlePlayerReconnect(Player player){
-        //check player
+        Party party = partyService.getPartyByPlayer(player);
+        /*Party null -> No dungeon*/
+        if(party == null) return;
+        String iid = party.getInstanceId();
+        if(iid == null) return;
+        DungeonInstance instance = instanceManager.get(UUID.fromString(iid));
+        if(instance == null){
+            party.setInstanceId("");
+            return;
+        }
+        PlayerStatus playerStatus = instance.getDungeonPlayers().getPlayers().get(player.getUniqueId());
+        if(playerStatus.getStatus() == PlayerStatus.Status.PLAYING){
+            scoreBoardManager.createBoard(player, instance, dungeonManager.get(instance.getSession().getDungeonId()));
+            return;
+        }
+        if(playerStatus.getStatus() == PlayerStatus.Status.DEAD){
+            player.setGameMode(GameMode.SPECTATOR);
+        }
     }
 
     public void handlePlayerDisconnect(Player player){
+        Party party = partyService.getPartyByPlayer(player);
+        /*Party null -> No dungeon*/
+        if(party == null) return;
+        String iid = party.getInstanceId();
+        if(iid == null) return;
+        DungeonInstance instance = instanceManager.get(UUID.fromString(iid));
         /*TODO*/
+        PlayerStatus playerStatus = instance.getDungeonPlayers().getPlayers().get(player.getUniqueId());
+        if(playerStatus.getStatus() == PlayerStatus.Status.DEAD){
+            player.setGameMode(GameMode.SURVIVAL);
+        }
     }
 
     private ActionContext resolveContext(Player player, org.bukkit.util.Vector actionPosition) {
@@ -100,8 +191,8 @@ public class PlayerActionController {
 
         Party party = partyService.getPartyByPlayer(player);
         if (party == null || party.getInstanceId() == null) return null;
-
-        DungeonInstance instance = instanceManager.get(party.getInstanceId());
+        if(party.getInstanceId().isEmpty()) return null;
+        DungeonInstance instance = instanceManager.get(UUID.fromString(party.getInstanceId()));
         if (instance == null || instance.getProgress() == null) return null;
 
         RoomInstance room = instance.getProgress().getCurrentRoom();

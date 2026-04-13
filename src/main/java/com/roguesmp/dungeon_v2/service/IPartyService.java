@@ -28,7 +28,7 @@ public interface IPartyService {
 
     Party getPartyByPlayer(Player player);
 
-    Party getPartyById(UUID partyId);
+    Party getPartyById(String partyId);
 
     void savePartyToFile();
 
