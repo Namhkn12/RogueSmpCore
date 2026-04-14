@@ -15,6 +15,7 @@ import com.roguesmp.dungeon_v2.manager.InstanceManager;
 import com.roguesmp.dungeon_v2.manager.RoomManager;
 import com.roguesmp.dungeon_v2.service.*;
 import com.roguesmp.dungeon_v2.utils.Razdon;
+import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 
 import java.util.ArrayList;
@@ -133,5 +134,15 @@ public class InstanceService implements IInstanceService {
     @Override
     public void saveDungeonInstance(DungeonInstance instance) {
 
+    }
+
+    @Override
+    public DungeonPlayer getPlayersInInstance(DungeonInstance instance) {
+        return instance.getDungeonPlayers();
+    }
+
+    @Override
+    public PlayerStatus getPlayerStatus(Player player) {
+        return null;
     }
 }

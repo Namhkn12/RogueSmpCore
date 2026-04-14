@@ -56,10 +56,11 @@ public class DungeonFlowController {
     private final ISchematicService schematicService;
     private final IDungeonService dungeonService;
     private final TaskScheduler taskScheduler;
+    private final IReviveService reviveService;
 
     public DungeonFlowController(IInstanceService instanceService, InstanceManager instanceManager, IPartyService partyService,
                                  IRegionService regionService, ScoreBoardManager scoreBoardManager,
-                                 DungeonManager dungeonManager, RoomManager roomManager, IRoomService roomService, DungeonPresenter dungeonPresenter, ISchematicService schematicService, IDungeonService dungeonService, TaskScheduler taskScheduler) {
+                                 DungeonManager dungeonManager, RoomManager roomManager, IRoomService roomService, DungeonPresenter dungeonPresenter, ISchematicService schematicService, IDungeonService dungeonService, TaskScheduler taskScheduler, IReviveService reviveService) {
         this.instanceService = instanceService;
         this.instanceManager = instanceManager;
         this.partyService = partyService;
@@ -72,6 +73,7 @@ public class DungeonFlowController {
         this.schematicService = schematicService;
         this.dungeonService = dungeonService;
         this.taskScheduler = taskScheduler;
+        this.reviveService = reviveService;
     }
 
     public void handleStartDungeon(String did, Player player){
@@ -443,6 +445,9 @@ public class DungeonFlowController {
         instance.getDungeonPlayers().getPlayers().forEach((uuid, playerStatus) -> {
             if(playerStatus.getStatus() == PlayerStatus.Status.DEAD){
                 playerStatus.setStatus(PlayerStatus.Status.PLAYING);
+
+                /*Clean up revive entry*/
+                reviveService.forceRemoveDeadEntry(UuidUtil.parseOrNull(uuid));
                 Player player = UuidUtil.getPlayerById(uuid);
                 if(player != null) {
                     player.teleport(playerStatus.getCheckPoint().toBukkit());

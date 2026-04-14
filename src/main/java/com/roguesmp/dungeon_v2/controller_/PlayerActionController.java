@@ -13,10 +13,12 @@ import com.roguesmp.dungeon_v2.data.runtime.session.PlayerStatus;
 import com.roguesmp.dungeon_v2.helper.SerializableLocation;
 import com.roguesmp.dungeon_v2.manager.DungeonManager;
 import com.roguesmp.dungeon_v2.manager.InstanceManager;
+import com.roguesmp.dungeon_v2.manager.ReviveManager;
 import com.roguesmp.dungeon_v2.manager.ScoreBoardManager;
 import com.roguesmp.dungeon_v2.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon_v2.service.IInstanceService;
 import com.roguesmp.dungeon_v2.service.IPartyService;
+import com.roguesmp.dungeon_v2.service.IReviveService;
 import com.roguesmp.dungeon_v2.task.TaskScheduler;
 import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.PdcUtil;
@@ -43,8 +45,10 @@ public class PlayerActionController {
     private final DungeonManager dungeonManager;
     private final TaskScheduler taskScheduler;
     private final DungeonPresenter presenter;
+    private final ReviveManager reviveManager;
+    private final IReviveService reviveService;
 
-    public PlayerActionController(IInstanceService instanceService, InstanceManager instanceManager, IPartyService partyService, ScoreBoardManager scoreBoardManager, DungeonManager dungeonManager, TaskScheduler taskScheduler, DungeonPresenter presenter) {
+    public PlayerActionController(IInstanceService instanceService, InstanceManager instanceManager, IPartyService partyService, ScoreBoardManager scoreBoardManager, DungeonManager dungeonManager, TaskScheduler taskScheduler, DungeonPresenter presenter, ReviveManager reviveManager, IReviveService reviveService) {
         this.instanceService = instanceService;
         this.instanceManager = instanceManager;
         this.partyService = partyService;
@@ -52,6 +56,8 @@ public class PlayerActionController {
         this.dungeonManager = dungeonManager;
         this.taskScheduler = taskScheduler;
         this.presenter = presenter;
+        this.reviveManager = reviveManager;
+        this.reviveService = reviveService;
     }
 
     public void handlePlayerKillMob(LivingEntity entity, Player player){
@@ -117,6 +123,8 @@ public class PlayerActionController {
         playerStatus.setStatus(PlayerStatus.Status.DEAD);
         playerStatus.upDead();
         player.setGameMode(GameMode.SPECTATOR);
+        /*Revive register player when dead*/
+        reviveService.registerPlayerDead(player);
         DungeonEcho.error(player, "You die! Wait for your teammates complete the room, you will be revived");
         presenter.onPlayerDead(player, player.getLocation());
     }
@@ -168,11 +176,23 @@ public class PlayerActionController {
         }
         PlayerStatus playerStatus = instance.getDungeonPlayers().getPlayers().get(player.getUniqueId().toString());
         if (playerStatus == null) return;
-        if(playerStatus.getStatus() == PlayerStatus.Status.PLAYING){
-            scoreBoardManager.createBoard(player, instance, dungeonManager.get(instance.getSession().getDungeonId()));
+
+        PlayerStatus.Status status = playerStatus.getStatus();
+
+        /*Out state*/
+        if (status == PlayerStatus.Status.OUT) return;
+
+        scoreBoardManager.createBoard(player, instance, dungeonManager.get(instance.getSession().getDungeonId()));
+
+        if (status == PlayerStatus.Status.DISCONNECT) {
+            playerStatus.setStatus(PlayerStatus.Status.PLAYING);
+            player.setGameMode(GameMode.SURVIVAL);
             return;
         }
-        if(playerStatus.getStatus() == PlayerStatus.Status.DEAD){
+
+        if (status == PlayerStatus.Status.DEAD_DISCONNECT) {
+            playerStatus.setStatus(PlayerStatus.Status.DEAD);
+            reviveService.registerPlayerDead(player);
             player.setGameMode(GameMode.SPECTATOR);
         }
     }
@@ -190,7 +210,12 @@ public class PlayerActionController {
         PlayerStatus playerStatus = instance.getDungeonPlayers().getPlayers().get(player.getUniqueId().toString());
         if (playerStatus == null) return;
         if(playerStatus.getStatus() == PlayerStatus.Status.DEAD){
+            playerStatus.setStatus(PlayerStatus.Status.DEAD_DISCONNECT);
             player.setGameMode(GameMode.SURVIVAL);
+            return;
+        }
+        if(playerStatus.getStatus() == PlayerStatus.Status.PLAYING){
+            playerStatus.setStatus(PlayerStatus.Status.DISCONNECT);
         }
     }
 

@@ -86,6 +86,7 @@ public class DungeonRegistry {
         DungeonManager dungeonManager = new DungeonManager(dungeonRepository, logger);
         SpawnerManager spawnerManager = new SpawnerManager(spawnerRepository, logger);
         LootTableManager lootTableManager = new LootTableManager(lootTableRepository);
+        ReviveManager reviveManager = new ReviveManager(taskScheduler);
 
         SpawnerInstanceManager spawnerInstanceManager = new SpawnerInstanceManager();
         instanceManager = new InstanceManager(instanceRepository, scoreBoardManager, logger);
@@ -108,6 +109,7 @@ public class DungeonRegistry {
                 dungeonManager,
                 new ChestOpenAnimation(plugin, taskScheduler)
                 );
+        IReviveService reviveService = new ReviveService(reviveManager, partyService, plugin, instanceManager, dungeonPresenter);
 
         /*Task*/
         PartyInviteTask inviteTask = new PartyInviteTask(plugin, partyService);
@@ -126,11 +128,22 @@ public class DungeonRegistry {
                 dungeonPresenter,
                 schematicService,
                 dungeonService,
-                taskScheduler
+                taskScheduler,
+                reviveService
         );
         SchemetaController schemetaController = new SchemetaController(schemetaService, schematicService);
         SpawnerEventController spawnerController = new SpawnerEventController(spawnerService, spawnerManager, spawnerInstanceManager, taskScheduler, logger);
-        PlayerActionController actionController = new PlayerActionController(instanceService, instanceManager, partyService, scoreBoardManager, dungeonManager, taskScheduler, dungeonPresenter);
+        PlayerActionController actionController = new PlayerActionController(
+                instanceService,
+                instanceManager,
+                partyService,
+                scoreBoardManager,
+                dungeonManager,
+                taskScheduler,
+                dungeonPresenter,
+                reviveManager,
+                reviveService
+        );
         DungeonTreasureController treasureController = new DungeonTreasureController(rewardService);
         BossRoomController bossRoomController = new BossRoomController(instanceManager, partyService, roomManager);
 
