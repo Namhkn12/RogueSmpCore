@@ -5,11 +5,10 @@ import com.roguesmp.dungeon_v2.manager.PartyManager;
 import com.roguesmp.dungeon_v2.service.IPartyService;
 import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.MCStringBuilder;
-import org.bukkit.Bukkit;
+import com.roguesmp.dungeon_v2.utils.UuidUtil;
 import org.bukkit.entity.Player;
 
 import java.util.List;
-import java.util.UUID;
 
 public class PartyService implements IPartyService {
 
@@ -40,7 +39,7 @@ public class PartyService implements IPartyService {
         if (party == null) return;
 
         for (String memberId : party.getMembers()) {
-            Player member = Bukkit.getPlayer(memberId);
+            Player member = UuidUtil.getPlayerById(memberId);
             if (member != null) {
                 DungeonEcho.warn(member, "Nhóm đã bị giải tán");
             }
@@ -107,7 +106,7 @@ public class PartyService implements IPartyService {
         Party party = partyManager.findByPlayer(owner.getUniqueId());
         if (party == null) return;
 
-        if (!party.getMembers().contains(target.getUniqueId())) {
+        if (!party.getMembers().contains(target.getUniqueId().toString())) {
             DungeonEcho.error(owner, "Người này không thuộc nhóm của bạn");
             return;
         }
@@ -127,7 +126,7 @@ public class PartyService implements IPartyService {
         Party party = partyManager.findByPlayer(currentOwner.getUniqueId());
         if (party == null) return;
 
-        if (!party.getMembers().contains(newOwner.getUniqueId())) {
+        if (!party.getMembers().contains(newOwner.getUniqueId().toString())) {
             DungeonEcho.error(currentOwner,"Người này không ở trong nhóm của bạn");
             return;
         }
@@ -155,7 +154,7 @@ public class PartyService implements IPartyService {
             return MCStringBuilder.yellow("Bạn không ở trong nhóm nào.");
         }
 
-        Player leader = Bukkit.getPlayer(UUID.fromString(party.getOwner()));
+        Player leader = UuidUtil.getPlayerById(party.getOwner());
         String leaderName = leader != null ? leader.getName() : MCStringBuilder.gray("(Offline)");
 
         MCStringBuilder sb = MCStringBuilder.of()
@@ -166,7 +165,7 @@ public class PartyService implements IPartyService {
                 .appendWhite("):").newLine();
 
         for (String memberId : party.getMembers()) {
-            Player member = Bukkit.getPlayer(UUID.fromString(memberId));
+            Player member = UuidUtil.getPlayerById(memberId);
             String memberName = member != null ? member.getName() : MCStringBuilder.gray("(Offline)");
             sb.appendGray(" - ").appendWhite(memberName).newLine();
         }
@@ -192,8 +191,7 @@ public class PartyService implements IPartyService {
     @Override
     public List<Player> getOnlineMembers(Party party) {
         return party.getMembers().stream()
-                .map(UUID::fromString)
-                .map(Bukkit::getPlayer)
+                .map(UuidUtil::getPlayerById)
                 .filter(p -> p != null && p.isOnline())
                 .toList();
     }

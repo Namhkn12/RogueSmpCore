@@ -11,11 +11,10 @@ import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class InstanceManager {
 
-    private final Map<UUID, DungeonInstance> instances = new LinkedHashMap<>();
+    private final Map<String, DungeonInstance> instances = new LinkedHashMap<>();
 
     private final IInstanceRepository instanceRepository;
     private final ScoreBoardManager scoreBoardManager;
@@ -32,7 +31,10 @@ public class InstanceManager {
     public void loadAll(){
         instances.clear();
         instanceRepository.loadAll().forEach(instance -> {
-            instances.put(instance.getSession().getSessionId(), instance);
+            if (instance == null || instance.getSession() == null) return;
+            String sessionId = instance.getSession().getSessionId();
+            if (sessionId == null || sessionId.isBlank()) return;
+            instances.put(sessionId, instance);
         });
     }
 
@@ -70,16 +72,19 @@ public class InstanceManager {
     }
 
     public void add(DungeonInstance instance){
-        instances.put(instance.getSession().getSessionId(), instance);
+        if (instance == null || instance.getSession() == null) return;
+        String sessionId = instance.getSession().getSessionId();
+        if (sessionId == null || sessionId.isBlank()) return;
+        instances.put(sessionId, instance);
         snapshotRoomRuntime(instance);
         instanceRepository.save(instance);
     }
 
-    public DungeonInstance get(UUID ssid){
+    public DungeonInstance get(String ssid){
         return instances.get(ssid);
     }
 
-    public DungeonInstance remove(UUID ssid){
+    public DungeonInstance remove(String ssid){
         logger.info(this.getClass(), "Remove dungeon instance with id: " + ssid);
         instanceRepository.delete(ssid);
         return instances.remove(ssid);

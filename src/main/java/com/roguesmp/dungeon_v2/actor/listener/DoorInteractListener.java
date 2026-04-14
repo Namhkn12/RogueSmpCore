@@ -7,6 +7,7 @@ import com.roguesmp.dungeon_v2.utils.filterchain.EventFilter;
 import com.roguesmp.dungeon_v2.utils.filterchain.FilterChain;
 import com.roguesmp.dungeon_v2.utils.filterchain.impl.InteractFilters;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Vault;
 import org.bukkit.entity.Player;
@@ -15,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.util.BoundingBox;
 
 public class DoorInteractListener implements Listener {
 
@@ -46,7 +48,7 @@ public class DoorInteractListener implements Listener {
         String worldName = player.getWorld().getName();
 
         if (!worldName.startsWith("dungeon_")) return;
-        if (player.getLocation().add(0, 0, 0).getBlock().getType() != Material.END_GATEWAY) return;
+        if (!isOverlappingBlockType(event, Material.END_GATEWAY)) return;
         /*Get into the treasure room*/
         dungeonFlowController.handleGetIntoTreasurePortal(player);
     }
@@ -113,4 +115,33 @@ public class DoorInteractListener implements Listener {
                     .require(InteractFilters.blockState(Vault.class))
                     .require(InteractFilters.clickedBlockInWorld("dungeon_"))
                     .build();
+
+    private boolean isOverlappingBlockType(PlayerMoveEvent event, Material material) {
+        if (event.getTo() == null) return false;
+
+        Player player = event.getPlayer();
+        BoundingBox movedBox = player.getBoundingBox().clone().shift(
+                event.getTo().getX() - event.getFrom().getX(),
+                event.getTo().getY() - event.getFrom().getY(),
+                event.getTo().getZ() - event.getFrom().getZ()
+        );
+
+        World world = player.getWorld();
+        int minX = (int) Math.floor(movedBox.getMinX());
+        int maxX = (int) Math.floor(movedBox.getMaxX());
+        int minY = (int) Math.floor(movedBox.getMinY());
+        int maxY = (int) Math.floor(movedBox.getMaxY());
+        int minZ = (int) Math.floor(movedBox.getMinZ());
+        int maxZ = (int) Math.floor(movedBox.getMaxZ());
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    if (world.getBlockAt(x, y, z).getType() == material) return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }

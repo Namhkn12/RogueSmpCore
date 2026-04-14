@@ -1,24 +1,22 @@
 package com.roguesmp.dungeon_v2.data.runtime.session;
 
-import java.util.UUID;
-
 /**
  * Identity and ownership metadata for one dungeon run.
  */
 public class DungeonSession {
 
-    private UUID sessionId;
+    private String sessionId;
     private String dungeonId;
     private String partyId;
-    private UUID regionId;
+    private String regionId;
     private long startedAt;
 
     public DungeonSession() {
     }
 
-    public static DungeonSession create(String dungeonId, UUID regionId, String partyId) {
+    public static DungeonSession create(String dungeonId, String regionId, String partyId) {
         DungeonSession session = new DungeonSession();
-        session.sessionId = UUID.randomUUID();
+        session.sessionId = java.util.UUID.randomUUID().toString();
         session.dungeonId = dungeonId;
         session.regionId = regionId;
         session.partyId = partyId;
@@ -26,11 +24,11 @@ public class DungeonSession {
         return session;
     }
 
-    public UUID getSessionId() {
+    public String getSessionId() {
         return sessionId;
     }
 
-    public void setSessionId(UUID sessionId) {
+    public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
 
@@ -58,11 +56,11 @@ public class DungeonSession {
         this.startedAt = startedAt;
     }
 
-    public UUID getRegionId() {
+    public String getRegionId() {
         return regionId;
     }
 
-    public void setRegionId(UUID regionId) {
+    public void setRegionId(String regionId) {
         this.regionId = regionId;
     }
 }

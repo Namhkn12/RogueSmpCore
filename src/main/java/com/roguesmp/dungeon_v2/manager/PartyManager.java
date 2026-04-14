@@ -95,10 +95,11 @@ public class PartyManager {
     }
 
     public boolean isInParty(UUID playerId) {
-        return playerIndex.containsKey(playerId);
+        return playerId != null && playerIndex.containsKey(playerId.toString());
     }
 
     public boolean checkIsOwner(UUID playerId) {
-        return findByPlayer(playerId).isOwner(playerId.toString());
+        Party party = findByPlayer(playerId);
+        return party != null && party.isOwner(playerId.toString());
     }
 }

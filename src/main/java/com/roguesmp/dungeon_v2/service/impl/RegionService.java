@@ -12,7 +12,6 @@ import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
-import java.util.UUID;
 
 public class RegionService implements IRegionService {
 
@@ -53,7 +52,7 @@ public class RegionService implements IRegionService {
     }
 
     @Override
-    public Region getRegionById(UUID reid) {
+    public Region getRegionById(String reid) {
         return manager.getRegionById(reid);
     }
 
@@ -91,14 +90,14 @@ public class RegionService implements IRegionService {
         int gridWidth = WorldConfig.GRID_WIDTH;
         double x = (index % gridWidth) * WorldConfig.DISTANCE_BETWEEN_REGION;
         double z = (index / gridWidth) * WorldConfig.DISTANCE_BETWEEN_REGION;
-        return new Region(UUID.randomUUID(), worldName, x, WorldConfig.REGION_Y, z);
+        return new Region(java.util.UUID.randomUUID().toString(), worldName, x, WorldConfig.REGION_Y, z);
     }
 
     /**
      * Tạo world dungeon mới với DungeonWorldGenerator (world trống)
      */
     private DungeonWorld createNewWorld() {
-        String worldName = String.join("_", DataFolderConfig.DUNGEON_TEMPLATE_FILE, UUID.randomUUID().toString());
+        String worldName = String.join("_", DataFolderConfig.DUNGEON_TEMPLATE_FILE, java.util.UUID.randomUUID().toString());
         WorldCreator creator = new WorldCreator(worldName);
         creator.generator(new DungeonWorldGenerator());
 

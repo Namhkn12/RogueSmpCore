@@ -9,9 +9,23 @@ import java.util.UUID;
 
 public class UUIDTypeAdapter extends TypeAdapter<UUID> {
     @Override public void write(JsonWriter out, UUID value) throws IOException {
+        if (value == null) {
+            out.nullValue();
+            return;
+        }
         out.value(value.toString());
     }
     @Override public UUID read(JsonReader in) throws IOException {
-        return UUID.fromString(in.nextString());
+        if (in.peek() == com.google.gson.stream.JsonToken.NULL) {
+            in.nextNull();
+            return null;
+        }
+        String raw = in.nextString();
+        if (raw == null || raw.isBlank()) return null;
+        try {
+            return UUID.fromString(raw);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 }

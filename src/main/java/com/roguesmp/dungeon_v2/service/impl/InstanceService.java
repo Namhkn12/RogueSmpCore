@@ -14,14 +14,11 @@ import com.roguesmp.dungeon_v2.manager.DungeonManager;
 import com.roguesmp.dungeon_v2.manager.InstanceManager;
 import com.roguesmp.dungeon_v2.manager.RoomManager;
 import com.roguesmp.dungeon_v2.service.*;
-import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import com.roguesmp.dungeon_v2.utils.Razdon;
 import org.bukkit.util.BoundingBox;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public class InstanceService implements IInstanceService {
 
@@ -51,9 +48,12 @@ public class InstanceService implements IInstanceService {
         DungeonInstance instance = new DungeonInstance();
         /*Try to acquire a region*/
         Region region = regionService.acquireRegion();
+        if (region == null || region.getId() == null || region.getId().isBlank()) {
+            return null;
+        }
         /*Prepare dungeon session*/
         DungeonSession session = new DungeonSession();
-        session.setSessionId(UUID.randomUUID());
+        session.setSessionId(java.util.UUID.randomUUID().toString());
         session.setRegionId(region.getId());
         session.setDungeonId(dungeon.getId());
         session.setPartyId(party.getPartyId());
@@ -82,7 +82,7 @@ public class InstanceService implements IInstanceService {
                     PlayerStatus.Status.PLAYING,
                     SerializableLocation.from(region.getRegionPoint().add(0, 1, 0))
             );
-            dungeonPlayer.addPlayerStatus(UUID.fromString(pid), status);
+            dungeonPlayer.addPlayerStatus(pid, status);
         });
 
         /*Set instance information*/
@@ -92,16 +92,17 @@ public class InstanceService implements IInstanceService {
         instance.setPlayers(dungeonPlayer);
 
         /*Set instance id to party info, make a faster way to lookup related instance*/
-        party.setInstanceId(instance.getSession().getSessionId().toString());
+        party.setInstanceId(instance.getSession().getSessionId());
 
         return instance;
     }
 
     @Override
     public void startDungeonInstance(DungeonInstance instance) {
-        Party party = partyService.getPartyById(instance.getSession().getPartyId());
+        if (instance == null || instance.getSession() == null || instance.getProgress() == null) return;
         Region region = regionService.getRegionById(instance.getSession().getRegionId());
         Dungeon dungeon = dungeonManager.get(instance.getSession().getDungeonId());
+        if (region == null || dungeon == null) return;
         /*Start rolling next rooms*/
         List<String> pool = instance.getProgress().getRoomPool();
         /*Find spawn room*/

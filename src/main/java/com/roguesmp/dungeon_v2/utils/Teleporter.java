@@ -44,4 +44,13 @@ public class Teleporter {
             }
         }
     }
+
+    public static void teleportAllByIdString(List<String> ids, Location location) {
+        for (String id : ids) {
+            Player player = UuidUtil.getPlayerById(id);
+            if (player != null && player.isOnline()) {
+                player.teleport(location);
+            }
+        }
+    }
 }

@@ -32,8 +32,6 @@ import org.bukkit.util.BoundingBox;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 public class PlayerActionController {
@@ -108,9 +106,12 @@ public class PlayerActionController {
         if(party == null) return;
         String iid = party.getInstanceId();
         if(iid == null) return;
-        DungeonInstance instance = instanceManager.get(UUID.fromString(iid));
+        if(iid.isBlank()) return;
+        DungeonInstance instance = instanceManager.get(iid);
+        if (instance == null) return;
 
-        PlayerStatus playerStatus = instance.getDungeonPlayers().getPlayers().get(player.getUniqueId());
+        PlayerStatus playerStatus = instance.getDungeonPlayers().getPlayers().get(player.getUniqueId().toString());
+        if (playerStatus == null) return;
         playerStatus.setCheckPoint(SerializableLocation.from(player.getLocation()));
         /*Set player status is DEAD*/
         playerStatus.setStatus(PlayerStatus.Status.DEAD);
@@ -125,7 +126,9 @@ public class PlayerActionController {
         if(party == null) return;
         String iid = party.getInstanceId();
         if(iid == null) return;
-        DungeonInstance instance = instanceManager.get(UUID.fromString(iid));
+        if(iid.isBlank()) return;
+        DungeonInstance instance = instanceManager.get(iid);
+        if (instance == null) return;
 
         BoundingBox bounder = instance.getProgress().getCurrentRoom().getBounds().toBukkit();
 
@@ -157,12 +160,14 @@ public class PlayerActionController {
         if(party == null) return;
         String iid = party.getInstanceId();
         if(iid == null) return;
-        DungeonInstance instance = instanceManager.get(UUID.fromString(iid));
+        if(iid.isBlank()) return;
+        DungeonInstance instance = instanceManager.get(iid);
         if(instance == null){
             party.setInstanceId("");
             return;
         }
-        PlayerStatus playerStatus = instance.getDungeonPlayers().getPlayers().get(player.getUniqueId());
+        PlayerStatus playerStatus = instance.getDungeonPlayers().getPlayers().get(player.getUniqueId().toString());
+        if (playerStatus == null) return;
         if(playerStatus.getStatus() == PlayerStatus.Status.PLAYING){
             scoreBoardManager.createBoard(player, instance, dungeonManager.get(instance.getSession().getDungeonId()));
             return;
@@ -178,9 +183,12 @@ public class PlayerActionController {
         if(party == null) return;
         String iid = party.getInstanceId();
         if(iid == null) return;
-        DungeonInstance instance = instanceManager.get(UUID.fromString(iid));
+        if(iid.isBlank()) return;
+        DungeonInstance instance = instanceManager.get(iid);
+        if (instance == null) return;
         /*TODO*/
-        PlayerStatus playerStatus = instance.getDungeonPlayers().getPlayers().get(player.getUniqueId());
+        PlayerStatus playerStatus = instance.getDungeonPlayers().getPlayers().get(player.getUniqueId().toString());
+        if (playerStatus == null) return;
         if(playerStatus.getStatus() == PlayerStatus.Status.DEAD){
             player.setGameMode(GameMode.SURVIVAL);
         }
@@ -192,7 +200,7 @@ public class PlayerActionController {
         Party party = partyService.getPartyByPlayer(player);
         if (party == null || party.getInstanceId() == null) return null;
         if(party.getInstanceId().isEmpty()) return null;
-        DungeonInstance instance = instanceManager.get(UUID.fromString(party.getInstanceId()));
+        DungeonInstance instance = instanceManager.get(party.getInstanceId());
         if (instance == null || instance.getProgress() == null) return null;
 
         RoomInstance room = instance.getProgress().getCurrentRoom();

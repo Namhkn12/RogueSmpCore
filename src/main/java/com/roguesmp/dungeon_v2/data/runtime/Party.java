@@ -3,7 +3,6 @@ package com.roguesmp.dungeon_v2.data.runtime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Runtime party aggregate used to enter and own dungeon sessions.

@@ -2,8 +2,6 @@ package com.roguesmp.dungeon_v2.service;
 
 
 import com.roguesmp.dungeon_v2.data.runtime.Region;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Quản lý dữ liệu về thông tin thế giới và cấp phát các slot
@@ -18,7 +16,7 @@ public interface IRegionService {
      */
     Region acquireRegion();
 
-    Region getRegionById(UUID reid);
+    Region getRegionById(String reid);
 
     /**
      * Trả region về pool sau khi dungeon kết thúc

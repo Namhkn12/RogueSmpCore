@@ -30,7 +30,6 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 public class DungeonRewardService implements IDungeonRewardService {
 
@@ -105,7 +104,9 @@ public class DungeonRewardService implements IDungeonRewardService {
         Player player = e.getPlayer();
         Party party = partyService.getPartyByPlayer(player);
         if (party == null) return false;
-        DungeonInstance instance = instanceManager.get(UUID.fromString(party.getInstanceId()));
+        String instanceId = party.getInstanceId();
+        if (instanceId == null || instanceId.isBlank()) return false;
+        DungeonInstance instance = instanceManager.get(instanceId);
         if (instance == null) return false;
         Dungeon dungeon = dungeonManager.get(instance.getSession().getDungeonId());
         if (dungeon == null) return false;
