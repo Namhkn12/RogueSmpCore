@@ -74,34 +74,19 @@ public class DungeonPresenter {
     }
 
     public void onPlayerDead(Player player, Location location) {
-        // Skull particle — màu xanh Warden (SCULK_SOUL)
         new PresentationSequence()
-                .addSound(DungeonSound.of(Sound.ENTITY_WARDEN_DEATH, 1f, 0.8f))
-                .addParticle(DungeonParticle.of(
-                        Particle.SCULK_SOUL,
-                        30,
-                        0.4, 0.6, 0.4
-                ))
-                .addParticle(DungeonParticle.of(
-                        Particle.SCULK_CHARGE_POP,
-                        20,
-                        0.3, 0.5, 0.3
-                ))
                 .addScreen(
                         ScreenMessage.title("&c&lYOU DIED", "&7Your soul fades...").delay(5)
                 )
                 .play(player, location, presentation);
+
+        location.getWorld().spawnParticle(Particle.SCULK_SOUL, location, 30, 0.4, 0.6, 0.4);
+        location.getWorld().spawnParticle(Particle.SCULK_CHARGE_POP, location, 20, 0.3, 0.5, 0.3);
+        location.getWorld().playSound(location, Sound.ENTITY_WARDEN_DEATH, 1f, 0.8f);
     }
 
     public void onPlayerRevive(Player player, Location location) {
-        // Totem break particle
         new PresentationSequence()
-                .addSound(DungeonSound.of(Sound.ITEM_TOTEM_USE, 1f, 1f))
-                .addParticle(DungeonParticle.of(
-                        Particle.TOTEM_OF_UNDYING,
-                        80,
-                        0.5, 1.0, 0.5
-                ))
                 .addScreen(
                         ScreenMessage.title(
                                 "&6&lFate grants you another chance!",
@@ -109,5 +94,7 @@ public class DungeonPresenter {
                         ).delay(10)
                 )
                 .play(player, location, presentation);
+        location.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, location, 80, 0.5, 1, 0.5);
+        location.getWorld().playSound(location, Sound.ITEM_TOTEM_USE, 1f, 0.8f);
     }
 }
