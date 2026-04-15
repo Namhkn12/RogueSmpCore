@@ -1,4 +1,4 @@
-﻿package com.roguesmp.dungeon_v2.data.runtime;
+package com.roguesmp.dungeon_v2.data.runtime;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -17,8 +17,12 @@ public class DeadEntry {
     public static final int DECAY_PER_TICK = 20;
 
     public DeadEntry(Player deadPlayer){
-        this.deadID = deadPlayer.getUniqueId();
-        this.deathLocation = deadPlayer.getLocation().clone();
+        this(deadPlayer.getUniqueId(), deadPlayer.getLocation());
+    }
+
+    public DeadEntry(UUID deadID, Location deathLocation) {
+        this.deadID = deadID;
+        this.deathLocation = deathLocation == null ? null : deathLocation.clone();
     }
 
     public UUID getDeadID(){

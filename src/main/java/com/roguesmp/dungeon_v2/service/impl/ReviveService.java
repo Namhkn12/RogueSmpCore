@@ -1,6 +1,7 @@
-﻿package com.roguesmp.dungeon_v2.service.impl;
+package com.roguesmp.dungeon_v2.service.impl;
 
 import com.roguesmp.dungeon_v2.data.runtime.DeadEntry;
+import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_v2.data.runtime.Party;
 import com.roguesmp.dungeon_v2.data.runtime.session.DungeonPlayer;
 import com.roguesmp.dungeon_v2.data.runtime.session.PlayerStatus;
@@ -17,8 +18,6 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.boss.BarColor;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,16 +27,16 @@ import java.util.stream.Collectors;
 
 public class ReviveService implements IReviveService {
 
-    private static final double REVIVE_RADIUS          = 3.0;
-    private static final int    PROGRESS_PER_TICK      = 20;  // +1s mỗi lần check
-    private static final int    DECAY_PER_TICK         = 10;  // -0.5s khi bị gián đoạn
+    private static final double REVIVE_RADIUS = 3.0;
+    private static final double REVIVE_RADIUS_SQUARED = REVIVE_RADIUS * REVIVE_RADIUS;
+    private static final int PROGRESS_PER_TICK = 20;  // +1s mỗi lần check
 
     private final ReviveManager reviveManager;
     private final IPartyService partyService;
     private final InstanceManager instanceManager;
     private final DungeonPresenter dungeonPresenter;
 
-    public ReviveService(ReviveManager reviveManager, IPartyService partyService, Plugin plugin, InstanceManager instanceManager, DungeonPresenter dungeonPresenter) {
+    public ReviveService(ReviveManager reviveManager, IPartyService partyService, InstanceManager instanceManager, DungeonPresenter dungeonPresenter) {
         this.reviveManager = reviveManager;
         this.partyService  = partyService;
         this.instanceManager = instanceManager;
@@ -51,7 +50,8 @@ public class ReviveService implements IReviveService {
 
     @Override
     public void registerPlayerDead(Player player) {
-        reviveManager.addEntry(player);
+        Location deathLocation = resolveDeadLocation(player);
+        reviveManager.addEntry(player, deathLocation);
         reviveManager.createBossBar(player.getUniqueId(), player);
     }
 
@@ -65,11 +65,22 @@ public class ReviveService implements IReviveService {
         revives.forEach(deadEntry -> {
             Player player = Bukkit.getPlayer(deadEntry.getDeadID());
             if(player == null) return;
+
             Party party = partyService.getPartyByPlayer(player);
             if (party == null) return;
-            DungeonPlayer dungeonPlayer = instanceManager.get(party.getInstanceId()).getDungeonPlayers();
+
+            String instanceId = party.getInstanceId();
+            if (instanceId == null || instanceId.isBlank()) return;
+
+            DungeonInstance dungeonInstance = instanceManager.get(instanceId);
+            if (dungeonInstance == null) return;
+
+            DungeonPlayer dungeonPlayer = dungeonInstance.getDungeonPlayers();
             if (dungeonPlayer == null) return;
-            Location deadLocation = dungeonPlayer.getPlayers().get(player.getUniqueId().toString()).getCheckPoint().toBukkit();
+
+            Location deadLocation = resolveDeadLocation(dungeonPlayer, player.getUniqueId(), deadEntry);
+            if (deadLocation == null || deadLocation.getWorld() == null) return;
+
             List<Player> rescuers = findRescuer(dungeonPlayer, player, deadLocation);
             if (rescuers.isEmpty()) {
                 deadEntry.decayProgress();
@@ -102,7 +113,9 @@ public class ReviveService implements IReviveService {
         Player player = Bukkit.getPlayer(deadUUID);
         if(player != null){
             status.setStatus(PlayerStatus.Status.PLAYING);
-            Teleporter.teleport(player, status.getCheckPoint());
+            if (status.getCheckPoint() != null) {
+                Teleporter.teleport(player, status.getCheckPoint());
+            }
             player.setGameMode(GameMode.SURVIVAL);
             player.setHealth(5);
             dungeonPresenter.onPlayerRevive(player, player.getLocation());
@@ -154,27 +167,21 @@ public class ReviveService implements IReviveService {
      * @return Player rescuer đầu tiên hợp lệ, hoặc null nếu không có
      */
     private List<Player> findRescuer(DungeonPlayer teammates, Player dead, Location deadLocation) {
+        if (deadLocation == null || deadLocation.getWorld() == null) return List.of();
+
         Party party = partyService.getPartyByPlayer(dead);
+        if (party == null) return List.of();
+
         return partyService.getOnlineMembers(party).stream()
                 .filter(player -> !player.equals(dead))
                 .filter(player -> {
                     PlayerStatus s = teammates.getPlayers().get(player.getUniqueId().toString());
                     return s != null && s.getStatus().equals(PlayerStatus.Status.PLAYING);
                 })
+                .filter(player -> player.getWorld().equals(deadLocation.getWorld()))
                 .filter(Player::isSneaking)
-                .filter(player -> player.getLocation().distance(deadLocation) <= REVIVE_RADIUS)
+                .filter(player -> player.getLocation().distanceSquared(deadLocation) <= REVIVE_RADIUS_SQUARED)
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Kiểm tra 2 player có cùng party/dungeon instance không.
-     * Dùng partyService.getPartyByPlayer() rồi so sánh instanceId.
-     */
-    private boolean sameInstance(Player a, Player b) {
-        // 1. Lấy party của a và b
-        // 2. Null check cả hai
-        // 3. So sánh instanceId
-        return false;
     }
 
     private void syncViewers(DeadEntry entry, List<Player> rescuers, Player dead) {
@@ -201,5 +208,38 @@ public class ReviveService implements IReviveService {
         double progress = entry.getProgressPercent();
         String title = "Reviving " + dead.getName() + " — " + rescuers.size() + " rescuer(s)";
         reviveManager.updateBossBar(deadUUID, title, progress, BarColor.GREEN);
+    }
+
+    private Location resolveDeadLocation(Player deadPlayer) {
+        if (deadPlayer == null) return null;
+
+        Party party = partyService.getPartyByPlayer(deadPlayer);
+        if (party == null) return deadPlayer.getLocation();
+
+        String instanceId = party.getInstanceId();
+        if (instanceId == null || instanceId.isBlank()) return deadPlayer.getLocation();
+
+        DungeonInstance instance = instanceManager.get(instanceId);
+        if (instance == null || instance.getDungeonPlayers() == null) return deadPlayer.getLocation();
+
+        PlayerStatus status = instance.getDungeonPlayers().getPlayers().get(deadPlayer.getUniqueId().toString());
+        if (status == null || status.getCheckPoint() == null) return deadPlayer.getLocation();
+
+        Location checkpoint = status.getCheckPoint().toBukkit();
+        if (checkpoint == null || checkpoint.getWorld() == null) return deadPlayer.getLocation();
+        return checkpoint;
+    }
+
+    private Location resolveDeadLocation(DungeonPlayer dungeonPlayer, UUID deadUUID, DeadEntry deadEntry) {
+        if (dungeonPlayer != null && deadUUID != null) {
+            PlayerStatus status = dungeonPlayer.getPlayers().get(deadUUID.toString());
+            if (status != null && status.getCheckPoint() != null) {
+                Location checkpoint = status.getCheckPoint().toBukkit();
+                if (checkpoint != null && checkpoint.getWorld() != null) {
+                    return checkpoint;
+                }
+            }
+        }
+        return deadEntry.getDeathLocation();
     }
 }

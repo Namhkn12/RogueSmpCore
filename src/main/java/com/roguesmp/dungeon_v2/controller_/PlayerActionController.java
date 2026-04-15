@@ -22,6 +22,7 @@ import com.roguesmp.dungeon_v2.service.IReviveService;
 import com.roguesmp.dungeon_v2.task.TaskScheduler;
 import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.PdcUtil;
+import com.roguesmp.dungeon_v2.utils.Teleporter;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -190,9 +191,21 @@ public class PlayerActionController {
             return;
         }
 
+        if (status == PlayerStatus.Status.DEAD) {
+            reviveService.registerPlayerDead(player);
+            if (playerStatus.getCheckPoint() != null) {
+                Teleporter.teleport(player, playerStatus.getCheckPoint());
+            }
+            player.setGameMode(GameMode.SPECTATOR);
+            return;
+        }
+
         if (status == PlayerStatus.Status.DEAD_DISCONNECT) {
             playerStatus.setStatus(PlayerStatus.Status.DEAD);
             reviveService.registerPlayerDead(player);
+            if (playerStatus.getCheckPoint() != null) {
+                Teleporter.teleport(player, playerStatus.getCheckPoint());
+            }
             player.setGameMode(GameMode.SPECTATOR);
         }
     }

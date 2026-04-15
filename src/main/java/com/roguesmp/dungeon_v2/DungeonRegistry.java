@@ -16,8 +16,8 @@ import com.roguesmp.dungeon_v2.expansion.DungeonExpansion;
 import com.roguesmp.dungeon_v2.itemdisplay.impl.ChestOpenAnimation;
 import com.roguesmp.dungeon_v2.manager.*;
 import com.roguesmp.dungeon_v2.presentation.*;
-import com.roguesmp.dungeon_v2.presentation.particle.DungeonParticle;
 import com.roguesmp.dungeon_v2.presentation.presenter.DungeonPresenter;
+import com.roguesmp.dungeon_v2.presentation.presenter.RevivePointPresenter;
 import com.roguesmp.dungeon_v2.repository.*;
 import com.roguesmp.dungeon_v2.repository.impl.*;
 import com.roguesmp.dungeon_v2.service.*;
@@ -39,6 +39,7 @@ public class DungeonRegistry {
 
     private static PartyManager partyManager;
     private static InstanceManager instanceManager;
+    private static ReviveManager reviveManager;
 
     public static void onEnable(Plugin plugin, ItemRegistry itemRegistry) {
         Gson gson = new GsonBuilder().registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
@@ -86,7 +87,8 @@ public class DungeonRegistry {
         DungeonManager dungeonManager = new DungeonManager(dungeonRepository, logger);
         SpawnerManager spawnerManager = new SpawnerManager(spawnerRepository, logger);
         LootTableManager lootTableManager = new LootTableManager(lootTableRepository);
-        ReviveManager reviveManager = new ReviveManager(taskScheduler);
+        RevivePointPresenter revivePointPresenter = new RevivePointPresenter();
+        reviveManager = new ReviveManager(taskScheduler, revivePointPresenter);
 
         SpawnerInstanceManager spawnerInstanceManager = new SpawnerInstanceManager();
         instanceManager = new InstanceManager(instanceRepository, scoreBoardManager, logger);
@@ -109,7 +111,7 @@ public class DungeonRegistry {
                 dungeonManager,
                 new ChestOpenAnimation(plugin, taskScheduler)
                 );
-        IReviveService reviveService = new ReviveService(reviveManager, partyService, plugin, instanceManager, dungeonPresenter);
+        IReviveService reviveService = new ReviveService(reviveManager, partyService, instanceManager, dungeonPresenter);
 
         /*Task*/
         PartyInviteTask inviteTask = new PartyInviteTask(plugin, partyService);
@@ -184,8 +186,15 @@ public class DungeonRegistry {
     }
 
     public static void onDisable() {
-        partyManager.saveAll();
-        instanceManager.saveAll();
+        if (reviveManager != null) {
+            reviveManager.shutdown();
+        }
+        if (partyManager != null) {
+            partyManager.saveAll();
+        }
+        if (instanceManager != null) {
+            instanceManager.saveAll();
+        }
     }
 
 }
