@@ -2,7 +2,6 @@ package com.roguesmp.dungeon_v2.actor.listener;
 
 import com.roguesmp.dungeon_v2.controller_.DungeonFlowController;
 import com.roguesmp.dungeon_v2.manager.InstanceManager;
-import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.filterchain.EventFilter;
 import com.roguesmp.dungeon_v2.utils.filterchain.FilterChain;
 import com.roguesmp.dungeon_v2.utils.filterchain.impl.InteractFilters;
@@ -16,12 +15,19 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.Location;
 import org.bukkit.util.BoundingBox;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DoorInteractListener implements Listener {
 
     private final DungeonFlowController dungeonFlowController;
     private final InstanceManager instanceManager;
+    private final Map<UUID, String> treasureEnteredByInstance = new ConcurrentHashMap<>();
 
     public DoorInteractListener(DungeonFlowController dungeonFlowController, InstanceManager instanceManager) {
         this.dungeonFlowController = dungeonFlowController;
@@ -48,7 +54,19 @@ public class DoorInteractListener implements Listener {
         String worldName = player.getWorld().getName();
 
         if (!worldName.startsWith("dungeon_")) return;
-        if (!isOverlappingBlockType(event, Material.END_GATEWAY)) return;
+
+        boolean fromInsideGateway = isOverlappingBlockType(event, event.getFrom(), Material.END_GATEWAY);
+        boolean toInsideGateway = isOverlappingBlockType(event, event.getTo(), Material.END_GATEWAY);
+        if (!toInsideGateway || fromInsideGateway) return;
+
+        String instanceId = resolveInstanceId(player);
+        if (instanceId == null || instanceId.isBlank()) return;
+
+        UUID playerId = player.getUniqueId();
+        String enteredInstance = treasureEnteredByInstance.get(playerId);
+        if (instanceId.equals(enteredInstance)) return;
+
+        treasureEnteredByInstance.put(playerId, instanceId);
         /*Get into the treasure room*/
         dungeonFlowController.handleGetIntoTreasurePortal(player);
     }
@@ -74,6 +92,11 @@ public class DoorInteractListener implements Listener {
                 || cause == PlayerTeleportEvent.TeleportCause.END_GATEWAY) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        treasureEnteredByInstance.remove(event.getPlayer().getUniqueId());
     }
 
 
@@ -116,14 +139,26 @@ public class DoorInteractListener implements Listener {
                     .require(InteractFilters.clickedBlockInWorld("dungeon_"))
                     .build();
 
-    private boolean isOverlappingBlockType(PlayerMoveEvent event, Material material) {
-        if (event.getTo() == null) return false;
+    private String resolveInstanceId(Player player) {
+        if (player == null) return null;
+        String playerId = player.getUniqueId().toString();
+
+        return instanceManager.getAll().stream()
+                .filter(instance -> instance != null && instance.getSession() != null && instance.getDungeonPlayers() != null)
+                .filter(instance -> instance.getDungeonPlayers().getPlayers().containsKey(playerId))
+                .map(instance -> instance.getSession().getSessionId())
+                .findFirst()
+                .orElse(null);
+    }
+
+    private boolean isOverlappingBlockType(PlayerMoveEvent event, Location sampleLoc, Material material) {
+        if (sampleLoc == null) return false;
 
         Player player = event.getPlayer();
         BoundingBox movedBox = player.getBoundingBox().clone().shift(
-                event.getTo().getX() - event.getFrom().getX(),
-                event.getTo().getY() - event.getFrom().getY(),
-                event.getTo().getZ() - event.getFrom().getZ()
+                sampleLoc.getX() - event.getFrom().getX(),
+                sampleLoc.getY() - event.getFrom().getY(),
+                sampleLoc.getZ() - event.getFrom().getZ()
         );
 
         World world = player.getWorld();
