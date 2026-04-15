@@ -17,6 +17,8 @@ public interface IPartyService {
 
     void kickMember(Player owner, Player target);
 
+    void forceKick(Player player);
+
     void transferOwnership(Player currentOwner, Player newOwner);
 
     String buildPartyInfo(Player player);

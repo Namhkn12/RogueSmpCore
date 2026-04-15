@@ -1,4 +1,4 @@
-﻿package com.roguesmp.dungeon_v2.service;
+package com.roguesmp.dungeon_v2.service;
 
 import com.roguesmp.dungeon_v2.data.runtime.session.DungeonPlayer;
 import org.bukkit.entity.Player;

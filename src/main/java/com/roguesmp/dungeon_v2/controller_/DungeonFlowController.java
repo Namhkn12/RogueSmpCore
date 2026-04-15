@@ -247,7 +247,7 @@ public class DungeonFlowController {
         Map<String, PlayerStatus> players = instance.getDungeonPlayers().getPlayers();
         players.remove(player.getUniqueId().toString());
         if(instance.getProgress().getStatus() == DungeonProgress.Status.IN_PROGRESS){
-            party.removeMember(player.getUniqueId().toString());
+            partyService.forceKick(player);
             instance.getDungeonPlayers().setPlayerStatus(player.getUniqueId().toString(), PlayerStatus.Status.OUT);
             DungeonEcho.info(player, "Bạn đã rời khỏi dungeon khi đang chơi," +
                     "đồng thời cũng sẽ rời khỏi party!");
@@ -257,6 +257,7 @@ public class DungeonFlowController {
         /*If all players in dungeon leave, remove dungeon instance*/
         if(players.isEmpty()){
             instanceService.removeDungeonInstance(instance);
+            party.setInstanceId("");
         }
     }
 
@@ -279,6 +280,7 @@ public class DungeonFlowController {
         });
         instanceService.removeDungeonInstance(instance);
         instanceManager.remove(instance.getSession().getSessionId());
+        partyService.getPartyById(instance.getSession().getPartyId()).setInstanceId("");
     }
 
     public void handleDungeonTimerTick() {

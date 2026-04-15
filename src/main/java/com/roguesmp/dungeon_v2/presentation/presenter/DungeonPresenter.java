@@ -51,8 +51,8 @@ public class DungeonPresenter {
                 .addSound(DungeonSound.of(Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.2f))
                 .addScreen(
                         ScreenMessage.title(
-                                "&a&lHOÀN THÀNH",
-                                "&7Bạn đã vượt qua căn phòng"
+                                "&a&lROOM CLEARED",
+                                "&7Your team have conquered this room"
                         )
                 )
 
@@ -65,8 +65,8 @@ public class DungeonPresenter {
                 .addSound(DungeonSound.of(Sound.BLOCK_BEACON_ACTIVATE, 1f, 1.2f))
                 .addScreen(
                         ScreenMessage.title(
-                                "&a&lCHÚC MỪNG",
-                                "&7Bạn đã vượt qua hầm ngục"
+                                "&a&lDUNGEON COMPLETED",
+                                "&7Your team have conquered the dungeon"
                         )
                 )
 
@@ -89,7 +89,7 @@ public class DungeonPresenter {
         new PresentationSequence()
                 .addScreen(
                         ScreenMessage.title(
-                                "&6&lFate grants you another chance!",
+                                "&6Revived",
                                 "&eYour soul is restored"
                         ).delay(10)
                 )

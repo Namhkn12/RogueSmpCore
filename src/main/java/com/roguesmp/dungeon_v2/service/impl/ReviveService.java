@@ -41,12 +41,10 @@ public class ReviveService implements IReviveService {
         this.partyService  = partyService;
         this.instanceManager = instanceManager;
         this.dungeonPresenter = dungeonPresenter;
-        // Truyền processTick xuống manager để manager chạy task,
-        // nhưng logic thực thi vẫn nằm ở đây.
+
         reviveManager.startTask(this::processTick);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
 
     @Override
     public void registerPlayerDead(Player player) {
@@ -55,13 +53,10 @@ public class ReviveService implements IReviveService {
         reviveManager.createBossBar(player.getUniqueId(), player);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
 
     @Override
     public void processTick() {
-        // 1. Lấy manager.getAllEntries() — snapshot để iterate an toàn
         List<DeadEntry> revives = reviveManager.getAllEntries();
-        // 2. Với mỗi DeadEntry:
         revives.forEach(deadEntry -> {
             Player player = Bukkit.getPlayer(deadEntry.getDeadID());
             if(player == null) return;
@@ -99,15 +94,11 @@ public class ReviveService implements IReviveService {
 
     @Override
     public void revivePlayer(UUID deadUUID, DungeonPlayer dungeonPlayer) {
-        // 1. Lấy entry từ manager.getEntry(uuid), return nếu empty
         DeadEntry entry = reviveManager.getEntry(deadUUID).orElse(null);
         if(entry == null) return;
         reviveManager.removeEntry(deadUUID);
         reviveManager.removeBossBar(deadUUID);
 
-        // 2. manager.removeEntry(uuid)
-        // 3. manager.removeBossBar(uuid)
-        // 4. Lấy Player từ Bukkit, return nếu null (đã offline)
         PlayerStatus status = dungeonPlayer.getPlayers().get(UuidUtil.toStringOrNull(deadUUID));
         if (status == null) return;
         Player player = Bukkit.getPlayer(deadUUID);
@@ -122,12 +113,6 @@ public class ReviveService implements IReviveService {
             DungeonEcho.success(player, "Fate grants you another chance!");
         }
         else status.setStatus(PlayerStatus.Status.DISCONNECT);
-
-
-        // 5. player.setGameMode(SURVIVAL)
-        // 6. player.teleport(entry.getDeathLocation())
-        // 7. Restore health / food level
-        // 8. Gọi presenter.onPlayerRevived(player) — title, sound, effect
     }
 
     @Override
@@ -136,7 +121,6 @@ public class ReviveService implements IReviveService {
         reviveManager.removeBossBar(uuid);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
 
     @Override
     public void reviveAll() {
@@ -144,28 +128,12 @@ public class ReviveService implements IReviveService {
         // 2. Gọi revivePlayer(uuid) cho từng UUID
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
 
     @Override
     public boolean isDead(UUID uuid) {
         return reviveManager.hasEntry(uuid);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Tìm rescuer hợp lệ cho dead player.
-     *
-     * Điều kiện:
-     *   - Không phải chính dead player
-     *   - Không đang trong trạng thái DEAD (isDead check)
-     *   - Cùng world với death location
-     *   - Đang sneaking (Shift)
-     *   - Trong vòng REVIVE_RADIUS tính từ death location
-     *   - Cùng party / cùng dungeon instance (check qua partyService)
-     *
-     * @return Player rescuer đầu tiên hợp lệ, hoặc null nếu không có
-     */
     private List<Player> findRescuer(DungeonPlayer teammates, Player dead, Location deadLocation) {
         if (deadLocation == null || deadLocation.getWorld() == null) return List.of();
 

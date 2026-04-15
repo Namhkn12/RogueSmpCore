@@ -1,78 +1,119 @@
 package com.roguesmp.dungeon_v2.presentation.presenter;
 
+import com.roguesmp.dungeon_v2.utils.NameSpaceKeys;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.entity.Display;
-import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.util.Transformation;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.EulerAngle;
 
 public class RevivePointPresenter {
 
-    private static final double ORBIT_RADIUS = 0.8D;
-    private static final double FLOAT_HEIGHT = 1.2D;
-    private static final float DISPLAY_SCALE = 0.75F;
-    private static final float ORBIT_DEGREE_PER_TICK = 12.0F;
+    // === ĐÃ GIẢM MẠNH ĐỂ BODY CHẠM ĐẤT ===
+    private static final double GROUND_OFFSET = -0.35D;   // Âm để kéo xuống
+    private static final double FLOAT_HEIGHT = 0.45D;     // Chiều cao float khi tick
 
-    public ItemDisplay spawnRevivePoint(Player deadPlayer, Location deadLocation) {
-        if (deadPlayer == null || deadLocation == null || deadLocation.getWorld() == null) return null;
+    public ArmorStand spawnRevivePoint(Player deadPlayer, Location deadLocation) {
+        if (deadPlayer == null || deadLocation == null || deadLocation.getWorld() == null)
+            return null;
 
-        ItemStack playerHead = ItemStack.of(Material.PLAYER_HEAD);
-        if (playerHead.getItemMeta() instanceof SkullMeta skullMeta) {
+        EntityEquipment playerEq = deadPlayer.getEquipment();
+
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        if (head.getItemMeta() instanceof SkullMeta skullMeta) {
             skullMeta.setOwningPlayer(deadPlayer);
-            playerHead.setItemMeta(skullMeta);
+            head.setItemMeta(skullMeta);
         }
 
-        Location spawnLoc = deadLocation.clone().add(0, FLOAT_HEIGHT, 0);
-        return spawnLoc.getWorld().spawn(spawnLoc, ItemDisplay.class, display -> {
-            display.setItemStack(playerHead);
-            display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.GROUND);
-            display.setBillboard(Display.Billboard.FIXED);
-            display.setGlowing(true);
-            display.setTransformation(new Transformation(
-                    new Vector3f(0F, 0F, 0F),
-                    new Quaternionf(),
-                    new Vector3f(DISPLAY_SCALE, DISPLAY_SCALE, DISPLAY_SCALE),
-                    new Quaternionf()
-            ));
+        ItemStack chestplate = getOrDefault(playerEq.getChestplate(), Material.CHAINMAIL_CHESTPLATE);
+        ItemStack leggings = getOrDefault(playerEq.getLeggings(), Material.CHAINMAIL_LEGGINGS);
+        ItemStack boots = getOrDefault(playerEq.getBoots(), Material.CHAINMAIL_BOOTS);
+        ItemStack mainHand = getHand(playerEq.getItemInMainHand());
+        ItemStack offHand = getHand(playerEq.getItemInOffHand());
+
+        Location spawnLoc = deadLocation.clone().add(0, GROUND_OFFSET, 0);
+
+        return spawnLoc.getWorld().spawn(spawnLoc, ArmorStand.class, stand -> {
+            stand.setVisible(false);
+            stand.setGravity(false);
+            stand.setInvulnerable(true);
+            stand.setCanPickupItems(false);
+            stand.setCollidable(false);
+            stand.setSilent(true);
+            stand.setArms(true);
+            stand.setBasePlate(false);
+            stand.setSmall(false);
+
+            stand.setBodyPose(new EulerAngle(Math.toRadians(271), 0, 0));
+
+            stand.setHeadPose(new EulerAngle(Math.toRadians(276), 0, 0));
+
+            stand.setRightArmPose(new EulerAngle(Math.toRadians(272), 0, 0));
+            stand.setLeftArmPose(new EulerAngle(Math.toRadians(272), 0, 0));
+
+            stand.setLeftLegPose(new EulerAngle(Math.toRadians(270), 0, 0));
+            stand.setRightLegPose(new EulerAngle(Math.toRadians(270), 0, 0));
+
+            stand.setGlowing(true);
+            stand.setRotation(deadLocation.getYaw(), 0);
+
+            EntityEquipment eq = stand.getEquipment();
+            eq.setHelmet(head);
+            eq.setChestplate(chestplate);
+            eq.setLeggings(leggings);
+            eq.setBoots(boots);
+            eq.setItemInMainHand(mainHand);
+            eq.setItemInOffHand(offHand);
+
+            stand.getPersistentDataContainer().set(
+                    NameSpaceKeys.REVIVE_POINT_KEY,
+                    PersistentDataType.BYTE,
+                    (byte) 1
+            );
         });
     }
 
-    public void tickRevivePoint(ItemDisplay display, Location center, int tick) {
-        if (display == null || display.isDead() || center == null || center.getWorld() == null) return;
+    public void tickRevivePoint(ArmorStand stand, Location center, int tick) {
+        if (stand == null || stand.isDead() || center == null || center.getWorld() == null)
+            return;
 
-        float angleDeg = (tick * ORBIT_DEGREE_PER_TICK) % 360F;
-        double angleRad = Math.toRadians(angleDeg);
+        // Float rất nhẹ vì đang nằm
+        double floatY = Math.sin(tick / 10.0) * 0.01;
+        Location floatLoc = center.clone().add(0, FLOAT_HEIGHT + floatY, 0);
 
-        double orbitX = Math.cos(angleRad) * ORBIT_RADIUS;
-        double orbitZ = Math.sin(angleRad) * ORBIT_RADIUS;
+        stand.teleport(floatLoc);
 
-        Location orbitLoc = center.clone().add(orbitX, FLOAT_HEIGHT, orbitZ);
-        display.teleport(orbitLoc);
-
-        Quaternionf spin = new Quaternionf().rotateY((float) (angleRad + Math.PI / 2));
-        display.setTransformation(new Transformation(
-                new Vector3f(0F, 0F, 0F),
-                spin,
-                new Vector3f(DISPLAY_SCALE, DISPLAY_SCALE, DISPLAY_SCALE),
-                new Quaternionf()
-        ));
-
-        center.getWorld().spawnParticle(Particle.END_ROD, orbitLoc.clone().add(0, 0.15, 0), 1, 0.03, 0.03, 0.03, 0.0);
-        if (tick % 2 == 0) {
-            center.getWorld().spawnParticle(Particle.ENCHANT, center.clone().add(0, 0.15, 0), 2, 0.45, 0.10, 0.45, 0.0);
+        if (tick % 4 == 0) {
+            center.getWorld().spawnParticle(
+                    Particle.ENCHANT,
+                    floatLoc.clone().add(0, 1.1, 0),
+                    6,
+                    0.3, 0.25, 0.3,
+                    0
+            );
         }
     }
 
-    public void removeRevivePoint(ItemDisplay display) {
-        if (display == null) return;
-        if (!display.isDead()) {
-            display.remove();
+    public void removeRevivePoint(ArmorStand stand) {
+        if (stand != null && !stand.isDead()) {
+            stand.remove();
         }
+    }
+
+    private ItemStack getHand(ItemStack item) {
+        if (item == null || item.getType().isAir()) return null;
+        return item.clone();
+    }
+
+    private ItemStack getOrDefault(ItemStack item, Material fallback) {
+        if (item == null || item.getType().isAir()) {
+            return new ItemStack(fallback);
+        }
+        return item.clone();
     }
 }

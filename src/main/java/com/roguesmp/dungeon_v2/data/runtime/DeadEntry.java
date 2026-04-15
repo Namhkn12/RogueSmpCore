@@ -12,7 +12,7 @@ public class DeadEntry {
 
     private int progressTicks = 0;
 
-    public static final int REVIVE_THRESHOLD_TICKS = 600;
+    public static final int REVIVE_THRESHOLD_TICKS = 240;
 
     public static final int DECAY_PER_TICK = 20;
 

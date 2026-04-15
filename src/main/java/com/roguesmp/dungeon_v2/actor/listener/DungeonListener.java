@@ -2,17 +2,21 @@ package com.roguesmp.dungeon_v2.actor.listener;
 
 import com.roguesmp.dungeon_v2.controller_.PlayerActionController;
 import com.roguesmp.dungeon_v2.task.TaskScheduler;
+import com.roguesmp.dungeon_v2.utils.NameSpaceKeys;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -81,6 +85,24 @@ public class DungeonListener implements Listener {
     public void onPlayerDisconnect(PlayerQuitEvent event){
         if(!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
         actionController.handlePlayerDisconnect(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onArmorStandInteract(PlayerInteractAtEntityEvent e) {
+        if (e.getRightClicked() instanceof ArmorStand stand) {
+            if (stand.getPersistentDataContainer().has(NameSpaceKeys.REVIVE_POINT_KEY)) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onArmorStandDamage(EntityDamageEvent e) {
+        if (e.getEntity() instanceof ArmorStand stand) {
+            if (stand.getPersistentDataContainer().has(NameSpaceKeys.REVIVE_POINT_KEY)) {
+                e.setCancelled(true);
+            }
+        }
     }
 
     //TODO

@@ -15,6 +15,7 @@ import com.roguesmp.dungeon_v2.utils.filterchain.impl.EntityFilters;
 import com.roguesmp.dungeon_v2.utils.filterchain.impl.InteractFilters;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.TrialSpawner;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Marker;
@@ -93,12 +94,19 @@ public class SpawnerEventListener implements Listener {
     }
 
     @EventHandler
-    public void onTrialSpawnerActive(PlayerInteractEvent event){
-        if(!TRIAL_FILTER.test(event)) return;
+    public void onTrialSpawnerActive(PlayerInteractEvent event) {
+        if (!TRIAL_FILTER.test(event)) return;
+
         Player player = event.getPlayer();
         Block block = event.getClickedBlock();
-        new TriggerBossGui(p -> {
-            bossRoomController.handleTriggerBossRoom(player, block);
+        if (block == null) return;
+
+        BlockState state = block.getState();
+
+        if (!(state instanceof TrialSpawner trialSpawner)) return;
+
+        new TriggerBossGui(block, p -> {
+            bossRoomController.handleTriggerBossRoom(p, block);
         }).showInventory(player);
     }
 

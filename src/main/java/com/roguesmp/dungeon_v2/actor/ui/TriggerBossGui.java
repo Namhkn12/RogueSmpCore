@@ -3,7 +3,11 @@ package com.roguesmp.dungeon_v2.actor.ui;
 import com.roguesmp.gui.BaseGui;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.TrialSpawner;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
 import java.util.function.Consumer;
@@ -16,14 +20,16 @@ public class TriggerBossGui extends BaseGui {
 
     private final ItemStack filler;
     private final ItemStack trigger;
+    private final Block block;
     private final Consumer<Player> onTrigger;
 
-    public TriggerBossGui(Consumer<Player> onTrigger) {
+    public TriggerBossGui(Block block, Consumer<Player> onTrigger) {
         super(Component.text("Boss"), TOTAL_ROW);
 
         filler = makeHidden(ItemStack.of(Material.RED_STAINED_GLASS_PANE));
         trigger = makeHidden(ItemStack.of(Material.TRIAL_SPAWNER));
         this.onTrigger = onTrigger;
+        this.block = block;
     }
 
     @Override
@@ -40,6 +46,26 @@ public class TriggerBossGui extends BaseGui {
 
     @Override
     public void onOpenInventory(InventoryOpenEvent event) {
-        super.onOpenInventory(event);
+        BlockState state = block.getState();
+
+        if (!(state instanceof TrialSpawner spawner)) return;
+
+        if (spawner.isOminous()) {
+            event.setCancelled(true);
+            return;
+        }
+
+        spawner.setOminous(true);
+        spawner.update();
+    }
+
+    @Override
+    public void onCloseInventory(InventoryCloseEvent event) {
+        BlockState state = block.getState();
+
+        if (!(state instanceof TrialSpawner spawner)) return;
+
+        spawner.setOminous(false);
+        spawner.update();
     }
 }

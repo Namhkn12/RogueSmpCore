@@ -35,11 +35,12 @@ public class DoorInteractListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
+    public void onPlayerInteractDoor(PlayerInteractEvent event) {
         if(!VAULT_FILTER.test(event)) return;
         event.setCancelled(true);
 
         Block block = event.getClickedBlock();
+        if(block == null) return;
         Vault vault = (Vault) block.getState();
         Player player = event.getPlayer();
 

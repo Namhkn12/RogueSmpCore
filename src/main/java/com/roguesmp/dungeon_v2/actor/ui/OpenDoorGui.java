@@ -81,7 +81,7 @@ public class OpenDoorGui extends BaseGui {
         /*Set player id into vault*/
         Vault vault = (Vault) door.getState();
         /*Just one player can open the door*/
-        if(!vault.getRewardedPlayers().isEmpty()) return;
+        if(!vault.getRewardedPlayers().isEmpty()) event.setCancelled(true);
         Player player = (Player) event.getPlayer();
         vault.addRewardedPlayer(player.getUniqueId());
         vault.update();

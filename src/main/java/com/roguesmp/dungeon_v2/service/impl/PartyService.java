@@ -113,7 +113,41 @@ public class PartyService implements IPartyService {
 
         partyManager.removeMember(party.getPartyId(), target.getUniqueId().toString());
         DungeonEcho.success(owner, "Đã đuổi " + target.getName() + " khỏi party.");
-        DungeonEcho.warn(owner, "Bạn đã bị buộc rời nhóm");
+        DungeonEcho.warn(target, "Bạn đã bị buộc rời nhóm");
+    }
+
+    @Override
+    public void forceKick(Player player) {
+        if (!partyManager.isInParty(player.getUniqueId())) {
+            return;
+        }
+
+        Party party = partyManager.findByPlayer(player.getUniqueId());
+        if (party == null) return;
+
+        String playerId = player.getUniqueId().toString();
+
+        if (partyManager.checkIsOwner(player.getUniqueId())) {
+
+            String newOwnerId = party.getMembers().stream()
+                    .filter(id -> !id.equals(playerId))
+                    .findFirst()
+                    .orElse(null);
+
+            if (newOwnerId == null) {
+                disbandParty(player);
+                return;
+            }
+
+            partyManager.transferOwner(party.getPartyId(), newOwnerId);
+
+            Player newOwner = UuidUtil.getPlayerById(newOwnerId);
+            if (newOwner != null) {
+                DungeonEcho.success(newOwner, "Bạn đã trở thành chủ nhóm");
+            }
+        }
+        partyManager.removeMember(party.getPartyId(), playerId);
+        DungeonEcho.warn(player, "Bạn đã rời khỏi party (force)");
     }
 
     @Override

@@ -8,7 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -16,10 +16,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Chịu trách nhiệm quản lý và thao tác dữ liệu revive.
- * Không chứa business logic — chỉ là nơi lưu trữ và cung cấp data.
- */
 public class ReviveManager {
 
     private static final long REVIVE_POINT_PERIOD_TICKS = 1L;
@@ -27,7 +23,7 @@ public class ReviveManager {
     private final Map<UUID, DeadEntry> deadEntries = new ConcurrentHashMap<>();
     private final Map<UUID, BossBar>   bossBars    = new ConcurrentHashMap<>();
     private final Map<UUID, BukkitTask> revivePointTasks = new ConcurrentHashMap<>();
-    private final Map<UUID, ItemDisplay> revivePointDisplays = new ConcurrentHashMap<>();
+    private final Map<UUID, ArmorStand> revivePointDisplays = new ConcurrentHashMap<>();
     private final TaskScheduler taskScheduler;
     private final RevivePointPresenter revivePointPresenter;
     private BukkitTask task;
@@ -155,7 +151,7 @@ public class ReviveManager {
     private void startOrReplaceRevivePoint(UUID deadUUID, Player deadPlayer, Location deathLocation) {
         stopRevivePoint(deadUUID);
 
-        ItemDisplay display = revivePointPresenter.spawnRevivePoint(deadPlayer, deathLocation);
+        ArmorStand display = revivePointPresenter.spawnRevivePoint(deadPlayer, deathLocation);
         if (display == null) return;
 
         revivePointDisplays.put(deadUUID, display);
@@ -178,7 +174,7 @@ public class ReviveManager {
             reviveTask.cancel();
         }
 
-        ItemDisplay display = revivePointDisplays.remove(deadUUID);
-        revivePointPresenter.removeRevivePoint(display);
+        ArmorStand stand = revivePointDisplays.remove(deadUUID);
+        revivePointPresenter.removeRevivePoint(stand);
     }
 }
