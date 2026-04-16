@@ -1,13 +1,13 @@
-package com.roguesmp.player.ability.impl.swap;
+package com.roguesmp.player.ability.impl.active;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.constant.AbilityTrigger;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
+import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.Hitbox;
 import com.roguesmp.utils.Utils;
@@ -26,54 +26,53 @@ import java.util.List;
 public class GravityBomb extends Ability {
     public static final String ID = "gravity_bomb";
 
-    // Level Scaling Lists
-    public static final List<Integer> DAMAGES = List.of(10, 20, 30, 40, 55);
-    public static final List<Double> RADIUS_LEVELS = List.of(8.0, 10.0, 12.0, 14.0, 16.0);
-    public static final List<Integer> COOLDOWN_LEVELS = List.of(160, 140, 120, 100, 80); // 8s down to 4s
+    // Cached Attributes
+    private final double radius;
+    private final double damage;
+    private final int cooldown;
+    private final double velocity = 1.1;
 
-    public static final double BASE_VELOCITY = 1.1;
-
-    public static final AbilityInfo<GravityBomb> INFO = new AbilityInfo.Builder<GravityBomb>()
-            .id(ID)
-            .descriptionProvider((p, level) -> List.of(
-                    Utils.text("Thả bom trọng lực hút kẻ địch, gây ", NamedTextColor.GRAY)
-                            .append(Utils.text(DAMAGES.get(level - 1) + " sát thương", NamedTextColor.BLUE)),
-                    Utils.text("Bán kính: ", NamedTextColor.GRAY)
-                            .append(Utils.text(Utils.formatDecimal(RADIUS_LEVELS.get(level - 1)) + "m", NamedTextColor.AQUA))
-            ))
-            .displayText(Component.text("Gravity Bomb", NamedTextColor.BLUE, TextDecoration.BOLD))
-            .displayIcon(Material.TNT)
-            .factory(GravityBomb::new)
-            .trigger(AbilityTrigger.SWAP)
-            .build();
+    /**
+     * Action-based INFO shell.
+     */
+    public static final AbilityInfo<GravityBomb> INFO = new AbilityInfo<>(
+            ID,
+            GravityBomb.class,
+            GravityBomb::new
+    ).registerAction("execute", GravityBomb::handleCast);
 
     public GravityBomb(SmpPlayer player, int level) {
         super(player, level);
+        // Cache attributes from the Info/JSON on initialization
+        this.radius = getAbilityInfo().getAttributeForLevel("radius", level);
+        this.damage = getAbilityInfo().getAttributeForLevel("damage", level);
+        this.cooldown = (int) getAbilityInfo().getAttributeForLevel("cooldown", level);
     }
 
-    @Override
-    public void cast() {
+    /**
+     * Replaced cast() with the new action-mapped handleCast().
+     */
+    public AbilityResponse handleCast() {
+        if (isOnCooldown()) return AbilityResponse.continueChain();
+
         Player player = smpPlayer.getBukkitPlayer();
         Location eyeLocation = player.getEyeLocation();
-
-        // Use level-scaled values
-        double radius = RADIUS_LEVELS.get(level - 1);
-        int damage = DAMAGES.get(level - 1);
-        setCooldownTick(COOLDOWN_LEVELS.get(level - 1));
-
-        Vector vel = eyeLocation.getDirection().normalize().multiply(BASE_VELOCITY);
-        double velY = vel.getY();
-        if (velY > 0 && velY < 0.2) {
-            vel.setY(0.2);
-        }
-
         World world = player.getWorld();
+
+        // 1. Set Cooldown using cached value
+        setCooldownTick(cooldown);
+
+        // 2. Physics & Sound
+        Vector vel = eyeLocation.getDirection().normalize().multiply(velocity);
+        if (vel.getY() > 0 && vel.getY() < 0.2) vel.setY(0.2);
+
         world.playSound(eyeLocation, Sound.ENTITY_SHULKER_SHOOT, SoundCategory.PLAYERS, 1.0f, 1.8f);
         world.playSound(eyeLocation, Sound.ENTITY_IRON_GOLEM_HURT, SoundCategory.PLAYERS, 1.0f, 1.8f);
 
+        // 3. Projectile Setup
         Item physicsItem = (Item) world.spawnEntity(eyeLocation, EntityType.ITEM);
         Slime grenade = (Slime) world.spawnEntity(eyeLocation, EntityType.SLIME);
-        ItemStack itemStack = ItemStack.of(Material.GUNPOWDER);
+        ItemStack itemStack = new ItemStack(Material.GUNPOWDER);
 
         grenade.setSize(1);
         grenade.setSilent(true);
@@ -89,23 +88,30 @@ public class GravityBomb extends Ability {
             @Override
             public void run() {
                 if (!player.isOnline()) {
-                    grenade.remove();
-                    physicsItem.remove();
-                    this.cancel();
+                    cleanup();
                     return;
                 }
 
+                // Collision or Expiration check
                 if (!grenade.isValid() || physicsItem.isOnGround() || tick > 120 || grenade.isInLava() || hasCollidedWithEnemy(grenade)) {
-                    Location location = grenade.getLocation();
-                    grenade.remove();
-                    physicsItem.remove();
-                    explode(location, damage, radius);
-                    this.cancel();
+                    Location explodeLoc = grenade.getLocation();
+                    cleanup();
+                    explode(explodeLoc, damage, radius);
                     return;
                 }
+
+                // Visuals (Optional: Add gravity pull particles here)
                 tick++;
             }
+
+            private void cleanup() {
+                grenade.remove();
+                physicsItem.remove();
+                this.cancel();
+            }
         }.runTaskTimer(RogueSmpCore.getInstance(), 0, 1);
+
+        return AbilityResponse.consume();
     }
 
     private boolean hasCollidedWithEnemy(Slime grenade) {
@@ -113,7 +119,7 @@ public class GravityBomb extends Ability {
         return !hitbox.getHitMobs(grenade).isEmpty();
     }
 
-    private void explode(Location location, int damage, double radius) {
+    private void explode(Location location, double damage, double radius) {
         World world = location.getWorld();
         world.playSound(location, Sound.ITEM_TOTEM_USE, SoundCategory.PLAYERS, 1.5f, 2.0f);
         world.playSound(location, Sound.BLOCK_BELL_RESONATE, SoundCategory.PLAYERS, 1.5f, 2.0f);
@@ -141,7 +147,7 @@ public class GravityBomb extends Ability {
     }
 
     @Override
-    public @NotNull AbilityInfo<? extends Ability> getAbilityInfo() {
+    public @NotNull AbilityInfo<?> getAbilityInfo() {
         return INFO;
     }
 }

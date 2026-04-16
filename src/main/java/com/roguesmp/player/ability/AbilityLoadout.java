@@ -1,191 +1,226 @@
 package com.roguesmp.player.ability;
 
-import com.roguesmp.constant.AbilityTrigger;
 import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.registry.AbilityRegistry;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import com.roguesmp.player.ability.trigger.AbilityResponse;
+import com.roguesmp.player.ability.trigger.AbilityTrigger;
+import com.roguesmp.registry.ability.AbilityRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class AbilityLoadout {
-    public static final int MAX_PASSIVE_ABILITY = 14;
-
     private final SmpPlayer smpPlayer;
-    private final Map<AbilityTrigger, Ability> equippedAbilities = new EnumMap<>(AbilityTrigger.class);
-    private final List<Ability> passiveAbilities = new ArrayList<>();
+
+    // Internal runtime storage: Fast array access per type
+    private final Map<AbilityType, Ability[]> abilityMap = new EnumMap<>(AbilityType.class);
+
+    // State Management for abilities that "intercept" inputs (e.g., aiming modes)
+    private Ability contextOwner = null;
+    private int contextTicksLeft = 0;
 
     public AbilityLoadout(SmpPlayer smpPlayer) {
         this.smpPlayer = smpPlayer;
 
-//        equipActiveAbility(AbilityTrigger.SWAP, GravityBomb.INFO.getFactory().apply(smpPlayer, 2));
-    }
-
-    public boolean cast(AbilityTrigger trigger) {
-        Ability ability = equippedAbilities.get(trigger);
-        if (ability == null) return false;
-        if (!ability.isOnCooldown()) {
-            smpPlayer.getBukkitPlayer().sendActionBar(Component.text("Kích hoạt kĩ năng ", NamedTextColor.YELLOW).append(ability.getAbilityInfo().displayText()));
-            ability.cast();
-            Bukkit.getPluginManager().callEvent(new AbilityCastEvent(smpPlayer, ability));
-            return true;
+        // Initialize arrays based on Enum definitions
+        for (AbilityType type : AbilityType.values()) {
+            abilityMap.put(type, new Ability[type.getMaxSlots()]);
         }
-        return false;
     }
 
-    public void equipActive(AbilityTrigger trigger, Ability ability) {
-        equippedAbilities.put(trigger, ability);
+    /**
+     * Unified equip method.
+     * Automatically syncs the runtime Ability instance and the PlayerData persistence.
+     */
+    public void equip(AbilityType type, @Nullable Ability ability, int index) {
+        Ability[] slots = abilityMap.get(type);
+        if (slots == null || index < 0 || index >= slots.length) return;
+
+        slots[index] = ability;
+
+        String id = (ability == null) ? null : ability.getId();
+        smpPlayer.getPlayerData().setEquippedAbility(type, index, id);
     }
 
-    public void removeActive(AbilityTrigger trigger) {
-        equippedAbilities.remove(trigger);
-    }
-
-    public void equipPassive(Ability ability) {
-        for (Ability ability1 : passiveAbilities) {
-            // If already equipped, ignore
-            if (ability1.getAbilityInfo().id().equals(ability.getAbilityInfo().id())) return;
-        }
-        passiveAbilities.add(ability);
-    }
-
-    public void removePassive(String id) {
-        passiveAbilities.removeIf(a -> a.getAbilityInfo().id().equals(id));
+    /**
+     * Helper to check if an ability ID is already equipped in a specific category.
+     */
+    public boolean isEquipped(String abilityId, AbilityType type) {
+        Ability[] slots = abilityMap.get(type);
+        if (slots == null) return false;
+        return Arrays.stream(slots).anyMatch(a -> a != null && a.getId().equals(abilityId));
     }
 
     public void loadData(PlayerData data) {
-        Map<String, Integer> pairs = data.getUnlockedAbilities();
+        Map<String, Integer> unlocked = data.getUnlockedAbilities();
 
-        Map<AbilityTrigger, String> equippedIds = data.getEquippedAbilities();
-        equippedIds.forEach((trigger, s) -> {
-            int level = pairs.getOrDefault(s, 1);
-            Ability ability = AbilityRegistry.createInstance(s, smpPlayer, level);
-            if (ability != null) {
-                equipActive(trigger, ability);
-            }
-        });
+        for (AbilityType type : AbilityType.values()) {
+            List<String> equippedIds = data.getEquippedByType(type);
 
-        List<String> passives = data.getPassiveAbilities();
-        passives.forEach(s -> {
-            int level = pairs.getOrDefault(s, 1);
-            Ability ability = AbilityRegistry.createInstance(s, smpPlayer, level);
-            if (ability != null) {
-                equipPassive(ability);
+            for (int i = 0; i < equippedIds.size(); i++) {
+                String id = equippedIds.get(i);
+                if (id == null) continue;
+
+                int level = unlocked.getOrDefault(id, 1);
+                Ability ability = AbilityRegistry.getInstance().createInstance(id, smpPlayer, level);
+
+                if (ability != null) {
+                    // Update internal map only (to avoid redundant dirty-flag triggers in PlayerData)
+                    abilityMap.get(type)[i] = ability;
+                }
             }
-        });
+        }
+    }
+
+    public void cast(AbilityTrigger.Key key) {
+        // 1. Give Context Owner priority (Interceptor pattern)
+        if (contextOwner != null) {
+            if (execute(contextOwner, key)) return;
+        }
+
+        // 2. Check all Active abilities in order
+        Ability[] actives = abilityMap.get(AbilityType.ACTIVE);
+        for (Ability ability : actives) {
+            if (ability == null || ability == contextOwner) continue;
+            if (execute(ability, key)) return;
+        }
+    }
+
+    // --- Execution Logic ---
+
+    @SuppressWarnings("unchecked")
+    private boolean execute(Ability ability, AbilityTrigger.Key key) {
+        AbilityInfo<Ability> info = (AbilityInfo<Ability>) ability.getAbilityInfo();
+        String actionKey = info.findMatchingActionKey(smpPlayer.getBukkitPlayer(), key);
+
+        if (actionKey == null) return false;
+
+        AbilityCastEvent event = new AbilityCastEvent(smpPlayer, ability);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return true;
+
+        AbilityResponse resp = info.executeSpecificAction(ability, actionKey);
+        return processSignal(ability, resp);
+    }
+
+    private boolean processSignal(Ability ability, AbilityResponse resp) {
+        switch (resp.signal()) {
+            case CAPTURE -> {
+                this.contextOwner = ability;
+                this.contextTicksLeft = resp.timeoutTicks();
+                return true;
+            }
+            case RELEASE -> {
+                this.contextOwner = null;
+                this.contextTicksLeft = 0;
+                return true;
+            }
+            case CONSUME -> { return true; }
+            case CONTINUE -> { return false; }
+            default -> { return false; }
+        }
+    }
+
+    // --- Getters ---
+
+    public Ability[] getAbilities(AbilityType type) {
+        return abilityMap.getOrDefault(type, new Ability[0]);
     }
 
     public SmpPlayer getSmpPlayer() {
         return smpPlayer;
     }
 
-    public Map<AbilityTrigger, Ability> getActiveAbilities() {
-        return equippedAbilities;
-    }
-
-    public List<Ability> getPassiveAbilities() {
-        return passiveAbilities;
-    }
-
     /**
-     * Return a list of all equipped abilities, with passive first and active last. The order of active is the same as AbilityTrigger enum
-     * @return An unmodifiable list containing all equipped abilities
+     * A private helper to execute logic on every non-null ability
+     * in the loadout, regardless of type.
      */
-    public @Unmodifiable List<Ability> getAbilities() {
-        List<Ability> abilities = new ArrayList<>(passiveAbilities);
-        abilities.addAll(equippedAbilities.values());
-        return List.copyOf(abilities);
+    private void forEachAbility(Consumer<Ability> action) {
+        for (Ability[] abilities : abilityMap.values()) {
+            for (Ability ability : abilities) {
+                if (ability != null) {
+                    action.accept(ability);
+                }
+            }
+        }
     }
 
     public void tick(int periodIncrement) {
-        passiveAbilities.forEach((ability) -> {
+        // 1. Handle Input Context Timeout
+        if (contextOwner != null) {
+            contextTicksLeft -= periodIncrement;
+            if (contextTicksLeft <= 0) contextOwner = null;
+        }
+
+        // 2. Tick all abilities across all categories
+        forEachAbility(ability -> {
+            // Handle Cooldowns
             if (ability.tickCooldown(PlayerManager.PERIOD)) {
                 ability.onCooldownRefreshed();
             }
-            ability.tick(periodIncrement);
-        });
-        equippedAbilities.forEach((trigger, ability) -> {
-            if (ability.tickCooldown(PlayerManager.PERIOD)) {
-                ability.onCooldownRefreshed();
-            }
+            // General Tick logic
             ability.tick(periodIncrement);
         });
     }
 
+    // --- Event Listeners ---
+
     public void onDamageEntity(DamageEvent event) {
-        passiveAbilities.forEach((ability) -> ability.onDamageEntity(event));
-        equippedAbilities.forEach((trigger, ability) -> ability.onDamageEntity(event));
+        forEachAbility(ability -> ability.onDamageEntity(event));
     }
 
     public void onKillEntity(EntityDeathEvent event) {
-        passiveAbilities.forEach((ability) -> ability.onKillEntity(event));
-        equippedAbilities.forEach((trigger, ability) -> ability.onKillEntity(event));
+        forEachAbility(ability -> ability.onKillEntity(event));
     }
 
     public void onHurt(DamageEvent event) {
-        passiveAbilities.forEach((ability) -> ability.onHurt(event));
-        equippedAbilities.forEach((trigger, ability) -> ability.onHurt(event));
+        forEachAbility(ability -> ability.onHurt(event));
     }
 
     public void onHurtFatal(DamageEvent event) {
-        passiveAbilities.forEach((ability) -> ability.onHurtFatal(event));
-        equippedAbilities.forEach((trigger, ability) -> ability.onHurtFatal(event));
+        forEachAbility(ability -> ability.onHurtFatal(event));
     }
 
     public void onConsume(PlayerItemConsumeEvent event) {
-        passiveAbilities.forEach((ability) -> ability.onConsume(event));
-        equippedAbilities.forEach((trigger, ability) -> ability.onConsume(event));
+        forEachAbility(ability -> ability.onConsume(event));
     }
 
     public void onExpChange(PlayerExpChangeEvent event) {
-        passiveAbilities.forEach((ability) -> ability.onExpChange(event));
-        equippedAbilities.forEach((trigger, ability) -> ability.onExpChange(event));
+        forEachAbility(ability -> ability.onExpChange(event));
     }
 
     public void onBlockBreak(BlockBreakEvent event) {
-        passiveAbilities.forEach((ability) -> ability.onBlockBreak(event));
-        equippedAbilities.forEach((trigger, ability) -> ability.onBlockBreak(event));
+        forEachAbility(ability -> ability.onBlockBreak(event));
     }
 
-    /**
-     * Called when player is put on fire
-     */
     public void onCombust(EntityCombustEvent event) {
-        passiveAbilities.forEach((ability) -> ability.onCombust(event));
-        equippedAbilities.forEach((trigger, ability) -> ability.onCombust(event));
+        forEachAbility(ability -> ability.onCombust(event));
     }
 
-    /**
-     * Called when player put other entities on fire (including projectiles...)
-     */
     public void onCombustEntity(EntityCombustByEntityEvent event) {
-        passiveAbilities.forEach((ability) -> ability.onCombustEntity(event));
-        equippedAbilities.forEach((trigger, ability) -> ability.onCombustEntity(event));
+        forEachAbility(ability -> ability.onCombustEntity(event));
     }
 
     public void onProjectileHit(ProjectileHitEvent event) {
-        passiveAbilities.forEach((ability) -> ability.onProjectileHit(event));
-        equippedAbilities.forEach((trigger, ability) -> ability.onProjectileHit(event));
+        forEachAbility(ability -> ability.onProjectileHit(event));
     }
 
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
-        passiveAbilities.forEach((ability) -> ability.onProjectileLaunch(event));
-        equippedAbilities.forEach((trigger, ability) -> ability.onProjectileLaunch(event));
+        forEachAbility(ability -> ability.onProjectileLaunch(event));
     }
 
     public void onConsumeArrow(ArrowConsumeEvent event) {
-        passiveAbilities.forEach(ability -> ability.onConsumeArrow(event));
-        equippedAbilities.forEach((trigger, ability) -> ability.onConsumeArrow(event));
+        forEachAbility(ability -> ability.onConsumeArrow(event));
     }
 }

@@ -1,8 +1,7 @@
-package com.roguesmp.player.ability.impl.shiftrightclick;
+package com.roguesmp.player.ability.impl.active;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.constant.AbilityTrigger;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.particle.DoubleSpiralShape;
@@ -10,6 +9,7 @@ import com.roguesmp.particle.ParticleShape;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
+import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.ParticleUtils;
 import com.roguesmp.utils.Utils;
@@ -29,11 +29,6 @@ import java.util.List;
 public class FireworkBlast extends Ability {
     public static final String ID = "firework_blast";
 
-    // Level Scaling Lists
-    private static final List<Double> BASE_DAMAGE_LEVELS = List.of(13.0, 16.0, 19.0, 22.0, 25.0);
-    private static final List<Double> DAMAGE_CAP_LEVELS = List.of(40.0, 45.0, 50.0, 55.0, 65.0);
-    private static final List<Integer> COOLDOWN_LEVELS = List.of(240, 220, 200, 180, 140); // 12s down to 7s
-
     private static final double RADIUS = 5.0;
 
     private static final List<ParticleBuilder> SPIRAL_PALETTE = List.of(
@@ -46,33 +41,31 @@ public class FireworkBlast extends Ability {
             new ParticleBuilder(Particle.CAMPFIRE_COSY_SMOKE).count(1).offset(0.02, 0.02, 0.02).extra(0.01)
     );
 
-    public static final AbilityInfo<FireworkBlast> INFO = new AbilityInfo.Builder<FireworkBlast>()
-            .id(ID)
-            .displayText(Component.text("Firework Blast", NamedTextColor.RED, TextDecoration.BOLD))
-            .descriptionProvider((p, l) -> List.of(
-                    Utils.text("Bắn pháo hoa tăng sát thương theo khoảng cách.", NamedTextColor.GRAY),
-                    Utils.text("Sát thương gốc: ", NamedTextColor.GRAY)
-                            .append(Utils.text(Utils.formatDecimal(BASE_DAMAGE_LEVELS.get(l - 1)), NamedTextColor.RED)),
-                    Utils.text("Giới hạn sát thương: ", NamedTextColor.GRAY)
-                            .append(Utils.text(Utils.formatDecimal(DAMAGE_CAP_LEVELS.get(l - 1)), NamedTextColor.GOLD)),
-                    Utils.text("Hồi chiêu: ", NamedTextColor.GRAY)
-                            .append(Utils.text(Utils.formatDecimal(COOLDOWN_LEVELS.get(l - 1) / 20.0) + "s", NamedTextColor.GREEN))
-            ))
-            .displayIcon(Material.FIREWORK_ROCKET)
-            .factory(FireworkBlast::new)
-            .trigger(AbilityTrigger.SHIFT_RIGHT_CLICK)
-            .build();
+    /**
+     * Using the new constructor style.
+     * Scaling and Metadata are handled by JSON.
+     */
+    public static final AbilityInfo<FireworkBlast> INFO = new AbilityInfo<>(
+            ID,
+            FireworkBlast.class,
+            FireworkBlast::new
+    ).registerAction("execute", FireworkBlast::handleCast);
 
-    public FireworkBlast(SmpPlayer player, int level) { super(player, level); }
+    private final double baseDamage;
+    private final double damageCap;
+    private final int cooldown;
 
-    @Override
-    public void cast() {
-        if (isOnCooldown()) return;
+    public FireworkBlast(SmpPlayer player, int level) {
+        super(player, level);
+        baseDamage = INFO.getAttributeForLevel("base_damage", level);
+        damageCap = INFO.getAttributeForLevel("damage_cap", level);
+        cooldown = (int) INFO.getAttributeForLevel("cooldown", level);
+    }
 
-        // Grab values based on current level
-        double baseDamage = BASE_DAMAGE_LEVELS.get(level - 1);
-        double damageCap = DAMAGE_CAP_LEVELS.get(level - 1);
-        setCooldownTick(COOLDOWN_LEVELS.get(level - 1));
+    public AbilityResponse handleCast() {
+        if (isOnCooldown()) return AbilityResponse.continueChain();
+
+        setCooldownTick(cooldown);
 
         Player p = smpPlayer.getBukkitPlayer();
         Location currentLoc = p.getEyeLocation();
@@ -92,12 +85,14 @@ public class FireworkBlast extends Ability {
             public void run() {
                 currentLoc.add(velocity);
 
+                // Collision with blocks
                 if (currentLoc.getBlock().getType().isSolid()) {
                     explode(currentLoc, start, tick, baseDamage, damageCap);
                     this.cancel();
                     return;
                 }
 
+                // Collision with entities
                 Collection<LivingEntity> targets = currentLoc.getNearbyLivingEntities(0.6, e -> !(e instanceof Player));
 
                 if (!targets.isEmpty() || tick > 100) {
@@ -106,6 +101,7 @@ public class FireworkBlast extends Ability {
                     return;
                 }
 
+                // Visuals
                 ParticleUtils.spawnShape(currentLoc, core, ENGINE_PALETTE, tick);
                 ParticleUtils.spawnShape(currentLoc, spiral, SPIRAL_PALETTE, tick);
 
@@ -116,6 +112,8 @@ public class FireworkBlast extends Ability {
                 tick++;
             }
         }.runTaskTimer(RogueSmpCore.getInstance(), 0, 1);
+
+        return AbilityResponse.consume();
     }
 
     private void explode(Location loc, Location start, int ticks, double baseDamage, double damageCap) {
@@ -175,5 +173,5 @@ public class FireworkBlast extends Ability {
         }
     }
 
-    @Override public @NotNull AbilityInfo<? extends Ability> getAbilityInfo() { return INFO; }
+    @Override public @NotNull AbilityInfo<?> getAbilityInfo() { return INFO; }
 }

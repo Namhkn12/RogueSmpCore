@@ -33,6 +33,9 @@ public class GrindstoneGui extends BaseGui {
     private final int INPUT_SLOT = 4;
     private ItemStack currentInput = null;
 
+    private Enchants pendingEnchant = null;
+    private int pendingLevel = 0;
+
     private int currentPage = 0;
     private static final int PAGE_SIZE = 14; // 2 rows of 9
     private static final int[] ENCHANT_SLOTS = {
@@ -71,11 +74,17 @@ public class GrindstoneGui extends BaseGui {
     }
 
     private void renderInterface() {
-        // 1. Current Item Display
+        // Current Item Display
         addButton(INPUT_SLOT, currentInput, event -> {
             event.setCancelled(true);
             returnItemToPlayer();
         });
+
+        // Check for Confirmation State
+        if (pendingEnchant != null) {
+            renderConfirmation();
+            return;
+        }
 
         SmpItem smpItem = new SmpItem(currentInput);
         EnchantComponent enchantComp = smpItem.getComponent(ComponentKeys.ENCHANT);
@@ -85,7 +94,7 @@ public class GrindstoneGui extends BaseGui {
             return;
         }
 
-        // 2. Pagination Logic
+        // Pagination Logic
         List<Map.Entry<Enchants, Integer>> entries = new ArrayList<>(enchantComp.getPersistentEnchants().entrySet());
         int maxPages = (int) Math.ceil((double) entries.size() / PAGE_SIZE);
 
@@ -101,7 +110,7 @@ public class GrindstoneGui extends BaseGui {
             addEnchantButton(ENCHANT_SLOTS[slotIndex], entry.getKey(), entry.getValue());
         }
 
-        // 3. Navigation Buttons
+        // Navigation Buttons
         if (currentPage > 0) {
             addButton(PREV_PAGE, PREV_PAGE_BUTTON, event -> {
                 event.setCancelled(true);
@@ -118,7 +127,7 @@ public class GrindstoneGui extends BaseGui {
             });
         }
 
-        // 4. Finish Button
+        // Finish Button
         ItemStack finish = new ItemStack(Material.CHEST);
         finish.setData(DataComponentTypes.ITEM_NAME, Component.text("Thu hồi vật phẩm", NamedTextColor.GREEN));
         addButton(FINISH_BUTTON, finish, event -> {
@@ -134,13 +143,9 @@ public class GrindstoneGui extends BaseGui {
 
         addButton(slot, book, event -> {
             event.setCancelled(true);
-            Map<Enchants, Integer> removalMap = Map.of(enchant, -level);
-            var result = SmpItemUtils.addEnchant(currentInput, smpPlayer, removalMap);
-            if (result.success()) {
-                this.currentInput = result.itemStack();
-                player.playSound(player.getLocation(), Sound.BLOCK_GRINDSTONE_USE, 1f, 1f);
-                setup();
-            }
+            this.pendingEnchant = enchant;
+            this.pendingLevel = level;
+            setup();
         });
     }
 
@@ -148,9 +153,34 @@ public class GrindstoneGui extends BaseGui {
         if (currentInput != null) {
             PlayerUtils.giveItem(player, currentInput);
             currentInput = null;
+            pendingEnchant = null;
             currentPage = 0;
             setup();
         }
+    }
+
+    private void renderConfirmation() {
+        // Info item: Shows what is being removed
+        ItemStack info = new ItemStack(Material.ENCHANTED_BOOK);
+        info.setData(DataComponentTypes.ITEM_NAME, Component.text("Gỡ: " + pendingEnchant.name() + " " + Utils.toRoman(pendingLevel), NamedTextColor.YELLOW));
+        addItem(13, info);
+
+        // Confirm Button (Green)
+        ItemStack confirm = new ItemStack(Material.LIME_CONCRETE);
+        confirm.setData(DataComponentTypes.ITEM_NAME, Component.text("XÁC NHẬN GỠ", NamedTextColor.GREEN));
+        addButton(20, confirm, event -> {
+            event.setCancelled(true);
+            executeRemoval();
+        });
+
+        // Cancel Button (Red)
+        ItemStack cancel = new ItemStack(Material.RED_CONCRETE);
+        cancel.setData(DataComponentTypes.ITEM_NAME, Component.text("HỦY BỎ", NamedTextColor.RED));
+        addButton(24, cancel, event -> {
+            event.setCancelled(true);
+            pendingEnchant = null;
+            setup();
+        });
     }
 
     private void setupNoEnchantsState() {
@@ -161,6 +191,18 @@ public class GrindstoneGui extends BaseGui {
             event.setCancelled(true);
             returnItemToPlayer();
         });
+    }
+
+    private void executeRemoval() {
+        Map<Enchants, Integer> removalMap = Map.of(pendingEnchant, -pendingLevel);
+        var result = SmpItemUtils.addEnchant(currentInput, smpPlayer, removalMap);
+        if (result.success()) {
+            this.currentInput = result.itemStack();
+            player.playSound(player.getLocation(), Sound.BLOCK_GRINDSTONE_USE, 1f, 1f);
+        }
+
+        this.pendingEnchant = null;
+        setup();
     }
 
     @Override

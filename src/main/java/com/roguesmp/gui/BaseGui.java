@@ -121,6 +121,13 @@ public abstract class BaseGui implements InventoryHolder {
         inventory.setItem(slot, itemStack);
     }
 
+    public static ItemStack createDecoration(Material material) {
+        ItemStack item = ItemStack.of(material);
+        item.setData(DataComponentTypes.ITEM_NAME, Component.empty());
+        item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
+        return item;
+    }
+
     /**
      * Clear the inventory, including its button handler
      */

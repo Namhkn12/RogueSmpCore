@@ -16,6 +16,11 @@ public class EntityUtils {
         return maxHealth == null ? 0 : maxHealth.getValue();
     }
 
+    public static void setHealthPercent(LivingEntity living, double value) {
+        double maxHp = getMaxHealth(living);
+        living.setHealth(Math.clamp(maxHp * value, 0d, maxHp));
+    }
+
     /**
      * Returns a List of LivingEntity excluding Players objects in the bounding box with the specified dimensions.
      *
