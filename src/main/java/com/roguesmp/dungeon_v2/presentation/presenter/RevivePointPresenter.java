@@ -14,13 +14,13 @@ import org.bukkit.util.EulerAngle;
 
 public class RevivePointPresenter {
 
-    // === ĐÃ GIẢM MẠNH ĐỂ BODY CHẠM ĐẤT ===
-    private static final double GROUND_OFFSET = -0.35D;   // Âm để kéo xuống
-    private static final double FLOAT_HEIGHT = 0.45D;     // Chiều cao float khi tick
+    private static final double GROUND_OFFSET = -0.35D;
+    private static final double FLOAT_AMPLITUDE = 0.01D;
 
     public ArmorStand spawnRevivePoint(Player deadPlayer, Location deadLocation) {
-        if (deadPlayer == null || deadLocation == null || deadLocation.getWorld() == null)
+        if (deadPlayer == null || deadLocation == null || deadLocation.getWorld() == null) {
             return null;
+        }
 
         EntityEquipment playerEq = deadPlayer.getEquipment();
 
@@ -50,14 +50,13 @@ public class RevivePointPresenter {
             stand.setSmall(false);
 
             stand.setBodyPose(new EulerAngle(Math.toRadians(271), 0, 0));
-
             stand.setHeadPose(new EulerAngle(Math.toRadians(276), 0, 0));
-
             stand.setRightArmPose(new EulerAngle(Math.toRadians(272), 0, 0));
             stand.setLeftArmPose(new EulerAngle(Math.toRadians(272), 0, 0));
 
-            stand.setLeftLegPose(new EulerAngle(Math.toRadians(270), 0, 0));
-            stand.setRightLegPose(new EulerAngle(Math.toRadians(270), 0, 0));
+            // Keep legs neutral so they remain attached to the torso in lie-down pose.
+            stand.setLeftLegPose(new EulerAngle(0, 0, 0));
+            stand.setRightLegPose(new EulerAngle(0, 0, 0));
 
             stand.setGlowing(true);
             stand.setRotation(deadLocation.getYaw(), 0);
@@ -79,12 +78,12 @@ public class RevivePointPresenter {
     }
 
     public void tickRevivePoint(ArmorStand stand, Location center, int tick) {
-        if (stand == null || stand.isDead() || center == null || center.getWorld() == null)
+        if (stand == null || stand.isDead() || center == null || center.getWorld() == null) {
             return;
+        }
 
-        // Float rất nhẹ vì đang nằm
-        double floatY = Math.sin(tick / 10.0) * 0.01;
-        Location floatLoc = center.clone().add(0, FLOAT_HEIGHT + floatY, 0);
+        double floatY = Math.sin(tick / 10.0) * FLOAT_AMPLITUDE;
+        Location floatLoc = center.clone().add(0, GROUND_OFFSET + floatY, 0);
 
         stand.teleport(floatLoc);
 
@@ -106,7 +105,9 @@ public class RevivePointPresenter {
     }
 
     private ItemStack getHand(ItemStack item) {
-        if (item == null || item.getType().isAir()) return null;
+        if (item == null || item.getType().isAir()) {
+            return null;
+        }
         return item.clone();
     }
 

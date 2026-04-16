@@ -150,10 +150,17 @@ public class DungeonRegistry {
         BossRoomController bossRoomController = new BossRoomController(instanceManager, partyService, roomManager);
 
         /*Command*/
-        new TemplateGenCommand(lootService).register();
+        new TemplateGenCommand(
+                lootService,
+                spawnerManager,
+                dungeonManager,
+                roomManager,
+                lootTableManager,
+                schemetaManager
+        ).register();
         new SchemetaCommand(schemetaController, schemetaManager).register();
         new PartyCommand(partyController).register();
-        new DungeonCommand(flowController).register();
+        new DungeonCommand(flowController, dungeonManager).register();
 
         /*Listener*/
         Bukkit.getPluginManager().registerEvents(

@@ -37,6 +37,12 @@ public class SpawnerManager {
         return cache.get(id);
     }
 
+    public List<String> getAllIds() {
+        return cache.keySet().stream()
+                .sorted()
+                .toList();
+    }
+
     public Spawner create(Spawner spawner){
         Spawner saved = spawnerRepository.save(spawner);
         if(saved == null) return null;

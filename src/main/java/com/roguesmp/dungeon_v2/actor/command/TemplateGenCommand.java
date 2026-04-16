@@ -1,13 +1,20 @@
 package com.roguesmp.dungeon_v2.actor.command;
 
 import com.roguesmp.dungeon_v2.data.definition.loot.LootContext;
+import com.roguesmp.dungeon_v2.data.definition.spawner.Spawner;
 import com.roguesmp.dungeon_v2.dto.loot.LootRules;
+import com.roguesmp.dungeon_v2.manager.DungeonManager;
+import com.roguesmp.dungeon_v2.manager.LootTableManager;
+import com.roguesmp.dungeon_v2.manager.RoomManager;
+import com.roguesmp.dungeon_v2.manager.SchemetaManager;
+import com.roguesmp.dungeon_v2.manager.SpawnerManager;
 import com.roguesmp.dungeon_v2.service.ILootService;
 import com.roguesmp.dungeon_v2.utils.NameSpaceKeys;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.Argument;
+import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.DoubleArgument;
-import dev.jorel.commandapi.arguments.GreedyStringArgument;
-import dev.jorel.commandapi.arguments.NamespacedKeyArgument;
+import dev.jorel.commandapi.arguments.StringArgument;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,88 +27,203 @@ import java.util.List;
 public class TemplateGenCommand {
 
     private final ILootService lootService;
+    private final SpawnerManager spawnerManager;
+    private final DungeonManager dungeonManager;
+    private final RoomManager roomManager;
+    private final LootTableManager lootTableManager;
+    private final SchemetaManager schemetaManager;
 
-    public TemplateGenCommand(ILootService lootService) {
+    public TemplateGenCommand(
+            ILootService lootService,
+            SpawnerManager spawnerManager,
+            DungeonManager dungeonManager,
+            RoomManager roomManager,
+            LootTableManager lootTableManager,
+            SchemetaManager schemetaManager
+    ) {
         this.lootService = lootService;
+        this.spawnerManager = spawnerManager;
+        this.dungeonManager = dungeonManager;
+        this.roomManager = roomManager;
+        this.lootTableManager = lootTableManager;
+        this.schemetaManager = schemetaManager;
     }
 
     public void register() {
-        new CommandAPICommand("templates")
-                .withSubcommand(
-                        new CommandAPICommand("spawner")
-                                .withSubcommand(
-                                        new CommandAPICommand("get")
-                                                .withSubcommand(
-                                                        new CommandAPICommand("archer_post").executesPlayer((player, args) -> {
-                                                            player.getInventory().addItem(buildSpawnerItem("spawner_archer_post", "Archer Post"));
-                                                            player.sendMessage("Give Archer Post Spawner");
-                                                        })
-                                                )
-                                                .withSubcommand(
-                                                        new CommandAPICommand("brute_patrol").executesPlayer((player, args) -> {
-                                                            player.getInventory().addItem(buildSpawnerItem("spawner_brute_patrol", "Brute Patrol"));
-                                                            player.sendMessage("Give Brute Patrol Spawner");
-                                                        })
-                                                )
-                                                .withSubcommand(
-                                                        new CommandAPICommand("test").executesPlayer((player, args) -> {
-                                                            player.getInventory().addItem(buildSpawnerItem("spawner_test_01", "Test Spawner"));
-                                                            player.sendMessage("Give Test Spawner");
-                                                        })
-                                                )
-                                )
-                )
-                .withSubcommand(
-                        new CommandAPICommand("loottable")
-                                .withSubcommand(
-                                        new CommandAPICommand("treasure")
-                                                .withSubcommand(
-                                                        new CommandAPICommand("give")
-                                                                .executesPlayer((player, args) -> {
-                                                                    player.getInventory().addItem(buildTreasureChestItem());
-                                                                    player.sendMessage("You received a Treasure Chest.");
-                                                                })
-                                                )
-                                )
-                                .withSubcommand(
-                                        new CommandAPICommand("roll")
-                                                .withArguments(new GreedyStringArgument("tableId"))
-                                                .executesPlayer((player, args) -> {
-                                                    String tableId = (String) args.get("tableId");
-                                                    rollAndGive(player, tableId, LootContext.builder().build());
-                                                })
-                                )
-                                .withSubcommand(
-                                        new CommandAPICommand("rollbonus")
-                                                .withArguments(
-                                                        new NamespacedKeyArgument("tableId"),
-                                                        new DoubleArgument("bonusModifier", 0.0)
-                                                )
-                                                .executesPlayer((player, args) -> {
-                                                    String tableId = (String) args.get("tableId");
-                                                    double bonus = (double) args.get("bonusModifier");
-                                                    LootContext ctx = LootContext.builder()
-                                                            .addRule(new LootRules.Fixed(bonus))
-                                                            .build();
-                                                    rollAndGive(player, tableId, ctx);
-                                                })
-                                )
-                                .withSubcommand(
-                                        new CommandAPICommand("check")
-                                                .withArguments(new GreedyStringArgument("tableId"))
-                                                .executesPlayer((player, args) -> {
-                                                    String tableId = (String) args.get("tableId");
-                                                    if (!lootService.exists(tableId)) {
-                                                        player.sendMessage("§c[LootTable] Not found: §f" + tableId);
-                                                        return;
-                                                    }
-                                                    player.sendMessage("§a[LootTable] Found: §f" + tableId);
-                                                })
-                                )
-                )
+        registerRoot("template");
+        registerRoot("templates");
+    }
+
+    private void registerRoot(String rootCommand) {
+        new CommandAPICommand(rootCommand)
+                .withSubcommand(buildSpawnerCommand())
+                .withSubcommand(buildLootTableCommand())
+                .withSubcommand(buildReloadCommand())
                 .register();
     }
 
+    private CommandAPICommand buildSpawnerCommand() {
+        return new CommandAPICommand("spawner")
+                .withSubcommand(
+                        new CommandAPICommand("get")
+                                .withArguments(
+                                        new StringArgument("templateId")
+                                                .replaceSuggestions(ArgumentSuggestions.strings(
+                                                        info -> spawnerManager.getAllIds().toArray(String[]::new)
+                                                ))
+                                )
+                                .executesPlayer((player, args) -> {
+                                    String templateId = (String) args.get("templateId");
+                                    Spawner template = spawnerManager.getById(templateId);
+
+                                    if (template == null) {
+                                        player.sendMessage("§c[Template] Spawner template not found: §f" + templateId);
+                                        return;
+                                    }
+
+                                    player.getInventory().addItem(
+                                            buildSpawnerItem(template.getId(), resolveSpawnerDisplayName(template))
+                                    );
+                                    player.sendMessage("§a[Template] Given spawner template: §f" + templateId);
+                                })
+                );
+    }
+
+    private CommandAPICommand buildLootTableCommand() {
+        return new CommandAPICommand("loottable")
+                .withSubcommand(
+                        new CommandAPICommand("treasure")
+                                .withSubcommand(
+                                        new CommandAPICommand("give")
+                                                .executesPlayer((player, args) -> {
+                                                    player.getInventory().addItem(buildTreasureChestItem());
+                                                    player.sendMessage("You received a Treasure Chest.");
+                                                })
+                                )
+                )
+                .withSubcommand(
+                        new CommandAPICommand("roll")
+                                .withArguments(lootTableIdArgument("tableId"))
+                                .executesPlayer((player, args) -> {
+                                    String tableId = (String) args.get("tableId");
+                                    rollAndGive(player, tableId, LootContext.builder().build());
+                                })
+                )
+                .withSubcommand(
+                        new CommandAPICommand("rollbonus")
+                                .withArguments(
+                                        lootTableIdArgument("tableId"),
+                                        new DoubleArgument("bonusModifier", 0.0)
+                                )
+                                .executesPlayer((player, args) -> {
+                                    String tableId = (String) args.get("tableId");
+                                    double bonus = (double) args.get("bonusModifier");
+                                    LootContext ctx = LootContext.builder()
+                                            .addRule(new LootRules.Fixed(bonus))
+                                            .build();
+                                    rollAndGive(player, tableId, ctx);
+                                })
+                )
+                .withSubcommand(
+                        new CommandAPICommand("check")
+                                .withArguments(lootTableIdArgument("tableId"))
+                                .executesPlayer((player, args) -> {
+                                    String tableId = (String) args.get("tableId");
+                                    if (!lootService.exists(tableId)) {
+                                        player.sendMessage("§c[LootTable] Not found: §f" + tableId);
+                                        return;
+                                    }
+                                    player.sendMessage("§a[LootTable] Found: §f" + tableId);
+                                })
+                );
+    }
+
+    private CommandAPICommand buildReloadCommand() {
+        return new CommandAPICommand("reload")
+                .executes((sender, args) -> {
+                    sender.sendMessage(reloadAllTemplates());
+                })
+                .withSubcommand(new CommandAPICommand("all")
+                        .executes((sender, args) -> {
+                            sender.sendMessage(reloadAllTemplates());
+                        }))
+                .withSubcommand(new CommandAPICommand("spawner")
+                        .executes((sender, args) -> {
+                            sender.sendMessage(reloadSpawnerTemplates());
+                        }))
+                .withSubcommand(new CommandAPICommand("dungeon")
+                        .executes((sender, args) -> {
+                            sender.sendMessage(reloadDungeonTemplates());
+                        }))
+                .withSubcommand(new CommandAPICommand("room")
+                        .executes((sender, args) -> {
+                            sender.sendMessage(reloadRoomTemplates());
+                        }))
+                .withSubcommand(new CommandAPICommand("loottable")
+                        .executes((sender, args) -> {
+                            sender.sendMessage(reloadLootTableTemplates());
+                        }))
+                .withSubcommand(new CommandAPICommand("schemeta")
+                        .executes((sender, args) -> {
+                            sender.sendMessage(reloadSchemetaTemplates());
+                        }));
+    }
+
+    private String reloadAllTemplates() {
+        schemetaManager.loadAll();
+        spawnerManager.load();
+        roomManager.loadAll();
+        dungeonManager.loadAll();
+        lootTableManager.load();
+
+        return "§a[Template] Reloaded all templates. §7"
+                + "schemeta=" + schemetaManager.getAll().size()
+                + ", spawner=" + spawnerManager.getAllIds().size()
+                + ", room=" + roomManager.getAllIds().size()
+                + ", dungeon=" + dungeonManager.getAllIds().size()
+                + ", loottable=" + lootTableManager.getCacheSize();
+    }
+
+    private String reloadSpawnerTemplates() {
+        spawnerManager.load();
+        return "§a[Template] Reloaded spawner templates: §f" + spawnerManager.getAllIds().size();
+    }
+
+    private String reloadDungeonTemplates() {
+        dungeonManager.loadAll();
+        return "§a[Template] Reloaded dungeon templates: §f" + dungeonManager.getAllIds().size();
+    }
+
+    private String reloadRoomTemplates() {
+        roomManager.loadAll();
+        return "§a[Template] Reloaded room templates: §f" + roomManager.getAllIds().size();
+    }
+
+    private String reloadLootTableTemplates() {
+        lootTableManager.load();
+        return "§a[Template] Reloaded loot table templates: §f" + lootTableManager.getCacheSize();
+    }
+
+    private String reloadSchemetaTemplates() {
+        schemetaManager.loadAll();
+        return "§a[Template] Reloaded schemeta templates: §f" + schemetaManager.getAll().size();
+    }
+
+    private Argument<String> lootTableIdArgument(String nodeName) {
+        return new StringArgument(nodeName)
+                .replaceSuggestions(ArgumentSuggestions.strings(
+                        info -> lootTableManager.getAllTables().keySet().stream()
+                                .sorted()
+                                .toArray(String[]::new)
+                ));
+    }
+
+    private String resolveSpawnerDisplayName(Spawner spawner) {
+        if (spawner.getName() != null && !spawner.getName().isBlank()) {
+            return spawner.getName();
+        }
+        return spawner.getId();
+    }
 
     private void rollAndGive(Player player, String tableId, LootContext ctx) {
         if (!lootService.exists(tableId)) {
@@ -110,10 +232,10 @@ public class TemplateGenCommand {
         }
         List<ItemStack> items = lootService.roll(tableId, ctx);
         if (items.isEmpty()) {
-            player.sendMessage("§e[LootTable] Rolled §f" + tableId + " §e— no items (empty roll)");
+            player.sendMessage("§e[LootTable] Rolled §f" + tableId + " §e- no items (empty roll)");
             return;
         }
-        player.sendMessage("§a[LootTable] Rolled §f" + tableId + " §a— §f" + items.size() + " §aitem(s):");
+        player.sendMessage("§a[LootTable] Rolled §f" + tableId + " §a- §f" + items.size() + " §aitem(s):");
         for (ItemStack item : items) {
             player.sendMessage("  §7- §f" + item.getType().name() + " §7x" + item.getAmount());
             player.getInventory().addItem(item);
