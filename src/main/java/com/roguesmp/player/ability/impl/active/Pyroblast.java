@@ -1,7 +1,6 @@
-package com.roguesmp.player.ability.impl.shiftprojectile;
+package com.roguesmp.player.ability.impl.active;
 
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.constant.AbilityTrigger;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
@@ -30,10 +29,10 @@ import java.util.WeakHashMap;
 public class Pyroblast extends Ability {
     public static final String ID = "pyroblast";
 
-    // Level Scaling
-    private static final List<Double> DAMAGE_LEVELS = List.of(20.0, 24.0, 28.0, 32.0, 44.0);
-    private static final List<Double> RADIUS_LEVELS = List.of(3.5, 4.0, 4.5, 5.0, 6.0);
-    private static final List<Integer> COOLDOWN_LEVELS = List.of(240, 220, 200, 180, 140); // 12s to 7s
+    // Cached Attributes
+    private final double damage;
+    private final double radius;
+    private final int cooldown;
 
     // Mechanics
     private static final int FIRE_DURATION_TICKS = 80; // 4 seconds
@@ -41,24 +40,17 @@ public class Pyroblast extends Ability {
     // Map to track active Pyroblast projectiles fired by this player
     private final Set<Projectile> activeProjectiles = Collections.newSetFromMap(new WeakHashMap<>());
 
-    public static final AbilityInfo<Pyroblast> INFO = new AbilityInfo.Builder<Pyroblast>()
-            .id(ID)
-            .displayText(Component.text("Pyroblast", NamedTextColor.RED, TextDecoration.BOLD))
-            .descriptionProvider((p, l) -> List.of(
-                    Utils.text("Ngồi xuống khi bắn tên để kích hoạt Pyroblast.", NamedTextColor.GRAY),
-                    Utils.text("Mũi tên sẽ nổ tung khi va chạm, gây sát thương phép.", NamedTextColor.DARK_GRAY),
-                    Utils.text("Sát thương nổ: ", NamedTextColor.GRAY)
-                            .append(Utils.text(Utils.formatDecimal(DAMAGE_LEVELS.get(l - 1)), NamedTextColor.GOLD)),
-                    Utils.text("Bán kính nổ: ", NamedTextColor.GRAY)
-                            .append(Utils.text(Utils.formatDecimal(RADIUS_LEVELS.get(l - 1)) + "m", NamedTextColor.YELLOW))
-            ))
-            .displayIcon(Material.TNT_MINECART)
-            .factory(Pyroblast::new)
-            .trigger(AbilityTrigger.SHIFT_PROJECTILE)
-            .build();
+    public static final AbilityInfo<Pyroblast> INFO = new AbilityInfo<>(
+            ID,
+            Pyroblast.class,
+            Pyroblast::new
+    );
 
     public Pyroblast(SmpPlayer player, int level) {
         super(player, level);
+        this.damage = getAbilityInfo().getAttributeForLevel("damage", level);
+        this.radius = getAbilityInfo().getAttributeForLevel("radius", level);
+        this.cooldown = (int) getAbilityInfo().getAttributeForLevel("cooldown", level);
     }
 
     @Override
@@ -69,12 +61,8 @@ public class Pyroblast extends Ability {
         castPyroblast(proj);
     }
 
-    @Override
-    public void cast() {
-    }
-
     private void castPyroblast(Projectile proj) {
-        setCooldownTick(COOLDOWN_LEVELS.get(level - 1));
+        setCooldownTick(cooldown);
         Player p = smpPlayer.getBukkitPlayer();
         activeProjectiles.add(proj);
 
@@ -114,8 +102,6 @@ public class Pyroblast extends Ability {
 
         World world = loc.getWorld();
         Player p = smpPlayer.getBukkitPlayer();
-        double radius = RADIUS_LEVELS.get(level - 1);
-        double damage = DAMAGE_LEVELS.get(level - 1);
 
         // Visuals
         world.spawnParticle(Particle.EXPLOSION_EMITTER, loc, 1);
@@ -134,5 +120,5 @@ public class Pyroblast extends Ability {
         proj.remove();
     }
 
-    @Override public @NotNull AbilityInfo<? extends Ability> getAbilityInfo() { return INFO; }
+    @Override public @NotNull AbilityInfo<?> getAbilityInfo() { return INFO; }
 }

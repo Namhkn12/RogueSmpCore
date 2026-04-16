@@ -1,8 +1,7 @@
-package com.roguesmp.player.ability.impl.swap;
+package com.roguesmp.player.ability.impl.active;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.constant.AbilityTrigger;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.particle.ParticleShape;
@@ -10,13 +9,9 @@ import com.roguesmp.particle.SphereShape;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
+import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.ParticleUtils;
-import com.roguesmp.utils.Utils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.*;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -30,12 +25,6 @@ import java.util.List;
 public class FlameSpirit extends Ability {
     public static final String ID = "flame_spirit";
 
-    // Level Scaling
-    private static final List<Double> DAMAGE_LEVELS = List.of(8.0, 10.0, 12.0, 14.0, 18.0);
-    private static final List<Double> RANGE_LEVELS = List.of(12.0, 15.0, 18.0, 22.0, 25.0);
-    private static final List<Integer> BURST_LEVELS = List.of(3, 3, 4, 4, 5);
-    private static final List<Integer> COOLDOWN_LEVELS = List.of(120, 110, 100, 90, 80); // 6s to 4s
-
     private static final List<ParticleBuilder> SPIRIT_CORE = List.of(
             new ParticleBuilder(Particle.SOUL_FIRE_FLAME).count(0).extra(0.02),
             new ParticleBuilder(Particle.FLAME).count(2).offset(0.05, 0.05, 0.05).extra(0.02)
@@ -45,33 +34,33 @@ public class FlameSpirit extends Ability {
             new ParticleBuilder(Particle.SOUL).count(1).offset(0.1, 0.1, 0.1).extra(0.02)
     );
 
-    public static final AbilityInfo<FlameSpirit> INFO = new AbilityInfo.Builder<FlameSpirit>()
-            .id(ID)
-            .displayText(Component.text("Flame Spirit", NamedTextColor.GOLD, TextDecoration.BOLD))
-            .descriptionProvider((p, l) -> List.of(
-                    Utils.text("Triệu hồi linh hồn lửa đuổi theo kẻ địch.", NamedTextColor.GRAY),
-                    Utils.text("Sát thương mỗi lần nổ: ", NamedTextColor.GRAY)
-                            .append(Utils.text(Utils.formatDecimal(DAMAGE_LEVELS.get(l - 1)), NamedTextColor.RED)),
-                    Utils.text("Số lần nổ: ", NamedTextColor.GRAY)
-                            .append(Utils.text(BURST_LEVELS.get(l - 1) + " lần", NamedTextColor.GOLD)),
-                    Utils.text("Tầm truy quét: ", NamedTextColor.GRAY)
-                            .append(Utils.text(Utils.formatDecimal(RANGE_LEVELS.get(l - 1)) + "m", NamedTextColor.AQUA))
-            ))
-            .displayIcon(Material.MAGMA_CREAM)
-            .factory(FlameSpirit::new)
-            .trigger(AbilityTrigger.SWAP)
-            .build();
+    /**
+     * Data-driven INFO shell.
+     * Description and Scaling are now in the JSON.
+     */
+    public static final AbilityInfo<FlameSpirit> INFO = new AbilityInfo<>(
+            ID,
+            FlameSpirit.class,
+            FlameSpirit::new
+    ).registerAction("execute", FlameSpirit::handleCast);
 
-    public FlameSpirit(SmpPlayer player, int level) { super(player, level); }
+    private final double damage;
+    private final double detectionRange;
+    private final int maxBursts;
+    private final int cooldown;
 
-    @Override
-    public void cast() {
-        if (isOnCooldown()) return;
+    public FlameSpirit(SmpPlayer player, int level) {
+        super(player, level);
+        damage = getAbilityInfo().getAttributeForLevel("damage", level);
+        detectionRange = getAbilityInfo().getAttributeForLevel("range", level);
+        maxBursts = (int) getAbilityInfo().getAttributeForLevel("burst_count", level);
+        cooldown = (int) getAbilityInfo().getAttributeForLevel("cooldown", level);
+    }
 
-        double damage = DAMAGE_LEVELS.get(level - 1);
-        double detectionRange = RANGE_LEVELS.get(level - 1);
-        int maxBursts = BURST_LEVELS.get(level - 1);
-        setCooldownTick(COOLDOWN_LEVELS.get(level - 1));
+    public AbilityResponse handleCast() {
+        if (isOnCooldown()) return AbilityResponse.continueChain();
+
+        setCooldownTick(cooldown);
 
         Player p = smpPlayer.getBukkitPlayer();
         World world = p.getWorld();
@@ -90,16 +79,15 @@ public class FlameSpirit extends Ability {
 
             @Override
             public void run() {
-                if (!p.isOnline()) {
+                if (!p.isOnline() || !p.isValid()) {
                     this.cancel();
                     return;
                 }
 
-                // 1. Movement Logic
+                // --- Movement Logic ---
                 if (tick < 10) {
                     current.add(0, 0.04 * Math.sin(tick * 0.8), 0);
                 } else {
-                    // Target Re-acquisition
                     if (target == null || !target.isValid() || target.isDead() || current.distanceSquared(target.getLocation()) > 900) {
                         target = current.getNearbyLivingEntities(detectionRange, e -> !(e instanceof Player) && e.isValid())
                                 .stream().findFirst().orElse(null);
@@ -107,33 +95,34 @@ public class FlameSpirit extends Ability {
 
                     if (target != null) {
                         Vector toTarget = target.getEyeLocation().toVector().subtract(current.toVector()).normalize();
-                        velocity.add(toTarget.multiply(0.22)).normalize().multiply(0.7 + (level * 0.05)); // Speed scales slightly with level
+                        // Speed scales slightly based on level index
+                        velocity.add(toTarget.multiply(0.22)).normalize().multiply(0.7 + (level * 0.05));
                     } else {
-                        velocity.multiply(0.98); // Slow drift if no target
+                        velocity.multiply(0.98);
                     }
                     current.add(velocity);
                 }
 
-                // 2. Burst Logic
+                // --- Burst Logic ---
                 if (hitCooldown > 0) hitCooldown--;
                 if (hitCooldown <= 0) {
                     Collection<LivingEntity> hits = current.getNearbyLivingEntities(1.8, e -> !(e instanceof Player));
                     if (!hits.isEmpty()) {
                         doBurst(current, hits, damage);
                         burstsDone++;
-                        hitCooldown = 15; // Refractory period between bursts
-                        velocity.multiply(-0.3).add(new Vector(0, 0.3, 0)); // Dynamic bounce
+                        hitCooldown = 15;
+                        velocity.multiply(-0.3).add(new Vector(0, 0.3, 0));
                     }
                 }
 
-                // 3. Termination Check
+                // --- Termination ---
                 if (tick > 160 || burstsDone >= maxBursts) {
                     doFinalExtinguish(current);
                     this.cancel();
                     return;
                 }
 
-                // 4. Visual Rendering
+                // --- Visuals ---
                 current.setDirection(velocity);
                 ParticleUtils.spawnShape(current, coreShape, SPIRIT_CORE, tick);
                 if (tick % 2 == 0) {
@@ -143,6 +132,8 @@ public class FlameSpirit extends Ability {
                 tick++;
             }
         }.runTaskTimer(RogueSmpCore.getInstance(), 0, 1);
+
+        return AbilityResponse.consume();
     }
 
     private void doBurst(Location loc, Collection<LivingEntity> targets, double damage) {
@@ -168,5 +159,5 @@ public class FlameSpirit extends Ability {
         world.playSound(loc, Sound.ENTITY_VEX_DEATH, 0.7f, 0.5f);
     }
 
-    @Override public @NotNull AbilityInfo<? extends Ability> getAbilityInfo() { return INFO; }
+    @Override public @NotNull AbilityInfo<?> getAbilityInfo() { return INFO; }
 }

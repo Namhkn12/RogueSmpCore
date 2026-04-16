@@ -8,9 +8,6 @@ import io.papermc.paper.registry.keys.SoundEventKeys;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Location;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
@@ -31,12 +28,8 @@ public abstract class Ability {
     }
 
     /**
-     * Cast the ability, cooldown should also be handled in this method via {@link #setCooldownTick(int)}
-     */
-    public abstract void cast();
-
-    /**
      * Get the {@link AbilityInfo} of this ability, every ability should have a static field of this
+     *
      * @return {@link AbilityInfo}
      */
     public abstract @NotNull AbilityInfo<? extends Ability> getAbilityInfo();
@@ -86,8 +79,12 @@ public abstract class Ability {
     public void onCooldownRefreshed() {
         Player bukkitPlayer = smpPlayer.getBukkitPlayer();
         bukkitPlayer.playSound(Sound.sound(SoundEventKeys.ITEM_TRIDENT_RETURN, Sound.Source.PLAYER, 1f, Utils.RANDOM.nextFloat(0.6f, 1.4f)));
-        bukkitPlayer.sendActionBar(getAbilityInfo().displayText().append(Component.text(" đã hồi chiêu", NamedTextColor.YELLOW)));
+        bukkitPlayer.sendActionBar(getAbilityInfo().getFormattedDisplayName().append(Component.text(" đã hồi chiêu", NamedTextColor.YELLOW)));
 
+    }
+
+    public String getId() {
+        return getAbilityInfo().getId();
     }
 
     /**
@@ -153,30 +150,4 @@ public abstract class Ability {
 
     }
 
-    /**
-     * Finds the closest LivingEntity within a cubical range, excluding the caster.
-     * @param loc The center point to search from.
-     * @param range The radius of the search box.
-     * @return The nearest LivingEntity, or null if none found.
-     */
-    protected LivingEntity findNearestEnemy(Location loc, double range) {
-        LivingEntity nearest = null;
-        double bestDistanceSq = range * range; // Compare squares to save performance
-        Player caster = smpPlayer.getBukkitPlayer();
-
-        // Search for entities in the bounding box
-        for (Entity entity : loc.getWorld().getNearbyEntities(loc, range, range, range)) {
-            if (entity instanceof LivingEntity living && !entity.equals(caster) && entity.isValid()) {
-                // Check if the entity is actually alive and not an armor stand (unless you want to hit those)
-                if (living instanceof org.bukkit.entity.Monster) {
-                    double distSq = loc.distanceSquared(living.getLocation());
-                    if (distSq < bestDistanceSq) {
-                        bestDistanceSq = distSq;
-                        nearest = living;
-                    }
-                }
-            }
-        }
-        return nearest;
-    }
 }

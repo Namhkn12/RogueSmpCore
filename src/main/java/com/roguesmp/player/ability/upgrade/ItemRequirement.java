@@ -32,7 +32,7 @@ public class ItemRequirement implements UpgradeRequirement {
         for (ItemStack stack : bukkitPlayer.getInventory().getContents()) {
             if (!ItemStackUtils.isValidItem(stack)) continue;
 
-            if (requiredItem.equals(SmpItemUtils.getBaseItem(stack))) {
+            if (requiredItem != null && requiredItem.equals(SmpItemUtils.getBaseItem(stack))) {
                 count += stack.getAmount();
             }
 
@@ -54,7 +54,7 @@ public class ItemRequirement implements UpgradeRequirement {
             ItemStack stack = inv.getItem(i);
             if (!ItemStackUtils.isValidItem(stack)) continue;
 
-            if (requiredItem.equals(SmpItemUtils.getBaseItem(stack))) {
+            if (requiredItem != null && requiredItem.equals(SmpItemUtils.getBaseItem(stack))) {
                 int stackAmount = stack.getAmount();
 
                 if (stackAmount <= leftToTake) {
@@ -73,7 +73,7 @@ public class ItemRequirement implements UpgradeRequirement {
     @Override
     public Component getDisplay(SmpPlayer player) {
         Component itemName;
-
+        if (requiredItem == null) return Component.text("null item");
         NameComponent nameComponent = requiredItem.getComponent(ComponentKeys.ITEM_NAME);
         if (nameComponent == null) {
             itemName = Utils.text(requiredItem.getId(), NamedTextColor.GRAY);

@@ -1,7 +1,6 @@
-package com.roguesmp.player.ability.impl.rightclick;
+package com.roguesmp.player.ability.impl.active;
 
 import com.destroystokyo.paper.ParticleBuilder;
-import com.roguesmp.constant.AbilityTrigger;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.particle.LineShape;
@@ -9,6 +8,7 @@ import com.roguesmp.particle.ParticleShape;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
+import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.ParticleUtils;
 import com.roguesmp.utils.Utils;
@@ -22,77 +22,90 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Sidearm extends Ability {
     public static final String ID = "sidearm";
 
-    // Level Scaling
-    public static final List<Double> DAMAGES = List.of(6.0, 9.0, 12.0, 15.0, 18.0);
-    public static final List<Integer> MAX_STACKS = List.of(3, 3, 4, 4, 5);
-    public static final List<Integer> RECHARGE_TICKS = List.of(120, 100, 100, 80, 60); // 6s down to 3s
+    // Cached Attributes
+    private final double damage;
+    private final int maxStacks;
+    private final int rechargeTicks;
 
+    // State variables
     private int currentStacks;
     private int rechargeTimer = 0;
 
-    public static final AbilityInfo<Sidearm> INFO = new AbilityInfo.Builder<Sidearm>()
-            .id(ID)
-            .displayText(Component.text("Sidearm", NamedTextColor.YELLOW, TextDecoration.BOLD))
-            .descriptionProvider((p, l) -> List.of(
-                    Utils.text("Bắn một tia thép nén từ tầm mắt.", NamedTextColor.GRAY),
-                    Utils.text("Sát thương: ", NamedTextColor.GRAY)
-                            .append(Utils.text(Utils.formatDecimal(DAMAGES.get(l - 1)), NamedTextColor.YELLOW)),
-                    Utils.text("Tối đa: ", NamedTextColor.GRAY)
-                            .append(Utils.text(MAX_STACKS.get(l - 1) + " cộng dồn", NamedTextColor.GOLD))
-            ))
-            .displayIcon(Material.IRON_HORSE_ARMOR)
-            .factory(Sidearm::new)
-            .trigger(AbilityTrigger.RIGHT_CLICK)
-            .build();
+    /**
+     * Action-based INFO shell.
+     * Descriptions and Scaling are now handled by JSON.
+     */
+    public static final AbilityInfo<Sidearm> INFO = new AbilityInfo<>(
+            ID,
+            Sidearm.class,
+            Sidearm::new
+    ).registerAction("execute", Sidearm::handleCast);
 
     public Sidearm(SmpPlayer player, int level) {
         super(player, level);
-        this.currentStacks = MAX_STACKS.get(level - 1);
+        // Cache attributes from JSON
+        this.damage = getAbilityInfo().getAttributeForLevel("damage", level);
+        this.maxStacks = (int) getAbilityInfo().getAttributeForLevel("max_stacks", level);
+        this.rechargeTicks = (int) getAbilityInfo().getAttributeForLevel("cooldown", level);
+
+        // Initialize state
+        this.currentStacks = maxStacks;
     }
 
     @Override
     public void tick(int periodIncrement) {
-        int max = MAX_STACKS.get(level - 1);
-        if (currentStacks < max) {
+        // Handle stack regeneration
+        if (currentStacks < maxStacks) {
             rechargeTimer += periodIncrement;
-            if (rechargeTimer >= RECHARGE_TICKS.get(level - 1)) {
+            if (rechargeTimer >= rechargeTicks) {
                 currentStacks++;
                 rechargeTimer = 0;
+                // Optional: Sound effect when a stack is ready
+                smpPlayer.getBukkitPlayer().playSound(smpPlayer.getBukkitPlayer().getLocation(),
+                        Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 2.0f);
             }
         }
     }
 
-    @Override
-    public void cast() {
+    public AbilityResponse handleCast() {
+        if (currentStacks <= 0) {
+            smpPlayer.getBukkitPlayer().playSound(smpPlayer.getBukkitPlayer().getLocation(),
+                    Sound.BLOCK_DISPENSER_FAIL, 1f, 2f);
+            return AbilityResponse.continueChain();
+        }
+
         Player p = smpPlayer.getBukkitPlayer();
         Location eye = p.getEyeLocation();
         Vector direction = eye.getDirection();
-        double range = 20.0; // Slightly buffed range
+        double range = 25.0; // Consistent range
 
+        // 1. Raytrace
         RayTraceResult result = p.getWorld().rayTrace(eye, direction, range,
                 FluidCollisionMode.NEVER, true, 0.5, (e) -> !(e instanceof Player) && e instanceof LivingEntity);
 
-        Location endPoint = (result != null) ? result.getHitPosition().toLocation(p.getWorld())
+        Location endPoint = (result != null && result.getHitPosition() != null)
+                ? result.getHitPosition().toLocation(p.getWorld())
                 : eye.clone().add(direction.clone().multiply(range));
 
-        // Damage Logic
+        // 2. Damage Logic using cached damage
         if (result != null && result.getHitEntity() instanceof LivingEntity victim) {
-            DamageUtils.damage(victim, p, DAMAGES.get(level - 1), new DamageEvent.Metadata(ID, DamageType.PROJECTILE_ABILITY));
+            DamageUtils.damage(victim, p, damage, new DamageEvent.Metadata(ID, DamageType.PROJECTILE_ABILITY));
             playImpactEffects(endPoint);
         }
 
-        // Visuals
+        // 3. Visuals & Consume Stack
         playMuzzleEffects(eye);
         renderTracer(eye, endPoint);
 
         currentStacks--;
         updateActionBar(p);
+
+        return AbilityResponse.consume();
     }
 
     private void renderTracer(Location start, Location end) {
@@ -133,12 +146,11 @@ public class Sidearm extends Ability {
     }
 
     private void updateActionBar(Player p) {
-        int max = MAX_STACKS.get(level - 1);
         p.sendActionBar(Component.text("Sidearm: ", NamedTextColor.GRAY)
                 .append(Component.text("▮".repeat(currentStacks), NamedTextColor.YELLOW))
-                .append(Component.text("▯".repeat(max - currentStacks), NamedTextColor.DARK_GRAY)));
+                .append(Component.text("▯".repeat(maxStacks - currentStacks), NamedTextColor.DARK_GRAY)));
     }
 
     @Override public boolean isOnCooldown() { return currentStacks <= 0; }
-    @Override public @NotNull AbilityInfo<? extends Ability> getAbilityInfo() { return INFO; }
+    @Override public @NotNull AbilityInfo<?> getAbilityInfo() { return INFO; }
 }
