@@ -265,7 +265,7 @@ public class DungeonFlowController {
         DungeonPlayer dungeonPlayer = instance.getDungeonPlayers();
         dungeonPlayer.getPlayers().forEach((uuid, playerStatus) -> {
             Player player = UuidUtil.getPlayerById(uuid);
-            if(player != null && playerStatus.getStatus() == PlayerStatus.Status.PLAYING){
+            if(player != null){
                 /*Notice player that dungeon will be destroyed*/
                 if(instance.getProgress().getStatus() == DungeonProgress.Status.FAILED){
                     DungeonEcho.warn(player, "The dungeon has collapsed! You barely escaped...");

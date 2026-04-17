@@ -7,6 +7,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -88,18 +89,18 @@ public class DungeonListener implements Listener {
     }
 
     @EventHandler
-    public void onArmorStandInteract(PlayerInteractAtEntityEvent e) {
-        if (e.getRightClicked() instanceof ArmorStand stand) {
-            if (stand.getPersistentDataContainer().has(NameSpaceKeys.REVIVE_POINT_KEY)) {
+    public void onMannequinInteract(PlayerInteractAtEntityEvent e) {
+        if (e.getRightClicked() instanceof Mannequin mannequin) {
+            if (mannequin.getPersistentDataContainer().has(NameSpaceKeys.REVIVE_POINT_KEY)) {
                 e.setCancelled(true);
             }
         }
     }
 
     @EventHandler
-    public void onArmorStandDamage(EntityDamageEvent e) {
-        if (e.getEntity() instanceof ArmorStand stand) {
-            if (stand.getPersistentDataContainer().has(NameSpaceKeys.REVIVE_POINT_KEY)) {
+    public void onMannequinDamage(EntityDamageEvent e) {
+        if (e.getEntity() instanceof Mannequin mannequin) {
+            if (mannequin.getPersistentDataContainer().has(NameSpaceKeys.REVIVE_POINT_KEY)) {
                 e.setCancelled(true);
             }
         }

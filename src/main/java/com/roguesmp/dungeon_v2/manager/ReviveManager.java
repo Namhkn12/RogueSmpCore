@@ -8,7 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -23,7 +23,7 @@ public class ReviveManager {
     private final Map<UUID, DeadEntry> deadEntries = new ConcurrentHashMap<>();
     private final Map<UUID, BossBar>   bossBars    = new ConcurrentHashMap<>();
     private final Map<UUID, BukkitTask> revivePointTasks = new ConcurrentHashMap<>();
-    private final Map<UUID, ArmorStand> revivePointDisplays = new ConcurrentHashMap<>();
+    private final Map<UUID, Mannequin> revivePointDisplays = new ConcurrentHashMap<>();
     private final TaskScheduler taskScheduler;
     private final RevivePointPresenter revivePointPresenter;
     private BukkitTask task;
@@ -151,7 +151,7 @@ public class ReviveManager {
     private void startOrReplaceRevivePoint(UUID deadUUID, Player deadPlayer, Location deathLocation) {
         stopRevivePoint(deadUUID);
 
-        ArmorStand display = revivePointPresenter.spawnRevivePoint(deadPlayer, deathLocation);
+        Mannequin display = revivePointPresenter.spawnRevivePoint(deadPlayer, deathLocation);
         if (display == null) return;
 
         revivePointDisplays.put(deadUUID, display);
@@ -160,7 +160,6 @@ public class ReviveManager {
         BukkitTask reviveTask = taskScheduler.runTimerCancellable(0L, REVIVE_POINT_PERIOD_TICKS, () -> {
             if (display.isDead()) {
                 stopRevivePoint(deadUUID);
-                return;
             }
             revivePointPresenter.tickRevivePoint(display, deathLocation, tickRef.getAndIncrement());
         });
@@ -173,8 +172,7 @@ public class ReviveManager {
         if (reviveTask != null && !reviveTask.isCancelled()) {
             reviveTask.cancel();
         }
-
-        ArmorStand stand = revivePointDisplays.remove(deadUUID);
-        revivePointPresenter.removeRevivePoint(stand);
+        Mannequin mannequin = revivePointDisplays.remove(deadUUID);
+        revivePointPresenter.removeRevivePoint(mannequin);
     }
 }
