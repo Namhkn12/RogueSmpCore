@@ -4,6 +4,7 @@ import com.roguesmp.dungeon_v2.data.definition.spawner.Spawner;
 import com.roguesmp.dungeon_v2.data.definition.spawner.behavior.BehaviorFactory;
 import com.roguesmp.dungeon_v2.data.definition.spawner.behavior.IBehavior;
 import com.roguesmp.dungeon_v2.data.runtime.SpawnerInstance;
+import org.bukkit.Location;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,12 +25,12 @@ public class SpawnerInstanceManager {
         return cache.get(siid);
     }
 
-    public SpawnerInstance create(String siid, Spawner spawner) {
+    public SpawnerInstance create(String siid, Spawner spawner, Location location) {
         List<IBehavior> behaviors = spawner.getBehaviors().stream()
                 .map(BehaviorFactory::create)
                 .toList();
 
-        return new SpawnerInstance(siid, spawner.getId(), behaviors);
+        return new SpawnerInstance(siid, spawner.getId(), location, behaviors);
     }
 
     @Override

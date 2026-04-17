@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon_v2.data.definition.spawner.behavior;
 
+import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -23,19 +24,19 @@ public class BehaviorPipeline {
     }
 
     /** @return true nếu tất cả behaviors đều cho phép break */
-    public boolean runBreak(Player player) {
+    public boolean runBreak(Player player, Location location) {
         boolean allow = true;
         for (IBehavior b : behaviors) {
-            if (!b.onBreak(player)) allow = false;
+            if (!b.onBreak(player, location)) allow = false;
         }
         return allow;
     }
 
     /** @return true nếu tất cả behaviors đều cho phép spawn */
-    public boolean runSpawn(LivingEntity entity) {
+    public boolean runSpawn(LivingEntity entity, Location location) {
         boolean allow = true;
         for (IBehavior b : behaviors) {
-            if (!b.onSpawn(entity)) allow = false;
+            if (!b.onSpawn(entity, location)) allow = false;
         }
         return allow;
     }

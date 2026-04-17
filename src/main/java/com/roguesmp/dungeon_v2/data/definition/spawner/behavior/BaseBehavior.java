@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon_v2.data.definition.spawner.behavior;
 
+import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -14,8 +15,8 @@ public abstract class BaseBehavior implements IBehavior {
 
     // Default no-op — chỉ override những gì behavior cần
 
-    @Override public boolean onBreak(Player player)       { return true; }
-    @Override public boolean onSpawn(LivingEntity entity) { return true; }
+    @Override public boolean onBreak(Player player, Location location)       { return true; }
+    @Override public boolean onSpawn(LivingEntity entity, Location location) { return true; }
     @Override public void onTick()                        { }
     @Override public void onPlayerEnter(Player player)    { }
 

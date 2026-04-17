@@ -1,6 +1,8 @@
 package com.roguesmp.dungeon_v2.data.definition.room.roomevent.impl;
 
 import com.roguesmp.dungeon_v2.data.definition.room.roomevent.BaseRoomEvent;
+import com.roguesmp.effect.EffectManager;
+import com.roguesmp.effect.impl.DamageIncreaseEffect;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -37,16 +39,9 @@ public class PartyStrengthBuffRoomEvent extends BaseRoomEvent {
     @Override
     protected void onStartInternal() {
         if (context == null || context.getParty() == null || context.getPartyService() == null) return;
-        context.getPartyService().getOnlineMembers(context.getParty()).forEach(player -> player.addPotionEffect(
-                new PotionEffect(
-                        PotionEffectType.STRENGTH,
-                        durationTicks,
-                        amplifier,
-                        false,
-                        true,
-                        true
-                )
-        ));
+        context.getPartyService().getOnlineMembers(context.getParty()).forEach(player -> {
+            EffectManager.getInstance().addEffect(player, "damage_increase", new DamageIncreaseEffect(durationTicks, amplifier));
+        });
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.roguesmp.dungeon_v2.data.definition.spawner.behavior.impl;
 
 import com.roguesmp.dungeon_v2.data.definition.spawner.behavior.BaseBehavior;
 import com.roguesmp.dungeon_v2.data.definition.spawner.behavior.BehaviorData;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class ProtectorSpawner extends BaseBehavior {
@@ -15,7 +16,7 @@ public class ProtectorSpawner extends BaseBehavior {
     }
 
     @Override
-    public boolean onBreak(Player player) {
+    public boolean onBreak(Player player, Location location) {
         if (completed) return true;
 
         brokenCount++;

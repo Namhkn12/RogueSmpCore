@@ -56,7 +56,7 @@ public class SpawnerEventController {
             SpawnerInstance instance = spawnerInstanceManager.get(iid);
             if (instance == null) return true;
 
-            boolean allowed = instance.getPipeline().runBreak(player);
+            boolean allowed = instance.getPipeline().runBreak(player, block.getLocation());
             if (allowed) {
                 spawnerInstanceManager.remove(iid);
             }
@@ -147,7 +147,7 @@ public class SpawnerEventController {
                 creatureSpawner.update();
             }
 
-            spawnerService.createInstance(templateId, iid);
+            spawnerService.createInstance(templateId, iid, block.getLocation());
             spawnerService.applyTemplate(templateId, creatureSpawner);
         } catch (BaseException e) {
             GlobalException.handle(e);
