@@ -17,10 +17,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Marker;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -69,6 +66,25 @@ public class SpawnerEventController {
         }
     }
 
+    public boolean handleSpawnerSpawn(CreatureSpawner spawner, Entity entity, List<Player> player){
+        PersistentDataContainer pdc = spawner.getPersistentDataContainer();
+        if (!pdc.has(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING))
+            return true;
+
+        String iid = pdc.get(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING);
+        try {
+            SpawnerInstance instance = spawnerInstanceManager.get(iid);
+            if (instance == null) return true;
+
+            return instance.getPipeline().runSpawn((LivingEntity) entity, player,spawner.getLocation());
+        } catch (SpawnerNotFoundException e) {
+            return true;
+        } catch (BaseException e) {
+            GlobalException.handle(e);
+            return true;
+        }
+    }
+
     public void handleSpawnerLoad(List<Entity> entities, String worldName){
         if(!worldName.startsWith("dungeon_")) return;
         for (Entity entity : entities) {
@@ -108,10 +124,6 @@ public class SpawnerEventController {
             }
             registerSpawner(block, sid);
         });
-    }
-
-    public void handleSpawnerSpawn(){
-
     }
 
     /*Admin api*/

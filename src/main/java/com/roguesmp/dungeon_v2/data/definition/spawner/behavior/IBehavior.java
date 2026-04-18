@@ -4,6 +4,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public interface IBehavior {
 
     /**
@@ -14,7 +16,7 @@ public interface IBehavior {
     /**
      * @return true = cho phép spawn, false = hủy
      */
-    boolean onSpawn(LivingEntity entity, Location location);
+    boolean onSpawn(LivingEntity entity, List<Player> players, Location location);
 
     void onTick();
 

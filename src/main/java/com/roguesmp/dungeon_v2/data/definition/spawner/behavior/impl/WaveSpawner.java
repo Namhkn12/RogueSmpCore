@@ -3,9 +3,14 @@ package com.roguesmp.dungeon_v2.data.definition.spawner.behavior.impl;
 import com.roguesmp.dungeon_v2.data.definition.spawner.behavior.BaseBehavior;
 import com.roguesmp.dungeon_v2.data.definition.spawner.behavior.BehaviorData;
 import com.roguesmp.dungeon_v2.utils.DungeonEcho;
+import com.roguesmp.dungeon_v2.utils.SpawnLocationRazdon;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+
+import java.util.List;
 
 public class WaveSpawner extends BaseBehavior {
 
@@ -33,13 +38,21 @@ public class WaveSpawner extends BaseBehavior {
     }
 
     @Override
-    public boolean onSpawn(LivingEntity entity, Location location) {
+    public boolean onSpawn(LivingEntity entity, List<Player> players, Location location) {
         if (completed) return true;
 
         waveCount++;
+        if (waveCount >= waves) completed = true;
 
-        if (waveCount >= waves) {
-            completed = true;
+        int extra = Math.max(0, players.size() - 1);
+        EntityType type = entity.getType();
+        World world = location.getWorld();
+
+        if (world == null) return true;
+
+        for (int i = 0; i < extra; i++) {
+            Location spawnLoc = SpawnLocationRazdon.getRandomLocation(location);
+            world.spawnEntity(spawnLoc, type);
         }
 
         return true;

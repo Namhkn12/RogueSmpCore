@@ -7,6 +7,10 @@ import com.roguesmp.dungeon_v2.manager.SchemetaManager;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import java.util.function.Predicate;
 
 public class SchemetaCommand {
 
@@ -24,6 +28,7 @@ public class SchemetaCommand {
         new CommandAPICommand("schemeta")
                 .withSubcommand(
                         new CommandAPICommand("save")
+                                .withRequirement(inBuildingWorld())
                                 .withArguments(new StringArgument("name"))
                                 .executesPlayer((player, args) -> {
                                     String name = (String) args.get("name");
@@ -32,6 +37,7 @@ public class SchemetaCommand {
                 )
                 .withSubcommand(
                         new CommandAPICommand("paste")
+                                .withRequirement(inBuildingWorld())
                                 .withArguments(
                                         new StringArgument("id")
                                                 .replaceSuggestions(ArgumentSuggestions.strings(
@@ -71,5 +77,12 @@ public class SchemetaCommand {
 //                                )
 //                )
                 .register();
+    }
+
+    private Predicate<CommandSender> inBuildingWorld() {
+        return sender -> {
+            if (!(sender instanceof Player player)) return false;
+            return player.getWorld().getName().startsWith("building");
+        };
     }
 }

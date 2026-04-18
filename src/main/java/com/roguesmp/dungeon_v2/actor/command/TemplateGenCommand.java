@@ -17,12 +17,14 @@ import dev.jorel.commandapi.arguments.DoubleArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public class TemplateGenCommand {
 
@@ -68,6 +70,7 @@ public class TemplateGenCommand {
                         new CommandAPICommand("get")
                                 .withArguments(
                                         new StringArgument("templateId")
+                                                .withRequirement(inBuildingWorld())
                                                 .replaceSuggestions(ArgumentSuggestions.strings(
                                                         info -> spawnerManager.getAllIds().toArray(String[]::new)
                                                 ))
@@ -93,6 +96,7 @@ public class TemplateGenCommand {
         return new CommandAPICommand("loottable")
                 .withSubcommand(
                         new CommandAPICommand("treasure")
+                                .withRequirement(inBuildingWorld())
                                 .withSubcommand(
                                         new CommandAPICommand("give")
                                                 .executesPlayer((player, args) -> {
@@ -103,6 +107,7 @@ public class TemplateGenCommand {
                 )
                 .withSubcommand(
                         new CommandAPICommand("roll")
+                                .withRequirement(inBuildingWorld())
                                 .withArguments(lootTableIdArgument("tableId"))
                                 .executesPlayer((player, args) -> {
                                     String tableId = (String) args.get("tableId");
@@ -111,6 +116,7 @@ public class TemplateGenCommand {
                 )
                 .withSubcommand(
                         new CommandAPICommand("rollbonus")
+                                .withRequirement(inBuildingWorld())
                                 .withArguments(
                                         lootTableIdArgument("tableId"),
                                         new DoubleArgument("bonusModifier", 0.0)
@@ -126,6 +132,7 @@ public class TemplateGenCommand {
                 )
                 .withSubcommand(
                         new CommandAPICommand("check")
+                                .withRequirement(inBuildingWorld())
                                 .withArguments(lootTableIdArgument("tableId"))
                                 .executesPlayer((player, args) -> {
                                     String tableId = (String) args.get("tableId");
@@ -140,30 +147,37 @@ public class TemplateGenCommand {
 
     private CommandAPICommand buildReloadCommand() {
         return new CommandAPICommand("reload")
+                .withRequirement(inBuildingWorld())
                 .executes((sender, args) -> {
                     sender.sendMessage(reloadAllTemplates());
                 })
                 .withSubcommand(new CommandAPICommand("all")
+                        .withRequirement(inBuildingWorld())
                         .executes((sender, args) -> {
                             sender.sendMessage(reloadAllTemplates());
                         }))
                 .withSubcommand(new CommandAPICommand("spawner")
+                        .withRequirement(inBuildingWorld())
                         .executes((sender, args) -> {
                             sender.sendMessage(reloadSpawnerTemplates());
                         }))
                 .withSubcommand(new CommandAPICommand("dungeon")
+                        .withRequirement(inBuildingWorld())
                         .executes((sender, args) -> {
                             sender.sendMessage(reloadDungeonTemplates());
                         }))
                 .withSubcommand(new CommandAPICommand("room")
+                        .withRequirement(inBuildingWorld())
                         .executes((sender, args) -> {
                             sender.sendMessage(reloadRoomTemplates());
                         }))
                 .withSubcommand(new CommandAPICommand("loottable")
+                        .withRequirement(inBuildingWorld())
                         .executes((sender, args) -> {
                             sender.sendMessage(reloadLootTableTemplates());
                         }))
                 .withSubcommand(new CommandAPICommand("schemeta")
+                        .withRequirement(inBuildingWorld())
                         .executes((sender, args) -> {
                             sender.sendMessage(reloadSchemetaTemplates());
                         }));
@@ -258,5 +272,12 @@ public class TemplateGenCommand {
         meta.getPersistentDataContainer().set(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING, "dungeon");
         item.setItemMeta(meta);
         return item;
+    }
+
+    private Predicate<CommandSender> inBuildingWorld() {
+        return sender -> {
+            if (!(sender instanceof Player player)) return false;
+            return player.getWorld().getName().startsWith("building");
+        };
     }
 }

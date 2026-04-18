@@ -91,6 +91,10 @@ public class SpawnerEventListener implements Listener {
 
     @EventHandler
     public void onSpawnerSpawn(SpawnerSpawnEvent event){
+        boolean allowSpawn = spawnerController.handleSpawnerSpawn(event.getSpawner(),
+                event.getEntity(),
+                event.getLocation().getNearbyPlayers(20).stream().toList());
+        event.setCancelled(!allowSpawn);
     }
 
     @EventHandler

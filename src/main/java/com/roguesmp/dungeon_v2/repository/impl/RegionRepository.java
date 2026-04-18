@@ -21,7 +21,6 @@ public class RegionRepository implements IRegionRepository {
     public RegionRepository(Plugin plugin, Gson gson, Log4Craft_ logger) {
         this.gson = gson;
 
-        // dungeon/region/ relative to plugin data folder
         this.regionFolder = new File(
                 plugin.getDataFolder(),
                 DataFolderConfig.getRegionFolder()

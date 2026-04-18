@@ -56,7 +56,6 @@ public class SchematicRepository implements ISchematicRepository {
         return toFile(name).exists();
     }
 
-    // ── helper ──────────────────────────────────────────────
     private File toFile(String name) {
         return new File(schematicFolder, name + DataFolderConfig.SCHEM_TYPE);
     }

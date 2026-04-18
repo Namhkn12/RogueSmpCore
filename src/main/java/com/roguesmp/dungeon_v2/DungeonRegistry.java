@@ -70,11 +70,11 @@ public class DungeonRegistry {
 
         /*Repository*/
         ISchematicRepository schematicRepository = new SchematicRepository(plugin);
-        ISchemetaRepository schemetaRepository = new SchemetaRepository(plugin, gson);
+        ISchemetaRepository schemetaRepository = new SchemetaRepository(plugin, gson, logger);
         IRegionRepository regionRepository = new RegionRepository(plugin, gson, logger);
         IRoomRepository roomRepository = new RoomRepository(plugin, gson, logger);
         IDungeonRepository dungeonRepository = new DungeonRepository(plugin, gson);
-        ISpawnerRepository spawnerRepository = new SpawnerRepository(plugin, gson);
+        ISpawnerRepository spawnerRepository = new SpawnerRepository(plugin, gson, logger);
         IPartyRepository partyRepository = new PartyRepository(plugin, gson, logger);
         IInstanceRepository instanceRepository = new InstanceRepository(plugin, gson, logger);
         ILootTableRepository lootTableRepository = new LootTableRepository(plugin, gson);

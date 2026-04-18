@@ -33,10 +33,10 @@ public class BehaviorPipeline {
     }
 
     /** @return true nếu tất cả behaviors đều cho phép spawn */
-    public boolean runSpawn(LivingEntity entity, Location location) {
+    public boolean runSpawn(LivingEntity entity, List<Player> players,Location location) {
         boolean allow = true;
         for (IBehavior b : behaviors) {
-            if (!b.onSpawn(entity, location)) allow = false;
+            if (!b.onSpawn(entity, players,location)) allow = false;
         }
         return allow;
     }
