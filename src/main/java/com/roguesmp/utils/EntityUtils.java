@@ -47,6 +47,20 @@ public class EntityUtils {
         return attr == null ? def : attr.getValue();
     }
 
+    public static double healthScalingCoef(int playerCount, double x, double y) {
+        if (playerCount < 1) {
+            return 1;
+        }
+        double scalingCoef = 0;
+        // calculates smallest scaling increase first. largest scaling increase last.
+        while (playerCount > 0) {
+            double iterCoef = Math.pow(x, Math.pow(playerCount - 1, y));
+            scalingCoef += iterCoef;
+            playerCount--;
+        }
+        return scalingCoef;
+    }
+
     public static boolean isAquatic(Entity entity) {
         return entity instanceof WaterMob || entity instanceof Guardian || entity instanceof Turtle;
     }

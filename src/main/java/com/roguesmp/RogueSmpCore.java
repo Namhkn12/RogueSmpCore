@@ -13,7 +13,7 @@ import com.roguesmp.listener.*;
 import com.roguesmp.player.PlayerDataManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.registry.BlockRegistry;
-import com.roguesmp.registry.EntityRegistry;
+import com.roguesmp.registry.entity.EntityRegistry;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.registry.VanillaCraftingRecipeRegistry;
 import com.roguesmp.registry.ability.AbilityRegistry;
@@ -43,8 +43,8 @@ public final class RogueSmpCore extends JavaPlugin {
         BlockManager.init(this);
 
         //Entity
-        EntityManager.init();
         EntityRegistry.init(this);
+        EntityManager.init(EntityRegistry.getInstance());
 
         ItemRegistry.init(this);
         BlockRegistry.init(this);
@@ -84,7 +84,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance(), PlayerDataManager.getInstance()));
-        registerListener(new EntityListener(EntityManager.getInstance(), EntityRegistry.getInstance()));
+        registerListener(new EntityListener(EntityManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
     }
 

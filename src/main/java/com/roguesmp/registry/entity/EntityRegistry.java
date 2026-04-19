@@ -1,12 +1,14 @@
-package com.roguesmp.registry;
+package com.roguesmp.registry.entity;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.SmpEntity;
+import com.roguesmp.entity.boss.PrimordialSlime;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Location;
+import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -14,26 +16,43 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 public class EntityRegistry {
     private static EntityRegistry INSTANCE;
     public static final String FOLDER_NAME = "entities";
 
-    private final Map<String, BaseEntity> dataMap = new HashMap<>();
+    private final Map<String, BaseEntity> definitions = new HashMap<>();
+    private final Map<String, BiFunction<BaseEntity, LivingEntity, SmpEntity>> factories = new HashMap<>();
     private final RogueSmpCore plugin;
 
     private EntityRegistry(RogueSmpCore plugin) {
         this.plugin = plugin;
+
+        registerSpecial("primordial_slime", PrimordialSlime::new);
+
     }
 
     public @Nullable SmpEntity spawnEntity(String id, Location location) {
-        BaseEntity base = dataMap.get(id);
+        BaseEntity base = definitions.get(id);
         if (base == null) return null;
         return base.spawn(location);
     }
 
+    /**
+     * Wrap an Entity within SmpEntity, or its subclasses
+     */
+    public SmpEntity wrap(BaseEntity base, LivingEntity living) {
+        // Default to standard SmpEntity if no special factory exists
+        return factories.getOrDefault(base.getId(), SmpEntity::new).apply(base, living);
+    }
+
+    public boolean isSpecialEntity(String id) {
+        return factories.containsKey(id);
+    }
+
     public BaseEntity getBaseEntity(String id) {
-        return dataMap.get(id);
+        return definitions.get(id);
     }
 
     public void loadFromFile() {
@@ -60,7 +79,7 @@ public class EntityRegistry {
                     continue;
                 }
 
-                dataMap.put(entity.getId(), entity);
+                definitions.put(entity.getId(), entity);
 
             } catch (Exception e) {
                 plugin.getLogger().severe("Failed to load entity file: " + file.getName());
@@ -68,7 +87,11 @@ public class EntityRegistry {
             }
         }
 
-        plugin.getLogger().info("Loaded entity registry (" + dataMap.size() + " entries)");
+        plugin.getLogger().info("Loaded entity registry (" + definitions.size() + " entries)");
+    }
+
+    private void registerSpecial(String id, BiFunction<BaseEntity, LivingEntity, SmpEntity> factory) {
+        factories.put(id, factory);
     }
 
     public static void init(RogueSmpCore plugin) {
@@ -83,7 +106,7 @@ public class EntityRegistry {
     }
 
     public void reload() {
-        dataMap.clear();
+        definitions.clear();
         loadFromFile();
     }
 

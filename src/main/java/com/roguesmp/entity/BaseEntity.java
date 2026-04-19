@@ -5,7 +5,8 @@ import com.roguesmp.constant.EntityAttribute;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.entity.spell.SpellManager;
-import com.roguesmp.registry.EntitySpellRegistry;
+import com.roguesmp.registry.entity.EntityRegistry;
+import com.roguesmp.registry.entity.EntitySpellRegistry;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
@@ -32,6 +33,7 @@ public class BaseEntity {
     private final EntityType entityType;
     private final String displayName;
     private final boolean noAi;
+    private final boolean invulnerable;
     private final boolean persistent;
     private final boolean isBoss;
     private final boolean isElite;
@@ -45,11 +47,12 @@ public class BaseEntity {
 
     private final Map<String, Map<String, Object>> spellParams;
 
-    public BaseEntity(String id, Map<EntityAttribute, Double> baseStat, Map<EquipmentSlot, EntityEquipment> equipments, EntityType entityType, String displayName, boolean noAi, boolean persistent, boolean isBoss, boolean isElite, int detectionRange, List<String> activeSpell, List<String> passiveSpell, int passiveInterval, boolean canCastSameSpellTwice, Map<String, Map<String, Object>> spellParams) {
+    public BaseEntity(String id, Map<EntityAttribute, Double> baseStat, Map<EquipmentSlot, EntityEquipment> equipments, EntityType entityType, String displayName, boolean noAi, boolean invulnerable, boolean persistent, boolean isBoss, boolean isElite, int detectionRange, List<String> activeSpell, List<String> passiveSpell, int passiveInterval, boolean canCastSameSpellTwice, Map<String, Map<String, Object>> spellParams) {
         this.id = id;
         this.entityType = entityType;
         this.displayName = displayName;
         this.noAi = noAi;
+        this.invulnerable = invulnerable;
         this.persistent = persistent;
         this.isBoss = isBoss;
         this.isElite = isElite;
@@ -69,14 +72,16 @@ public class BaseEntity {
      * @return SmpEntity instance
      */
     public SmpEntity spawn(Location location) {
-        Entity spawned = location.getWorld().spawn(location, this.getEntityType().getEntityClass(), this::processEntity);
+        Entity spawned = location.getWorld().spawn(location, this.getEntityType().getEntityClass(), false, entity -> {});
 
         if (!(spawned instanceof LivingEntity living)) {
-            RogueSmpCore.LOGGER.warn("EntityType must be a living entity!");
             throw new RuntimeException("EntityType must be a living entity!");
         }
+        SmpEntity smpEntity = EntityRegistry.getInstance().wrap(this, living);
+        smpEntity.initialize();
+        EntityManager.getInstance().register(smpEntity);
 
-        return new SmpEntity(this, living);
+        return smpEntity;
     }
 
     public EntitySnapshot spawnOnlyEquipmentSnapshot(Location location) {
@@ -92,12 +97,11 @@ public class BaseEntity {
     }
 
     /**
-     * If this entity is not registered in EntityManager, add spells from BaseEntity to this SmpEntity instance
+     * If this SmpEntity is not initialized, add spells from BaseEntity to this SmpEntity instance
      * @param smpEntity the entity
      */
     public void processSpell(SmpEntity smpEntity) {
-        // If already registered, don't process spell again, it is handled in EntityListener
-        if (EntityManager.getInstance().isRegistered(smpEntity.entity)) return;
+        if (smpEntity.isInitialized()) return;
         List<Spell> activeSpells = new ArrayList<>();
         if (activeSpell != null) {
             activeSpell.forEach(s -> {
@@ -127,9 +131,10 @@ public class BaseEntity {
         smpEntity.startSpell(spellManager, passiveSpells, detectionRange2, null, 5, passiveIntervalTick, canCastSameSpellTwice);
     }
 
-    private void processEntity(Entity entity) {
+    public void processEntity(Entity entity) {
         if (!(entity instanceof LivingEntity living)) return;
 
+        living.setInvulnerable(invulnerable);
         living.setAI(!noAi);
         living.setPersistent(persistent);
         living.setRemoveWhenFarAway(!persistent);
@@ -137,23 +142,28 @@ public class BaseEntity {
         living.customName(Utils.fromString(displayName));
         PersistentDataContainer pdc = living.getPersistentDataContainer();
         pdc.set(Keys.MOB_ID, PersistentDataType.STRING, id);
+        if (baseStat != null) {
+            this.getBaseStat().forEach((entityAttribute, aDouble) -> {
+                AttributeInstance instance = living.getAttribute(entityAttribute.getBukkitAttribute());
+                if (instance == null) {
+                    living.registerAttribute(entityAttribute.getBukkitAttribute());
+                }
+                // Cannot be null since we registered it
+                instance.setBaseValue(aDouble);
+                if (entityAttribute.getBukkitAttribute() == Attribute.MAX_HEALTH) living.setHealth(aDouble);
+            });
+        }
 
-        this.getBaseStat().forEach((entityAttribute, aDouble) -> {
-            AttributeInstance instance = living.getAttribute(entityAttribute.getBukkitAttribute());
-            if (instance == null) {
-                living.registerAttribute(entityAttribute.getBukkitAttribute());
-            }
-            // Cannot be null since we registered it
-            instance.setBaseValue(aDouble);
-            if (entityAttribute.getBukkitAttribute() == Attribute.MAX_HEALTH) living.setHealth(aDouble);
-        });
 
         org.bukkit.inventory.EntityEquipment equipment = living.getEquipment();
         if (equipment != null) {
-            this.getEquipments().forEach((equipmentSlot, entityEquipment) -> {
-                equipment.setDropChance(equipmentSlot, 0f);
-                equipment.setItem(equipmentSlot, entityEquipment.createItemStack());
-            });
+            if (equipments != null) {
+                this.getEquipments().forEach((equipmentSlot, entityEquipment) -> {
+                    equipment.setDropChance(equipmentSlot, 0f);
+                    equipment.setItem(equipmentSlot, entityEquipment.createItemStack());
+                });
+            }
+
         }
     }
 

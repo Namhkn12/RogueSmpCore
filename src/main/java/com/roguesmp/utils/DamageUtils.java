@@ -1,8 +1,13 @@
 package com.roguesmp.utils;
 
 import com.roguesmp.event.DamageEvent;
+import org.bukkit.Location;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,5 +29,9 @@ public class DamageUtils {
             victim.setNoDamageTicks(originalIFrame);
             victim.setLastDamage(originalLastDamage);
         } else victim.damage(damage, damager);
+    }
+
+    public static void damage(@NotNull LivingEntity victim, @Nullable Entity damager, Location location, double damage, DamageEvent.Metadata metadata) {
+
     }
 }

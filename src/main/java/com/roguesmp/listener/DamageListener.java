@@ -6,8 +6,10 @@ import com.roguesmp.utils.DamageDisplayUtils;
 import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.EntityUtils;
 import com.roguesmp.utils.Utils;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -43,12 +45,13 @@ public class DamageListener implements Listener {
 
             DamageEvent.Metadata metadata = DamageUtils.nextMetadata;
             DamageEvent damageEvent;
+            double originalDamage = event.getDamage();
             if (metadata != null) { // Damage caused by plugin via DamageUtils
-                damageEvent = new DamageEvent(victim, damager, event.getDamage(), metadata);
+                damageEvent = new DamageEvent(victim, damager, originalDamage, metadata);
                 DamageUtils.nextMetadata = null;
             } else {
                 DamageType damageType = DamageType.getType(event.getCause());
-                damageEvent = new DamageEvent(victim, damager, event.getDamage(), new DamageEvent.Metadata(damageType));
+                damageEvent = new DamageEvent(victim, damager, originalDamage, new DamageEvent.Metadata(damageType));
             }
 
             damageEvent.setCritical(entityDamageByEntityEvent.isCritical());
