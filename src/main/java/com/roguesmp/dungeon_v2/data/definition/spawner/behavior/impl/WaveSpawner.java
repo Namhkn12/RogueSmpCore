@@ -6,18 +6,31 @@ import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.SpawnLocationRazdon;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
+/**
+ * Example json config
+ *
+ * {
+ *   "spawnerId": "undead_wave_nest",
+ *   "behaviors": [
+ *     {
+ *       "type": "wave",
+ *       "waves": 5
+ *     }
+ *   ]
+ * }
+ *
+ * */
 public class WaveSpawner extends BaseBehavior {
 
     private final int waves;
     private int waveCount = 0;
 
-    protected WaveSpawner(BehaviorData data) {
+    public WaveSpawner(BehaviorData data) {
         super(data);
         this.waves = data.getInt("waves", 3);
     }
@@ -44,15 +57,14 @@ public class WaveSpawner extends BaseBehavior {
         waveCount++;
         if (waveCount >= waves) completed = true;
 
-        int extra = Math.max(0, players.size() - 1);
-        EntityType type = entity.getType();
+        int extra = Math.max(0, players.size() + 2);
         World world = location.getWorld();
 
         if (world == null) return true;
 
         for (int i = 0; i < extra; i++) {
             Location spawnLoc = SpawnLocationRazdon.getRandomLocation(location);
-            world.spawnEntity(spawnLoc, type);
+            entity.copy(spawnLoc);
         }
 
         return true;

@@ -1,4 +1,4 @@
-﻿package com.roguesmp.dungeon_v2.utils;
+package com.roguesmp.dungeon_v2.utils;
 
 import org.bukkit.Location;
 import org.bukkit.World;

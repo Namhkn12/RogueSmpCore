@@ -46,7 +46,8 @@ public class DungeonRegistry {
                 .setPrettyPrinting()
                 .create();
         /*Scheduler*/
-        TaskScheduler taskScheduler = new TaskScheduler(plugin);
+        TaskScheduler.init(plugin);
+        TaskScheduler taskScheduler = TaskScheduler.getInstance();
 
         /*ScoreBoard*/
         DungeonExpansion papiExpansion = new DungeonExpansion();

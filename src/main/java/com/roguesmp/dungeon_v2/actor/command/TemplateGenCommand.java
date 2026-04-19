@@ -11,10 +11,7 @@ import com.roguesmp.dungeon_v2.manager.SpawnerManager;
 import com.roguesmp.dungeon_v2.service.ILootService;
 import com.roguesmp.dungeon_v2.utils.NameSpaceKeys;
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.Argument;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.DoubleArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel.commandapi.arguments.*;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -99,9 +96,30 @@ public class TemplateGenCommand {
                                 .withRequirement(inBuildingWorld())
                                 .withSubcommand(
                                         new CommandAPICommand("give")
+                                                .withArguments(
+                                                        treasureTableIdArgument("tableId")
+                                                )
                                                 .executesPlayer((player, args) -> {
-                                                    player.getInventory().addItem(buildTreasureChestItem());
-                                                    player.sendMessage("You received a Treasure Chest.");
+
+                                                    String tableId = (String) args.get("tableId");
+
+                                                    if (!tableId.equals("dungeon")
+                                                            && !lootTableManager.exists(tableId)) {
+
+                                                        player.sendMessage(
+                                                                "§c[LootTable] Not found: §f" + tableId
+                                                        );
+                                                        return;
+                                                    }
+
+                                                    player.getInventory().addItem(
+                                                            buildTreasureChestItem(tableId)
+                                                    );
+
+                                                    player.sendMessage(
+                                                            "§aYou received a Treasure Chest for: §f"
+                                                                    + tableId
+                                                    );
                                                 })
                                 )
                 )
@@ -118,8 +136,8 @@ public class TemplateGenCommand {
                         new CommandAPICommand("rollbonus")
                                 .withRequirement(inBuildingWorld())
                                 .withArguments(
-                                        lootTableIdArgument("tableId"),
-                                        new DoubleArgument("bonusModifier", 0.0)
+                                        new DoubleArgument("bonusModifier", 0.0),
+                                        lootTableIdArgument("tableId")  // GreedyString ở cuối
                                 )
                                 .executesPlayer((player, args) -> {
                                     String tableId = (String) args.get("tableId");
@@ -224,9 +242,10 @@ public class TemplateGenCommand {
     }
 
     private Argument<String> lootTableIdArgument(String nodeName) {
-        return new StringArgument(nodeName)
+        return new GreedyStringArgument(nodeName)
                 .replaceSuggestions(ArgumentSuggestions.strings(
-                        info -> lootTableManager.getAllTables().keySet().stream()
+                        info -> lootTableManager.getAllTables().keySet()
+                                .stream()
                                 .sorted()
                                 .toArray(String[]::new)
                 ));
@@ -265,13 +284,32 @@ public class TemplateGenCommand {
         return item;
     }
 
-    private ItemStack buildTreasureChestItem() {
+    private ItemStack buildTreasureChestItem(String rewardId) {
         ItemStack item = new ItemStack(Material.CHEST);
+
         ItemMeta meta = item.getItemMeta();
+
         meta.setDisplayName("Treasure Chest");
-        meta.getPersistentDataContainer().set(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING, "dungeon");
+
+        meta.getPersistentDataContainer().set(
+                NameSpaceKeys.REWARD_CID_KEY,
+                PersistentDataType.STRING,
+                rewardId
+        );
+
         item.setItemMeta(meta);
+
         return item;
+    }
+
+    private Argument<String> treasureTableIdArgument(String nodeName) {
+        return new GreedyStringArgument(nodeName)
+                .replaceSuggestions(ArgumentSuggestions.strings(
+                        info -> java.util.stream.Stream.concat(
+                                java.util.stream.Stream.of("dungeon"),
+                                lootTableManager.getAllTables().keySet().stream().sorted()
+                        ).toArray(String[]::new)
+                ));
     }
 
     private Predicate<CommandSender> inBuildingWorld() {

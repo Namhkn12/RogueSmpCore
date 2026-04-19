@@ -44,8 +44,8 @@ public class SpawnerService implements ISpawnerService {
         spawner.setDelay(template.getDelay());
         spawner.setSpawnRange(template.getSpawnRange());
         spawner.setMaxNearbyEntities(template.getMaxNearBy());
-        spawner.setMaxSpawnDelay(template.getMaxDelay());
         spawner.setMinSpawnDelay(template.getMinDelay());
+        spawner.setMaxSpawnDelay(template.getMaxDelay());
         spawner.setRequiredPlayerRange(template.getActiveRange());
         spawner.setSpawnCount(template.getSpawnCount());
         spawner.setSpawnedType(null);

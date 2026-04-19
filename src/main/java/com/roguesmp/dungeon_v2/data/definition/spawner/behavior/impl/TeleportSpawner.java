@@ -5,30 +5,41 @@ import com.roguesmp.dungeon_v2.data.definition.spawner.behavior.BehaviorData;
 import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.NameSpaceKeys;
 import com.roguesmp.dungeon_v2.utils.Razdon;
-import com.roguesmp.registry.EntityRegistry;
 import org.bukkit.*;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * Example json config
+ *
+ * {
+ *   "spawnerId": "phantom_nest",
+ *   "behaviors": [
+ *     {
+ *       "type": "teleport",
+ *       "max_teleports": 4,
+ *       "teleport_radius": 30.0,
+ *       "safe_check_radius": 5.0
+ *     }
+ *   ]
+ * }
+ * */
 public class TeleportSpawner extends BaseBehavior {
 
     private final int maxTeleports;
-    private final double teleportRadius;     // bán kính tìm player
-    private final double safeCheckRadius;    // bán kính check vị trí an toàn quanh player
+    private final double teleportRadius;
+    private final double safeCheckRadius;
     private int teleportCount = 0;
 
     private final JavaPlugin plugin;
 
-    protected TeleportSpawner(BehaviorData data, JavaPlugin plugin) {
+    public TeleportSpawner(BehaviorData data, JavaPlugin plugin) {
         super(data);
         this.maxTeleports = data.getInt("max_teleports", 3);
         this.teleportRadius = data.getDouble("teleport_radius", 20.0);
@@ -36,9 +47,6 @@ public class TeleportSpawner extends BaseBehavior {
         this.plugin = plugin;
     }
 
-    // =========================================================
-    // onBreak: chưa hết lần tele → chặn vỡ, tele spawner đi
-    // =========================================================
     @Override
     public boolean onBreak(Player player, Location location) {
         if (completed) return true;
@@ -54,7 +62,6 @@ public class TeleportSpawner extends BaseBehavior {
                 teleportSpawner(location, dest);
                 teleportCount++;
             } else {
-                // Không tìm được vị trí → coi như dùng 1 lần nhưng không di chuyển
                 teleportCount++;
                 DungeonEcho.info(player, "The spawner trembles but holds its ground.");
             }
@@ -71,9 +78,6 @@ public class TeleportSpawner extends BaseBehavior {
         return true;
     }
 
-    // =========================================================
-    // onSpawn: tìm player gần nhất trong vùng, tele mob đến đó
-    // =========================================================
     @Override
     public boolean onSpawn(LivingEntity entity, List<Player> players, Location location) {
         if (completed) return true;
@@ -82,9 +86,6 @@ public class TeleportSpawner extends BaseBehavior {
         World world = location.getWorld();
         if (world == null) return true;
 
-        EntityType type = entity.getType();
-
-        // Mỗi player spawn 2-4 mob tele đến họ
         for (Player player : players) {
             if (!player.getWorld().equals(world)) continue;
 
@@ -92,22 +93,17 @@ public class TeleportSpawner extends BaseBehavior {
             for (int i = 0; i < count; i++) {
                 Location dest = findSafeLocationNearPlayer(player);
                 if (dest == null) continue;
-
-                LivingEntity spawned = (LivingEntity) world.spawnEntity(dest, type);
+                /* Copy and spawn */
+                entity.copy(dest);
+                /* Play trail */
                 playTeleportTrail(location, dest);
             }
         }
-
-        // Cancel entity gốc vì đã tự spawn thay thế
         entity.remove();
         return false;
     }
 
-    // =========================================================
-    // Helpers
-    // =========================================================
-
-    /** Tìm vị trí an toàn ngẫu nhiên quanh player */
+    /** Find a safe location */
     private Location findSafeLocationNearPlayer(Player player) {
         Razdon rng = Razdon.getInstance();
         Location playerLoc = player.getLocation();
@@ -119,11 +115,10 @@ public class TeleportSpawner extends BaseBehavior {
         return null;
     }
 
-    /** Tìm vị trí ngẫu nhiên trong world để spawner tele đến (tránh xa player) */
     private Location findTeleportDestination(Location current, World world) {
         Razdon rng = Razdon.getInstance();
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 15; i++) {
             Location candidate = rng.nextLocationXZ(current, 10.0, teleportRadius);
             if (isSafe(candidate)) return candidate;
         }
@@ -136,15 +131,13 @@ public class TeleportSpawner extends BaseBehavior {
                 && !loc.clone().subtract(0, 1, 0).getBlock().isPassable(); // có block phía dưới
     }
 
-    /** Particle trail từ origin → dest để chỉ hướng tele */
     private void playTeleportTrail(Location origin, Location dest) {
         World world = origin.getWorld();
         if (world == null) return;
 
         world.spawnParticle(Particle.PORTAL, origin, 40, 0.3, 0.5, 0.3, 0.1);
         world.spawnParticle(Particle.WITCH, origin, 15, 0.2, 0.4, 0.2, 0);
-
-        // Trail dọc theo đường đi
+        /*Draw trail*/
         drawTrail(origin, dest, world);
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -172,20 +165,16 @@ public class TeleportSpawner extends BaseBehavior {
     }
 
     private void teleportSpawner(Location from, Location to) {
-        // Lấy meta cũ trước khi xóa
-        CreatureSpawner oldSpawner = (CreatureSpawner) from.getBlock().getState();
-        PersistentDataContainer oldPdc = oldSpawner.getPersistentDataContainer();
-        String iid = oldPdc.get(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING);
+
+        CreatureSpawner oldSpawner =
+                (CreatureSpawner) from.getBlock().getState();
 
         to.getBlock().setType(Material.SPAWNER);
 
-        // Copy IID sang spawner mới
-        CreatureSpawner newSpawner = (CreatureSpawner) to.getBlock().getState();
-        if (iid != null) {
-            newSpawner.getPersistentDataContainer()
-                    .set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, iid);
-        }
-        newSpawner.update();
+        CreatureSpawner copiedSpawner =
+                (CreatureSpawner) oldSpawner.copy(to);
+
+        copiedSpawner.update(true, false);
 
         from.getBlock().setType(Material.AIR);
     }

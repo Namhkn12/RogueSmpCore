@@ -5,6 +5,20 @@ import com.roguesmp.dungeon_v2.data.definition.spawner.behavior.BehaviorData;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+/**
+ * Example json config
+ *
+ * {
+ *   "spawnerId": "boss_guardian",
+ *   "behaviors": [
+ *     {
+ *       "type": "protector",
+ *       "requireBreak": 5
+ *     }
+ *   ]
+ * }
+ *
+ * */
 public class ProtectorSpawner extends BaseBehavior {
 
     private final int requireBreak;
@@ -23,12 +37,12 @@ public class ProtectorSpawner extends BaseBehavior {
         int remaining = requireBreak - brokenCount;
 
         if (remaining > 0) {
-            sendMessage(player, "Spawner được bảo vệ — còn " + remaining + " lần.");
+            sendMessage(player, "The spawner shield active —  " + remaining + " break remaining.");
             return false;
         }
 
         completed = true;
-        sendMessage(player, "Lớp bảo vệ đã bị phá!");
+        sendMessage(player, "Spawner defenses destroyed!");
         return true;
     }
 
