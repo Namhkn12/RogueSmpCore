@@ -25,9 +25,11 @@ import java.util.function.Consumer;
 public class SmpEntity {
     public static final int PASSIVE_RUN_INTERVAL_DEFAULT = 5;
 
-    public final LivingEntity entity;
-    private final String id;
+    protected final LivingEntity entity;
+    protected final BaseEntity base;
     private final RogueSmpCore plugin;
+
+    protected boolean initialized;
 
     private int detectionRange;
     public SpellManager activeSpells;
@@ -44,9 +46,19 @@ public class SmpEntity {
     public SmpEntity(BaseEntity base, LivingEntity entity) {
         this.plugin = RogueSmpCore.getInstance();
         this.entity = entity;
-        id = base.getId();
+        this.base = base;
         activeSpells = SpellManager.EMPTY;
         passiveSpells = Collections.emptyList();
+    }
+
+    public void initialize() {
+        if (initialized) return; // Safety check
+
+        // This triggers the logic inside BaseEntity to call startSpell()
+        base.processEntity(this.entity);
+        base.processSpell(this);
+
+        this.initialized = true;
     }
 
     public void changePhase(SpellManager activeSpells,
@@ -137,6 +149,7 @@ public class SmpEntity {
 
         this.passiveIntervalTicks = passiveIntervalTicks;
         if (passiveSpells != null && !passiveSpells.isEmpty()) {
+            if (taskPassive != null) taskPassive.cancel();
             taskPassive = entity.getScheduler().runAtFixedRate(
                     plugin,
                     task -> runPassiveSpellTask(),
@@ -147,6 +160,7 @@ public class SmpEntity {
         }
 
         if (activeSpells != null && !activeSpells.isEmpty()) {
+            if (taskActive != null) taskActive.cancel();
             taskActive = entity.getScheduler().runAtFixedRate(
                     plugin,
                     task -> runActiveSpellTask(),
@@ -212,12 +226,16 @@ public class SmpEntity {
             SpellCastEvent event = new SpellCastEvent(entity, this, sp);
             Bukkit.getPluginManager().callEvent(event);
         } else {
-            RogueSmpCore.LOGGER.warn("Warning: Entity '{}' attempted to force cast '{}' but entity does not have this spell!", id, spell.toString());
+            RogueSmpCore.LOGGER.warn("Warning: Entity '{}' attempted to force cast '{}' but entity does not have this spell!", base.getId(), spell.toString());
         }
     }
 
     public String getId() {
-        return id;
+        return base.getId();
+    }
+
+    public boolean isInitialized() {
+        return initialized;
     }
 
     public void unload() {

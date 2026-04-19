@@ -7,7 +7,7 @@ import com.roguesmp.dungeon_v2.manager.SpawnerManager;
 import com.roguesmp.dungeon_v2.service.ISpawnerService;
 import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import com.roguesmp.entity.BaseEntity;
-import com.roguesmp.registry.EntityRegistry;
+import com.roguesmp.registry.entity.EntityRegistry;
 import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.spawner.SpawnerEntry;

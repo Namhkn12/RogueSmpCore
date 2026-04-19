@@ -8,7 +8,7 @@ import com.roguesmp.dungeon_v2.data.runtime.Party;
 import com.roguesmp.dungeon_v2.manager.InstanceManager;
 import com.roguesmp.dungeon_v2.manager.RoomManager;
 import com.roguesmp.dungeon_v2.service.IPartyService;
-import com.roguesmp.registry.EntityRegistry;
+import com.roguesmp.registry.entity.EntityRegistry;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
