@@ -10,6 +10,7 @@ import com.roguesmp.item.component.impl.ConsumableComponent;
 import com.roguesmp.item.component.impl.EnchantComponent;
 import com.roguesmp.item.component.impl.EquipAttributeComponent;
 import com.roguesmp.player.ability.AbilityLoadout;
+import com.roguesmp.player.ability.trigger.AbilityTrigger;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
@@ -22,10 +23,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
-import org.bukkit.event.player.PlayerExpChangeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -206,27 +204,28 @@ public class SmpPlayer {
         Action action = event.getAction();
         Player player = event.getPlayer();
         if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.GRINDSTONE) {
-            new GrindstoneGui(this).showInventory(this.getBukkitPlayer());
+            new GrindstoneGui(this).showInventory(player);
             event.setCancelled(true);
             return;
         }
         if (event.getHand() != EquipmentSlot.HAND) return;
         if (action.isLeftClick()) {
-            if (player.isSneaking()) abilityLoadout.cast(AbilityTrigger.SHIFT_LEFT_CLICK);
+            abilityLoadout.cast(AbilityTrigger.Key.LEFT_CLICK);
         } else if (action.isRightClick()) {
-            // Is it a valid casting tool? (Not food, not a bow, etc.)
-            if (!ItemStackUtils.canBeCastedWith(event.getItem())) return;
-            // Does it have the required stats to be considered a 'weapon'?
-            if (!activeAttributes.containsKey(Attributes.MELEE_DAMAGE_BASE)) return;
-            if (player.isSneaking()) abilityLoadout.cast(AbilityTrigger.SHIFT_RIGHT_CLICK);
-            else abilityLoadout.cast(AbilityTrigger.RIGHT_CLICK);
+            abilityLoadout.cast(AbilityTrigger.Key.RIGHT_CLICK);
         }
     }
 
     public void onSwapHand(PlayerSwapHandItemsEvent event) {
-        if (event.getPlayer().isSneaking()) abilityLoadout.cast(AbilityTrigger.SHIFT_SWAP);
-        else abilityLoadout.cast(AbilityTrigger.SWAP);
+        abilityLoadout.cast(AbilityTrigger.Key.SWAP);
         event.setCancelled(true);
+    }
+
+    public void onInput(PlayerInputEvent event) {
+        if (event.getInput().isJump()) abilityLoadout.cast(AbilityTrigger.Key.JUMP);
+        else if (event.getInput().isSneak()) {
+            abilityLoadout.cast(AbilityTrigger.Key.SNEAK);
+        }
     }
 
     public void onDamageEntity(DamageEvent event) {
@@ -377,7 +376,6 @@ public class SmpPlayer {
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
         Player player = getBukkitPlayer();
         if (player == null) return;
-        if (player.isSneaking()) abilityLoadout.cast(AbilityTrigger.SHIFT_PROJECTILE);
 
         event.getEntity().setPersistent(false);
         this.trackProjectile(event.getEntity());

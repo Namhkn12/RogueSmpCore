@@ -1,18 +1,19 @@
 package com.roguesmp.player.ability.impl.passive;
 
-import com.roguesmp.constant.AbilityTrigger;
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
+import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -20,50 +21,46 @@ import java.util.List;
 public class Sharpshooter extends Ability {
     public static final String ID = "sharpshooter";
 
-    // Level Scaling
-    private static final List<Double> PASSIVE_DMG = List.of(0.10, 0.15, 0.20, 0.25, 0.40);
-    private static final List<Double> STACK_DMG = List.of(0.03, 0.04, 0.05, 0.06, 0.10);
-    private static final List<Integer> DECAY_TICKS = List.of(80, 80, 80, 80, 120); // 4s, Lvl 5 is 6s
+    // Cached Attributes
+    private final double passiveDmg;
+    private final double stackDmg;
+    private final int decayTicks;
     private static final int MAX_STACKS = 4;
 
+    // State
     private int stacks = 0;
     private int ticksUntilDecay = 0;
 
-    public static final AbilityInfo<Sharpshooter> INFO = new AbilityInfo.Builder<Sharpshooter>()
-            .id(ID)
-            .displayText(Component.text("Sharpshooter", NamedTextColor.GOLD, TextDecoration.BOLD))
-            .descriptionProvider((p, l) -> List.of(
-                    Utils.text("Sát thương tầm xa tăng ", NamedTextColor.GRAY).append(Utils.text(Utils.formatDecimal(PASSIVE_DMG.get(l-1) * 100) + "%", NamedTextColor.GREEN)),
-                    Utils.text("Khi bắn trúng địch sẽ nhận một cộng dồn", NamedTextColor.GRAY),
-                    Utils.text("Mỗi cộng dồn (Tối đa 4): ", NamedTextColor.GRAY)
-                            .append(Utils.text("+" + Utils.formatDecimal(STACK_DMG.get(l-1) * 100) + "% sát thương tầm xa", NamedTextColor.YELLOW)),
-                    Utils.text("Cộng dồn sẽ mất sau vài giây nếu không đánh trúng.", NamedTextColor.DARK_GRAY)
-            ))
-            .displayIcon(Material.TARGET)
-            .factory(Sharpshooter::new)
-            .trigger(AbilityTrigger.PASSIVE)
-            .build();
+    public static final AbilityInfo<Sharpshooter> INFO = new AbilityInfo<>(
+            ID,
+            Sharpshooter.class,
+            Sharpshooter::new
+    ).registerAction("execute", (ability) -> AbilityResponse.continueChain());
 
     public Sharpshooter(SmpPlayer player, int level) {
         super(player, level);
+        // Cache attributes from JSON for high-frequency access
+        this.passiveDmg = getAbilityInfo().getAttributeForLevel("passive_dmg", level);
+        this.stackDmg = getAbilityInfo().getAttributeForLevel("stack_dmg", level);
+        this.decayTicks = (int) getAbilityInfo().getAttributeForLevel("cooldown_decay", level);
     }
 
     @Override
     public void onDamageEntity(DamageEvent event) {
+        // Only apply to projectile damage
         if (event.getDamageType() == DamageType.PROJECTILE) {
 
-            // 1. Apply Multiplier
-            double multiplier = PASSIVE_DMG.get(level - 1) + (stacks * STACK_DMG.get(level - 1));
+            // 1. Calculate and Apply Multiplier using cached values
+            double multiplier = passiveDmg + (stacks * stackDmg);
             event.addDamageModifier(multiplier, DamageOperation.INCREASE_BASE);
 
-            // 2. Stack Logic: Check if it's a "Critical" or valid projectile hit
+            // 2. Add/Refresh stacks
             addStack();
-
         }
     }
 
     private void addStack() {
-        this.ticksUntilDecay = DECAY_TICKS.get(level - 1);
+        this.ticksUntilDecay = decayTicks;
 
         if (stacks < MAX_STACKS) {
             stacks++;
@@ -73,32 +70,36 @@ public class Sharpshooter extends Ability {
 
     @Override
     public void tick(int periodIncrement) {
-        if (stacks <= 0) {
-            stacks = 0;
-            return;
-        }
+        if (stacks <= 0) return;
 
-        ticksUntilDecay -= periodIncrement; // Check every 10 ticks (0.5s)
+        ticksUntilDecay -= periodIncrement;
 
         if (ticksUntilDecay <= 0) {
             stacks--;
-            ticksUntilDecay = DECAY_TICKS.get(level - 1);
+            // If stacks remain, reset timer for the next decay step
+            if (stacks > 0) {
+                ticksUntilDecay = decayTicks;
+            }
             updateActionBar();
         }
     }
 
     private void updateActionBar() {
-        if (stacks <= 0) return;
+        Player p = smpPlayer.getBukkitPlayer();
+
+        // Clear action bar if stacks are gone
+        if (stacks <= 0) {
+            p.sendActionBar(Component.empty());
+            return;
+        }
 
         TextColor color = stacks >= MAX_STACKS ? NamedTextColor.RED : NamedTextColor.GOLD;
-        smpPlayer.getBukkitPlayer().sendActionBar(
+        p.sendActionBar(
                 Component.text("Sharpshooter Stacks: ", NamedTextColor.GRAY)
                         .append(Component.text(stacks, color, TextDecoration.BOLD))
                         .append(Component.text("/" + MAX_STACKS, NamedTextColor.DARK_GRAY))
         );
     }
 
-    @Override public void cast() {} // Passive
-
-    @Override public @NotNull AbilityInfo<? extends Ability> getAbilityInfo() { return INFO; }
+    @Override public @NotNull AbilityInfo<?> getAbilityInfo() { return INFO; }
 }

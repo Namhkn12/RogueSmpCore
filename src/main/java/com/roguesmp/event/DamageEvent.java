@@ -18,9 +18,10 @@ public class DamageEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
 
     public static class Metadata {
-        private final @Nullable String mobSpellId;
-        private final @Nullable String abilityId;
-        private DamageType damageType;
+        private @Nullable String mobSpellId;
+        private @Nullable String abilityId;
+        private final DamageType damageType;
+        private boolean isBlockable = true;
         private boolean ignoreIframe;
 
         public Metadata(DamageType damageType) {
@@ -49,6 +50,26 @@ public class DamageEvent extends Event implements Cancellable {
         public boolean isIgnoreIframe() {
             return ignoreIframe;
         }
+
+        public @Nullable String getMobSpellId() {
+            return mobSpellId;
+        }
+
+        public @Nullable String getAbilityId() {
+            return abilityId;
+        }
+
+        public DamageType getDamageType() {
+            return damageType;
+        }
+
+        public boolean isBlockable() {
+            return isBlockable;
+        }
+
+        public void setBlockable(boolean blockable) {
+            isBlockable = blockable;
+        }
     }
 
     private final Entity victim;
@@ -58,6 +79,7 @@ public class DamageEvent extends Event implements Cancellable {
 
     private boolean needUpdate = true; // For recalculating dmg value
 
+    private boolean isBlocked;
     private boolean isCancelled;
     private boolean isCritical;
 
@@ -200,6 +222,18 @@ public class DamageEvent extends Event implements Cancellable {
 
     public DamageType getDamageType() {
         return metadata.damageType;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.isBlocked = blocked;
+        if (blocked) {
+            // Leave it as complete negation for now, might add a percent reduction in the future
+            this.addDamageModifier(0, DamageOperation.MORE_FINAL);
+        }
+    }
+
+    public Metadata getMetadata() {
+        return metadata;
     }
 
     public static HandlerList getHandlerList() {

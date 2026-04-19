@@ -1,12 +1,16 @@
 package com.roguesmp.utils;
 
+import com.destroystokyo.paper.MaterialTags;
 import com.roguesmp.constant.Keys;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import io.papermc.paper.persistence.PersistentDataContainerView;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
@@ -33,20 +37,29 @@ public class ItemStackUtils {
         stack.setData(DataComponentTypes.ITEM_NAME, component);
     }
 
-    public static final EnumSet<Material> castBlockItems = EnumSet.of(
+    public static final EnumSet<Material> PROJECTILE_WEAPONS = EnumSet.of(
             Material.BOW,
             Material.CROSSBOW,
             Material.TRIDENT,
-            Material.FISHING_ROD,
-            Material.FIREWORK_ROCKET
+            Material.EGG,
+            Material.SNOWBALL
             );
-    public static boolean canBeCastedWith(ItemStack itemStack) {
+    public static boolean isProjectileWeapon(ItemStack itemStack) {
         if (itemStack == null || itemStack.getType().isAir()) return false;
 
-        // Block items that have a specific "Right Click" mechanic
-        if (castBlockItems.contains(itemStack.getType())) return false;
+        return PROJECTILE_WEAPONS.contains(itemStack.getType());
+    }
 
-        return !itemStack.hasData(DataComponentTypes.CONSUMABLE);
+    public static boolean isConsumable(ItemStack itemStack) {
+        if (itemStack == null || itemStack.getType().isAir()) return false;
+
+        return itemStack.hasData(DataComponentTypes.CONSUMABLE);
+    }
+
+    public static boolean isPickaxe(ItemStack itemStack) {
+        if (itemStack == null || itemStack.getType().isAir()) return false;
+
+        return Tag.ITEMS_PICKAXES.isTagged(itemStack.getType());
     }
 
     /**

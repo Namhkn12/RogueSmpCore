@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,24 @@ public class PlayerUtils {
 
     public static List<Player> playersInRange(Location loc, double range, boolean includeNonTargetable) {
         return playersInRange(loc, range, includeNonTargetable, false);
+    }
+
+    public static @Nullable Player getNearestPlayer(Location location, double range) {
+        double closestDistanceSq = range * range;
+        Player closestPlayer = null;
+        for (Player player : location.getWorld().getPlayers()) {
+            if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE) {
+                continue;
+            }
+
+            double distSq = player.getLocation().distanceSquared(location);
+
+            if (distSq < closestDistanceSq) {
+                closestDistanceSq = distSq;
+                closestPlayer = player;
+            }
+        }
+        return closestPlayer;
     }
 
     /**

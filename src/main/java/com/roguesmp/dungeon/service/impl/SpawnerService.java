@@ -8,7 +8,7 @@ import com.roguesmp.dungeon.manager.SpawnerInstanceManager;
 import com.roguesmp.dungeon.manager.SpawnerManager;
 import com.roguesmp.dungeon.service.ISpawnerService;
 import com.roguesmp.entity.BaseEntity;
-import com.roguesmp.registry.EntityRegistry;
+import com.roguesmp.registry.entity.EntityRegistry;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.spawner.SpawnerEntry;
 import org.bukkit.entity.EntitySnapshot;

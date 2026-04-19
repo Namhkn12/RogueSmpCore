@@ -2,10 +2,11 @@ package com.roguesmp.gui.ability;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.gui.BaseGui;
+import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.AbilityInfo;
-import com.roguesmp.registry.AbilityRegistry;
+import com.roguesmp.registry.ability.AbilityRegistry;
 import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -55,7 +56,7 @@ public class AbilityCatalogue extends BaseGui {
         nextPage = ItemStack.of(Material.ARROW);
         nextPage.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang sau"));
 
-        abilityList.addAll(AbilityRegistry.getAll());
+        abilityList.addAll(AbilityRegistry.getInstance().getAll());
     }
 
     @Override
@@ -86,14 +87,14 @@ public class AbilityCatalogue extends BaseGui {
             int col = 1 + (index % 7);
 
             AbilityInfo<?> info = abilityList.get(i);
-            boolean isUnlocked = unlocked.containsKey(info.id());
+            boolean isUnlocked = unlocked.containsKey(info.getId());
             ItemStack display;
             if (isUnlocked) {
-                int level = unlocked.get(info.id());
+                int level = unlocked.get(info.getId());
                 display = createInfoItem(info, smpPlayer, level);
             } else {
                 display = notUnlockedItem.clone();
-                display.setData(DataComponentTypes.ITEM_NAME, info.displayText());
+                display.setData(DataComponentTypes.ITEM_NAME, info.getFormattedDisplayName());
                 display.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(Component.text("Chưa mở khóa", NamedTextColor.GRAY))));
             }
 
@@ -128,17 +129,16 @@ public class AbilityCatalogue extends BaseGui {
     }
 
     private static ItemStack createInfoItem(AbilityInfo<?> info, SmpPlayer smpPlayer, int level) {
-        ItemStack item = ItemStack.of(info.displayIcon());
+        ItemStack item = ItemStack.of(info.getIcon());
 
-        item.setData(DataComponentTypes.ITEM_NAME, info.displayText());
+        item.setData(DataComponentTypes.ITEM_NAME, info.getFormattedDisplayName());
 
         List<Component> lore = new ArrayList<>();
 
-        lore.add(Component.text("Kích hoạt: ", NamedTextColor.GRAY).append(info.trigger().simpleName()).decoration(TextDecoration.ITALIC, false));
         lore.add(Component.text("Cấp: " + level, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
         lore.add(Component.empty());
 
-        lore.addAll(info.descriptionProvider().apply(smpPlayer, level));
+        lore.addAll(info.getFormattedDescription(level));
 
         item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
 
@@ -156,11 +156,12 @@ public class AbilityCatalogue extends BaseGui {
                         .executesPlayer((player, commandArguments) -> {
                             SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player.getUniqueId());
                             if (smpPlayer == null) return;
+                            PlayerData playerData = smpPlayer.getPlayerData();
                             Map<String, Integer> data = new HashMap<>();
-                            AbilityRegistry.getAll().forEach(info -> {
-                                data.put(info.id(), 5);
+                            AbilityRegistry.getInstance().getAll().forEach(info -> {
+                                data.put(info.getId(), 1);
                             });
-                            smpPlayer.getPlayerData().setUnlockedAbilities(data);
+                            data.forEach(playerData::setAbilityLevel);
                         }))
                 .withSubcommand(new CommandAPICommand("loadout")
                         .executesPlayer((player, commandArguments) -> {

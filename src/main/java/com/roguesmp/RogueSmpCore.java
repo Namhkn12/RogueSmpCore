@@ -13,9 +13,10 @@ import com.roguesmp.listener.*;
 import com.roguesmp.player.PlayerDataManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.registry.BlockRegistry;
-import com.roguesmp.registry.EntityRegistry;
+import com.roguesmp.registry.entity.EntityRegistry;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.registry.VanillaCraftingRecipeRegistry;
+import com.roguesmp.registry.ability.AbilityRegistry;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
@@ -35,13 +36,15 @@ public final class RogueSmpCore extends JavaPlugin {
 
         ComponentKeys.loadClass();
 
+        //Player
+        AbilityRegistry.init();
         PlayerManager.init(this, PlayerDataManager.getInstance());
         EffectManager.init(this);
         BlockManager.init(this);
 
         //Entity
-        EntityManager.init();
         EntityRegistry.init(this);
+        EntityManager.init(EntityRegistry.getInstance());
 
         ItemRegistry.init(this);
         BlockRegistry.init(this);
@@ -58,6 +61,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Load data from files, databases, etc
     public void loadData() {
+        AbilityRegistry.getInstance().loadAll();
         ItemRegistry.getInstance().loadFromFile();
         EntityRegistry.getInstance().loadFromFile();
         BlockStorage.getInstance().loadFromFile();
@@ -65,7 +69,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
     //Run on onDisable
     public void saveData() {
-        ItemRegistry.getInstance().saveToFile(true);
+        ItemRegistry.getInstance().saveToFile(false);
         BlockStorage.getInstance().saveToFile(true);
 
         PlayerManager.getInstance().onDisable();
@@ -80,7 +84,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance(), PlayerDataManager.getInstance()));
-        registerListener(new EntityListener(EntityManager.getInstance(), EntityRegistry.getInstance()));
+        registerListener(new EntityListener(EntityManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
     }
 

@@ -16,6 +16,11 @@ public class EntityUtils {
         return maxHealth == null ? 0 : maxHealth.getValue();
     }
 
+    public static void setHealthPercent(LivingEntity living, double value) {
+        double maxHp = getMaxHealth(living);
+        living.setHealth(Math.clamp(maxHp * value, 0d, maxHp));
+    }
+
     /**
      * Returns a List of LivingEntity excluding Players objects in the bounding box with the specified dimensions.
      *
@@ -40,6 +45,20 @@ public class EntityUtils {
     public static double getAttributeOrDefault(Attributable entity, Attribute attribute, double def) {
         AttributeInstance attr = entity.getAttribute(attribute);
         return attr == null ? def : attr.getValue();
+    }
+
+    public static double healthScalingCoef(int playerCount, double x, double y) {
+        if (playerCount < 1) {
+            return 1;
+        }
+        double scalingCoef = 0;
+        // calculates smallest scaling increase first. largest scaling increase last.
+        while (playerCount > 0) {
+            double iterCoef = Math.pow(x, Math.pow(playerCount - 1, y));
+            scalingCoef += iterCoef;
+            playerCount--;
+        }
+        return scalingCoef;
     }
 
     public static boolean isAquatic(Entity entity) {

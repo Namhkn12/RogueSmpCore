@@ -1,5 +1,6 @@
-package com.roguesmp.registry;
+package com.roguesmp.registry.entity;
 
+import com.roguesmp.entity.boss.primordialslime.PrimordialSlimeAltarSpell;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.entity.spell.impl.DummyEntitySpell;
 import com.roguesmp.entity.spell.impl.SelfDestructSpell;
@@ -18,6 +19,8 @@ public class EntitySpellRegistry {
         register("self_destruct_spell", SelfDestructSpell::readParam);
         register("slow_aura_spell", SlowAuraSpell::readParam);
         register("dummy_entity_spell", DummyEntitySpell::factory);
+
+        register("primordial_slime_altar_spell", PrimordialSlimeAltarSpell::readParam);
     }
 
     public static @Nullable Spell createSpell(String id, @Nullable Map<String, Object> param, LivingEntity owner) {

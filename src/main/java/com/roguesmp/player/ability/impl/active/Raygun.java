@@ -1,10 +1,8 @@
-package com.roguesmp.player.ability.impl.shiftprojectile;
+package com.roguesmp.player.ability.impl.active;
 
 import com.destroystokyo.paper.ParticleBuilder;
-import com.roguesmp.constant.AbilityTrigger;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
-import com.roguesmp.particle.LineShape;
 import com.roguesmp.particle.ParticleShape;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
@@ -15,72 +13,75 @@ import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.event.KeyEvent;
 import java.util.List;
 
 public class Raygun extends Ability {
-    public static final String ID = "ray_gun";
+    public static final String ID = "raygun";
 
-    // Level Scaling Lists (1-5)
-    private static final List<Double> DAMAGE_LEVELS = List.of(12.0, 15.0, 18.0, 22.0, 26.0);
-    private static final List<Double> RANGE_LEVELS = List.of(20.0, 25.0, 30.0, 35.0, 40.0);
-    private static final List<Integer> COOLDOWN_LEVELS = List.of(120, 100, 80, 70, 60); // In ticks
+    // Cached Attributes
+    private final double damage;
+    private final double range;
+    private final int cooldown;
 
-    public static final AbilityInfo<Raygun> INFO = new AbilityInfo.Builder<Raygun>()
-            .id(ID)
-            .displayText(Component.text("Ray Gun", NamedTextColor.AQUA, TextDecoration.BOLD))
-            .descriptionProvider((p, level) -> List.of(
-                    Utils.text("Bắn một tia năng lượng điện từ gây ", NamedTextColor.GRAY)
-                            .append(Utils.text(Utils.formatDecimal(DAMAGE_LEVELS.get(level - 1)) + " sát thương", NamedTextColor.RED)),
-                    Utils.text("Tầm xa: ", NamedTextColor.GRAY)
-                            .append(Utils.text(Utils.formatDecimal(RANGE_LEVELS.get(level - 1)) + "m", NamedTextColor.YELLOW)),
-                    Utils.text("Hồi chiêu: ", NamedTextColor.GRAY)
-                            .append(Utils.text(Utils.formatDecimal(COOLDOWN_LEVELS.get(level - 1) / 20.0) + "s", NamedTextColor.GREEN))
-            ))
-            .displayIcon(Material.END_ROD)
-            .factory(Raygun::new)
-            .trigger(AbilityTrigger.SHIFT_PROJECTILE)
-            .build();
+    public static final AbilityInfo<Raygun> INFO = new AbilityInfo<>(
+            ID,
+            Raygun.class,
+            Raygun::new
+    );
 
-    public Raygun(SmpPlayer player, int level) { super(player, level); }
+    public Raygun(SmpPlayer player, int level) {
+        super(player, level);
+        // Cache values from JSON via getAttributeForLevel
+        this.damage = getAbilityInfo().getAttributeForLevel("damage", level);
+        this.range = getAbilityInfo().getAttributeForLevel("range", level);
+        this.cooldown = (int) getAbilityInfo().getAttributeForLevel("cooldown", level);
+    }
 
     @Override
-    public void cast() {
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
         Player p = smpPlayer.getBukkitPlayer();
-        if (isOnCooldown()) return;
 
-        // Grab values based on current level
-        double damage = DAMAGE_LEVELS.get(level - 1);
-        double range = RANGE_LEVELS.get(level - 1);
-        int cooldown = COOLDOWN_LEVELS.get(level - 1);
+        // Filter: Must be sneaking and off cooldown
+        if (isOnCooldown() || !p.isSneaking()) return;
 
+        // 1. Consume the projectile (Turn arrow into laser)
+        event.setCancelled(true);
         setCooldownTick(cooldown);
 
         Location start = p.getEyeLocation().subtract(0, 0.2, 0);
         Vector direction = start.getDirection();
 
-        // 1. Raytrace using scaled range
-        RayTraceResult ray = p.getWorld().rayTrace(start, direction, range,
-                FluidCollisionMode.NEVER, true, 0.5, e -> !e.equals(p));
+        // 2. Raytrace logic using cached range
+        RayTraceResult ray = p.getWorld().rayTrace(
+                start,
+                direction,
+                range,
+                FluidCollisionMode.NEVER,
+                true,
+                0.5,
+                e -> !e.equals(p)
+        );
 
-        Location end = ray != null
+        Location end = (ray != null && ray.getHitPosition() != null)
                 ? ray.getHitPosition().toLocation(p.getWorld())
                 : start.clone().add(direction.clone().multiply(range));
 
-        // 2. Visuals (Electric Sound & Tilted Arcs)
+        // 3. Visuals & Sound
         playElectricLaunchSounds(start);
         spawnLaserBeam(start, end);
 
-        // 3. Impact Logic
-        if (ray != null && !(ray.getHitEntity() instanceof Player) && ray.getHitEntity() instanceof LivingEntity victim) {
+        // 4. Impact Logic using cached damage
+        if (ray != null && ray.getHitEntity() instanceof LivingEntity victim && !(victim instanceof Player)) {
             DamageUtils.damage(victim, p, damage, new DamageEvent.Metadata(ID, DamageType.PROJECTILE_ABILITY));
             playImpactEffects(end, victim);
         }
@@ -129,5 +130,5 @@ public class Raygun extends Ability {
         }
     }
 
-    @Override public @NotNull AbilityInfo<? extends Ability> getAbilityInfo() { return INFO; }
+    @Override public @NotNull AbilityInfo<?> getAbilityInfo() { return INFO; }
 }
