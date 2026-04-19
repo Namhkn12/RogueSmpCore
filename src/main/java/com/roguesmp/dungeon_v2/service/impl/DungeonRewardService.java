@@ -92,32 +92,47 @@ public class DungeonRewardService implements IDungeonRewardService {
         if (!(block.getState() instanceof TileState tileState)) return false;
 
         PersistentDataContainer blockPdc = tileState.getPersistentDataContainer();
-
         String cidValue = blockPdc.get(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING);
-        if (!"dungeon".equals(cidValue)) return false;
+        if (cidValue == null || cidValue.isBlank()) return false;
 
         e.setCancelled(true);
-
         tileState.getPersistentDataContainer().remove(NameSpaceKeys.REWARD_CID_KEY);
         tileState.update();
 
         Player player = e.getPlayer();
-        Party party = partyService.getPartyByPlayer(player);
-        if (party == null) return false;
-        DungeonInstance instance = instanceManager.get(party.getInstanceId());
-        if (instance == null) return false;
-        Dungeon dungeon = dungeonManager.get(instance.getSession().getDungeonId());
-        if (dungeon == null) return false;
 
-        int totalScore = instance.getProgress().getScore();
-        LootContext ctx = LootContext.builder()
-                .addRule(new LootRules.DungeonScoreRule(totalScore, 0.01))
-                .build();
+        String tableId;
+        LootContext ctx;
 
-        List<ItemStack> items = lootService.roll(dungeon.getLootTableId(), ctx);
+        if ("dungeon".equals(cidValue)) {
+            Party party = partyService.getPartyByPlayer(player);
+            if (party == null) return false;
+            String instanceId = party.getInstanceId();
+            if (instanceId == null || instanceId.isBlank()) return false;
+            DungeonInstance instance = instanceManager.get(instanceId);
+            if (instance == null) return false;
+            Dungeon dungeon = dungeonManager.get(instance.getSession().getDungeonId());
+            if (dungeon == null) return false;
+
+            tableId = dungeon.getLootTableId();
+            int totalScore = instance.getProgress().getScore();
+            ctx = LootContext.builder()
+                    .addRule(new LootRules.DungeonScoreRule(totalScore, 0.01))
+                    .build();
+        } else {
+            tableId = cidValue;
+            ctx = LootContext.builder().build();
+        }
+
+        if (!lootService.exists(tableId)) {
+            player.sendMessage("§c[Chest] Loot table not found: §f" + tableId);
+            return true;
+        }
+
+        List<ItemStack> items = lootService.roll(tableId, ctx);
 
         if (isDoubleSide(block)) {
-            items.addAll(lootService.roll(dungeon.getLootTableId(), ctx));
+            items.addAll(lootService.roll(tableId, ctx));
         }
 
         Chest chest = (Chest) block.getState();

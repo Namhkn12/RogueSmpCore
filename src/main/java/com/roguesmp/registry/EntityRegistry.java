@@ -82,18 +82,39 @@ public class EntityRegistry {
         return INSTANCE;
     }
 
+    public void reload() {
+        dataMap.clear();
+        loadFromFile();
+    }
+
     public static void registerCommand() {
+
+        // Spawn command
         new CommandAPICommand("smpentity")
                 .withArguments(new StringArgument("entity_id"))
-                .executesPlayer((player, commandArguments) -> {
-                    String id = (String) commandArguments.get("entity_id");
-                    BaseEntity base = EntityRegistry.getInstance().getBaseEntity(id);
+                .executesPlayer((player, args) -> {
+
+                    String id = (String) args.get("entity_id");
+
+                    BaseEntity base = getInstance().getBaseEntity(id);
+
                     if (base == null) {
                         player.sendMessage("Id not found");
                         return;
                     }
+
                     base.spawn(player.getLocation());
-                })
-                .register(RogueSmpCore.getInstance());
+
+                }).register();
+
+
+        new CommandAPICommand("smpentityreload")
+                .executes((sender, args) -> {
+
+                    getInstance().reload();
+
+                    sender.sendMessage("§aEntity registry reloaded.");
+
+                }).register();
     }
 }

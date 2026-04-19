@@ -22,7 +22,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class InstanceRepository implements IInstanceRepository {
 
@@ -39,20 +38,26 @@ public class InstanceRepository implements IInstanceRepository {
 
     @Override
     public void save(DungeonInstance instance) {
-        File file = getFile(instance.getSession().getSessionId());
+        if (instance == null || instance.getSession() == null) return;
+        String sessionId = instance.getSession().getSessionId();
+        if (sessionId == null || sessionId.isBlank()) return;
+
+        File file = getFile(sessionId);
         try (Writer writer = new FileWriter(file)) {
             gson.toJson(instance, writer);
         } catch (IOException e) {
-            logger.warn(this.getClass(), "Failed to save instance: " + instance.getSession().getSessionId());
+            logger.warn(this.getClass(), "Failed to save instance: " + sessionId);
         }
     }
 
     @Override
-    public void delete(UUID sessionId) {
+    public boolean delete(String sessionId) {
         File file = getFile(sessionId);
         if (file.exists() && !file.delete()) {
             logger.error(this.getClass(), "Failed to delete instance file: " + sessionId);
+            return false;
         }
+        return true;
     }
 
     @Override
@@ -65,6 +70,10 @@ public class InstanceRepository implements IInstanceRepository {
             try (Reader reader = new FileReader(file)) {
                 DungeonInstance instance = gson.fromJson(reader, DungeonInstance.class);
                 if (instance == null) continue;
+                if (instance.getSession() == null || instance.getSession().getSessionId() == null || instance.getSession().getSessionId().isBlank()) {
+                    logger.warn(this.getClass(), "Skip instance file with invalid session id: " + file.getName());
+                    continue;
+                }
                 restoreRoomRuntime(instance);
                 result.add(instance);
             } catch (IOException e) {
@@ -122,7 +131,7 @@ public class InstanceRepository implements IInstanceRepository {
         return restored;
     }
 
-    private File getFile(UUID sessionId) {
+    private File getFile(String sessionId) {
         return new File(dataFolder, DataFolderConfig.DUNGEON_INSTANCE_FILE + sessionId + DataFolderConfig.JSON_TYPE);
     }
 }

@@ -2,37 +2,38 @@ package com.roguesmp.dungeon_v2.data.runtime.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class DungeonPlayer {
-    private Map<UUID, PlayerStatus> players = new HashMap<>();
+    private Map<String, PlayerStatus> players = new HashMap<>();
 
     public DungeonPlayer() {
     }
 
-    public DungeonPlayer(Map<UUID, PlayerStatus> players) {
+    public DungeonPlayer(Map<String, PlayerStatus> players) {
         this.players = players;
     }
 
-    public Map<UUID, PlayerStatus> getPlayers() {
+    public Map<String, PlayerStatus> getPlayers() {
         return players;
     }
 
-    public void setPlayers(Map<UUID, PlayerStatus> players) {
-        this.players = players;
+    public void setPlayers(Map<String, PlayerStatus> players) {
+        this.players = players != null ? players : new HashMap<>();
     }
 
-    public void addPlayerStatus(UUID pid, PlayerStatus status){
+    public void addPlayerStatus(String pid, PlayerStatus status){
         players.put(pid, status);
     }
 
-    public void setPlayerStatus(UUID pid, PlayerStatus.Status status){
+    public void setPlayerStatus(String pid, PlayerStatus.Status status){
         PlayerStatus playerStatus = players.get(pid);
+        if (playerStatus == null) return;
         playerStatus.setStatus(status);
     }
 
-    public void countPlayerDead(UUID pid){
+    public void countPlayerDead(String pid){
         PlayerStatus playerStatus = players.get(pid);
+        if (playerStatus == null) return;
         playerStatus.upDead();
     }
 }

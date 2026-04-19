@@ -2,11 +2,11 @@ package com.roguesmp.dungeon_v2.actor.listener;
 
 import com.roguesmp.dungeon_v2.controller_.DungeonFlowController;
 import com.roguesmp.dungeon_v2.manager.InstanceManager;
-import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.filterchain.EventFilter;
 import com.roguesmp.dungeon_v2.utils.filterchain.FilterChain;
 import com.roguesmp.dungeon_v2.utils.filterchain.impl.InteractFilters;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Vault;
 import org.bukkit.entity.Player;
@@ -15,11 +15,19 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.Location;
+import org.bukkit.util.BoundingBox;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DoorInteractListener implements Listener {
 
     private final DungeonFlowController dungeonFlowController;
     private final InstanceManager instanceManager;
+    private final Map<UUID, String> treasureEnteredByInstance = new ConcurrentHashMap<>();
 
     public DoorInteractListener(DungeonFlowController dungeonFlowController, InstanceManager instanceManager) {
         this.dungeonFlowController = dungeonFlowController;
@@ -27,11 +35,12 @@ public class DoorInteractListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
+    public void onPlayerInteractDoor(PlayerInteractEvent event) {
         if(!VAULT_FILTER.test(event)) return;
         event.setCancelled(true);
 
         Block block = event.getClickedBlock();
+        if(block == null) return;
         Vault vault = (Vault) block.getState();
         Player player = event.getPlayer();
 
@@ -46,11 +55,21 @@ public class DoorInteractListener implements Listener {
         String worldName = player.getWorld().getName();
 
         if (!worldName.startsWith("dungeon_")) return;
-        if (player.getLocation().add(0, 1, 0).getBlock().getType() != Material.END_GATEWAY) return;
 
-        // xử lý
+        boolean fromInsideGateway = isOverlappingBlockType(event, event.getFrom(), Material.END_GATEWAY);
+        boolean toInsideGateway = isOverlappingBlockType(event, event.getTo(), Material.END_GATEWAY);
+        if (!toInsideGateway || fromInsideGateway) return;
+
+        String instanceId = resolveInstanceId(player);
+        if (instanceId == null || instanceId.isBlank()) return;
+
+        UUID playerId = player.getUniqueId();
+        String enteredInstance = treasureEnteredByInstance.get(playerId);
+        if (instanceId.equals(enteredInstance)) return;
+
+        treasureEnteredByInstance.put(playerId, instanceId);
+        /*Get into the treasure room*/
         dungeonFlowController.handleGetIntoTreasurePortal(player);
-        DungeonEcho.success(player, " den phong nhan phan thương nào");
     }
 
     @EventHandler
@@ -62,9 +81,6 @@ public class DoorInteractListener implements Listener {
 
         if (!worldName.startsWith("dungeon_")) return;
         if (player.getLocation().getBlock().getType() != Material.END_PORTAL) return;
-
-        // xử lý
-        DungeonEcho.success(player, " roi");
     }
 
     @EventHandler
@@ -77,6 +93,11 @@ public class DoorInteractListener implements Listener {
                 || cause == PlayerTeleportEvent.TeleportCause.END_GATEWAY) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        treasureEnteredByInstance.remove(event.getPlayer().getUniqueId());
     }
 
 
@@ -118,4 +139,45 @@ public class DoorInteractListener implements Listener {
                     .require(InteractFilters.blockState(Vault.class))
                     .require(InteractFilters.clickedBlockInWorld("dungeon_"))
                     .build();
+
+    private String resolveInstanceId(Player player) {
+        if (player == null) return null;
+        String playerId = player.getUniqueId().toString();
+
+        return instanceManager.getAll().stream()
+                .filter(instance -> instance != null && instance.getSession() != null && instance.getDungeonPlayers() != null)
+                .filter(instance -> instance.getDungeonPlayers().getPlayers().containsKey(playerId))
+                .map(instance -> instance.getSession().getSessionId())
+                .findFirst()
+                .orElse(null);
+    }
+
+    private boolean isOverlappingBlockType(PlayerMoveEvent event, Location sampleLoc, Material material) {
+        if (sampleLoc == null) return false;
+
+        Player player = event.getPlayer();
+        BoundingBox movedBox = player.getBoundingBox().clone().shift(
+                sampleLoc.getX() - event.getFrom().getX(),
+                sampleLoc.getY() - event.getFrom().getY(),
+                sampleLoc.getZ() - event.getFrom().getZ()
+        );
+
+        World world = player.getWorld();
+        int minX = (int) Math.floor(movedBox.getMinX());
+        int maxX = (int) Math.floor(movedBox.getMaxX());
+        int minY = (int) Math.floor(movedBox.getMinY());
+        int maxY = (int) Math.floor(movedBox.getMaxY());
+        int minZ = (int) Math.floor(movedBox.getMinZ());
+        int maxZ = (int) Math.floor(movedBox.getMaxZ());
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    if (world.getBlockAt(x, y, z).getType() == material) return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }

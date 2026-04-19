@@ -1,15 +1,9 @@
 package com.roguesmp.dungeon_v2.actor.ui;
 
-import com.roguesmp.dungeon_v2.controller_.DungeonFlowController;
 import com.roguesmp.dungeon_v2.data.definition.room.Room;
-import com.roguesmp.dungeon_v2.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_v2.dto.SelectRoomCallback;
-import com.roguesmp.dungeon_v2.utils.filterchain.EventFilter;
-import com.roguesmp.dungeon_v2.utils.filterchain.FilterChain;
-import com.roguesmp.dungeon_v2.utils.filterchain.impl.InteractFilters;
 import com.roguesmp.gui.BaseGui;
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -17,12 +11,10 @@ import org.bukkit.block.Vault;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
+import static com.roguesmp.dungeon_v2.utils.HiddenItemBuilder.makeHidden;
 
 public class OpenDoorGui extends BaseGui {
 
@@ -88,6 +80,8 @@ public class OpenDoorGui extends BaseGui {
     public void onOpenInventory(InventoryOpenEvent event) {
         /*Set player id into vault*/
         Vault vault = (Vault) door.getState();
+        /*Just one player can open the door*/
+        if(!vault.getRewardedPlayers().isEmpty()) event.setCancelled(true);
         Player player = (Player) event.getPlayer();
         vault.addRewardedPlayer(player.getUniqueId());
         vault.update();
@@ -133,31 +127,22 @@ public class OpenDoorGui extends BaseGui {
         int count = rooms.size();
         if (count == 0) return;
 
-        // Xác định các room slot cần dùng (lấy từ giữa ra)
         int[] activeRoomSlots = switch (count) {
             case 1 -> new int[]{13};
             case 2 -> new int[]{10, 16};
             default -> new int[]{10, 13, 16};
         };
 
-        // Vẽ trục dọc chung từ player lên row3 (slot 49->40->31)
-        // row4 col4=40, row3 col4=31
         placeConnector(40);
         placeConnector(31);
 
-        // Với mỗi room được chọn, vẽ nhánh từ row3 lên room
         for (int i = 0; i < activeRoomSlots.length; i++) {
             int roomSlot = activeRoomSlots[i];
-            int col = roomSlot % 9; // col của room (1, 4, hoặc 7)
+            int col = roomSlot % 9;
+            int row3Target = 27 + col;
+            int row2Target = 18 + col;
 
-            // row3 tại cột đích
-            int row3Target = 27 + col; // row3 = offset 27
-            // row2 tại cột đích
-            int row2Target = 18 + col; // row2 = offset 18
-
-            // Nếu cần rẽ ngang tại row3 (chỉ khi col != 4)
             if (col != 4) {
-                // Điền ngang từ col4 đến col đích tại row3
                 int startCol = 4;
                 int endCol   = col;
                 int step     = (endCol > startCol) ? 1 : -1;
@@ -166,11 +151,8 @@ public class OpenDoorGui extends BaseGui {
                 }
             }
 
-            // Đi thẳng từ row3 lên row1 tại cột đích (row2 -> room)
             placeConnector(row2Target);
-            // slot roomSlot = row1 col đích — không đặt connector, đặt room item
 
-            // Đặt room item
             Room room = rooms.get(i);
             ItemStack roomItem = buildRoomItem(room);
             addButton(roomSlot, roomItem, event -> {
@@ -206,9 +188,4 @@ public class OpenDoorGui extends BaseGui {
         }
     }
 
-    private ItemStack makeHidden(ItemStack item) {
-        item.setData(DataComponentTypes.TOOLTIP_DISPLAY,
-                TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
-        return item;
-    }
 }

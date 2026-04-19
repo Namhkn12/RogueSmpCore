@@ -42,7 +42,7 @@ public class Log4Craft_ {
     }
 
     public void send(String color, Class clazz, String message){
-        Bukkit.getConsoleSender().sendMessage(color + prefix + " " + clazz.getName() + ": " + message + COLOR_RESET);
+        Bukkit.getConsoleSender().sendMessage(color + prefix + " <" + clazz.getSimpleName() + "> " + message + COLOR_RESET);
     }
 
     private static final String COLOR_INFO    = "§7";

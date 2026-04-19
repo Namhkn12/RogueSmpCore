@@ -5,10 +5,12 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.PlayerProfileArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.profile.PlayerProfile;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 public class PartyCommand {
 
@@ -26,7 +28,7 @@ public class PartyCommand {
                         new CommandAPICommand("create")
                                 .executesPlayer((player, args) -> {
                                     partyController.handleCreateParty(player);
-                                })
+                                }).withRequirement(inDungeonWorld())
                 )
                 .withSubcommand(
                         new CommandAPICommand("disband")
@@ -55,7 +57,7 @@ public class PartyCommand {
                                     }
 
                                     partyController.handleInvitePlayer(player, target);
-                                })
+                                }).withRequirement(inDungeonWorld())
                 )
                 .withSubcommand(
                         new CommandAPICommand("accept")
@@ -63,7 +65,7 @@ public class PartyCommand {
                                 .executesPlayer((player, args) -> {
                                     String inviterName = (String) args.get("player");
                                     partyController.handleAcceptInvite(player, inviterName);
-                                })
+                                }).withRequirement(inDungeonWorld())
                 )
                 .withSubcommand(
                         new CommandAPICommand("deny")
@@ -71,13 +73,13 @@ public class PartyCommand {
                                 .executesPlayer((player, args) -> {
                                     String inviterName = (String) args.get("player");
                                     partyController.handleDenyInvite(player, inviterName);
-                                })
+                                }).withRequirement(inDungeonWorld())
                 )
                 .withSubcommand(
                         new CommandAPICommand("leave")
                                 .executesPlayer((player, args) -> {
                                     partyController.handleLeaveParty(player);
-                                })
+                                }).withRequirement(inDungeonWorld())
                 )
                 .withSubcommand(
                         new CommandAPICommand("info")
@@ -88,4 +90,12 @@ public class PartyCommand {
 
                 .register();
     }
+
+    private Predicate<CommandSender> inDungeonWorld() {
+        return sender -> {
+            if (!(sender instanceof Player player)) return false;
+            return !player.getWorld().getName().startsWith("dungeon_");
+        };
+    }
+
 }

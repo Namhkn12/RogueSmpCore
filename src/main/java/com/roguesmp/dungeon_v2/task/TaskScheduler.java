@@ -6,10 +6,25 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class TaskScheduler {
 
+    private static TaskScheduler instance;
+
     private final Plugin plugin;
 
-    public TaskScheduler(Plugin plugin) {
+    private TaskScheduler(Plugin plugin) {
         this.plugin = plugin;
+    }
+
+    public static void init(Plugin plugin) {
+        if (instance == null) {
+            instance = new TaskScheduler(plugin);
+        }
+    }
+
+    public static TaskScheduler getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("TaskScheduler not initialized.");
+        }
+        return instance;
     }
 
     /**

@@ -18,7 +18,7 @@ public class RegionManager {
     private final Map<String, DungeonWorld> worldMap = new LinkedHashMap<>();
 
     // flat index để lookup region theo id mà không cần duyệt worldMap
-    private final Map<UUID, Region> regionIndex = new HashMap<>();
+    private final Map<String, Region> regionIndex = new HashMap<>();
 
     private final IRegionRepository repository;
     private final Log4Craft_ logger;
@@ -39,8 +39,13 @@ public class RegionManager {
 
         List<DungeonWorld> worlds = repository.loadAll();
         for (DungeonWorld world : worlds) {
+            if (world == null || world.getWorldName() == null) continue;
             worldMap.put(world.getWorldName(), world);
-            world.getRegions().forEach((id, region) -> regionIndex.put(id, region));
+            if (world.getRegions() == null) continue;
+            world.getRegions().forEach((id, region) -> {
+                if (id == null || id.isBlank() || region == null) return;
+                regionIndex.put(id, region);
+            });
         }
     }
 
@@ -71,7 +76,7 @@ public class RegionManager {
         return worldMap.get(worldName);
     }
 
-    public Region getRegionById(UUID regionId) {
+    public Region getRegionById(String regionId) {
         return regionIndex.get(regionId);
     }
     public Collection<DungeonWorld> getAllWorlds() {
@@ -81,6 +86,7 @@ public class RegionManager {
     public void addRegion(String worldName, Region region) {
         DungeonWorld world = worldMap.get(worldName);
         if (world == null) return;
+        if (region == null || region.getId() == null || region.getId().isBlank()) return;
         world.getRegions().put(region.getId(), region);
         regionIndex.put(region.getId(), region);
     }

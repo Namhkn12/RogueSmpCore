@@ -5,11 +5,10 @@ import com.roguesmp.dungeon_v2.manager.PartyManager;
 import com.roguesmp.dungeon_v2.service.IPartyService;
 import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.MCStringBuilder;
-import org.bukkit.Bukkit;
+import com.roguesmp.dungeon_v2.utils.UuidUtil;
 import org.bukkit.entity.Player;
 
 import java.util.List;
-import java.util.UUID;
 
 public class PartyService implements IPartyService {
 
@@ -39,8 +38,8 @@ public class PartyService implements IPartyService {
         Party party = partyManager.findByPlayer(owner.getUniqueId());
         if (party == null) return;
 
-        for (UUID memberId : party.getMembers()) {
-            Player member = Bukkit.getPlayer(memberId);
+        for (String memberId : party.getMembers()) {
+            Player member = UuidUtil.getPlayerById(memberId);
             if (member != null) {
                 DungeonEcho.warn(member, "Nhóm đã bị giải tán");
             }
@@ -69,7 +68,7 @@ public class PartyService implements IPartyService {
             return;
         }
 
-        partyManager.addMember(party.getPartyId(), player.getUniqueId());
+        partyManager.addMember(party.getPartyId(), player.getUniqueId().toString());
         DungeonEcho.success(player, "Bạn đã tham gia nhóm");
     }
 
@@ -88,7 +87,7 @@ public class PartyService implements IPartyService {
         Party party = partyManager.findByPlayer(player.getUniqueId());
         if (party == null) return;
 
-        partyManager.removeMember(party.getPartyId(), player.getUniqueId());
+        partyManager.removeMember(party.getPartyId(), player.getUniqueId().toString());
         DungeonEcho.success(player, "Bạn đã rời nhóm");
     }
 
@@ -107,14 +106,48 @@ public class PartyService implements IPartyService {
         Party party = partyManager.findByPlayer(owner.getUniqueId());
         if (party == null) return;
 
-        if (!party.getMembers().contains(target.getUniqueId())) {
+        if (!party.getMembers().contains(target.getUniqueId().toString())) {
             DungeonEcho.error(owner, "Người này không thuộc nhóm của bạn");
             return;
         }
 
-        partyManager.removeMember(party.getPartyId(), target.getUniqueId());
+        partyManager.removeMember(party.getPartyId(), target.getUniqueId().toString());
         DungeonEcho.success(owner, "Đã đuổi " + target.getName() + " khỏi party.");
-        DungeonEcho.warn(owner, "Bạn đã bị buộc rời nhóm");
+        DungeonEcho.warn(target, "Bạn đã bị buộc rời nhóm");
+    }
+
+    @Override
+    public void forceKick(Player player) {
+        if (!partyManager.isInParty(player.getUniqueId())) {
+            return;
+        }
+
+        Party party = partyManager.findByPlayer(player.getUniqueId());
+        if (party == null) return;
+
+        String playerId = player.getUniqueId().toString();
+
+        if (partyManager.checkIsOwner(player.getUniqueId())) {
+
+            String newOwnerId = party.getMembers().stream()
+                    .filter(id -> !id.equals(playerId))
+                    .findFirst()
+                    .orElse(null);
+
+            if (newOwnerId == null) {
+                disbandParty(player);
+                return;
+            }
+
+            partyManager.transferOwner(party.getPartyId(), newOwnerId);
+
+            Player newOwner = UuidUtil.getPlayerById(newOwnerId);
+            if (newOwner != null) {
+                DungeonEcho.success(newOwner, "Bạn đã trở thành chủ nhóm");
+            }
+        }
+        partyManager.removeMember(party.getPartyId(), playerId);
+        DungeonEcho.warn(player, "Bạn đã rời khỏi party (force)");
     }
 
     @Override
@@ -127,11 +160,11 @@ public class PartyService implements IPartyService {
         Party party = partyManager.findByPlayer(currentOwner.getUniqueId());
         if (party == null) return;
 
-        if (!party.getMembers().contains(newOwner.getUniqueId())) {
+        if (!party.getMembers().contains(newOwner.getUniqueId().toString())) {
             DungeonEcho.error(currentOwner,"Người này không ở trong nhóm của bạn");
             return;
         }
-        partyManager.transferOwner(party.getPartyId(), newOwner.getUniqueId());
+        partyManager.transferOwner(party.getPartyId(), newOwner.getUniqueId().toString());
 
         DungeonEcho.success(currentOwner,"Đã chuyển quyền chủ nhóm cho " + newOwner.getName() + ".");
         DungeonEcho.success(newOwner, "Bạn đã trở thành chủ nhóm");
@@ -155,7 +188,7 @@ public class PartyService implements IPartyService {
             return MCStringBuilder.yellow("Bạn không ở trong nhóm nào.");
         }
 
-        Player leader = Bukkit.getPlayer(party.getOwner());
+        Player leader = UuidUtil.getPlayerById(party.getOwner());
         String leaderName = leader != null ? leader.getName() : MCStringBuilder.gray("(Offline)");
 
         MCStringBuilder sb = MCStringBuilder.of()
@@ -165,8 +198,8 @@ public class PartyService implements IPartyService {
                 .appendGold(party.getMembers().size() + "/" + party.getMaxSize())
                 .appendWhite("):").newLine();
 
-        for (UUID memberId : party.getMembers()) {
-            Player member = Bukkit.getPlayer(memberId);
+        for (String memberId : party.getMembers()) {
+            Player member = UuidUtil.getPlayerById(memberId);
             String memberName = member != null ? member.getName() : MCStringBuilder.gray("(Offline)");
             sb.appendGray(" - ").appendWhite(memberName).newLine();
         }
@@ -180,7 +213,7 @@ public class PartyService implements IPartyService {
     }
 
     @Override
-    public Party getPartyById(UUID partyId) {
+    public Party getPartyById(String partyId) {
         return partyManager.findById(partyId);
     }
 
@@ -192,7 +225,7 @@ public class PartyService implements IPartyService {
     @Override
     public List<Player> getOnlineMembers(Party party) {
         return party.getMembers().stream()
-                .map(Bukkit::getPlayer)
+                .map(UuidUtil::getPlayerById)
                 .filter(p -> p != null && p.isOnline())
                 .toList();
     }

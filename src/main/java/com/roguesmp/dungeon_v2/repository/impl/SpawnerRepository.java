@@ -9,6 +9,7 @@ import com.roguesmp.dungeon_v2.exception.impl.data.DataLoadException;
 import com.roguesmp.dungeon_v2.exception.impl.data.DataSaveException;
 import com.roguesmp.dungeon_v2.repository.ISpawnerRepository;
 import com.roguesmp.dungeon_v2.utils.Log4Craft;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;
@@ -21,10 +22,12 @@ public class SpawnerRepository implements ISpawnerRepository {
 
     private final File dataFolder;
     private final Gson gson;
+    private final Log4Craft_ logger;
 
-    public SpawnerRepository(Plugin plugin, Gson gson) {
+    public SpawnerRepository(Plugin plugin, Gson gson, Log4Craft_ logger) {
         this.dataFolder = new File(plugin.getDataFolder(), DataFolderConfig.getSpawnerTemplateFolder());
         this.gson = gson;
+        this.logger = logger;
 
         if(!dataFolder.exists()) dataFolder.mkdirs();
     }
@@ -45,10 +48,10 @@ public class SpawnerRepository implements ISpawnerRepository {
                 if(spawner != null && spawner.getId() != null){
                     spawners.add(spawner);
                 }else {
-                    Log4Craft.debug("Data is null, please check: " + file.getAbsolutePath());
+                    logger.debug(this.getClass(), "Data is null, please check: " + file.getAbsolutePath());
                 }
             } catch (JsonParseException | IOException e){
-                Log4Craft.error("Invalid data in file: " + file.getAbsolutePath());
+                logger.error(this.getClass(),   "Invalid data in file: " + file.getAbsolutePath());
             }
         }
         return spawners;

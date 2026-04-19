@@ -5,6 +5,7 @@ import com.roguesmp.dungeon_v2.repository.IRoomRepository;
 import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RoomManager {
@@ -43,5 +44,11 @@ public class RoomManager {
 
     public Room get(String rid){
         return cache.get(rid);
+    }
+
+    public List<String> getAllIds() {
+        return cache.keySet().stream()
+                .sorted()
+                .toList();
     }
 }

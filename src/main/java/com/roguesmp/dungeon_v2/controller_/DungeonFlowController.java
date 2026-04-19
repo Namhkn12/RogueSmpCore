@@ -32,10 +32,8 @@ import com.roguesmp.dungeon_v2.service.*;
 import com.roguesmp.dungeon_v2.task.TaskScheduler;
 import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.Teleporter;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import com.roguesmp.dungeon_v2.utils.UuidUtil;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
@@ -43,7 +41,6 @@ import org.bukkit.util.BoundingBox;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class DungeonFlowController {
 
@@ -59,10 +56,11 @@ public class DungeonFlowController {
     private final ISchematicService schematicService;
     private final IDungeonService dungeonService;
     private final TaskScheduler taskScheduler;
+    private final IReviveService reviveService;
 
     public DungeonFlowController(IInstanceService instanceService, InstanceManager instanceManager, IPartyService partyService,
                                  IRegionService regionService, ScoreBoardManager scoreBoardManager,
-                                 DungeonManager dungeonManager, RoomManager roomManager, IRoomService roomService, DungeonPresenter dungeonPresenter, ISchematicService schematicService, IDungeonService dungeonService, TaskScheduler taskScheduler) {
+                                 DungeonManager dungeonManager, RoomManager roomManager, IRoomService roomService, DungeonPresenter dungeonPresenter, ISchematicService schematicService, IDungeonService dungeonService, TaskScheduler taskScheduler, IReviveService reviveService) {
         this.instanceService = instanceService;
         this.instanceManager = instanceManager;
         this.partyService = partyService;
@@ -75,6 +73,7 @@ public class DungeonFlowController {
         this.schematicService = schematicService;
         this.dungeonService = dungeonService;
         this.taskScheduler = taskScheduler;
+        this.reviveService = reviveService;
     }
 
     public void handleStartDungeon(String did, Player player){
@@ -86,6 +85,7 @@ public class DungeonFlowController {
         Dungeon dungeon = dungeonManager.get(did);
         /*Start dungeon*/
         DungeonInstance instance = instanceService.createDungeonInstance(dungeon, party);
+        if (instance == null || instance.getSession() == null || instance.getSession().getSessionId() == null) return;
         party.setInstanceId(instance.getSession().getSessionId());
         instanceManager.add(instance);
         /*Start instance*/
@@ -97,8 +97,9 @@ public class DungeonFlowController {
             triggerRoomEnd(startRoom);
         }
         Region region = regionService.getRegionById(instance.getSession().getRegionId());
+        if (region == null) return;
         /*Teleport player to spawn room (region point)*/
-        Teleporter.teleportAllByID(party.getMembers(), region.getRegionPoint());
+        Teleporter.teleportAllByIdString(party.getMembers(), region.getRegionPoint());
         /*Presentation*/
         partyService.getOnlineMembers(party).forEach(p -> {
             /*Build scoreboard*/
@@ -110,7 +111,9 @@ public class DungeonFlowController {
 
     public void handleOpenNextDoor(Block door, Player player){
         Party party = partyService.getPartyByPlayer(player);
+        if (party == null || party.getInstanceId() == null || party.getInstanceId().isBlank()) return;
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
+        if (instance == null) return;
         DungeonProgress progress = instance.getProgress();
 
         /*Boss defeated → open treasure portal*/
@@ -147,7 +150,9 @@ public class DungeonFlowController {
 
     public void handleSelectNextRoom(Player player, Block door, Room room){
         Party party = partyService.getPartyByPlayer(player);
+        if (party == null || party.getInstanceId() == null || party.getInstanceId().isBlank()) return;
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
+        if (instance == null) return;
         DungeonProgress progress = instance.getProgress();
         Location doorLoc = door.getLocation();
         Location pasteLoc = doorLoc.clone().add(0, -2, 0);
@@ -172,7 +177,8 @@ public class DungeonFlowController {
 
         /*Presenter*/
         party.getMembers().forEach(playerId -> {
-            Player member = Bukkit.getPlayer(playerId);
+            Player member = UuidUtil.getPlayerById(playerId);
+            if (member == null) return;
             dungeonPresenter.onOpenDoor(member);
         });
 
@@ -208,12 +214,15 @@ public class DungeonFlowController {
 
     public void handleGetIntoTreasurePortal(Player player){
         Party party = partyService.getPartyByPlayer(player);
+        if (party == null || party.getInstanceId() == null || party.getInstanceId().isBlank()) return;
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
+        if (instance == null) return;
         /*Paste treasure room for each player*/
         Region region = regionService.getRegionById(instance.getSession().getRegionId());
+        if (region == null) return;
         Location location = region.getRegionPoint();
         String treasureRoomId = instance.getProgress().getTreasureRoomId();
-        int space = 64;
+        int space = 32;
         int count = instance.getProgress().getFinalRewardBuildCount() + 1;
         instance.getProgress().setFinalRewardBuildCount(count);
         Room room = roomManager.get(treasureRoomId);
@@ -235,23 +244,28 @@ public class DungeonFlowController {
         }
         /*TODO: implement GUI for confirming leave dungeon*/
         /*Remove tracking player from dungeon instance*/
-        Map<UUID, PlayerStatus> players = instance.getDungeonPlayers().getPlayers();
-        players.remove(player.getUniqueId());
+        Map<String, PlayerStatus> players = instance.getDungeonPlayers().getPlayers();
+        players.remove(player.getUniqueId().toString());
         if(instance.getProgress().getStatus() == DungeonProgress.Status.IN_PROGRESS){
-            party.removeMember(player.getUniqueId());
+            partyService.forceKick(player);
+            instance.getDungeonPlayers().setPlayerStatus(player.getUniqueId().toString(), PlayerStatus.Status.OUT);
+            DungeonEcho.info(player, "Bạn đã rời khỏi dungeon khi đang chơi," +
+                    "đồng thời cũng sẽ rời khỏi party!");
         }
         Teleporter.teleport(player, SerializableLocation.from(new Location(Bukkit.getWorld("building"), 0, 0, 0)));
+        scoreBoardManager.removeBoard(player);
         /*If all players in dungeon leave, remove dungeon instance*/
         if(players.isEmpty()){
             instanceService.removeDungeonInstance(instance);
+            party.setInstanceId("");
         }
     }
 
     public void handleEndUpDungeon(DungeonInstance instance){
         DungeonPlayer dungeonPlayer = instance.getDungeonPlayers();
         dungeonPlayer.getPlayers().forEach((uuid, playerStatus) -> {
-            Player player = Bukkit.getPlayer(uuid);
-            if(player != null && playerStatus.getStatus() == PlayerStatus.Status.PLAYING){
+            Player player = UuidUtil.getPlayerById(uuid);
+            if(player != null){
                 /*Notice player that dungeon will be destroyed*/
                 if(instance.getProgress().getStatus() == DungeonProgress.Status.FAILED){
                     DungeonEcho.warn(player, "The dungeon has collapsed! You barely escaped...");
@@ -265,6 +279,8 @@ public class DungeonFlowController {
             }
         });
         instanceService.removeDungeonInstance(instance);
+        instanceManager.remove(instance.getSession().getSessionId());
+        partyService.getPartyById(instance.getSession().getPartyId()).setInstanceId("");
     }
 
     public void handleDungeonTimerTick() {
@@ -337,6 +353,7 @@ public class DungeonFlowController {
             if (objective instanceof BaseObjective baseObjective) {
                 baseObjective.setCallback(o -> {
                     DungeonInstance instance = instanceManager.get(party.getInstanceId());
+                    if (instance == null) return;
                     /*Plus score when finish*/
                     int gained = baseObjective.getScore();
                     instance.getProgress().setScore(
@@ -346,7 +363,7 @@ public class DungeonFlowController {
                     if (baseObjective.getCompletionScope() == CompletionScope.DUNGEON) {
                         checkDungeonCompletion(instance, party);
                     } else {
-                        checkRoomCompletion(roomInstance, party);
+                        checkRoomCompletion(instance, roomInstance, party);
                     }
                 });
             }
@@ -390,7 +407,7 @@ public class DungeonFlowController {
         // Hook for room-event side effects outside the event class itself.
     }
 
-    private void checkRoomCompletion(RoomInstance room, Party party) {
+    private void checkRoomCompletion(DungeonInstance instance, RoomInstance room, Party party) {
         if (room == null || room.getActiveObjectives() == null) return;
 
         boolean allDone = room.getActiveObjectives().stream()
@@ -402,12 +419,14 @@ public class DungeonFlowController {
             room.setCompleted(true);
             triggerRoomEnd(room);
             DungeonEcho.success(partyService.getOnlineMembers(party), "Room clear!");
+            revivePlayer(instance);
             /*Open the back door*/
             if (room.getDoor() != null) {
                 roomService.openRoomDoor(room.getDoor().toBukkit());
             }
             /*Presenter*/
             partyService.getOnlineMembers(party).forEach(dungeonPresenter::onCompleteRoom);
+
         }
     }
 
@@ -418,9 +437,27 @@ public class DungeonFlowController {
         long newEndTime = System.currentTimeMillis() + rewardWindowMs;
         instance.getTimer().setEndTime(newEndTime);
         /*Message to all players that the boss are defeated*/
-        //TODO
         DungeonEcho.success(partyService.getOnlineMembers(party), "Boss defeated!!!");
+        revivePlayer(instance);
         /*Presenter*/
         partyService.getOnlineMembers(party).forEach(dungeonPresenter::onCompleteDungeon);
+    }
+
+    private void revivePlayer(DungeonInstance instance){
+        instance.getDungeonPlayers().getPlayers().forEach((uuid, playerStatus) -> {
+            if(playerStatus.getStatus() == PlayerStatus.Status.DEAD){
+                playerStatus.setStatus(PlayerStatus.Status.PLAYING);
+
+                /*Clean up revive entry*/
+                reviveService.forceRemoveDeadEntry(UuidUtil.parseOrNull(uuid));
+                Player player = UuidUtil.getPlayerById(uuid);
+                if(player != null) {
+                    player.teleport(playerStatus.getCheckPoint().toBukkit());
+                    player.setGameMode(GameMode.SURVIVAL);
+                    dungeonPresenter.onPlayerRevive(player, playerStatus.getCheckPoint().toBukkit());
+                    DungeonEcho.success(player, "Fate grants you another chance!");
+                }
+            }
+        });
     }
 }

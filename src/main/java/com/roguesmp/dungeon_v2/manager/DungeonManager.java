@@ -5,6 +5,7 @@ import com.roguesmp.dungeon_v2.repository.IDungeonRepository;
 import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DungeonManager {
@@ -43,5 +44,11 @@ public class DungeonManager {
 
     public Dungeon get(String did){
         return cache.get(did);
+    }
+
+    public List<String> getAllIds() {
+        return cache.keySet().stream()
+                .sorted()
+                .toList();
     }
 }

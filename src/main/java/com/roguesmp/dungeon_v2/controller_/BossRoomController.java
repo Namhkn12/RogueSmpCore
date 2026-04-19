@@ -9,7 +9,6 @@ import com.roguesmp.dungeon_v2.manager.InstanceManager;
 import com.roguesmp.dungeon_v2.manager.RoomManager;
 import com.roguesmp.dungeon_v2.service.IPartyService;
 import com.roguesmp.registry.EntityRegistry;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -27,8 +26,9 @@ public class BossRoomController {
 
     public void handleOpenBossRoom(Player player, Block spawn){
         Party party = partyService.getPartyByPlayer(player);
-        if(party == null) return;
+        if(party == null || party.getInstanceId() == null || party.getInstanceId().isBlank()) return;
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
+        if (instance == null) return;
         /*We treat the boss room as a normal objective room with different active method*/
         String rid = instance.getProgress().getCurrentRoom().getRoomId();
         Room currentR = roomManager.get(rid);
@@ -44,5 +44,26 @@ public class BossRoomController {
         /*Spawn boss*/
         /*Todo: Should have a manager for spawn boss effect */
         EntityRegistry.getInstance().spawnEntity(bossId, spawn.getLocation().add(0, 3, 0));
+    }
+
+    public void handleTriggerBossRoom(Player player, Block trigger){
+        Party party = partyService.getPartyByPlayer(player);
+        if(party == null || party.getInstanceId() == null || party.getInstanceId().isBlank()) return;
+        DungeonInstance instance = instanceManager.get(party.getInstanceId());
+        if (instance == null) return;
+        /*We treat the boss room as a normal objective room with different active method*/
+        String rid = instance.getProgress().getCurrentRoom().getRoomId();
+        Room currentR = roomManager.get(rid);
+        if(currentR.getType() != RoomType.BOSS) return;
+        /*Try to get objective data from the Boss Room*/
+        String bossId = currentR.getObjectives().stream()
+                .filter(cfg -> DemonSlayer.TYPE.equals(cfg.getType()))
+                .map(cfg -> cfg.getParams().get("target"))
+                .filter(v -> v instanceof String)
+                .map(v -> (String) v)
+                .findFirst()
+                .orElse("fallback here");
+        /*Call spawn boss here*/
+        EntityRegistry.getInstance().spawnEntity(bossId, trigger.getLocation().add(0.5 , 3, 0.5));
     }
 }

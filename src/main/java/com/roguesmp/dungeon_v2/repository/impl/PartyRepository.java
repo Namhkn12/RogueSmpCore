@@ -1,6 +1,7 @@
 package com.roguesmp.dungeon_v2.repository.impl;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.roguesmp.dungeon_v2.config.DataFolderConfig;
 import com.roguesmp.dungeon_v2.data.runtime.Party;
 import com.roguesmp.dungeon_v2.exception.impl.data.DataDeleteException;
@@ -40,7 +41,7 @@ public class PartyRepository implements IPartyRepository {
     }
 
     @Override
-    public void delete(UUID partyId) {
+    public void delete(String partyId) {
         File file = getFile(partyId);
         if (file.exists() && !file.delete()) {
             throw new DataDeleteException(file.getName(), null);
@@ -59,14 +60,18 @@ public class PartyRepository implements IPartyRepository {
             try (Reader reader = new FileReader(file)) {
                 Party party = gson.fromJson(reader, Party.class);
                 if (party != null) result.add(party);
+            } catch (JsonSyntaxException e) {
+                logger.fire(this.getClass(), "Corrupt party file, skipping: " + file.getName(), e);
+                file.renameTo(new File(file.getParent(), file.getName() + ".corrupt"));
             } catch (IOException e) {
                 logger.fire(this.getClass(), "Failed to load party file: " + file.getName(), e);
+                file.renameTo(new File(file.getParent(), file.getName() + ".corrupt"));
             }
         }
         return result;
     }
 
-    private File getFile(UUID partyId) {
+    private File getFile(String partyId) {
         return new File(dataFolder, DataFolderConfig.PARTY_FILE + partyId + DataFolderConfig.JSON_TYPE);
     }
 }

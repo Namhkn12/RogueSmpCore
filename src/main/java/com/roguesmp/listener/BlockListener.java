@@ -32,6 +32,7 @@ public class BlockListener implements Listener {
         if(id == null) return;
 
         SmpBlock block = manager.getBlock(id);
+        if(block == null) return;
         block.onBlockPlace(event, id);
     }
 

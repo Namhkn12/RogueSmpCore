@@ -36,7 +36,7 @@ public class SpawnerListener implements Listener {
         boolean passes = FilterChain.of(BlockPlaceEvent.class)
                 .require(BlockPlaceFilters.blockType(Material.SPAWNER))
                 .require(BlockPlaceFilters.hasMeta())
-                .require(BlockPlaceFilters.hasPdc(NameSpaceKeys.SPAWNER_IID_KEY, event.getItemInHand().getItemMeta()))
+                .require(BlockPlaceFilters.hasPdc(NameSpaceKeys.SPAWNER_TID_KEY, event.getItemInHand().getItemMeta()))
                 .build().test(event);
         if (!passes) return;
 

@@ -3,7 +3,7 @@ package com.roguesmp.dungeon_v2.data.runtime.session;
 import com.roguesmp.dungeon_v2.helper.SerializableLocation;
 
 public class PlayerStatus{
-    public enum Status { PLAYING, DISCONNECT, OUT  }
+    public enum Status { PLAYING, DEAD, DISCONNECT, DEAD_DISCONNECT, OUT  }
 
     private int deadCount = 0;
     private Status status;

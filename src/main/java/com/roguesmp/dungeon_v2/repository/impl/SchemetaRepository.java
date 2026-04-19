@@ -7,6 +7,7 @@ import com.roguesmp.dungeon.utils.Log4Craft;
 import com.roguesmp.dungeon_v2.config.DataFolderConfig;
 import com.roguesmp.dungeon_v2.data.definition.Schemeta;
 import com.roguesmp.dungeon_v2.repository.ISchemetaRepository;
+import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;
@@ -20,10 +21,12 @@ public class SchemetaRepository implements ISchemetaRepository {
 
     private final File schemetaFolder;
     private final Gson gson;
+    private final Log4Craft_ logger;
 
-    public SchemetaRepository(Plugin plugin, Gson gson) {
+    public SchemetaRepository(Plugin plugin, Gson gson, Log4Craft_ logger) {
         this.schemetaFolder = new File(plugin.getDataFolder(), DataFolderConfig.getSchemetaFolder());
         this.gson = gson;
+        this.logger = logger;
         if (!schemetaFolder.exists()) schemetaFolder.mkdirs();
     }
 
@@ -40,7 +43,7 @@ public class SchemetaRepository implements ISchemetaRepository {
                     result.add(schemeta);
                 }
             } catch (Exception e) {
-                Log4Craft.fire("Failed to load schemeta file: " + file.getName(), e);
+                logger.fire(this.getClass(), "Failed to load schemeta file: " + file.getName(), e);
             }
         }
         return result;
@@ -54,7 +57,7 @@ public class SchemetaRepository implements ISchemetaRepository {
         try (Reader reader = Files.newBufferedReader(file.toPath())) {
             return Optional.ofNullable(gson.fromJson(reader, Schemeta.class));
         } catch (Exception e) {
-            Log4Craft.fire("Failed to load schemeta: " + id, e);
+            logger.fire(this.getClass(), "Failed to load schemeta: " + id, e);
             return Optional.empty();
         }
     }
@@ -82,7 +85,6 @@ public class SchemetaRepository implements ISchemetaRepository {
         return toFile(id).exists();
     }
 
-    // ── helper ──────────────────────────────────────────────
     private File toFile(String id) {
         return new File(schemetaFolder, id + DataFolderConfig.JSON_TYPE);
     }

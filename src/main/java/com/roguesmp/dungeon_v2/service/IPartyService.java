@@ -4,7 +4,6 @@ import com.roguesmp.dungeon_v2.data.runtime.Party;
 import org.bukkit.entity.Player;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface IPartyService {
 
@@ -18,6 +17,8 @@ public interface IPartyService {
 
     void kickMember(Player owner, Player target);
 
+    void forceKick(Player player);
+
     void transferOwnership(Player currentOwner, Player newOwner);
 
     String buildPartyInfo(Player player);
@@ -28,7 +29,7 @@ public interface IPartyService {
 
     Party getPartyByPlayer(Player player);
 
-    Party getPartyById(UUID partyId);
+    Party getPartyById(String partyId);
 
     void savePartyToFile();
 

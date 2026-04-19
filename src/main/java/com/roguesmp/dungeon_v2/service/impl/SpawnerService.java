@@ -8,6 +8,7 @@ import com.roguesmp.dungeon_v2.service.ISpawnerService;
 import com.roguesmp.dungeon_v2.utils.Log4Craft_;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.registry.EntityRegistry;
+import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.spawner.SpawnerEntry;
 import org.bukkit.entity.EntitySnapshot;
@@ -43,8 +44,8 @@ public class SpawnerService implements ISpawnerService {
         spawner.setDelay(template.getDelay());
         spawner.setSpawnRange(template.getSpawnRange());
         spawner.setMaxNearbyEntities(template.getMaxNearBy());
-        spawner.setMaxSpawnDelay(template.getMaxDelay());
         spawner.setMinSpawnDelay(template.getMinDelay());
+        spawner.setMaxSpawnDelay(template.getMaxDelay());
         spawner.setRequiredPlayerRange(template.getActiveRange());
         spawner.setSpawnCount(template.getSpawnCount());
         spawner.setSpawnedType(null);
@@ -63,9 +64,13 @@ public class SpawnerService implements ISpawnerService {
     }
 
     @Override
-    public void createInstance(String siid, String sid) {
+    public void createInstance(String sid, String siid, Location location) {
         Spawner spawner = spawnerManager.getById(sid);
-        SpawnerInstance instance = instanceManager.create(siid, spawner);
+        if(spawner == null){
+            logger.error(this.getClass(), "Spawner template is null! Please check");
+        }
+        SpawnerInstance instance = instanceManager.create(siid, spawner, location);
+        logger.sucess(this.getClass(), "Create spawner instance with siid: " + siid + " and sid: " + sid);
         if(instance == null){
             logger.error(this.getClass(), "Couldn't create spawner instance with siid " + siid);
             return;

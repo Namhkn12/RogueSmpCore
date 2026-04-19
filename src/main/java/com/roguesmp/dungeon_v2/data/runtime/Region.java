@@ -3,13 +3,11 @@ package com.roguesmp.dungeon_v2.data.runtime;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
-import java.util.UUID;
-
 /**
  * Persistent region slot that can host a dungeon instance.
  */
 public class Region {
-    private UUID id;
+    private String id;
     private String worldName;
     private double x;
     private double y;
@@ -20,7 +18,7 @@ public class Region {
         this.status = RegionStatus.AVAILABLE;
     }
 
-    public Region(UUID id, String worldName, double x, double y, double z) {
+    public Region(String id, String worldName, double x, double y, double z) {
         this.id = id;
         this.worldName = worldName;
         this.x = x;
@@ -29,11 +27,11 @@ public class Region {
         this.status = RegionStatus.AVAILABLE;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
