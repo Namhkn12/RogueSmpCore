@@ -21,4 +21,9 @@ player đập spawner thì bị dính stack hiệu ứng gây hại.
 
 + Teleport spawner : khi đập vỡ nó sẽ dịch chuyển trong vùng 3 4 block
 
-+
+Dungeon Flow
+- party-> start dungeon -> when complete a room + score -> next room
+- get min minium-> boss -> win -> final reward
+- fail -> Lose
+-player die -> show mess for player
+- die all lose -> leave dungeon

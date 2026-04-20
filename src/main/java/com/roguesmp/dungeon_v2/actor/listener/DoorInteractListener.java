@@ -2,6 +2,7 @@ package com.roguesmp.dungeon_v2.actor.listener;
 
 import com.roguesmp.dungeon_v2.controller_.DungeonFlowController;
 import com.roguesmp.dungeon_v2.manager.InstanceManager;
+import com.roguesmp.dungeon_v2.utils.DungeonEcho;
 import com.roguesmp.dungeon_v2.utils.filterchain.EventFilter;
 import com.roguesmp.dungeon_v2.utils.filterchain.FilterChain;
 import com.roguesmp.dungeon_v2.utils.filterchain.impl.InteractFilters;
@@ -19,7 +20,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.Location;
 import org.bukkit.util.BoundingBox;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,6 +31,8 @@ public class DoorInteractListener implements Listener {
     private final DungeonFlowController dungeonFlowController;
     private final InstanceManager instanceManager;
     private final Map<UUID, String> treasureEnteredByInstance = new ConcurrentHashMap<>();
+    private final Set<UUID> insideGateway = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
 
     public DoorInteractListener(DungeonFlowController dungeonFlowController, InstanceManager instanceManager) {
         this.dungeonFlowController = dungeonFlowController;
@@ -53,22 +58,26 @@ public class DoorInteractListener implements Listener {
 
         Player player = event.getPlayer();
         String worldName = player.getWorld().getName();
-
         if (!worldName.startsWith("dungeon_")) return;
 
-        boolean fromInsideGateway = isOverlappingBlockType(event, event.getFrom(), Material.END_GATEWAY);
+        UUID playerId = player.getUniqueId();
         boolean toInsideGateway = isOverlappingBlockType(event, event.getTo(), Material.END_GATEWAY);
-        if (!toInsideGateway || fromInsideGateway) return;
+
+        if (toInsideGateway) {
+            if (insideGateway.contains(playerId)) return;
+            insideGateway.add(playerId);
+        } else {
+            insideGateway.remove(playerId);
+            return;
+        }
 
         String instanceId = resolveInstanceId(player);
         if (instanceId == null || instanceId.isBlank()) return;
 
-        UUID playerId = player.getUniqueId();
         String enteredInstance = treasureEnteredByInstance.get(playerId);
         if (instanceId.equals(enteredInstance)) return;
 
         treasureEnteredByInstance.put(playerId, instanceId);
-        /*Get into the treasure room*/
         dungeonFlowController.handleGetIntoTreasurePortal(player);
     }
 
