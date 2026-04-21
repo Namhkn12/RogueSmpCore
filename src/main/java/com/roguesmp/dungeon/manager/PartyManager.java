@@ -1,10 +1,8 @@
 package com.roguesmp.dungeon.manager;
 
-import com.roguesmp.dungeon.constant.PrefixConfig;
-import com.roguesmp.dungeon.data.Party;
+import com.roguesmp.dungeon.data.runtime.Party;
 import com.roguesmp.dungeon.repository.IPartyRepository;
-import com.roguesmp.dungeon.utils.ConsoleLogger;
-import com.roguesmp.dungeon.utils.Log4Craft;
+import com.roguesmp.dungeon.utils.Log4Craft_;
 
 import java.util.*;
 
@@ -14,16 +12,18 @@ import java.util.*;
  */
 public class PartyManager {
 
-    private static final int DEFAULT_PARTY_SIZE = 3;
+    private static final int DEFAULT_PARTY_SIZE = 4;
 
     // In-memory cache — chuyển từ repo sang đây
-    private final Map<UUID, Party> partyMap = new HashMap<>();
-    private final Map<UUID, UUID> playerIndex = new HashMap<>();
+    private final Map<String, Party> partyMap = new HashMap<>();
+    private final Map<String, String> playerIndex = new HashMap<>();
 
     private final IPartyRepository repository;
+    private final Log4Craft_ logger;
 
-    public PartyManager(IPartyRepository repository) {
+    public PartyManager(IPartyRepository repository, Log4Craft_ logger) {
         this.repository = repository;
+        this.logger = logger;
 
         loadAll();
     }
@@ -32,11 +32,11 @@ public class PartyManager {
         Collection<Party> parties = repository.loadAll();
         for (Party party : parties) {
             partyMap.put(party.getPartyId(), party);
-            for (UUID memberId : party.getMembers()) {
+            for (String memberId : party.getMembers()) {
                 playerIndex.put(memberId, party.getPartyId());
             }
         }
-        Log4Craft.success("Loaded party to cache: " + parties.size() + " party");
+        logger.info(this.getClass(), "Loaded party to cache: " + parties.size() + " party");
     }
 
     // Gọi khi server stop — save từng party một
@@ -44,66 +44,62 @@ public class PartyManager {
         for (Party party : partyMap.values()) {
             repository.save(party);
         }
-        Log4Craft.success("Saved party to file: " + partyMap.size() + " party");
+        logger.info(this.getClass(),"Saved party to file: " + partyMap.size() + " party");
     }
 
     public Party createParty(UUID ownerId) {
         UUID partyId = UUID.randomUUID();
-        List<UUID> members = new ArrayList<>();
-        members.add(ownerId);
-
-        Party party = new Party(partyId, ownerId, members, DEFAULT_PARTY_SIZE, true);
-        partyMap.put(partyId, party);
-        playerIndex.put(ownerId, partyId);
+        Party party = new Party(partyId.toString(), ownerId.toString(), DEFAULT_PARTY_SIZE);
+        partyMap.put(partyId.toString(), party);
+        playerIndex.put(ownerId.toString(), partyId.toString());
         return party;
     }
 
-    public void disbandParty(UUID partyId) {
+    public void disbandParty(String partyId) {
         Party party = partyMap.remove(partyId);
         if (party == null) return;
-        for (UUID memberId : party.getMembers()) {
+        for (String memberId : party.getMembers()) {
             playerIndex.remove(memberId);
         }
         repository.delete(partyId);
     }
 
-    public void addMember(UUID partyId, UUID playerId) {
+    public void addMember(String partyId, String playerId) {
         Party party = partyMap.get(partyId);
         if (party == null) return;
-        party.getMembers().add(playerId);
+        party.addMember(playerId);
         playerIndex.put(playerId, partyId);
     }
 
-    public void removeMember(UUID partyId, UUID playerId) {
+    public void removeMember(String partyId, String playerId) {
         Party party = partyMap.get(partyId);
         if (party == null) return;
-        party.getMembers().remove(playerId);
+        party.removeMember(playerId);
         playerIndex.remove(playerId);
     }
 
-    public void transferOwner(UUID partyId, UUID newOwnerId) {
+    public void transferOwner(String partyId, String newOwnerId) {
         Party party = partyMap.get(partyId);
         if (party == null) return;
         party.setOwner(newOwnerId);
     }
 
-    public Optional<Party> findByPlayer(UUID playerId) {
-        UUID partyId = playerIndex.get(playerId);
-        if (partyId == null) return Optional.empty();
-        return Optional.ofNullable(partyMap.get(partyId));
+    public Party findByPlayer(UUID playerId) {
+        String partyId = playerIndex.get(playerId.toString());
+        if (partyId == null) return null;
+        return partyMap.get(partyId);
     }
 
-    public Optional<Party> findById(UUID partyId) {
-        return Optional.ofNullable(partyMap.get(partyId));
+    public Party findById(String partyId) {
+        return partyMap.get(partyId);
     }
 
     public boolean isInParty(UUID playerId) {
-        return playerIndex.containsKey(playerId);
+        return playerId != null && playerIndex.containsKey(playerId.toString());
     }
 
-    public boolean isOwner(UUID playerId) {
-        return findByPlayer(playerId)
-                .map(party -> party.getOwner().equals(playerId))
-                .orElse(false);
+    public boolean checkIsOwner(UUID playerId) {
+        Party party = findByPlayer(playerId);
+        return party != null && party.isOwner(playerId.toString());
     }
 }

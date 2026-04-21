@@ -1,13 +1,8 @@
 package com.roguesmp.dungeon.manager;
 
-import com.roguesmp.dungeon.data.LootTable;
-import com.roguesmp.dungeon.dto.DataResult;
+import com.roguesmp.dungeon.data.definition.loot.LootTable;
 import com.roguesmp.dungeon.repository.ILootTableRepository;
 import com.roguesmp.dungeon.utils.Log4Craft;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,30 +19,22 @@ public class LootTableManager {
     // Quick lookup sets, rebuilt on each reload
     private Set<String> tablesWithBonusRolls = Collections.emptySet();
 
-    public LootTableManager(@NotNull ILootTableRepository repository) {
+    public LootTableManager(ILootTableRepository repository) {
         this.repository = repository;
+
+        load();
     }
 
     /**
      * Clears the cache and reloads all loot tables from the repository.
      * Call this on plugin enable and on /reload.
      */
-    public void reload() {
+    public void load() {
         cache.clear();
         tablesWithBonusRolls = Collections.emptySet();
 
-        DataResult<Map<String, LootTable>> dataResult = repository.loadAll();
+        Map<String, LootTable> loaded = repository.loadAll();
 
-        if (!dataResult.getLogs().isEmpty()) {
-            Log4Craft.debug("[LootTableManager] " + dataResult.getLogs().size() + " error(s) while loading loot tables:");
-            dataResult.getLogs().forEach(err -> Log4Craft.debug("  - " + err));
-        }
-
-        Map<String, LootTable> loaded = dataResult.getResult();
-        if (loaded == null || loaded.isEmpty()) {
-            Log4Craft.debug("[LootTableManager] No loot tables loaded — check your loot_tables/ folder.");
-            return;
-        }
 
         cache.putAll(loaded);
         propagateBonusRolls();
@@ -64,45 +51,41 @@ public class LootTableManager {
      *
      * @param id e.g. {@code "rogue:dungeons/dungeon_a_reward"}
      */
-    public @Nullable LootTable getTable(@NotNull String id) {
+    public LootTable getTable(String id) {
         return cache.get(id);
     }
 
     /**
      * Returns true if a loot table with the given ID exists in cache.
      */
-    public boolean exists(@NotNull String id) {
+    public boolean exists(String id) {
         return cache.containsKey(id);
     }
 
     /**
      * Returns an immutable view of all cached loot tables.
      */
-    public @NotNull @Unmodifiable Map<String, LootTable> getAllTables() {
+    public Map<String, LootTable> getAllTables() {
         return Collections.unmodifiableMap(cache);
     }
 
     /**
      * Returns all table IDs that have bonus_rolls (directly or via a nested child).
      */
-    public @NotNull @Unmodifiable Set<String> getTablesWithBonusRolls() {
+    public Set<String> getTablesWithBonusRolls() {
         return tablesWithBonusRolls;
     }
 
     /**
      * Quick check: does the table benefit from LootRules (luck, looting, tier)?
      */
-    public boolean hasBonusRolls(@NotNull String id) {
+    public boolean hasBonusRolls(String id) {
         return tablesWithBonusRolls.contains(id);
     }
 
     public int getCacheSize() {
         return cache.size();
     }
-
-    // -----------------------------------------------------------------------
-    // Internal
-    // -----------------------------------------------------------------------
 
     /**
      * Propagates hasBonusRolls upward through the nested table tree.

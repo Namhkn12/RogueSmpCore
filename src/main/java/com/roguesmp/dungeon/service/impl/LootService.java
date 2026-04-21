@@ -1,19 +1,16 @@
 package com.roguesmp.dungeon.service.impl;
 
-import com.roguesmp.dungeon.context.LootContext;
-import com.roguesmp.dungeon.data.LootEntry;
-import com.roguesmp.dungeon.data.LootPool;
-import com.roguesmp.dungeon.data.LootTable;
-import com.roguesmp.dungeon.dto.LootRollResult;
+import com.roguesmp.dungeon.data.definition.loot.LootContext;
+import com.roguesmp.dungeon.data.definition.loot.LootEntry;
+import com.roguesmp.dungeon.data.definition.loot.LootPool;
+import com.roguesmp.dungeon.data.definition.loot.LootTable;
+import com.roguesmp.dungeon.dto.loot.LootRollResult;
 import com.roguesmp.dungeon.manager.LootTableManager;
 import com.roguesmp.dungeon.service.ILootService;
 import com.roguesmp.dungeon.utils.Log4Craft;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.registry.ItemRegistry;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -27,27 +24,27 @@ public class LootService implements ILootService {
     private final ItemRegistry itemRegistry;
 
     public LootService(
-            @NotNull LootTableManager lootTableManager,
-            @NotNull ItemRegistry itemRegistry
+           LootTableManager lootTableManager,
+           ItemRegistry itemRegistry
     ) {
         this.lootTableManager = lootTableManager;
         this.itemRegistry = itemRegistry;
     }
 
     @Override
-    public @NotNull List<ItemStack> roll(@NotNull String lootTableId, @NotNull LootContext context) {
+    public List<ItemStack> roll(String lootTableId, LootContext context) {
         List<ItemStack> results = new ArrayList<>();
         rollTable(lootTableId, context, results, 0);
         return results;
     }
 
     @Override
-    public @NotNull List<ItemStack> roll(@NotNull String lootTableId) {
+    public List<ItemStack> roll(String lootTableId) {
         return roll(lootTableId, LootContext.builder().build());
     }
 
     @Override
-    public boolean exists(@NotNull String lootTableId) {
+    public boolean exists(String lootTableId) {
         return lootTableManager.exists(lootTableId);
     }
 
@@ -57,9 +54,9 @@ public class LootService implements ILootService {
      * @param depth current recursion depth — aborts if exceeds {@link #MAX_DEPTH}
      */
     private void rollTable(
-            @NotNull String tableId,
-            @NotNull LootContext context,
-            @NotNull List<ItemStack> results,
+            String tableId,
+            LootContext context,
+            List<ItemStack> results,
             int depth
     ) {
         if (depth > MAX_DEPTH) {
@@ -84,10 +81,10 @@ public class LootService implements ILootService {
      * one weighted entry per roll.
      */
     private void rollPool(
-            @NotNull LootPool pool,
-            @NotNull LootTable parentTable,
-            @NotNull LootContext context,
-            @NotNull List<ItemStack> results,
+            LootPool pool,
+            LootTable parentTable,
+            LootContext context,
+            List<ItemStack> results,
             int depth
     ) {
         int totalRolls = computeTotalRolls(pool, parentTable, context);
@@ -111,9 +108,9 @@ public class LootService implements ILootService {
      * This avoids unnecessary rule evaluation on tables that ignore luck entirely.
      */
     private int computeTotalRolls(
-            @NotNull LootPool pool,
-            @NotNull LootTable parentTable,
-            @NotNull LootContext context
+            LootPool pool,
+            LootTable parentTable,
+            LootContext context
     ) {
         int base = Math.max(1, pool.getRolls());
 
@@ -134,7 +131,7 @@ public class LootService implements ILootService {
      *
      * @return the selected entry, or null if the pool has no entries with positive weight
      */
-    private @Nullable LootEntry pickWeightedEntry(@NotNull LootPool pool) {
+    private LootEntry pickWeightedEntry(LootPool pool) {
         List<LootEntry> entries = pool.getEntries();
         if (entries.isEmpty()) return null;
 
@@ -157,9 +154,9 @@ public class LootService implements ILootService {
     /**
      * Executes a single selected entry and returns the items it produces.
      */
-    private @NotNull LootRollResult executeEntry(
-            @NotNull LootEntry entry,
-            @NotNull LootContext context,
+    private LootRollResult executeEntry(
+            LootEntry entry,
+            LootContext context,
             int depth
     ) {
         return switch (entry.getType()) {
@@ -173,9 +170,9 @@ public class LootService implements ILootService {
      * Resolves an ITEM entry — looks up BaseItem via ItemRegistry,
      * picks a random amount in [min, max], builds the ItemStack via SmpItem.
      */
-    private @NotNull LootRollResult executeItemEntry(
-            @NotNull LootEntry entry,
-            @NotNull LootContext context
+    private LootRollResult executeItemEntry(
+            LootEntry entry,
+            LootContext context
     ) {
         String itemId = entry.getItemId();
         if (itemId == null) {
@@ -199,9 +196,9 @@ public class LootService implements ILootService {
      * Resolves a LOOT_TABLE entry — recurses into the nested table.
      * Results are collected directly into the parent results list via the recursive call.
      */
-    private @NotNull LootRollResult executeNestedTableEntry(
-            @NotNull LootEntry entry,
-            @NotNull LootContext context,
+    private LootRollResult executeNestedTableEntry(
+            LootEntry entry,
+            LootContext context,
             int depth
     ) {
         String nestedId = entry.getNestedTableId();

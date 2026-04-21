@@ -1,13 +1,12 @@
 package com.roguesmp.dungeon.dto;
 
 import com.roguesmp.dungeon.actor.scoreboard.MemberStatus;
-import java.util.Collections;
+
 import java.util.List;
 
 public class DungeonScoreBoard {
     private String dungeonName;
     private int score;
-    private List<PartyMember> members;
     private List<List<String>> objectiveLines;
 
     // DungeonScoreBoard.java
@@ -30,10 +29,9 @@ public class DungeonScoreBoard {
         public MemberStatus getStatus() { return status; }
     }
 
-    public DungeonScoreBoard(String dungeonName, int score, List<PartyMember> members) {
+    public DungeonScoreBoard(String dungeonName, int score) {
         this.dungeonName = dungeonName;
         this.score = score;
-        this.members = members;
     }
 
     public DungeonScoreBoard() {
@@ -53,13 +51,5 @@ public class DungeonScoreBoard {
 
     public void setScore(int score) {
         this.score = score;
-    }
-
-    public List<PartyMember> getMembers() {
-        return Collections.unmodifiableList(members);
-    }
-
-    public void setMembers(List<PartyMember> members) {
-        this.members = members;
     }
 }

@@ -1,31 +1,33 @@
 package com.roguesmp.dungeon.repository.impl;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.roguesmp.RogueSmpCore;
-import com.roguesmp.dungeon.adapter.UUIDTypeAdapter;
-import com.roguesmp.dungeon.constant.DataConfig;
-import com.roguesmp.dungeon.data.Party;
+import com.google.gson.JsonSyntaxException;
+import com.roguesmp.dungeon.config.DataFolderConfig;
+import com.roguesmp.dungeon.data.runtime.Party;
 import com.roguesmp.dungeon.exception.impl.data.DataDeleteException;
 import com.roguesmp.dungeon.exception.impl.data.DataSaveException;
 import com.roguesmp.dungeon.repository.IPartyRepository;
-import com.roguesmp.dungeon.utils.Log4Craft;
+import com.roguesmp.dungeon.utils.Log4Craft_;
+import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.util.*;
 
 public class PartyRepository implements IPartyRepository {
 
-    private final File partyFolder;
+    private final File dataFolder;
     private final Gson gson;
+    private final Log4Craft_ logger;
 
-    public PartyRepository(Gson gson) {
-        this.partyFolder = new File(
-                RogueSmpCore.getInstance().getDataFolder(),
-                DataConfig.getPartyFolder()
+    public PartyRepository(Plugin plugin, Gson gson, Log4Craft_ logger) {
+        this.dataFolder = new File(
+                plugin.getDataFolder(),
+                DataFolderConfig.getPartyFolder()
         );
-        this.partyFolder.mkdirs();
         this.gson = gson;
+        this.logger = logger;
+        if (!dataFolder.exists()) dataFolder.mkdirs();
+
     }
 
     @Override
@@ -39,7 +41,7 @@ public class PartyRepository implements IPartyRepository {
     }
 
     @Override
-    public void delete(UUID partyId) {
+    public void delete(String partyId) {
         File file = getFile(partyId);
         if (file.exists() && !file.delete()) {
             throw new DataDeleteException(file.getName(), null);
@@ -48,8 +50,8 @@ public class PartyRepository implements IPartyRepository {
 
     @Override
     public Collection<Party> loadAll() {
-        File[] files = partyFolder.listFiles(
-                (dir, name) -> name.endsWith(DataConfig.JSON_TYPE)
+        File[] files = dataFolder.listFiles(
+                (dir, name) -> name.endsWith(DataFolderConfig.JSON_TYPE)
         );
         if (files == null) return Collections.emptyList();
 
@@ -58,14 +60,18 @@ public class PartyRepository implements IPartyRepository {
             try (Reader reader = new FileReader(file)) {
                 Party party = gson.fromJson(reader, Party.class);
                 if (party != null) result.add(party);
+            } catch (JsonSyntaxException e) {
+                logger.fire(this.getClass(), "Corrupt party file, skipping: " + file.getName(), e);
+                file.renameTo(new File(file.getParent(), file.getName() + ".corrupt"));
             } catch (IOException e) {
-                Log4Craft.fire("Failed to load party file: " + file.getName(), e);
+                logger.fire(this.getClass(), "Failed to load party file: " + file.getName(), e);
+                file.renameTo(new File(file.getParent(), file.getName() + ".corrupt"));
             }
         }
         return result;
     }
 
-    private File getFile(UUID partyId) {
-        return new File(partyFolder, DataConfig.PARTY_FILE + partyId + DataConfig.JSON_TYPE);
+    private File getFile(String partyId) {
+        return new File(dataFolder, DataFolderConfig.PARTY_FILE + partyId + DataFolderConfig.JSON_TYPE);
     }
 }

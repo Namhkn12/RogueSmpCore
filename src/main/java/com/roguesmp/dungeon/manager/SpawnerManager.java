@@ -1,57 +1,59 @@
 package com.roguesmp.dungeon.manager;
 
-import com.roguesmp.dungeon.constant.PrefixConfig;
-import com.roguesmp.dungeon.data.Spawner;
-import com.roguesmp.dungeon.dto.DataResult;
-import com.roguesmp.dungeon.exception.impl.spawner.SpawnerNotFoundException;
+import com.roguesmp.dungeon.data.definition.spawner.Spawner;
 import com.roguesmp.dungeon.repository.ISpawnerRepository;
-import com.roguesmp.dungeon.utils.ConsoleLogger;
-import com.roguesmp.dungeon.utils.Log4Craft;
+import com.roguesmp.dungeon.utils.Log4Craft_;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class SpawnerManager {
-    private final Map<String, Spawner> spawners = new HashMap<>();
+    private final Map<String, Spawner> cache = new HashMap<>();
     private final ISpawnerRepository spawnerRepository;
+    private final Log4Craft_ logger;
 
-    public SpawnerManager(ISpawnerRepository spawnerRepository) {
+    public SpawnerManager(ISpawnerRepository spawnerRepository, Log4Craft_ logger) {
         this.spawnerRepository = spawnerRepository;
+        this.logger = logger;
+
         load();
     }
 
     public void load(){
-        spawners.clear();
-        DataResult<Map<String, Spawner>> result = spawnerRepository.loadAll();
-        spawners.putAll(result.getResult());
-
-        if(result.hasLogs()){
-            result.getLogs().forEach(Log4Craft::warn);
+        cache.clear();
+        List<Spawner> spawners = spawnerRepository.loadAll();
+        if(spawners == null) {
+            logger.debug(this.getClass(), "No data found" );
+            return;
         }
+        spawners.forEach(spawner -> {
+            cache.put(spawner.getId(), spawner);
+        });
+        logger.info(this.getClass(), "Loaded data: " + cache.size() + " record");
     }
 
-    public Spawner get(String id) {
-        Spawner spawner = spawners.get(id);
-        if (spawner == null) throw new SpawnerNotFoundException(id, null);
-        return spawner;
-    }
-    public Map<String, Spawner> getAllTemplate(){
-        return spawners;
+    public Spawner getById(String id){
+        return cache.get(id);
     }
 
-    public Spawner create(String name){
-        String id = UUID.randomUUID().toString();
-        Spawner spawner = new Spawner(id, name,new HashMap<>(), 0, 0, 0, 0, 0, 0, 0);
+    public List<String> getAllIds() {
+        return cache.keySet().stream()
+                .sorted()
+                .toList();
+    }
+
+    public Spawner create(Spawner spawner){
         Spawner saved = spawnerRepository.save(spawner);
-        spawners.put(saved.getId(), saved);
+        if(saved == null) return null;
+        cache.put(saved.getId(), saved);
         return saved;
     }
 
     public boolean delete(String id){
-        if(!spawners.containsKey(id)) return false;
+        if(!cache.containsKey(id)) return false;
         boolean result = spawnerRepository.delete(id);
-        spawners.remove(id);
+        if(result) cache.remove(id);
         return result;
     }
 }

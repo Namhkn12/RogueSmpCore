@@ -1,9 +1,7 @@
 package com.roguesmp.dungeon.service;
 
-import com.roguesmp.dungeon.context.LootContext;
+import com.roguesmp.dungeon.data.definition.loot.LootContext;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
 
 /**
@@ -43,7 +41,7 @@ public interface ILootService {
      * @param context     runtime context carrying player info and active LootRules
      * @return list of generated ItemStacks. Never null, may be empty.
      */
-    @NotNull List<ItemStack> roll(@NotNull String lootTableId, @NotNull LootContext context);
+    List<ItemStack> roll(String lootTableId, LootContext context);
 
     /**
      * Convenience overload — rolls without any LootContext (no player, no bonus rules).
@@ -52,7 +50,7 @@ public interface ILootService {
      * @param lootTableId the loot table ID
      * @return list of generated ItemStacks. Never null, may be empty.
      */
-    @NotNull List<ItemStack> roll(@NotNull String lootTableId);
+    List<ItemStack> roll(String lootTableId);
 
     /**
      * Returns true if the loot table exists and is loaded in cache.
@@ -60,5 +58,5 @@ public interface ILootService {
      *
      * @param lootTableId the loot table ID to check
      */
-    boolean exists(@NotNull String lootTableId);
+    boolean exists(String lootTableId);
 }

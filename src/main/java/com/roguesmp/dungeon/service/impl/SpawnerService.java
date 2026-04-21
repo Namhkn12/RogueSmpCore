@@ -1,15 +1,16 @@
 package com.roguesmp.dungeon.service.impl;
 
-import com.roguesmp.dungeon.data.Spawner;
-import com.roguesmp.dungeon.exception.impl.InvalidInputException;
-import com.roguesmp.dungeon.exception.impl.spawner.InstanceException;
-import com.roguesmp.dungeon.instance.SpawnerInstance;
+import com.roguesmp.dungeon.data.definition.spawner.Spawner;
+import com.roguesmp.dungeon.data.runtime.SpawnerInstance;
 import com.roguesmp.dungeon.manager.SpawnerInstanceManager;
 import com.roguesmp.dungeon.manager.SpawnerManager;
 import com.roguesmp.dungeon.service.ISpawnerService;
+import com.roguesmp.dungeon.utils.Log4Craft_;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.registry.entity.EntityRegistry;
+import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.block.spawner.SpawnRule;
 import org.bukkit.block.spawner.SpawnerEntry;
 import org.bukkit.entity.EntitySnapshot;
 
@@ -20,59 +21,68 @@ public class SpawnerService implements ISpawnerService {
 
     private final SpawnerManager spawnerManager;
     private final SpawnerInstanceManager instanceManager;
+    private final Log4Craft_ logger;
 
-    public SpawnerService(SpawnerManager spawnerManager, SpawnerInstanceManager instanceManager) {
+    public SpawnerService(SpawnerManager spawnerManager, SpawnerInstanceManager instanceManager, Log4Craft_ logger) {
         this.spawnerManager = spawnerManager;
         this.instanceManager = instanceManager;
+        this.logger = logger;
     }
 
     @Override
-    public void createTemplate(String name) {
-        spawnerManager.create(name);
+    public void createSpawner(Spawner spawner) {
+        spawnerManager.create(spawner);
     }
 
     @Override
-    public void createInstance(String iid, String templateId) {
-        Spawner spawner = spawnerManager.get(templateId);
-        SpawnerInstance instance = instanceManager.createInstance(iid, spawner);
-        if (instance == null) throw new InstanceException(iid);
-        instanceManager.addInstance(instance);
-    }
+    public void applyTemplate(String sid, CreatureSpawner spawner) {
+        Spawner template = spawnerManager.getById(sid);
+        if (template == null) {
+            logger.error(this.getClass(), "Spawner is null! Cannot apply data");
+            return;
+        }
 
-    @Override
-    public List<Spawner> getTemplates() {
-        return spawnerManager.getAllTemplate().values().stream().toList();
-    }
-
-    @Override
-    public SpawnerInstance getInstance(String iid) {
-        return instanceManager.getInstance(iid);
-    }
-
-    @Override
-    public void applyTemplate(String templateId, CreatureSpawner spawner) {
-        Spawner sp = spawnerManager.get(templateId);
-        if (spawner == null) throw new InvalidInputException(CreatureSpawner.class.getName(), "cannot be null");
-
-        spawner.setDelay(sp.getDelay());
-        spawner.setSpawnRange(sp.getSpawnRange());
-        spawner.setMaxNearbyEntities(sp.getMaxNearBy());
-        spawner.setMaxSpawnDelay(sp.getMaxDelay());
-        spawner.setMinSpawnDelay(sp.getMinDelay());
-        spawner.setRequiredPlayerRange(sp.getActiveRange());
-        spawner.setSpawnCount(sp.getSpawnCount());
+        spawner.setDelay(template.getDelay());
+        spawner.setSpawnRange(template.getSpawnRange());
+        spawner.setMaxNearbyEntities(template.getMaxNearBy());
+        spawner.setMinSpawnDelay(template.getMinDelay());
+        spawner.setMaxSpawnDelay(template.getMaxDelay());
+        spawner.setRequiredPlayerRange(template.getActiveRange());
+        spawner.setSpawnCount(template.getSpawnCount());
         spawner.setSpawnedType(null);
 
         List<SpawnerEntry> entries = new ArrayList<>();
-        sp.getMobs().forEach((mobId, weight) -> {
-            BaseEntity baseEntity = EntityRegistry.getInstance().getBaseEntity(mobId);
+        template.getMobs().forEach((mid, weight) -> {
+            BaseEntity baseEntity = EntityRegistry.getInstance().getBaseEntity(mid);
             if (baseEntity == null) return;
             EntitySnapshot snapshot = baseEntity.spawnOnlyEquipmentSnapshot(spawner.getLocation());
             if (snapshot == null) return;
-            entries.add(new SpawnerEntry(snapshot, weight, null));
+
+            SpawnRule rule = new SpawnRule(0, 15, 0, 15);
+            entries.add(new SpawnerEntry(snapshot, weight, rule));
         });
 
         spawner.setPotentialSpawns(entries);
         spawner.update();
+    }
+
+    @Override
+    public void createInstance(String sid, String siid, Location location) {
+        Spawner spawner = spawnerManager.getById(sid);
+        if(spawner == null){
+            logger.error(this.getClass(), "Spawner template is null! Please check");
+        }
+        SpawnerInstance instance = instanceManager.create(siid, spawner, location);
+        logger.sucess(this.getClass(), "Create spawner instance with siid: " + siid + " and sid: " + sid);
+        if(instance == null){
+            logger.error(this.getClass(), "Couldn't create spawner instance with siid " + siid);
+            return;
+        }
+        instanceManager.add(instance);
+    }
+
+    @Override
+    public SpawnerInstance getInstance(String siid) {
+        return instanceManager.get(siid);
     }
 }

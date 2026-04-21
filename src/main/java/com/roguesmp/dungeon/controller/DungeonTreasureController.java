@@ -1,6 +1,5 @@
 package com.roguesmp.dungeon.controller;
 
-import com.roguesmp.dungeon.dto.ActionResult;
 import com.roguesmp.dungeon.service.IDungeonRewardService;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -14,25 +13,25 @@ public class DungeonTreasureController {
         this.rewardService = rewardService;
     }
 
-    public ActionResult<Void> handlePlaceLootChest(BlockPlaceEvent e){
+    public void handlePlaceLootChest(BlockPlaceEvent e){
         if(!rewardService.onPlace(e)){
-            return ActionResult.ok("Failed place a dungeon reward chest");
+            return;
         }
-        return ActionResult.ok("Successfully place a dungeon reward chest");
+        return;
     }
 
-    public ActionResult<Void> handleBreakLootChest(BlockBreakEvent e){
+    public void handleBreakLootChest(BlockBreakEvent e){
         if(!rewardService.onBreak(e)){
-            return ActionResult.ok("Dungeon reward chest now able to break");
+            return;
         }
-        return ActionResult.ok("Successfully cancel break a dungeon reward chest");
+        return;
     }
 
-    public ActionResult<Void> handleOpenLootChestInDungeon(PlayerInteractEvent e){
+    public void handleOpenLootChestInDungeon(PlayerInteractEvent e){
         if(!rewardService.onOpen(e)){
-            return ActionResult.ok("This reward chest can not be opened");
+            return;
         }
-        return ActionResult.ok("Successfully open the dungeon reward chest");
+        return;
     }
 
 }

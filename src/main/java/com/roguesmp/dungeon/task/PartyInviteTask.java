@@ -1,12 +1,12 @@
 package com.roguesmp.dungeon.task;
 
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.service.IPartyService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
@@ -18,9 +18,11 @@ public class PartyInviteTask {
     // targetUUID → (inviterUUID → expireTask)
     private final Map<UUID, Map<UUID, BukkitTask>> pendingInvites = new HashMap<>();
     private final IPartyService partyService;
+    private final Plugin plugin;
 
-    public PartyInviteTask(IPartyService partyService) {
+    public PartyInviteTask(Plugin plugin, IPartyService partyService) {
         this.partyService = partyService;
+        this.plugin = plugin;
     }
 
     public boolean sendInvite(Player inviter, Player target) {
@@ -63,7 +65,7 @@ public class PartyInviteTask {
         target.sendMessage(Component.text("Lời mời hết hạn sau 2 phút.").color(NamedTextColor.GRAY));
 
         BukkitTask expireTask = Bukkit.getScheduler().runTaskLater(
-                RogueSmpCore.getInstance(),
+                plugin,
                 () -> expireInvite(target.getUniqueId(), inviter.getUniqueId(), target, inviter),
                 20L * 120
         );

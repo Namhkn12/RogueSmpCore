@@ -1,7 +1,6 @@
 package com.roguesmp.dungeon.repository;
 
-import com.roguesmp.dungeon.data.DungeonWorld;
-
+import com.roguesmp.dungeon.data.definition.DungeonWorld;
 import java.util.List;
 import java.util.Optional;
 

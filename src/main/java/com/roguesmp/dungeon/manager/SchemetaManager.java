@@ -1,58 +1,103 @@
 package com.roguesmp.dungeon.manager;
 
-import com.roguesmp.dungeon.data.Schemeta;
-import com.roguesmp.dungeon.repository.ISchemetaRepository;
 import com.roguesmp.dungeon.utils.Log4Craft;
+import com.roguesmp.dungeon.data.definition.Schemeta;
+import com.roguesmp.dungeon.repository.ISchematicRepository;
+import com.roguesmp.dungeon.repository.ISchemetaRepository;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SchemetaManager {
 
-    private final Map<String, Schemeta> schemetas = new HashMap<>();
-    private final ISchemetaRepository repository;
+    // Eager cache — metadata nhẹ, load hết khi khởi động
+    private final Map<String, Schemeta> schemetaCache = new HashMap<>();
 
-    public SchemetaManager(ISchemetaRepository repository) {
-        this.repository = repository;
+    // Lazy cache — Clipboard nặng, chỉ load khi lần đầu paste
+    private final Map<String, Clipboard> clipboardCache = new HashMap<>();
 
-        load();
+    private final ISchemetaRepository schemetaRepo;
+    private final ISchematicRepository schematicRepo;
+
+    public SchemetaManager(ISchemetaRepository schemetaRepo,
+                           ISchematicRepository schematicRepo) {
+        this.schemetaRepo = schemetaRepo;
+        this.schematicRepo = schematicRepo;
+        loadAll();
     }
 
-    public void load() {
-        schemetas.clear();
-        repository.loadAll().forEach(s -> schemetas.put(s.getSchemId(), s));
-        Log4Craft.success("Loaded schemeta to cache: " + schemetas.size() + " party");
+    // ── Lifecycle ────────────────────────────────────────────
+
+    public void loadAll() {
+        schemetaCache.clear();
+        clipboardCache.clear(); // invalidate clipboard cache cùng lúc
+        schemetaRepo.loadAll().forEach(s -> schemetaCache.put(s.getId(), s));
+        Log4Craft.success("Loaded " + schemetaCache.size() + " schemeta(s) into cache.");
     }
 
-    public void register(Schemeta schemeta) {
-        schemetas.put(schemeta.getSchemId(), schemeta);
-        repository.save(schemeta);
+    // ── Schemeta CRUD ────────────────────────────────────────
+
+    public void register(Schemeta schemeta, Clipboard clipboard) {
+        schemetaRepo.save(schemeta);
+        schematicRepo.save(schemeta.getId(), clipboard);
+
+        schemetaCache.put(schemeta.getId(), schemeta);
+        clipboardCache.put(schemeta.getId(), clipboard); // cache luôn vì vừa có trong tay
     }
 
     public void delete(String id) {
-        schemetas.remove(id);
-        repository.delete(id);
+        schemetaRepo.delete(id);
+        schematicRepo.delete(id);
+
+        schemetaCache.remove(id);
+        clipboardCache.remove(id);
     }
 
-    public Schemeta get(String id) {
-        return schemetas.get(id);
+    public Optional<Schemeta> get(String id) {
+        return Optional.ofNullable(schemetaCache.get(id));
     }
 
-    public List<Schemeta> getSchemetaList() {
-        return List.copyOf(schemetas.values());
+    public List<Schemeta> getAll() {
+        return List.copyOf(schemetaCache.values());
     }
 
-    public List<String> getSchematicIdList() {
-        return List.copyOf(schemetas.keySet());
+    public boolean exists(String id) {
+        return schemetaCache.containsKey(id);
     }
 
-    public void saveSchem(String name, Clipboard clipboard) {
-        repository.saveSchem(name, clipboard);
+    // ── Clipboard (lazy) ─────────────────────────────────────
+
+    /**
+     * Lấy Clipboard để paste. Load từ file nếu chưa có trong cache.
+     * Trả về Optional.empty() nếu file không tồn tại.
+     */
+    public Optional<Clipboard> getClipboard(String id) {
+        if (clipboardCache.containsKey(id)) {
+            return Optional.of(clipboardCache.get(id));
+        }
+
+        if (!schematicRepo.exists(id)) {
+            Log4Craft.fire("Schematic file not found for id: " + id, null);
+            return Optional.empty();
+        }
+
+        Clipboard clipboard = schematicRepo.load(id);
+        clipboardCache.put(id, clipboard);
+        return Optional.of(clipboard);
     }
 
-    public Clipboard loadSchem(String name) {
-        return repository.loadSchem(name);
+    /**
+     * Xóa 1 clipboard khỏi cache (giải phóng RAM nếu cần).
+     */
+    public void evictClipboard(String id) {
+        clipboardCache.remove(id);
+    }
+
+    /**
+     * Xóa toàn bộ clipboard cache — dùng khi reload hoặc bộ nhớ thấp.
+     */
+    public void evictAllClipboards() {
+        clipboardCache.clear();
+        Log4Craft.success("Clipboard cache cleared.");
     }
 }

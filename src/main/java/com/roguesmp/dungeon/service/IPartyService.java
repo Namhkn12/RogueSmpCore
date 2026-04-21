@@ -1,10 +1,9 @@
 package com.roguesmp.dungeon.service;
 
-import com.roguesmp.dungeon.data.Party;
+import com.roguesmp.dungeon.data.runtime.Party;
 import org.bukkit.entity.Player;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.List;
 
 public interface IPartyService {
 
@@ -18,6 +17,8 @@ public interface IPartyService {
 
     void kickMember(Player owner, Player target);
 
+    void forceKick(Player player);
+
     void transferOwnership(Player currentOwner, Player newOwner);
 
     String buildPartyInfo(Player player);
@@ -26,10 +27,12 @@ public interface IPartyService {
 
     boolean isOwner(Player player);
 
-    Optional<Party> getPartyByPlayer(Player player);
+    Party getPartyByPlayer(Player player);
 
-    Optional<Party> getPartyById(UUID partyId);
+    Party getPartyById(String partyId);
 
     void savePartyToFile();
+
+    List<Player> getOnlineMembers(Party party);
 
 }

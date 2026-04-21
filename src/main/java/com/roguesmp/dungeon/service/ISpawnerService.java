@@ -1,15 +1,13 @@
 package com.roguesmp.dungeon.service;
 
-import com.roguesmp.dungeon.data.Spawner;
-import com.roguesmp.dungeon.instance.SpawnerInstance;
+import com.roguesmp.dungeon.data.definition.spawner.Spawner;
+import com.roguesmp.dungeon.data.runtime.SpawnerInstance;
+import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
 
-import java.util.List;
-
 public interface ISpawnerService {
-    void createTemplate(String name);
-    void createInstance(String iid, String templateId);
-    List<Spawner> getTemplates();
-    SpawnerInstance getInstance(String iid);
-    void applyTemplate(String templateId, CreatureSpawner spawner);
+    void createSpawner(Spawner spawner);
+    void applyTemplate(String sid, CreatureSpawner spawner);
+    void createInstance(String sid, String siid, Location location);
+    SpawnerInstance getInstance(String siid);
 }

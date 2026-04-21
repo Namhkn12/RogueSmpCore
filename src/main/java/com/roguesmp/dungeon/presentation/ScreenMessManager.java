@@ -4,6 +4,7 @@ import com.roguesmp.dungeon.presentation.message.ScreenMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+
 import static me.clip.placeholderapi.util.Msg.color;
 
 public class ScreenMessManager {

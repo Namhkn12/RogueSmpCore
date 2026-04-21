@@ -1,82 +1,96 @@
 package com.roguesmp.dungeon.manager;
 
-import com.roguesmp.dungeon.instance.DungeonInstance;
+import com.roguesmp.dungeon.data.definition.objective.PersistableObjective;
+import com.roguesmp.dungeon.data.definition.room.roomevent.PersistableRoomEvent;
+import com.roguesmp.dungeon.data.runtime.DungeonInstance;
+import com.roguesmp.dungeon.data.runtime.RoomInstance;
+import com.roguesmp.dungeon.data.runtime.session.DungeonProgress;
 import com.roguesmp.dungeon.repository.IInstanceRepository;
+import com.roguesmp.dungeon.utils.Log4Craft_;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-/**
- * Quản lý state in-memory của tất cả DungeonInstance đang active.
- * Key = partyId để lookup nhanh từ player event.
- */
 public class InstanceManager {
 
-    private final IInstanceRepository repository;
+    private final Map<String, DungeonInstance> instances = new LinkedHashMap<>();
+
+    private final IInstanceRepository instanceRepository;
     private final ScoreBoardManager scoreBoardManager;
+    private final Log4Craft_ logger;
 
-    private final Map<UUID, DungeonInstance> instances = new LinkedHashMap<>();
-
-    public InstanceManager(IInstanceRepository repository, ScoreBoardManager scoreBoardManager) {
-        this.repository = repository;
+    public InstanceManager(IInstanceRepository instanceRepository, ScoreBoardManager scoreBoardManager, Log4Craft_ logger) {
+        this.instanceRepository = instanceRepository;
         this.scoreBoardManager = scoreBoardManager;
+        this.logger = logger;
+
         loadAll();
     }
 
-    /**
-     * Load tất cả instance từ file khi server restart
-     */
-    public void loadAll() {
+    public void loadAll(){
         instances.clear();
-        repository.loadAll((instance, room, obj) -> {
-            instance.setScore(instance.getScore() + obj.getScore());
-            scoreBoardManager.onScoreChanged(instance);
-        }).forEach(instance ->
-                instances.put(instance.getParty(), instance)
-        );
+        instanceRepository.loadAll().forEach(instance -> {
+            if (instance == null || instance.getSession() == null) return;
+            String sessionId = instance.getSession().getSessionId();
+            if (sessionId == null || sessionId.isBlank()) return;
+            instances.put(sessionId, instance);
+        });
     }
 
-    /**
-     * Lưu tất cả instance khi server close
-     */
     public void saveAll() {
-        instances.values().forEach(repository::save);
+        instances.forEach((uuid, instance) -> {
+            snapshotRoomRuntime(instance);
+            instanceRepository.save(instance);
+        });
     }
 
-    /**
-     * Thêm instance mới vào memory và ghi file ngay
-     */
-    public void add(DungeonInstance instance) {
-        instances.put(instance.getParty(), instance);
-        repository.save(instance);
-    }
+    private void snapshotRoomRuntime(DungeonInstance instance) {
+        DungeonProgress progress = instance.getProgress();
+        if (progress == null) return;
 
-    /**
-     * Xóa instance khỏi memory và xóa file
-     */
-    public void remove(UUID partyId) {
-        instances.remove(partyId);
-        repository.delete(partyId);
-    }
+        RoomInstance currentRoom = progress.getCurrentRoom();
+        if (currentRoom == null) return;
 
-    /**
-     * Lưu lại instance đã thay đổi (dùng sau checkpoint, clear room, ...)
-     */
-    public void save(UUID partyId) {
-        DungeonInstance instance = instances.get(partyId);
-        if (instance != null) {
-            repository.save(instance);
+        if (currentRoom.getActiveObjectives() != null) {
+            List<Map<String, Object>> objectiveStates = currentRoom.getActiveObjectives()
+                    .stream()
+                    .filter(PersistableObjective.class::isInstance)
+                    .map(obj -> ((PersistableObjective) obj).serialize())
+                    .toList();
+            currentRoom.setObjectiveStates(objectiveStates);
+        }
+
+        if (currentRoom.getActiveRoomEvents() != null) {
+            List<Map<String, Object>> eventStates = currentRoom.getActiveRoomEvents()
+                    .stream()
+                    .filter(PersistableRoomEvent.class::isInstance)
+                    .map(event -> ((PersistableRoomEvent) event).serialize())
+                    .toList();
+            currentRoom.setRoomEventStates(eventStates);
         }
     }
 
-    public Optional<DungeonInstance> getByParty(UUID partyId) {
-        return Optional.ofNullable(instances.get(partyId));
+    public void add(DungeonInstance instance){
+        if (instance == null || instance.getSession() == null) return;
+        String sessionId = instance.getSession().getSessionId();
+        if (sessionId == null || sessionId.isBlank()) return;
+        instances.put(sessionId, instance);
+        snapshotRoomRuntime(instance);
+        instanceRepository.save(instance);
     }
 
-    public Map<UUID, DungeonInstance> getInstancesMap() {
-        return instances;
+    public DungeonInstance get(String ssid){
+        return instances.get(ssid);
     }
 
-    public boolean hasActiveInstance(UUID partyId) {
-        return instances.containsKey(partyId);
+    public DungeonInstance remove(String ssid){
+        logger.info(this.getClass(), "Remove dungeon instance with id: " + ssid);
+        instanceRepository.delete(ssid);
+        return instances.remove(ssid);
+    }
+
+    public List<DungeonInstance> getAll() {
+        return List.copyOf(instances.values());
     }
 }

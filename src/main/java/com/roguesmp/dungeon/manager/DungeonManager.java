@@ -1,77 +1,54 @@
 package com.roguesmp.dungeon.manager;
 
-import com.roguesmp.dungeon.constant.DataConfig;
-import com.roguesmp.dungeon.constant.PrefixConfig;
-import com.roguesmp.dungeon.data.Dungeon;
+import com.roguesmp.dungeon.data.definition.Dungeon;
 import com.roguesmp.dungeon.repository.IDungeonRepository;
-import com.roguesmp.dungeon.utils.ConsoleLogger;
-import com.roguesmp.dungeon.utils.Log4Craft;
-import com.roguesmp.dungeon.utils.TimeId;
+import com.roguesmp.dungeon.utils.Log4Craft_;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DungeonManager {
 
-    private final Map<String, Dungeon> dungeons = new HashMap<>();
+    private final Map<String, Dungeon> cache = new HashMap<>();
+
     private final IDungeonRepository dungeonRepository;
+    private final Log4Craft_ logger;
 
-    public DungeonManager(IDungeonRepository dungeonRepository) {
+    public DungeonManager(IDungeonRepository dungeonRepository, Log4Craft_ logger) {
         this.dungeonRepository = dungeonRepository;
+        this.logger = logger;
 
-        load();
+        loadAll();
     }
 
-    /** Load all dungeons from storage into cache. */
-    public void load() {
-        dungeons.clear();
-        dungeonRepository.loadAll().forEach(d -> dungeons.put(d.getDgId(), d));
-        Log4Craft.info("Loaded " +  dungeons.size() + " dungeon template data");
+    public void loadAll(){
+        cache.clear();
+        dungeonRepository.loadAll().forEach(d -> cache.put(d.getId(), d));
+        logger.info(this.getClass(),"Loaded data" + cache.size() + " record");
     }
 
-    /** Create a new dungeon, persist it, and put it in cache. */
-    public Dungeon create(String name) {
-        String dgId = DataConfig.DUNGEON_TEMPLATE_FILE + TimeId.generateTimeId();
-        Dungeon dungeon = new Dungeon(dgId, name, "", 0, "");
-
-        dungeons.put(dgId, dungeon);
-        dungeonRepository.save(dungeon);
-
-        return dungeon;
+    public boolean delete(String did){
+        if(!cache.containsKey(did)) return false;
+        boolean result = dungeonRepository.delete(did);
+        if(result) cache.remove(did);
+        return result;
     }
 
-    /** Update an existing dungeon in cache and persist it. */
-    public boolean update(Dungeon dungeon) {
-        if (dungeon == null || dungeon.getDgId() == null) return false;
-        if (!dungeons.containsKey(dungeon.getDgId())) return false;
-
-        dungeons.put(dungeon.getDgId(), dungeon);
-        dungeonRepository.save(dungeon);
-        return true;
+    public Dungeon create(Dungeon dungeon){
+        Dungeon saved = dungeonRepository.save(dungeon);
+        if(saved == null) return null;
+        cache.put(saved.getId(), dungeon);
+        return saved;
     }
 
-    /** Remove a dungeon from cache and storage. */
-    public boolean delete(String dgId) {
-        if (!dungeons.containsKey(dgId)) return false;
-        if(dungeonRepository.delete(dgId)){
-            dungeons.remove(dgId);
-            return true;
-        }
-        return false;
+    public Dungeon get(String did){
+        return cache.get(did);
     }
 
-    public List<String> getDungeonIdList() {
-        return List.copyOf(dungeons.keySet());
-    }
-
-    public Optional<Dungeon> getById(String dgId) {
-        return Optional.ofNullable(dungeons.get(dgId));
-    }
-
-    public Collection<Dungeon> getAll() {
-        return Collections.unmodifiableCollection(dungeons.values());
-    }
-
-    public boolean exists(String dgId) {
-        return dungeons.containsKey(dgId);
+    public List<String> getAllIds() {
+        return cache.keySet().stream()
+                .sorted()
+                .toList();
     }
 }

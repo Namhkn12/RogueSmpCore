@@ -1,68 +1,126 @@
 package com.roguesmp.dungeon.actor.listener;
 
-import com.roguesmp.dungeon.manager.PartyManager;
-import io.papermc.paper.event.block.VaultChangeStateEvent;
-import io.papermc.paper.event.player.PlayerPickItemEvent;
+import com.roguesmp.dungeon.controller.PlayerActionController;
+import com.roguesmp.dungeon.task.TaskScheduler;
+import com.roguesmp.dungeon.utils.NameSpaceKeys;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mannequin;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerBedEnterEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.event.world.PortalCreateEvent;
 
 public class DungeonListener implements Listener {
 
-    private final PartyManager partyManager;
+    private final PlayerActionController actionController;
+    private final TaskScheduler taskScheduler;
 
-    public DungeonListener(PartyManager partyManager) {
-        this.partyManager = partyManager;
+    public DungeonListener(PlayerActionController actionController, TaskScheduler taskScheduler) {
+        this.actionController = actionController;
+        this.taskScheduler = taskScheduler;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerBreakSpawner(BlockBreakEvent event){
+        if(event.isCancelled()) return;
+        if(event.getBlock().getType() != Material.SPAWNER) return;
+        /**/
+        Player player = event.getPlayer();
+        actionController.handlePlayerBreakSpawner(event.getBlock(), player);
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event){
-        //handle player join
+    public void onPlayerKillMobs(EntityDeathEvent event){
+        if(event.isCancelled()) return;
+        LivingEntity entity = event.getEntity();
+        if(entity.getKiller() == null) return;
+        Player player = event.getEntity().getKiller();
+        if(player == null) return;
+        actionController.handlePlayerKillMob(entity, player);
     }
 
     @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event){
-        //handle player quit
+    public void onItemCollect(EntityPickupItemEvent event){
+        if(event.isCancelled()) return;
+        if(!(event.getEntity() instanceof Player player)) return;
+        actionController.handlePlayerCollectItem(event.getItem().getItemStack(), player);
     }
 
     @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent event){
-        //handle player death in dungeon
+    public void onPlayerMoveInDeadMode(PlayerMoveEvent event){
+        if(!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        Player player = event.getPlayer();
+        if(player.getGameMode() != GameMode.SPECTATOR) return;
+
+        actionController.handlePlayerMoveInDeadMode(player);
     }
 
     @EventHandler
-    public void onPlayerInteractVault(VaultChangeStateEvent event){
-        //handle player interact with vault ( door )
+    public void onPlayerReJoin(PlayerJoinEvent event){
+        Player player = event.getPlayer();
+        taskScheduler.runLater(2L, () -> {
+            actionController.handlePlayerReconnect(player);
+        });
     }
 
     @EventHandler
-    public void onPlayerBreakBlock(BlockBreakEvent event){
-        //handle player break block in dungeon
+    public void onPlayerDead(PlayerDeathEvent event){
+        if(!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        event.setCancelled(true);
+        actionController.handlePlayerDead(event.getPlayer());
     }
 
     @EventHandler
-    public void onPlayerKillMob(EntityDeathEvent event){
-        //handle player kill entity in dungeon
+    public void onPlayerDisconnect(PlayerQuitEvent event){
+        if(!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        actionController.handlePlayerDisconnect(event.getPlayer());
     }
 
     @EventHandler
-    public void onPlayerPickUpItem(PlayerPickItemEvent event){
-        //handle player pickup item in dungeon
+    public void onMannequinInteract(PlayerInteractAtEntityEvent e) {
+        if (e.getRightClicked() instanceof Mannequin mannequin) {
+            if (mannequin.getPersistentDataContainer().has(NameSpaceKeys.REVIVE_POINT_KEY)) {
+                e.setCancelled(true);
+            }
+        }
     }
 
     @EventHandler
-    public void onPlayerBedEnter(PlayerBedEnterEvent event){
-        //handle player use bed in dungeon
+    public void onMannequinDamage(EntityDamageEvent e) {
+        if (e.getEntity() instanceof Mannequin mannequin) {
+            if (mannequin.getPersistentDataContainer().has(NameSpaceKeys.REVIVE_POINT_KEY)) {
+                e.setCancelled(true);
+            }
+        }
     }
 
     @EventHandler
-    public void onPlayerNetherEnter(PlayerPortalEvent event){
-        //handle player go through the portal ( nether or end )
+    public void onEnderPearlTeleport(PlayerTeleportEvent event) {
+        if (event.getCause() != PlayerTeleportEvent.TeleportCause.ENDER_PEARL) return;
+        Player player = event.getPlayer();
+        event.setCancelled(actionController.handlePlayerTeleport(player, event.getTo()));
     }
+
+    @EventHandler
+    public void onChorusFruitTeleport(PlayerTeleportEvent event) {
+        if (event.getCause() != PlayerTeleportEvent.TeleportCause.CONSUMABLE_EFFECT) return;
+        Player player = event.getPlayer();
+        event.setCancelled(actionController.handlePlayerTeleport(player, event.getTo()));
+    }
+
+    @EventHandler
+    public void onPortalCreate(PortalCreateEvent event) {
+        if (!event.getWorld().getName().startsWith("dungeon_")) return;
+        event.setCancelled(true);
+    }
+
 }
