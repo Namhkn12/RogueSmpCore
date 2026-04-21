@@ -1,7 +1,6 @@
 package com.roguesmp.dungeon.repository.impl;
 
 import com.google.gson.Gson;
-import com.roguesmp.dungeon.constant.DataConfig;
 import com.roguesmp.dungeon.exception.impl.data.DataDeleteException;
 import com.roguesmp.dungeon.exception.impl.data.DataSaveException;
 import com.roguesmp.dungeon.config.DataFolderConfig;
@@ -60,7 +59,7 @@ public class DungeonRepository implements IDungeonRepository {
 
     @Override
     public Dungeon save(Dungeon dungeon) {
-        File file = new File(dungeonTemplateFolder, dungeon.getId() + DataConfig.JSON_TYPE);
+        File file = new File(dungeonTemplateFolder, dungeon.getId() + DataFolderConfig.JSON_TYPE);
         try (Writer writer = new FileWriter(file, StandardCharsets.UTF_8)){
             gson.toJson(dungeon, writer);
         }catch (Exception e){
