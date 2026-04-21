@@ -49,7 +49,6 @@ public class SpawnerService implements ISpawnerService {
         spawner.setMaxSpawnDelay(template.getMaxDelay());
         spawner.setRequiredPlayerRange(template.getActiveRange() * template.getActiveRange());
         spawner.setSpawnCount(template.getSpawnCount());
-        spawner.setSpawnedType(null);
 
         List<SpawnerEntry> entries = new ArrayList<>();
         template.getMobs().forEach((mid, weight) -> {
