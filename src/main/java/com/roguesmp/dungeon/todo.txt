@@ -1,0 +1,29 @@
+- Objective v2 { code: done, test:n/a}
+- Dungeon Model and Data { code: n/a, test: n/s }
+- Repository { code : n/a, test: n/a }
+- Manager { code: n/a, test: n/a }
+- Service { code: n/a, test: n/a }
+- Controller { code: n/a, test: n/a }
+
+- handle player quit, cancel animation // todo
+
+- spawner behavior
++ cursed spawner: player tiếp cận,
+player đập spawner thì bị dính stack hiệu ứng gây hại.
+
++ BadEffectSpawner: player trong vùng spawner sẽ bị dính effect xấu
+
++ WaveSpawner: spawn theo wave chỉ đc phép vỡ khi hết wave
+
++ OverChargeSpawner: spawner phát nổ lớn khi bị vỡ
+
++ PreciseSpawner : spawn quái tại vị trí của player trong range
+
++ Teleport spawner : khi đập vỡ nó sẽ dịch chuyển trong vùng 3 4 block
+
+Dungeon Flow
+- party-> start dungeon -> when complete a room + score -> next room
+- get min minium-> boss -> win -> final reward
+- fail -> Lose
+-player die -> show mess for player
+- die all lose -> leave dungeon

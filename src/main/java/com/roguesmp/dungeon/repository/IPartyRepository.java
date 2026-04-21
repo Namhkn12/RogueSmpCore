@@ -1,10 +1,8 @@
 package com.roguesmp.dungeon.repository;
 
-import com.roguesmp.dungeon.data.Party;
 
+import com.roguesmp.dungeon.data.runtime.Party;
 import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
 
 public interface IPartyRepository {
 
@@ -16,7 +14,7 @@ public interface IPartyRepository {
     /**
      * Xóa party data file
      */
-    void delete(UUID partyId);
+    void delete(String partyId);
 
     /**
      * Load tất cả các party được lưu file

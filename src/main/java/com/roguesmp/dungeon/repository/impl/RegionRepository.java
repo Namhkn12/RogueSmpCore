@@ -1,32 +1,31 @@
 package com.roguesmp.dungeon.repository.impl;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.roguesmp.dungeon.constant.DataConfig;
-import com.roguesmp.dungeon.data.DungeonWorld;
-import com.roguesmp.RogueSmpCore;
+import com.roguesmp.dungeon.config.DataFolderConfig;
+import com.roguesmp.dungeon.data.definition.DungeonWorld;
 import com.roguesmp.dungeon.repository.IRegionRepository;
-import com.roguesmp.dungeon.utils.Log4Craft;
+import com.roguesmp.dungeon.utils.Log4Craft_;
+import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
 
 public class RegionRepository implements IRegionRepository {
 
     private final Gson gson;
     private final File regionFolder;
+    private final Log4Craft_ logger;
 
-    public RegionRepository(Gson gson) {
+    public RegionRepository(Plugin plugin, Gson gson, Log4Craft_ logger) {
         this.gson = gson;
 
-        // dungeon/region/ relative to plugin data folder
         this.regionFolder = new File(
-                RogueSmpCore.getInstance().getDataFolder(),
-                DataConfig.getRegionFolder()
+                plugin.getDataFolder(),
+                DataFolderConfig.getRegionFolder()
         );
+        this.logger = logger;
 
         if (!regionFolder.exists()) {
             regionFolder.mkdirs();
@@ -37,7 +36,7 @@ public class RegionRepository implements IRegionRepository {
     public List<DungeonWorld> loadAll() {
         List<DungeonWorld> result = new ArrayList<>();
         File[] files = regionFolder.listFiles(
-                (dir, name) -> name.endsWith(DataConfig.JSON_TYPE)
+                (dir, name) -> name.endsWith(DataFolderConfig.JSON_TYPE)
         );
 
         if (files == null) return result;
@@ -49,10 +48,7 @@ public class RegionRepository implements IRegionRepository {
                     result.add(world);
                 }
             } catch (IOException e) {
-                RogueSmpCore.getInstance().getLogger().log(
-                        Level.SEVERE,
-                        "Failed to load region file: " + file.getName(), e
-                );
+                logger.fire(this.getClass(), "Failed to load region file: " + file.getName(), e);
             }
         }
 
@@ -65,7 +61,7 @@ public class RegionRepository implements IRegionRepository {
         try (Writer writer = new FileWriter(file)) {
             gson.toJson(dungeonWorld, writer);
         } catch (IOException e) {
-            Log4Craft.fire("Failed to save region file for world: " + dungeonWorld.getWorldName(), e);
+            logger.fire(this.getClass(), "Failed to save region file for world: " + dungeonWorld.getWorldName(), e);
         }
     }
 
@@ -77,10 +73,7 @@ public class RegionRepository implements IRegionRepository {
         try (Reader reader = new FileReader(file)) {
             return Optional.ofNullable(gson.fromJson(reader, DungeonWorld.class));
         } catch (IOException e) {
-            RogueSmpCore.getInstance().getLogger().log(
-                    Level.SEVERE,
-                    "Failed to load region file for world: " + worldName, e
-            );
+            logger.fire(this.getClass(), "Failed to load region file for world: " + worldName, e);
             return Optional.empty();
         }
     }
@@ -89,14 +82,13 @@ public class RegionRepository implements IRegionRepository {
     public void delete(String worldName) {
         File file = getFile(worldName);
         if (file.exists() && !file.delete()) {
-            RogueSmpCore.getInstance().getLogger().warning(
-                    "Failed to delete region file for world: " + worldName
-            );
+            logger.warn(this.getClass(), "Failed to delete region file for world: " + worldName);
+
         }
     }
 
     // tên file = worldName.json
     private File getFile(String worldName) {
-        return new File(regionFolder, DataConfig.REGION_INSTANCE_FILE + worldName + DataConfig.JSON_TYPE);
+        return new File(regionFolder, worldName + DataFolderConfig.JSON_TYPE);
     }
 }

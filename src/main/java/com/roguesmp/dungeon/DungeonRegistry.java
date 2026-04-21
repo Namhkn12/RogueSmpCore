@@ -3,146 +3,234 @@ package com.roguesmp.dungeon;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.dungeon.actor.command.*;
-import com.roguesmp.dungeon.actor.command.LootTableCommand;
+import com.roguesmp.dungeon.actor.command.DungeonCommand;
+import com.roguesmp.dungeon.actor.command.PartyCommand;
+import com.roguesmp.dungeon.actor.command.SchemetaCommand;
+import com.roguesmp.dungeon.actor.command.TemplateGenCommand;
+import com.roguesmp.dungeon.actor.listener.DoorInteractListener;
+import com.roguesmp.dungeon.actor.listener.DungeonListener;
 import com.roguesmp.dungeon.actor.listener.LootTableListener;
-import com.roguesmp.dungeon.actor.listener.NextDoorListener;
-import com.roguesmp.dungeon.actor.listener.ObjectiveListener;
-import com.roguesmp.dungeon.actor.listener.SpawnerListener;
-import com.roguesmp.dungeon.adapter.LocationAdapter;
-import com.roguesmp.dungeon.adapter.ObjectiveAdapter_;
-import com.roguesmp.dungeon.adapter.UUIDTypeAdapter;
+import com.roguesmp.dungeon.actor.listener.SpawnerEventListener;
 import com.roguesmp.dungeon.controller.*;
 import com.roguesmp.dungeon.expansion.DungeonExpansion;
+import com.roguesmp.dungeon.itemdisplay.impl.ChestOpenAnimation;
 import com.roguesmp.dungeon.manager.*;
-import com.roguesmp.dungeon.objective_.IObjective;
-import com.roguesmp.dungeon.presentation.EffectManager;
-import com.roguesmp.dungeon.presentation.PresentationManager;
-import com.roguesmp.dungeon.presentation.ScreenMessManager;
-import com.roguesmp.dungeon.presentation.SoundManager;
+import com.roguesmp.dungeon.presentation.*;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
+import com.roguesmp.dungeon.presentation.presenter.RevivePointPresenter;
 import com.roguesmp.dungeon.repository.*;
 import com.roguesmp.dungeon.repository.impl.*;
-import com.roguesmp.dungeon.task.DungeonTickTask;
 import com.roguesmp.dungeon.service.*;
 import com.roguesmp.dungeon.service.impl.*;
 import com.roguesmp.dungeon.task.PartyInviteTask;
+import com.roguesmp.dungeon.task.TaskScheduler;
+import com.roguesmp.dungeon.utils.Log4Craft_;
+import com.roguesmp.dungeon.utils.adapter.UUIDTypeAdapter;
 import com.roguesmp.registry.ItemRegistry;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 
 import java.util.UUID;
 
+/**
+ * Placeholder bootstrap for the future dungeon v2 module wiring.
+ */
 public class DungeonRegistry {
 
-    private static IInstanceService instanceService;
-    private static IRegionService regionService;
-    private static IPartyService partyService;
+    private static PartyManager partyManager;
+    private static InstanceManager instanceManager;
+    private static ReviveManager reviveManager;
 
     public static void onEnable(Plugin plugin, ItemRegistry itemRegistry) {
-        // --- Infrastructure ---
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Location.class, new LocationAdapter())
-                .registerTypeAdapter(IObjective.class, new ObjectiveAdapter_())
-                .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
+        Gson gson = new GsonBuilder().registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
                 .setPrettyPrinting()
                 .create();
+        /*Scheduler*/
+        TaskScheduler.init(plugin);
+        TaskScheduler taskScheduler = TaskScheduler.getInstance();
 
-        // --- ScoreBoard ---
+        /*ScoreBoard*/
         DungeonExpansion papiExpansion = new DungeonExpansion();
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             papiExpansion.register();
         }
         ScoreBoardManager scoreBoardManager = new ScoreBoardManager(papiExpansion);
 
+        /*Logging and Messaging*/
+        Log4Craft_ logger = new Log4Craft_(plugin, "[WDA]");
 
-        // --- Present ---
+        /*Presentation*/
         SoundManager soundManager = new SoundManager(plugin);
         EffectManager effectManager = new EffectManager(plugin);
         ScreenMessManager screenMessManager = new ScreenMessManager(plugin);
-        PresentationManager presentationManager = new PresentationManager(soundManager, effectManager, screenMessManager);
+        ParticleManager dungeonParticle = new ParticleManager();
+        PresentationManager presentationManager = new PresentationManager(soundManager, effectManager, screenMessManager, dungeonParticle);
 
+        /*Presentation Implement*/
         DungeonPresenter dungeonPresenter = new DungeonPresenter(presentationManager);
 
-        // --- Repository ---
-        ISchemetaRepository schemetaRepository = new SchemetaRepository(gson);
-        IDungeonRepository dungeonRepository = new DungeonRepository(gson);
-        IRegionRepository regionRepository = new RegionRepository(gson);
-        IPartyRepository partyRepository = new PartyRepository(gson);
-        IInstanceRepository instanceRepository = new InstanceRepository(gson);
-        ISpawnerRepository spawnerRepository = new SpawnerRepository(plugin, gson);
+        /*Repository*/
+        ISchematicRepository schematicRepository = new SchematicRepository(plugin);
+        ISchemetaRepository schemetaRepository = new SchemetaRepository(plugin, gson, logger);
+        IRegionRepository regionRepository = new RegionRepository(plugin, gson, logger);
+        IRoomRepository roomRepository = new RoomRepository(plugin, gson, logger);
+        IDungeonRepository dungeonRepository = new DungeonRepository(plugin, gson);
+        ISpawnerRepository spawnerRepository = new SpawnerRepository(plugin, gson, logger);
+        IPartyRepository partyRepository = new PartyRepository(plugin, gson, logger);
+        IInstanceRepository instanceRepository = new InstanceRepository(plugin, gson, logger);
         ILootTableRepository lootTableRepository = new LootTableRepository(plugin, gson);
 
-        // --- Manager ---
-        SchemetaManager schemetaManager = new SchemetaManager(schemetaRepository);
-        DungeonManager dungeonManager = new DungeonManager(dungeonRepository);
-        RegionManager regionManager = new RegionManager(regionRepository);
-        PartyManager partyManager = new PartyManager(partyRepository);
-        InstanceManager instanceManager = new InstanceManager(instanceRepository, scoreBoardManager);
-        SpawnerManager spawnerManager = new SpawnerManager(spawnerRepository);
-        SpawnerInstanceManager spawnerInstanceManager = new SpawnerInstanceManager();
+        /*Manager*/
+        SchemetaManager schemetaManager = new SchemetaManager(schemetaRepository, schematicRepository);
+        RegionManager regionManager = new RegionManager(regionRepository, logger);
+        partyManager = new PartyManager(partyRepository, logger);
+        RoomManager roomManager = new RoomManager(roomRepository, logger);
+        DungeonManager dungeonManager = new DungeonManager(dungeonRepository, logger);
+        SpawnerManager spawnerManager = new SpawnerManager(spawnerRepository, logger);
         LootTableManager lootTableManager = new LootTableManager(lootTableRepository);
-        lootTableManager.reload();
+        RevivePointPresenter revivePointPresenter = new RevivePointPresenter();
+        reviveManager = new ReviveManager(taskScheduler, revivePointPresenter);
 
-        // --- Service ---
+        SpawnerInstanceManager spawnerInstanceManager = new SpawnerInstanceManager();
+        instanceManager = new InstanceManager(instanceRepository, scoreBoardManager, logger);
+
+        /*Service*/
+        ISchematicService schematicService = new SchematicService(schemetaManager);
         ISchemetaService schemetaService = new SchemetaService(schemetaManager);
-        IDungeonService dungeonService = new DungeonService(dungeonManager);
-        regionService = new RegionService(regionManager);
-        partyService = new PartyService(partyManager);
-        instanceService = new InstanceService(dungeonManager, instanceManager);
-        PartyInviteTask partyInviteTask = new PartyInviteTask(partyService);
-        ISpawnerService spawnerService = new SpawnerService(spawnerManager, spawnerInstanceManager);
-        ILootService lootService = new LootService(lootTableManager, itemRegistry);
-        IDungeonRewardService rewardService = new DungeonRewardService(lootService, instanceService, partyService, dungeonService);
-        IDungeonFlowService dungeonFlowService = new DungeonFlowService(partyService, instanceService, dungeonService, schemetaService, regionService, scoreBoardManager, dungeonPresenter);
+        IRoomService roomService = new RoomService(roomManager);
+        IPartyService partyService = new PartyService(partyManager);
+        IRegionService regionService = new RegionService(regionManager, logger);
+        IDungeonService dungeonService = new DungeonService(roomManager, dungeonManager,logger);
+        ISpawnerService spawnerService = new SpawnerService(spawnerManager, spawnerInstanceManager, logger);
+        IInstanceService instanceService = new InstanceService(instanceManager,
+                dungeonManager, roomManager, regionService, dungeonService, partyService, roomService, schematicService);
+        ILootService lootService = new LootService(lootTableManager, ItemRegistry.getInstance());
+        IDungeonRewardService rewardService = new DungeonRewardService(
+                lootService,
+                partyService,
+                instanceManager,
+                dungeonManager,
+                new ChestOpenAnimation(plugin, taskScheduler)
+                );
+        IReviveService reviveService = new ReviveService(reviveManager, partyService, instanceManager, dungeonPresenter);
+        ObjectiveDispatchService objectiveDispatchService = new ObjectiveDispatchService(partyService, instanceManager);
+        SpectatorBoundaryService spectatorBoundaryService = new SpectatorBoundaryService(partyService, instanceManager);
+        RoomRuntimeService roomRuntimeService = new RoomRuntimeService(
+                roomManager, instanceManager, partyService, regionService, spawnerInstanceManager
+        );
+        RoomCompletionService roomCompletionService = new RoomCompletionService(
+                partyService, roomService, reviveService, dungeonPresenter, roomRuntimeService
+        );
+        roomRuntimeService.setCompletionService(roomCompletionService);
+        DungeonLifecycleService dungeonLifecycleService = new DungeonLifecycleService(
+                instanceService,
+                instanceManager,
+                partyService,
+                regionService,
+                scoreBoardManager,
+                dungeonManager,
+                spawnerInstanceManager,
+                dungeonPresenter,
+                roomRuntimeService
+        );
+        PlayerDeathService playerDeathService = new PlayerDeathService(partyService, instanceManager, reviveService, dungeonLifecycleService,dungeonPresenter);
+        PlayerSessionService playerSessionService = new PlayerSessionService(partyService, instanceManager, scoreBoardManager, dungeonManager, playerDeathService);
+        RoomNavigationService roomNavigationService = new RoomNavigationService(
+                partyService,
+                instanceManager,
+                roomManager,
+                schematicService,
+                dungeonService,
+                roomService,
+                roomRuntimeService,
+                dungeonPresenter,
+                taskScheduler
+        );
+        TreasureService treasureService = new TreasureService(
+                partyService,
+                instanceManager,
+                regionService,
+                roomManager,
+                schematicService,
+                taskScheduler
+        );
+        DungeonTimerService dungeonTimerService = new DungeonTimerService(
+                instanceManager, partyService, roomRuntimeService, dungeonLifecycleService
+        );
+        PlayerTeleportService playerTeleportService = new PlayerTeleportService(partyService, instanceManager);
 
-        // --- Controller ---
-        BuildingController buildingController = new BuildingController(schemetaService);
-        TemplateController templateController = new TemplateController(dungeonService);
-        PartyController partyController = new PartyController(partyService,partyInviteTask);
-        DungeonController dungeonController = new DungeonController(instanceService, dungeonFlowService);
-        SpawnerController spawnerController = new SpawnerController(spawnerService, RogueSmpCore.getInstance());
+        /*Task*/
+        PartyInviteTask inviteTask = new PartyInviteTask(plugin, partyService);
+
+        /*Controller*/
+        PartyController partyController = new PartyController(partyService, inviteTask);
+        DungeonFlowController flowController = new DungeonFlowController(
+                dungeonLifecycleService, roomNavigationService, treasureService, dungeonTimerService
+        );
+        SchemetaController schemetaController = new SchemetaController(schemetaService, schematicService);
+        SpawnerEventController spawnerController = new SpawnerEventController(spawnerService, spawnerManager, spawnerInstanceManager, taskScheduler, logger);
+        PlayerActionController actionController = new PlayerActionController(
+            objectiveDispatchService, playerDeathService, spectatorBoundaryService, playerSessionService, playerTeleportService
+        );
         DungeonTreasureController treasureController = new DungeonTreasureController(rewardService);
+        BossRoomController bossRoomController = new BossRoomController(instanceManager, partyService, roomManager);
 
-        //Task
-        new DungeonTickTask(scoreBoardManager, instanceService)
-                .runTaskTimer(RogueSmpCore.getInstance(), 0L, 20L);
-
-        // --- Command ---
-        new SchemetaCommand(buildingController).register();
-        new TemplateCommand(templateController).register();
+        /*Command*/
+        new TemplateGenCommand(
+                lootService,
+                spawnerManager,
+                dungeonManager,
+                roomManager,
+                lootTableManager,
+                schemetaManager
+        ).register();
+        new SchemetaCommand(schemetaController, schemetaManager).register();
         new PartyCommand(partyController).register();
-        new DungeonCommand(dungeonController, partyController).register();
-        new SpawnerCommand().register();
-        new LootTableCommand(lootService).register();
+        new DungeonCommand(flowController, dungeonManager).register();
 
-        // --- Listener ---
-        Bukkit.getPluginManager().registerEvents(
-                new NextDoorListener(dungeonController, partyController, buildingController),
+        /*Listener*/
+        PluginManager pluginManager = Bukkit.getPluginManager();
+
+        pluginManager.registerEvents(
+                new DoorInteractListener(flowController, partyService),
                 RogueSmpCore.getInstance()
         );
 
-        Bukkit.getPluginManager().registerEvents(
-                new ObjectiveListener(dungeonController, partyController),
+        pluginManager.registerEvents(
+                new SpawnerEventListener(spawnerController, bossRoomController),
                 RogueSmpCore.getInstance()
         );
 
-        Bukkit.getPluginManager().registerEvents(
-                new SpawnerListener(spawnerController),
+        pluginManager.registerEvents(
+                new DungeonListener(actionController, taskScheduler),
                 RogueSmpCore.getInstance()
         );
 
-        Bukkit.getPluginManager().registerEvents(
+        pluginManager.registerEvents(
                 new LootTableListener(treasureController),
                 RogueSmpCore.getInstance()
         );
 
+        /*Runtime tick: refresh scoreboard + monitor dungeon timeout (1s)*/
+        taskScheduler.runTimer(20L, 20L, () -> {
+            scoreBoardManager.tickUpdate();
+            flowController.handleDungeonTimerTick();
+        });
+
+
     }
 
-    public static void onDisable(){
-        partyService.savePartyToFile();
-        instanceService.onServerStop();
+    public static void onDisable() {
+        if (reviveManager != null) {
+            reviveManager.shutdown();
+        }
+        if (partyManager != null) {
+            partyManager.saveAll();
+        }
+        if (instanceManager != null) {
+            instanceManager.saveAll();
+        }
     }
 
 }

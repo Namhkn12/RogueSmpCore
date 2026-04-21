@@ -1,47 +1,42 @@
 package com.roguesmp.dungeon.manager;
 
-import com.roguesmp.dungeon.behavior.BehaviorFactory;
-import com.roguesmp.dungeon.behavior.IBehavior;
-import com.roguesmp.dungeon.data.Spawner;
-import com.roguesmp.dungeon.instance.SpawnerInstance;
+import com.roguesmp.dungeon.data.definition.spawner.Spawner;
+import com.roguesmp.dungeon.data.definition.spawner.behavior.BehaviorFactory;
+import com.roguesmp.dungeon.data.definition.spawner.behavior.IBehavior;
+import com.roguesmp.dungeon.data.runtime.SpawnerInstance;
+import org.bukkit.Location;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class SpawnerInstanceManager {
 
-    /**
-     * key : marker entity id
-     * value : spawner instance data
-     * */
-    private final Map<String, SpawnerInstance> spawnerInstances = new HashMap<>();
+    private final Map<String, SpawnerInstance> cache = new HashMap<>();
 
     public SpawnerInstanceManager() {
     }
 
-    public void addInstance(SpawnerInstance instance){
-        spawnerInstances.put(instance.getId(), instance);
+    public void add(SpawnerInstance instance) {cache.put(instance.getId(), instance);}
+
+    public void remove(String siid){cache.remove(siid);}
+
+    public SpawnerInstance get(String siid){
+        return cache.get(siid);
     }
 
-    public SpawnerInstance getInstance(String id){
-        return spawnerInstances.get(id);
-    }
-
-    public SpawnerInstance createInstance(String markerId, Spawner spawner){
-        SpawnerInstance instance = new SpawnerInstance();
-        instance.setId(markerId);
-        instance.setTemplateId(spawner.getId());
+    public SpawnerInstance create(String siid, Spawner spawner, Location location) {
         List<IBehavior> behaviors = spawner.getBehaviors().stream()
                 .map(BehaviorFactory::create)
-                .collect(Collectors.toList());
+                .toList();
 
-        instance.setBehaviors(behaviors);
-        return instance;
+        return new SpawnerInstance(siid, spawner.getId(), location, behaviors);
     }
 
-    public boolean removeInstance(String id){
-        return spawnerInstances.remove(id) != null;
+    @Override
+    public String toString() {
+        return "SpawnerInstanceManager{" +
+                "cache=" + cache +
+                '}';
     }
 }

@@ -1,17 +1,18 @@
 package com.roguesmp.dungeon.service;
 
-import com.roguesmp.dungeon.data.Schemeta;
-import org.bukkit.Location;
+import com.roguesmp.dungeon.data.definition.Schemeta;
 import org.bukkit.entity.Player;
-import org.bukkit.util.BoundingBox;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ISchemetaService {
-    Schemeta createSchemeta(Player player, String name);
-    void deleteSchemeta(String id);
-    Schemeta getSchemeta(String id);
-    List<Schemeta> getSchemetaList();
-    List<String> getSchemetaIdList();
-    BoundingBox pasteSchematic(String id, Location location);
+    // Data management
+    Schemeta create(Player player, String name);
+    void delete(String id);
+    Optional<Schemeta> getById(String id);
+    List<Schemeta> getAll();
+
+    // Validation helper (service nên expose)
+    boolean exists(String id);
 }

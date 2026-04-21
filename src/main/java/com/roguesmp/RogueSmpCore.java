@@ -3,7 +3,7 @@ package com.roguesmp;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.constant.ComponentKeys;
-import com.roguesmp.dungeon_v2.DungeonRegistry;
+import com.roguesmp.dungeon.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.gui.ItemBrowser;
@@ -56,7 +56,7 @@ public final class RogueSmpCore extends JavaPlugin {
         //dungeon register
         //DungeonRegistry.onEnable(this, ItemRegistry.getInstance());
         //dungeon register v2
-        com.roguesmp.dungeon_v2.DungeonRegistry.onEnable(this, ItemRegistry.getInstance());
+        com.roguesmp.dungeon.DungeonRegistry.onEnable(this, ItemRegistry.getInstance());
     }
 
     // Load data from files, databases, etc

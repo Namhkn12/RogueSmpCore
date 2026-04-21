@@ -1,13 +1,11 @@
 package com.roguesmp.dungeon.utils;
 
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.NamespacedKey;
 
 import java.util.Optional;
 
@@ -15,10 +13,7 @@ public final class PdcUtil {
 
     private PdcUtil() {}
 
-    // -------------------------
     // ItemStack
-    // -------------------------
-
     public static <P, C> Optional<C> get(ItemStack item, NamespacedKey key, PersistentDataType<P, C> type) {
         if (item == null || !item.hasItemMeta()) return Optional.empty();
         ItemMeta meta = item.getItemMeta();
@@ -36,10 +31,7 @@ public final class PdcUtil {
         return meta != null && meta.getPersistentDataContainer().has(key, type);
     }
 
-    // -------------------------
     // Entity
-    // -------------------------
-
     public static <P, C> Optional<C> get(Entity entity, NamespacedKey key, PersistentDataType<P, C> type) {
         if (entity == null) return Optional.empty();
         return get(entity.getPersistentDataContainer(), key, type);
@@ -54,10 +46,7 @@ public final class PdcUtil {
         return entity.getPersistentDataContainer().has(key, type);
     }
 
-    // -------------------------
     // PersistentDataContainer (base)
-    // -------------------------
-
     public static <P, C> Optional<C> get(PersistentDataContainer pdc, NamespacedKey key, PersistentDataType<P, C> type) {
         if (pdc == null || !pdc.has(key, type)) return Optional.empty();
         return Optional.ofNullable(pdc.get(key, type));

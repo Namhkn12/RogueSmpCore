@@ -1,63 +1,69 @@
 package com.roguesmp.dungeon.repository.impl;
 
 import com.google.gson.Gson;
-import com.roguesmp.RogueSmpCore;
-import com.roguesmp.dungeon.constant.DataConfig;
-import com.roguesmp.dungeon.data.Schemeta;
 import com.roguesmp.dungeon.exception.impl.data.DataDeleteException;
-import com.roguesmp.dungeon.exception.impl.data.DataLoadException;
 import com.roguesmp.dungeon.exception.impl.data.DataSaveException;
+import com.roguesmp.dungeon.config.DataFolderConfig;
+import com.roguesmp.dungeon.data.definition.Schemeta;
 import com.roguesmp.dungeon.repository.ISchemetaRepository;
-import com.roguesmp.dungeon.utils.Log4Craft;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
+import com.roguesmp.dungeon.utils.Log4Craft_;
+import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class SchemetaRepository implements ISchemetaRepository {
 
-    private final File schematicFolder;
     private final File schemetaFolder;
     private final Gson gson;
+    private final Log4Craft_ logger;
 
-    public SchemetaRepository(Gson gson) {
-        this.schematicFolder = new File(RogueSmpCore.getInstance().getDataFolder(), DataConfig.getSchematicFolder());
-        this.schemetaFolder = new File(RogueSmpCore.getInstance().getDataFolder(), DataConfig.getSchemetaFolder());
+    public SchemetaRepository(Plugin plugin, Gson gson, Log4Craft_ logger) {
+        this.schemetaFolder = new File(plugin.getDataFolder(), DataFolderConfig.getSchemetaFolder());
         this.gson = gson;
-
-        if (!schematicFolder.exists()) schematicFolder.mkdirs();
+        this.logger = logger;
         if (!schemetaFolder.exists()) schemetaFolder.mkdirs();
     }
 
     @Override
     public List<Schemeta> loadAll() {
-        List<Schemeta> schemetas = new ArrayList<>();
-
-        File[] files = schemetaFolder.listFiles((dir, name) -> name.endsWith(DataConfig.JSON_TYPE));
-        if (files == null) return schemetas;
+        List<Schemeta> result = new ArrayList<>();
+        File[] files = schemetaFolder.listFiles((dir, name) -> name.endsWith(DataFolderConfig.JSON_TYPE));
+        if (files == null) return result;
 
         for (File file : files) {
             try (Reader reader = Files.newBufferedReader(file.toPath())) {
                 Schemeta schemeta = gson.fromJson(reader, Schemeta.class);
-                if (schemeta != null && schemeta.getSchemId() != null) {
-                    schemetas.add(schemeta);
+                if (schemeta != null && schemeta.getId() != null) {
+                    result.add(schemeta);
                 }
             } catch (Exception e) {
-                Log4Craft.fire("Failed to load schemeta file: " + file.getName(), e);
+                logger.fire(this.getClass(), "Failed to load schemeta file: " + file.getName(), e);
             }
         }
-        return schemetas;
+        return result;
+    }
+
+    @Override
+    public Optional<Schemeta> findById(String id) {
+        File file = toFile(id);
+        if (!file.exists()) return Optional.empty();
+
+        try (Reader reader = Files.newBufferedReader(file.toPath())) {
+            return Optional.ofNullable(gson.fromJson(reader, Schemeta.class));
+        } catch (Exception e) {
+            logger.fire(this.getClass(), "Failed to load schemeta: " + id, e);
+            return Optional.empty();
+        }
     }
 
     @Override
     public void save(Schemeta schemeta) {
-        File file = new File(schemetaFolder,  schemeta.getSchemId() + DataConfig.JSON_TYPE);
+        File file = toFile(schemeta.getId());
         try (Writer writer = new FileWriter(file, StandardCharsets.UTF_8)) {
             gson.toJson(schemeta, writer);
         } catch (IOException e) {
@@ -67,35 +73,18 @@ public class SchemetaRepository implements ISchemetaRepository {
 
     @Override
     public void delete(String id) {
-        File file = new File(schemetaFolder, id + DataConfig.JSON_TYPE);
+        File file = toFile(id);
         if (file.exists() && !file.delete()) {
             throw new DataDeleteException(file.getName(), null);
         }
     }
 
     @Override
-    public void saveSchem(String name, Clipboard clipboard) {
-        File schemFile = new File(schematicFolder, name + DataConfig.SCHEM_TYPE);
-        try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_SCHEMATIC
-                .getWriter(new FileOutputStream(schemFile))) {
-            writer.write(clipboard);
-        } catch (IOException e) {
-            throw new DataSaveException(schemFile.getName(), e);
-        }
+    public boolean exists(String id) {
+        return toFile(id).exists();
     }
 
-    @Override
-    public Clipboard loadSchem(String name) {
-        File schemFile = new File(schematicFolder, name + DataConfig.SCHEM_TYPE);
-        if (!schemFile.exists()) {
-            throw new DataLoadException(schemFile.getName(), null);
-        }
-        try (ClipboardReader reader = BuiltInClipboardFormat.SPONGE_SCHEMATIC
-                .getReader(new FileInputStream(schemFile))) {
-            return reader.read();
-        } catch (IOException e) {
-            throw new DataLoadException(schemFile.getName(), e);
-        }
+    private File toFile(String id) {
+        return new File(schemetaFolder, id + DataFolderConfig.JSON_TYPE);
     }
-
 }

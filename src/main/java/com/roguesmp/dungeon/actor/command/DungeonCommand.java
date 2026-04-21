@@ -1,61 +1,60 @@
 package com.roguesmp.dungeon.actor.command;
 
-import com.roguesmp.dungeon.controller.DungeonController;
-import com.roguesmp.dungeon.controller.PartyController;
-import com.roguesmp.dungeon.dto.ActionResult;
-import com.roguesmp.dungeon.instance.DungeonInstance;
-import com.roguesmp.dungeon.utils.Log4Craft;
+import com.roguesmp.dungeon.controller.DungeonFlowController;
+import com.roguesmp.dungeon.manager.DungeonManager;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import java.util.function.Predicate;
 
 public class DungeonCommand {
+    private final DungeonFlowController flowController;
+    private final DungeonManager dungeonManager;
 
-    private final DungeonController dungeonController;
-    private final PartyController partyController;
-
-    public DungeonCommand(DungeonController dungeonController, PartyController partyController) {
-        this.dungeonController = dungeonController;
-        this.partyController = partyController;
+    public DungeonCommand(DungeonFlowController flowController, DungeonManager dungeonManager) {
+        this.flowController = flowController;
+        this.dungeonManager = dungeonManager;
     }
 
-    public void register() {
+    public void register(){
         new CommandAPICommand("dungeon")
                 .withSubcommand(
                         new CommandAPICommand("start")
-                                .executesPlayer((player, args) -> {
-                                    String templateId = "dungeon_20260310231827";
-                                    ActionResult<Void> result = dungeonController.handleRequestDungeon(templateId, player);
-                                    if(result.isOk()){
-                                        Log4Craft.info(result.getMessage());
-                                    }else {
-                                        Log4Craft.error(result.getMessage());
+                                .withRequirement(inDungeonWorld())
+                                .withArguments(
+                                        new StringArgument("dungeonId")
+                                                .replaceSuggestions(ArgumentSuggestions.strings(
+                                                        info -> dungeonManager.getAllIds().toArray(String[]::new)
+                                                ))
+                                )
+                                .executesPlayer(((player, commandArguments) -> {
+                                    String dungeonId = (String) commandArguments.get("dungeonId");
+                                    if (dungeonManager.get(dungeonId) == null) {
+                                        player.sendMessage("§c[Dungeon] Not found: §f" + dungeonId);
+                                        return;
                                     }
-                                })
+                                    flowController.handleStartDungeon(dungeonId, player);
+                                }))
                 )
                 .withSubcommand(
-                        new CommandAPICommand("ui")
-                                .executesPlayer((player, args) -> {
-                                })
+                        new CommandAPICommand("leave")
+                                .executesPlayer((((player, commandArguments) -> {
+                                    flowController.handleLeaveDungeon(player);
+                                })))
                 )
-                .withSubcommand(
-                        new CommandAPICommand("stop")
-                                .executesPlayer((player, args) -> {
-                                    // check for dungeon
-                                    // stop dungeon
-                                    // delete instance
-                                })
-                )
-                .withSubcommand(
-                        new CommandAPICommand("create")
-                                .withArguments(new StringArgument("name"))
-                                .withArguments(new StringArgument("description"))
-                                .executesPlayer((player, args) -> {
-
-                                })
-                )
-                .executes((sender, args) -> {
-                    sender.sendMessage("Usage: /dungeon <start|stop|ui|create>");
-                })
+                .executes(((commandSender, commandArguments) -> {
+                    commandSender.sendMessage("Usage: /dungeon <start>");
+                }))
                 .register();
+    }
+
+    private Predicate<CommandSender> inDungeonWorld() {
+        return sender -> {
+            if (!(sender instanceof Player player)) return false;
+            return !player.getWorld().getName().startsWith("dungeon_");
+        };
     }
 }

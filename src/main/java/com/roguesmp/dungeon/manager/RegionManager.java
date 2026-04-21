@@ -1,9 +1,11 @@
 package com.roguesmp.dungeon.manager;
 
-import com.roguesmp.dungeon.data.DungeonWorld;
-import com.roguesmp.dungeon.data.Region;
+
+import com.roguesmp.dungeon.data.definition.DungeonWorld;
+import com.roguesmp.dungeon.data.runtime.Region;
+import com.roguesmp.dungeon.data.runtime.RegionStatus;
 import com.roguesmp.dungeon.repository.IRegionRepository;
-import com.roguesmp.dungeon.utils.Log4Craft;
+import com.roguesmp.dungeon.utils.Log4Craft_;
 
 import java.util.*;
 
@@ -12,16 +14,18 @@ import java.util.*;
  */
 public class RegionManager {
 
-    private final IRegionRepository repository;
-
     // key = worldName
     private final Map<String, DungeonWorld> worldMap = new LinkedHashMap<>();
 
     // flat index để lookup region theo id mà không cần duyệt worldMap
-    private final Map<UUID, Region> regionIndex = new HashMap<>();
+    private final Map<String, Region> regionIndex = new HashMap<>();
 
-    public RegionManager(IRegionRepository repository) {
+    private final IRegionRepository repository;
+    private final Log4Craft_ logger;
+
+    public RegionManager(IRegionRepository repository, Log4Craft_ logger) {
         this.repository = repository;
+        this.logger = logger;
 
         loadAll();
     }
@@ -35,8 +39,13 @@ public class RegionManager {
 
         List<DungeonWorld> worlds = repository.loadAll();
         for (DungeonWorld world : worlds) {
+            if (world == null || world.getWorldName() == null) continue;
             worldMap.put(world.getWorldName(), world);
-            world.getRegions().forEach((id, region) -> regionIndex.put(id, region));
+            if (world.getRegions() == null) continue;
+            world.getRegions().forEach((id, region) -> {
+                if (id == null || id.isBlank() || region == null) return;
+                regionIndex.put(id, region);
+            });
         }
     }
 
@@ -44,7 +53,7 @@ public class RegionManager {
      * Gọi khi server close — ghi toàn bộ xuống file
      */
     public void saveAll() {
-        Log4Craft.info("Start save all dungeon worlds: " + worldMap.size());
+        logger.info(this.getClass(),"Start save all dungeon worlds: " + worldMap.size());
         worldMap.values().forEach(repository::save);
     }
 
@@ -63,10 +72,13 @@ public class RegionManager {
         repository.save(world);
     }
 
-    public Optional<DungeonWorld> getWorld(String worldName) {
-        return Optional.ofNullable(worldMap.get(worldName));
+    public DungeonWorld getWorld(String worldName) {
+        return worldMap.get(worldName);
     }
 
+    public Region getRegionById(String regionId) {
+        return regionIndex.get(regionId);
+    }
     public Collection<DungeonWorld> getAllWorlds() {
         return Collections.unmodifiableCollection(worldMap.values());
     }
@@ -74,25 +86,22 @@ public class RegionManager {
     public void addRegion(String worldName, Region region) {
         DungeonWorld world = worldMap.get(worldName);
         if (world == null) return;
+        if (region == null || region.getId() == null || region.getId().isBlank()) return;
         world.getRegions().put(region.getId(), region);
         regionIndex.put(region.getId(), region);
-    }
-
-    public Optional<Region> getRegionById(UUID regionId) {
-        return Optional.ofNullable(regionIndex.get(regionId));
     }
 
     /**
      * Tìm region available đầu tiên trong 1 world
      */
-    public Optional<Region> findAvailableRegion(String worldName) {
+    public Region findAvailableRegion(String worldName) {
         DungeonWorld world = worldMap.get(worldName);
-        if (world == null) return Optional.empty();
+        if (world == null) return null;
 
         return world.getRegions().values()
                 .stream()
-                .filter(r -> !r.isStatus()) // false = available
-                .findFirst();
+                .filter(r -> r.getStatus() == RegionStatus.AVAILABLE)
+                .findFirst().orElse(null);
     }
 
     public int getRegionCount(String worldName) {

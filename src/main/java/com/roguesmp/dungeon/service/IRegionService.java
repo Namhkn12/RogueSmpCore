@@ -1,8 +1,7 @@
 package com.roguesmp.dungeon.service;
 
-import com.roguesmp.dungeon.data.Region;
 
-import java.util.Optional;
+import com.roguesmp.dungeon.data.runtime.Region;
 
 /**
  * Quản lý dữ liệu về thông tin thế giới và cấp phát các slot
@@ -15,7 +14,9 @@ public interface IRegionService {
      * Nếu tất cả world đầy slot → tạo world mới rồi cấp region.
      * Trả empty nếu đạt MAX_WORLD_PER_SERVER và tất cả các world đều full slot.
      */
-    Optional<Region> acquireRegion();
+    Region acquireRegion();
+
+    Region getRegionById(String reid);
 
     /**
      * Trả region về pool sau khi dungeon kết thúc

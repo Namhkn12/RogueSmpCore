@@ -5,10 +5,12 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.PlayerProfileArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.profile.PlayerProfile;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 public class PartyCommand {
 
@@ -25,13 +27,13 @@ public class PartyCommand {
                 .withSubcommand(
                         new CommandAPICommand("create")
                                 .executesPlayer((player, args) -> {
-                                    partyController.createParty(player);
-                                })
+                                    partyController.handleCreateParty(player);
+                                }).withRequirement(inDungeonWorld())
                 )
                 .withSubcommand(
                         new CommandAPICommand("disband")
                                 .executesPlayer((player, args) -> {
-                                    partyController.disbandParty(player);
+                                    partyController.handleDisbandParty(player);
                                 })
                 )
                 .withSubcommand(
@@ -54,38 +56,46 @@ public class PartyCommand {
                                         return;
                                     }
 
-                                    partyController.invitePlayer(player, target);
-                                })
+                                    partyController.handleInvitePlayer(player, target);
+                                }).withRequirement(inDungeonWorld())
                 )
                 .withSubcommand(
                         new CommandAPICommand("accept")
                                 .withArguments(new StringArgument("player"))
                                 .executesPlayer((player, args) -> {
                                     String inviterName = (String) args.get("player");
-                                    partyController.acceptInvite(player, inviterName);
-                                })
+                                    partyController.handleAcceptInvite(player, inviterName);
+                                }).withRequirement(inDungeonWorld())
                 )
                 .withSubcommand(
                         new CommandAPICommand("deny")
                                 .withArguments(new StringArgument("player"))
                                 .executesPlayer((player, args) -> {
                                     String inviterName = (String) args.get("player");
-                                    partyController.denyInvite(player, inviterName);
-                                })
+                                    partyController.handleDenyInvite(player, inviterName);
+                                }).withRequirement(inDungeonWorld())
                 )
                 .withSubcommand(
                         new CommandAPICommand("leave")
                                 .executesPlayer((player, args) -> {
-                                    partyController.leaveParty(player);
-                                })
+                                    partyController.handleLeaveParty(player);
+                                }).withRequirement(inDungeonWorld())
                 )
                 .withSubcommand(
                         new CommandAPICommand("info")
                                 .executesPlayer((player, args) -> {
-                                    partyController.showPartyInfo(player);
+                                    partyController.handeShowPartyInfo(player);
                                 })
                 )
 
                 .register();
     }
+
+    private Predicate<CommandSender> inDungeonWorld() {
+        return sender -> {
+            if (!(sender instanceof Player player)) return false;
+            return !player.getWorld().getName().startsWith("dungeon_");
+        };
+    }
+
 }
