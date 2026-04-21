@@ -30,11 +30,9 @@ public class DataFolderConfig {
     public static final String DUNGEON_TEMPLATE_FILE = "dungeon";
     public static final String ROOM_TEMPLATE_FILE = "room";
     public static final String DUNGEON_INSTANCE_FILE = "di";
-    public static final String REGION_INSTANCE_FILE = "region";
     public static final String SCHEMETA_FILE = "schemeta";
     public static final String SPAWNER_TEMPLATE_FILE = "spawner";
     public static final String PARTY_FILE = "party";
-    public static final String LOOTABLE_FILE = "loot";
 
     public static String getRoomTemplateFolder(){
         return buildFolderPath(List.of(
