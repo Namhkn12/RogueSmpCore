@@ -3,7 +3,8 @@ package com.roguesmp.registry.entity;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.SmpEntity;
-import com.roguesmp.entity.boss.PrimordialSlime;
+import com.roguesmp.entity.boss.hellknight.HellKnight;
+import com.roguesmp.entity.boss.primordialslime.PrimordialSlime;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.StringArgument;
@@ -30,6 +31,7 @@ public class EntityRegistry {
         this.plugin = plugin;
 
         registerSpecial("primordial_slime", PrimordialSlime::new);
+        registerSpecial("hell_knight", HellKnight::new);
 
     }
 

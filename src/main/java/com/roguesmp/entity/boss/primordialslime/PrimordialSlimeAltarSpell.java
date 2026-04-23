@@ -1,6 +1,5 @@
 package com.roguesmp.entity.boss.primordialslime;
 
-import com.roguesmp.entity.boss.PrimordialSlime;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.registry.entity.EntityRegistry;
 import com.roguesmp.utils.ItemStackUtils;
@@ -24,7 +23,7 @@ public class PrimordialSlimeAltarSpell extends Spell {
 
 
     @Override
-    public void run() {
+    public void run(int interval) {
 
          Collection<Entity> items = altarEntity.getWorld().getNearbyEntities(altarEntity.getLocation(),1, 0.5, 1, e -> e instanceof Item);
          for (Entity entity : items) {

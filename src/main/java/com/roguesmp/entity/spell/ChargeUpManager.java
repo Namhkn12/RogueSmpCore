@@ -99,7 +99,7 @@ public class ChargeUpManager {
         }
 
         for (Player player : location.getWorld().getPlayers()) {
-            if ((!requireEntity || (entity != null && entity.isValid())) && player.getLocation().distance(location) < range && !excludedPlayers.contains(player.getUniqueId())) {
+            if ((!requireEntity || (entity != null && entity.isValid())) && player.getLocation().distanceSquared(location) < range * range && !excludedPlayers.contains(player.getUniqueId())) {
                 player.showBossBar(bar);
             } else {
                 player.hideBossBar(bar);

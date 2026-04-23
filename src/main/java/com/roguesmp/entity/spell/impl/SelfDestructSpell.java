@@ -18,7 +18,7 @@ public class SelfDestructSpell extends Spell {
     }
 
     @Override
-    public void run() {
+    public void run(int interval) {
 
     }
 

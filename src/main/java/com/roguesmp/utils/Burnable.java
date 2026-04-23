@@ -20,7 +20,7 @@ public class Burnable {
         VANILLA_FUELS.put(Material.CHARCOAL, 1600);       // Đốt được 8 item
         VANILLA_FUELS.put(Material.STICK, 100);           // Đốt được 0.5 item
         VANILLA_FUELS.put(Material.BAMBOO, 50);           // Đốt được 0.25 item
-
+        
         for(Material mat: Tag.LOGS.getValues()){
             VANILLA_FUELS.put(mat, 300); //1.5 items
         }

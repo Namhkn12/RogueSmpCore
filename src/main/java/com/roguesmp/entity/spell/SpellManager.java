@@ -1,5 +1,6 @@
 package com.roguesmp.entity.spell;
 
+import com.roguesmp.entity.SmpEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -91,7 +92,7 @@ public class SpellManager {
                 if (preventSameSpellTwiceInARow && previousSpell != null && spell.getClass().equals(previousSpell.getClass())) {
                     continue;
                 }
-                spell.run();
+                spell.run(SmpEntity.ACTIVE_RUN_INTERVAL_DEFAULT);
                 lastCasted = spell;
                 cooldownSpells.add(spell);
                 iterator.remove();
@@ -116,7 +117,7 @@ public class SpellManager {
         }
         Spell sp = readySpells.get(spell);
         if (sp != null && sp.canRun()) {
-            sp.run();
+            sp.run(SmpEntity.ACTIVE_RUN_INTERVAL_DEFAULT);
             lastCasted = sp;
             cooldownSpells.add(sp);
             return sp.cooldownTicks();

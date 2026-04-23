@@ -18,7 +18,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import java.util.HashSet;
@@ -63,7 +62,7 @@ public class MagmaShockwave extends Spell {
     }
 
     @Override
-    public void run() {
+    public void run(int interval) {
         owner.setAI(false);
 
         new BukkitRunnable() {

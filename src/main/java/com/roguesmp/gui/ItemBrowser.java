@@ -50,6 +50,7 @@ public class ItemBrowser extends BaseGui {
 
     @Override
     public void setup() {
+        clearUi();
         for (int i = 0; i < 9; i++) {
             this.addButton(0, i, filler, ClickHandler.noAction());
             this.addButton(5, i, filler, ClickHandler.noAction());

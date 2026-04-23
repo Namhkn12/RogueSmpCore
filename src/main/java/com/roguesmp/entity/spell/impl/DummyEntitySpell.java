@@ -18,7 +18,7 @@ import java.util.Map;
 public class DummyEntitySpell extends Spell {
 
     @Override
-    public void run() {
+    public void run(int interval) {
 
     }
 

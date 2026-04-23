@@ -2,7 +2,6 @@ package com.roguesmp.entity.boss.primordialslime;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageType;
-import com.roguesmp.entity.boss.PrimordialSlime;
 import com.roguesmp.entity.spell.ChargeUpManager;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.event.DamageEvent;
@@ -17,7 +16,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.entity.Fireball;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -29,8 +27,6 @@ import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.awt.*;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -53,7 +49,7 @@ public class MeteorRainSpell extends Spell {
     }
 
     @Override
-    public void run() {
+    public void run(int interval) {
         if (owner == null || !owner.isValid()) return;
 
         ChargeUpManager timerBar = new ChargeUpManager(

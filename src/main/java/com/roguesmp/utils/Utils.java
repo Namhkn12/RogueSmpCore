@@ -150,6 +150,34 @@ public class Utils {
         }
     }
 
+    public static String convertSeconds(int totalSeconds) {
+        // 1 giờ = 3600 giây
+        int hours = totalSeconds / 3600;
+        // Số giây còn lại sau khi tính giờ, dùng để tính phút
+        int remainingAfterHours = totalSeconds % 3600;
+        int minutes = remainingAfterHours / 60;
+        // Số giây còn lại cuối cùng
+        int seconds = remainingAfterHours % 60;
+
+        StringBuilder result = new StringBuilder();
+
+        // Nếu có giờ, thêm vào chuỗi kết quả
+        if (hours > 0) {
+            result.append(hours).append("h ");
+        }
+
+        // Nếu có giờ HOẶC có phút, thì mới hiển thị phần phút
+        // (Để đảm bảo 3665s ra "1h 1p 5s" thay vì "1h 5s")
+        if (hours > 0 || minutes > 0) {
+            result.append(minutes).append("p ");
+        }
+
+        // Luôn hiển thị giây
+        result.append(seconds).append("s");
+
+        return result.toString().trim();
+    }
+
     public static String toString(Component component) {
         return MiniMessage.miniMessage().serialize(component);
     }

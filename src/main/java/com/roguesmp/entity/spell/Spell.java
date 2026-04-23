@@ -5,6 +5,7 @@ import com.roguesmp.event.SpellCastEvent;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -22,7 +23,10 @@ public abstract class Spell implements Cloneable {
         return true;
     }
 
-    public abstract void run();
+    /**
+     * @param interval Tick interval, default for passive is {@link com.roguesmp.entity.SmpEntity#PASSIVE_RUN_INTERVAL_DEFAULT}.
+     */
+    public abstract void run(int interval);
 
     /**
      * Cancels all currently running tasks (tasks in activeRunnables)
@@ -33,7 +37,7 @@ public abstract class Spell implements Cloneable {
     public void cancel() {
         /*
          * Iterate over a copy of activeRunnables and cancel each task that isn't already cancelled.
-         * Need to iterate over a copy because some runnables remove themselves from activeRunnables when cancelled
+         * Need to iterate over a copy because some runnables can remove themselves from activeRunnables when cancelled
          */
         for (BukkitRunnable runnable : new ArrayList<>(activeRunnables)) {
             if (!runnable.isCancelled()) {
@@ -110,9 +114,20 @@ public abstract class Spell implements Cloneable {
 
     }
 
-//    public void nearbyPlayerDeath(PlayerDeathEvent event) {
-//
-//    }
+    /**
+     * Override this if an ability need to have player death trigger
+     * @return true if {@link #onNearbyPlayerDeath(PlayerDeathEvent)} need to trigger
+     */
+    public boolean hasNearbyPlayerDeathTrigger() {
+        return false;
+    }
+
+    /**
+     * This will only be called if {@link Spell#hasNearbyPlayerDeathTrigger()} return true
+     */
+    public void onNearbyPlayerDeath(PlayerDeathEvent event) {
+
+    }
 
     @FunctionalInterface
     public interface GetSpellTargets<V extends Entity> {

@@ -6,7 +6,6 @@ import com.roguesmp.event.DamageEvent;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import org.bukkit.Sound;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 public class ShieldStunSpell extends Spell {
@@ -20,7 +19,7 @@ public class ShieldStunSpell extends Spell {
     }
 
     @Override
-    public void run() {
+    public void run(int interval) {
 
     }
 
