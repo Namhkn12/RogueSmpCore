@@ -6,6 +6,7 @@ import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
@@ -58,6 +59,7 @@ public class EntityManager {
     }
 
     public @Nullable SmpEntity getSmpEntity(LivingEntity living) {
+        if (living instanceof Player) return null;
         return spawnedEntities.get(living.getUniqueId());
     }
 

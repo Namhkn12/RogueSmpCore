@@ -46,7 +46,7 @@ public class AccumulateDamage extends Spell {
     }
 
     @Override
-    public void run() {
+    public void run(int interval) {
         // Spell passive
     }
 

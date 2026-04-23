@@ -2,13 +2,10 @@ package com.roguesmp.entity.boss.primordialslime;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageType;
-import com.roguesmp.effect.EffectManager;
-import com.roguesmp.effect.impl.SpeedEffect;
 import com.roguesmp.entity.spell.ChargeUpManager;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.utils.DamageUtils;
-import com.roguesmp.utils.MovementUtils;
 import com.roguesmp.utils.PlayerUtils;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -23,7 +20,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Transformation;
-import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -58,7 +54,7 @@ public class MagmaTendrils extends Spell {
     }
 
     @Override
-    public void run() {
+    public void run(int interval) {
         owner.setAI(false);
 
         new BukkitRunnable() {

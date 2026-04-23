@@ -2,13 +2,10 @@ package com.roguesmp.entity.boss.primordialslime;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageType;
-import com.roguesmp.entity.boss.PrimordialSlime;
 import com.roguesmp.entity.spell.ChargeUpManager;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.utils.DamageUtils;
-import com.roguesmp.utils.EntityUtils;
-import com.roguesmp.utils.PlayerUtils;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -16,11 +13,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Transformation;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
 import java.util.Random;
 
@@ -42,7 +35,7 @@ public class DoomTotemSpell extends Spell {
     }
 
     @Override
-    public void run() {
+    public void run(int interval) {
         if (owner == null || !owner.isValid()) return;
 
         // Bắt đầu triệu hồi

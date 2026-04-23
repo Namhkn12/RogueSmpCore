@@ -1,10 +1,8 @@
 package com.roguesmp.entity.boss.primordialslime;
 
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.entity.boss.PrimordialSlime;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.registry.entity.EntityRegistry;
-import com.roguesmp.utils.PlayerUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -50,8 +48,8 @@ public class SummonMinionSpell extends Spell {
     }
 
     @Override
-    public void run() {
-        currentCooldown++;
+    public void run(int interval) {
+        currentCooldown = currentCooldown + interval;
         if (currentCooldown < cooldownTicks()) return;
         currentCooldown = 0;
 

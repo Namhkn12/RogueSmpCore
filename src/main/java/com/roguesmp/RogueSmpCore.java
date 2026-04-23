@@ -7,6 +7,7 @@ import com.roguesmp.dungeon.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.gui.ItemBrowser;
+import com.roguesmp.gui.TrashGui;
 import com.roguesmp.gui.ability.AbilityCatalogue;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.listener.*;
@@ -95,6 +96,8 @@ public final class RogueSmpCore extends JavaPlugin {
         EntityRegistry.registerCommand();
 
         AbilityCatalogue.register();
+
+        TrashGui.register();
     }
 
     @Override

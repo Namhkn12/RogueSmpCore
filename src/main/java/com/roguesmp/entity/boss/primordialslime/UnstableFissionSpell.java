@@ -2,7 +2,6 @@ package com.roguesmp.entity.boss.primordialslime;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageType;
-import com.roguesmp.entity.boss.PrimordialSlime;
 import com.roguesmp.entity.spell.ChargeUpManager;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.event.DamageEvent;
@@ -52,7 +51,7 @@ public class UnstableFissionSpell extends Spell {
     }
 
     @Override
-    public void run() {
+    public void run(int interval) {
         if (owner == null || !owner.isValid()) return;
 
         // BossBar sử dụng tên hiển thị từ config

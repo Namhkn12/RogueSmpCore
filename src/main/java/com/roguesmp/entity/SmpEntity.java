@@ -11,6 +11,7 @@ import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +25,7 @@ import java.util.function.Consumer;
  */
 public class SmpEntity {
     public static final int PASSIVE_RUN_INTERVAL_DEFAULT = 5;
+    public static final int ACTIVE_RUN_INTERVAL_DEFAULT = 2;
 
     protected final LivingEntity entity;
     protected final BaseEntity base;
@@ -40,7 +42,7 @@ public class SmpEntity {
     private boolean unloaded = false;
     private int nextActiveTimer = 0;
     public boolean dead = false;
-    private long passiveIntervalTicks;
+    private int passiveIntervalTicks;
     private @Nullable BossBarManager bossBar;
 
     public SmpEntity(BaseEntity base, LivingEntity entity) {
@@ -78,17 +80,17 @@ public class SmpEntity {
             }
             taskActive = entity.getScheduler().runAtFixedRate(
                     plugin,
-                    task -> runActiveSpellTask(),
+                    task -> runActiveSpellTask(ACTIVE_RUN_INTERVAL_DEFAULT),
                     null,
                     spellDelay,
-                    2L
+                    ACTIVE_RUN_INTERVAL_DEFAULT
             );
             if (taskPassive != null) {
                 taskPassive.cancel();
             }
             taskPassive = entity.getScheduler().runAtFixedRate(
                     plugin,
-                    task -> runPassiveSpellTask(),
+                    task -> runPassiveSpellTask(passiveIntervalTicks),
                     null,
                     1L,
                     passiveIntervalTicks
@@ -113,12 +115,12 @@ public class SmpEntity {
     }
 
     public void startSpell(Spell activeSpell, int detectionRange,
-                              @Nullable BossBarManager bossBar, long spellDelay) {
+                              @Nullable BossBarManager bossBar, int spellDelay) {
         startSpell(List.of(activeSpell), Collections.emptyList(), detectionRange, bossBar, spellDelay);
     }
 
     public void startSpell(List<Spell> activeSpells, List<Spell> passiveSpells,
-                              int detectionRange, @Nullable BossBarManager bossBar, long spellDelay) {
+                              int detectionRange, @Nullable BossBarManager bossBar, int spellDelay) {
         startSpell(new SpellManager(activeSpells), passiveSpells, detectionRange, bossBar, spellDelay);
     }
 
@@ -128,19 +130,19 @@ public class SmpEntity {
     }
 
     public void startSpell(SpellManager activeSpells, List<Spell> passiveSpells, int detectionRange,
-                              @Nullable BossBarManager bossBar, long spellDelay) {
+                              @Nullable BossBarManager bossBar, int spellDelay) {
         startSpell(activeSpells, passiveSpells, detectionRange, bossBar, spellDelay, PASSIVE_RUN_INTERVAL_DEFAULT);
     }
 
     public void startSpell(SpellManager activeSpells, List<Spell> passiveSpells, int detectionRange,
-                              @Nullable BossBarManager bossBar, long spellDelay, long passiveIntervalTicks) {
+                              @Nullable BossBarManager bossBar, int spellDelay, int passiveIntervalTicks) {
         startSpell(activeSpells, passiveSpells, detectionRange, bossBar, spellDelay, passiveIntervalTicks, false);
     }
 
     /* If detectionRange <= 0, will always run regardless of whether players are nearby */
     public void startSpell(SpellManager activeSpells, List<Spell> passiveSpells,
-                           int detectionRange, @Nullable BossBarManager bossBar, long spellDelay,
-                           long passiveIntervalTicks, boolean preventSameSpellTwiceInARow) {
+                           int detectionRange, @Nullable BossBarManager bossBar, int spellDelay,
+                           int passiveIntervalTicks, boolean preventSameSpellTwiceInARow) {
         this.detectionRange = detectionRange;
         this.bossBar = bossBar;
         this.activeSpells = activeSpells;
@@ -152,7 +154,7 @@ public class SmpEntity {
             if (taskPassive != null) taskPassive.cancel();
             taskPassive = entity.getScheduler().runAtFixedRate(
                     plugin,
-                    task -> runPassiveSpellTask(),
+                    task -> runPassiveSpellTask(passiveIntervalTicks),
                     this::unload,
                     1L,
                     passiveIntervalTicks
@@ -163,15 +165,15 @@ public class SmpEntity {
             if (taskActive != null) taskActive.cancel();
             taskActive = entity.getScheduler().runAtFixedRate(
                     plugin,
-                    task -> runActiveSpellTask(),
+                    task -> runActiveSpellTask(ACTIVE_RUN_INTERVAL_DEFAULT),
                     this::unload,
                     spellDelay,
-                    2L
+                    ACTIVE_RUN_INTERVAL_DEFAULT
             );
         }
     }
 
-    private void runPassiveSpellTask() {
+    private void runPassiveSpellTask(int passiveIntervalTicks) {
         if (bossBar != null && !dead) {
             bossBar.update();
         }
@@ -180,15 +182,15 @@ public class SmpEntity {
         }
         if (passiveSpells != null) {
             for (Spell spell : passiveSpells) {
-                spell.run();
+                spell.run(passiveIntervalTicks);
             }
         }
     }
 
     private boolean activeDisabled = true;
 
-    private void runActiveSpellTask() {
-        nextActiveTimer -= 2;
+    private void runActiveSpellTask(int activeInterval) {
+        nextActiveTimer -= activeInterval;
 
         if (nextActiveTimer > 0) {
             return;
@@ -232,6 +234,10 @@ public class SmpEntity {
 
     public String getId() {
         return base.getId();
+    }
+
+    public int getDetectionRange() {
+        return detectionRange;
     }
 
     public boolean isInitialized() {
@@ -322,7 +328,11 @@ public class SmpEntity {
         });
     }
 
-//    public void nearbyPlayerDeath(PlayerDeathEvent event) {
-//
-//    }
+    public boolean hasPlayerDeathTrigger() {
+        return false;
+    }
+
+    public void onNearbyPlayerDeath(PlayerDeathEvent event) {
+
+    }
 }

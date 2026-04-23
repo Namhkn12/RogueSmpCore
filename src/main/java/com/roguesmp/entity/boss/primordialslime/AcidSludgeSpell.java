@@ -25,7 +25,7 @@ public class AcidSludgeSpell extends Spell {
     }
 
     @Override
-    public void run() {
+    public void run(int interval) {
         if (owner == null || !owner.isValid()) return;
         tick++;
         if (tick > cooldownTicks()) return;

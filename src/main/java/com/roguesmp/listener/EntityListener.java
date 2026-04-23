@@ -11,10 +11,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.entity.SlimeSplitEvent;
+import org.bukkit.event.entity.*;
 
 public class EntityListener implements Listener {
     private final EntityManager entityManager;

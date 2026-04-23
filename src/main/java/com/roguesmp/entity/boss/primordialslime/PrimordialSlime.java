@@ -1,11 +1,10 @@
-package com.roguesmp.entity.boss;
+package com.roguesmp.entity.boss.primordialslime;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.BossBarManager;
 import com.roguesmp.entity.SmpEntity;
-import com.roguesmp.entity.boss.primordialslime.*;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.entity.spell.SpellManager;
 import com.roguesmp.event.DamageEvent;
@@ -178,7 +177,7 @@ public class PrimordialSlime extends SmpEntity {
         );
 
         // Sync the BossBar to the existing tasks
-        this.startSpell(new SpellManager(phase1Actives), phase1Passives, 30, bb);
+        this.startSpell(new SpellManager(phase1Actives), phase1Passives, 30, bb, 1, 1);
 
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_SLIME_JUMP, 2f, 0.5f);
         broadcastBossMessage(Component.text("Ma chất nguyên thủy đã thức tỉnh", NamedTextColor.GREEN));

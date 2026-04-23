@@ -13,6 +13,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.spawner.SpawnRule;
 import org.bukkit.block.spawner.SpawnerEntry;
 import org.bukkit.entity.EntitySnapshot;
+import org.bukkit.entity.EntityType;
 
 import java.util.ArrayList;
 import java.util.List;
