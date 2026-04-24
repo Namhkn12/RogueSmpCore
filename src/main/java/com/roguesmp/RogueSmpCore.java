@@ -6,6 +6,7 @@ import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.dungeon.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
+import com.roguesmp.goal.zombified_piglin.PigZombieSpawnListener;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.gui.TrashGui;
 import com.roguesmp.gui.ability.AbilityCatalogue;
@@ -87,6 +88,7 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new PlayerListener(PlayerManager.getInstance(), PlayerDataManager.getInstance()));
         registerListener(new EntityListener(EntityManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
+        registerListener(new PigZombieSpawnListener(this));
     }
 
     //Register CommandAPICommand

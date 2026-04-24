@@ -16,4 +16,6 @@ public class NameSpaceKeys {
             new NamespacedKey(RogueSmpCore.getInstance(), "end_door");
     public static final NamespacedKey REVIVE_POINT_KEY =
             new NamespacedKey(RogueSmpCore.getInstance(), "revive_point");
+    public static final NamespacedKey PIGZOMBIE_KEY =
+            new NamespacedKey(RogueSmpCore.getInstance(), "pigzombie_attack");
 }
