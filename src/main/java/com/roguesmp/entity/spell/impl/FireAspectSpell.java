@@ -2,6 +2,8 @@ package com.roguesmp.entity.spell.impl;
 
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.event.DamageEvent;
+import org.bukkit.entity.LivingEntity;
+
 import java.util.Map;
 
 public class FireAspectSpell extends Spell {
@@ -15,16 +17,16 @@ public class FireAspectSpell extends Spell {
     }
 
     @Override
-    public void onHurt(DamageEvent event) {
+    public void onDamage(DamageEvent event) {
         event.getVictim().setFireTicks(60);
     }
 
     @Override
     public int cooldownTicks() {
-        return 7;
+        return 0;
     }
 
-    public static FireAspectSpell readParam(Map<String, Object> param) {
+    public static FireAspectSpell readParam(Map<String, Object> param, LivingEntity owner) {
         return new FireAspectSpell();
     }
 

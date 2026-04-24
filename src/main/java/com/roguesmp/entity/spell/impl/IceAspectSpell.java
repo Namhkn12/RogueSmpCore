@@ -3,9 +3,7 @@ package com.roguesmp.entity.spell.impl;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.event.DamageEvent;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 
-import java.util.Collection;
 import java.util.Map;
 
 public class IceAspectSpell extends Spell {
@@ -22,13 +20,13 @@ public class IceAspectSpell extends Spell {
     }
 
     @Override
-    public void onHurt(DamageEvent event) {
+    public void onDamage(DamageEvent event) {
         event.getVictim().setFreezeTicks(40);
     }
 
     @Override
     public int cooldownTicks() {
-        return 7;
+        return 0;
     }
 
     public static IceAspectSpell readParam(Map<String, Object> param, LivingEntity owner) {

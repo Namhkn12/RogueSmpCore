@@ -1,6 +1,7 @@
 package com.roguesmp.entity.spell.impl;
 
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.event.DamageEvent;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -21,17 +22,19 @@ public class BlindSpell extends Spell {
 
     @Override
     public void run() {
-        Collection<Player> players = owner.getLocation().getNearbyPlayers(5);
-        players.forEach(player -> {
-            player.addPotionEffects(List.of(
-                    new PotionEffect(PotionEffectType.BLINDNESS, 60, 4)
-            ));
-        });
+    }
+
+    @Override
+    public void onDamage(DamageEvent event) {
+        Player player = (Player) event.getVictim();
+        if(player != null) player.addPotionEffects(List.of(
+                new PotionEffect(PotionEffectType.BLINDNESS, 60, 4)
+        ));
     }
 
     @Override
     public int cooldownTicks() {
-        return 7;
+        return 0;
     }
 
     public static BlindSpell readParam(Map<String, Object> param, LivingEntity owner) {
