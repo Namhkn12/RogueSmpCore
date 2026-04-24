@@ -17,7 +17,7 @@ public class FireRestanceSpell extends Spell {
     }
 
     @Override
-    public void run() {
+    public void run(int interval) {
         owner.addPotionEffects(List.of(
                 new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 500, 1)
         ));

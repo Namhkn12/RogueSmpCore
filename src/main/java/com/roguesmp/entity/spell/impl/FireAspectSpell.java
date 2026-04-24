@@ -13,7 +13,7 @@ public class FireAspectSpell extends Spell {
     }
 
     @Override
-    public void run() {
+    public void run(int interval) {
     }
 
     @Override

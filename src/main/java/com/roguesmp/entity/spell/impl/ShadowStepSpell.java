@@ -19,7 +19,7 @@ public class ShadowStepSpell extends Spell {
     }
 
     @Override
-    public void run() {
+    public void run(int interval) {
         Entity target = owner.getTargetEntity(20);
         if (!(target instanceof Player player)) return;
 

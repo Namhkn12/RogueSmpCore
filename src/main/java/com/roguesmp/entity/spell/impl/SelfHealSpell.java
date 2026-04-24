@@ -15,7 +15,7 @@ public class SelfHealSpell extends Spell {
     }
 
     @Override
-    public void run() {
+    public void run(int interval) {
         double maxHealth = owner.getAttribute(Attribute.MAX_HEALTH).getValue();
         double currentHealth = owner.getHealth();
         double missingHealth = maxHealth - currentHealth;

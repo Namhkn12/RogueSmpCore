@@ -14,14 +14,14 @@ public class IceAspectSpell extends Spell {
         this.owner = owner;
     }
 
-
-    @Override
-    public void run() {
-    }
-
     @Override
     public void onDamage(DamageEvent event) {
         event.getVictim().setFreezeTicks(40);
+    }
+
+    @Override
+    public void run(int interval) {
+
     }
 
     @Override
