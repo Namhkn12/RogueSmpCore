@@ -218,6 +218,11 @@ public class DungeonRegistry {
             flowController.handleDungeonTimerTick();
         });
 
+        taskScheduler.runLater(6000L, () -> {
+            /*Save dungeon instance to file*/
+            instanceManager.saveAll();
+        });
+
 
     }
 
