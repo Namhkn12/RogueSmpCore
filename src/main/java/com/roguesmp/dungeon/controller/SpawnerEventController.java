@@ -154,12 +154,21 @@ public class SpawnerEventController {
                 if (spawnerService.getInstance(iid) != null) return;
             } else {
                 iid = UUID.randomUUID().toString();
-                spawnerPdc.set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, iid);
-                creatureSpawner.update();
             }
 
-            spawnerService.createInstance(templateId, iid, block.getLocation());
-            spawnerService.applyTemplate(templateId, creatureSpawner);
+            Location location = block.getLocation();
+
+            block.setType(Material.AIR, false);
+            block.setType(Material.SPAWNER, false);
+
+            CreatureSpawner newSpawner = (CreatureSpawner) location.getBlock().getState();
+
+            PersistentDataContainer newPdc = newSpawner.getPersistentDataContainer();
+            newPdc.set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, iid);
+            newSpawner.update();
+
+            spawnerService.createInstance(templateId, iid, location);
+            spawnerService.applyTemplate(templateId, newSpawner);
         } catch (BaseException e) {
             GlobalException.handle(e);
         }

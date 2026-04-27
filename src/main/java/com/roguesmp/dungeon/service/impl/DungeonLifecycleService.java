@@ -16,6 +16,7 @@ import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.service.IInstanceService;
 import com.roguesmp.dungeon.service.IPartyService;
 import com.roguesmp.dungeon.service.IRegionService;
+import com.roguesmp.dungeon.service.IReviveService;
 import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.Teleporter;
 import com.roguesmp.dungeon.utils.UuidUtil;
@@ -35,8 +36,9 @@ public class DungeonLifecycleService {
     private final DungeonManager dungeonManager;
     private final DungeonPresenter presenter;
     private final RoomRuntimeService roomRuntimeService;
+    private final IReviveService reviveService;
 
-    public DungeonLifecycleService(IInstanceService instanceService, InstanceManager instanceManager, IPartyService partyService, IRegionService regionService, ScoreBoardManager scoreBoardManager, DungeonManager dungeonManager, SpawnerInstanceManager spawnerInstanceManager, DungeonPresenter presenter, RoomRuntimeService roomRuntimeService) {
+    public DungeonLifecycleService(IInstanceService instanceService, InstanceManager instanceManager, IPartyService partyService, IRegionService regionService, ScoreBoardManager scoreBoardManager, DungeonManager dungeonManager, SpawnerInstanceManager spawnerInstanceManager, DungeonPresenter presenter, RoomRuntimeService roomRuntimeService, IReviveService reviveService) {
         this.instanceService = instanceService;
         this.instanceManager = instanceManager;
         this.partyService = partyService;
@@ -45,6 +47,7 @@ public class DungeonLifecycleService {
         this.dungeonManager = dungeonManager;
         this.presenter = presenter;
         this.roomRuntimeService = roomRuntimeService;
+        this.reviveService = reviveService;
     }
 
 
@@ -120,7 +123,12 @@ public class DungeonLifecycleService {
 
         instanceService.removeDungeonInstance(instance);
         instanceManager.remove(instance.getSession().getSessionId());
-        partyService.getPartyById(instance.getSession().getPartyId()).setInstanceId("");
+        Party party = partyService.getPartyById(instance.getSession().getPartyId());
+        party.setInstanceId("");
+        party.getMembers().forEach(s -> {
+            Player p = UuidUtil.getPlayerById(s);
+            if(p != null) reviveService.forceRemoveDeadEntry(p.getUniqueId());
+        });
     }
 
     public void onDungeonTimeExpired(DungeonInstance instance) {

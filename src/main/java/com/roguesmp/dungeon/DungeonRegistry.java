@@ -132,7 +132,8 @@ public class DungeonRegistry {
                 dungeonManager,
                 spawnerInstanceManager,
                 dungeonPresenter,
-                roomRuntimeService
+                roomRuntimeService,
+                reviveService
         );
         PlayerDeathService playerDeathService = new PlayerDeathService(partyService, instanceManager, reviveService, dungeonLifecycleService,dungeonPresenter);
         PlayerSessionService playerSessionService = new PlayerSessionService(partyService, instanceManager, scoreBoardManager, dungeonManager, playerDeathService);

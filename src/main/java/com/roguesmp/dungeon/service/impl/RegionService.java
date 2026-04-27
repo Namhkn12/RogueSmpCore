@@ -88,9 +88,20 @@ public class RegionService implements IRegionService {
      */
     private Region createRegion(String worldName, int index) {
         int gridWidth = WorldConfig.GRID_WIDTH;
-        double x = (index % gridWidth) * WorldConfig.DISTANCE_BETWEEN_REGION;
-        double z = ((double) index / gridWidth) * WorldConfig.DISTANCE_BETWEEN_REGION;
-        return new Region(java.util.UUID.randomUUID().toString(), worldName, x, WorldConfig.REGION_Y, z);
+
+        int row = index / gridWidth;
+        int col = index % gridWidth;
+
+        double x = col * WorldConfig.DISTANCE_BETWEEN_REGION;
+        double z = row * WorldConfig.DISTANCE_BETWEEN_REGION;
+
+        return new Region(
+                java.util.UUID.randomUUID().toString(),
+                worldName,
+                x,
+                WorldConfig.REGION_Y,
+                z
+        );
     }
 
     /**

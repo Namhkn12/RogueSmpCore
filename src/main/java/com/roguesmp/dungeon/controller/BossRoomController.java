@@ -9,6 +9,7 @@ import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.manager.RoomManager;
 import com.roguesmp.dungeon.service.IPartyService;
 import com.roguesmp.registry.entity.EntityRegistry;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -65,5 +66,6 @@ public class BossRoomController {
                 .orElse("fallback here");
         /*Call spawn boss here*/
         EntityRegistry.getInstance().spawnEntity(bossId, trigger.getLocation().add(0.5 , 3, 0.5));
+        trigger.setType(Material.SPAWNER);
     }
 }

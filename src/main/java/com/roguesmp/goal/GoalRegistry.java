@@ -1,4 +1,4 @@
-﻿package com.roguesmp.goal;
+package com.roguesmp.goal;
 
 public class GoalRegistry {
 }
