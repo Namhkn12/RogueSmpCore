@@ -4,10 +4,7 @@ import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.SpellCastEvent;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -111,6 +108,10 @@ public abstract class Spell implements Cloneable {
     }
 
     public void onCastSpell(SpellCastEvent event) {
+
+    }
+
+    public void onTargetEntity(EntityTargetLivingEntityEvent event) {
 
     }
 

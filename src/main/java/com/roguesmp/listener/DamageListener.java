@@ -29,6 +29,7 @@ public class DamageListener implements Listener {
                 event.setCancelled(true);
                 return;
             }
+
             if (damager instanceof Projectile projectile) {
                 if (projectile.getShooter() instanceof Player) {
                     if (victim instanceof Player) {
@@ -40,6 +41,13 @@ public class DamageListener implements Listener {
                     // for easier entity creation
                     double projectileDamage = EntityUtils.getAttributeOrDefault(living, Attribute.ATTACK_DAMAGE, 0);
                     event.setDamage(projectileDamage);
+                }
+            }
+
+            if (damager instanceof EvokerFangs fangs) {
+                if (fangs.getOwner() != null) {
+                    double damage = EntityUtils.getAttributeOrDefault(fangs.getOwner(), Attribute.ATTACK_DAMAGE, 0);
+                    event.setDamage(damage);
                 }
             }
 
@@ -76,9 +84,10 @@ public class DamageListener implements Listener {
         if (event.isCancelled()) return;
         Entity victim = event.getVictim();
 
-        double offsetX = (Utils.RANDOM.nextDouble() - 0.5) * 0.8;
-        double offsetZ = (Utils.RANDOM.nextDouble() - 0.5) * 0.8;
-        Location spawnLoc = victim.getLocation().add(offsetX, 0.75, offsetZ);
+        double offsetX = (Utils.RANDOM.nextDouble() - 0.5) * 1.3;
+        double offsetY = (Utils.RANDOM.nextDouble() * 0.8) + 1;
+        double offsetZ = (Utils.RANDOM.nextDouble() - 0.5) * 1.3;
+        Location spawnLoc = victim.getLocation().add(offsetX, offsetY, offsetZ);
 
         DamageDisplayUtils.spawnDamageDisplay(
                 spawnLoc,
