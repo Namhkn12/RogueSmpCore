@@ -1,7 +1,7 @@
 name: RogueSmpCore
 version: '1.0-SNAPSHOT'
 main: com.roguesmp.RogueSmpCore
-api-version: '1.21'
+api-version: '1.21.11'
 description: Rework plugin
 depend:
   - CommandAPI

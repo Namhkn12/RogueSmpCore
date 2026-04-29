@@ -1,6 +1,5 @@
 package com.roguesmp.utils;
 
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -10,8 +9,6 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.TextDisplay;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Transformation;
 
 public class DamageDisplayUtils {
 
@@ -19,12 +16,12 @@ public class DamageDisplayUtils {
         Component text = formatDamage(damage, type, isCritical);
 
         // Initial Physics Constants (Fast & Snappy)
-        double vx = (Utils.RANDOM.nextDouble() - 0.5) * 0.22;
-        double vz = (Utils.RANDOM.nextDouble() - 0.5) * 0.22;
-        final double[] vy = {0.45}; // Upward burst
-        final double gravity = 0.08;
+//        double vx = (Utils.RANDOM.nextDouble() - 0.5) * 0.22;
+//        double vz = (Utils.RANDOM.nextDouble() - 0.5) * 0.22;
+//        final double[] vy = {0.45}; // Upward burst
+//        final double gravity = 0.08;
 
-        TextDisplay display = hitLocation.getWorld().spawn(hitLocation, TextDisplay.class, entity -> {
+        hitLocation.getWorld().spawn(hitLocation, TextDisplay.class, entity -> {
             entity.setPersistent(false);
 
             entity.text(text);
@@ -33,35 +30,35 @@ public class DamageDisplayUtils {
             entity.setShadowed(true);
         });
 
-        new BukkitRunnable() {
-            int ticks = 0;
-            final int maxTicks = 16;
-            double offX = 0, offY = 0, offZ = 0;
-            final Transformation trans = display.getTransformation();
-            @Override
-            public void run() {
-                if (!display.isValid() || ticks >= maxTicks) {
-                    display.remove();
-                    this.cancel();
-                    return;
-                }
-
-                display.setInterpolationDelay(0);
-                display.setInterpolationDuration(1);
-
-//                Transformation trans = display.getTransformation();
-
-                offX += vx;
-                offZ += vz;
-                offY += vy[0];
-                vy[0] -= gravity;
-
-                trans.getTranslation().set((float) offX, (float) offY, (float) offZ);
-
-                display.setTransformation(trans);
-                ticks++;
-            }
-        }.runTaskTimer(RogueSmpCore.getInstance(), 0, 1);
+//        new BukkitRunnable() {
+//            int ticks = 0;
+//            final int maxTicks = 16;
+//            double offX = 0, offY = 0, offZ = 0;
+//            final Transformation trans = display.getTransformation();
+//            @Override
+//            public void run() {
+//                if (!display.isValid() || ticks >= maxTicks) {
+//                    display.remove();
+//                    this.cancel();
+//                    return;
+//                }
+//
+//                display.setInterpolationDelay(0);
+//                display.setInterpolationDuration(1);
+//
+////                Transformation trans = display.getTransformation();
+//
+//                offX += vx;
+//                offZ += vz;
+//                offY += vy[0];
+//                vy[0] -= gravity;
+//
+//                trans.getTranslation().set((float) offX, (float) offY, (float) offZ);
+//
+//                display.setTransformation(trans);
+//                ticks++;
+//            }
+//        }.runTaskTimer(RogueSmpCore.getInstance(), 0, 2);
     }
 
     private static Component formatDamage(double damage, DamageType type, boolean isCritical) {
