@@ -84,9 +84,9 @@ public class DamageListener implements Listener {
         if (event.isCancelled()) return;
         Entity victim = event.getVictim();
 
-        double offsetX = (Utils.RANDOM.nextDouble() - 0.5) * 1.1;
-        double offsetY = (Utils.RANDOM.nextDouble() - 0.5) * 0.5;
-        double offsetZ = (Utils.RANDOM.nextDouble() - 0.5) * 1.1;
+        double offsetX = (Utils.RANDOM.nextDouble() - 0.5) * 1.3;
+        double offsetY = (Utils.RANDOM.nextDouble() * 0.8) + 1;
+        double offsetZ = (Utils.RANDOM.nextDouble() - 0.5) * 1.3;
         Location spawnLoc = victim.getLocation().add(offsetX, offsetY, offsetZ);
 
         DamageDisplayUtils.spawnDamageDisplay(

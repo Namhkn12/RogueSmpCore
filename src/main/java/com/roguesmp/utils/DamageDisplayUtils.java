@@ -21,7 +21,7 @@ public class DamageDisplayUtils {
 //        final double[] vy = {0.45}; // Upward burst
 //        final double gravity = 0.08;
 
-        hitLocation.getWorld().spawn(hitLocation, TextDisplay.class, entity -> {
+        TextDisplay display = hitLocation.getWorld().spawn(hitLocation, TextDisplay.class, entity -> {
             entity.setPersistent(false);
 
             entity.text(text);
@@ -29,6 +29,8 @@ public class DamageDisplayUtils {
             entity.setBackgroundColor(Color.fromARGB(0, 0, 0, 0));
             entity.setShadowed(true);
         });
+
+        Utils.runLater(display::remove, 16);
 
 //        new BukkitRunnable() {
 //            int ticks = 0;

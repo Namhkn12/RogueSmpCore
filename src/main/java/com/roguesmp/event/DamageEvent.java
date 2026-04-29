@@ -155,7 +155,7 @@ public class DamageEvent extends Event implements Cancellable {
         }
 
         needUpdate = false;
-        return Math.max(0, finalDamage); // Prevent negative damage
+        return Math.max(0.01, finalDamage); // Prevent negative damage
     }
 
     private double calculateFinalDefense() {

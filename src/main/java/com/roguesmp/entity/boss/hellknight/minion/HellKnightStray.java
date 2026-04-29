@@ -1,0 +1,25 @@
+package com.roguesmp.entity.boss.hellknight.minion;
+
+import com.roguesmp.entity.BaseEntity;
+import com.roguesmp.entity.spell.SpellManager;
+import org.bukkit.entity.LivingEntity;
+
+import java.util.List;
+
+public class HellKnightStray extends HellKnightMinion {
+    public HellKnightStray(BaseEntity base, LivingEntity entity) {
+        super(base, entity);
+    }
+
+    @Override
+    public void initialize() {
+        if (initialized) return; // Safety check
+
+        // This triggers the logic inside BaseEntity to call startSpell()
+        base.processEntity(this.entity);
+
+        startSpell(new SpellManager(List.of(new HellFireBeam(entity, 25, 40, 30))), List.of(new TpAwaySpell(this, 100, 15)), 30,null);
+
+        this.initialized = true;
+    }
+}

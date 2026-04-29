@@ -4,12 +4,14 @@ import com.google.gson.*;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.effect.impl.DamageIncreaseEffect;
 import com.roguesmp.effect.impl.SpeedEffect;
+import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.registry.EffectCodecRegistry;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EvokerFangs;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -251,13 +253,26 @@ public class EffectManager {
     }
 
     public void handleDamageEvent(DamageEvent event) {
-        Entity le = event.getDamager();
-        if (le != null) {
-            Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(le.getUniqueId());
-            if (effectMap != null) {
-                effectMap.forEach((s, smpEffects) -> {
-                    smpEffects.getLast().onDamageEntity(event);
-                });
+        Entity entity = event.getDamager();
+        if (entity != null) {
+            if (entity instanceof EvokerFangs fangs) {
+                if (fangs.getOwner() != null) {
+                    Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(fangs.getOwner().getUniqueId());
+                    if (effectMap != null) {
+                        effectMap.forEach((s, smpEffects) -> {
+                            if (smpEffects.isEmpty()) return;
+                            smpEffects.getLast().onDamageEntity(event);
+                        });
+                    }
+                }
+            } else {
+                Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(entity.getUniqueId());
+                if (effectMap != null) {
+                    effectMap.forEach((s, smpEffects) -> {
+                        if (smpEffects.isEmpty()) return;
+                        smpEffects.getLast().onDamageEntity(event);
+                    });
+                }
             }
         }
 

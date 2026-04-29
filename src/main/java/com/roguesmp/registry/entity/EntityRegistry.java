@@ -4,6 +4,8 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.boss.hellknight.HellKnight;
+import com.roguesmp.entity.boss.hellknight.minion.*;
+import com.roguesmp.entity.boss.hellknight.minion.companion.HellKnightCompanion;
 import com.roguesmp.entity.boss.primordialslime.PrimordialSlime;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -31,7 +33,16 @@ public class EntityRegistry {
         this.plugin = plugin;
 
         registerSpecial("primordial_slime", PrimordialSlime::new);
+
         registerSpecial("hell_knight", HellKnight::new);
+        registerSpecial(HellKnightCompanion.ID, HellKnightCompanion::new);
+        registerSpecial("hell_knight_hordes", HellKnightHordes::new);
+        registerSpecial("hell_knight_minion_melee", HellKnightMinionMelee::new);
+        registerSpecial("hell_knight_minion_ranged", HellKnightMinionRanged::new);
+        registerSpecial("hell_knight_evoker", HellKnightEvoker::new);
+        registerSpecial("hell_knight_stray", HellKnightStray::new);
+        registerSpecial("hell_knight_blaze", HellKnightBlaze::new);
+        registerSpecial("hell_knight_golem", HellKnightGolem::new);
 
     }
 

@@ -1,21 +1,27 @@
 package com.roguesmp.entity;
 
+import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.registry.entity.EntityRegistry;
+import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Evoker;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class EntityManager {
-    public static EntityManager INSTANCE;
+    private static EntityManager INSTANCE;
 
     private final Map<UUID, SmpEntity> spawnedEntities = new HashMap<>();
     private final EntityRegistry entityRegistry;
@@ -29,7 +35,7 @@ public class EntityManager {
         if (smpEntity == null) return;
         smpEntity.unload();
         spawnedEntities.remove(entity.getUniqueId());
-        Bukkit.getLogger().info("Removed entity");
+//        Bukkit.getLogger().info("Removed entity");
     }
 
     public void onAddToWorld(Entity entity) {
@@ -37,6 +43,9 @@ public class EntityManager {
         // GUARD: If the EntityManager already tracks this, stop here.
         // This prevents double-registration from the spawn() method.
         if (this.isRegistered(living)) return;
+        if (entity instanceof Evoker evoker) {
+            Bukkit.getMobGoals().removeGoal(evoker, VanillaGoal.EVOKER_SUMMON_SPELL); // Evoker won't summon vexes.
+        }
 
         String entityId = entity.getPersistentDataContainer().get(Keys.MOB_ID, PersistentDataType.STRING);
         if (entityId == null) return;
@@ -52,6 +61,19 @@ public class EntityManager {
         SmpEntity smpEntity = entityRegistry.wrap(base, living);
         smpEntity.initialize();
         this.register(smpEntity);
+    }
+
+    public void handleNearbyPlayerDeath(PlayerDeathEvent event) {
+        for (Map.Entry<UUID, SmpEntity> entry : spawnedEntities.entrySet()) {
+            SmpEntity smpEntity = entry.getValue();
+
+            if (!smpEntity.hasPlayerDeathTrigger()) continue;
+            Location playerLoc = event.getPlayer().getLocation();
+            Location entityLoc = smpEntity.entity.getLocation();
+            if (!playerLoc.getWorld().getUID().equals(entityLoc.getWorld().getUID())) return;
+            if (playerLoc.distanceSquared(entityLoc) > smpEntity.getDetectionRange() * smpEntity.getDetectionRange()) return;
+            smpEntity.onNearbyPlayerDeath(event);
+        }
     }
 
     public void register(SmpEntity smpEntity) {

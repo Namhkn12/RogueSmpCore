@@ -6,9 +6,7 @@ import com.roguesmp.entity.EntityManager;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.SpellCastEvent;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
@@ -47,6 +45,11 @@ public class EntityListener implements Listener {
         } else if (damager instanceof LivingEntity living) {
             SmpEntity smpEntity = entityManager.getSmpEntity(living);
             if (smpEntity != null) smpEntity.onDamage(event);
+        } else if (damager instanceof EvokerFangs fangs) {
+            if (fangs.getOwner() != null) {
+                SmpEntity smpEntity = entityManager.getSmpEntity(fangs.getOwner());
+                if (smpEntity != null) smpEntity.onDamage(event);
+            }
         }
     }
 
@@ -69,6 +72,11 @@ public class EntityListener implements Listener {
             smpEntity.onDeath(event);
             entityManager.unload(event.getEntity());
         }
+    }
+
+    @EventHandler
+    public void onNearbyPlayerDeath(PlayerDeathEvent event) {
+        entityManager.handleNearbyPlayerDeath(event);
     }
 
     /*
@@ -96,6 +104,14 @@ public class EntityListener implements Listener {
     @EventHandler
     public void onCastSpell(SpellCastEvent event) {
         event.getSmpEntity().onCastSpell(event);
+    }
+
+    @EventHandler
+    public void onTargetEntity(EntityTargetLivingEntityEvent event) {
+        if (!(event.getEntity() instanceof LivingEntity living)) return;
+        SmpEntity smpEntity = entityManager.getSmpEntity(living);
+        if (smpEntity == null) return;
+        smpEntity.onTargetEntity(event);
     }
 
     // Yes, disable slime split since it's annoying to handle

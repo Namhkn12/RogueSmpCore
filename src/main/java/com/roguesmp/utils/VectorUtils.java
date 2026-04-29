@@ -64,11 +64,11 @@ public class VectorUtils {
      * @param vector The original {@link Vector} to be rotated.
      * @param axis   The direction {@link Vector} defining the axis of rotation.
      * This vector will be normalized internally.
-     * @param angle  The amount of rotation in <b>radians</b>.
+     * @param degree  The amount of rotation in <b>radians</b>.
      * @return A new {@link Vector} representing the rotated position.
      * @see <a href="https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula">Rodrigues' Rotation Formula</a>
      */
-    public static Vector rotateAroundAxis(Vector vector, Vector axis, double angle) {
+    public static Vector rotateAroundAxis(Vector vector, Vector axis, double degree) {
 
         // Normalize axis
         axis = axis.clone().normalize();
@@ -81,8 +81,8 @@ public class VectorUtils {
         double v = axis.getY();
         double w = axis.getZ();
 
-        double cos = FastMath.cos(angle);
-        double sin = FastMath.sin(angle);
+        double cos = FastMath.cos(Math.toRadians(degree));
+        double sin = FastMath.sin(Math.toRadians(degree));
 
         double dot = u * x + v * y + w * z;
 
@@ -95,10 +95,10 @@ public class VectorUtils {
         return new Vector(newX, newY, newZ);
     }
 
-    public static Vector rotateYAxis(Vector vector, double angle) {
+    public static Vector rotateYAxis(Vector vector, double degree) {
         // Standard rotation uses radians
-        double sin = FastMath.sin(angle);
-        double cos = FastMath.cos(angle);
+        double sin = FastMath.sin(Math.toRadians(degree));
+        double cos = FastMath.cos(Math.toRadians(degree));
 
         double x = vector.getX() * cos + vector.getZ() * sin;
         double z = vector.getZ() * cos - vector.getX() * sin;

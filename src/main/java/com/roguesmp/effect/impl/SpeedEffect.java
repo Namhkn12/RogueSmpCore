@@ -85,6 +85,9 @@ public class SpeedEffect extends SmpEffect {
 
     @Override
     public @Nullable Component getDisplay() {
+        if (value <= 0) {
+            return Component.text(Utils.formatDecimal(value * 100) + "% tốc chạy", NamedTextColor.RED);
+        }
         return Component.text("+" + Utils.formatDecimal(value * 100) + "% tốc chạy", NamedTextColor.GREEN);
     }
 

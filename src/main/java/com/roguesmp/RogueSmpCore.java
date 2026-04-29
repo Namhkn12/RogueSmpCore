@@ -19,6 +19,7 @@ import com.roguesmp.registry.entity.EntityRegistry;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.registry.VanillaCraftingRecipeRegistry;
 import com.roguesmp.registry.ability.AbilityRegistry;
+import com.roguesmp.utils.GlowUtils;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public final class RogueSmpCore extends JavaPlugin {
     // Init whatever here, called before initListeners
     public void init() {
         new PlaceholderAPIIntegration(this).register();
+        GlowUtils.init(this);
 
         PlayerDataManager.init();
 
@@ -86,9 +88,9 @@ public final class RogueSmpCore extends JavaPlugin {
 
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance(), PlayerDataManager.getInstance()));
-        registerListener(new EntityListener(EntityManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
         registerListener(new PigZombieSpawnListener(this));
+        registerListener(new EntityListener(EntityManager.getInstance()));
     }
 
     //Register CommandAPICommand

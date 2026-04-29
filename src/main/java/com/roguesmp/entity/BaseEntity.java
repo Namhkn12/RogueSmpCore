@@ -157,6 +157,7 @@ public class BaseEntity {
                 AttributeInstance instance = living.getAttribute(entityAttribute.getBukkitAttribute());
                 if (instance == null) {
                     living.registerAttribute(entityAttribute.getBukkitAttribute());
+                    instance = living.getAttribute(entityAttribute.getBukkitAttribute());
                 }
                 // Cannot be null since we registered it
                 instance.setBaseValue(aDouble);

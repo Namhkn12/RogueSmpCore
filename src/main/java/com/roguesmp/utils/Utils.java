@@ -79,6 +79,7 @@ public class Utils {
     }
 
     public static Component fromString(String miniMessage) {
+        if (miniMessage == null) return null;
         return MiniMessage.miniMessage().deserialize(miniMessage);
     }
 

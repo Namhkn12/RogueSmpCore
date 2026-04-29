@@ -1,19 +1,19 @@
 package com.roguesmp.entity;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.constant.DamageOperation;
+import com.roguesmp.constant.DamageType;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.entity.spell.SpellManager;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.SpellCastEvent;
+import com.roguesmp.utils.EntityUtils;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -190,6 +190,9 @@ public class SmpEntity {
     private boolean activeDisabled = true;
 
     private void runActiveSpellTask(int activeInterval) {
+        if (bossBar != null && !dead) {
+            bossBar.update();
+        }
         nextActiveTimer -= activeInterval;
 
         if (nextActiveTimer > 0) {
@@ -240,6 +243,10 @@ public class SmpEntity {
         return detectionRange;
     }
 
+    public LivingEntity getEntity() {
+        return entity;
+    }
+
     public boolean isInitialized() {
         return initialized;
     }
@@ -284,6 +291,22 @@ public class SmpEntity {
         passiveSpells.forEach(spell -> {
             spell.onHurt(event);
         });
+
+        if (entity != null && event.getDamageType() != DamageType.TRUE) {
+            if (bossBar == null || !bossBar.capsDamage()) {
+                return;
+            }
+            bossBar.getNextHealthThreshold().ifPresent(nextHpPercent -> {
+                // Min 1 to make sure we actually go below the threshold but don't kill the boss
+                double setHealth = Math.max(nextHpPercent * EntityUtils.getMaxHealth(entity) / 100, 1);
+                double health = entity.getHealth();
+                if (health - event.getFinalDamage() >= setHealth) {
+                    return;
+                }
+                entity.setHealth((health - setHealth + 1));
+                event.addDamageModifier(0, DamageOperation.MORE_FINAL);
+            });
+        }
     }
 
     public void onDeath(EntityDeathEvent event) {
@@ -325,6 +348,15 @@ public class SmpEntity {
         });
         passiveSpells.forEach(spell -> {
             spell.onCastSpell(event);
+        });
+    }
+
+    public void onTargetEntity(EntityTargetLivingEntityEvent event) {
+        activeSpells.getSpells().forEach(spell -> {
+            spell.onTargetEntity(event);
+        });
+        passiveSpells.forEach(spell -> {
+            spell.onTargetEntity(event);
         });
     }
 

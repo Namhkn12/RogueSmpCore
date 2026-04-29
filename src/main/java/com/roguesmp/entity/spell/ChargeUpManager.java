@@ -119,6 +119,10 @@ public class ChargeUpManager {
         setProgress((float) progress);
     }
 
+    public float getProgress() {
+        return (float) time / (float) chargeTime;
+    }
+
     public void setProgress(float progress) {
         if (progress > 1) progress = 1;
         if (progress < 0) progress = 0;
