@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -29,8 +30,8 @@ import java.util.function.Supplier;
  */
 public class SmpItem {
     private final BaseItem baseItem;
-    private ItemStack itemStack;
-    private boolean loadedModifier = false;
+    private final ItemStack itemStack;
+    private boolean loadedModifiers = false;
 
     private final Map<String, ItemComponent> componentMap = new HashMap<>();
 
@@ -38,7 +39,7 @@ public class SmpItem {
      * Create an SmpItem instance, and load base data from {@link BaseItem} and pdc. To fully update the components, call {@link SmpItem#applyModifiers(SmpPlayer)}
      */
     public SmpItem(@NotNull ItemStack itemStack) {
-        this.itemStack = itemStack.clone();
+        this.itemStack = itemStack;
         PersistentDataContainerView pdc = itemStack.getPersistentDataContainer();
 
         String itemId = pdc.get(Keys.ITEM_ID, PersistentDataType.STRING);
@@ -61,6 +62,7 @@ public class SmpItem {
         loadData(this.itemStack.getPersistentDataContainer());
     }
 
+    @SuppressWarnings("unchecked")
     public @Nullable <T extends ItemComponent> T getComponent(ComponentKey<T> key) {
         return (T) componentMap.get(key.id());
     }
@@ -74,14 +76,19 @@ public class SmpItem {
         return comp;
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends ItemComponent> T setComponent(ComponentKey<T> key, T component) {
         return (T) componentMap.put(key.id(), component);
     }
 
+    public BaseItem getBaseItem() {
+        return baseItem;
+    }
+
     /**
-     * Return the itemStack for this SmpItem, might be stale
+     * Get the original ItemStack used to create this SmpItem.
      */
-    public ItemStack getItemStack() {
+    public ItemStack getSourceItemStack() {
         return itemStack;
     }
 
@@ -115,34 +122,34 @@ public class SmpItem {
 
             applyModifiers(player);
 
-            componentMap.forEach((s, itemComponent) -> {
+            for (Map.Entry<String, ItemComponent> entry : componentMap.entrySet()) {
+                ItemComponent itemComponent = entry.getValue();
                 itemComponent.save(pdc);
                 itemComponent.modifyStack(dataContext);
                 itemComponent.contributeLore(loreContext);
-            });
+            }
         });
 
         result.setData(DataComponentTypes.LORE, ItemLore.lore(loreBuilder.build()));
-
-        itemStack = result;
 
         return result;
     }
 
     public void applyModifiers(@Nullable SmpPlayer player) {
-        if (loadedModifier) return;
-        for (ItemModifier itemModifier : ModifierRegistry.getModifiers()) {
+        // Guard to prevent components from modifying the item again
+        if (loadedModifiers) return;
+        List<ItemModifier> modifierList = ModifierRegistry.getModifiers();
+        for (ItemModifier itemModifier : modifierList) {
             itemModifier.collectAndApply(this, player);
         }
-        loadedModifier = true;
+        loadedModifiers = true;
     }
 
     private void loadData(PersistentDataContainerView pdc) {
-        baseItem.getComponents().forEach((s, itemComponent) -> {
-            componentMap.put(s, itemComponent.copy());
-        });
-        componentMap.forEach((s, itemComponent) -> {
-            itemComponent.load(pdc);
-        });
+        for (Map.Entry<String, ItemComponent> entry : baseItem.getComponents().entrySet()) {
+            ItemComponent copy = entry.getValue().copy();
+            componentMap.put(entry.getKey(), copy);
+            copy.load(pdc);
+        }
     }
 }

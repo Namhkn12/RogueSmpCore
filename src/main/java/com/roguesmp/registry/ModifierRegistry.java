@@ -12,16 +12,17 @@ import java.util.*;
  */
 public class ModifierRegistry {
 
-
     private static final List<ItemModifier> modifiers = new ArrayList<>();
+    private static final List<ItemModifier> UNMODIFIABLE_MODIFIERS;
 
     static {
         modifiers.add(new GemModifier());
-
         modifiers.add(new EnchantAttributeModifier());
+
+        UNMODIFIABLE_MODIFIERS = Collections.unmodifiableList(modifiers);
     }
 
     public static @Unmodifiable List<ItemModifier> getModifiers() {
-        return Collections.unmodifiableList(modifiers);
+        return UNMODIFIABLE_MODIFIERS;
     }
 }

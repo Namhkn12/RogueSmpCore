@@ -9,6 +9,7 @@ import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -25,21 +26,7 @@ public class ItemRequirement implements UpgradeRequirement {
 
     @Override
     public boolean canFulfill(SmpPlayer player) {
-        Player bukkitPlayer = player.getBukkitPlayer();
-        if (bukkitPlayer == null) return false;
-
-        int count = 0;
-        for (ItemStack stack : bukkitPlayer.getInventory().getContents()) {
-            if (!ItemStackUtils.isValidItem(stack)) continue;
-
-            if (requiredItem != null && requiredItem.equals(SmpItemUtils.getBaseItem(stack))) {
-                count += stack.getAmount();
-            }
-
-            if (count >= amount) return true;
-        }
-
-        return count >= amount;
+        return getCurrentAmount(player) >= amount;
     }
 
     @Override
@@ -72,16 +59,45 @@ public class ItemRequirement implements UpgradeRequirement {
 
     @Override
     public Component getDisplay(SmpPlayer player) {
+        if (requiredItem == null) return Component.text("Item Error", NamedTextColor.RED);
+
+        // 1. Get the item name
         Component itemName;
-        if (requiredItem == null) return Component.text("null item");
         NameComponent nameComponent = requiredItem.getComponent(ComponentKeys.ITEM_NAME);
         if (nameComponent == null) {
-            itemName = Utils.text(requiredItem.getId(), NamedTextColor.GRAY);
+            itemName = Component.text(requiredItem.getId(), NamedTextColor.GRAY);
         } else {
-            itemName = Utils.fromString(nameComponent.value());
+            itemName = Utils.fromString(nameComponent.value()).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
         }
 
-        return Component.text("- " + amount + "x ")
-                .append(itemName);
+        // 2. Calculate progress
+        int current = getCurrentAmount(player);
+        boolean hasEnough = current >= amount;
+
+        // 3. Build adaptive component
+        // Example: - 5x Steel Ingot (2/5)
+        return Component.text(" • ", NamedTextColor.DARK_GRAY)
+                .append(Component.text(amount + "x ", NamedTextColor.GREEN))
+                .append(itemName)
+                .append(Component.text(" (", NamedTextColor.GRAY))
+                .append(Component.text(current, hasEnough ? NamedTextColor.GREEN : NamedTextColor.RED))
+                .append(Component.text("/", NamedTextColor.GRAY))
+                .append(Component.text(amount, NamedTextColor.GRAY))
+                .append(Component.text(")", NamedTextColor.GRAY));
+    }
+
+    private int getCurrentAmount(SmpPlayer player) {
+        Player bukkitPlayer = player.getBukkitPlayer();
+        if (bukkitPlayer == null) return 0;
+
+        int count = 0;
+        for (ItemStack stack : bukkitPlayer.getInventory().getContents()) {
+            if (!ItemStackUtils.isValidItem(stack)) continue;
+
+            if (requiredItem != null && requiredItem.equals(SmpItemUtils.getBaseItem(stack))) {
+                count += stack.getAmount();
+            }
+        }
+        return count;
     }
 }

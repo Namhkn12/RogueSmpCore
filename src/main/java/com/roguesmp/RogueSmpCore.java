@@ -63,10 +63,10 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Load data from files, databases, etc
     public void loadData() {
-        AbilityRegistry.getInstance().loadAll();
         ItemRegistry.getInstance().loadFromFile();
         EntityRegistry.getInstance().loadFromFile();
         BlockStorage.getInstance().loadFromFile();
+        AbilityRegistry.getInstance().loadAll();
     }
 
     //Run on onDisable
