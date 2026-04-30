@@ -7,6 +7,7 @@ import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.registry.ability.AbilityRegistry;
+import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -90,7 +91,7 @@ public class AbilityCatalogue extends BaseGui {
             boolean isUnlocked = unlocked.containsKey(info.getId());
             ItemStack display;
             if (isUnlocked) {
-                int level = unlocked.get(info.getId());
+                int level = unlocked.getOrDefault(info.getId(), 1);
                 display = createInfoItem(info, smpPlayer, level);
             } else {
                 display = notUnlockedItem.clone();
@@ -101,7 +102,7 @@ public class AbilityCatalogue extends BaseGui {
             addButton(row, col, display, event -> {
                 event.setCancelled(true);
                 if (!isUnlocked) return;
-                // TODO: open ability detail GUI
+                Utils.runLater(() -> new AbilityDetailGui(smpPlayer, info, unlocked.getOrDefault(info.getId(), 1)).showInventory(event.getWhoClicked()));
             });
 
             index++;
