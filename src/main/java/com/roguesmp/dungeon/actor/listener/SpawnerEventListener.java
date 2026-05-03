@@ -71,11 +71,11 @@ public class SpawnerEventListener implements Listener {
         spawnerController.handleSpawnerAppear((Marker) entity);
     }
 
-    @EventHandler
-    public void onMarkerLoad(EntitiesLoadEvent event){
-        if (!event.getWorld().getName().startsWith("dungeon_")) return;
-        spawnerController.handleSpawnerLoad(event.getEntities(), event.getWorld().getName());
-    }
+//    @EventHandler
+//    public void onMarkerLoad(EntitiesLoadEvent event){
+//        if (!event.getWorld().getName().startsWith("dungeon_")) return;
+//        spawnerController.handleSpawnerLoad(event.getEntities(), event.getWorld().getName());
+//    }
 
     @EventHandler
     public void onSpawnerBreak(BlockBreakEvent event){

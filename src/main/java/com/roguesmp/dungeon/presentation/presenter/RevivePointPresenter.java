@@ -35,7 +35,7 @@ public class RevivePointPresenter {
                     ResolvableProfile.resolvableProfile(deadPlayer.getPlayerProfile())
             );
 
-            mannequin.setPose(Pose.SLEEPING);
+            mannequin.setPose(Pose.STANDING);
 
             mannequin.setGlowing(true);
             mannequin.setGravity(false);

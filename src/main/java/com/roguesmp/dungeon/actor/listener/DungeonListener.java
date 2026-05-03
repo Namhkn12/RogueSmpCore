@@ -123,4 +123,31 @@ public class DungeonListener implements Listener {
         event.setCancelled(true);
     }
 
+    @EventHandler
+    public void onPlayerActionInDead(PlayerInteractEvent e) {
+        Player player = e.getPlayer();
+
+        if (player.getGameMode() == GameMode.SPECTATOR) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
+        Player player = e.getPlayer();
+
+        if (player.getGameMode() == GameMode.SPECTATOR) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e) {
+        Player player = e.getPlayer();
+
+        if (player.getGameMode() == GameMode.SPECTATOR) {
+            e.setCancelled(true);
+        }
+    }
+
 }

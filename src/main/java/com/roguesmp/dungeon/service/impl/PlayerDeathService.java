@@ -11,7 +11,10 @@ import com.roguesmp.dungeon.service.IPartyService;
 import com.roguesmp.dungeon.service.IReviveService;
 import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.Teleporter;
+import com.roguesmp.dungeon.utils.UuidUtil;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 public class PlayerDeathService {
@@ -49,8 +52,20 @@ public class PlayerDeathService {
             dungeonLifecycleService.onDungeonFinish(instance);
             return;
         }
+        instance.getDungeonPlayers().getPlayers().forEach((s, playerStatus) -> {
+            if(!UuidUtil.toStringOrNull(player.getUniqueId()).equals(s)){
+                Player p = UuidUtil.getPlayerById(s);
+                if(p != null){
+                    Location loc = player.getLocation();
+                    String coords = "[" + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + "]";
+                    DungeonEcho.error(p, "Your teammate " + player.getName() + " died at " + coords);
+                    p.playSound(p.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.0f);
+                }
+            }
+        });
 
         DungeonEcho.error(player, "You die! Wait for your teammates complete the room, you will be revived");
+        player.playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.0f);
         presenter.onPlayerDead(player, player.getLocation());
     }
 

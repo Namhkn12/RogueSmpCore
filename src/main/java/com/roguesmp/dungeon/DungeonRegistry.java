@@ -132,7 +132,8 @@ public class DungeonRegistry {
                 dungeonManager,
                 spawnerInstanceManager,
                 dungeonPresenter,
-                roomRuntimeService
+                roomRuntimeService,
+                reviveService
         );
         PlayerDeathService playerDeathService = new PlayerDeathService(partyService, instanceManager, reviveService, dungeonLifecycleService,dungeonPresenter);
         PlayerSessionService playerSessionService = new PlayerSessionService(partyService, instanceManager, scoreBoardManager, dungeonManager, playerDeathService);
@@ -216,6 +217,11 @@ public class DungeonRegistry {
         taskScheduler.runTimer(20L, 20L, () -> {
             scoreBoardManager.tickUpdate();
             flowController.handleDungeonTimerTick();
+        });
+
+        taskScheduler.runLater(6000L, () -> {
+            /*Save dungeon instance to file*/
+            instanceManager.saveAll();
         });
 
 

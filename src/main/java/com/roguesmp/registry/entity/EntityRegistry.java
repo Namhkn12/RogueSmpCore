@@ -9,6 +9,7 @@ import com.roguesmp.entity.boss.hellknight.minion.companion.HellKnightCompanion;
 import com.roguesmp.entity.boss.primordialslime.PrimordialSlime;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
@@ -19,6 +20,7 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 public class EntityRegistry {
@@ -118,6 +120,10 @@ public class EntityRegistry {
         return INSTANCE;
     }
 
+    public Set<String> getAllIds() {
+        return definitions.keySet();
+    }
+
     public void reload() {
         definitions.clear();
         loadFromFile();
@@ -127,12 +133,17 @@ public class EntityRegistry {
 
         // Spawn command
         new CommandAPICommand("smpentity")
-                .withArguments(new StringArgument("entity_id"))
+                .withArguments(
+                        new StringArgument("entity_id")
+                                .replaceSuggestions(ArgumentSuggestions.strings(info ->
+                                        EntityRegistry.getInstance().getAllIds().toArray(String[]::new)
+                                ))
+                )
                 .executesPlayer((player, args) -> {
 
                     String id = (String) args.get("entity_id");
 
-                    BaseEntity base = getInstance().getBaseEntity(id);
+                    BaseEntity base = EntityRegistry.getInstance().getBaseEntity(id);
 
                     if (base == null) {
                         player.sendMessage("Id not found");
@@ -141,7 +152,8 @@ public class EntityRegistry {
 
                     base.spawn(player.getLocation());
 
-                }).register();
+                })
+                .register();
 
 
         new CommandAPICommand("smpentityreload")
