@@ -59,79 +59,62 @@ public class SmpPlayer {
     }
 
     public void updateSlotStat(Player player, EquipSlot slot, @Nullable SmpItem newItem) {
-
-        SmpItem oldItem = slotCache.remove(slot);
-
-        activeAttributes.forEach((attributes, aDouble) -> {
-            attributes.getAttribute().removeVanillaAttribute(player);
-        });
+        SmpItem oldItem = slotCache.get(slot);
+        Set<Attributes> affected = new HashSet<>();
 
         if (oldItem != null) {
-            EnchantComponent oldEnchant = oldItem.getComponent(ComponentKeys.ENCHANT);
-            EquipAttributeComponent oldAttribute = oldItem.getComponent(ComponentKeys.ATTRIBUTE);
-
-            if (oldEnchant != null) {
-                oldEnchant.getEnchants().forEach((enchants, integer) -> {
-                    Set<EquipSlot> activeSlot = enchants.getEnchant().getActiveSlots();
-                    if (activeSlot.contains(slot)) {
-                        activeEnchants.merge(enchants, -integer, (integer1, integer2) -> {
-                            int res = integer1 + integer2;
-                            if (res <= 0) return null; //If enchant is not positive then remove it
-                            return res;
-                        });
-                    }
+            EquipAttributeComponent oldComp = oldItem.getComponent(ComponentKeys.ATTRIBUTE);
+            if (oldComp != null && oldComp.getSlot() == slot) {
+                oldComp.getAttributes().forEach((attr, val) -> {
+                    affected.add(attr);
+                    activeAttributes.merge(attr, -val, (oldV, delta) -> {
+                        double res = oldV + delta;
+                        return Utils.isEffectiveZero(res) ? null : res;
+                    });
                 });
             }
-            if (oldAttribute != null) {
-                oldAttribute.getAttributes().forEach((attributes, aDouble) -> {
-                    if (oldAttribute.getSlot() == slot) {
-                        activeAttributes.merge(attributes, -aDouble, (aDouble1, aDouble2) -> {
-                            double res = aDouble1 + aDouble2;
-                            if (Utils.isEffectiveZero(res)) return null;
-                            return res;
-                        });
-                    }
-
-                });
-            }
-
+            processEnchantDelta(oldItem, slot, -1);
+            slotCache.remove(slot);
         }
 
         if (newItem != null) {
-            EnchantComponent newEnchant = newItem.getComponent(ComponentKeys.ENCHANT);
-            EquipAttributeComponent newAttribute = newItem.getComponent(ComponentKeys.ATTRIBUTE);
-
-            if (newEnchant != null) {
-                newEnchant.getEnchants().forEach((enchants, integer) -> {
-                    Set<EquipSlot> activeSlot = enchants.getEnchant().getActiveSlots();
-                    if (activeSlot.contains(slot)) {
-                        activeEnchants.merge(enchants, integer, (integer1, integer2) -> {
-                            int res = integer1 + integer2;
-                            if (res <= 0) return null;
-                            return res;
-                        });
-                    }
+            EquipAttributeComponent newComp = newItem.getComponent(ComponentKeys.ATTRIBUTE);
+            if (newComp != null && newComp.getSlot() == slot) {
+                newComp.getAttributes().forEach((attr, val) -> {
+                    affected.add(attr);
+                    activeAttributes.merge(attr, val, (oldV, delta) -> {
+                        double res = oldV + delta;
+                        return Utils.isEffectiveZero(res) ? null : res;
+                    });
                 });
             }
-            if (newAttribute != null) {
-                newAttribute.getAttributes().forEach((attributes, aDouble) -> {
-                    if (newAttribute.getSlot() == slot) {
-                        activeAttributes.merge(attributes, aDouble, (aDouble1, aDouble2) -> {
-                            double res = aDouble1 + aDouble2;
-                            if (Utils.isEffectiveZero(res)) return null;
-                            return res;
-                        });
-                    }
-                });
-            }
-
+            processEnchantDelta(newItem, slot, 1);
             slotCache.put(slot, newItem);
         }
 
-        activeAttributes.forEach((attributes, aDouble) -> {
-            attributes.getAttribute().addVanillaAttribute(player, aDouble);
-        });
+        for (Attributes attr : affected) {
+            Double total = activeAttributes.get(attr); // Null if pruned above
+            if (total == null) {
+                attr.getAttribute().removeVanillaAttribute(player);
+            } else {
+                attr.getAttribute().addVanillaAttribute(player, total);
+            }
+        }
+    }
 
+    private void processEnchantDelta(SmpItem item, EquipSlot slot, int multiplier) {
+        EnchantComponent enchantComp = item.getComponent(ComponentKeys.ENCHANT);
+        if (enchantComp == null) return;
+
+        enchantComp.getEnchants().forEach((ench, level) -> {
+            // Only apply if the enchant is valid for the current equipment slot
+            if (ench.getEnchant().getActiveSlots().contains(slot)) {
+                activeEnchants.merge(ench, level * multiplier, (oldVal, delta) -> {
+                    int result = oldVal + delta;
+                    return result <= 0 ? null : result;
+                });
+            }
+        });
     }
 
     public @Unmodifiable Map<Enchants, Integer> getActiveEnchants() {

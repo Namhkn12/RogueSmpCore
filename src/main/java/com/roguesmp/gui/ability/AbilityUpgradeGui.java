@@ -14,6 +14,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -142,5 +143,10 @@ public class AbilityUpgradeGui extends BaseGui {
         ItemStack max = ItemStack.of(Material.BARRIER);
         max.setData(DataComponentTypes.ITEM_NAME, Component.text("Kĩ năng đã đạt cấp tối đa", NamedTextColor.RED));
         addItem(2, 4, max);
+    }
+
+    @Override
+    public void onClickBottomInventory(InventoryClickEvent event) {
+        event.setCancelled(true);
     }
 }

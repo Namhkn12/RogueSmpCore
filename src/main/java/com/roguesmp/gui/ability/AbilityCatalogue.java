@@ -140,6 +140,8 @@ public class AbilityCatalogue extends BaseGui {
         lore.add(Component.empty());
 
         lore.addAll(info.getFormattedDescription(level));
+        lore.add(Component.empty());
+        lore.add(Utils.text("Click để xem chi tiết", NamedTextColor.GRAY));
 
         item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
 

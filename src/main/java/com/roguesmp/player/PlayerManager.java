@@ -29,13 +29,9 @@ public class PlayerManager {
         players = new HashMap<>();
 
         new BukkitRunnable() {
-            int ticks = 0;
 
             @Override
             public void run() {
-                ticks += PERIOD;
-                if (ticks >= 20) ticks = 0;
-
                 for (SmpPlayer player : players.values()) {
                     player.tick(PERIOD);
                 }

@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -78,5 +79,10 @@ public class AbilityDetailGui extends BaseGui {
             event.setCancelled(true);
             new AbilityCatalogue(smpPlayer).showInventory(event.getWhoClicked());
         });
+    }
+
+    @Override
+    public void onClickBottomInventory(InventoryClickEvent event) {
+        event.setCancelled(true);
     }
 }

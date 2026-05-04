@@ -1,5 +1,6 @@
 package com.roguesmp.item;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.context.ItemDataContext;
 import com.roguesmp.context.ItemLoreContext;
@@ -26,7 +27,20 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 /**
- * Represent our custom items
+ * Represents a custom item instance.
+ * <p>
+ * <strong>Lifecycle Warning:</strong> This is designed as a <b>short-lived, single-use wrapper</b>.
+ * It follows a "Load -> Apply -> Generate" pipeline.
+ * </p>
+ * <ul>
+ *     <li>Data is loaded from the {@link ItemStack} or {@link BaseItem} on construction.</li>
+ *     <li>Modifiers (Gems, Leveling, etc.) are applied once via {@link #applyModifiers(SmpPlayer)}.</li>
+ *     <li>The final {@link ItemStack} is generated via {@link #generateItemStack(int)}.</li>
+ * </ul>
+ * <p>
+ * <strong>Immutability:</strong> If you modify a component (e.g., via {@link #setComponent}, or the component itself) after
+ * {@link #generateItemStack(SmpPlayer, int)} has been called, you <b>must</b> create a new {@code SmpItem}
+ * instance to ensure modifiers are recalculated correctly.
  */
 public class SmpItem {
     private final BaseItem baseItem;
@@ -93,17 +107,35 @@ public class SmpItem {
     }
 
     /**
-     * Apply modifiers and generate the ItemStack
+     * Transforms this wrapper into a Minecraft {@link ItemStack}.
+     * <p>
+     * This method is an overload of {@link #generateItemStack(SmpPlayer, int)} with player being null.
+     * </p>
+     *
+     * @param stackAmount The amount for the resulting stack.
+     * @return A fully processed ItemStack with custom lore and PDC data.
      */
     public ItemStack generateItemStack(int stackAmount) {
         return generateItemStack(null, stackAmount);
     }
 
     /**
-     * Apply modifiers and generate the ItemStack
+     * Transforms this wrapper into a Minecraft {@link ItemStack}.
+     * <p>
+     * This method automatically triggers {@link #applyModifiers(SmpPlayer)}. Because modifiers
+     * are guarded, the resulting stats are calculated against the base data loaded at construction.
+     * </p>
+     *
+     * @param player Context for player-specific lore or modifiers.
+     * @param stackAmount The amount for the resulting stack.
+     * @return A fully processed ItemStack with custom lore and PDC data.
      */
     public ItemStack generateItemStack(@Nullable SmpPlayer player, int stackAmount) {
         if (baseItem == null) return itemStack;
+        if (loadedModifiers) {
+            RogueSmpCore.LOGGER.warn("Calling generateItemStack again on the same SmpItem instance, the result ItemStack will not reflect the change!");
+        }
+
         ItemStack result = ItemStack.of(baseItem.getBase(), stackAmount);
 
         result.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Set.of(DataComponentTypes.ENCHANTMENTS, DataComponentTypes.ATTRIBUTE_MODIFIERS)).build());
@@ -135,6 +167,13 @@ public class SmpItem {
         return result;
     }
 
+    /**
+     * Applies all registered {@link ItemModifier}s to this item.
+     * <p>
+     * <strong>Note:</strong> This method uses a guard flag. It will only execute logic once
+     * per instance. Subsequent calls will do nothing to prevent duplicate stat stacking.
+     * </p>
+     */
     public void applyModifiers(@Nullable SmpPlayer player) {
         // Guard to prevent components from modifying the item again
         if (loadedModifiers) return;
