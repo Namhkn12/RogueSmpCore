@@ -25,6 +25,7 @@ public class BaseItem {
         this.components = components;
     }
 
+    @SuppressWarnings("unchecked")
     public @Nullable <T extends ItemComponent> T getComponent(ComponentKey<T> key) {
         return (T) components.get(key.id());
     }
@@ -41,6 +42,7 @@ public class BaseItem {
         return Collections.unmodifiableMap(components);
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends ItemComponent> T getComponentOrDefault(ComponentKey<T> key, T defaultValue) {
         return (T) components.getOrDefault(key.id(), defaultValue);
     }

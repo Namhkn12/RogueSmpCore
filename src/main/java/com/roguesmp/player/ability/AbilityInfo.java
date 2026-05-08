@@ -3,7 +3,6 @@ package com.roguesmp.player.ability;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.player.ability.trigger.AbilityTrigger;
-import com.roguesmp.player.ability.trigger.InputSignal;
 import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -142,6 +141,10 @@ public class AbilityInfo<T extends Ability> {
         if (values == null || values.isEmpty()) return 0.0;
         int index = Math.min(Math.max(0, level - 1), values.size() - 1);
         return values.get(index);
+    }
+
+    public boolean hasNextLevel(int nextLevel) {
+        return scaling.values().stream().anyMatch(list -> list.size() >= nextLevel + 1);
     }
 
     public String getId() {

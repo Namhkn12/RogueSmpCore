@@ -69,6 +69,7 @@ public class DamageListener implements Listener {
             event.setDamage(damageEvent.getFinalDamage());
         } else {
             Entity victim = event.getEntity();
+            if (victim instanceof Item) return; //Somehow item burning also call damage event
             DamageType damageType = DamageType.getType(event.getCause());
             DamageEvent damageEvent = new DamageEvent(victim, null, event.getDamage(), new DamageEvent.Metadata(damageType));
 

@@ -8,9 +8,7 @@ import com.roguesmp.player.*;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.event.entity.EntityEquipmentChangedEvent;
-import io.papermc.paper.event.entity.EntityLoadCrossbowEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,8 +16,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class PlayerListener implements Listener {
@@ -55,17 +55,19 @@ public class PlayerListener implements Listener {
     public void onEquipmentChange(EntityEquipmentChangedEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
-        event.getEquipmentChanges().forEach((equipmentSlot, equipmentChange) -> {
+        if (smpPlayer == null) return;
+        for (Map.Entry<EquipmentSlot, EntityEquipmentChangedEvent.EquipmentChange> entry : event.getEquipmentChanges().entrySet()) {
+            EquipmentSlot equipmentSlot = entry.getKey();
+            EntityEquipmentChangedEvent.EquipmentChange equipmentChange = entry.getValue();
             EquipSlot equipSlot = EquipSlot.fromVanilla(equipmentSlot.getGroup());
-            if (smpPlayer != null) {
-                SmpItem newItem = null;
-                if (ItemStackUtils.isValidItem(equipmentChange.newItem())) {
-                    newItem = new SmpItem(equipmentChange.newItem());
-                    player.getEquipment().setItem(equipmentSlot, newItem.generateItemStack(smpPlayer, equipmentChange.newItem().getAmount()));
-                }
-                smpPlayer.updateSlotStat(player, equipSlot, newItem);
+            SmpItem newItem = null;
+            ItemStack newStack = equipmentChange.newItem();
+            if (ItemStackUtils.isValidItem(newStack)) {
+                newItem = new SmpItem(newStack);
+                player.getEquipment().setItem(equipmentSlot, newItem.generateItemStack(smpPlayer, newStack.getAmount()));
             }
-        });
+            smpPlayer.updateSlotStat(player, equipSlot, newItem);
+        }
     }
 
     @EventHandler
@@ -73,6 +75,13 @@ public class PlayerListener implements Listener {
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
         if (smpPlayer == null) return;
         smpPlayer.onInteract(event);
+    }
+
+    @EventHandler
+    public void onInput(PlayerInputEvent event) {
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
+        if (smpPlayer == null) return;
+        smpPlayer.onInput(event);
     }
 
     @EventHandler

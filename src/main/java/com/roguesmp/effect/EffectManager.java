@@ -201,6 +201,7 @@ public class EffectManager {
                     Utils.runLater(() -> {
                         allEffects.put(uuid, effects);
                         effects.forEach((s, smpEffects) -> {
+                            if (smpEffects.isEmpty()) return;
                             smpEffects.getLast().onLoseEffect(event.getPlayer());
                             smpEffects.getLast().onGainEffect(event.getPlayer());
                         });
@@ -214,6 +215,7 @@ public class EffectManager {
         allEffects.put(uuid, effectMap);
 
         effectMap.forEach((s, smpEffects) -> {
+            if (smpEffects.isEmpty()) return;
             SmpEffect effect = smpEffects.getLast();
             effect.onLoseEffect(event.getPlayer());
             effect.onGainEffect(event.getPlayer());
@@ -233,6 +235,7 @@ public class EffectManager {
         if (effectMap == null) return;
         if (le instanceof Player) {
             effectMap.forEach((s, smpEffects) -> {
+                if (smpEffects.isEmpty()) return;
                 smpEffects.getLast().onDeath(event);
                 var effectIter = smpEffects.descendingIterator();
                 while (effectIter.hasNext()) {
@@ -246,6 +249,7 @@ public class EffectManager {
             });
         } else {
             effectMap.forEach((s, smpEffects) -> {
+                if (smpEffects.isEmpty()) return;
                 smpEffects.getLast().onDeath(event);
             });
             allEffects.remove(le.getUniqueId());
@@ -281,6 +285,7 @@ public class EffectManager {
             Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(victim.getUniqueId());
             if (effectMap != null) {
                 effectMap.forEach((s, smpEffects) -> {
+                    if (smpEffects.isEmpty()) return;
                     smpEffects.getLast().onHurt(event);
                 });
             }

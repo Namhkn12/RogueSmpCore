@@ -99,6 +99,10 @@ public class Utils {
         return components;
     }
 
+    public static Component text(String text, TextColor color, TextDecoration decoration) {
+        return Component.text(text, color, decoration).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
+    }
+
     /**
      * Return a non-italic Component
      */

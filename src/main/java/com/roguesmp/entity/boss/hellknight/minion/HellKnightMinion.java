@@ -51,6 +51,16 @@ public class HellKnightMinion extends SmpEntity {
     }
 
     @Override
+    public void onDamage(DamageEvent event) {
+        super.onDamage(event);
+        if (event.getVictim() instanceof LivingEntity living) {
+            if (EntityManager.getInstance().getSmpEntity(living) instanceof HellKnight) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @Override
     public void onTargetEntity(EntityTargetLivingEntityEvent event) {
         if (event.getTarget() != null && !(event.getTarget() instanceof Player)) {
             event.setCancelled(true);

@@ -100,7 +100,7 @@ public class InfernalCleave extends Spell {
                 hb.getHitPlayers(true).forEach(p -> {
                     // Tránh gây damage nhiều lần cho một người trong cùng một chiêu
                     // Metadata giúp hệ thống damage nhận diện chiêu thức
-                    DamageUtils.damage(p, caster, damage, new DamageEvent.Metadata("infernal_fan", null, DamageType.MELEE, true));
+                    DamageUtils.damage(p, caster, damage, new DamageEvent.Metadata("infernal_fan", null, DamageType.MELEE, false));
 
                     // Lực hất vung: Hất ra xa tâm và hất lên cao
                     Vector knockback = p.getLocation().toVector().subtract(center.toVector()).normalize().multiply(0.8).setY(0.5);
