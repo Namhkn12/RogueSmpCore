@@ -18,6 +18,6 @@ public record NameComponent(String value) implements ItemComponent {
 
     @Override
     public void modifyStack(ItemDataContext context) {
-        context.newStack().setData(DataComponentTypes.ITEM_NAME, Utils.fromString(value));
+        context.newStack().setData(DataComponentTypes.CUSTOM_NAME, Utils.fromString(value));
     }
 }

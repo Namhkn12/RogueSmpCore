@@ -195,6 +195,7 @@ public class SmpPlayer {
         if (action.isLeftClick()) {
             abilityLoadout.cast(AbilityTrigger.Key.LEFT_CLICK);
         } else if (action.isRightClick()) {
+            if (event.isBlockInHand()) return;
             abilityLoadout.cast(AbilityTrigger.Key.RIGHT_CLICK);
         }
     }

@@ -11,7 +11,6 @@ import java.util.List;
 public class ComponentKeys {
 
     public static final ComponentKey<NameComponent> ITEM_NAME;
-    public static final ComponentKey<CustomNameComponent> CUSTOM_ITEM_NAME;
     public static final ComponentKey<StackSizeComponent> STACK_SIZE;
     public static final ComponentKey<EnchantComponent> ENCHANT;
     public static final ComponentKey<EquipAttributeComponent> ATTRIBUTE;
@@ -20,12 +19,11 @@ public class ComponentKeys {
     public static final ComponentKey<GemSocketComponent> GEM_SOCKET;
     public static final ComponentKey<GemDataComponent> GEM_DATA;
     public static final ComponentKey<ConsumableComponent> CONSUMABLE;
+    public static final ComponentKey<PotionContentComponent> POTION_CONTENT;
 
     static {
         ITEM_NAME = ItemComponentCodecRegistry.register("name",
                 ComponentCodec.singleArg(String.class, NameComponent::new, NameComponent::value));
-        CUSTOM_ITEM_NAME = ItemComponentCodecRegistry.register("custom_name",
-                ComponentCodec.singleArg(String.class, CustomNameComponent::new, CustomNameComponent::value));
         STACK_SIZE = ItemComponentCodecRegistry.register("stack_size",
                 ComponentCodec.singleArg(Integer.class, StackSizeComponent::new, StackSizeComponent::size));
         ENCHANT = ItemComponentCodecRegistry.register("enchant", EnchantComponent.class);
@@ -38,6 +36,7 @@ public class ComponentKeys {
                 ComponentCodec.singleArg(Integer.class, GemSocketComponent::new, GemSocketComponent::getSocketCount));
         GEM_DATA = ItemComponentCodecRegistry.register("gem_data", GemDataComponent.class);
         CONSUMABLE = ItemComponentCodecRegistry.register("consumable", new ConsumableComponent.Codec());
+        POTION_CONTENT = ItemComponentCodecRegistry.register("potion_content", PotionContentComponent.class);
     }
 
     public static void loadClass() {

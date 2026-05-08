@@ -50,24 +50,6 @@ public class PlayerUtils {
         return playersInRange(loc, range, includeNonTargetable, false);
     }
 
-    public static @Nullable Player getNearestPlayer(Location location, double range) {
-        double closestDistanceSq = range * range;
-        Player closestPlayer = null;
-        for (Player player : location.getWorld().getPlayers()) {
-            if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE) {
-                continue;
-            }
-
-            double distSq = player.getLocation().distanceSquared(location);
-
-            if (distSq < closestDistanceSq) {
-                closestDistanceSq = distSq;
-                closestPlayer = player;
-            }
-        }
-        return closestPlayer;
-    }
-
     /**
      * Give items to players and drop items that are not fit on the ground, only the owner can see and pick up the dropped item
      */

@@ -78,6 +78,13 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onInput(PlayerInputEvent event) {
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
+        if (smpPlayer == null) return;
+        smpPlayer.onInput(event);
+    }
+
+    @EventHandler
     public void onSwapHand(PlayerSwapHandItemsEvent event) {
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
         if (smpPlayer == null) return;

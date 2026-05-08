@@ -8,22 +8,29 @@ import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.goal.zombified_piglin.PigZombieSpawnListener;
 import com.roguesmp.gui.ItemBrowser;
+import com.roguesmp.gui.SkinBrowserGui;
 import com.roguesmp.gui.TrashGui;
 import com.roguesmp.gui.ability.AbilityCatalogue;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.listener.*;
+import com.roguesmp.npc.NpcManager;
 import com.roguesmp.player.PlayerDataManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.registry.BlockRegistry;
+import com.roguesmp.registry.SkinRegistry;
 import com.roguesmp.registry.entity.EntityRegistry;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.registry.VanillaCraftingRecipeRegistry;
 import com.roguesmp.registry.ability.AbilityRegistry;
+import com.roguesmp.registry.npc.NpcRegistry;
 import com.roguesmp.utils.GlowUtils;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileWriter;
 
 public final class RogueSmpCore extends JavaPlugin {
 
@@ -31,14 +38,19 @@ public final class RogueSmpCore extends JavaPlugin {
 
     public static final Logger LOGGER = LoggerFactory.getLogger("RogueSMP");
 
+    private GlobalConfig globalConfig;
+
     // Init whatever here, called before initListeners
     public void init() {
+        globalConfig = GlobalConfig.loadGlobalConfig(this);
         new PlaceholderAPIIntegration(this).register();
         GlowUtils.init(this);
 
         PlayerDataManager.init();
 
         ComponentKeys.loadClass();
+
+        SkinRegistry.init();
 
         //Player
         AbilityRegistry.init();
@@ -49,6 +61,10 @@ public final class RogueSmpCore extends JavaPlugin {
         //Entity
         EntityRegistry.init(this);
         EntityManager.init(EntityRegistry.getInstance());
+
+        //Npc
+        NpcRegistry.init();
+        NpcManager.init();
 
         ItemRegistry.init(this);
         BlockRegistry.init(this);
@@ -63,14 +79,17 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Load data from files, databases, etc
     public void loadData() {
+        SkinRegistry.getInstance().loadSkin();
         ItemRegistry.getInstance().loadFromFile();
         EntityRegistry.getInstance().loadFromFile();
         BlockStorage.getInstance().loadFromFile();
         AbilityRegistry.getInstance().loadAll();
+        NpcRegistry.getInstance().loadData();
     }
 
     //Run on onDisable
     public void saveData() {
+        SkinRegistry.getInstance().saveSkin();
         ItemRegistry.getInstance().saveToFile(false);
         BlockStorage.getInstance().saveToFile(true);
 
@@ -89,13 +108,17 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new EffectListener(EffectManager.getInstance()));
         registerListener(new PigZombieSpawnListener(this));
         registerListener(new EntityListener(EntityManager.getInstance()));
+        registerListener(new NpcListener(NpcManager.getInstance()));
     }
 
     //Register CommandAPICommand
     public void initCommands() {
+        SkinRegistry.registerSkinFetchCommand();
+        SkinBrowserGui.registerCommand();
         ItemBrowser.registerCommand();
         EffectManager.registerCommand();
         EntityRegistry.registerCommand();
+        NpcManager.getInstance().registerCommand();
 
         AbilityCatalogue.register();
 
@@ -122,6 +145,10 @@ public final class RogueSmpCore extends JavaPlugin {
 
     public static RogueSmpCore getInstance() {
         return INSTANCE;
+    }
+
+    public static GlobalConfig getGlobalConfig() {
+        return INSTANCE.globalConfig;
     }
 
     public void registerListener(Listener listener) {
