@@ -114,8 +114,9 @@ public class SkinBrowserGui extends BaseGui {
                 Utils.fromString("<!i><dark_gray>Ví dụ:"),
                 Utils.fromString("<!i><dark_gray>/skinfetch 691a14f8153742b8abf4247ca6b9140a catgirl_uwu"),
                 Component.empty(),
-                Utils.fromString("<!i><dark_gray>id trùng nhau sẽ bị ghi đè."),
-                Utils.fromString("<!i><dark_gray>uuid là phần này: https://minesk.in/<gray>691a14f8153742b8abf4247ca6b9140a")
+                Utils.fromString("<!i><dark_gray>uuid là phần này: https://minesk.in/<gray>691a14f8153742b8abf4247ca6b9140a"),
+                Component.empty(),
+                Utils.fromString("<!i><dark_gray>Lưu ý: id trùng nhau sẽ bị ghi đè.")
         );
         info.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
 

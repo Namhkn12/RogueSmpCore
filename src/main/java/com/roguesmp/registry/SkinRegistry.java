@@ -4,6 +4,7 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.gson.JsonObject;
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.annotation.GsonIgnore;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.StringArgument;
@@ -14,7 +15,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -23,8 +23,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
@@ -37,7 +37,53 @@ public class SkinRegistry {
 
     private final HashMap<String, SkinData> data = new HashMap<>();
 
-    public record SkinData(String value, String signature) { }
+    public static final class SkinData {
+        private final String value;
+        private final String signature;
+
+        @GsonIgnore
+        private PlayerProfile profile;
+
+        public SkinData(String value, String signature) {
+            this.value = value;
+            this.signature = signature;
+
+            this.profile = Bukkit.createProfile(UUID.randomUUID(), null);
+            profile.setProperty(new ProfileProperty("textures", value, signature));
+        }
+
+        public PlayerProfile getProfile() {
+            if (profile == null) {
+                this.profile = Bukkit.createProfile(UUID.randomUUID(), null);
+                this.profile.setProperty(new ProfileProperty("textures", value, signature));
+            }
+            return profile;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        public String signature() {
+            return signature;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (SkinData) obj;
+            return Objects.equals(this.value, that.value) &&
+                    Objects.equals(this.signature, that.signature);
+        }
+
+        @Override
+        public String toString() {
+            return "SkinData[" +
+                    "value=" + value + ", " +
+                    "signature=" + signature + ']';
+        }
+    }
 
     public void fetchAndRegisterSkin(String uuid, String skinId, BiConsumer<String, SkinData> onSuccess, Consumer<String> onError) {
         String apiUrl = "https://api.mineskin.org/v2/skins/" + uuid;
@@ -153,10 +199,7 @@ public class SkinRegistry {
         if (skin == null) return item;
         item.setData(DataComponentTypes.CUSTOM_NAME, Component.text(id).decoration(TextDecoration.ITALIC, false));
 
-        PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID(), null);
-        profile.setProperty(new ProfileProperty("textures", skin.value(), skin.signature()));
-
-        item.setData(DataComponentTypes.PROFILE, ResolvableProfile.resolvableProfile(profile));
+        item.setData(DataComponentTypes.PROFILE, ResolvableProfile.resolvableProfile(skin.getProfile()));
 
         return item;
     }

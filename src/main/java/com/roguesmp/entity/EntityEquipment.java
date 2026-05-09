@@ -2,11 +2,13 @@ package com.roguesmp.entity;
 
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.DyedItemColor;
 import io.papermc.paper.datacomponent.item.ItemArmorTrim;
 import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -28,14 +30,16 @@ public class EntityEquipment {
     private final boolean enchantGlint;
     private final String trimMaterial;
     private final String trimPattern;
+    private final String dyeColor;
 
-    public EntityEquipment(Material material, String displayName, List<String> lore, boolean enchantGlint, String trimMaterial, String trimPattern) {
+    public EntityEquipment(Material material, String displayName, List<String> lore, boolean enchantGlint, String trimMaterial, String trimPattern, String dyeColor) {
         this.material = material;
         this.displayName = displayName;
         this.lore = lore;
         this.enchantGlint = enchantGlint;
         this.trimMaterial = trimMaterial;
         this.trimPattern = trimPattern;
+        this.dyeColor = dyeColor;
     }
 
     public ItemStack createItemStack() {
@@ -54,6 +58,21 @@ public class EntityEquipment {
         if (trimPattern != null) trimPattern1 = RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN).get(NamespacedKey.minecraft(trimPattern));
         if (trimMaterial1 != null && trimPattern1 != null) {
             itemStack.setData(DataComponentTypes.TRIM, ItemArmorTrim.itemArmorTrim(new ArmorTrim(trimMaterial1, trimPattern1)));
+        }
+
+        if (dyeColor != null && !dyeColor.isEmpty()) {
+            String[] parts = dyeColor.split(",");
+
+            itemStack.setData(DataComponentTypes.DYED_COLOR,
+                    DyedItemColor.dyedItemColor(
+                            Color.fromARGB(
+                                    Integer.parseInt(parts[0]),
+                                    Integer.parseInt(parts[1]),
+                                    Integer.parseInt(parts[2]),
+                                    Integer.parseInt(parts[3]))
+                            )
+            );
+
         }
 
         return itemStack;
