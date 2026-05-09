@@ -2,13 +2,8 @@ package com.roguesmp.item.component.impl;
 
 import com.roguesmp.context.ItemDataContext;
 import com.roguesmp.item.component.ItemComponent;
-import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.persistence.PersistentDataContainerView;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-
-import javax.annotation.Nullable;
 
 public record DurabilityComponent(int maxDurability) implements ItemComponent {
 

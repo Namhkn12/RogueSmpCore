@@ -20,6 +20,7 @@ public class ComponentKeys {
     public static final ComponentKey<GemDataComponent> GEM_DATA;
     public static final ComponentKey<ConsumableComponent> CONSUMABLE;
     public static final ComponentKey<PotionContentComponent> POTION_CONTENT;
+    public static final ComponentKey<PlayerHeadSkinComponent> HEAD_SKIN;
 
     static {
         ITEM_NAME = ItemComponentCodecRegistry.register("name",
@@ -37,6 +38,8 @@ public class ComponentKeys {
         GEM_DATA = ItemComponentCodecRegistry.register("gem_data", GemDataComponent.class);
         CONSUMABLE = ItemComponentCodecRegistry.register("consumable", new ConsumableComponent.Codec());
         POTION_CONTENT = ItemComponentCodecRegistry.register("potion_content", PotionContentComponent.class);
+        HEAD_SKIN = ItemComponentCodecRegistry.register("head_skin",
+                ComponentCodec.singleArg(String.class, PlayerHeadSkinComponent::new, PlayerHeadSkinComponent::getSkinId));
     }
 
     public static void loadClass() {
