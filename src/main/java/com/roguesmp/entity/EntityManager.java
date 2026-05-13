@@ -3,7 +3,6 @@ package com.roguesmp.entity;
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.registry.entity.EntityRegistry;
-import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -16,13 +15,13 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class EntityManager {
     private static EntityManager INSTANCE;
 
+    private final Map<UUID, Map<String, Object>> extraData = new HashMap<>();
     private final Map<UUID, SmpEntity> spawnedEntities = new HashMap<>();
     private final EntityRegistry entityRegistry;
 
@@ -83,6 +82,32 @@ public class EntityManager {
     public @Nullable SmpEntity getSmpEntity(LivingEntity living) {
         if (living instanceof Player) return null;
         return spawnedEntities.get(living.getUniqueId());
+    }
+
+    public void clearAllMetadata(Entity entity) {
+        extraData.remove(entity.getUniqueId());
+    }
+
+    public void addMetadata(Entity entity, String key, Object value) {
+        extraData.computeIfAbsent(entity.getUniqueId(), uuid -> new HashMap<>()).put(key, value);
+    }
+
+    public void removeMetadata(Entity entity, String key) {
+        Map<String, Object> objectMap = extraData.get(entity.getUniqueId());
+        if (objectMap == null) return;
+        objectMap.remove(key);
+    }
+
+    public boolean hasMetadata(Entity entity, String key) {
+        Map<String, Object> objectMap = extraData.get(entity.getUniqueId());
+        if (objectMap == null) return false;
+        return objectMap.containsKey(key);
+    }
+
+    public @Nullable Object getMetadataValue(Entity entity, String key) {
+        Map<String, Object> objectMap = extraData.get(entity.getUniqueId());
+        if (objectMap == null) return null;
+        return objectMap.get(key);
     }
 
     public boolean isRegistered(LivingEntity living) {

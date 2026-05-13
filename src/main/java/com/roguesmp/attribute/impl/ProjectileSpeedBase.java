@@ -30,7 +30,7 @@ public class ProjectileSpeedBase implements SmpAttribute {
 
     @Override
     public @NotNull String getSimpleName() {
-        return "Tốc độ đạn";
+        return "Vận tốc đạn";
     }
 
     @Override

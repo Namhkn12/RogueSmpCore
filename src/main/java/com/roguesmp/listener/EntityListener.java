@@ -27,6 +27,7 @@ public class EntityListener implements Listener {
     @EventHandler
     public void onRemoveFromWorld(EntityRemoveFromWorldEvent event) {
         Entity entity = event.getEntity();
+        entityManager.clearAllMetadata(entity);
         if (!(entity instanceof LivingEntity living)) return;
         SmpEntity smpEntity = entityManager.getSmpEntity(living);
         if (smpEntity != null) {

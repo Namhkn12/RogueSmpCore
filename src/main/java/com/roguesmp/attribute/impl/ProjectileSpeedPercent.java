@@ -27,7 +27,7 @@ public class ProjectileSpeedPercent implements SmpAttribute {
 
     @Override
     public @NotNull String getSimpleName() {
-        return "Tốc độ đạn";
+        return "Vận tốc đạn";
     }
 
     @Override
@@ -40,7 +40,7 @@ public class ProjectileSpeedPercent implements SmpAttribute {
         Entity entity = event.getEntity();
         PlayerProjectile playerProjectile = player.getProjectile(entity.getUniqueId());
         if (playerProjectile != null) {
-            // If contains base speed stat, ignore
+            // If contains base speed stat, ignore, it is handled in Speed base attribute
             if (playerProjectile.getActiveAttributes().containsKey(Attributes.PROJECTILE_SPEED_BASE)) return;
 
             entity.setVelocity(entity.getVelocity().multiply(1 + value));

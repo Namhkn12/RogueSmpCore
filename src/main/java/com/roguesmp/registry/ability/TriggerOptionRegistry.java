@@ -19,8 +19,8 @@ public class TriggerOptionRegistry {
         registry.put("sprinting", Player::isSprinting);
         registry.put("not_sprinting", p -> !p.isSprinting());
         registry.put("not_holding_pickaxe", p -> !ItemStackUtils.isPickaxe(p.getInventory().getItemInMainHand()));
-        registry.put("holding_projectile", p -> ItemStackUtils.isProjectileWeapon(p.getInventory().getItemInMainHand()));
-        registry.put("not_holding_projectile", p -> !ItemStackUtils.isProjectileWeapon(p.getInventory().getItemInMainHand()));
+        registry.put("holding_projectile", p -> ItemStackUtils.isShootableItem(p.getInventory().getItemInMainHand()));
+        registry.put("not_holding_projectile", p -> !ItemStackUtils.isShootableItem(p.getInventory().getItemInMainHand()));
         registry.put("not_holding_consumable", p -> !ItemStackUtils.isConsumable(p.getInventory().getItemInMainHand()));
     }
 

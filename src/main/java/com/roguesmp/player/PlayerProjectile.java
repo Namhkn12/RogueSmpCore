@@ -18,10 +18,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * For tracking projectiles (snapshot stat,...)
@@ -32,6 +29,8 @@ public class PlayerProjectile {
     private final SmpPlayer smpPlayer;
     private final Map<Enchants, Integer> activeEnchants = new EnumMap<>(Enchants.class);
     private final Map<Attributes, Double> activeAttributes = new EnumMap<>(Attributes.class);
+
+    private int tickAlive = 0;
 
     public PlayerProjectile(SmpPlayer player, Projectile projectile, Map<Enchants, Integer> snapshotEnchant, Map<Attributes, Double> snapshotAttribute) {
         this.uuid = projectile.getUniqueId();
@@ -80,38 +79,38 @@ public class PlayerProjectile {
     }
 
     public void onDamageEntity(DamageEvent event) {
-        activeEnchants.forEach((enchants, integer) -> {
-            enchants.getEnchant().onDamageEntity(event, integer, smpPlayer);
-        });
         activeAttributes.forEach((attributes, aDouble) -> {
             attributes.getAttribute().onDamageEntity(event, aDouble, smpPlayer);
+        });
+        activeEnchants.forEach((enchants, integer) -> {
+            enchants.getEnchant().onDamageEntity(event, integer, smpPlayer);
         });
     }
 
     public void onProjectileHit(ProjectileHitEvent event) {
-        activeEnchants.forEach((enchants, integer) -> {
-            enchants.getEnchant().onProjectileHit(event, integer, smpPlayer);
-        });
         activeAttributes.forEach((attributes, aDouble) -> {
             attributes.getAttribute().onProjectileHit(event, aDouble, smpPlayer);
+        });
+        activeEnchants.forEach((enchants, integer) -> {
+            enchants.getEnchant().onProjectileHit(event, integer, smpPlayer);
         });
     }
 
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
-        activeEnchants.forEach((enchants, integer) -> {
-            enchants.getEnchant().onProjectileLaunch(event, integer, smpPlayer);
-        });
         activeAttributes.forEach((attributes, aDouble) -> {
             attributes.getAttribute().onProjectileLaunch(event, aDouble, smpPlayer);
+        });
+        activeEnchants.forEach((enchants, integer) -> {
+            enchants.getEnchant().onProjectileLaunch(event, integer, smpPlayer);
         });
     }
 
     public void onCombustEntity(EntityCombustByEntityEvent event) {
-        activeEnchants.forEach((enchants, integer) -> {
-            enchants.getEnchant().onCombustEntity(event, integer, smpPlayer);
-        });
         activeAttributes.forEach((attributes, aDouble) -> {
             attributes.getAttribute().onCombustEntity(event, aDouble, smpPlayer);
+        });
+        activeEnchants.forEach((enchants, integer) -> {
+            enchants.getEnchant().onCombustEntity(event, integer, smpPlayer);
         });
     }
 
@@ -125,5 +124,17 @@ public class PlayerProjectile {
 
     public @Nullable Projectile getProjectile() {
         return (Projectile) Bukkit.getEntity(uuid);
+    }
+
+    public boolean shouldRemove() {
+        return tickAlive > 200;
+    }
+
+    public int getTickAlive() {
+        return tickAlive;
+    }
+
+    public void incrementTickAlive(int periodIncrement) {
+        tickAlive = tickAlive + periodIncrement;
     }
 }
