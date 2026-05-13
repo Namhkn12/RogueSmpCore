@@ -11,6 +11,7 @@ import com.roguesmp.item.component.impl.EnchantComponent;
 import com.roguesmp.item.component.impl.EquipAttributeComponent;
 import com.roguesmp.player.ability.AbilityLoadout;
 import com.roguesmp.player.ability.trigger.AbilityTrigger;
+import com.roguesmp.registry.BlockRegistry;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
@@ -22,6 +23,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
@@ -34,6 +36,7 @@ import java.util.*;
 public class SmpPlayer {
 
     private final UUID uuid;
+    private final @Nullable Player bukkitPlayer; //Shouldn't be null, but just to be sure
     private final Map<Enchants, Integer> activeEnchants;
     private final Map<Attributes, Double> activeAttributes;
 
@@ -42,16 +45,18 @@ public class SmpPlayer {
     private final AbilityLoadout abilityLoadout;
 
     private final Map<UUID, PlayerProjectile> projectiles = new HashMap<>();
+    private int projectileCleanupTimer = 0;
 
     public SmpPlayer(UUID uuid) {
         this.uuid = uuid;
+        this.bukkitPlayer = Bukkit.getPlayer(uuid);
         abilityLoadout = new AbilityLoadout(this);
         activeEnchants = new EnumMap<>(Enchants.class);
         activeAttributes = new EnumMap<>(Attributes.class);
     }
 
-    public SmpPlayer(Player player) {
-        this(player.getUniqueId());
+    public SmpPlayer(Player bukkitPlayer) {
+        this(bukkitPlayer.getUniqueId());
     }
 
     public void loadData(PlayerData playerData) {
@@ -150,19 +155,17 @@ public class SmpPlayer {
     }
 
     public @Nullable Player getBukkitPlayer() {
-        return Bukkit.getPlayer(uuid);
+        return bukkitPlayer;
     }
 
     public void sendMessage(Component text) {
-        Player player = getBukkitPlayer();
-        if (player == null) return;
-        player.sendMessage(text);
+        if (bukkitPlayer == null) return;
+        bukkitPlayer.sendMessage(text);
     }
 
     public void sendMessage(String text) {
-        Player player = getBukkitPlayer();
-        if (player == null) return;
-        player.sendMessage(text);
+        if (bukkitPlayer == null) return;
+        bukkitPlayer.sendMessage(text);
     }
 
     public @Nullable PlayerProjectile getProjectile(UUID uuid) {
@@ -170,6 +173,7 @@ public class SmpPlayer {
     }
 
     public void trackProjectile(Projectile projectile) {
+        if (projectiles.containsKey(projectile.getUniqueId())) return;
         projectiles.put(projectile.getUniqueId(), new PlayerProjectile(this, projectile, activeEnchants, activeAttributes));
     }
 
@@ -178,6 +182,23 @@ public class SmpPlayer {
     }
 
     public void tick(int periodIncrement) {
+
+        projectileCleanupTimer = projectileCleanupTimer + periodIncrement;
+        if (projectileCleanupTimer > 100) {
+            projectileCleanupTimer = 0;
+            var projectileIterator = projectiles.entrySet().iterator();
+            while (projectileIterator.hasNext()) {
+                var playerProjectile = projectileIterator.next().getValue();
+                if (playerProjectile.shouldRemove()) {
+                    Projectile projectile = playerProjectile.getProjectile();
+                    if (projectile != null) projectile.remove();
+                    projectileIterator.remove();
+                } else {
+                    playerProjectile.incrementTickAlive(periodIncrement);
+                }
+            }
+        }
+
         activeEnchants.forEach((enchants, integer) -> enchants.getEnchant().tick(this, periodIncrement, integer));
         activeAttributes.forEach((attributes, aDouble) -> attributes.getAttribute().tick(this, periodIncrement, aDouble));
         abilityLoadout.tick(periodIncrement);
@@ -309,6 +330,14 @@ public class SmpPlayer {
         abilityLoadout.onBlockBreak(event);
     }
 
+    public void onBlockPlace(BlockPlaceEvent event) {
+        EquipSlot equipSlot = EquipSlot.fromVanilla(event.getHand().getGroup());
+        SmpItem smpItem = slotCache.get(equipSlot);
+        if (smpItem != null && smpItem.getBaseItem() != null && BlockRegistry.getBlock(smpItem.getBaseItem().getId()) == null) { //Prevent placing custom items
+            event.setCancelled(true);
+        }
+    }
+
     /**
      * Called when player is set on fire
      */
@@ -358,8 +387,14 @@ public class SmpPlayer {
     }
 
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
-        Player player = getBukkitPlayer();
-        if (player == null) return;
+        if (bukkitPlayer == null) return;
+
+        ItemStack offhand = bukkitPlayer.getEquipment().getItemInOffHand();
+        // Disallow shooting stuff from offhand, because calculating stats with it is very buggy
+        if (ItemStackUtils.isShootableItem(offhand) && offhand.getType() != Material.FIREWORK_ROCKET && offhand.getType() != Material.WIND_CHARGE) {
+            event.setCancelled(true);
+            return;
+        }
 
         event.getEntity().setPersistent(false);
         this.trackProjectile(event.getEntity());
@@ -367,8 +402,6 @@ public class SmpPlayer {
         if (playerProjectile == null) return;
         playerProjectile.onProjectileLaunch(event);
         abilityLoadout.onProjectileLaunch(event);
-        // Untrack in case the projectile never hit anything
-        Utils.runLater(() -> this.untrackProjectile(event.getEntity().getUniqueId()), 20 * 10);
     }
 
     public void onConsumeArrow(ArrowConsumeEvent event) {

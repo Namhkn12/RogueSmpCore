@@ -1,10 +1,12 @@
 package com.roguesmp.utils;
 
+import com.roguesmp.entity.EntityManager;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,5 +74,25 @@ public class EntityUtils {
     public static boolean isUndead(Entity entity) {
         return entity instanceof AbstractSkeleton || entity instanceof Zombie ||
                 entity instanceof Wither || entity instanceof Phantom;
+    }
+
+    public void clearAllMetadata(Entity entity) {
+        EntityManager.getInstance().clearAllMetadata(entity);
+    }
+
+    public void addMetadata(Entity entity, String key, Object value) {
+        EntityManager.getInstance().addMetadata(entity, key, value);
+    }
+
+    public void removeMetadata(Entity entity, String key) {
+        EntityManager.getInstance().removeMetadata(entity, key);
+    }
+
+    public boolean hasMetadata(Entity entity, String key) {
+        return EntityManager.getInstance().hasMetadata(entity, key);
+    }
+
+    public @Nullable Object getMetadataValue(Entity entity, String key) {
+        return EntityManager.getInstance().getMetadataValue(entity, key);
     }
 }

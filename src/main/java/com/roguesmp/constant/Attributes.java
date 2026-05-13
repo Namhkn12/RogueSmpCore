@@ -9,14 +9,20 @@ public enum Attributes {
     @SerializedName("melee_damage_base")
     MELEE_DAMAGE_BASE(new MeleeDamageBase()),
 
+    @SerializedName("attack_speed_base")
+    ATTACK_SPEED_BASE(new AttackSpeedBase()),
+
     @SerializedName("projectile_damage_base")
     PROJECTILE_DAMAGE_BASE(new ProjectileDamageBase()),
 
-    @SerializedName(("projectile_speed_base"))
+    @SerializedName("projectile_speed_base")
     PROJECTILE_SPEED_BASE(new ProjectileSpeedBase()),
 
-    @SerializedName("attack_speed_base")
-    ATTACK_SPEED_BASE(new AttackSpeedBase()),
+    @SerializedName("throw_rate_base")
+    THROW_RATE_BASE(new ThrowRateBase()),
+
+    @SerializedName("throw_rate_percent")
+    THROW_RATE_PERCENT(new ThrowRatePercent()),
 
     @SerializedName("projectile_damage_percent")
     PROJECTILE_DAMAGE_PERCENT(new ProjectileDamagePercent()),

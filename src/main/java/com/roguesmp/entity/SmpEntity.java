@@ -303,7 +303,7 @@ public class SmpEntity {
                 if (health - event.getFinalDamage() >= setHealth) {
                     return;
                 }
-                entity.setHealth((health - setHealth + 1));
+                entity.setHealth(Math.max(0, health - setHealth + 1));
                 event.addDamageModifier(0, DamageOperation.MORE_FINAL);
             });
         }

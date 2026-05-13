@@ -39,39 +39,39 @@ public class Multishot implements SmpEnchant {
     @Override
     public void onProjectileLaunch(ProjectileLaunchEvent event, int level, @NotNull SmpPlayer player) {
         if (event.isCancelled()) return;
-        Utils.runLater(() -> { //This whole block need to run a tick later so other buff can apply to the primary projectile
-            Projectile primary = event.getEntity();
-            Location spawnLoc = primary.getLocation();
-            Vector direction = primary.getVelocity();
+        Projectile primary = event.getEntity();
+        Location spawnLoc = primary.getLocation();
 
-            double baseSpread = 0.15; // ~8.5 rad
+        Vector direction = primary.getVelocity();
 
-            for (int i = -level; i <= level; i++) {
-                if (i == 0) continue;
+        double baseSpread = 10;
 
-                double angle = i * baseSpread;
+        for (int i = -level; i <= level; i++) {
+            if (i == 0) continue;
 
-                Vector spreadVelocity = VectorUtils.rotateYAxis(direction.clone().normalize(), angle)
-                        .multiply(direction.length());
-                // Safe because primary is always projectile
-                Projectile shotProjectile = (Projectile) spawnLoc.getWorld().spawn(spawnLoc, primary.getType().getEntityClass(), entity -> {
-                    Projectile projectile = (Projectile) entity;
-                    projectile.setVelocity(spreadVelocity);
-                    projectile.setFireTicks(primary.getFireTicks());
+            double angle = i * baseSpread;
 
-                    if (primary instanceof AbstractArrow arrow && entity instanceof AbstractArrow sideArrow) {
-                        sideArrow.setCritical(arrow.isCritical());
-                        sideArrow.setPierceLevel(arrow.getPierceLevel());
-                        sideArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
-                        sideArrow.setItemStack(arrow.getItemStack());
-                    } else if (primary instanceof ThrowableProjectile throwable && entity instanceof ThrowableProjectile sideThrowable) {
-                        sideThrowable.setItem(throwable.getItem());
-                    }
-                });
-                shotProjectile.setShooter(player.getBukkitPlayer());
-                player.trackProjectile(shotProjectile);
-            }
-        });
+            Vector spreadVelocity = VectorUtils.rotateYAxis(direction.clone().normalize(), angle)
+                    .multiply(direction.length());
+            // Safe because primary is always projectile
+            Projectile shotProjectile = (Projectile) spawnLoc.getWorld().spawn(spawnLoc, primary.getType().getEntityClass(), entity -> {
+                Projectile projectile = (Projectile) entity;
+                projectile.setVelocity(spreadVelocity);
+                projectile.setFireTicks(primary.getFireTicks());
+
+                if (primary instanceof AbstractArrow arrow && entity instanceof AbstractArrow sideArrow) {
+                    sideArrow.setCritical(arrow.isCritical());
+                    sideArrow.setPierceLevel(arrow.getPierceLevel());
+                    sideArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
+                    sideArrow.setItemStack(arrow.getItemStack());
+                } else if (primary instanceof ThrowableProjectile throwable && entity instanceof ThrowableProjectile sideThrowable) {
+                    sideThrowable.setItem(throwable.getItem());
+                }
+            });
+            shotProjectile.setShooter(player.getBukkitPlayer());
+            player.trackProjectile(shotProjectile);
+        }
+
     }
 
 }

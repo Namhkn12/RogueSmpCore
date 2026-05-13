@@ -1,13 +1,10 @@
 package com.roguesmp.utils;
 
-import com.destroystokyo.paper.MaterialTags;
 import com.roguesmp.constant.Keys;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import io.papermc.paper.persistence.PersistentDataContainerView;
-import io.papermc.paper.registry.RegistryAccess;
-import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -37,17 +34,30 @@ public class ItemStackUtils {
         stack.setData(DataComponentTypes.ITEM_NAME, component);
     }
 
-    public static final EnumSet<Material> PROJECTILE_WEAPONS = EnumSet.of(
+    public static void damageItem(ItemStack itemStack, int amount) {
+        Integer current = itemStack.getData(DataComponentTypes.DAMAGE);
+        if (current == null) return;
+        itemStack.setData(DataComponentTypes.DAMAGE, Math.max(current + amount, 0));
+
+    }
+
+    public static final EnumSet<Material> SHOOTABLES = EnumSet.of(
             Material.BOW,
             Material.CROSSBOW,
-            Material.TRIDENT,
+            Material.SNOWBALL,
             Material.EGG,
-            Material.SNOWBALL
+            Material.ENDER_PEARL,
+            Material.FIREWORK_ROCKET,
+            Material.FISHING_ROD,
+            Material.SPLASH_POTION,
+            Material.LINGERING_POTION,
+            Material.EXPERIENCE_BOTTLE,
+            Material.WIND_CHARGE
             );
-    public static boolean isProjectileWeapon(ItemStack itemStack) {
+    public static boolean isShootableItem(ItemStack itemStack) {
         if (itemStack == null || itemStack.getType().isAir()) return false;
 
-        return PROJECTILE_WEAPONS.contains(itemStack.getType());
+        return SHOOTABLES.contains(itemStack.getType());
     }
 
     public static boolean isConsumable(ItemStack itemStack) {

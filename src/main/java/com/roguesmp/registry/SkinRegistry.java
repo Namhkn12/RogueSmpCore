@@ -40,24 +40,36 @@ public class SkinRegistry {
     public static final class SkinData {
         private final String value;
         private final String signature;
+        private UUID uuid;
 
         @GsonIgnore
         private PlayerProfile profile;
 
+        /**
+         * Create a new SkinData, will also generate the uuid and profile for this skin
+         */
         public SkinData(String value, String signature) {
             this.value = value;
             this.signature = signature;
 
-            this.profile = Bukkit.createProfile(UUID.randomUUID(), null);
+            this.uuid = UUID.randomUUID();
+            this.profile = Bukkit.createProfile(uuid, null);
             profile.setProperty(new ProfileProperty("textures", value, signature));
         }
 
         public PlayerProfile getProfile() {
             if (profile == null) {
-                this.profile = Bukkit.createProfile(UUID.randomUUID(), null);
+                this.profile = Bukkit.createProfile(getUuid(), null);
                 this.profile.setProperty(new ProfileProperty("textures", value, signature));
             }
             return profile;
+        }
+
+        public UUID getUuid() {
+            if (uuid == null) {
+                this.uuid = UUID.randomUUID();
+            }
+            return uuid;
         }
 
         public String value() {
@@ -75,13 +87,6 @@ public class SkinRegistry {
             var that = (SkinData) obj;
             return Objects.equals(this.value, that.value) &&
                     Objects.equals(this.signature, that.signature);
-        }
-
-        @Override
-        public String toString() {
-            return "SkinData[" +
-                    "value=" + value + ", " +
-                    "signature=" + signature + ']';
         }
     }
 
