@@ -25,10 +25,21 @@ public class DamageUtils {
         if (bypassIFrame) {
             victim.setNoDamageTicks(0);
             victim.damage(damage, damager);
-
+            nextMetadata = null;
             victim.setNoDamageTicks(originalIFrame);
             victim.setLastDamage(originalLastDamage);
-        } else victim.damage(damage, damager);
+        } else {
+            victim.damage(damage, damager);
+            nextMetadata = null;
+        }
+    }
+
+    /**
+     * @param percentToDamage 0.1 = 10% damage
+     */
+    public static void damagePercent(@NotNull LivingEntity victim, @Nullable Entity damager, double percentToDamage, DamageEvent.Metadata metadata) {
+        double damage = EntityUtils.getMaxHealth(victim) * percentToDamage;
+        damage(victim, damager, damage, metadata);
     }
 
     public static void damage(@NotNull LivingEntity victim, @Nullable Entity damager, Location location, double damage, DamageEvent.Metadata metadata) {

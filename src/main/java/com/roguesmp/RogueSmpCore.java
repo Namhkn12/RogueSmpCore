@@ -3,6 +3,7 @@ package com.roguesmp;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.constant.Tags;
 import com.roguesmp.dungeon.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
@@ -28,9 +29,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileWriter;
 
 public final class RogueSmpCore extends JavaPlugin {
 
@@ -85,6 +83,8 @@ public final class RogueSmpCore extends JavaPlugin {
         BlockStorage.getInstance().loadFromFile();
         AbilityRegistry.getInstance().loadAll();
         NpcRegistry.getInstance().loadData();
+
+        Tags.loadTagData(this);
     }
 
     //Run on onDisable

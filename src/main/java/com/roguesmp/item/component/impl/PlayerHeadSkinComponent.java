@@ -17,7 +17,7 @@ public class PlayerHeadSkinComponent implements ItemComponent {
 
     @Override
     public @NotNull ItemComponent copy() {
-        return new PlayerHeadSkinComponent(skinId);
+        return this;
     }
 
     public String getSkinId() {

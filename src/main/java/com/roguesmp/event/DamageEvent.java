@@ -144,7 +144,7 @@ public class DamageEvent extends Event implements Cancellable {
 
         // Vanilla mechanics
         if (metadata.damageType == DamageType.MELEE && damager instanceof Player bukkitPlayer) {
-            if (isCritical && bukkitPlayer.getAttribute(Attribute.ATTACK_DAMAGE).getValue() <= 1d) finalDamage *= 1.5;
+            if (isCritical) finalDamage *= 1.5;
         }
 
         finalDamage += addFinal;
@@ -155,7 +155,7 @@ public class DamageEvent extends Event implements Cancellable {
         }
 
         needUpdate = false;
-        return Math.max(0.01, finalDamage); // Prevent negative damage
+        return Math.max(0.001, finalDamage); // Prevent negative damage
     }
 
     private double calculateFinalDefense() {

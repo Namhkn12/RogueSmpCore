@@ -14,7 +14,7 @@ public record DescriptionComponent(List<String> description) implements ItemComp
 
     @Override
     public @NotNull ItemComponent copy() {
-        return new DescriptionComponent(description);
+        return this;
     }
 
     @Override

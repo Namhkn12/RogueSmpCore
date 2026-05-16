@@ -31,22 +31,22 @@ public class BlockRegistry {
     }
 
     private void setup(){
-        BlockManager.registerBlockType("steel_furnace", SteelFurnace::new);
-        BlockManager.registerBlockType("electric_steel_furnace", ElectricSteelFurnace::new);
-        BlockManager.registerBlockType("energy_node", EnergyNode::new);
-        BlockManager.registerBlockType("solar_panel", SolarPanel::new);
-        BlockManager.registerBlockType("coal_generator", CoalGenerator::new);
-
+//        BlockManager.registerBlockType("steel_furnace", SteelFurnace::new);
+//        BlockManager.registerBlockType("electric_steel_furnace", ElectricSteelFurnace::new);
+//        BlockManager.registerBlockType("energy_node", EnergyNode::new);
+//        BlockManager.registerBlockType("solar_panel", SolarPanel::new);
+//        BlockManager.registerBlockType("coal_generator", CoalGenerator::new);
+//
         registerDataMap();
     }
 
     private void registerDataMap(){
-        dataMap.put("steel_furnace", new SteelFurnace());
-        dataMap.put("steel_block", new SmpBlock(ItemRegistry.getInstance().getBaseItem("steel_block"), true));
-        dataMap.put("electric_steel_furnace", new ElectricSteelFurnace());
-        dataMap.put("energy_node", new EnergyNode());
-        dataMap.put("solar_panel", new SolarPanel());
-        dataMap.put("coal_generator", new CoalGenerator());
+//        dataMap.put("steel_furnace", new SteelFurnace());
+//        dataMap.put("steel_block", new SmpBlock(ItemRegistry.getInstance().getBaseItem("steel_block"), true));
+//        dataMap.put("electric_steel_furnace", new ElectricSteelFurnace());
+//        dataMap.put("energy_node", new EnergyNode());
+//        dataMap.put("solar_panel", new SolarPanel());
+//        dataMap.put("coal_generator", new CoalGenerator());
     }
 
     public void registerMachineRecipes(){

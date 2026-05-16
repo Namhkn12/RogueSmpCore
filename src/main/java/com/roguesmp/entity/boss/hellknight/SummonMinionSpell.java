@@ -90,6 +90,6 @@ public class SummonMinionSpell extends Spell {
 
     @Override
     public int cooldownTicks() {
-        return 260;
+        return 500;
     }
 }

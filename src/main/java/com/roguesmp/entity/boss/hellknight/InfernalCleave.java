@@ -43,10 +43,6 @@ public class InfernalCleave extends Spell {
         LivingEntity caster = boss.getEntity();
         caster.setAI(false);
 
-        // 1. Tạo ItemDisplay Thanh kiếm khổng lồ
-
-        // 2. ChargeUpManager
-
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -124,19 +120,25 @@ public class InfernalCleave extends Spell {
     }
 
     private void drawChargeOutline(Location center, Vector dir) {
-        double angleRad = Math.toRadians(fanAngle);
-        // Draw the two side lines of the fan
-        for (double d = 0; d < fanRadius; d += 1.0) {
-            Vector left = VectorUtils.rotateYAxis(dir.clone(), -fanAngle / 2).multiply(d);
-            Vector right = VectorUtils.rotateYAxis(dir.clone(), fanAngle / 2).multiply(d);
-
-            center.getWorld().spawnParticle(Particle.FLAME, center.clone().add(left), 1, 0, 0, 0, 0);
-            center.getWorld().spawnParticle(Particle.FLAME, center.clone().add(right), 1, 0, 0, 0, 0);
-        }
-        // Draw the outer arc
-        for (double a = -fanAngle / 2; a <= fanAngle / 2; a += 5) {
+        // 1. Vẽ viền ngoài cùng bằng SOUL_FIRE_FLAME hoặc FLAME để định hình rõ ranh giới (Optional nhưng nên giữ để rõ nét)
+        for (double a = -fanAngle / 2; a <= fanAngle / 2; a += 4) {
             Vector arc = VectorUtils.rotateYAxis(dir.clone(), a).multiply(fanRadius);
-            center.getWorld().spawnParticle(Particle.SMALL_FLAME, center.clone().add(arc), 1, 0, 0, 0, 0);
+            center.getWorld().spawnParticle(Particle.FLAME, center.clone().add(arc), 1, 0, 0, 0, 0);
+        }
+
+        // 2. Lấp đầy bên trong khu vực sát thương (Inside Indicator)
+        double distanceStep = 1.5; // Khoảng cách giữa các tầng hạt theo chiều dọc (mét)
+        double angleStep = 8.0;    // Khoảng cách góc giữa các hàng hạt (độ)
+
+        for (double d = 1.0; d < fanRadius; d += distanceStep) {
+            // Càng ra xa, chu vi hình quạt càng lớn, nên ta có thể giảm bớt angleStep ở gần tâm
+            // hoặc giữ nguyên nếu góc quạt không quá lớn (< 120 độ).
+            for (double a = -fanAngle / 2; a <= fanAngle / 2; a += angleStep) {
+                Vector point = VectorUtils.rotateYAxis(dir.clone(), a).multiply(d);
+
+                // Sử dụng các hạt nhỏ, ít hiệu ứng động như SMALL_FLAME hoặc DUST để làm nền
+                center.getWorld().spawnParticle(Particle.FLAME, center.clone().add(point), 1, 0, 0, 0, 0);
+            }
         }
     }
 }

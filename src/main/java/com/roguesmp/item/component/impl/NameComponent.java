@@ -11,7 +11,7 @@ public record NameComponent(String value) implements ItemComponent {
 
     @Override
     public @NotNull ItemComponent copy() {
-        return new NameComponent(value);
+        return this;
     }
 
     @Override

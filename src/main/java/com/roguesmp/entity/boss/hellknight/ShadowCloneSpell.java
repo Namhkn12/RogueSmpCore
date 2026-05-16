@@ -1,10 +1,13 @@
 package com.roguesmp.entity.boss.hellknight;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.constant.DamageType;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.boss.hellknight.minion.HellKnightMinion;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.event.DamageEvent;
 import com.roguesmp.registry.entity.EntityRegistry;
+import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.EntityUtils;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Location;
@@ -165,7 +168,7 @@ public class ShadowCloneSpell extends Spell {
         altarLocation.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, altarLocation, 1);
         altarLocation.getWorld().strikeLightningEffect(altarLocation);
 
-        EntityUtils.setHealthPercent(caster, 0.69);
+        DamageUtils.damagePercent(caster, null, 0.1, new DamageEvent.Metadata(DamageType.TRUE));
     }
 
     private Location getRandomLocationAroundAltar(Location altarLocation) {

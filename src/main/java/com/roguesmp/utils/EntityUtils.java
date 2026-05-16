@@ -1,11 +1,15 @@
 package com.roguesmp.utils;
 
+import com.roguesmp.constant.Keys;
+import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
+import com.roguesmp.registry.entity.EntityRegistry;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.*;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -76,23 +80,29 @@ public class EntityUtils {
                 entity instanceof Wither || entity instanceof Phantom;
     }
 
-    public void clearAllMetadata(Entity entity) {
+    public static void clearAllMetadata(Entity entity) {
         EntityManager.getInstance().clearAllMetadata(entity);
     }
 
-    public void addMetadata(Entity entity, String key, Object value) {
+    public static void addMetadata(Entity entity, String key, Object value) {
         EntityManager.getInstance().addMetadata(entity, key, value);
     }
 
-    public void removeMetadata(Entity entity, String key) {
+    public static void removeMetadata(Entity entity, String key) {
         EntityManager.getInstance().removeMetadata(entity, key);
     }
 
-    public boolean hasMetadata(Entity entity, String key) {
+    public static boolean hasMetadata(Entity entity, String key) {
         return EntityManager.getInstance().hasMetadata(entity, key);
     }
 
-    public @Nullable Object getMetadataValue(Entity entity, String key) {
+    public static @Nullable Object getMetadataValue(Entity entity, String key) {
         return EntityManager.getInstance().getMetadataValue(entity, key);
+    }
+
+    public static @Nullable BaseEntity getBaseEntity(Entity entity) {
+        String id = entity.getPersistentDataContainer().get(Keys.MOB_ID, PersistentDataType.STRING);
+        if (id == null) return null;
+        return EntityRegistry.getInstance().getBaseEntity(id);
     }
 }

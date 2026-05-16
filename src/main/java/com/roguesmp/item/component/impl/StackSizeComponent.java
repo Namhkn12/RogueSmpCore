@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 public record StackSizeComponent(int size) implements ItemComponent {
     @Override
     public @NotNull ItemComponent copy() {
-        return new StackSizeComponent(size);
+        return this;
     }
 
     @Override
