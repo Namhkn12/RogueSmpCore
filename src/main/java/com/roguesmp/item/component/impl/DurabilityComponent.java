@@ -9,7 +9,7 @@ public record DurabilityComponent(int maxDurability) implements ItemComponent {
 
     @Override
     public @NotNull ItemComponent copy() {
-        return new DurabilityComponent(maxDurability);
+        return this;
     }
 
     @Override

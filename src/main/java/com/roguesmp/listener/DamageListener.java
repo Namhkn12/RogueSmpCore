@@ -51,11 +51,10 @@ public class DamageListener implements Listener {
                 }
             }
 
-            DamageEvent.Metadata metadata = DamageUtils.nextMetadata;
             DamageEvent damageEvent;
             double originalDamage = event.getDamage();
-            if (metadata != null) { // Damage caused by plugin via DamageUtils
-                damageEvent = new DamageEvent(victim, damager, originalDamage, metadata);
+            if (DamageUtils.nextMetadata != null) { // Damage caused by plugin via DamageUtils
+                damageEvent = new DamageEvent(victim, damager, originalDamage, DamageUtils.nextMetadata);
                 DamageUtils.nextMetadata = null;
             } else {
                 DamageType damageType = DamageType.getType(event.getCause());
@@ -85,9 +84,9 @@ public class DamageListener implements Listener {
         if (event.isCancelled()) return;
         Entity victim = event.getVictim();
 
-        double offsetX = (Utils.RANDOM.nextDouble() - 0.5) * 1.3;
+        double offsetX = (Utils.RANDOM.nextDouble() - 0.5) * 1.4;
         double offsetY = (Utils.RANDOM.nextDouble() * 0.8) + 1;
-        double offsetZ = (Utils.RANDOM.nextDouble() - 0.5) * 1.3;
+        double offsetZ = (Utils.RANDOM.nextDouble() - 0.5) * 1.4;
         Location spawnLoc = victim.getLocation().add(offsetX, offsetY, offsetZ);
 
         DamageDisplayUtils.spawnDamageDisplay(

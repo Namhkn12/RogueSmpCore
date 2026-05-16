@@ -54,7 +54,7 @@ public class PotionContentComponent implements ItemComponent {
 
     @Override
     public @NotNull ItemComponent copy() {
-        return new PotionContentComponent(color, effects);
+        return this;
     }
 
     @Override

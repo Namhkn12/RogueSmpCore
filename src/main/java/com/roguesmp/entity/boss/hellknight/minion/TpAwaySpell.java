@@ -73,7 +73,13 @@ public class TpAwaySpell extends Spell {
 
     private Location getRandomLocationAroundAltar() {
         Random random = Utils.RANDOM;
-        Location altarLocation = smpEntity.getMainBoss().getAltarLocation();
+        Location altarLocation;
+        if (smpEntity.getMainBoss() == null){
+            LivingEntity entity = smpEntity.getEntity();
+            altarLocation = entity.getLocation();
+        } else {
+            altarLocation = smpEntity.getMainBoss().getAltarLocation();
+        }
         double angle = random.nextDouble() * 2 * Math.PI;
         double r = random.nextDouble() * tpRadius;
 

@@ -49,7 +49,7 @@ public class GemDataComponent implements ItemComponent {
 
     @Override
     public @NotNull ItemComponent copy() {
-        return new GemDataComponent(attributes);
+        return this;
     }
 
     public @Unmodifiable Map<EquipSlot, Map<Attributes, Double>> getAttributes() {

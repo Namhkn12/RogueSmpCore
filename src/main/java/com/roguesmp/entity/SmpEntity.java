@@ -81,7 +81,7 @@ public class SmpEntity {
             taskActive = entity.getScheduler().runAtFixedRate(
                     plugin,
                     task -> runActiveSpellTask(ACTIVE_RUN_INTERVAL_DEFAULT),
-                    null,
+                    this::unload,
                     spellDelay,
                     ACTIVE_RUN_INTERVAL_DEFAULT
             );
@@ -91,7 +91,7 @@ public class SmpEntity {
             taskPassive = entity.getScheduler().runAtFixedRate(
                     plugin,
                     task -> runPassiveSpellTask(passiveIntervalTicks),
-                    null,
+                    this::unload,
                     1L,
                     passiveIntervalTicks
             );

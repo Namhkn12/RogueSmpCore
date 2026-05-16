@@ -17,7 +17,6 @@ import com.roguesmp.registry.entity.EntityRegistry;
 import com.roguesmp.utils.*;
 import io.papermc.paper.registry.keys.SoundEventKeys;
 import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -84,7 +83,7 @@ public class HellKnight extends SmpEntity {
                 new PeriodicLightningStrike(this, 15, 160, 25, 3)
         );
         phase3Active = Arrays.asList(
-                new InfernalCleave(this, 25, 26, 220, 40),
+                new InfernalCleave(this, 25, 26, 180, 40),
                 new MultiTargetBoltSpell(this, 12, 1.3, 1, 3, 15),
                 new LineChargeSpell(this, 15, 2.0, 30, 3,20, 100)
         );
@@ -116,8 +115,8 @@ public class HellKnight extends SmpEntity {
             this.changePhase(SpellManager.EMPTY, Collections.emptyList(), null);
 
             getParticipants().forEach(player -> {
-                player.playSound(Sound.sound(SoundEventKeys.ENTITY_WITHER_AMBIENT, Sound.Source.HOSTILE, 0.5f, 1.2f));
-                player.playSound(Sound.sound(SoundEventKeys.ENTITY_ENDER_DRAGON_GROWL, Sound.Source.HOSTILE, 1.2f, 0.8f));
+                player.playSound(entity, org.bukkit.Sound.ENTITY_WITHER_AMBIENT, SoundCategory.HOSTILE, 0.5f, 1.2f);
+                player.playSound(entity, org.bukkit.Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.HOSTILE, 1.2f, 0.8f);
 
                 EffectManager.getInstance().addEffect(player, "HkTransitionSlowness", new SpeedEffect(40, 0.2, "hk_transition_slowness"));
             });
@@ -151,8 +150,8 @@ public class HellKnight extends SmpEntity {
             });
 
             getParticipants().forEach(player -> {
-                player.playSound(Sound.sound(SoundEventKeys.ENTITY_WITHER_AMBIENT, Sound.Source.HOSTILE, 0.5f, 1.2f));
-                player.playSound(Sound.sound(SoundEventKeys.ENTITY_ENDER_DRAGON_GROWL, Sound.Source.HOSTILE, 1.2f, 0.8f));
+                player.playSound(entity, org.bukkit.Sound.ENTITY_WITHER_AMBIENT, SoundCategory.HOSTILE, 0.5f, 1.2f);
+                player.playSound(entity, org.bukkit.Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.HOSTILE, 1.2f, 0.8f);
 
                 EffectManager.getInstance().addEffect(player, "HkTransitionSlowness", new SpeedEffect(40, 0.2, "hk_transition_slowness"));
             });
@@ -183,8 +182,8 @@ public class HellKnight extends SmpEntity {
             this.changePhase(SpellManager.EMPTY, Collections.emptyList(), null);
 
             getParticipants().forEach(player -> {
-                player.playSound(Sound.sound(SoundEventKeys.ENTITY_WITHER_AMBIENT, Sound.Source.HOSTILE, 0.5f, 1.2f));
-                player.playSound(Sound.sound(SoundEventKeys.ENTITY_ENDER_DRAGON_GROWL, Sound.Source.HOSTILE, 1.2f, 0.8f));
+                player.playSound(entity, org.bukkit.Sound.ENTITY_WITHER_AMBIENT, SoundCategory.HOSTILE, 0.5f, 1.2f);
+                player.playSound(entity, org.bukkit.Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.HOSTILE, 1.2f, 0.8f);
 
                 EffectManager.getInstance().addEffect(player, "HkTransitionSlowness", new SpeedEffect(40, 0.2, "hk_transition_slowness"));
             });
@@ -203,7 +202,7 @@ public class HellKnight extends SmpEntity {
                 entity.teleport(altarLocation.clone().add(1.5, 1, 1.5));
 
                 // 4. Visual/Audio Flair for the TP
-                entity.getWorld().playSound(Sound.sound(SoundEventKeys.ENTITY_ENDERMAN_TELEPORT, SoundCategory.HOSTILE,2f, 0.8f));
+                entity.getWorld().playSound(entity, org.bukkit.Sound.ENTITY_ENDERMAN_TELEPORT, 2f, 0.8f);
                 entity.getWorld().spawnParticle(Particle.REVERSE_PORTAL, altarLocation.clone().add(0, 1, 0), 50, 0.5, 1, 0.5, 0.1);
 
                 // 5. The Mounting
@@ -217,7 +216,7 @@ public class HellKnight extends SmpEntity {
                     // Re-enable AI or start the next phase movement logic
                     setAi(true);
 
-                    companion.changePhase(new SpellManager(List.of(new InfernalTremor(companion.getEntity(), 14, 3, 30,40, 1.2, 30))), Collections.emptyList(), null);
+                    companion.changePhase(new SpellManager(List.of(new InfernalTremor(companion.getEntity(), 14, 2, 30,40, 1.2, 30))), Collections.emptyList(), null);
                     HellKnight.this.changePhase(new SpellManager(phase4Active), phase4Passive, null);
                 });
 
@@ -249,7 +248,7 @@ public class HellKnight extends SmpEntity {
 
                     // Hiệu ứng âm thanh tụ năng lượng (tăng pitch dần)
                     if (ticks % 5 == 0) {
-                        world.playSound(Sound.sound(SoundEventKeys.ENTITY_BLAZE_SHOOT, Sound.Source.HOSTILE, 1.5f, (float) (0.5 + progress)), Sound.Emitter.self());
+                        entity.getWorld().playSound(entity, org.bukkit.Sound.ENTITY_BLAZE_SHOOT, SoundCategory.HOSTILE,1.5f, (float) (0.5 + progress));
                     }
 
                     // Tạo nhiều vòng xoáy hạt khác nhau
@@ -276,7 +275,7 @@ public class HellKnight extends SmpEntity {
                     entity.setInvisible(false);
                     world.strikeLightningEffect(center);
                     world.spawnParticle(Particle.EXPLOSION_EMITTER, center, 3);
-                    world.playSound(Sound.sound(SoundEventKeys.ENTITY_WITHER_SPAWN, Sound.Source.HOSTILE, 2.0f, 0.5f));
+                    entity.getWorld().playSound(entity, org.bukkit.Sound.ENTITY_WITHER_SPAWN, SoundCategory.HOSTILE, 2f, 0.5f);
 
                     PlayerUtils.playersInRange(entity.getLocation(), 6, true).forEach(player -> {
                         // 1. Get the direction vector
@@ -332,7 +331,7 @@ public class HellKnight extends SmpEntity {
 
                 if (timer % 5 == 0) {
                     summonLoc.getWorld().spawnParticle(Particle.BLOCK, summonLoc, 10, 0.5, 0.1, 0.5, 0, Material.DIRT.createBlockData());
-                    summonLoc.getWorld().playSound(Sound.sound(SoundEventKeys.BLOCK_GRAVEL_BREAK, Sound.Source.HOSTILE,1.2f, 0.5f));
+                    entity.getWorld().playSound(entity, org.bukkit.Sound.BLOCK_GRAVEL_BREAK, SoundCategory.HOSTILE,1.5f, 0.5f);
                 }
 
                 double angle = timer * 0.5;
@@ -345,7 +344,7 @@ public class HellKnight extends SmpEntity {
 
                 // 3. Audio: Increasing pitch roar
                 if (timer == 40) {
-                    summonLoc.getWorld().playSound(Sound.sound(SoundEventKeys.ENTITY_RAVAGER_ROAR, Sound.Source.HOSTILE, 1.5f, 0.5f));
+                    entity.getWorld().playSound(entity, Sound.ENTITY_RAVAGER_ROAR, SoundCategory.HOSTILE,1.5f, 0.5f);
                 }
 
                 timer++;

@@ -1,11 +1,9 @@
 package com.roguesmp.entity;
 
+import com.roguesmp.registry.SkinRegistry;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.DyedItemColor;
-import io.papermc.paper.datacomponent.item.ItemArmorTrim;
-import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
-import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.datacomponent.item.*;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Color;
@@ -31,8 +29,9 @@ public class EntityEquipment {
     private final String trimMaterial;
     private final String trimPattern;
     private final String dyeColor;
+    private final String headSkin;
 
-    public EntityEquipment(Material material, String displayName, List<String> lore, boolean enchantGlint, String trimMaterial, String trimPattern, String dyeColor) {
+    public EntityEquipment(Material material, String displayName, List<String> lore, boolean enchantGlint, String trimMaterial, String trimPattern, String dyeColor, String headSkin) {
         this.material = material;
         this.displayName = displayName;
         this.lore = lore;
@@ -40,6 +39,7 @@ public class EntityEquipment {
         this.trimMaterial = trimMaterial;
         this.trimPattern = trimPattern;
         this.dyeColor = dyeColor;
+        this.headSkin = headSkin;
     }
 
     public ItemStack createItemStack() {
@@ -72,6 +72,14 @@ public class EntityEquipment {
                                     Integer.parseInt(parts[3]))
                             )
             );
+
+        }
+
+        if (headSkin != null) {
+            SkinRegistry.SkinData skinData = SkinRegistry.getInstance().getSkin(headSkin);
+            if (skinData != null) {
+                itemStack.setData(DataComponentTypes.PROFILE, ResolvableProfile.resolvableProfile(skinData.getProfile()));
+            }
 
         }
 

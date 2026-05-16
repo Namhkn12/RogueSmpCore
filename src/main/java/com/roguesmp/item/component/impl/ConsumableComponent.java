@@ -88,7 +88,8 @@ public class ConsumableComponent implements ItemComponent {
 
     @Override
     public @NotNull ItemComponent copy() {
-        return new ConsumableComponent(effects, hunger, saturation, canAlwaysEat, consumeSeconds, animation, sound, hasParticles);
+//        return new ConsumableComponent(effects, hunger, saturation, canAlwaysEat, consumeSeconds, animation, sound, hasParticles);
+        return this;
     }
 
     /**
