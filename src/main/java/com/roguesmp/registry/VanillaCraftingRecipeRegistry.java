@@ -25,9 +25,9 @@ public class VanillaCraftingRecipeRegistry {
     }
 
     private void setup(){
-        steelFurnaceRecipe();
-        steelBlockRecipe();
-        electricSteelFurnaceRecipe();
+//        steelFurnaceRecipe();
+//        steelBlockRecipe();
+//        electricSteelFurnaceRecipe();
 
         int numberOfCustomRecipeAdded = 0;
         for(Recipe recipe : recipes){

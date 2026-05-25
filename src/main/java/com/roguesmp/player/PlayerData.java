@@ -18,12 +18,14 @@ public class PlayerData{
 
     private final UUID uuid;
     private int level;
+    private UUID islandId;
     private final Map<String, Integer> unlockedAbilities;
 
     private final Map<AbilityType, List<String>> equippedAbilities;
 
     public PlayerData(UUID uuid) {
         this.uuid = uuid;
+        this.islandId = null;
         this.unlockedAbilities = new HashMap<>();
         this.equippedAbilities = new EnumMap<>(AbilityType.class);
 
@@ -31,20 +33,6 @@ public class PlayerData{
         for (AbilityType type : AbilityType.values()) {
             equippedAbilities.put(type, new ArrayList<>(Collections.nCopies(type.getMaxSlots(), null)));
         }
-    }
-
-    // Clone constructor
-    public PlayerData(PlayerData other) {
-        this.uuid = other.uuid;
-        this.level = other.level;
-        this.unlockedAbilities = new HashMap<>(other.unlockedAbilities);
-        this.equippedAbilities = new EnumMap<>(AbilityType.class);
-
-        other.equippedAbilities.forEach((type, list) ->
-                this.equippedAbilities.put(type, new ArrayList<>(list))
-        );
-
-        this.dirty = other.dirty;
     }
 
     public void setEquippedAbility(AbilityType type, int index, @Nullable String abilityId) {
@@ -86,6 +74,12 @@ public class PlayerData{
     }
 
     public UUID getUuid() { return uuid; }
+    public @Nullable UUID getIslandId() {
+        return islandId;
+    }
+    public void setIslandId(@Nullable UUID islandId) {
+        this.islandId = islandId;
+    }
     public int getLevel() { return level; }
     public void setLevel(int level) { this.level = level; this.dirty = true; }
     public boolean isDirty() { return dirty; }

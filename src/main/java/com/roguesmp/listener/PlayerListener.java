@@ -3,6 +3,8 @@ package com.roguesmp.listener;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.island.IslandData;
+import com.roguesmp.island.IslandManager;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.*;
 import com.roguesmp.utils.ItemStackUtils;
@@ -27,29 +29,63 @@ public class PlayerListener implements Listener {
 
     private final PlayerManager playerManager;
     private final PlayerDataManager playerDataManager;
+    private final IslandManager islandManager;
 
-    public PlayerListener(PlayerManager playerManager, PlayerDataManager playerDataManager) {
+    public PlayerListener(PlayerManager playerManager, IslandManager islandManager) {
         this.playerManager = playerManager;
-        this.playerDataManager = playerDataManager;
+        this.playerDataManager = playerManager.getDataManager();
+        this.islandManager = islandManager;
     }
 
     @EventHandler
     public void onPlayerPreJoin(AsyncPlayerPreLoginEvent event) {
         UUID uuid = event.getUniqueId();
         PlayerData playerData = playerDataManager.loadPlayerData(uuid);
-        Utils.runLater(() -> playerDataManager.cacheData(playerData));
+        IslandData islandData = islandManager.getIslandDataManager().loadIslandData(playerData.getIslandId());
+        Utils.runLater(() -> {
+            playerDataManager.cacheData(playerData);
+            if (islandData != null) {
+                islandManager.getIslandDataManager().cache(islandData);
+            }
+        });
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        playerManager.loadPlayer(player.getUniqueId());
+        playerManager.loadAndTrackPlayer(player.getUniqueId());
     }
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        playerManager.unloadPlayer(player.getUniqueId());
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(player);
+        if (smpPlayer == null) return;
+
+        PlayerData playerData = playerManager.getDataManager().removeCachedData(smpPlayer.getUuid());
+        playerManager.untrackPlayer(smpPlayer.getUuid());
+
+        IslandData islandData = islandManager.getIslandDataManager().getCachedData(playerData.getIslandId());
+        if (islandData != null) {
+            boolean islandEmpty = true;
+            for (UUID memberId : islandData.getMembers()) {
+                if (memberId.equals(player.getUniqueId())) continue;
+
+                Player onlineMember = Bukkit.getPlayer(memberId);
+                if (onlineMember != null && onlineMember.isOnline()) {
+                    islandEmpty = false;
+                    break; // Keep it loaded, some member is still online
+                }
+            }
+            if (islandEmpty) {
+                islandManager.getIslandDataManager().removeCache(playerData.getIslandId());
+                Utils.runAsync(() -> islandManager.getIslandDataManager().saveIslandData(islandData));
+            }
+        }
+
+        Utils.runAsync(() -> {
+            playerManager.getDataManager().savePlayerData(playerData);
+        });
     }
 
     @EventHandler
