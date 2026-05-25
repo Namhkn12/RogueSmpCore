@@ -2,6 +2,8 @@ package com.roguesmp.player;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.utils.Utils;
+import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.HashMap;
@@ -14,11 +16,9 @@ import java.util.UUID;
 public class PlayerDataManager {
     public static final String FOLDER = "player_data";
 
-    private static PlayerDataManager INSTANCE;
-
     private final Map<UUID, PlayerData> playerDataCache = new HashMap<>();
 
-    private PlayerDataManager() {
+    public PlayerDataManager() {
 
     }
 
@@ -30,26 +30,26 @@ public class PlayerDataManager {
         return playerDataCache.remove(uuid);
     }
 
-    public void savePlayerData(PlayerData data) {
-        if (data == null) return;
-
+    public @Blocking void savePlayerData(PlayerData playerData) {
+        if (playerData == null) return;
+        String dataStr = Utils.GSON.toJson(playerData); //Basically a snapshot
 
         File folder = new File(RogueSmpCore.getInstance().getDataFolder(), FOLDER);
         if (!folder.exists()) {
             folder.mkdirs();
         }
 
-        File file = new File(folder, data.getUuid().toString() + ".json");
+        File file = new File(folder, playerData.getUuid().toString() + ".json");
 
         try (Writer writer = new FileWriter(file)) {
-            Utils.GSON.toJson(data, writer);
-            RogueSmpCore.LOGGER.info("Player data saved (uuid: {})", data.getUuid());
+            Utils.GSON.toJson(dataStr, writer);
+            RogueSmpCore.LOGGER.info("Player data saved (uuid: {})", playerData.getUuid());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public PlayerData loadPlayerData(UUID uuid) {
+    public @Blocking PlayerData loadPlayerData(UUID uuid) {
         RogueSmpCore.LOGGER.info("Loading player data (uuid: {})", uuid);
         File folder = new File(RogueSmpCore.getInstance().getDataFolder(), FOLDER);
         if (!folder.exists()) {
@@ -79,22 +79,11 @@ public class PlayerDataManager {
         }
     }
 
-    public PlayerData getData(UUID uuid) {
+    public @Nullable PlayerData getData(UUID uuid) {
         return playerDataCache.get(uuid);
     }
 
     private static PlayerData createDefault(UUID uuid) {
         return new PlayerData(uuid);
-    }
-
-    public static void init() {
-        INSTANCE = new PlayerDataManager();
-    }
-
-    public static PlayerDataManager getInstance() {
-        if (INSTANCE == null) {
-            throw new RuntimeException("PlayerDataManager is null");
-        }
-        return INSTANCE;
     }
 }

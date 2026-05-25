@@ -36,7 +36,6 @@ import java.util.*;
 public class SmpPlayer {
 
     private final UUID uuid;
-    private final @Nullable Player bukkitPlayer; //Shouldn't be null, but just to be sure
     private final Map<Enchants, Integer> activeEnchants;
     private final Map<Attributes, Double> activeAttributes;
 
@@ -49,7 +48,6 @@ public class SmpPlayer {
 
     public SmpPlayer(UUID uuid) {
         this.uuid = uuid;
-        this.bukkitPlayer = Bukkit.getPlayer(uuid);
         abilityLoadout = new AbilityLoadout(this);
         activeEnchants = new EnumMap<>(Enchants.class);
         activeAttributes = new EnumMap<>(Attributes.class);
@@ -151,19 +149,21 @@ public class SmpPlayer {
     }
 
     public PlayerData getPlayerData() {
-        return PlayerDataManager.getInstance().getData(uuid);
+        return PlayerManager.getInstance().getDataManager().getData(uuid);
     }
 
     public @Nullable Player getBukkitPlayer() {
-        return bukkitPlayer;
+        return Bukkit.getPlayer(uuid);
     }
 
     public void sendMessage(Component text) {
+        Player bukkitPlayer = getBukkitPlayer();
         if (bukkitPlayer == null) return;
         bukkitPlayer.sendMessage(text);
     }
 
     public void sendMessage(String text) {
+        Player bukkitPlayer = getBukkitPlayer();
         if (bukkitPlayer == null) return;
         bukkitPlayer.sendMessage(text);
     }
@@ -387,6 +387,7 @@ public class SmpPlayer {
     }
 
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
+        Player bukkitPlayer = getBukkitPlayer();
         if (bukkitPlayer == null) return;
 
         ItemStack offhand = bukkitPlayer.getEquipment().getItemInOffHand();

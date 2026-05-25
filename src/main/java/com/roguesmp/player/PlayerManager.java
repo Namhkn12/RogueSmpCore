@@ -1,7 +1,6 @@
 package com.roguesmp.player;
 
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -23,9 +22,9 @@ public class PlayerManager {
     private final PlayerDataManager dataManager;
     private final Map<UUID, SmpPlayer> players;
 
-    private PlayerManager(RogueSmpCore plugin, PlayerDataManager dataManager) {
+    private PlayerManager(RogueSmpCore plugin) {
         this.plugin = plugin;
-        this.dataManager = dataManager;
+        this.dataManager = new PlayerDataManager();
         players = new HashMap<>();
 
         new BukkitRunnable() {
@@ -47,7 +46,7 @@ public class PlayerManager {
         return getSmpPlayer(player.getUniqueId());
     }
 
-    public void loadPlayer(UUID uuid) {
+    public void loadAndTrackPlayer(UUID uuid) {
         SmpPlayer smpPlayer = new SmpPlayer(uuid);
         players.put(uuid, smpPlayer);
         PlayerData playerData = dataManager.getData(uuid);
@@ -55,12 +54,8 @@ public class PlayerManager {
         smpPlayer.loadData(playerData);
     }
 
-    public void unloadPlayer(UUID uuid) {
-        SmpPlayer smpPlayer = players.get(uuid);
-        if (smpPlayer == null) return;
-        PlayerData playerData = dataManager.removeCachedData(uuid);
+    public void untrackPlayer(UUID uuid) {
         players.remove(uuid);
-        Utils.runAsync(() -> dataManager.savePlayerData(playerData));
     }
 
     public void onDisable() {
@@ -72,6 +67,10 @@ public class PlayerManager {
         });
     }
 
+    public PlayerDataManager getDataManager() {
+        return dataManager;
+    }
+
     public static PlayerManager getInstance() {
         if (INSTANCE == null) {
             throw new RuntimeException(PlayerManager.class.getSimpleName() + "is null when getInstance() is called.");
@@ -79,7 +78,7 @@ public class PlayerManager {
         return INSTANCE;
     }
 
-    public static void init(RogueSmpCore core, PlayerDataManager dataManager) {
-        INSTANCE = new PlayerManager(core, dataManager);
+    public static void init(RogueSmpCore core) {
+        INSTANCE = new PlayerManager(core);
     }
 }

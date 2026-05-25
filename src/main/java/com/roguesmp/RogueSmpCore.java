@@ -13,15 +13,15 @@ import com.roguesmp.gui.SkinBrowserGui;
 import com.roguesmp.gui.TrashGui;
 import com.roguesmp.gui.ability.AbilityCatalogue;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
+import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
 import com.roguesmp.npc.NpcManager;
-import com.roguesmp.player.PlayerDataManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.registry.BlockRegistry;
 import com.roguesmp.registry.SkinRegistry;
+import com.roguesmp.registry.VanillaCraftingRecipeRegistry;
 import com.roguesmp.registry.entity.EntityRegistry;
 import com.roguesmp.registry.ItemRegistry;
-import com.roguesmp.registry.VanillaCraftingRecipeRegistry;
 import com.roguesmp.registry.ability.AbilityRegistry;
 import com.roguesmp.registry.npc.NpcRegistry;
 import com.roguesmp.utils.GlowUtils;
@@ -44,15 +44,18 @@ public final class RogueSmpCore extends JavaPlugin {
         new PlaceholderAPIIntegration(this).register();
         GlowUtils.init(this);
 
-        PlayerDataManager.init();
-
         ComponentKeys.loadClass();
 
         SkinRegistry.init();
 
-        //Player
         AbilityRegistry.init();
-        PlayerManager.init(this, PlayerDataManager.getInstance());
+
+        //Player
+        PlayerManager.init(this);
+
+        //Island
+        IslandManager.init(this, PlayerManager.getInstance());
+
         EffectManager.init(this);
         BlockManager.init(this);
 
@@ -95,6 +98,8 @@ public final class RogueSmpCore extends JavaPlugin {
 
         PlayerManager.getInstance().onDisable();
         DungeonRegistry.onDisable();
+
+        IslandManager.getInstance().onDisable();
     }
 
     // Register Listener here
@@ -104,11 +109,13 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new BlockListener());
 
         registerListener(new DamageListener());
-        registerListener(new PlayerListener(PlayerManager.getInstance(), PlayerDataManager.getInstance()));
+        registerListener(new PlayerListener(PlayerManager.getInstance(), IslandManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
         registerListener(new PigZombieSpawnListener(this));
         registerListener(new EntityListener(EntityManager.getInstance()));
         registerListener(new NpcListener(NpcManager.getInstance()));
+
+        registerListener(new IslandListener(IslandManager.getInstance()));
     }
 
     //Register CommandAPICommand
@@ -123,6 +130,8 @@ public final class RogueSmpCore extends JavaPlugin {
         AbilityCatalogue.register();
 
         TrashGui.register();
+
+        IslandManager.getInstance().registerCommands();
     }
 
     @Override

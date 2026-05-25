@@ -8,3 +8,5 @@ depend:
   - FastAsyncWorldEdit
   - TAB
   - PlaceholderAPI
+  - Multiverse-Core
+  - WorldGuard
