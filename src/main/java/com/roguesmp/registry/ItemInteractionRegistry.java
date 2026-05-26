@@ -1,6 +1,7 @@
 package com.roguesmp.registry;
 
 import com.roguesmp.item.interaction.ItemInteraction;
+import com.roguesmp.item.interaction.WalletInteraction;
 import com.roguesmp.item.interaction.WrenchInteraction;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +16,7 @@ public class ItemInteractionRegistry {
 
     static {
         register("wrench", new WrenchInteraction());
+        register("wallet", new WalletInteraction());
     }
 
     public static @Nullable ItemInteraction getInteraction(String id) {

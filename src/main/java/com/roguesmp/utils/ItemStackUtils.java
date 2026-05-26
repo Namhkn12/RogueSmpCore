@@ -76,6 +76,7 @@ public class ItemStackUtils {
      * Get the ItemStack's id
      */
     public static @Nullable String getId(ItemStack itemStack) {
+        if (itemStack == null) return null;
         PersistentDataContainerView pdc = itemStack.getPersistentDataContainer();
         return pdc.get(Keys.ITEM_ID, PersistentDataType.STRING);
     }

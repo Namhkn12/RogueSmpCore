@@ -49,6 +49,7 @@ public class GlowUtils {
     }
 
     public static void unsetGlow(Entity entity, Player player) {
+        if (entity == null || !entity.isValid()) return;
         try {
             glowingEntities.unsetGlowing(entity, player);
         } catch (ReflectiveOperationException e) {
@@ -57,6 +58,7 @@ public class GlowUtils {
     }
 
     public static void unsetGlow(Entity entity) {
+        if (entity == null || !entity.isValid()) return;
         entity.getWorld().getPlayers().forEach(player -> {
             unsetGlow(entity, player);
         });
