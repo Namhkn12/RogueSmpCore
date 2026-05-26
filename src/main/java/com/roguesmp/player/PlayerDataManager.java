@@ -32,7 +32,6 @@ public class PlayerDataManager {
 
     public @Blocking void savePlayerData(PlayerData playerData) {
         if (playerData == null) return;
-        String dataStr = Utils.GSON.toJson(playerData); //Basically a snapshot
 
         File folder = new File(RogueSmpCore.getInstance().getDataFolder(), FOLDER);
         if (!folder.exists()) {
@@ -42,7 +41,7 @@ public class PlayerDataManager {
         File file = new File(folder, playerData.getUuid().toString() + ".json");
 
         try (Writer writer = new FileWriter(file)) {
-            Utils.GSON.toJson(dataStr, writer);
+            Utils.GSON.toJson(playerData, writer);
             RogueSmpCore.LOGGER.info("Player data saved (uuid: {})", playerData.getUuid());
         } catch (IOException e) {
             e.printStackTrace();

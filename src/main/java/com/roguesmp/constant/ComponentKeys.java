@@ -21,6 +21,8 @@ public class ComponentKeys {
     public static final ComponentKey<ConsumableComponent> CONSUMABLE;
     public static final ComponentKey<PotionContentComponent> POTION_CONTENT;
     public static final ComponentKey<PlayerHeadSkinComponent> HEAD_SKIN;
+    public static final ComponentKey<WalletComponent> WALLET;
+    public static final ComponentKey<ItemModelComponent> ITEM_MODEL;
 
     static {
         ITEM_NAME = ItemComponentCodecRegistry.register("name",
@@ -40,6 +42,10 @@ public class ComponentKeys {
         POTION_CONTENT = ItemComponentCodecRegistry.register("potion_content", PotionContentComponent.class);
         HEAD_SKIN = ItemComponentCodecRegistry.register("head_skin",
                 ComponentCodec.singleArg(String.class, PlayerHeadSkinComponent::new, PlayerHeadSkinComponent::getSkinId));
+        WALLET = ItemComponentCodecRegistry.register("wallet",
+                ComponentCodec.singleArg(String.class, WalletComponent::new, WalletComponent::getCurrencyType));
+        ITEM_MODEL = ItemComponentCodecRegistry.register("item_model",
+                ComponentCodec.singleArg(String.class, ItemModelComponent::new, ItemModelComponent::getModelKey));
     }
 
     public static void loadClass() {
