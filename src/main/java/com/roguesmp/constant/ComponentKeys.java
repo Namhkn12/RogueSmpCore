@@ -43,7 +43,7 @@ public class ComponentKeys {
         HEAD_SKIN = ItemComponentCodecRegistry.register("head_skin",
                 ComponentCodec.singleArg(String.class, PlayerHeadSkinComponent::new, PlayerHeadSkinComponent::getSkinId));
         WALLET = ItemComponentCodecRegistry.register("wallet",
-                ComponentCodec.singleArg(String.class, WalletComponent::new, WalletComponent::getCurrencyType));
+                ComponentCodec.singleArg(Integer.class, WalletComponent::new, WalletComponent::getMaxSlot));
         ITEM_MODEL = ItemComponentCodecRegistry.register("item_model",
                 ComponentCodec.singleArg(String.class, ItemModelComponent::new, ItemModelComponent::getModelKey));
     }

@@ -14,6 +14,7 @@ public record DurabilityComponent(int maxDurability) implements ItemComponent {
 
     @Override
     public void modifyStack(ItemDataContext context) {
+        context.newStack().unsetData(DataComponentTypes.UNBREAKABLE);
         context.newStack().setData(DataComponentTypes.MAX_DAMAGE, maxDurability);
         Integer duraDmg = context.oldStack().getData(DataComponentTypes.DAMAGE);
         if (duraDmg != null && duraDmg > 0) {

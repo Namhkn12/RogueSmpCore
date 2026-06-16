@@ -1,7 +1,9 @@
 package com.roguesmp.utils;
 
+import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.item.BaseItem;
+import com.roguesmp.item.component.impl.WalletComponent;
 import com.roguesmp.registry.ItemRegistry;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -20,14 +22,11 @@ public class WalletUtils {
     public static final int VALUE_INGOT = 64;
     public static final int VALUE_BLOCK = 64 * 64; // 4096
 
-    // 27 Slots * 64 Items/Slot * 4096 Nuggets/Item = 7,077,888 max capacity
-    public static final int MAX_CURRENCY = 64 * 64 * 64 * 27;
-
     // Registry Identifiers
     public static final String BLOCK_ID = "copper_block_currency";
     public static final String INGOT_ID = "copper_ingot_currency";
     public static final String NUGGET_ID = "copper_nugget_currency";
-    public static final String WALLET_ID = "wallet";
+    public static final String WALLET_ID_PREFIX = "wallet";
 
     public static boolean isCurrency(ItemStack itemStack) {
         String id = ItemStackUtils.getId(itemStack);
@@ -38,7 +37,7 @@ public class WalletUtils {
     public static boolean isWalletItem(ItemStack itemStack) {
         String id = ItemStackUtils.getId(itemStack);
         if (id == null) return false;
-        return id.equals(WALLET_ID);
+        return id.startsWith(WALLET_ID_PREFIX);
     }
 
     public static int calculateMoneyValue(ItemStack item) {
@@ -101,6 +100,25 @@ public class WalletUtils {
     }
 
     /**
+     * Get how much currency this item can hold
+     */
+    public static int getCapacity(ItemStack itemStack) {
+        return getSlotCapacity(itemStack) * VALUE_BLOCK * 64;
+    }
+
+    /**
+     * Get how much slot this wallet has
+     */
+    public static int getSlotCapacity(ItemStack itemStack) {
+        if (!isWalletItem(itemStack)) return 0;
+        BaseItem walletBase = SmpItemUtils.getBaseItem(itemStack);
+        if (walletBase == null) return 0;
+        WalletComponent walletComponent = walletBase.getComponent(ComponentKeys.WALLET);
+        if (walletComponent == null) return 0;
+        return walletComponent.getMaxSlot();
+    }
+
+    /**
      * Get how much money this itemstack might have stored.
      */
     public static int getBalance(ItemStack itemStack) {
@@ -114,7 +132,7 @@ public class WalletUtils {
      */
     public static void setBalance(ItemStack itemStack, int amount) {
         if (!isWalletItem(itemStack)) return;
-        int boundedAmount = Math.max(0, Math.min(amount, MAX_CURRENCY));
+        int boundedAmount = Math.max(0, Math.min(amount, getCapacity(itemStack)));
         itemStack.editPersistentDataContainer(pdc -> pdc.set(DATA_ID, PersistentDataType.INTEGER, boundedAmount));
     }
 
@@ -129,7 +147,7 @@ public class WalletUtils {
         if (!isWalletItem(itemStack) || amount <= 0) return amount;
 
         int currentBalance = getBalance(itemStack);
-        int maxRoomLeft = MAX_CURRENCY - currentBalance;
+        int maxRoomLeft = getCapacity(itemStack) - currentBalance;
 
         if (maxRoomLeft <= 0) return amount;
 

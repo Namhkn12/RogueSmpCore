@@ -107,6 +107,26 @@ public class PlayerListener implements Listener {
         }
     }
 
+//    @EventHandler
+//    public void onWorldChange(PlayerChangedWorldEvent event) {
+//        Player player = event.getPlayer();
+//        SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
+//        if (smpPlayer == null) return;
+//
+//        for (EquipSlot slot : EquipSlot.values()) {
+//            smpPlayer.markForInstantUpdate(slot);
+//        }
+//    }
+//
+//    @EventHandler
+//    public void onItemDamage(PlayerItemDamageEvent event) {
+//        Player player = event.getPlayer();
+//        SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
+//        if (smpPlayer == null) return;
+//        smpPlayer.
+//        event.setDamage(1); //Always 1.
+//    }
+
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());

@@ -120,7 +120,6 @@ public class IslandManager {
         // Update values and update active team references
         islandData.setSpawnLocation(targetLocation);
 
-        Utils.runAsync(() -> islandDataManager.saveIslandData(islandData));
         return true;
     }
 

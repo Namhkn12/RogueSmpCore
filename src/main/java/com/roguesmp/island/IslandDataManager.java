@@ -27,19 +27,20 @@ public class IslandDataManager {
 
     public @Blocking void saveIslandData(IslandData islandData) {
         if (islandData == null) return;
-        RogueSmpCore.LOGGER.info("Saving island data with ID: {}", islandData.getIslandId());
+        IslandData clone = new IslandData(islandData);
+        RogueSmpCore.LOGGER.info("Saving island data with ID: {}", clone.getIslandId());
         File dataFolder = new File(plugin.getDataFolder(), FOLDER_NAME);
         if (!dataFolder.exists()) {
             dataFolder.mkdirs();
         }
 
-        File file = new File(dataFolder, islandData.getIslandId().toString() + ".json");
+        File file = new File(dataFolder, clone.getIslandId().toString() + ".json");
 
         try (FileWriter writer = new FileWriter(file)) {
-            Utils.GSON.toJson(islandData, writer);
-            RogueSmpCore.LOGGER.info("Saved island data with ID: {}", islandData.getIslandId());
+            Utils.GSON.toJson(clone, writer);
+            RogueSmpCore.LOGGER.info("Saved island data with ID: {}", clone.getIslandId());
         } catch (Exception e) {
-            RogueSmpCore.LOGGER.error("Failed to save island data for ID: {}", islandData.getIslandId(), e);
+            RogueSmpCore.LOGGER.error("Failed to save island data for ID: {}", clone.getIslandId(), e);
         }
     }
 

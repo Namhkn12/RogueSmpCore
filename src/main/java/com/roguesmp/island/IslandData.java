@@ -44,6 +44,15 @@ public class IslandData {
         this.gridIndex = -1;
     }
 
+    public IslandData(IslandData source) {
+        this.islandId = source.islandId;
+        this.gridIndex = source.gridIndex;
+        this.members = new HashSet<>(source.members);
+        this.spawnLocation = source.spawnLocation;
+        this.archived = source.archived;
+        this.dirty = source.dirty;
+    }
+
     public UUID getIslandId() {
         return islandId;
     }

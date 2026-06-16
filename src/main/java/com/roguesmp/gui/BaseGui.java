@@ -153,18 +153,9 @@ public abstract class BaseGui implements InventoryHolder {
         int slot = event.getSlot();
         ClickHandler handler = handlerMap.get(slot);
         if (handler == null) {
-            this.onClick(event);
             return;
         }
         handler.onClick(event);
-    }
-
-    /**
-     * Override this if normal button function is not enough, there should be no ClickHandler bound to the clicked slot
-     * @param event The event
-     */
-    public void onClick(InventoryClickEvent event) {
-
     }
 
     /**
