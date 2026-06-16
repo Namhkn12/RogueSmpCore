@@ -16,6 +16,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -44,7 +45,10 @@ public class ItemBrowser extends BaseGui {
         nextPage.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang kế", NamedTextColor.GREEN));
         prePage.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang trước", NamedTextColor.GREEN));
         infoBook.setData(DataComponentTypes.ITEM_NAME, Component.text("Item Browser", NamedTextColor.GREEN));
-        infoBook.setData(DataComponentTypes.LORE, ItemLore.lore(Collections.singletonList(Component.text("Bấm vào một item để nhận", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false))));
+        infoBook.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
+                Utils.text("Bấm vào một item để nhận", NamedTextColor.GREEN),
+                Utils.text("Shift-Click để nhận stack.", NamedTextColor.GREEN))
+        ));
         totalPages = getTotalPages();
     }
 
@@ -80,8 +84,14 @@ public class ItemBrowser extends BaseGui {
         for (var entry : pageEntries) {
             ItemStack itemStack = entry.getValue().generateItemStack(null, 1);
             this.addButton(i, itemStack, event -> {
-                event.getWhoClicked().getInventory().addItem(itemStack);
                 event.setCancelled(true);
+                if (event.getClick().isShiftClick()) {
+                    ItemStack toGive = itemStack.clone();
+                    toGive.setAmount(itemStack.getDataOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1));
+                    event.getWhoClicked().getInventory().addItem(toGive);
+                    return;
+                }
+                event.getWhoClicked().getInventory().addItem(itemStack);
             });
             i++;
         }
@@ -97,6 +107,11 @@ public class ItemBrowser extends BaseGui {
         }
 
         return entries.subList(fromIndex, toIndex);
+    }
+
+    @Override
+    public void onClickBottomInventory(InventoryClickEvent event) {
+        event.setCancelled(true);
     }
 
     private int getTotalPages() {

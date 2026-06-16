@@ -132,14 +132,12 @@ public class SmpItem {
      */
     public ItemStack generateItemStack(@Nullable SmpPlayer player, int stackAmount) {
         if (baseItem == null) return itemStack;
-        if (loadedModifiers) {
-            RogueSmpCore.LOGGER.warn("Calling generateItemStack again on the same SmpItem instance, the result ItemStack will not reflect the change!");
-        }
 
         ItemStack result = ItemStack.of(baseItem.getBase(), stackAmount);
 
-        result.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Set.of(DataComponentTypes.ENCHANTMENTS, DataComponentTypes.ATTRIBUTE_MODIFIERS)).build());
+        result.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Set.of(DataComponentTypes.ENCHANTMENTS, DataComponentTypes.ATTRIBUTE_MODIFIERS, DataComponentTypes.UNBREAKABLE)).build());
         result.unsetData(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+        result.setData(DataComponentTypes.UNBREAKABLE);
 //        result.setData(DataComponentTypes.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.itemAttributes().build());
 
         PersistentDataContainerView oldData = itemStack.getPersistentDataContainer();

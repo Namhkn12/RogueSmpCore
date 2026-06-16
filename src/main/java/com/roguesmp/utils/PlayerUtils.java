@@ -55,6 +55,7 @@ public class PlayerUtils {
      * Give items to players and drop items that are not fit on the ground, only the owner can see and pick up the dropped item
      */
     public static void giveItem(Player player, ItemStack... itemStacks) {
+        if (player == null) return;
         List<ItemStack> normalItemsToGive = new ArrayList<>();
 
         for (ItemStack item : itemStacks) {
@@ -92,6 +93,10 @@ public class PlayerUtils {
                 }
             }
         }
+    }
+
+    public static void giveItem(Player player, List<ItemStack> items) {
+        giveItem(player, items.toArray(new ItemStack[0]));
     }
 
     /**

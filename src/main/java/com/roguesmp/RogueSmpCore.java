@@ -17,6 +17,7 @@ import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
 import com.roguesmp.npc.NpcManager;
 import com.roguesmp.player.PlayerManager;
+import com.roguesmp.quest.QuestManager;
 import com.roguesmp.registry.BlockRegistry;
 import com.roguesmp.registry.SkinRegistry;
 import com.roguesmp.registry.VanillaCraftingRecipeRegistry;
@@ -24,6 +25,7 @@ import com.roguesmp.registry.entity.EntityRegistry;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.registry.ability.AbilityRegistry;
 import com.roguesmp.registry.npc.NpcRegistry;
+import com.roguesmp.registry.quest.QuestRegistry;
 import com.roguesmp.utils.GlowUtils;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -56,6 +58,10 @@ public final class RogueSmpCore extends JavaPlugin {
         //Island
         IslandManager.init(this, PlayerManager.getInstance());
 
+        //Quest
+        QuestRegistry.init(this);
+        QuestManager.init(this, QuestRegistry.getInstance());
+
         EffectManager.init(this);
         BlockManager.init(this);
 
@@ -86,6 +92,7 @@ public final class RogueSmpCore extends JavaPlugin {
         BlockStorage.getInstance().loadFromFile();
         AbilityRegistry.getInstance().loadAll();
         NpcRegistry.getInstance().loadData();
+        QuestRegistry.getInstance().loadQuest();
 
         Tags.loadTagData(this);
     }
@@ -100,6 +107,7 @@ public final class RogueSmpCore extends JavaPlugin {
         DungeonRegistry.onDisable();
 
         IslandManager.getInstance().onDisable();
+        QuestManager.getInstance().onDisable();
     }
 
     // Register Listener here
@@ -117,6 +125,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         registerListener(new IslandListener(IslandManager.getInstance()));
         registerListener(new WalletPickupListener());
+        registerListener(new QuestListener(QuestManager.getInstance()));
     }
 
     //Register CommandAPICommand
@@ -133,6 +142,7 @@ public final class RogueSmpCore extends JavaPlugin {
         TrashGui.register();
 
         IslandManager.getInstance().registerCommands();
+        QuestManager.getInstance().registerQuestCommand();
     }
 
     @Override

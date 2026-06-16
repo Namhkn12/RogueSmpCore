@@ -1,30 +1,25 @@
 package com.roguesmp.gui;
 
-import com.roguesmp.RogueSmpCore;
-import com.roguesmp.item.BaseItem;
-import com.roguesmp.item.component.impl.WalletComponent;
-import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.WalletUtils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ItemLore;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.NamespacedKey;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
 
 public class WalletGui extends BaseGui {
 
     private final ItemStack walletItem;
-    private final Player player;
+    private final int slot;
 
     public WalletGui(ItemStack walletItem, Player player) {
         // Automatically reads the item's custom name via Paper components if it exists
@@ -32,7 +27,7 @@ public class WalletGui extends BaseGui {
                 ? walletItem.getData(DataComponentTypes.CUSTOM_NAME)
                 : Component.text("Ví Đồng", NamedTextColor.GOLD), 3);
         this.walletItem = walletItem;
-        this.player = player;
+        this.slot = WalletUtils.getSlotCapacity(walletItem);
     }
 
     @Override
@@ -40,14 +35,15 @@ public class WalletGui extends BaseGui {
         // Prevent layout ghosting when updating balances dynamically
         clearUi();
 
-        int totalNuggets;
-        Integer value = walletItem.getPersistentDataContainer().get(WalletUtils.DATA_ID, PersistentDataType.INTEGER);
-        if (value == null) {
-            player.sendMessage(Utils.fromString("<red>Vật phẩm này không chưa data của ví? ඞ"));
-            RogueSmpCore.LOGGER.warn("Người chơi {} muốn mở WalletGui nhưng Wallet ItemStack không chứa data? Very sus", player.getName());
-            return;
+        ItemStack blockedSlotItem = ItemStack.of(Material.BLACK_STAINED_GLASS_PANE);
+        blockedSlotItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Không khả dụng", NamedTextColor.GRAY));
+        blockedSlotItem.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(Utils.text("Biết đâu bạn sẽ tìm được chiếc ví to hơn...", NamedTextColor.DARK_GRAY))));
+
+        for (int i = slot; i < getInventory().getSize(); i++) {
+            addButton(i, blockedSlotItem, ClickHandler.noAction());
         }
-        totalNuggets = value;
+
+        int totalNuggets = WalletUtils.getBalance(walletItem);
 
         List<ItemStack> currencyStacks = WalletUtils.convertMoneyToPhysicalItems(totalNuggets);
 
@@ -122,5 +118,19 @@ public class WalletGui extends BaseGui {
             }
         }
         WalletUtils.setBalance(walletItem, totalNuggets);
+    }
+
+    /**
+     * Loops through current UI layout windows to extract live totals.
+     */
+    private int getCurrentGuiTotalValue() {
+        int total = 0;
+        for (int i = 0; i < getInventory().getSize(); i++) {
+            ItemStack item = getInventory().getItem(i);
+            if (ItemStackUtils.isValidItem(item) && WalletUtils.isCurrency(item)) {
+                total += WalletUtils.calculateMoneyValue(item);
+            }
+        }
+        return total;
     }
 }

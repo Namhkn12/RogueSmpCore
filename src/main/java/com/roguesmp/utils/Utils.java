@@ -18,6 +18,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class Utils {
@@ -143,6 +144,12 @@ public class Utils {
         }
 
         return sb.toString();
+    }
+
+    private static final DecimalFormat COMMA_FORMATTER = new DecimalFormat("#,###");
+
+    public static String formatMoney(int amount) {
+        return COMMA_FORMATTER.format(amount);
     }
 
     public static String intToMinuteAndSeconds(int i) {

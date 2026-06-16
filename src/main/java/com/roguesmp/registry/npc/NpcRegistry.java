@@ -58,9 +58,10 @@ public class NpcRegistry {
                 String id = jsonObject.get("id").getAsString();
                 String name = jsonObject.get("name").getAsString();
                 EntityType type = EntityType.valueOf(jsonObject.get("entityType").getAsString().toUpperCase());
-                String skinValue = jsonObject.has("skinValue") ? jsonObject.get("skinValue").getAsString() : "";
-                String skinSignature = jsonObject.has("skinSignature") ? jsonObject.get("skinSignature").getAsString() : "";
-                String description = jsonObject.has("description") ? jsonObject.get("description").getAsString() : "";
+                String skinValue = jsonObject.has("skinValue") ? jsonObject.get("skinValue").getAsString() : null;
+                String skinSignature = jsonObject.has("skinSignature") ? jsonObject.get("skinSignature").getAsString() : null;
+                String description = jsonObject.has("description") ? jsonObject.get("description").getAsString() : null;
+                String skinId = jsonObject.has("skinId") ? jsonObject.get("skinId").getAsString() : null;
 
                 // 4. Handle Actions List
                 List<NpcAction> actions = new ArrayList<>();
@@ -79,7 +80,7 @@ public class NpcRegistry {
                 }
 
                 // 5. Construct and register
-                BaseNpc npc = new BaseNpc(type, name, skinValue, skinSignature, description, id, actions);
+                BaseNpc npc = new BaseNpc(type, name, skinValue, skinSignature, skinId, description, id, actions);
                 registry.put(id, npc);
                 count++;
             } catch (Exception e) {

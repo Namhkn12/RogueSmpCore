@@ -233,6 +233,14 @@ public class SmpPlayer {
         }
     }
 
+    public void onItemDamage(PlayerItemDamageEvent event) {
+
+    }
+
+    public void onItemBreak(PlayerItemBreakEvent event) {
+
+    }
+
     public void onDamageEntity(DamageEvent event) {
         if (event.getDamager() instanceof Projectile projectile && projectile.getShooter() instanceof Player) {
             // Player damage an entity with projectile

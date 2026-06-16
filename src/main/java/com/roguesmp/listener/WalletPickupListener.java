@@ -1,9 +1,13 @@
 package com.roguesmp.listener;
 
+import com.roguesmp.gui.WalletGui;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.WalletUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,6 +24,10 @@ public class WalletPickupListener implements Listener {
 
         ItemStack pickedItem = event.getItem().getItemStack();
         if (!WalletUtils.isCurrency(pickedItem)) return;
+        // If player has a wallet open, the items won't go into wallet
+        if (player.getOpenInventory().getTopInventory().getHolder() instanceof WalletGui) {
+            return;
+        }
 
         int pickupMoneyValue = WalletUtils.calculateMoneyValue(pickedItem);
         if (pickupMoneyValue <= 0) return;
@@ -34,7 +42,7 @@ public class WalletPickupListener implements Listener {
             if (walletItem == null || !WalletUtils.isWalletItem(walletItem)) continue;
 
             int currentBalance = WalletUtils.getBalance(walletItem);
-            int spaceLeft = WalletUtils.MAX_CURRENCY - currentBalance;
+            int spaceLeft = WalletUtils.getCapacity(walletItem) - currentBalance;
 
             // The moment we find ONE wallet that can completely absorb the stack, we take it!
             if (spaceLeft >= pickupMoneyValue) {
@@ -58,6 +66,7 @@ public class WalletPickupListener implements Listener {
             event.setCancelled(true);
             event.getItem().remove();
             player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.6F, 1.2F);
+            player.sendActionBar(Component.text("+" + Utils.formatMoney(pickupMoneyValue) + " đồng", NamedTextColor.GOLD));
         }
     }
 }
