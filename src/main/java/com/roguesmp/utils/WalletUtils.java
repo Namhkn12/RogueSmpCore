@@ -29,19 +29,19 @@ public class WalletUtils {
     public static final String WALLET_ID_PREFIX = "wallet";
 
     public static boolean isCurrency(ItemStack itemStack) {
-        String id = ItemStackUtils.getId(itemStack);
+        String id = ItemStackUtils.getBaseId(itemStack);
         if (id == null) return false;
         return id.equals(BLOCK_ID) || id.equals(INGOT_ID) || id.equals(NUGGET_ID);
     }
 
     public static boolean isWalletItem(ItemStack itemStack) {
-        String id = ItemStackUtils.getId(itemStack);
+        String id = ItemStackUtils.getBaseId(itemStack);
         if (id == null) return false;
         return id.startsWith(WALLET_ID_PREFIX);
     }
 
     public static int calculateMoneyValue(ItemStack item) {
-        String id = ItemStackUtils.getId(item);
+        String id = ItemStackUtils.getBaseId(item);
         if (id == null) return 0;
 
         return switch (id) {

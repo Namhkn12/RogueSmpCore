@@ -7,6 +7,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record ItemDataContext(SmpItem smpItem, @Nullable SmpPlayer player, ItemStack newStack, @NotNull ItemStack oldStack,
+public record ItemDataContext(SmpItem smpItem, @Nullable SmpPlayer player, ItemStack newStack,
                               @NotNull PersistentDataContainerView data) {
 }

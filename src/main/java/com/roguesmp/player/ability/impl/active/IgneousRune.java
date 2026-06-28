@@ -27,15 +27,10 @@ import java.util.List;
 public class IgneousRune extends Ability {
     public static final String ID = "igneous_rune";
 
-    // Cached Attributes
     private final double damage;
     private final double radius;
     private final int cooldown;
 
-    /**
-     * Action-based INFO shell.
-     * Metadata and scaling are pulled from JSON.
-     */
     public static final AbilityInfo<IgneousRune> INFO = new AbilityInfo<>(
             ID,
             IgneousRune.class,
@@ -44,7 +39,6 @@ public class IgneousRune extends Ability {
 
     public IgneousRune(SmpPlayer player, int level) {
         super(player, level);
-        // Cache attributes from JSON for performance
         this.damage = getAbilityInfo().getAttributeForLevel("damage", level);
         this.radius = getAbilityInfo().getAttributeForLevel("radius", level);
         this.cooldown = (int) getAbilityInfo().getAttributeForLevel("cooldown", level);

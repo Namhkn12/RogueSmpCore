@@ -1,5 +1,6 @@
 package com.roguesmp.player.ability.impl.active;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
@@ -16,6 +17,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -54,10 +56,18 @@ public class Pyroblast extends Ability {
     }
 
     @Override
-    public void onProjectileLaunch(ProjectileLaunchEvent event) {
-        if (isOnCooldown() || (event.getEntity().getShooter() instanceof Player player && !player.isSneaking())) return;
+    public void onProjectileLaunch(PlayerLaunchProjectileEvent event) {
+        if (isOnCooldown() || !event.getPlayer().isSneaking()) return;
 
-        Projectile proj = event.getEntity();
+        Projectile proj = event.getProjectile();
+        castPyroblast(proj);
+    }
+
+    @Override
+    public void onShootArrow(EntityShootBowEvent event) {
+        if (isOnCooldown() || !event.getEntity().isSneaking()) return;
+
+        Projectile proj = (Projectile) event.getProjectile();
         castPyroblast(proj);
     }
 

@@ -17,11 +17,13 @@ import java.util.Map;
 public class BaseItem {
     private final String id;
     private final Material base;
+    private final boolean unique;
     private final Map<String, ItemComponent> components;
 
-    public BaseItem(String id, Material base, Map<String, ItemComponent> components) {
+    public BaseItem(String id, Material base, boolean unique, Map<String, ItemComponent> components) {
         this.id = id;
         this.base = base;
+        this.unique = unique;
         this.components = components;
     }
 
@@ -53,5 +55,9 @@ public class BaseItem {
 
     public Material getBase() {
         return base;
+    }
+
+    public boolean isUnique() {
+        return unique;
     }
 }

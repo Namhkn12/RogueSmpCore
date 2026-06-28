@@ -1,5 +1,6 @@
 package com.roguesmp.enchant.impl;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.Enchants;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.SmpEnchant;
@@ -9,6 +10,7 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.NotNull;
@@ -49,7 +51,13 @@ public class Explosive implements SmpEnchant {
     }
 
     @Override
-    public void onProjectileLaunch(ProjectileLaunchEvent event, int level, @NotNull SmpPlayer player) {
+    public void onProjectileLaunch(PlayerLaunchProjectileEvent event, int level, @NotNull SmpPlayer player) {
+        Player player1 = player.getBukkitPlayer();
+        player1.playSound(player1 , Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f);
+    }
+
+    @Override
+    public void onShootArrow(EntityShootBowEvent event, int level, @NotNull SmpPlayer player) {
         Player player1 = player.getBukkitPlayer();
         player1.playSound(player1 , Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f);
     }

@@ -1,5 +1,6 @@
 package com.roguesmp.enchant;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.Enchants;
 import com.roguesmp.constant.EquipSlot;
@@ -103,7 +104,11 @@ public interface SmpEnchant {
 
     }
 
-    default void onProjectileLaunch(ProjectileLaunchEvent event, int level, @NotNull SmpPlayer player) {
+    default void onProjectileLaunch(PlayerLaunchProjectileEvent event, int level, @NotNull SmpPlayer player) {
+
+    }
+
+    default void onShootArrow(EntityShootBowEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 

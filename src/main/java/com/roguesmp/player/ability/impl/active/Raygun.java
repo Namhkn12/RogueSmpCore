@@ -1,6 +1,7 @@
 package com.roguesmp.player.ability.impl.active;
 
 import com.destroystokyo.paper.ParticleBuilder;
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.particle.ParticleShape;
@@ -9,26 +10,20 @@ import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.ParticleUtils;
-import com.roguesmp.utils.Utils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.event.KeyEvent;
 import java.util.List;
 
 public class Raygun extends Ability {
     public static final String ID = "raygun";
 
-    // Cached Attributes
     private final double damage;
     private final double range;
     private final int cooldown;
@@ -41,27 +36,33 @@ public class Raygun extends Ability {
 
     public Raygun(SmpPlayer player, int level) {
         super(player, level);
-        // Cache values from JSON via getAttributeForLevel
         this.damage = getAbilityInfo().getAttributeForLevel("damage", level);
         this.range = getAbilityInfo().getAttributeForLevel("range", level);
         this.cooldown = (int) getAbilityInfo().getAttributeForLevel("cooldown", level);
     }
 
     @Override
-    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+    public void onProjectileLaunch(PlayerLaunchProjectileEvent event) {
         Player p = smpPlayer.getBukkitPlayer();
-
-        // Filter: Must be sneaking and off cooldown
         if (isOnCooldown() || !p.isSneaking()) return;
-
-        // 1. Consume the projectile (Turn arrow into laser)
         event.setCancelled(true);
+        castRayGun(p);
+    }
+
+    @Override
+    public void onShootArrow(EntityShootBowEvent event) {
+        Player p = smpPlayer.getBukkitPlayer();
+        if (isOnCooldown() || !p.isSneaking()) return;
+        event.setCancelled(true);
+        castRayGun(p);
+    }
+
+    private void castRayGun(Player p) {
         setCooldownTick(cooldown);
 
         Location start = p.getEyeLocation().subtract(0, 0.2, 0);
         Vector direction = start.getDirection();
 
-        // 2. Raytrace logic using cached range
         RayTraceResult ray = p.getWorld().rayTrace(
                 start,
                 direction,
@@ -72,15 +73,13 @@ public class Raygun extends Ability {
                 e -> !e.equals(p)
         );
 
-        Location end = (ray != null && ray.getHitPosition() != null)
+        Location end = ray != null
                 ? ray.getHitPosition().toLocation(p.getWorld())
                 : start.clone().add(direction.clone().multiply(range));
 
-        // 3. Visuals & Sound
         playElectricLaunchSounds(start);
         spawnLaserBeam(start, end);
 
-        // 4. Impact Logic using cached damage
         if (ray != null && ray.getHitEntity() instanceof LivingEntity victim && !(victim instanceof Player)) {
             DamageUtils.damage(victim, p, damage, new DamageEvent.Metadata(ID, DamageType.PROJECTILE_ABILITY));
             playImpactEffects(end, victim);

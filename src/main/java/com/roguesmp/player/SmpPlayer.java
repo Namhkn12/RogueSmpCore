@@ -1,21 +1,22 @@
 package com.roguesmp.player;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.*;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.gui.enchant.GrindstoneGui;
-import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.ConsumableComponent;
+import com.roguesmp.item.component.impl.DurabilityComponent;
 import com.roguesmp.item.component.impl.EnchantComponent;
 import com.roguesmp.item.component.impl.EquipAttributeComponent;
 import com.roguesmp.player.ability.AbilityLoadout;
 import com.roguesmp.player.ability.trigger.AbilityTrigger;
 import com.roguesmp.registry.BlockRegistry;
 import com.roguesmp.utils.ItemStackUtils;
-import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -39,7 +40,7 @@ public class SmpPlayer {
     private final Map<Enchants, Integer> activeEnchants;
     private final Map<Attributes, Double> activeAttributes;
 
-    private final Map<EquipSlot, SmpItem> slotCache = new EnumMap<>(EquipSlot.class);
+    private final Map<EquipSlot, SmpItem> currentEquipment = new EnumMap<>(EquipSlot.class);
 
     private final AbilityLoadout abilityLoadout;
 
@@ -62,13 +63,13 @@ public class SmpPlayer {
     }
 
     public void updateSlotStat(Player player, EquipSlot slot, @Nullable SmpItem newItem) {
-        SmpItem oldItem = slotCache.get(slot);
+        SmpItem oldItem = currentEquipment.get(slot);
         Set<Attributes> affected = new HashSet<>();
 
         if (oldItem != null) {
             EquipAttributeComponent oldComp = oldItem.getComponent(ComponentKeys.ATTRIBUTE);
             if (oldComp != null && oldComp.getSlot() == slot) {
-                oldComp.getAttributes().forEach((attr, val) -> {
+                oldComp.getFinalAttributes().forEach((attr, val) -> {
                     affected.add(attr);
                     activeAttributes.merge(attr, -val, (oldV, delta) -> {
                         double res = oldV + delta;
@@ -77,13 +78,13 @@ public class SmpPlayer {
                 });
             }
             processEnchantDelta(oldItem, slot, -1);
-            slotCache.remove(slot);
+            currentEquipment.remove(slot);
         }
 
         if (newItem != null) {
             EquipAttributeComponent newComp = newItem.getComponent(ComponentKeys.ATTRIBUTE);
             if (newComp != null && newComp.getSlot() == slot) {
-                newComp.getAttributes().forEach((attr, val) -> {
+                newComp.getFinalAttributes().forEach((attr, val) -> {
                     affected.add(attr);
                     activeAttributes.merge(attr, val, (oldV, delta) -> {
                         double res = oldV + delta;
@@ -92,7 +93,7 @@ public class SmpPlayer {
                 });
             }
             processEnchantDelta(newItem, slot, 1);
-            slotCache.put(slot, newItem);
+            currentEquipment.put(slot, newItem);
         }
 
         for (Attributes attr : affected) {
@@ -109,7 +110,7 @@ public class SmpPlayer {
         EnchantComponent enchantComp = item.getComponent(ComponentKeys.ENCHANT);
         if (enchantComp == null) return;
 
-        enchantComp.getEnchants().forEach((ench, level) -> {
+        enchantComp.getTotalEnchants().forEach((ench, level) -> {
             // Only apply if the enchant is valid for the current equipment slot
             if (ench.getEnchant().getActiveSlots().contains(slot)) {
                 activeEnchants.merge(ench, level * multiplier, (oldVal, delta) -> {
@@ -172,9 +173,8 @@ public class SmpPlayer {
         return projectiles.get(uuid);
     }
 
-    public void trackProjectile(Projectile projectile) {
-        if (projectiles.containsKey(projectile.getUniqueId())) return;
-        projectiles.put(projectile.getUniqueId(), new PlayerProjectile(this, projectile, activeEnchants, activeAttributes));
+    public void trackProjectile(Projectile projectile, Map<Enchants, Integer> projEnchant, Map<Attributes, Double> projAttribute) {
+        projectiles.put(projectile.getUniqueId(), new PlayerProjectile(this, projectile, projEnchant, projAttribute));
     }
 
     public @Nullable PlayerProjectile untrackProjectile(UUID uuid) {
@@ -231,14 +231,6 @@ public class SmpPlayer {
         else if (event.getInput().isSneak()) {
             abilityLoadout.cast(AbilityTrigger.Key.SNEAK);
         }
-    }
-
-    public void onItemDamage(PlayerItemDamageEvent event) {
-
-    }
-
-    public void onItemBreak(PlayerItemBreakEvent event) {
-
     }
 
     public void onDamageEntity(DamageEvent event) {
@@ -305,16 +297,14 @@ public class SmpPlayer {
 
         if (!event.isCancelled()) { //Handle Consumable component
             ItemStack consumed = event.getItem();
-            BaseItem baseItem = SmpItemUtils.getBaseItem(consumed);
-            if (baseItem != null) {
-                SmpItem smpItem = new SmpItem(consumed);
-                smpItem.applyModifiers(this);
+            SmpItem smpItem = SmpItem.wrap(consumed, this);
+            smpItem.applyModifiers(this);
 
-                ConsumableComponent consumableComponent = smpItem.getComponent(ComponentKeys.CONSUMABLE);
-                if (consumableComponent != null) {
-                    consumableComponent.applyEffects(event.getPlayer());
-                }
+            ConsumableComponent consumableComponent = smpItem.getComponent(ComponentKeys.CONSUMABLE);
+            if (consumableComponent != null) {
+                consumableComponent.applyEffects(event.getPlayer());
             }
+
         }
     }
 
@@ -340,7 +330,7 @@ public class SmpPlayer {
 
     public void onBlockPlace(BlockPlaceEvent event) {
         EquipSlot equipSlot = EquipSlot.fromVanilla(event.getHand().getGroup());
-        SmpItem smpItem = slotCache.get(equipSlot);
+        SmpItem smpItem = currentEquipment.get(equipSlot);
         if (smpItem != null && smpItem.getBaseItem() != null && BlockRegistry.getBlock(smpItem.getBaseItem().getId()) == null) { //Prevent placing custom items
             event.setCancelled(true);
         }
@@ -394,23 +384,49 @@ public class SmpPlayer {
         }
     }
 
-    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+    public void onProjectileLaunch(PlayerLaunchProjectileEvent event) {
         Player bukkitPlayer = getBukkitPlayer();
         if (bukkitPlayer == null) return;
 
         ItemStack offhand = bukkitPlayer.getEquipment().getItemInOffHand();
         // Disallow shooting stuff from offhand, because calculating stats with it is very buggy
-        if (ItemStackUtils.isShootableItem(offhand) && offhand.getType() != Material.FIREWORK_ROCKET && offhand.getType() != Material.WIND_CHARGE) {
+        if (ItemStackUtils.isShootableItem(offhand)) {
+            bukkitPlayer.sendMessage(Component.text("Bạn không thể ném/bắn khi có vũ khí ở tay phụ!", NamedTextColor.RED));
             event.setCancelled(true);
             return;
         }
 
-        event.getEntity().setPersistent(false);
-        this.trackProjectile(event.getEntity());
-        PlayerProjectile playerProjectile = this.getProjectile(event.getEntity().getUniqueId());
+        event.getProjectile().setPersistent(false);
+        this.trackProjectile(event.getProjectile(), activeEnchants, activeAttributes);
+        PlayerProjectile playerProjectile = this.getProjectile(event.getProjectile().getUniqueId());
         if (playerProjectile == null) return;
         playerProjectile.onProjectileLaunch(event);
         abilityLoadout.onProjectileLaunch(event);
+
+        SmpItem currentMainhand = currentEquipment.get(EquipSlot.MAINHAND);
+        if (currentMainhand != null) {
+            DurabilityComponent durabilityComponent = currentMainhand.getComponent(ComponentKeys.DURABILITY);
+            if (durabilityComponent != null) {
+                durabilityComponent.setCurrentDurability(durabilityComponent.currentDurability() - 1);
+                bukkitPlayer.getEquipment().getItemInMainHand().editPersistentDataContainer(durabilityComponent::save);
+            }
+        }
+    }
+
+    public void onShootArrow(EntityShootBowEvent event) {
+        Player bukkitPlayer = getBukkitPlayer();
+        if (bukkitPlayer == null) return;
+        if (event.getHand() == EquipmentSlot.OFF_HAND) {
+            bukkitPlayer.sendMessage(Component.text("Bạn không thể bắn tên từ tay phụ.", NamedTextColor.RED));
+            event.setCancelled(true);
+        }
+
+        event.getProjectile().setPersistent(false);
+        this.trackProjectile((Projectile) event.getProjectile(), activeEnchants, activeAttributes);
+        PlayerProjectile playerProjectile = this.getProjectile(event.getProjectile().getUniqueId());
+        if (playerProjectile == null) return;
+        playerProjectile.onShootArrow(event);
+        abilityLoadout.onShootArrow(event);
     }
 
     public void onConsumeArrow(ArrowConsumeEvent event) {

@@ -8,6 +8,10 @@ import org.jetbrains.annotations.NotNull;
 
 public interface ItemComponent {
 
+    /**
+     * Copy BaseItem component into active SmpItem instance
+     * @return A fresh/new copy
+     */
     @NotNull ItemComponent copy();
 
     default void contributeLore(ItemLoreContext context) {

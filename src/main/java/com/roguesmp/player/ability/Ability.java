@@ -1,5 +1,6 @@
 package com.roguesmp.player.ability;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
@@ -142,7 +143,11 @@ public abstract class Ability {
 
     }
 
-    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+    public void onProjectileLaunch(PlayerLaunchProjectileEvent event) {
+
+    }
+
+    public void onShootArrow(EntityShootBowEvent event) {
 
     }
 

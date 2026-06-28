@@ -1,6 +1,5 @@
 package com.roguesmp.item;
 
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.context.ItemDataContext;
 import com.roguesmp.context.ItemLoreContext;
@@ -11,46 +10,36 @@ import com.roguesmp.item.modifier.ItemModifier;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.registry.ModifierRegistry;
+import io.papermc.paper.datacomponent.DataComponentType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import io.papermc.paper.persistence.PersistentDataContainerView;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Represents a custom item instance.
- * <p>
- * <strong>Lifecycle Warning:</strong> This is designed as a <b>short-lived, single-use wrapper</b>.
- * It follows a "Load -> Apply -> Generate" pipeline.
- * </p>
- * <ul>
- *     <li>Data is loaded from the {@link ItemStack} or {@link BaseItem} on construction.</li>
- *     <li>Modifiers (Gems, Leveling, etc.) are applied once via {@link #applyModifiers(SmpPlayer)}.</li>
- *     <li>The final {@link ItemStack} is generated via {@link #generateItemStack(int)}.</li>
- * </ul>
- * <p>
- * <strong>Immutability:</strong> If you modify a component (e.g., via {@link #setComponent}, or the component itself) after
- * {@link #generateItemStack(SmpPlayer, int)} has been called, you <b>must</b> create a new {@code SmpItem}
- * instance to ensure modifiers are recalculated correctly.
+ * Represent our custom items. To get a cached SmpItem, use {@link ItemManager#}
  */
 public class SmpItem {
     private final BaseItem baseItem;
-    private final ItemStack itemStack;
+    private final UUID uuid;
+    private ItemStack itemStack;
     private boolean loadedModifiers = false;
 
     private final Map<String, ItemComponent> componentMap = new HashMap<>();
 
     /**
-     * Create an SmpItem instance, and load base data from {@link BaseItem} and pdc. To fully update the components, call {@link SmpItem#applyModifiers(SmpPlayer)}
+     * Create an SmpItem instance, and load base data from {@link BaseItem} and pdc. To fully update the components, call {@link SmpItem#applyModifiers(SmpPlayer)} <br>
+     * To get a cached SmpItem, use {@link ItemManager#wrapItem(ItemStack, SmpPlayer)}
      */
     public SmpItem(@NotNull ItemStack itemStack) {
         this.itemStack = itemStack;
@@ -59,7 +48,13 @@ public class SmpItem {
         String itemId = pdc.get(Keys.ITEM_ID, PersistentDataType.STRING);
         if (itemId != null) {
             this.baseItem = ItemRegistry.getInstance().getBaseItem(itemId);
-        } else this.baseItem = null;
+            String uuidStr = pdc.get(Keys.ITEM_UUID, PersistentDataType.STRING);
+            if (uuidStr == null) this.uuid = null;
+            else this.uuid = UUID.fromString(uuidStr);
+        } else {
+            this.baseItem = null;
+            this.uuid = null;
+        }
 
         if (baseItem != null) {
             loadData(pdc);
@@ -67,13 +62,27 @@ public class SmpItem {
     }
 
     /**
-     * Create an SmpItem instance, and load base data from {@link BaseItem}. To fully update the components, call {@link SmpItem#applyModifiers(SmpPlayer)}
+     * Create an SmpItem instance, and load base data from {@link BaseItem}.
      */
     public SmpItem(@NotNull BaseItem baseItem) {
         this.baseItem = baseItem;
         this.itemStack = ItemStack.of(baseItem.getBase());
+        if (baseItem.isUnique()) this.uuid = UUID.randomUUID();
+        else this.uuid = null;
 
         loadData(this.itemStack.getPersistentDataContainer());
+    }
+
+    public static SmpItem wrap(ItemStack itemStack) {
+        return ItemManager.getInstance().wrapItem(itemStack);
+    }
+
+    public static SmpItem wrap(ItemStack itemStack, @Nullable SmpPlayer smpPlayer) {
+        return ItemManager.getInstance().wrapItem(itemStack, smpPlayer);
+    }
+
+    public static SmpItem wrap(ItemStack itemStack, SmpPlayer smpPlayer, @Nullable Consumer<SmpItem> onCacheMiss) {
+        return ItemManager.getInstance().wrapItem(itemStack, smpPlayer, onCacheMiss);
     }
 
     @SuppressWarnings("unchecked")
@@ -99,11 +108,8 @@ public class SmpItem {
         return baseItem;
     }
 
-    /**
-     * Get the original ItemStack used to create this SmpItem.
-     */
-    public ItemStack getSourceItemStack() {
-        return itemStack;
+    public UUID getUuid() {
+        return uuid;
     }
 
     /**
@@ -122,8 +128,7 @@ public class SmpItem {
     /**
      * Transforms this wrapper into a Minecraft {@link ItemStack}.
      * <p>
-     * This method automatically triggers {@link #applyModifiers(SmpPlayer)}. Because modifiers
-     * are guarded, the resulting stats are calculated against the base data loaded at construction.
+     * This method automatically triggers {@link #applyModifiers(SmpPlayer)}.
      * </p>
      *
      * @param player Context for player-specific lore or modifiers.
@@ -147,7 +152,7 @@ public class SmpItem {
 
             oldData.copyTo(pdc, true);
             pdc.set(Keys.ITEM_ID, PersistentDataType.STRING, baseItem.getId());
-            ItemDataContext dataContext = new ItemDataContext(this, player, result, itemStack, pdc);
+            ItemDataContext dataContext = new ItemDataContext(this, player, result, pdc);
             ItemLoreContext loreContext = new ItemLoreContext(this, player, loreBuilder, pdc);
 
             applyModifiers(player);
@@ -162,6 +167,8 @@ public class SmpItem {
 
         result.setData(DataComponentTypes.LORE, ItemLore.lore(loreBuilder.build()));
 
+        this.itemStack = result;
+
         return result;
     }
 
@@ -173,13 +180,10 @@ public class SmpItem {
      * </p>
      */
     public void applyModifiers(@Nullable SmpPlayer player) {
-        // Guard to prevent components from modifying the item again
-        if (loadedModifiers) return;
         List<ItemModifier> modifierList = ModifierRegistry.getModifiers();
         for (ItemModifier itemModifier : modifierList) {
             itemModifier.collectAndApply(this, player);
         }
-        loadedModifiers = true;
     }
 
     private void loadData(PersistentDataContainerView pdc) {

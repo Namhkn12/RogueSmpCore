@@ -14,7 +14,15 @@ public class Keys {
         return new NamespacedKey(GLOBAL_NAMESPACE, key);
     }
 
+    /**
+     * ItemStack BaseItem's id
+     */
     public static final NamespacedKey ITEM_ID = of("id");
+
+    /**
+     * ItemStack UUID, used to track and cache custom SmpItem
+     */
+    public static final NamespacedKey ITEM_UUID = of("uuid");
 
     public static final NamespacedKey APPLIED_GEM = of("gem");
 

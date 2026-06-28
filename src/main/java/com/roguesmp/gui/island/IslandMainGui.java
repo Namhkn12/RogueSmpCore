@@ -104,7 +104,7 @@ public class IslandMainGui extends BaseGui {
         addButton(2, 2, teleportItem, event -> {
             event.setCancelled(true);
             player.closeInventory();
-            islandManager.teleportToIsland(player);
+            islandManager.teleportToHomeIsland(player);
         });
 
         // --- BUTTON 2: SET SPAWN POINT ---

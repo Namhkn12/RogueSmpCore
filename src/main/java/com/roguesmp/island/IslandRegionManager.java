@@ -70,22 +70,16 @@ public class IslandRegionManager {
      * Tailors specific guard rules ensuring players outside the island team cannot interact with it.
      */
     private void applyIsolationFlags(ProtectedRegion region) {
-        // Stop non-members from placing/breaking blocks
-        region.setFlag(Flags.BUILD, StateFlag.State.ALLOW);
 
-        // Block interaction with chests, furnaces, or doors for non-members
+        region.setFlag(Flags.BUILD, StateFlag.State.ALLOW);
         region.setFlag(Flags.CHEST_ACCESS, StateFlag.State.ALLOW);
         region.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
-
-        // Prevent random players from wandering or flying directly inside the space
         region.setFlag(Flags.EXIT, StateFlag.State.DENY);
-        region.setFlag(Flags.ENTRY, StateFlag.State.DENY);
 
         region.setFlag(Flags.BUILD.getRegionGroupFlag(), com.sk89q.worldguard.protection.flags.RegionGroup.MEMBERS);
         region.setFlag(Flags.CHEST_ACCESS.getRegionGroupFlag(), com.sk89q.worldguard.protection.flags.RegionGroup.MEMBERS);
         region.setFlag(Flags.INTERACT.getRegionGroupFlag(), com.sk89q.worldguard.protection.flags.RegionGroup.MEMBERS);
         region.setFlag(Flags.EXIT.getRegionGroupFlag(), com.sk89q.worldguard.protection.flags.RegionGroup.MEMBERS);
-        region.setFlag(Flags.ENTRY.getRegionGroupFlag(), RegionGroup.NON_MEMBERS);
     }
 
     /**

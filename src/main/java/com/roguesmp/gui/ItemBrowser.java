@@ -86,7 +86,7 @@ public class ItemBrowser extends BaseGui {
             this.addButton(i, itemStack, event -> {
                 event.setCancelled(true);
                 if (event.getClick().isShiftClick()) {
-                    ItemStack toGive = itemStack.clone();
+                    ItemStack toGive = entry.getValue().generateItemStack(null, 1);
                     toGive.setAmount(itemStack.getDataOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1));
                     event.getWhoClicked().getInventory().addItem(toGive);
                     return;

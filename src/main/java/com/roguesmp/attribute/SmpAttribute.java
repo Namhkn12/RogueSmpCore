@@ -1,5 +1,6 @@
 package com.roguesmp.attribute;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
@@ -97,7 +98,11 @@ public interface SmpAttribute {
 
     }
 
-    default void onProjectileLaunch(ProjectileLaunchEvent event, double value, @NotNull SmpPlayer player) {
+    default void onProjectileLaunch(PlayerLaunchProjectileEvent event, double value, @NotNull SmpPlayer player) {
+
+    }
+
+    default void onShootArrow(EntityShootBowEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 

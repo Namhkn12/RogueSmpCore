@@ -21,7 +21,7 @@ import java.util.Map;
 public class SmpItemUtils {
 
     public static @Nullable BaseItem getBaseItem(ItemStack itemStack) {
-        String id = ItemStackUtils.getId(itemStack);
+        String id = ItemStackUtils.getBaseId(itemStack);
         if (id == null) return null;
         return ItemRegistry.getInstance().getBaseItem(id);
     }
@@ -34,7 +34,7 @@ public class SmpItemUtils {
     ) {}
 
     public static Result<String> addGem(ItemStack itemStack, SmpPlayer player, String gemId) {
-        SmpItem smpItem = new SmpItem(itemStack);
+        SmpItem smpItem = SmpItem.wrap(itemStack, player);
         GemSocketComponent gemSocketComponent = smpItem.getComponent(ComponentKeys.GEM_SOCKET);
 
         // 1. Check for component
@@ -70,7 +70,7 @@ public class SmpItemUtils {
     }
 
     public static Result<String> removeGem(ItemStack itemStack, SmpPlayer player, String gemId) {
-        SmpItem smpItem = new SmpItem(itemStack);
+        SmpItem smpItem = SmpItem.wrap(itemStack, player);
         GemSocketComponent gemSocketComponent = smpItem.getComponent(ComponentKeys.GEM_SOCKET);
 
         // 1. Check if the item can even hold gems
@@ -85,7 +85,7 @@ public class SmpItemUtils {
     }
 
     public static Result<Map<Enchants, Integer>> addEnchant(ItemStack itemStack, SmpPlayer player, Map<Enchants, Integer> enchantsData) {
-        SmpItem smpItem = new SmpItem(itemStack);
+        SmpItem smpItem = SmpItem.wrap(itemStack, player);
         EnchantComponent enchantComponent = smpItem.getComponent(ComponentKeys.ENCHANT);
 
         if (enchantComponent == null) {

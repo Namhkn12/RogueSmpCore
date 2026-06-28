@@ -39,6 +39,13 @@ public class IslandListener implements Listener {
                 api.getSafetyTeleporter().to(loadedMultiverseWorld.getSpawnLocation()).passengerMode(PassengerModes.RETAIN_ALL).teleportSingle(player);
                 player.sendMessage(Component.text("Bạn không có điểm hồi sinh nào nên sẽ được dịch chuyển về hub.", NamedTextColor.YELLOW));
             });
+        } else { //Player will always spawn on their island upon logging in
+            MultiverseCoreApi api = islandManager.getIslandWorldManager().getMultiverseApi();
+            api.getWorldManager().getDefaultWorld().peek(loadedMultiverseWorld -> {
+                player.setVelocity(new Vector(0, 0, 0));
+                player.setFallDistance(0);
+                api.getSafetyTeleporter().to(loadedMultiverseWorld.getSpawnLocation()).passengerMode(PassengerModes.RETAIN_ALL).teleportSingle(player);
+            });
         }
     }
 
