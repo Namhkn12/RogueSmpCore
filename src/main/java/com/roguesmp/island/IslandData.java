@@ -1,14 +1,14 @@
 package com.roguesmp.island;
 
 import com.roguesmp.annotation.GsonIgnore;
+import com.roguesmp.island.setting.IslandSettings;
+import com.roguesmp.island.setting.Setting;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class IslandData {
 
@@ -20,6 +20,7 @@ public class IslandData {
     private final Set<UUID> members;
     private final int gridIndex;
     private String spawnLocation; //x,y,z,yaw,pitch (int)
+    private final Map<String, Object> settings;
 
     public IslandData(UUID creatorId, int gridIndex) {
         this.gridIndex = gridIndex;
@@ -27,6 +28,7 @@ public class IslandData {
         this.members = new HashSet<>();
         this.members.add(creatorId);
         this.archived = false;
+        this.settings = getDefaultSettings();
     }
 
     public IslandData(UUID islandId, Set<UUID> members, int gridIndex) {
@@ -34,6 +36,7 @@ public class IslandData {
         this.members = new HashSet<>(members);
         this.gridIndex = gridIndex;
         this.archived = false;
+        this.settings = getDefaultSettings();
     }
 
     //no-args constructor because gson love it
@@ -42,6 +45,7 @@ public class IslandData {
         this.islandId = UUID.randomUUID();
         this.members = new HashSet<>();
         this.gridIndex = -1;
+        this.settings = getDefaultSettings();
     }
 
     public IslandData(IslandData source) {
@@ -51,14 +55,26 @@ public class IslandData {
         this.spawnLocation = source.spawnLocation;
         this.archived = source.archived;
         this.dirty = source.dirty;
+        this.settings = new LinkedHashMap<>(source.settings);
+    }
+
+    private Map<String, Object> getDefaultSettings() {
+        Map<String, Object> defaultMap = new LinkedHashMap<>();
+        defaultMap.put(IslandSettings.ALLOW_GUEST.id(), IslandSettings.ALLOW_GUEST.defaultValue());
+        return defaultMap;
+    }
+
+    @SuppressWarnings("unchecked")
+    public @Nullable <T> T getSettingValue(Setting<T> setting) {
+        return (T) this.settings.get(setting.id());
+    }
+
+    public <T> void setSettingValue(Setting<T> setting, T value) {
+        this.settings.put(setting.id(), value);
     }
 
     public UUID getIslandId() {
         return islandId;
-    }
-
-    public String getWorldName() {
-        return islandId.toString();
     }
 
     public @Unmodifiable Set<UUID> getMembers() {

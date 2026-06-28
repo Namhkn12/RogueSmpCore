@@ -86,7 +86,7 @@ public class GrindstoneGui extends BaseGui {
             return;
         }
 
-        SmpItem smpItem = new SmpItem(currentInput);
+        SmpItem smpItem = SmpItem.wrap(currentInput, smpPlayer);
         EnchantComponent enchantComp = smpItem.getComponent(ComponentKeys.ENCHANT);
 
         if (enchantComp == null || enchantComp.getPersistentEnchants().isEmpty()) {

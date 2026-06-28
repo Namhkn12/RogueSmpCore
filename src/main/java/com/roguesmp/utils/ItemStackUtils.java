@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.UUID;
 
 public class ItemStackUtils {
     public static boolean isValidItem(ItemStack itemStack) {
@@ -45,6 +46,7 @@ public class ItemStackUtils {
             Material.BOW,
             Material.CROSSBOW,
             Material.SNOWBALL,
+            Material.TRIDENT,
             Material.EGG,
             Material.ENDER_PEARL,
             Material.FIREWORK_ROCKET,
@@ -53,7 +55,7 @@ public class ItemStackUtils {
             Material.LINGERING_POTION,
             Material.EXPERIENCE_BOTTLE,
             Material.WIND_CHARGE
-            );
+    );
     public static boolean isShootableItem(ItemStack itemStack) {
         if (itemStack == null || itemStack.getType().isAir()) return false;
 
@@ -73,11 +75,22 @@ public class ItemStackUtils {
     }
 
     /**
-     * Get the ItemStack's id
+     * Get the ItemStack's BaseItem id
      */
-    public static @Nullable String getId(ItemStack itemStack) {
+    public static @Nullable String getBaseId(ItemStack itemStack) {
         if (itemStack == null) return null;
         PersistentDataContainerView pdc = itemStack.getPersistentDataContainer();
         return pdc.get(Keys.ITEM_ID, PersistentDataType.STRING);
+    }
+
+    /**
+     * Get the ItemStack UUID, used to track and cache SmpItem.
+     */
+    public static @Nullable UUID getUUID(ItemStack itemStack) {
+        if (itemStack == null) return null;
+        PersistentDataContainerView pdc = itemStack.getPersistentDataContainer();
+        String uuidStr = pdc.get(Keys.ITEM_UUID, PersistentDataType.STRING);
+        if (uuidStr == null) return null;
+        return UUID.fromString(uuidStr);
     }
 }

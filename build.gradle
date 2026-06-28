@@ -33,7 +33,7 @@ dependencies {
     compileOnly 'org.mvplugins.multiverse.core:multiverse-core:5.6.1-SNAPSHOT'
     compileOnly 'com.sk89q.worldguard:worldguard-bukkit:7.0.16'
     implementation('org.apache.commons:commons-math3:3.6.1')
-    implementation 'com.github.MrMicky-FR:FastBoard:b1af036'
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.4")
     implementation 'fr.skytasul:glowingentities:1.4.11'
 }
 
@@ -74,7 +74,6 @@ processResources {
 }
 
 shadowJar {
-    relocate 'fr.mrmicky.fastboard', 'com.roguesmp.libs.fastboard'
     relocate 'fr.skytasul.glowingentities', 'com.roguesmp.libs.glowingentities'
     configurations = [project.configurations.runtimeClasspath]
 }

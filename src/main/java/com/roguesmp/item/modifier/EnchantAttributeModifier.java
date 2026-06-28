@@ -10,7 +10,6 @@ import com.roguesmp.player.SmpPlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
-import java.util.Set;
 
 public class EnchantAttributeModifier implements ItemModifier {
     @Override
@@ -21,10 +20,10 @@ public class EnchantAttributeModifier implements ItemModifier {
         EnchantComponent enchantComponent = smpItem.getComponent(ComponentKeys.ENCHANT);
         if (enchantComponent == null) return;
         EquipSlot slot = equipAttributeComponent.getSlot();
-        Map<Enchants, Integer> enchantMap = enchantComponent.getEnchants();
+        Map<Enchants, Integer> enchantMap = enchantComponent.getTotalEnchants();
         enchantMap.forEach((enchants, integer) -> {
             if (enchants.getEnchant().getActiveSlots().contains(slot)) {
-                equipAttributeComponent.addModifier(enchants.getEnchant().provideAttributes(integer));
+                equipAttributeComponent.putModifier(enchants.getEnchant().getId(), enchants.getEnchant().provideAttributes(integer));
             }
         });
     }

@@ -74,7 +74,7 @@ public class GemSocketGui extends BaseGui {
     private void renderGemSlot() {
         if (!ItemStackUtils.isValidItem(targetItem)) return;
 
-        SmpItem smpItem = new SmpItem(targetItem);
+        SmpItem smpItem = SmpItem.wrap(targetItem, smpPlayer);
         GemSocketComponent socketComp = smpItem.getComponent(ComponentKeys.GEM_SOCKET);
 
         if (socketComp == null) return;
@@ -110,7 +110,7 @@ public class GemSocketGui extends BaseGui {
     private void handleGemAddition(ItemStack gemStack) {
         if (!ItemStackUtils.isValidItem(targetItem)) return;
 
-        String gemId = ItemStackUtils.getId(gemStack);
+        String gemId = ItemStackUtils.getBaseId(gemStack);
         if (gemId == null) return;
 
         SmpItemUtils.Result<String> result = SmpItemUtils.addGem(targetItem, smpPlayer, gemId);

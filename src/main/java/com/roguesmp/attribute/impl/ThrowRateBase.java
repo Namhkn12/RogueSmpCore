@@ -1,21 +1,16 @@
 package com.roguesmp.attribute.impl;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.attribute.SmpAttribute;
 import com.roguesmp.constant.Attributes;
-import com.roguesmp.entity.EntityManager;
 import com.roguesmp.player.PlayerProjectile;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Sound;
-import org.bukkit.SoundCategory;
 import org.bukkit.entity.*;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,14 +38,10 @@ public class ThrowRateBase implements SmpAttribute {
     }
 
     @Override
-    public void onProjectileLaunch(ProjectileLaunchEvent event, double value, @NotNull SmpPlayer player) {
-        Projectile projectile = event.getEntity();
-
-        if (EntityManager.getInstance().hasMetadata(projectile, "throw_rate_guard")) {
-            return;
-        }
-
-        event.setCancelled(true);
+    public void onProjectileLaunch(PlayerLaunchProjectileEvent event, double value, @NotNull SmpPlayer player) {
+        Projectile projectile = event.getProjectile();
+        Player bukkitPlayer = player.getBukkitPlayer();
+        event.setShouldConsume(false);
         PlayerProjectile playerProjectile = player.getProjectile(projectile.getUniqueId());
         if (playerProjectile != null) {
             double bonus = playerProjectile.getActiveAttributes().getOrDefault(Attributes.THROW_RATE_PERCENT, 0d);
@@ -58,29 +49,7 @@ public class ThrowRateBase implements SmpAttribute {
         }
 
         int cooldown = (int) (20 / value);
-
-        if (projectile instanceof ThrowableProjectile) {
-            Player bukkitPlayer = player.getBukkitPlayer();
-            if (bukkitPlayer != null) {
-                bukkitPlayer.launchProjectile(projectile.getClass(), projectile.getVelocity(), p -> {
-                    ThrowableProjectile throwableProjectile = (ThrowableProjectile) p;
-                    throwableProjectile.setItem(((ThrowableProjectile) projectile).getItem());
-                    EntityManager.getInstance().addMetadata(p, "throw_rate_guard", true);
-                    if (throwableProjectile instanceof Trident trident) {
-                        trident.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
-                    }
-                });
-
-                ItemStack projectileItem = bukkitPlayer.getEquipment().getItemInMainHand();
-                bukkitPlayer.setCooldown(projectileItem.getType(), cooldown);
-                if (projectile instanceof Trident) {
-                    bukkitPlayer.playSound(bukkitPlayer, Sound.ITEM_TRIDENT_THROW, SoundCategory.PLAYERS,1f, 1f);
-                    ItemStackUtils.damageItem(projectileItem, 1); //Damage as if player thrown it normally
-
-                    Utils.runLater(() -> bukkitPlayer.playSound(bukkitPlayer, Sound.ITEM_TRIDENT_RETURN, SoundCategory.PLAYERS,1f, 1f), cooldown);
-                } else bukkitPlayer.playSound(bukkitPlayer, Sound.ENTITY_SNOWBALL_THROW, SoundCategory.PLAYERS,1f, 0.5f);
-            }
-        }
+        bukkitPlayer.setCooldown(event.getItemStack().getType(), cooldown);
 
     }
 }

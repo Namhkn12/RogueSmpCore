@@ -1,5 +1,6 @@
 package com.roguesmp.player.ability;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
@@ -216,8 +217,12 @@ public class AbilityLoadout {
         forEachAbility(ability -> ability.onProjectileHit(event));
     }
 
-    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+    public void onProjectileLaunch(PlayerLaunchProjectileEvent event) {
         forEachAbility(ability -> ability.onProjectileLaunch(event));
+    }
+
+    public void onShootArrow(EntityShootBowEvent event) {
+        forEachAbility(ability -> ability.onShootArrow(event));
     }
 
     public void onConsumeArrow(ArrowConsumeEvent event) {

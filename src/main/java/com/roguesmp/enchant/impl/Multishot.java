@@ -1,8 +1,10 @@
 package com.roguesmp.enchant.impl;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.Enchants;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.SmpEnchant;
+import com.roguesmp.entity.EntityManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.VectorUtils;
@@ -12,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrowableProjectile;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -37,10 +40,21 @@ public class Multishot implements SmpEnchant {
     }
 
     @Override
-    public void onProjectileLaunch(ProjectileLaunchEvent event, int level, @NotNull SmpPlayer player) {
+    public void onProjectileLaunch(PlayerLaunchProjectileEvent event, int level, @NotNull SmpPlayer player) {
         if (event.isCancelled()) return;
-        Projectile primary = event.getEntity();
-        Location spawnLoc = primary.getLocation();
+        handleMultishot(level, player, event.getProjectile());
+    }
+
+    @Override
+    public void onShootArrow(EntityShootBowEvent event, int level, @NotNull SmpPlayer player) {
+        if (event.isCancelled()) return;
+        handleMultishot(level, player, (Projectile) event.getProjectile());
+    }
+
+    private static void handleMultishot(int level, @NotNull SmpPlayer player, Projectile primary) {
+        if (EntityManager.getInstance().hasMetadata(primary, "multishot_guard")) {
+            return;
+        }
 
         Vector direction = primary.getVelocity();
 
@@ -54,10 +68,10 @@ public class Multishot implements SmpEnchant {
             Vector spreadVelocity = VectorUtils.rotateYAxis(direction.clone().normalize(), angle)
                     .multiply(direction.length());
             // Safe because primary is always projectile
-            Projectile shotProjectile = (Projectile) spawnLoc.getWorld().spawn(spawnLoc, primary.getType().getEntityClass(), entity -> {
-                Projectile projectile = (Projectile) entity;
-                projectile.setVelocity(spreadVelocity);
-                projectile.setFireTicks(primary.getFireTicks());
+            player.getBukkitPlayer().launchProjectile(primary.getClass(), spreadVelocity, entity -> {
+                EntityManager.getInstance().addMetadata(primary, "multishot_guard", true);
+                entity.setVelocity(spreadVelocity);
+                entity.setFireTicks(primary.getFireTicks());
 
                 if (primary instanceof AbstractArrow arrow && entity instanceof AbstractArrow sideArrow) {
                     sideArrow.setCritical(arrow.isCritical());
@@ -68,10 +82,22 @@ public class Multishot implements SmpEnchant {
                     sideThrowable.setItem(throwable.getItem());
                 }
             });
-            shotProjectile.setShooter(player.getBukkitPlayer());
-            player.trackProjectile(shotProjectile);
+//            Projectile shotProjectile = (Projectile) spawnLoc.getWorld().spawn(spawnLoc, primary.getType().getEntityClass(), entity -> {
+//                Projectile projectile = (Projectile) entity;
+//                projectile.setVelocity(spreadVelocity);
+//                projectile.setFireTicks(primary.getFireTicks());
+//
+//                if (primary instanceof AbstractArrow arrow && entity instanceof AbstractArrow sideArrow) {
+//                    sideArrow.setCritical(arrow.isCritical());
+//                    sideArrow.setPierceLevel(arrow.getPierceLevel());
+//                    sideArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
+//                    sideArrow.setItemStack(arrow.getItemStack());
+//                } else if (primary instanceof ThrowableProjectile throwable && entity instanceof ThrowableProjectile sideThrowable) {
+//                    sideThrowable.setItem(throwable.getItem());
+//                }
+//            });
+//            shotProjectile.setShooter(player.getBukkitPlayer());
+//            player.trackProjectile(shotProjectile, player.getActiveEnchants(), player.getActiveAttributes());
         }
-
     }
-
 }

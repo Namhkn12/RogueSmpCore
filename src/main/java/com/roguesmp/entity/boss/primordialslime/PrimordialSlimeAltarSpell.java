@@ -28,7 +28,7 @@ public class PrimordialSlimeAltarSpell extends Spell {
          Collection<Entity> items = altarEntity.getWorld().getNearbyEntities(altarEntity.getLocation(),1, 0.5, 1, e -> e instanceof Item);
          for (Entity entity : items) {
              Item item = (Item) entity;
-             String itemId = ItemStackUtils.getId(item.getItemStack());
+             String itemId = ItemStackUtils.getBaseId(item.getItemStack());
              if (itemId != null && itemId.equals(PrimordialSlime.KEY_ITEM_ID)) {
                  EntityRegistry.getInstance().spawnEntity(PrimordialSlime.ID, item.getLocation());
                  altarEntity.getWorld().strikeLightningEffect(item.getLocation());

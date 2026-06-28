@@ -1,5 +1,6 @@
 package com.roguesmp.player;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.constant.Enchants;
@@ -14,6 +15,7 @@ import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrowableProjectile;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.Nullable;
@@ -32,50 +34,12 @@ public class PlayerProjectile {
 
     private int tickAlive = 0;
 
-    public PlayerProjectile(SmpPlayer player, Projectile projectile, Map<Enchants, Integer> snapshotEnchant, Map<Attributes, Double> snapshotAttribute) {
+    public PlayerProjectile(SmpPlayer player, Projectile projectile, Map<Enchants, Integer> enchants, Map<Attributes, Double> attributes) {
         this.uuid = projectile.getUniqueId();
         this.smpPlayer = player;
-        this.activeEnchants.putAll(snapshotEnchant);
-        this.activeAttributes.putAll(snapshotAttribute);
-        SmpItem smpItem = null;
-        if (projectile instanceof ThrowableProjectile throwable) {
-            smpItem = new SmpItem(throwable.getItem());
-        } else if (projectile instanceof AbstractArrow arrow) {
-            smpItem = new SmpItem(arrow.getItemStack());
-        }
-        if (smpItem != null) {
-            mergeProjectileStat(player, this.activeEnchants, this.activeAttributes, smpItem);
-        }
+        this.activeEnchants.putAll(enchants);
+        this.activeAttributes.putAll(attributes);
 
-    }
-
-    private static void mergeProjectileStat(SmpPlayer player, Map<Enchants, Integer> activeEnchants, Map<Attributes, Double> activeAttributes, SmpItem smpItem) {
-        smpItem.applyModifiers(player);
-        EnchantComponent enchantComponent = smpItem.getComponent(ComponentKeys.ENCHANT);
-        if (enchantComponent != null) {
-            enchantComponent.getEnchants().forEach((enchants, integer) -> {
-                Set<EquipSlot> activeSlot = enchants.getEnchant().getActiveSlots();
-                if (activeSlot.contains(EquipSlot.PROJECTILE)) {
-                    activeEnchants.merge(enchants, integer, (integer1, integer2) -> {
-                        int res = integer1 + integer2;
-                        if (res == 0) return null;
-                        return res;
-                    });
-                }
-            });
-        }
-        EquipAttributeComponent attributeComponent = smpItem.getComponent(ComponentKeys.ATTRIBUTE);
-        if (attributeComponent != null) {
-            attributeComponent.getAttributes().forEach((attributes, aDouble) -> {
-                if (attributeComponent.getSlot() == EquipSlot.PROJECTILE) {
-                    activeAttributes.merge(attributes, aDouble, (aDouble1, aDouble2) -> {
-                        double res = aDouble1 + aDouble2;
-                        if (Utils.isEffectiveZero(res)) return null;
-                        return res;
-                    });
-                }
-            });
-        }
     }
 
     public void onDamageEntity(DamageEvent event) {
@@ -96,12 +60,21 @@ public class PlayerProjectile {
         });
     }
 
-    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+    public void onProjectileLaunch(PlayerLaunchProjectileEvent event) {
         activeAttributes.forEach((attributes, aDouble) -> {
             attributes.getAttribute().onProjectileLaunch(event, aDouble, smpPlayer);
         });
         activeEnchants.forEach((enchants, integer) -> {
             enchants.getEnchant().onProjectileLaunch(event, integer, smpPlayer);
+        });
+    }
+
+    public void onShootArrow(EntityShootBowEvent event) {
+        activeAttributes.forEach((attributes, aDouble) -> {
+            attributes.getAttribute().onShootArrow(event, aDouble, smpPlayer);
+        });
+        activeEnchants.forEach((enchants, integer) -> {
+            enchants.getEnchant().onShootArrow(event, integer, smpPlayer);
         });
     }
 

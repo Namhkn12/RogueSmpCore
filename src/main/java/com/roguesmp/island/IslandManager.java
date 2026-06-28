@@ -2,6 +2,7 @@ package com.roguesmp.island;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.gui.island.IslandMainGui;
+import com.roguesmp.island.setting.IslandSettings;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.utils.Utils;
@@ -19,7 +20,6 @@ import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
-import dev.jorel.commandapi.arguments.PlayerProfileArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -255,7 +255,7 @@ public class IslandManager {
 
     }
 
-    public void teleportToIsland(Player player) {
+    public void teleportToHomeIsland(Player player) {
         PlayerData playerData = playerManager.getDataManager().getData(player.getUniqueId());
         if (playerData == null) return;
         var islandData = islandDataManager.getCachedData(playerData.getIslandId());
@@ -269,6 +269,42 @@ public class IslandManager {
         Location targetSpawn = islandData.getSpawnLocationWorld(targetCenter.getWorld());
         islandWorldManager.getMultiverseApi().getSafetyTeleporter().to(targetSpawn).passengerMode(PassengerModes.RETAIN_ALL).teleportSingle(player);
 
+    }
+
+    /**
+     * Allow a player to visit another player island
+     * @param bypass whether visitor can ignore
+     */
+    public void visitIsland(Player visitor, UUID islandId, boolean bypass) {
+        IslandData islandData = this.getIslandDataManager().getCachedData(islandId);
+        if (islandData == null) {
+            Utils.runAsync(() -> {
+                IslandData islandData1 = this.getIslandDataManager().loadIslandData(islandId);
+                if (islandData1 == null) {
+                    visitor.sendMessage(Utils.fromString("<red>Không thể tim thấy dữ liệu đảo."));
+                    return;
+                }
+                Utils.runLater(() -> checkConditionAndVisit(visitor, islandData1, bypass));
+            });
+        } else checkConditionAndVisit(visitor, islandData, bypass);
+    }
+
+    private void checkConditionAndVisit(Player visitor, IslandData islandData, boolean bypass) {
+        if (!bypass) {
+            Boolean allowGuest = islandData.getSettingValue(IslandSettings.ALLOW_GUEST);
+            if (allowGuest == null || !allowGuest) {
+                visitor.sendMessage(Utils.fromString("<red>Đảo này không cho người chơi khác thăm!"));
+                return;
+            }
+        }
+
+        Location location = islandData.getSpawnLocationWorld(getIslandWorld(islandData));
+        tpPlayer(visitor, location, PassengerModes.RETAIN_ALL);
+        visitor.sendMessage(Utils.fromString("<green>Dịch chuyển thành công."));
+    }
+
+    private void tpPlayer(Player player, Location targetLocation, PassengerModes passengerModes) {
+        islandWorldManager.getMultiverseApi().getSafetyTeleporter().to(targetLocation).passengerMode(passengerModes).teleportSingle(player);
     }
 
     private void generateBaselineIslandStructure(Location center) {
@@ -363,6 +399,10 @@ public class IslandManager {
         return islandWorldManager.getIslandWorld(islandData);
     }
 
+    public @Nullable World getIslandWorld(IslandData islandData) {
+        return islandWorldManager.getIslandWorld(islandData);
+    }
+
     /**
      * Get player's island spawn location (The location could be set by player)
      * @return The island's spawn Location or {@code null} if player island doesn't have a spawn location.
@@ -419,14 +459,14 @@ public class IslandManager {
         CommandAPICommand goSub = new CommandAPICommand("go")
                 .executesPlayer((player, args) -> {
                     player.sendMessage(Utils.fromString("<green>Đang dịch chuyển về đảo..."));
-                    this.teleportToIsland(player);
+                    this.teleportToHomeIsland(player);
                 });
 
         // 3. Subcommand: /is home (Alias setup)
         CommandAPICommand homeSub = new CommandAPICommand("home")
                 .executesPlayer((player, args) -> {
                     player.sendMessage(Utils.fromString("<green>Đang dịch chuyển về đảo..."));
-                    this.teleportToIsland(player);
+                    this.teleportToHomeIsland(player);
                 });
 
         CommandAPICommand inviteSub = new CommandAPICommand("invite")

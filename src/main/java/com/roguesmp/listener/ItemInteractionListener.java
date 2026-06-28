@@ -17,7 +17,7 @@ public class ItemInteractionListener implements Listener {
     public void onInteract(PlayerInteractEvent event) {
         ItemStack itemStack = event.getItem();
         if (itemStack == null) return;
-        String itemId = ItemStackUtils.getId(itemStack);
+        String itemId = ItemStackUtils.getBaseId(itemStack);
         if (itemId == null) return;
         ItemInteraction interaction = ItemInteractionRegistry.getInteraction(itemId);
         if (interaction == null) return;
@@ -33,7 +33,7 @@ public class ItemInteractionListener implements Listener {
         if (clickedInventory == null) return;
         ItemStack itemStack = clickedInventory.getItem(event.getSlot());
         if (itemStack == null) return;
-        String itemId = ItemStackUtils.getId(itemStack);
+        String itemId = ItemStackUtils.getBaseId(itemStack);
         if (itemId == null) return;
         ItemInteraction interaction = ItemInteractionRegistry.getInteraction(itemId);
         if (interaction == null) return;

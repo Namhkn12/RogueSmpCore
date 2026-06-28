@@ -1,5 +1,6 @@
 package com.roguesmp.listener;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
@@ -100,8 +101,9 @@ public class PlayerListener implements Listener {
             SmpItem newItem = null;
             ItemStack newStack = equipmentChange.newItem();
             if (ItemStackUtils.isValidItem(newStack)) {
-                newItem = new SmpItem(newStack);
-                player.getEquipment().setItem(equipmentSlot, newItem.generateItemStack(smpPlayer, newStack.getAmount()));
+                newItem = SmpItem.wrap(newStack, smpPlayer, smpItem -> {
+                    player.getEquipment().setItem(equipmentSlot, smpItem.generateItemStack(smpPlayer, newStack.getAmount()));
+                });
             }
             smpPlayer.updateSlotStat(player, equipSlot, newItem);
         }
@@ -267,10 +269,9 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+    public void onProjectileLaunch(PlayerLaunchProjectileEvent event) {
         if (event.isCancelled()) return;
-        if (!(event.getEntity().getShooter() instanceof Player player)) return;
-        SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
         if (smpPlayer == null) return;
         smpPlayer.onProjectileLaunch(event);
     }
@@ -284,8 +285,8 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onShootBow(EntityShootBowEvent event) {
-        if (event.getEntity() instanceof Player player
-                && event.getBow() != null
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (event.getBow() != null
                 && event.getProjectile() instanceof AbstractArrow arrow
                 && arrow.getPickupStatus() == AbstractArrow.PickupStatus.ALLOWED) {
             ArrowConsumeEvent arrowConsumeEvent = new ArrowConsumeEvent(player, event.getConsumable());
@@ -298,5 +299,9 @@ public class PlayerListener implements Listener {
                 player.updateInventory();
             }
         }
+
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
+        if (smpPlayer == null) return;
+        smpPlayer.onShootArrow(event);
     }
 }

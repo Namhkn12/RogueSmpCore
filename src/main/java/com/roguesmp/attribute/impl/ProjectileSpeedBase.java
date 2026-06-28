@@ -1,5 +1,6 @@
 package com.roguesmp.attribute.impl;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.attribute.SmpAttribute;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.player.PlayerProjectile;
@@ -10,6 +11,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Entity;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,13 +42,23 @@ public class ProjectileSpeedBase implements SmpAttribute {
     }
 
     @Override
-    public void onProjectileLaunch(ProjectileLaunchEvent event, double value, @NotNull SmpPlayer player) {
-        Entity entity = event.getEntity();
+    public void onProjectileLaunch(PlayerLaunchProjectileEvent event, double value, @NotNull SmpPlayer player) {
+        Entity entity = event.getProjectile();
+        handleVelocity(value, player, entity);
+
+    }
+
+    @Override
+    public void onShootArrow(EntityShootBowEvent event, double value, @NotNull SmpPlayer player) {
+        Entity entity = event.getProjectile();
+        handleVelocity(value, player, entity);
+    }
+
+    private static void handleVelocity(double value, @NotNull SmpPlayer player, Entity entity) {
         PlayerProjectile playerProjectile = player.getProjectile(entity.getUniqueId());
         if (playerProjectile != null) {
             double mult = playerProjectile.getActiveAttributes().getOrDefault(Attributes.PROJECTILE_SPEED_PERCENT, 0d);
             entity.setVelocity(entity.getVelocity().multiply(value * (1 + mult)));
         }
-
     }
 }

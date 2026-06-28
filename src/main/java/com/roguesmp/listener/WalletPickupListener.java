@@ -49,7 +49,7 @@ public class WalletPickupListener implements Listener {
                 WalletUtils.setBalance(walletItem, currentBalance + pickupMoneyValue);
                 deposited = true;
 
-                SmpItem smpItem = new SmpItem(walletItem);
+                SmpItem smpItem = SmpItem.wrap(walletItem);
                 SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
                 if (smpPlayer != null) {
                     ItemStack updated = smpItem.generateItemStack(smpPlayer, walletItem.getAmount());
