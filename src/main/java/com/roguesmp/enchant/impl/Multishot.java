@@ -5,17 +5,15 @@ import com.roguesmp.constant.Enchants;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.entity.EntityManager;
+import com.roguesmp.player.PlayerProjectile;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.VectorUtils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrowableProjectile;
 import org.bukkit.event.entity.EntityShootBowEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,6 +51,10 @@ public class Multishot implements SmpEnchant {
 
     private static void handleMultishot(int level, @NotNull SmpPlayer player, Projectile primary) {
         if (EntityManager.getInstance().hasMetadata(primary, "multishot_guard")) {
+            PlayerProjectile playerProjectile = player.getProjectile(primary.getUniqueId());
+            if (playerProjectile != null) {
+                playerProjectile.setReduceDurability(false);
+            }
             return;
         }
 

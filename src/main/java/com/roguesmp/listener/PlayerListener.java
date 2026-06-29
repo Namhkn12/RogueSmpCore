@@ -97,7 +97,7 @@ public class PlayerListener implements Listener {
         for (Map.Entry<EquipmentSlot, EntityEquipmentChangedEvent.EquipmentChange> entry : event.getEquipmentChanges().entrySet()) {
             EquipmentSlot equipmentSlot = entry.getKey();
             EntityEquipmentChangedEvent.EquipmentChange equipmentChange = entry.getValue();
-            EquipSlot equipSlot = EquipSlot.fromVanilla(equipmentSlot.getGroup());
+            EquipSlot equipSlot = EquipSlot.fromVanilla(equipmentSlot);
             SmpItem newItem = null;
             ItemStack newStack = equipmentChange.newItem();
             if (ItemStackUtils.isValidItem(newStack)) {

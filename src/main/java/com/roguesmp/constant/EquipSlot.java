@@ -1,5 +1,6 @@
 package com.roguesmp.constant;
 
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.jetbrains.annotations.Nullable;
 
@@ -7,33 +8,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum EquipSlot {
-    MAINHAND(EquipmentSlotGroup.MAINHAND, "<!i><gray>Khi trang bị tay chính:", "Tay chính","mainhand"),
-    OFFHAND(EquipmentSlotGroup.OFFHAND, "<!i><gray>Khi trang bị tay phụ:", "Tay phụ", "offhand"),
-    HEAD(EquipmentSlotGroup.HEAD, "<!i><gray>Khi trang bị ở đầu:", "Đầu", "head"),
-    CHEST(EquipmentSlotGroup.CHEST, "<!i><gray>Khi trang bị ở ngực:", "Ngực", "chest"),
-    LEGS(EquipmentSlotGroup.LEGS, "<!i><gray>Khi trang bị ở chân:", "Chân", "legs"),
-    FEET(EquipmentSlotGroup.FEET, "<!i><gray>Khi trang bị ở bàn chân:", "Bàn chân","feet"),
+    MAINHAND(EquipmentSlot.HAND, "<!i><gray>Khi trang bị tay chính:", "Tay chính","mainhand"),
+    OFFHAND(EquipmentSlot.OFF_HAND, "<!i><gray>Khi trang bị tay phụ:", "Tay phụ", "offhand"),
+    HEAD(EquipmentSlot.HEAD, "<!i><gray>Khi trang bị ở đầu:", "Đầu", "head"),
+    CHEST(EquipmentSlot.CHEST, "<!i><gray>Khi trang bị ở ngực:", "Ngực", "chest"),
+    LEGS(EquipmentSlot.LEGS, "<!i><gray>Khi trang bị ở chân:", "Chân", "legs"),
+    FEET(EquipmentSlot.FEET, "<!i><gray>Khi trang bị ở bàn chân:", "Bàn chân","feet"),
     PROJECTILE(null, "<!i><gray>Khi bắn:", "Đạn", "projectile");
 
-    private static final Map<EquipmentSlotGroup, EquipSlot> vanillaToSlot = new HashMap<>();
+    private static final Map<EquipmentSlot, EquipSlot> vanillaToSlot = new HashMap<>();
 
-    private final EquipmentSlotGroup vanillaSlot;
+    private final EquipmentSlot vanillaSlot;
     private final String displayString;
     private final String simpleName;
     private final String id;
 
-    EquipSlot(EquipmentSlotGroup vanillaSlot, String displayString, String simpleName, String id) {
+    EquipSlot(EquipmentSlot vanillaSlot, String displayString, String simpleName, String id) {
         this.vanillaSlot = vanillaSlot;
         this.displayString = displayString;
         this.simpleName = simpleName;
         this.id = id;
     }
 
-    public static EquipSlot fromVanilla(EquipmentSlotGroup slotGroup) {
-        return vanillaToSlot.get(slotGroup);
+    public static EquipSlot fromVanilla(EquipmentSlot slot) {
+        return vanillaToSlot.get(slot);
     }
 
-    public @Nullable EquipmentSlotGroup getVanillaSlot() {
+    public @Nullable EquipmentSlot getVanillaSlot() {
         return vanillaSlot;
     }
 

@@ -20,8 +20,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -93,12 +95,10 @@ public class ConsumableComponent implements ItemComponent {
     }
 
     /**
-     * Return a copy of all effects of this component
+     * Return a view of all effects of this component
      */
-    public List<SmpEffect> getEffects() {
-        List<SmpEffect> cloned = new ArrayList<>();
-        effects.forEach(smpEffect -> cloned.add(smpEffect.clone()));
-        return cloned;
+    public @Unmodifiable List<SmpEffect> getEffects() {
+        return Collections.unmodifiableList(effects);
     }
 
     public void applyEffects(Player player) {

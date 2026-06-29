@@ -23,8 +23,8 @@ public class ItemManager {
 
     private static final ItemManager INSTANCE = new ItemManager();
     private final Cache<@NotNull UUID, SmpItem> trackedItems = Caffeine.newBuilder()
-            .expireAfterAccess(20, TimeUnit.SECONDS)
-            .expireAfterWrite(60, TimeUnit.SECONDS) // Clock resets on every access
+            .expireAfterAccess(10, TimeUnit.SECONDS)
+            .expireAfterWrite(40, TimeUnit.SECONDS) // Clock resets on every access
             .build();
     /**
      * Get the cached SmpItem corresponding to this itemStack, or return a transient SmpItem. Will also automatically cache the item if it is unique
