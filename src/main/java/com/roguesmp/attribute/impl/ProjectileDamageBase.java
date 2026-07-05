@@ -12,6 +12,7 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Trident;
@@ -56,5 +57,15 @@ public class ProjectileDamageBase implements SmpAttribute {
             }
             event.addDamageModifier(value, DamageOperation.BASE);
         }
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Sát thương tầm xa gốc (Chữ xanh trên vũ khí), tất cả buff sẽ dựa vào con số này";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.ARROW;
     }
 }

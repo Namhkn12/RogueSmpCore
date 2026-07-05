@@ -8,6 +8,7 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -58,5 +59,15 @@ public class AttackSpeedBase implements SmpAttribute {
         if (ai != null) {
             ai.removeModifier(MODIFIER_KEY);
         }
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Hoạt động giống như minecraft thông thường";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.IRON_SWORD;
     }
 }

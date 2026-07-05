@@ -12,6 +12,7 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
@@ -38,6 +39,14 @@ public interface SmpEnchant {
     @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc);
 
     @NotNull Set<EquipSlot> getActiveSlots();
+
+    default @NotNull String getSimpleDescription() {
+        return "Phù phép này chưa có mô tả, xin hãy thông báo tới admin để được thêm.";
+    }
+
+    default Material getIcon() {
+        return Material.PAPER;
+    }
 
     /**
      * Called when this enchant is added to an itemStack, for putting default/starter data for use in stacking enchants, etc...

@@ -5,6 +5,7 @@ import com.roguesmp.constant.Attributes;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -54,5 +55,15 @@ public class SpeedFlat implements SmpAttribute {
         if (ai != null) {
             ai.removeModifier(MODIFIER_ID);
         }
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tăng tốc độ di chuyển thêm x";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.SUGAR;
     }
 }

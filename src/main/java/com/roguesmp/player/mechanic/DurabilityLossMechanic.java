@@ -9,7 +9,9 @@ import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.DurabilityComponent;
 import com.roguesmp.player.PlayerProjectile;
 import com.roguesmp.player.SmpPlayer;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
@@ -18,6 +20,16 @@ import java.util.Set;
 public class DurabilityLossMechanic implements PlayerMechanic {
 
     @Override public int getPriority() { return 600; } // Runs near the absolute end
+
+    @Override
+    public void onBlockBreak(BlockBreakEvent event, SmpPlayer player) {
+        if (event.isCancelled()) return;
+        Block block = event.getBlock();
+        if (!block.getType().isCollidable()) return;
+        SmpItem currentMainhand = player.getItemAtEquipSlot(EquipSlot.MAINHAND);
+        damageItem(player, currentMainhand, 1, EquipSlot.MAINHAND);
+
+    }
 
     @Override
     public void onProjectileLaunch(PlayerLaunchProjectileEvent event, SmpPlayer player) {

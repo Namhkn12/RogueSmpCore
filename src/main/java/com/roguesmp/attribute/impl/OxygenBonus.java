@@ -6,6 +6,7 @@ import com.roguesmp.constant.Keys;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -55,5 +56,15 @@ public class OxygenBonus implements SmpAttribute {
         if (ai != null) {
             ai.removeModifier(MODIFIER_ID);
         }
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Thay đổi tỉ lệ mất không khí mỗi 50 mili giây khi ở dưới nước theo công thức 1/(x+1)";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.SEAGRASS;
     }
 }

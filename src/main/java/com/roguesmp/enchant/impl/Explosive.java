@@ -41,6 +41,11 @@ public class Explosive implements SmpEnchant {
     }
 
     @Override
+    public @NotNull String getSimpleDescription() {
+        return "Mũi tên tạo hiệu ứng nổ khi va chạm, không gây sát thương vì đây dùng để test!";
+    }
+
+    @Override
     public @NotNull Set<EquipSlot> getActiveSlots() {
         return Set.of(EquipSlot.MAINHAND, EquipSlot.PROJECTILE);
     }

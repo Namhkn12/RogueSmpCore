@@ -6,8 +6,10 @@ import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,6 +28,16 @@ public class Density implements SmpEnchant {
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
         return defaultLoreProvider(level);
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tăng sát thương gốc gây ra thêm " + Utils.formatDecimal(DMG_PER_LEVEL) + " * {khoảng cách rơi} mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.MACE;
     }
 
     @Override public @NotNull Set<EquipSlot> getActiveSlots() {

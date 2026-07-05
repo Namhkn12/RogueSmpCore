@@ -12,6 +12,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,5 +56,15 @@ public class DefenseFlat implements SmpAttribute {
         if (protectedType.contains(event.getDamageType())) {
             event.addDefenseModifier(value, DamageOperation.ADD_BASE);
         }
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Giảm sát thương cận chiến, phép, vật bắn ra, vụ nổ nhận vào, công thức: ST * (20 / (20 + x))";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.IRON_CHESTPLATE;
     }
 }

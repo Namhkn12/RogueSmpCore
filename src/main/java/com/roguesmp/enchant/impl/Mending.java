@@ -8,6 +8,7 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +23,16 @@ public class Mending implements SmpEnchant {
     @Override public @NotNull String getId() { return "mending"; }
     @Override public @NotNull Enchants getEnumConstant() { return Enchants.MENDING; }
     @Override public @NotNull String getSimpleName() { return "Tu sửa"; }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Hoạt động giống vanilla";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.GREEN_DYE;
+    }
 
     @Override public @NotNull Set<EquipSlot> getActiveSlots() {
         return EnumSet.allOf(EquipSlot.class);

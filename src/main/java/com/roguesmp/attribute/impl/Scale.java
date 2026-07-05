@@ -5,6 +5,7 @@ import com.roguesmp.constant.Attributes;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -41,5 +42,15 @@ public class Scale implements SmpAttribute {
 
     @Override public @NotNull List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
         return defaultPercentLoreProvider(value * 100);
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tăng kích cỡ bản thân thêm x";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.PISTON;
     }
 }

@@ -7,6 +7,7 @@ import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,6 +24,16 @@ public class FeatherFalling implements SmpEnchant {
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
         return defaultLoreProvider(level);
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Giảm sát thương rơi phải nhận 10% mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.FEATHER;
     }
 
     @Override public @NotNull Set<EquipSlot> getActiveSlots() {

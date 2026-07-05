@@ -6,6 +6,7 @@ import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +22,16 @@ public class Looting implements SmpEnchant {
     @Override public @NotNull String getId() { return "looting"; }
     @Override public @NotNull Enchants getEnumConstant() { return Enchants.LOOTING; }
     @Override public @NotNull String getSimpleName() { return "Nhặt"; }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Hoạt động giống vanilla";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.EMERALD;
+    }
 
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {

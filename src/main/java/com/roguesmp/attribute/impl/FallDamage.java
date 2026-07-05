@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -51,5 +52,15 @@ public class FallDamage implements SmpAttribute {
         color = value > 0 ? NamedTextColor.RED : NamedTextColor.BLUE;
         fullDisplay = Component.text(numberPrefix + Utils.formatDecimal(value * 100) + "% " + getSimpleName(), color).decoration(TextDecoration.ITALIC, false);
         return List.of(fullDisplay);
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tăng sát thương rơi nhận phải thêm x %";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.FEATHER;
     }
 }

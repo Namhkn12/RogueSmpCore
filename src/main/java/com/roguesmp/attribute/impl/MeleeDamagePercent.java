@@ -14,20 +14,20 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ProjectileDamagePercent implements SmpAttribute {
+public class MeleeDamagePercent implements SmpAttribute {
     @Override
     public @NotNull String getId() {
-        return "projectile_damage_percent";
+        return "melee_damage_percent";
     }
 
     @Override
     public @NotNull Attributes getEnumConstant() {
-        return Attributes.PROJECTILE_DAMAGE_PERCENT;
+        return Attributes.MELEE_DAMAGE_PERCENT;
     }
 
     @Override
     public @NotNull String getSimpleName() {
-        return "Sát thương tầm xa";
+        return "Sát thương cận chiến";
     }
 
     @Override
@@ -37,19 +37,18 @@ public class ProjectileDamagePercent implements SmpAttribute {
 
     @Override
     public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
-        if (DamageType.isProjectileDamage(event.getDamageType())) {
+        if (DamageType.isMeleeDamage(event.getDamageType())) {
             event.addDamageModifier(value, DamageOperation.INCREASE_BASE);
         }
-
     }
 
     @Override
     public @NotNull String getSimpleDescription() {
-        return "Tăng sát thương tầm xa thêm x %";
+        return "Tăng sát thương cận chiến thêm x %";
     }
 
     @Override
     public Material getIcon() {
-        return Material.ARROW;
+        return Material.IRON_SWORD;
     }
 }

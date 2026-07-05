@@ -6,6 +6,7 @@ import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +25,16 @@ public class FireAspect implements SmpEnchant {
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
         return defaultLoreProvider(level);
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Là phù phép vanilla <:";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.MAGMA_CREAM;
     }
 
     @Override public @NotNull Set<EquipSlot> getActiveSlots() {

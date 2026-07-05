@@ -10,6 +10,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.VectorUtils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrowableProjectile;
@@ -27,6 +28,16 @@ public class Multishot implements SmpEnchant {
     @Override public @NotNull String getId() { return "multishot"; }
     @Override public @NotNull Enchants getEnumConstant() { return Enchants.MULTISHOT; }
     @Override public @NotNull String getSimpleName() { return "Bắn nhiều tia"; }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Đạn bắn ra sẽ đi kèm thêm hai viên đạn mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.CROSSBOW;
+    }
 
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {

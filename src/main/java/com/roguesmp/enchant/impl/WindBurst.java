@@ -7,6 +7,7 @@ import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,16 @@ public class WindBurst implements SmpEnchant {
     @Override public @NotNull String getId() { return "wind_burst"; }
     @Override public @NotNull Enchants getEnumConstant() { return Enchants.WIND_BURST; }
     @Override public @NotNull String getSimpleName() { return "Phong bộc"; }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Hoạt động giống vanilla";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.MACE;
+    }
 
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {

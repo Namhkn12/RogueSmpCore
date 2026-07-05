@@ -9,6 +9,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.EntityUtils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +40,16 @@ public class BaneOfArthropods implements SmpEnchant {
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
         return defaultLoreProvider(level);
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Sát thương gốc gây ra cho quái chân đốt tăng thêm 2 mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.COBWEB;
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.EntityUtils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +25,16 @@ public class Impaling implements SmpEnchant {
     @Override public @NotNull String getId() { return "impaling"; }
     @Override public @NotNull Enchants getEnumConstant() { return Enchants.IMPALING; }
     @Override public @NotNull String getSimpleName() { return "Đâm vào da thịt"; }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tăng sát thương gốc gây ra cho thủy quái thêm 2 mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.SEAGRASS;
+    }
 
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {

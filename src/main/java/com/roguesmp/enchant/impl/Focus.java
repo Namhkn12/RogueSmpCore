@@ -16,20 +16,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class SwiftSneak implements SmpEnchant {
-
-    @Override public @NotNull String getId() { return "swift_sneak"; }
-    @Override public @NotNull Enchants getEnumConstant() { return Enchants.SWIFT_SNEAK; }
-    @Override public @NotNull String getSimpleName() { return "Bò nhanh"; }
-
+public class Focus implements SmpEnchant {
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng chỉ số " + Attributes.SNEAKING_SPEED.getAttribute().getSimpleName() + " thêm 0.15 mỗi cấp";
+    public @NotNull String getId() {
+        return "focus";
     }
 
     @Override
-    public Material getIcon() {
-        return Material.LEATHER_BOOTS;
+    public @NotNull Enchants getEnumConstant() {
+        return null;
+    }
+
+    @Override
+    public @NotNull String getSimpleName() {
+        return "Định tâm";
     }
 
     @Override
@@ -37,12 +37,23 @@ public class SwiftSneak implements SmpEnchant {
         return defaultLoreProvider(level);
     }
 
-    @Override public @NotNull Set<EquipSlot> getActiveSlots() {
-        return EnumSet.of(EquipSlot.LEGS);
+    @Override
+    public @NotNull Set<EquipSlot> getActiveSlots() {
+        return EnumSet.allOf(EquipSlot.class);
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Nhận 1% sát thương tầm xa mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.TARGET;
     }
 
     @Override
     public @NotNull Map<Attributes, Double> provideAttributes(int level) {
-        return Map.of(Attributes.SNEAKING_SPEED, level * 0.15);
+        return Map.of(Attributes.PROJECTILE_DAMAGE_PERCENT, 0.01 * level);
     }
 }

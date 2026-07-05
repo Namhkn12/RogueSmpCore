@@ -1,45 +1,40 @@
 package com.roguesmp.enchant.impl;
 
+import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.Enchants;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-public class Punch implements SmpEnchant {
+public class Celerity implements SmpEnchant {
+
+    private static final double VALUE_PER_LEVEL = 0.01;
+
     @Override
     public @NotNull String getId() {
-        return "punch";
+        return "celerity";
     }
 
     @Override
     public @NotNull Enchants getEnumConstant() {
-        return Enchants.PUNCH;
+        return Enchants.CELERITY;
     }
 
     @Override
     public @NotNull String getSimpleName() {
-        return "Đẩy lùi";
+        return "Thần tốc";
     }
 
     @Override
     public @NotNull String getSimpleDescription() {
-        return "Hoạt động giống vanilla";
-    }
-
-    @Override
-    public Material getIcon() {
-        return Material.SLIME_BALL;
+        return "Tăng tốc độ di chuyển thêm " + Utils.formatDecimal(VALUE_PER_LEVEL * 100) + "% mỗi cấp";
     }
 
     @Override
@@ -49,11 +44,13 @@ public class Punch implements SmpEnchant {
 
     @Override
     public @NotNull Set<EquipSlot> getActiveSlots() {
-        return EnumSet.of(EquipSlot.MAINHAND);
+        return EnumSet.allOf(EquipSlot.class);
     }
 
     @Override
-    public void attachVanillaEnchant(Map<Enchantment, Integer> currentVanillaEnchants, int level) {
-        currentVanillaEnchants.put(Enchantment.PUNCH, level);
+    public @NotNull Map<Attributes, Double> provideAttributes(int level) {
+        return Map.of(Attributes.SPEED_PERCENT, VALUE_PER_LEVEL * level);
     }
+
+
 }
