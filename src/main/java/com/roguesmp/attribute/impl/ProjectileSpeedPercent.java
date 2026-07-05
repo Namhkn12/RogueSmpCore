@@ -58,4 +58,9 @@ public class ProjectileSpeedPercent implements SmpAttribute {
             entity.setVelocity(entity.getVelocity().multiply(1 + value));
         }
     }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tăng tốc độ đạn bắn ra thêm x %";
+    }
 }

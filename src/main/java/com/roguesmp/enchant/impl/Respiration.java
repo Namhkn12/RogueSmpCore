@@ -7,6 +7,7 @@ import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,6 +21,16 @@ public class Respiration implements SmpEnchant {
     @Override public @NotNull String getId() { return "respiration"; }
     @Override public @NotNull Enchants getEnumConstant() { return Enchants.RESPIRATION; }
     @Override public @NotNull String getSimpleName() { return "Hô hấp"; }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Nhận 1 điểm chỉ số " + Attributes.OXYGEN_BONUS.getAttribute().getSimpleName() + " mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.FISHING_ROD;
+    }
 
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {

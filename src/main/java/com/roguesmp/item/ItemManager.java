@@ -7,6 +7,7 @@ import com.roguesmp.constant.Keys;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.SmpItemUtils;
+import io.papermc.paper.persistence.PersistentDataContainerView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -23,17 +24,18 @@ public class ItemManager {
 
     private static final ItemManager INSTANCE = new ItemManager();
     private final Cache<@NotNull UUID, SmpItem> trackedItems = Caffeine.newBuilder()
-            .expireAfterAccess(20, TimeUnit.SECONDS)
-            .expireAfterWrite(60, TimeUnit.SECONDS) // Clock resets on every access
+            .expireAfterAccess(10, TimeUnit.SECONDS)
+            .expireAfterWrite(40, TimeUnit.SECONDS) // Clock resets on every access
             .build();
     /**
      * Get the cached SmpItem corresponding to this itemStack, or return a transient SmpItem. Will also automatically cache the item if it is unique
      */
     public SmpItem wrapItem(@NotNull ItemStack itemStack, @Nullable SmpPlayer smpPlayer, @Nullable Consumer<SmpItem> onCacheMiss) {
-        BaseItem baseItem = SmpItemUtils.getBaseItem(itemStack);
+        PersistentDataContainerView pdcv = itemStack.getPersistentDataContainer();
+        BaseItem baseItem = SmpItemUtils.getBaseItem(pdcv);
         if (baseItem == null) return new SmpItem(itemStack);
 
-        UUID uuid = ItemStackUtils.getUUID(itemStack);
+        UUID uuid = ItemStackUtils.getUUID(pdcv);
 
         if (baseItem.isUnique() && uuid == null) {
             UUID generatedId = UUID.randomUUID();

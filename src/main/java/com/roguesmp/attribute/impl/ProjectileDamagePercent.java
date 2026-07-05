@@ -8,6 +8,7 @@ import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,14 +32,24 @@ public class ProjectileDamagePercent implements SmpAttribute {
 
     @Override
     public @Nullable List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
-        return defaultPercentLoreProvider(value);
+        return defaultPercentLoreProvider(value * 100);
     }
 
     @Override
     public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
         if (DamageType.isProjectileDamage(event.getDamageType())) {
-            event.addDamageModifier(value / 100, DamageOperation.INCREASE_BASE);
+            event.addDamageModifier(value, DamageOperation.INCREASE_BASE);
         }
 
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tăng sát thương tầm xa thêm x %";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.ARROW;
     }
 }

@@ -80,7 +80,18 @@ public enum Enchants {
     @SerializedName("greed")
     GREED(new Greed()),
     @SerializedName("explosive")
-    EXPLOSIVE(new Explosive())
+    EXPLOSIVE(new Explosive()),
+
+    @SerializedName("vigor")
+    VIGOR(new Vigor()),
+    @SerializedName("focus")
+    FOCUS(new Focus()),
+    @SerializedName("fortitude")
+    FORTITUDE(new Fortitude()),
+    @SerializedName("perspicacity")
+    PERSPICACITY(new Perspicacity()),
+    @SerializedName("celerity")
+    CELERITY(new Celerity());
     ;
 
     private static final Map<String, Enchants> reverseMap = new HashMap<>();

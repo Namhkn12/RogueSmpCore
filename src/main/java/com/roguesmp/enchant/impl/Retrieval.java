@@ -8,6 +8,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
@@ -32,6 +33,16 @@ public class Retrieval implements SmpEnchant {
     @Override
     public @NotNull String getSimpleName() {
         return "Thu hồi tên";
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Mũi tên bắn ra có tỉ lệ 10% không bị tiêu hao mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.BUNDLE;
     }
 
     @Override

@@ -79,7 +79,10 @@ public class ItemStackUtils {
      */
     public static @Nullable String getBaseId(ItemStack itemStack) {
         if (itemStack == null) return null;
-        PersistentDataContainerView pdc = itemStack.getPersistentDataContainer();
+        return getBaseId(itemStack.getPersistentDataContainer());
+    }
+
+    public static @Nullable String getBaseId(PersistentDataContainerView pdc) {
         return pdc.get(Keys.ITEM_ID, PersistentDataType.STRING);
     }
 
@@ -88,7 +91,10 @@ public class ItemStackUtils {
      */
     public static @Nullable UUID getUUID(ItemStack itemStack) {
         if (itemStack == null) return null;
-        PersistentDataContainerView pdc = itemStack.getPersistentDataContainer();
+        return getUUID(itemStack.getPersistentDataContainer());
+    }
+
+    public static @Nullable UUID getUUID(PersistentDataContainerView pdc) {
         String uuidStr = pdc.get(Keys.ITEM_UUID, PersistentDataType.STRING);
         if (uuidStr == null) return null;
         return UUID.fromString(uuidStr);

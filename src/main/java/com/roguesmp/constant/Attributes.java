@@ -21,6 +21,12 @@ public enum Attributes {
     @SerializedName("throw_rate_base")
     THROW_RATE_BASE(new ThrowRateBase()),
 
+    @SerializedName("melee_damage_percent")
+    MELEE_DAMAGE_PERCENT(new MeleeDamagePercent()),
+
+    @SerializedName("magic_damage_percent")
+    MAGIC_DAMAGE_PERCENT(new MagicDamagePercent()),
+
     @SerializedName("throw_rate_percent")
     THROW_RATE_PERCENT(new ThrowRatePercent()),
 

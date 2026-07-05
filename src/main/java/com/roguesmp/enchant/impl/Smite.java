@@ -9,6 +9,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.EntityUtils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +25,16 @@ public class Smite implements SmpEnchant {
     @Override public @NotNull String getId() { return "smite"; }
     @Override public @NotNull Enchants getEnumConstant() { return Enchants.SMITE; }
     @Override public @NotNull String getSimpleName() { return "Hại thây ma"; }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Gây thêm 2 sát thương gốc mỗi cấp khi tấn công kẻ địch dạng thây ma";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.ZOMBIE_HEAD;
+    }
 
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {

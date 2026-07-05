@@ -10,6 +10,7 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,5 +52,15 @@ public class ThrowRateBase implements SmpAttribute {
         int cooldown = (int) (20 / value);
         bukkitPlayer.setCooldown(event.getItemStack().getType(), cooldown);
 
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tốc độ ném vũ khí gốc (đinh ba, trứng, v.v...), càng cao thì thời gian chờ càng nhỏ";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.SNOWBALL;
     }
 }

@@ -11,6 +11,7 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,5 +50,15 @@ public class MeleeDamageBase implements SmpAttribute {
     private static double getMeleeCooldownMultiplier(Player player) {
         float p = player.getAttackCooldown();
         return 0.2 + 0.8 * p * p;
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Sát thương cận chiến gốc (chữ xanh lá trên vũ khí), tất cả các buff sẽ dựa vào con số này";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.IRON_SWORD;
     }
 }

@@ -2,22 +2,13 @@ package com.roguesmp.player;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.Attributes;
-import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.constant.Enchants;
-import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.event.DamageEvent;
-import com.roguesmp.item.SmpItem;
-import com.roguesmp.item.component.impl.EnchantComponent;
-import com.roguesmp.item.component.impl.EquipAttributeComponent;
-import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Projectile;
-import org.bukkit.entity.ThrowableProjectile;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -31,6 +22,7 @@ public class PlayerProjectile {
     private final SmpPlayer smpPlayer;
     private final Map<Enchants, Integer> activeEnchants = new EnumMap<>(Enchants.class);
     private final Map<Attributes, Double> activeAttributes = new EnumMap<>(Attributes.class);
+    private boolean reduceDurability;
 
     private int tickAlive = 0;
 
@@ -109,5 +101,13 @@ public class PlayerProjectile {
 
     public void incrementTickAlive(int periodIncrement) {
         tickAlive = tickAlive + periodIncrement;
+    }
+
+    public void setReduceDurability(boolean reduceDurability) {
+        this.reduceDurability = reduceDurability;
+    }
+
+    public boolean shouldReduceDurability() {
+        return reduceDurability;
     }
 }

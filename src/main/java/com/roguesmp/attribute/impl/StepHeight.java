@@ -5,6 +5,7 @@ import com.roguesmp.constant.Attributes;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -42,5 +43,15 @@ public class StepHeight implements SmpAttribute {
 
     @Override public @NotNull List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
         return defaultFlatLoreProvider(value);
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tăng độ cao bước chân thêm x khối (Khi x = 0.5, người chơi có thể bước lên khối mà không cần nhảy";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.STONE_STAIRS;
     }
 }

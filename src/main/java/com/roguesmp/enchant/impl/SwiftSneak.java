@@ -7,6 +7,7 @@ import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,6 +21,16 @@ public class SwiftSneak implements SmpEnchant {
     @Override public @NotNull String getId() { return "swift_sneak"; }
     @Override public @NotNull Enchants getEnumConstant() { return Enchants.SWIFT_SNEAK; }
     @Override public @NotNull String getSimpleName() { return "Bò nhanh"; }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tăng chỉ số " + Attributes.SNEAKING_SPEED.getAttribute().getSimpleName() + " thêm 0.15 mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.LEATHER_BOOTS;
+    }
 
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {

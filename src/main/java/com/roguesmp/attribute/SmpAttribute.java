@@ -12,6 +12,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
@@ -31,6 +32,14 @@ public interface SmpAttribute {
 
     //return null for no display
     @Nullable List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc);
+
+    default @NotNull String getSimpleDescription() {
+        return "Chỉ số này chưa có mô tả, xin hãy thông báo tới admin để được thêm.";
+    }
+
+    default Material getIcon() {
+        return Material.PAPER;
+    }
 
     /**
      * Add attribute on equip, remove existing modifier before adding new one!

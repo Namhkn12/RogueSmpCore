@@ -6,6 +6,7 @@ import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,6 +26,16 @@ public class FireProtection implements SmpEnchant {
         return defaultLoreProvider(level);
     }
 
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Nhận 4 phòng ngự mỗi cấp khi chịu sát thương lửa và giảm thời gian cháy 10% mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.MAGMA_BLOCK;
+    }
+
     @Override public @NotNull Set<EquipSlot> getActiveSlots() {
         return EnumSet.allOf(EquipSlot.class);
     }
@@ -32,11 +43,7 @@ public class FireProtection implements SmpEnchant {
     @Override
     public void onHurt(DamageEvent event, int level, @NotNull SmpPlayer player) {
         if (event.getDamageType() == DamageType.FIRE) {
-            // Vanilla: 8% damage reduction per level (EPF)
-            // Use this scaling to match Vanilla's ~8% per level curve
-            // Level 1: ~1.3, Level 4: ~7.0
-            double bonusDefense = (level * 1.2) + (level * level * 0.13);
-            event.addDefenseModifier(bonusDefense, DamageOperation.ADD_BASE);
+            event.addDefenseModifier(4 * level, DamageOperation.ADD_BASE);
         }
     }
 

@@ -7,6 +7,7 @@ import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,6 +21,16 @@ public class SweepingEdge implements SmpEnchant {
     @Override public @NotNull String getId() { return "sweeping_edge"; }
     @Override public @NotNull Enchants getEnumConstant() { return Enchants.SWEEPING_EDGE; }
     @Override public @NotNull String getSimpleName() { return "Quét cạnh"; }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tăng chỉ số " + Attributes.SWEEPING_DAMAGE_RATIO.getAttribute().getSimpleName() + " thêm 0.1 mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.WIND_CHARGE;
+    }
 
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {

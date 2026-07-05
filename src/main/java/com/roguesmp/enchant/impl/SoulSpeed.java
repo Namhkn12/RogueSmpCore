@@ -6,6 +6,7 @@ import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,6 +21,16 @@ public class SoulSpeed implements SmpEnchant {
     @Override public @NotNull String getId() { return "soul_speed"; }
     @Override public @NotNull Enchants getEnumConstant() { return Enchants.SOUL_SPEED; }
     @Override public @NotNull String getSimpleName() { return "Tốc độ linh hồn"; }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Hoạt động giống vanilla";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.SOUL_SOIL;
+    }
 
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {

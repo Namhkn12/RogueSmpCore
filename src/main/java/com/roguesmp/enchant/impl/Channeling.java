@@ -7,8 +7,10 @@ import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.DamageUtils;
+import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -40,6 +42,16 @@ public class Channeling implements SmpEnchant {
     }
 
     @Override
+    public @NotNull String getSimpleDescription() {
+        return "Giáng sấm sét xuống kẻ địch bị trúng tên, gây " + Utils.formatDecimal(DMG_PER_LEVEL) + " sát thương phép mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.TRIDENT;
+    }
+
+    @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
         return defaultLoreProvider(level);
     }
@@ -58,7 +70,9 @@ public class Channeling implements SmpEnchant {
 
         world.strikeLightningEffect(hitEntity.getLocation());
         if (hitEntity instanceof LivingEntity living) {
-            DamageUtils.damage(living, player.getBukkitPlayer(), DMG_PER_LEVEL * level, new DamageEvent.Metadata(DamageType.MAGIC));
+            DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.MAGIC);
+            metadata.setIgnoreIframe(true);
+            DamageUtils.damage(living, player.getBukkitPlayer(), DMG_PER_LEVEL * level, metadata);
         }
 
     }

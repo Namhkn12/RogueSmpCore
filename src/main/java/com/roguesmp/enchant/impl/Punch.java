@@ -6,6 +6,7 @@ import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +30,16 @@ public class Punch implements SmpEnchant {
     @Override
     public @NotNull String getSimpleName() {
         return "Đẩy lùi";
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Hoạt động giống vanilla";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.SLIME_BALL;
     }
 
     @Override

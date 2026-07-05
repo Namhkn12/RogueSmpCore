@@ -9,6 +9,7 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +38,16 @@ public class AquaAffinity implements SmpEnchant {
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
         return List.of(Component.text(getSimpleName(), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tăng thời gian thở dưới nước thêm 15s mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.SEA_LANTERN;
     }
 
     @Override

@@ -10,7 +10,9 @@ import com.roguesmp.item.component.impl.GemDataComponent;
 import com.roguesmp.item.component.impl.GemSocketComponent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.ItemRegistry;
+import io.papermc.paper.persistence.PersistentDataContainerView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -21,7 +23,12 @@ import java.util.Map;
 public class SmpItemUtils {
 
     public static @Nullable BaseItem getBaseItem(ItemStack itemStack) {
-        String id = ItemStackUtils.getBaseId(itemStack);
+        if (itemStack == null) return null;
+        return getBaseItem(itemStack.getPersistentDataContainer());
+    }
+
+    public static @Nullable BaseItem getBaseItem(PersistentDataContainerView pdc) {
+        String id = ItemStackUtils.getBaseId(pdc);
         if (id == null) return null;
         return ItemRegistry.getInstance().getBaseItem(id);
     }

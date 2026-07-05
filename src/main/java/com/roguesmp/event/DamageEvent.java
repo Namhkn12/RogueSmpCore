@@ -2,7 +2,6 @@ package com.roguesmp.event;
 
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.constant.DamageType;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -51,6 +50,10 @@ public class DamageEvent extends Event implements Cancellable {
             return ignoreIframe;
         }
 
+        public void setIgnoreIframe(boolean ignoreIframe) {
+            this.ignoreIframe = ignoreIframe;
+        }
+
         public @Nullable String getMobSpellId() {
             return mobSpellId;
         }
@@ -77,7 +80,8 @@ public class DamageEvent extends Event implements Cancellable {
     private final double initialDamage;
     private final Metadata metadata;
 
-    private boolean needUpdate = true; // For recalculating dmg value
+    private boolean needUpdateDmg = true; // For recalculating dmg value
+    private boolean needUpdateDef = true;
 
     private boolean isBlocked;
     private boolean isCancelled;
@@ -110,7 +114,7 @@ public class DamageEvent extends Event implements Cancellable {
     }
 
     public void addDamageModifier(double value, DamageOperation operation) {
-        needUpdate = true;
+        needUpdateDmg = true;
         switch (operation) {
             case BASE -> baseOverride = value;
             case ADD_BASE -> addBase += value;
@@ -122,7 +126,7 @@ public class DamageEvent extends Event implements Cancellable {
     }
 
     public void addDefenseModifier(double value, DamageOperation operation) {
-        needUpdate = true;
+        needUpdateDef = true;
         switch (operation) {
             case BASE -> baseDef = value;
             case ADD_BASE -> addBaseDef += value;
@@ -134,7 +138,7 @@ public class DamageEvent extends Event implements Cancellable {
     }
 
     private double calculateFinalDamage() {
-        if (!needUpdate) return finalDamage;
+        if (!needUpdateDmg) return finalDamage;
         double base = (baseOverride >= 0) ? baseOverride : initialDamage;
 
         finalDamage = base + addBase;
@@ -154,12 +158,12 @@ public class DamageEvent extends Event implements Cancellable {
             finalDamage = applyDefense(finalDamage, totalDef);
         }
 
-        needUpdate = false;
+        needUpdateDmg = false;
         return Math.max(0.001, finalDamage); // Prevent negative damage
     }
 
     private double calculateFinalDefense() {
-        if (!needUpdate) return finalDef;
+        if (!needUpdateDef) return finalDef;
         finalDef = baseDef + addBaseDef;
         finalDef *= (1 + increaseBaseDef);
         finalDef *= moreBaseDef;
@@ -169,7 +173,7 @@ public class DamageEvent extends Event implements Cancellable {
     }
 
     private static double applyDefense(double damage, double defense) {
-        final double C = 15d;
+        final double C = 20d;
         return damage * (C / (C + defense));
     }
 

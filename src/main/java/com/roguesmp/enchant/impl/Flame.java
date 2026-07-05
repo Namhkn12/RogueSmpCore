@@ -7,6 +7,7 @@ import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -28,6 +29,16 @@ public class Flame implements SmpEnchant {
     @Override
     public @Nullable List<Component> getDisplayText(int level, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
         return defaultLoreProvider(level);
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Mũi tên bọc lửa, khiến kẻ địch bị cháy 5 giây mỗi cấp";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.MAGMA_CREAM;
     }
 
     @Override public @NotNull Set<EquipSlot> getActiveSlots() {

@@ -5,6 +5,7 @@ import com.roguesmp.constant.Attributes;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -41,5 +42,15 @@ public class WaterMovementEfficiency implements SmpAttribute {
 
     @Override public @NotNull List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc) {
         return defaultFlatLoreProvider(value);
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tăng hiệu suất di chuyển dưới nước thêm x (Khi hiệu suất bằng 1, di chuyển cảm giác như trên cạn)";
+    }
+
+    @Override
+    public Material getIcon() {
+        return Material.IRON_BOOTS;
     }
 }

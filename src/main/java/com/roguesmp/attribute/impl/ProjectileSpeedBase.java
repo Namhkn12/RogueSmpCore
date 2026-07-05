@@ -10,6 +10,7 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -60,5 +61,10 @@ public class ProjectileSpeedBase implements SmpAttribute {
             double mult = playerProjectile.getActiveAttributes().getOrDefault(Attributes.PROJECTILE_SPEED_PERCENT, 0d);
             entity.setVelocity(entity.getVelocity().multiply(value * (1 + mult)));
         }
+    }
+
+    @Override
+    public @NotNull String getSimpleDescription() {
+        return "Tốc độ đạn khi bắn/ném ra (gồm: đinh ba, mũi tên, trứng, v.v...) tăng x lần (Chữ xanh lá trên vũ khí)";
     }
 }
