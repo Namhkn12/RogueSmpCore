@@ -1,9 +1,11 @@
 package com.roguesmp.player.mechanic;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
+import com.roguesmp.entity.EntityManager;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.trigger.AbilityTrigger;
+import com.roguesmp.utils.ItemStackUtils;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
@@ -25,10 +27,17 @@ public class AbilityLoadoutMechanic implements PlayerMechanic {
     public void onInteract(PlayerInteractEvent event, SmpPlayer player) {
         if (event.getHand() != EquipmentSlot.HAND) return;
 
-        if (event.getAction().isLeftClick()) {
+        if (event.getAction().isLeftClick()) { //A hack to prevent triggering left click skills when player throw/use an item (snowball, etc...)
+            if (EntityManager.getInstance().hasMetadata(event.getPlayer(), "thrown_left_click")) {
+                EntityManager.getInstance().removeMetadata(event.getPlayer(), "thrown_left_click");
+                return;
+            }
             player.getAbilityLoadout().cast(AbilityTrigger.Key.LEFT_CLICK);
         } else if (event.getAction().isRightClick()) {
             if (event.isBlockInHand()) return;
+            if (ItemStackUtils.isCauseLeftClickWhenThrownItem(event.getItem())) {
+                EntityManager.getInstance().addMetadata(event.getPlayer(), "thrown_left_click", true);
+            }
             player.getAbilityLoadout().cast(AbilityTrigger.Key.RIGHT_CLICK);
         }
     }

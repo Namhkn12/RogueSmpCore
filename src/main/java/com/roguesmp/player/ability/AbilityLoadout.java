@@ -84,7 +84,12 @@ public class AbilityLoadout {
         }
     }
 
+    private int lastCastTick = 0;
+
     public void cast(AbilityTrigger.Key key) {
+        int currentTick = Bukkit.getCurrentTick();
+        if (lastCastTick == currentTick) return;
+        lastCastTick = currentTick; //Only allow 1 key trigger per tick
         // 1. Give Context Owner priority (Interceptor pattern)
         if (contextOwner != null) {
             if (execute(contextOwner, key)) return;
