@@ -1,5 +1,6 @@
 package com.roguesmp.registry;
 
+import com.roguesmp.item.modifier.BrokenModifier;
 import com.roguesmp.item.modifier.EnchantAttributeModifier;
 import com.roguesmp.item.modifier.GemModifier;
 import com.roguesmp.item.modifier.ItemModifier;
@@ -18,6 +19,8 @@ public class ModifierRegistry {
     static {
         modifiers.add(new GemModifier());
         modifiers.add(new EnchantAttributeModifier());
+
+        modifiers.add(new BrokenModifier());
 
         UNMODIFIABLE_MODIFIERS = Collections.unmodifiableList(modifiers);
     }

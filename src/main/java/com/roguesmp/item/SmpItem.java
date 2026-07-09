@@ -104,6 +104,15 @@ public class SmpItem {
         return (T) componentMap.put(key.id(), component);
     }
 
+    @SuppressWarnings("unchecked")
+    public <T extends ItemComponent> T unsetComponent(ComponentKey<T> key) {
+        return (T) componentMap.remove(key.id());
+    }
+
+    public <T extends ItemComponent> boolean hasComponent(ComponentKey<T> key) {
+        return componentMap.containsKey(key.id());
+    }
+
     public BaseItem getBaseItem() {
         return baseItem;
     }

@@ -23,6 +23,8 @@ public class ComponentKeys {
     public static final ComponentKey<PlayerHeadSkinComponent> HEAD_SKIN;
     public static final ComponentKey<WalletComponent> WALLET;
     public static final ComponentKey<ItemModelComponent> ITEM_MODEL;
+    public static final ComponentKey<BrokenComponent> BROKEN;
+    public static final ComponentKey<DurabilityRepairComponent> DURABILITY_REPAIR;
 
     static {
         ITEM_NAME = ItemComponentCodecRegistry.register("name",
@@ -46,6 +48,9 @@ public class ComponentKeys {
                 ComponentCodec.singleArg(Integer.class, WalletComponent::new, WalletComponent::getMaxSlot));
         ITEM_MODEL = ItemComponentCodecRegistry.register("item_model",
                 ComponentCodec.singleArg(String.class, ItemModelComponent::new, ItemModelComponent::getModelKey));
+        BROKEN = new ComponentKey<>("broken"); //Transient so it has no CODEC.
+        DURABILITY_REPAIR = ItemComponentCodecRegistry.register("durability_repair",
+                ComponentCodec.singleArg(Integer.class, DurabilityRepairComponent::new, DurabilityRepairComponent::getAmount));
     }
 
     public static void loadClass() {

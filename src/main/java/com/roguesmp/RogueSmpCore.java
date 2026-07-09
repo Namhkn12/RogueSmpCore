@@ -9,6 +9,7 @@ import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.goal.zombified_piglin.PigZombieSpawnListener;
 import com.roguesmp.gui.ItemBrowser;
+import com.roguesmp.gui.ItemRepairGui;
 import com.roguesmp.gui.SkinBrowserGui;
 import com.roguesmp.gui.TrashGui;
 import com.roguesmp.gui.ability.AbilityCatalogue;
@@ -142,6 +143,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         TrashGui.register();
         SmpWikiMainMenuGui.registerCommands();
+        ItemRepairGui.registerCommand();
 
         IslandManager.getInstance().registerCommands();
         QuestManager.getInstance().registerQuestCommand();
