@@ -62,6 +62,23 @@ public class ItemStackUtils {
         return SHOOTABLES.contains(itemStack.getType());
     }
 
+    public static final EnumSet<Material> LEFTCLICK_WHEN_THROW = EnumSet.of(
+            Material.SNOWBALL,
+            Material.EGG,
+            Material.ENDER_PEARL,
+            Material.FIREWORK_ROCKET,
+            Material.FISHING_ROD,
+            Material.SPLASH_POTION,
+            Material.LINGERING_POTION,
+            Material.EXPERIENCE_BOTTLE,
+            Material.WIND_CHARGE
+    );
+    public static boolean isCauseLeftClickWhenThrownItem(ItemStack itemStack) {
+        if (itemStack == null || itemStack.getType().isAir()) return false;
+
+        return LEFTCLICK_WHEN_THROW.contains(itemStack.getType());
+    }
+
     public static boolean isConsumable(ItemStack itemStack) {
         if (itemStack == null || itemStack.getType().isAir()) return false;
 

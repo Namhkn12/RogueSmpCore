@@ -61,14 +61,6 @@ public class Multishot implements SmpEnchant {
     }
 
     private static void handleMultishot(int level, @NotNull SmpPlayer player, Projectile primary) {
-        if (EntityManager.getInstance().hasMetadata(primary, "multishot_guard")) {
-            PlayerProjectile playerProjectile = player.getProjectile(primary.getUniqueId());
-            if (playerProjectile != null) {
-                playerProjectile.setReduceDurability(false);
-            }
-            return;
-        }
-
         Vector direction = primary.getVelocity();
 
         double baseSpread = 10;
@@ -81,8 +73,8 @@ public class Multishot implements SmpEnchant {
             Vector spreadVelocity = VectorUtils.rotateYAxis(direction.clone().normalize(), angle)
                     .multiply(direction.length());
             // Safe because primary is always projectile
+            // Apparently this doesn't call the event, so we have to track ourselves
             player.getBukkitPlayer().launchProjectile(primary.getClass(), spreadVelocity, entity -> {
-                EntityManager.getInstance().addMetadata(primary, "multishot_guard", true);
                 entity.setVelocity(spreadVelocity);
                 entity.setFireTicks(primary.getFireTicks());
 
@@ -94,6 +86,9 @@ public class Multishot implements SmpEnchant {
                 } else if (primary instanceof ThrowableProjectile throwable && entity instanceof ThrowableProjectile sideThrowable) {
                     sideThrowable.setItem(throwable.getItem());
                 }
+
+                PlayerProjectile playerProjectile = player.trackProjectile(entity, player.getActiveEnchants(), player.getActiveAttributes());
+                playerProjectile.setReduceDurability(false);
             });
 //            Projectile shotProjectile = (Projectile) spawnLoc.getWorld().spawn(spawnLoc, primary.getType().getEntityClass(), entity -> {
 //                Projectile projectile = (Projectile) entity;

@@ -36,6 +36,7 @@ public class NpcListener implements Listener {
         Entity clicked = event.getRightClicked();
         SmpNpc npc = manager.getNpc(clicked);
         if (npc == null) return;
+        event.setCancelled(true);
         npc.onRightClick(event);
     }
 

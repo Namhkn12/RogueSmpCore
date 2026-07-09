@@ -6,10 +6,7 @@ import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.gui.enchant.GrindstoneGui;
 import com.roguesmp.item.SmpItem;
-import com.roguesmp.item.component.impl.ConsumableComponent;
-import com.roguesmp.item.component.impl.DurabilityComponent;
-import com.roguesmp.item.component.impl.EnchantComponent;
-import com.roguesmp.item.component.impl.EquipAttributeComponent;
+import com.roguesmp.item.component.impl.*;
 import com.roguesmp.player.ability.AbilityLoadout;
 import com.roguesmp.player.ability.trigger.AbilityTrigger;
 import com.roguesmp.player.mechanic.*;
@@ -105,7 +102,7 @@ public class SmpPlayer {
             currentEquipment.remove(slot);
         }
 
-        if (newItem != null) {
+        if (newItem != null && !newItem.hasComponent(ComponentKeys.BROKEN)) {
             EquipAttributeComponent newComp = newItem.getComponent(ComponentKeys.ATTRIBUTE);
             if (newComp != null && newComp.getSlot() == slot) {
                 newComp.getFinalAttributes().forEach((attr, val) -> {
