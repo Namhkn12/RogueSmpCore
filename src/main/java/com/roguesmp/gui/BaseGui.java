@@ -1,5 +1,6 @@
 package com.roguesmp.gui;
 
+import com.roguesmp.registry.SkinRegistry;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -24,35 +25,32 @@ import java.util.Map;
 
 public abstract class BaseGui implements InventoryHolder {
 
-    protected static final ItemStack FILLER;
-    protected static final ItemStack FILLER_BLACK;
-    protected static final ItemStack NEXT_PAGE_BUTTON;
-    protected static final ItemStack PREV_PAGE_BUTTON;
+    protected final ItemStack FILLER;
+    protected final ItemStack FILLER_BLACK;
+    protected final ItemStack NEXT_PAGE_BUTTON;
+    protected final ItemStack PREV_PAGE_BUTTON;
 
-    static {
+    private final Map<Integer, ClickHandler> handlerMap = new HashMap<>();
+    private final Inventory inventory;
+    private final Component name;
+
+    public BaseGui(Component name, int row) {
+        this.name = name;
+        inventory = Bukkit.createInventory(this, row * 9, this.name);
+
         FILLER = ItemStack.of(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
         FILLER.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
 
         FILLER_BLACK = ItemStack.of(Material.BLACK_STAINED_GLASS_PANE);
         FILLER_BLACK.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
 
-        NEXT_PAGE_BUTTON = new ItemStack(Material.ARROW);
-        NEXT_PAGE_BUTTON.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang sau »"));
+        ItemStack nextPageHead = SkinRegistry.getInstance().getHead("gui_next_page");
+        NEXT_PAGE_BUTTON = nextPageHead == null ? new ItemStack(Material.ARROW) : nextPageHead;
+        NEXT_PAGE_BUTTON.setData(DataComponentTypes.CUSTOM_NAME, Utils.text("Trang sau »"));
 
-        PREV_PAGE_BUTTON = new ItemStack(Material.ARROW);
-        PREV_PAGE_BUTTON.setData(DataComponentTypes.ITEM_NAME, Component.text("« Trang trước"));
-
-    }
-
-    private final Map<Integer, ClickHandler> handlerMap = new HashMap<>();
-    private final Inventory inventory;
-    private final Component name;
-    private final int row;
-
-    public BaseGui(Component name, int row) {
-        this.name = name;
-        this.row = row;
-        inventory = Bukkit.createInventory(this, this.row * 9, this.name);
+        ItemStack prevPageHead = SkinRegistry.getInstance().getHead("gui_prev_page");
+        PREV_PAGE_BUTTON = prevPageHead == null ? new ItemStack(Material.ARROW) : prevPageHead;
+        PREV_PAGE_BUTTON.setData(DataComponentTypes.ITEM_NAME, Utils.text("« Trang trước"));
     }
 
     @Override

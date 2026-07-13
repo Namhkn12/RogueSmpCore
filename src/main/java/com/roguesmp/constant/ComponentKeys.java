@@ -21,7 +21,6 @@ public class ComponentKeys {
     public static final ComponentKey<ConsumableComponent> CONSUMABLE;
     public static final ComponentKey<PotionContentComponent> POTION_CONTENT;
     public static final ComponentKey<PlayerHeadSkinComponent> HEAD_SKIN;
-    public static final ComponentKey<WalletComponent> WALLET;
     public static final ComponentKey<ItemModelComponent> ITEM_MODEL;
     public static final ComponentKey<BrokenComponent> BROKEN;
     public static final ComponentKey<DurabilityRepairComponent> DURABILITY_REPAIR;
@@ -44,8 +43,6 @@ public class ComponentKeys {
         POTION_CONTENT = ItemComponentCodecRegistry.register("potion_content", PotionContentComponent.class);
         HEAD_SKIN = ItemComponentCodecRegistry.register("head_skin",
                 ComponentCodec.singleArg(String.class, PlayerHeadSkinComponent::new, PlayerHeadSkinComponent::getSkinId));
-        WALLET = ItemComponentCodecRegistry.register("wallet",
-                ComponentCodec.singleArg(Integer.class, WalletComponent::new, WalletComponent::getMaxSlot));
         ITEM_MODEL = ItemComponentCodecRegistry.register("item_model",
                 ComponentCodec.singleArg(String.class, ItemModelComponent::new, ItemModelComponent::getModelKey));
         BROKEN = new ComponentKey<>("broken"); //Transient so it has no CODEC.

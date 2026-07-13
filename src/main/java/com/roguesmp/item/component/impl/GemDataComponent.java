@@ -16,8 +16,11 @@ import java.util.*;
 public class GemDataComponent implements ItemComponent {
 
     private final Map<EquipSlot, Map<Attributes, Double>> attributes = new EnumMap<>(EquipSlot.class);
+    private final double successChance;
 
-    public GemDataComponent(Map<EquipSlot, Map<Attributes, Double>> attributes) {
+    public GemDataComponent(Map<EquipSlot, Map<Attributes, Double>> attributes, double successChance) {
+        if (successChance <= 0d) this.successChance = 0f;
+        else this.successChance = successChance;
         attributes.forEach((equipSlot, attributesDoubleMap) -> {
             Map<Attributes, Double> copy = new EnumMap<>(Attributes.class);
             copy.putAll(attributesDoubleMap);
@@ -42,7 +45,23 @@ public class GemDataComponent implements ItemComponent {
             lores.add(Component.empty());
         });
 
-        lores.removeLast();
+        TextColor chanceColor;
+        if (successChance >= 0.9) {
+            chanceColor = NamedTextColor.GREEN;
+        } else if (successChance >= 0.7) {
+            chanceColor = NamedTextColor.YELLOW;
+        } else if (successChance >= 0.5) {
+            chanceColor = NamedTextColor.GOLD;
+        } else {
+            chanceColor = NamedTextColor.RED;
+        }
+
+        lores.add(Utils.fromString(
+                "<!i><gold>Tỉ lệ khảm thành công<white>: <" +
+                        chanceColor.asHexString() + ">" +
+                        Utils.formatDecimal(this.successChance * 100) +
+                        "%</" + chanceColor.asHexString() + ">"
+        ));
 
         context.builder().putLines(105, lores);
     }
@@ -54,5 +73,9 @@ public class GemDataComponent implements ItemComponent {
 
     public @Unmodifiable Map<EquipSlot, Map<Attributes, Double>> getAttributes() {
         return Collections.unmodifiableMap(attributes);
+    }
+
+    public double getSuccessChance() {
+        return successChance;
     }
 }

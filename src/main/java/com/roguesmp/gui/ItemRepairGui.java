@@ -70,7 +70,7 @@ public class ItemRepairGui extends BaseGui {
             addButton(ITEM_SLOT, inputInfoItem, ClickHandler.noAction());
         }
 
-        if (repairMaterialItemStack != null) {
+        if (repairMaterialItemStack != null && repairMaterialItemStack.getAmount() > 1) {
             addButton(MATERIAL_SLOT, repairMaterialItemStack, event -> {
                 event.setCancelled(true);
                 returnItem(MATERIAL_SLOT, repairMaterialItemStack, player);
@@ -149,7 +149,9 @@ public class ItemRepairGui extends BaseGui {
 
         if (repairMaterialItemStack.getAmount() > 1) {
             repairMaterialItemStack.setAmount(repairMaterialItemStack.getAmount() - 1);
-        } else {
+        }
+
+        if (repairMaterialItemStack.getAmount() == 0) {
             repairMaterialItemStack = null;
             repairMaterialItem = null;
         }

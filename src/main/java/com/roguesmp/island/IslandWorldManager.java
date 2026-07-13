@@ -3,13 +3,11 @@ package com.roguesmp.island;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.utils.Utils;
 import org.bukkit.*;
-import org.bukkit.block.Biome;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.Nullable;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
 import org.mvplugins.multiverse.core.world.AllowedPortalType;
 import org.mvplugins.multiverse.core.world.options.CreateWorldOptions;
+import org.mvplugins.multiverse.core.world.options.LoadWorldOptions;
 
 import java.io.File;
 import java.io.FileReader;
@@ -54,6 +52,8 @@ public class IslandWorldManager {
                         loadedMultiverseWorld.setPortalForm(AllowedPortalType.NONE);
                         loadedMultiverseWorld.setAutoLoad(true);
                     });
+        } else {
+            multiverseApi.getWorldManager().loadWorld(LoadWorldOptions.world(multiverseApi.getWorldManager().getWorld(WORLD_NAME).get()));
         }
 
     }
@@ -88,7 +88,8 @@ public class IslandWorldManager {
     public World getIslandWorld(int gridIndex) {
         World world = Bukkit.getWorld(WORLD_NAME);
         if (world == null) {
-            throw new IllegalStateException(WORLD_NAME + " is not loaded!");
+            loadSkyblockWorld();
+            throw new IllegalStateException(WORLD_NAME + " does not exist! Will attempt to create a new one...");
         }
         return world;
     }

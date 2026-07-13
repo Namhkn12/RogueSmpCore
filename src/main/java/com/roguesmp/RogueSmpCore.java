@@ -126,7 +126,6 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new NpcListener(NpcManager.getInstance()));
 
         registerListener(new IslandListener(IslandManager.getInstance()));
-        registerListener(new WalletPickupListener());
         registerListener(new QuestListener(QuestManager.getInstance()));
     }
 

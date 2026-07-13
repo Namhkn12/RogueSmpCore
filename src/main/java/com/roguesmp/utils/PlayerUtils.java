@@ -6,7 +6,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -56,43 +55,21 @@ public class PlayerUtils {
      */
     public static void giveItem(Player player, ItemStack... itemStacks) {
         if (player == null) return;
-        List<ItemStack> normalItemsToGive = new ArrayList<>();
-
-        for (ItemStack item : itemStacks) {
-            if (!ItemStackUtils.isValidItem(item)) continue;
-
-            // Route currency into wallets across their inventory layout automatically
-            if (WalletUtils.isCurrency(item)) {
-                int moneyValue = WalletUtils.calculateMoneyValue(item);
-
-                // Cascades down wallets, returning what couldn't fit due to max limit restrictions
-                int excessNuggets = WalletUtils.addPlayerBalance(player, moneyValue);
-                player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.6F, 1.3F);
-
-                // If ALL wallets hit their absolute storage capacity ceiling, process leftovers physically
-                if (excessNuggets > 0) {
-                    normalItemsToGive.addAll(WalletUtils.convertMoneyToPhysicalItems(excessNuggets));
-                }
-                continue;
-            }
-
-            normalItemsToGive.add(item);
-        }
 
         // Deliver remaining physical inventory modifications or drop to ground
-        if (!normalItemsToGive.isEmpty()) {
-            Map<Integer, ItemStack> leftOver = player.getInventory().addItem(normalItemsToGive.toArray(new ItemStack[0]));
-            if (!leftOver.isEmpty()) {
-                player.sendMessage(Component.text("Túi đồ của bạn đã đầy nên một số vật phẩm sẽ bị rơi ra", NamedTextColor.RED));
-                for (ItemStack item : leftOver.values()) {
-                    Item itemEntity = player.getWorld().dropItemNaturally(player.getLocation(), item);
-                    itemEntity.setOwner(player.getUniqueId());
-                    itemEntity.setVisibleByDefault(false);
-                    player.showEntity(RogueSmpCore.getInstance(), itemEntity);
-                    GlowUtils.glow(itemEntity, player, ChatColor.WHITE, 600);
-                }
+
+        Map<Integer, ItemStack> leftOver = player.getInventory().addItem(itemStacks);
+        if (!leftOver.isEmpty()) {
+            player.sendMessage(Component.text("Túi đồ của bạn đã đầy nên một số vật phẩm sẽ bị rơi ra", NamedTextColor.RED));
+            for (ItemStack item : leftOver.values()) {
+                Item itemEntity = player.getWorld().dropItemNaturally(player.getLocation(), item);
+                itemEntity.setOwner(player.getUniqueId());
+                itemEntity.setVisibleByDefault(false);
+                player.showEntity(RogueSmpCore.getInstance(), itemEntity);
+                GlowUtils.glow(itemEntity, player, ChatColor.WHITE, 600);
             }
         }
+
     }
 
     public static void giveItem(Player player, List<ItemStack> items) {
