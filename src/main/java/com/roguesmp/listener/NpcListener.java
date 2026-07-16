@@ -9,6 +9,7 @@ import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 public class NpcListener implements Listener {
@@ -17,6 +18,13 @@ public class NpcListener implements Listener {
 
     public NpcListener(NpcManager manager) {
         this.manager = manager;
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageEvent event) {
+        SmpNpc npc = manager.getNpc(event.getEntity());
+        if (npc == null) return;
+        npc.onDamage(event);
     }
 
     @EventHandler

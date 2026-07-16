@@ -29,6 +29,8 @@ import com.roguesmp.registry.ability.AbilityRegistry;
 import com.roguesmp.registry.npc.NpcRegistry;
 import com.roguesmp.registry.quest.QuestRegistry;
 import com.roguesmp.utils.GlowUtils;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
@@ -162,6 +164,12 @@ public final class RogueSmpCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
+
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            player.closeInventory();
+            player.kick(Component.text("Server đang tắt..."));
+        });
+
         // Plugin shutdown logic
         saveData();
     }

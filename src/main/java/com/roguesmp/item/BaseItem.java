@@ -32,6 +32,10 @@ public class BaseItem {
         return (T) components.get(key.id());
     }
 
+    public <T extends ItemComponent> boolean hasComponent(ComponentKey<T> key) {
+        return components.containsKey(key.id());
+    }
+
     public ItemStack generateItemStack(@Nullable SmpPlayer player, int stackAmount) {
         return new SmpItem(this).generateItemStack(player, stackAmount);
     }

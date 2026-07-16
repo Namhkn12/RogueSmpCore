@@ -1,9 +1,5 @@
 package com.roguesmp.constant;
 
-import com.roguesmp.item.SmpItem;
-import com.roguesmp.player.SmpPlayer;
-import org.bukkit.Material;
-
 /**
  * Basic enchants that player will add onto their item
  */
@@ -26,14 +22,19 @@ public enum Infusion {
         this.baseMaterialCost = baseMaterialCost;
     }
 
-    /**
-     * Check if a player can apply the infusion onto this item, currently only check cost
-     */
-    public static boolean canInfuse(SmpPlayer smpPlayer, SmpItem smpItem, Infusion infusion, int level) {
-        return false;
+    public Enchants getSmpEnchant() {
+        return enchant;
     }
 
-    public static void infuseItem(SmpPlayer smpPlayer, SmpItem smpItem, Infusion infusion, int level) {
+    public String getCostItemId() {
+        return costItemId;
+    }
 
+    public int getBaseExpLevelCost() {
+        return baseExpCost;
+    }
+
+    public int getBaseMaterialCost() {
+        return baseMaterialCost;
     }
 }

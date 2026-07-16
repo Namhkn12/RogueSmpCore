@@ -76,6 +76,38 @@ public class PlayerUtils {
         giveItem(player, items.toArray(new ItemStack[0]));
     }
 
+    public static int countItemsInInventory(Player player, String baseItemId) {
+        int total = 0;
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (!ItemStackUtils.isValidItem(item)) continue;
+            String itemId = ItemStackUtils.getBaseId(item);
+            if (itemId != null && itemId.equalsIgnoreCase(baseItemId)) {
+                total += item.getAmount();
+            }
+        }
+        return total;
+    }
+
+    public static void removeItem(Player player, String baseItemId, int amountToTake) {
+        ItemStack[] contents = player.getInventory().getContents();
+        for (ItemStack item : contents) {
+            if (amountToTake <= 0) break;
+            if (!ItemStackUtils.isValidItem(item)) continue;
+
+            String itemId = ItemStackUtils.getBaseId(item);
+            if (itemId != null && itemId.equalsIgnoreCase(baseItemId)) {
+                int currentAmount = item.getAmount();
+                if (currentAmount <= amountToTake) {
+                    amountToTake -= currentAmount;
+                    item.setAmount(0);
+                } else {
+                    item.setAmount(currentAmount - amountToTake);
+                    amountToTake = 0;
+                }
+            }
+        }
+    }
+
     /**
      * Calculate a player's total experience based on level and progress to next.
      *

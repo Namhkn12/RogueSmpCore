@@ -53,7 +53,7 @@ public class Vigor implements SmpEnchant {
     @Override
     public @NotNull Map<Attributes, Double> provideAttributes(int level) {
         Map<Attributes, Double> map = new EnumMap<>(Attributes.class);
-        map.put(Attributes.MELEE_DAMAGE_PERCENT, 1d * level);
+        map.put(Attributes.MELEE_DAMAGE_PERCENT, 0.01d * level);
         return map;
     }
 }

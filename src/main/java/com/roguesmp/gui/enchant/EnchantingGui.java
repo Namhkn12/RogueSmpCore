@@ -5,6 +5,7 @@ import com.roguesmp.constant.Enchants;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.item.BaseItem;
+import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.EquipAttributeComponent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.ItemStackUtils;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// Will convert to Dev UI later, unused for now
 public class EnchantingGui extends BaseGui {
 
     private enum GuiState { INPUT, ENCHANT_SELECT, LEVEL_SELECT }
@@ -235,8 +237,9 @@ public class EnchantingGui extends BaseGui {
         p.setLevel(p.getLevel() - cost);
         Map<Enchants, Integer> data = new HashMap<>();
         data.put(selectedEnchant, level);
-
-        this.targetItem = SmpItemUtils.addEnchant(targetItem, smpPlayer, data).itemStack();
+        SmpItem smpItem = SmpItem.wrap(targetItem);
+        SmpItemUtils.addEnchant(smpItem, data);
+        this.targetItem = smpItem.generateItemStack(smpPlayer, targetItem.getAmount());
 
         this.currentState = GuiState.ENCHANT_SELECT;
         setup();
