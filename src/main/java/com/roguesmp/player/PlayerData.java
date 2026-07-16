@@ -20,6 +20,7 @@ public class PlayerData{
     private int level;
     private UUID islandId;
     private final Map<String, Integer> unlockedAbilities;
+    private long money;
 
     private final Map<AbilityType, List<String>> equippedAbilities;
 
@@ -49,8 +50,8 @@ public class PlayerData{
 
     // --- Legacy Compatibility Getters (Optional) ---
 
-    public List<String> getActiveAbilities() { return getEquippedByType(AbilityType.ACTIVE); }
-    public List<String> getPassiveAbilities() { return getEquippedByType(AbilityType.PASSIVE); }
+    public @Unmodifiable List<String> getActiveAbilities() { return getEquippedByType(AbilityType.ACTIVE); }
+    public @Unmodifiable List<String> getPassiveAbilities() { return getEquippedByType(AbilityType.PASSIVE); }
     public @Nullable String getLifelineAbility() {
         List<String> lifeline = equippedAbilities.get(AbilityType.LIFELINE);
         return (lifeline != null && !lifeline.isEmpty()) ? lifeline.getFirst() : null;
@@ -69,7 +70,7 @@ public class PlayerData{
         return unlockedAbilities.getOrDefault(abilityId, 0);
     }
 
-    public Map<String, Integer> getUnlockedAbilities() {
+    public @Unmodifiable Map<String, Integer> getUnlockedAbilities() {
         return Collections.unmodifiableMap(unlockedAbilities);
     }
 
@@ -84,4 +85,12 @@ public class PlayerData{
     public void setLevel(int level) { this.level = level; this.dirty = true; }
     public boolean isDirty() { return dirty; }
     public void setDirty(boolean dirty) { this.dirty = dirty; }
+
+    public void setMoney(long money) {
+        this.money = money;
+    }
+
+    public long getMoney() {
+        return money;
+    }
 }

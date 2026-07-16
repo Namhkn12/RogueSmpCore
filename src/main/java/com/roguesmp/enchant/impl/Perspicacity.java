@@ -21,7 +21,7 @@ public class Perspicacity implements SmpEnchant {
 
     @Override
     public @NotNull Enchants getEnumConstant() {
-        return Enchants.CELERITY;
+        return Enchants.PERSPICACITY;
     }
 
     @Override

@@ -121,6 +121,10 @@ public class SmpItem {
         return uuid;
     }
 
+    public String getId() {
+        return baseItem.getId();
+    }
+
     /**
      * Transforms this wrapper into a Minecraft {@link ItemStack}.
      * <p>

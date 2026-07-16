@@ -93,6 +93,6 @@ public class SmpAttributeWikiGui extends BaseGui {
             });
         }
 
-        fillEmpty(BaseGui.FILLER_BLACK);
+        fillEmpty(FILLER_BLACK);
     }
 }

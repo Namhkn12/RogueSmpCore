@@ -1,7 +1,5 @@
 package com.roguesmp.gui;
 
-import com.roguesmp.gui.enchant.EnchantingGui;
-import com.roguesmp.gui.gem.GemSocketGui;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.registry.ItemRegistry;
@@ -14,7 +12,6 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -137,15 +134,10 @@ public class ItemBrowser extends BaseGui {
                             new ItemBrowser().showInventory(player);
                         })
                 )
-                .withSubcommand(new CommandAPICommand("gem")
+                .withSubcommand(new CommandAPICommand("blacksmith")
                         .executesPlayer((player, commandArguments) -> {
-                            new GemSocketGui(PlayerManager.getInstance().getSmpPlayer(player.getUniqueId())).showInventory(player);
+                            new BlacksmithGui(player).showInventory(player);
                         }))
-                .withSubcommand(new CommandAPICommand("enchant")
-                        .executesPlayer((player, commandArguments) -> {
-                            new EnchantingGui(PlayerManager.getInstance().getSmpPlayer(player.getUniqueId())).showInventory(player);
-                        })
-                )
                 .withSubcommand(new CommandAPICommand("reload") // WILL CAUSE THE SERVER TO FREEZE
                         .executesPlayer((player1, commandArguments) -> {
                             Utils.runLater(() -> ItemRegistry.getInstance().loadFromFile());

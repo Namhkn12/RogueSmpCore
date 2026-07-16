@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,6 +78,10 @@ public class SmpNpc {
         for (NpcAction npcAction : npcActions) {
             npcAction.onLeftClick(event);
         }
+    }
+
+    public void onDamage(EntityDamageEvent event) {
+        event.setCancelled(true); //Always invulnerable
     }
 
     private static @Nullable Player getNearestPlayer(Location location, double range) {

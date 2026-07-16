@@ -197,11 +197,14 @@ public class SkinRegistry {
         }
     }
 
-    public ItemStack getHead(String id) {
-        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+    /**
+     * Return null if id is not found
+     */
+    public @Nullable ItemStack getHead(String id) {
         SkinData skin = getSkin(id);
 
-        if (skin == null) return item;
+        if (skin == null) return null;
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         item.setData(DataComponentTypes.CUSTOM_NAME, Component.text(id).decoration(TextDecoration.ITALIC, false));
 
         item.setData(DataComponentTypes.PROFILE, ResolvableProfile.resolvableProfile(skin.getProfile()));

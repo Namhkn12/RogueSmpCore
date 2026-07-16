@@ -27,8 +27,6 @@ public class GemSocketComponent implements ItemComponent {
     private final int amount;
 
     @GsonIgnore
-    private final List<BaseItem> activeGem = new ArrayList<>();
-    @GsonIgnore
     private final List<String> appliedItem = new ArrayList<>(); //For old gem data (for removal in case we change socket count, or the applied gem is no longer compatible)
 
     public GemSocketComponent(int amount) {
@@ -39,9 +37,8 @@ public class GemSocketComponent implements ItemComponent {
         return amount;
     }
 
-    public void addGem(@NotNull BaseItem baseItem) {
-        appliedItem.add(baseItem.getId());
-        activeGem.add(baseItem);
+    public void addGem(@NotNull String gemId) {
+        appliedItem.add(gemId);
     }
 
     public boolean canFitGem() {
@@ -52,49 +49,44 @@ public class GemSocketComponent implements ItemComponent {
      * Have to use string to handle removing gems that are no longer fit
      */
     public void removeGem(@NotNull String baseItemId) {
-        BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(baseItemId);
-        if (baseItem != null) {
-            Iterator<BaseItem> iterator = activeGem.iterator();
-            while (iterator.hasNext()) {
-                BaseItem gem = iterator.next();
-                if (gem.getId().equals(baseItemId)) {
-                    iterator.remove();
-                    break;
-                }
+        Iterator<String> iterator = appliedItem.iterator();
+        while (iterator.hasNext()) {
+            String gem = iterator.next();
+            if (gem.equals(baseItemId)) {
+                iterator.remove();
+                break;
             }
         }
-        appliedItem.remove(baseItemId);
     }
 
     /**
-     * Return a view of all the gem currently working/active on this itemStack
+     * Return a view of all the item that count as gem currently working/active on this itemStack
      */
     public @Unmodifiable List<BaseItem> getActiveGem() {
+        List<BaseItem> activeGem = new ArrayList<>();
+        for (String s : appliedItem) {
+            if (activeGem.size() >= this.amount) break;
+            BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(s);
+            if (baseItem == null) continue;
+            GemDataComponent gemDataComponent = baseItem.getComponent(ComponentKeys.GEM_DATA);
+            if (gemDataComponent == null) continue;
+            activeGem.add(baseItem);
+        }
         return Collections.unmodifiableList(activeGem);
     }
 
     /**
      * Return a view of all items applied onto his itemStack (including non-gems/legacy itemStack/gems that are no longer compatible)
      */
-    public @Unmodifiable List<BaseItem> getAppliedItem() {
-        List<BaseItem> applied = new ArrayList<>();
-        for (String s : appliedItem) {
-            BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(s);
-            if (baseItem == null) continue;
-            applied.add(baseItem);
-        }
-        return Collections.unmodifiableList(applied);
+    public @Unmodifiable List<String> getAppliedItem() {
+        return Collections.unmodifiableList(appliedItem);
     }
 
     @Override
     public void load(PersistentDataContainerView pdc) {
         List<String> appliedGemIds = pdc.get(Keys.APPLIED_GEM, ListPersistentDataType.LIST.strings());
         if (appliedGemIds == null) return;
-        appliedGemIds.forEach(s -> {
-             BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(s);
-             if (baseItem == null) return;
-             addGem(baseItem);
-        });
+        appliedGemIds.forEach(this::addGem);
     }
 
     @Override
@@ -111,6 +103,7 @@ public class GemSocketComponent implements ItemComponent {
     public void contributeLore(ItemLoreContext context) {
         List<Component> res = new ArrayList<>();
         res.add(Component.empty());
+        List<BaseItem> activeGem = getActiveGem();
         res.add(buildSlotDisplay(amount, activeGem.size()));
         if (!activeGem.isEmpty()) res.addAll(buildGemLine(activeGem));
         context.builder().putLines(95, res);
