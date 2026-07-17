@@ -1,14 +1,14 @@
 package com.roguesmp.dungeon.actor.command;
 
-import com.roguesmp.dungeon.data.definition.loot.LootContext;
+import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.dungeon.data.definition.spawner.Spawner;
-import com.roguesmp.dungeon.dto.loot.LootRules;
+import com.roguesmp.loot.rule.LootRules;
 import com.roguesmp.dungeon.manager.DungeonManager;
-import com.roguesmp.dungeon.manager.LootTableManager;
+import com.roguesmp.loot.manager.LootTableManager;
 import com.roguesmp.dungeon.manager.RoomManager;
 import com.roguesmp.dungeon.manager.SchemetaManager;
 import com.roguesmp.dungeon.manager.SpawnerManager;
-import com.roguesmp.dungeon.service.ILootService;
+import com.roguesmp.loot.service.ILootService;
 import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.*;

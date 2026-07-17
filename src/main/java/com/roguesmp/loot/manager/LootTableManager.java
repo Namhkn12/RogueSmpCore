@@ -1,8 +1,8 @@
-package com.roguesmp.dungeon.manager;
+package com.roguesmp.loot.manager;
 
-import com.roguesmp.dungeon.data.definition.loot.LootTable;
-import com.roguesmp.dungeon.repository.ILootTableRepository;
-import com.roguesmp.dungeon.utils.Log4Craft;
+import com.roguesmp.RogueSmpCore;
+import com.roguesmp.loot.LootTable;
+import com.roguesmp.loot.repository.ILootTableRepository;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +40,7 @@ public class LootTableManager {
         propagateBonusRolls();
         buildIndexes();
 
-        Log4Craft.info("[LootTableManager] Cached " + cache.size() + " loot tables. "
+        RogueSmpCore.LOGGER.info("[LootTableManager] Cached " + cache.size() + " loot tables. "
                 + tablesWithBonusRolls.size() + " have bonus rolls.");
 
         logSummary();
@@ -142,11 +142,11 @@ public class LootTableManager {
     }
 
     private void logSummary() {
-        tablesWithBonusRolls.forEach(id -> Log4Craft.info("  + " + id));
+        tablesWithBonusRolls.forEach(id -> RogueSmpCore.LOGGER.info("  + " + id));
 
-        Log4Craft.info("[LootTableManager] Tables WITHOUT bonus rolls:");
+        RogueSmpCore.LOGGER.info("[LootTableManager] Tables WITHOUT bonus rolls:");
         cache.keySet().stream()
                 .filter(id -> !tablesWithBonusRolls.contains(id))
-                .forEach(id -> Log4Craft.info("  - " + id));
+                .forEach(id -> RogueSmpCore.LOGGER.info("  - " + id));
     }
 }

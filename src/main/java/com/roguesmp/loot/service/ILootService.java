@@ -1,6 +1,6 @@
-package com.roguesmp.dungeon.service;
+package com.roguesmp.loot.service;
 
-import com.roguesmp.dungeon.data.definition.loot.LootContext;
+import com.roguesmp.loot.context.LootContext;
 import org.bukkit.inventory.ItemStack;
 import java.util.List;
 

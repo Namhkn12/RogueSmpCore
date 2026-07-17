@@ -1,14 +1,15 @@
 package com.roguesmp.dungeon.service.impl;
 
 import com.roguesmp.dungeon.data.definition.Dungeon;
-import com.roguesmp.dungeon.data.definition.loot.LootContext;
+import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon.data.runtime.Party;
-import com.roguesmp.dungeon.dto.loot.LootRules;
+import com.roguesmp.loot.rule.LootRules;
 import com.roguesmp.dungeon.itemdisplay.impl.ChestOpenAnimation;
 import com.roguesmp.dungeon.manager.DungeonManager;
 import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.service.*;
+import com.roguesmp.loot.service.ILootService;
 import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import org.bukkit.Material;

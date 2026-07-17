@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.data.definition.loot;
+package com.roguesmp.loot;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;

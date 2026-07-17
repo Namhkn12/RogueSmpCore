@@ -1,6 +1,6 @@
-package com.roguesmp.dungeon.data.definition.loot;
+package com.roguesmp.loot.context;
 
-import com.roguesmp.dungeon.dto.loot.LootRule;
+import com.roguesmp.loot.rule.LootRule;
 import com.roguesmp.player.SmpPlayer;
 
 import java.util.ArrayList;

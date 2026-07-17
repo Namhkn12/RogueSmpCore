@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.dto.loot;
+package com.roguesmp.loot;
 
 import org.bukkit.inventory.ItemStack;
 import java.util.Collections;
