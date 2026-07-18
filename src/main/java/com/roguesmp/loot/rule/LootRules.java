@@ -1,6 +1,6 @@
-package com.roguesmp.dungeon.dto.loot;
+package com.roguesmp.loot.rule;
 
-import com.roguesmp.dungeon.data.definition.loot.LootContext;
+import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.player.SmpPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Built-in {@link com.roguesmp.dungeon.loot.LootRule} implementations.
+ * Built-in {@link LootRule} implementations.
  *
  * <p>Use these as-is or extend them for custom behavior.
  */

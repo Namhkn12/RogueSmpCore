@@ -4,14 +4,12 @@ import com.roguesmp.dungeon.data.runtime.Party;
 import com.roguesmp.dungeon.itemdisplay.AnimationHandle;
 import com.roguesmp.dungeon.itemdisplay.FloatingItemAnimation;
 import com.roguesmp.dungeon.task.TaskScheduler;
-import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
-import org.bukkit.block.TileState;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.ItemDisplay;
@@ -45,47 +43,43 @@ public class ChestOpenAnimation {
         this.taskScheduler = taskScheduler;
     }
 
-    public void play(Player clicker, Block block, List<ItemStack> items) {
+    public void play(Player clicker, Block block, List<ItemStack> items, Runnable onComplete) {
 
         Location center = getAnimCenter(block);
         clicker.playSound(center, Sound.BLOCK_CHEST_OPEN, 1f, 0.7f);
 
         AnimationHandle handle = FloatingItemAnimation
                 .builder(plugin, center, taskScheduler)
-                .duration(50)
+                .duration(45)
                 .spinSpeed(8f)
                 .items(items)
                 .iconCycleInterval(5)
                 .displayScale(0.7f)
+                .viewer(clicker)
 
                 .onStart(ctx ->
                         clicker.sendActionBar(Component.text("Opening...", NamedTextColor.GOLD))
                 )
 
                 .onTick(ctx -> {
-                    // Particle dọn đường mỗi 10 tick, trước tick 40
                     if (ctx.getTick() % 10 == 0 && ctx.getTick() < 40) {
-                        ctx.getLocation().getWorld().spawnParticle(
+                        clicker.spawnParticle(
                                 Particle.END_ROD,
                                 ctx.getLocation().clone().add(0, 1.8, 0),
                                 6, 0.3, 0.3, 0.3, 0.04
                         );
                     }
 
-                    // Tick 40: bắn firework rồi cancel animation
                     if (ctx.getTick() == 40) {
-                        spawnFirework(ctx.getLocation().clone().add(0, 1.0, 0));
+                        spawnFirework(clicker, ctx.getLocation().clone().add(0, 1.0, 0));
                         clicker.playSound(ctx.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1f, 1f);
                         clicker.playSound(ctx.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.3f);
-                        ctx.cancel(); // → trigger onEnd
                     }
                 })
 
                 .onEnd(ctx -> {
-                    if (block.getState() instanceof TileState freshState) {
-                        freshState.getPersistentDataContainer().remove(NameSpaceKeys.REWARD_CID_KEY);
-                        freshState.update();
-                    }
+                    activeAnimations.remove(clicker.getUniqueId());
+                    if (onComplete != null) onComplete.run();
                 })
 
                 .build()
@@ -94,13 +88,23 @@ public class ChestOpenAnimation {
         activeAnimations.put(clicker.getUniqueId(), handle);
     }
 
-    // Cancel nếu player disconnect giữa chừng
+    public void playAlreadyClaimed(Player clicker, Block block) {
+        Location lid = getAnimCenter(block).clone().add(0, 0.9, 0);
+        clicker.playSound(lid, Sound.ENTITY_VILLAGER_NO, 1f, 1f);
+        for (double y = 0; y <= 1.0; y += 0.2) {
+            clicker.spawnParticle(
+                    Particle.SMOKE,
+                    lid.clone().add(0, y, 0),
+                    3, 0.03, 0.02, 0.03, 0.01
+            );
+        }
+    }
+
     public void cancelFor(Player player) {
         AnimationHandle handle = activeAnimations.remove(player.getUniqueId());
         if (handle != null) handle.cancel();
     }
 
-    // ... getAnimCenter, spawnFirework giữ nguyên như cũ
     private Location getAnimCenter(Block block) {
         if (!(block.getState() instanceof Chest chest)) return block.getLocation().add(0.5, 0, 0.5);
 
@@ -114,7 +118,6 @@ public class ChestOpenAnimation {
     }
 
     private ItemDisplay spawnSpinDisplay(Location center, List<ItemStack> items) {
-        // Hiển thị item "xịn nhất" (cuối list nếu sort theo rarity)
         ItemStack showcase = items.isEmpty()
                 ? new ItemStack(Material.CHEST)
                 : items.get(items.size() - 1);
@@ -157,8 +160,9 @@ public class ChestOpenAnimation {
     /**
      * Firework BURST trắng + vàng, không fly (power 0), tự detonate ngay.
      */
-    private void spawnFirework(Location loc) {
-        Firework fw = loc.getWorld().spawn(loc, Firework.class);
+    private void spawnFirework(Player viewer, Location loc) {
+        Firework fw = loc.getWorld().spawn(loc, Firework.class, f -> f.setVisibleByDefault(false));
+        viewer.showEntity(plugin, fw);
         FireworkMeta meta = fw.getFireworkMeta();
 
         FireworkEffect effect = FireworkEffect.builder()
@@ -173,7 +177,6 @@ public class ChestOpenAnimation {
         meta.setPower(0);
         fw.setFireworkMeta(meta);
 
-        // Detonate ngay tick tiếp theo (power=0 vẫn cần 1 tick)
         new BukkitRunnable() {
             @Override public void run() {
                 if (!fw.isDead()) fw.detonate();

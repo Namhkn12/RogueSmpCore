@@ -1,6 +1,6 @@
-package com.roguesmp.dungeon.repository;
+package com.roguesmp.loot.repository;
 
-import com.roguesmp.dungeon.data.definition.loot.LootTable;
+import com.roguesmp.loot.LootTable;
 
 import java.util.Map;
 

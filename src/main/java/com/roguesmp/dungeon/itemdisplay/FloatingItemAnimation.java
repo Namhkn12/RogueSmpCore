@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -21,17 +22,16 @@ import java.util.function.Consumer;
 
 public class FloatingItemAnimation {
 
-    // ── Config ────────────────────────────────────────────────────
     private final Plugin plugin;
     private final TaskScheduler taskScheduler;
     private final Location location;
-    private final int duration;                  // tổng tick
-    private final float spinSpeed;               // độ/tick
-    private final List<ItemStack> items;         // danh sách item để cycle icon
-    private final int iconCycleInterval;         // đổi icon mỗi N tick
+    private final int duration;
+    private final float spinSpeed;
+    private final List<ItemStack> items;
+    private final int iconCycleInterval;
     private final float displayScale;
+    private final Player viewer;
 
-    // ── Callbacks ─────────────────────────────────────────────────
     private final Consumer<AnimationContext> onStart;
     private final Consumer<AnimationContext> onTick;
     private final Consumer<AnimationContext> onEnd;
@@ -45,6 +45,7 @@ public class FloatingItemAnimation {
         this.items             = builder.items;
         this.iconCycleInterval = builder.iconCycleInterval;
         this.displayScale      = builder.displayScale;
+        this.viewer            = builder.viewer;
         this.onStart           = builder.onStart;
         this.onTick            = builder.onTick;
         this.onEnd             = builder.onEnd;
@@ -73,13 +74,14 @@ public class FloatingItemAnimation {
                     new Quaternionf()
             ));
             d.setGlowing(true);
+            if (viewer != null) d.setVisibleByDefault(false);
         });
 
-        // cancelFlag dùng để báo hiệu dừng từ cả trong lẫn ngoài
+        if (viewer != null) viewer.showEntity(plugin, display);
+
         AtomicBoolean cancelFlag = new AtomicBoolean(false);
         AtomicInteger tickRef = new AtomicInteger(0);
         AtomicReference<Float> angleRef = new AtomicReference<>(0f);
-        // AnimationHandle trả về ngay, caller giữ để cancel sau
         AnimationHandle handle = new AnimationHandle(() -> cancelFlag.set(true));
 
         BukkitTask task = taskScheduler.runTimerCancellable(0L, 1L, () -> {
@@ -156,6 +158,7 @@ public class FloatingItemAnimation {
         private List<ItemStack> items   = new ArrayList<>();
         private int iconCycleInterval   = 5;
         private float displayScale      = 0.7f;
+        private Player viewer;
 
         private Consumer<AnimationContext> onStart;
         private Consumer<AnimationContext> onTick;
@@ -172,6 +175,7 @@ public class FloatingItemAnimation {
         public Builder items(List<ItemStack> items)            { this.items = items;                return this; }
         public Builder iconCycleInterval(int ticks)           { this.iconCycleInterval = ticks;    return this; }
         public Builder displayScale(float scale)               { this.displayScale = scale;         return this; }
+        public Builder viewer(Player viewer)                   { this.viewer = viewer;              return this; }
         public Builder onStart(Consumer<AnimationContext> cb)  { this.onStart = cb;                 return this; }
         public Builder onTick(Consumer<AnimationContext> cb)   { this.onTick = cb;                  return this; }
         public Builder onEnd(Consumer<AnimationContext> cb)    { this.onEnd = cb;                   return this; }

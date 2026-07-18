@@ -13,8 +13,6 @@ public class DataFolderConfig {
     public static final String TEMPLATE_FOLDER = "template";
     public static final String RUNTIME_FOLDER = "runtime";
 
-    public static final String LOOTABLE_FOLDER = "loottable";
-
     public static final String DUNGEON_TEMPLATE_FOLDER = "dungeon_template";
     public static final String ROOM_FOLDER = "room_template";
     public static final String SCHEMETA_FOLDER = "schemeta";
@@ -39,13 +37,6 @@ public class DataFolderConfig {
                 MAIN_FOLDER,
                 TEMPLATE_FOLDER,
                 ROOM_FOLDER
-        ));
-    }
-
-    public static String getLootTableFolder(){
-        return buildFolderPath(List.of(
-                MAIN_FOLDER,
-                LOOTABLE_FOLDER
         ));
     }
 

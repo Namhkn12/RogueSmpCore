@@ -1,6 +1,6 @@
-package com.roguesmp.dungeon.dto.loot;
+package com.roguesmp.loot.rule;
 
-import com.roguesmp.dungeon.data.definition.loot.LootContext;
+import com.roguesmp.loot.context.LootContext;
 
 /**
  * Strategy interface for contributing a bonus roll modifier to a loot roll session.

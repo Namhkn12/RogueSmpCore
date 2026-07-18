@@ -1,5 +1,7 @@
-package com.roguesmp.dungeon.data.definition.loot;
+package com.roguesmp.loot;
 
+import com.roguesmp.loot.context.LootContext;
+import com.roguesmp.loot.rule.LootRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -11,14 +13,14 @@ import java.util.List;
  *
  * <p>When a pool is rolled:
  * <ol>
- *   <li>Compute total rolls = {@code rolls} + (bonus_rolls modifier from {@link com.roguesmp.loot.rule.LootRule})</li>
+ *   <li>Compute total rolls = {@code rolls} + (bonus_rolls modifier from {@link LootRule})</li>
  *   <li>For each roll, pick one entry by weighted random</li>
  *   <li>Execute the chosen entry (drop item / delegate to nested table / do nothing)</li>
  * </ol>
  *
  * <p>{@code bonusRolls} is the base multiplier. The actual bonus applied depends on
- * how the active {@link com.roguesmp.loot.rule.LootRule}s contribute to the
- * {@link com.roguesmp.loot.context.LootContext}.
+ * how the active {@link LootRule}s contribute to the
+ * {@link LootContext}.
  */
 public class LootPool {
 

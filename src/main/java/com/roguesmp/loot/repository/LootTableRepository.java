@@ -1,16 +1,14 @@
-package com.roguesmp.dungeon.repository.impl;
+package com.roguesmp.loot.repository;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.roguesmp.dungeon.config.DataFolderConfig;
-import com.roguesmp.dungeon.data.definition.loot.LootEntry;
-import com.roguesmp.dungeon.data.definition.loot.LootEntryType;
-import com.roguesmp.dungeon.data.definition.loot.LootPool;
-import com.roguesmp.dungeon.data.definition.loot.LootTable;
-import com.roguesmp.dungeon.exception.impl.data.DataLoadException;
-import com.roguesmp.dungeon.repository.ILootTableRepository;
+import com.roguesmp.loot.LootConfig;
+import com.roguesmp.loot.LootEntry;
+import com.roguesmp.loot.LootEntryType;
+import com.roguesmp.loot.LootPool;
+import com.roguesmp.loot.LootTable;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
@@ -31,7 +29,7 @@ public class LootTableRepository implements ILootTableRepository {
     private final Logger logger;
 
     public LootTableRepository(Plugin plugin, Gson gson) {
-        this.lootFolder = new File(plugin.getDataFolder(), DataFolderConfig.getLootTableFolder());
+        this.lootFolder = new File(plugin.getDataFolder(), LootConfig.LOOT_TABLE_FOLDER);
         this.namespace = "rogue";
         this.gson = gson;
         this.logger = plugin.getLogger();
@@ -47,7 +45,7 @@ public class LootTableRepository implements ILootTableRepository {
         List<String> errors = new ArrayList<>();
 
         if (!lootFolder.exists() || !lootFolder.isDirectory()) {
-            throw new DataLoadException(lootFolder.getName(), null);
+            throw new IllegalStateException("Fail to load data from source: " + lootFolder.getName());
         }
 
         collectJsonFiles(lootFolder, result, errors);
@@ -61,7 +59,7 @@ public class LootTableRepository implements ILootTableRepository {
     @Override
     public LootTable loadById(String id) {
         String withoutNamespace = id.contains(":") ? id.substring(id.indexOf(':') + 1) : id;
-        File file = new File(lootFolder, withoutNamespace + DataFolderConfig.JSON_TYPE);
+        File file = new File(lootFolder, withoutNamespace + LootConfig.JSON_TYPE);
 
         if (!file.exists()) {
             logger.warning("[LootTable] File not found for id '" + id + "': " + file.getPath());
@@ -90,7 +88,7 @@ public class LootTableRepository implements ILootTableRepository {
         for (File file : files) {
             if (file.isDirectory()) {
                 collectJsonFiles(file, result, errors);
-            } else if (file.getName().endsWith(DataFolderConfig.JSON_TYPE)) {
+            } else if (file.getName().endsWith(LootConfig.JSON_TYPE)) {
                 LootTable table = parseFile(file, errors);
                 if (table != null) {
                     result.put(table.getId(), table);

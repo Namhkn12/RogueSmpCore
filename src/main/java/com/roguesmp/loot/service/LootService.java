@@ -1,13 +1,12 @@
-package com.roguesmp.dungeon.service.impl;
+package com.roguesmp.loot.service;
 
-import com.roguesmp.dungeon.data.definition.loot.LootContext;
-import com.roguesmp.dungeon.data.definition.loot.LootEntry;
-import com.roguesmp.dungeon.data.definition.loot.LootPool;
-import com.roguesmp.dungeon.data.definition.loot.LootTable;
-import com.roguesmp.dungeon.dto.loot.LootRollResult;
-import com.roguesmp.dungeon.manager.LootTableManager;
-import com.roguesmp.dungeon.service.ILootService;
-import com.roguesmp.dungeon.utils.Log4Craft;
+import com.roguesmp.RogueSmpCore;
+import com.roguesmp.loot.context.LootContext;
+import com.roguesmp.loot.LootEntry;
+import com.roguesmp.loot.LootPool;
+import com.roguesmp.loot.LootTable;
+import com.roguesmp.loot.LootRollResult;
+import com.roguesmp.loot.manager.LootTableManager;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.registry.ItemRegistry;
 import org.bukkit.inventory.ItemStack;
@@ -60,14 +59,14 @@ public class LootService implements ILootService {
             int depth
     ) {
         if (depth > MAX_DEPTH) {
-            Log4Craft.debug("[LootService] Max recursion depth reached at table '" + tableId
+            RogueSmpCore.LOGGER.debug("[LootService] Max recursion depth reached at table '" + tableId
                     + "' — possible circular reference.");
             return;
         }
 
         LootTable table = lootTableManager.getTable(tableId);
         if (table == null) {
-            Log4Craft.debug("[LootService] Loot table not found: '" + tableId + "'");
+            RogueSmpCore.LOGGER.debug("[LootService] Loot table not found: '" + tableId + "'");
             return;
         }
 
@@ -137,7 +136,7 @@ public class LootService implements ILootService {
 
         int totalWeight = entries.stream().mapToInt(LootEntry::getWeight).sum();
         if (totalWeight <= 0) {
-            Log4Craft.debug("[LootService] Pool has zero total weight — skipping.");
+            RogueSmpCore.LOGGER.debug("[LootService] Pool has zero total weight — skipping.");
             return null;
         }
 
@@ -176,13 +175,13 @@ public class LootService implements ILootService {
     ) {
         String itemId = entry.getItemId();
         if (itemId == null) {
-            Log4Craft.debug("[LootService] ITEM entry has null item_id — skipping.");
+            RogueSmpCore.LOGGER.debug("[LootService] ITEM entry has null item_id — skipping.");
             return LootRollResult.empty();
         }
 
         BaseItem baseItem = itemRegistry.getBaseItem(itemId);
         if (baseItem == null) {
-            Log4Craft.debug("[LootService] Unknown item_id '" + itemId + "' — skipping.");
+            RogueSmpCore.LOGGER.debug("[LootService] Unknown item_id '" + itemId + "' — skipping.");
             return LootRollResult.empty();
         }
 
@@ -203,7 +202,7 @@ public class LootService implements ILootService {
     ) {
         String nestedId = entry.getNestedTableId();
         if (nestedId == null) {
-            Log4Craft.debug("[LootService] LOOT_TABLE entry has null nested table id — skipping.");
+            RogueSmpCore.LOGGER.debug("[LootService] LOOT_TABLE entry has null nested table id — skipping.");
             return LootRollResult.empty();
         }
 
