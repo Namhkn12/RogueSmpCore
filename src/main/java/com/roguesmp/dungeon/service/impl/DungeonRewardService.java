@@ -12,6 +12,7 @@ import com.roguesmp.dungeon.service.*;
 import com.roguesmp.loot.service.ILootService;
 import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.NameSpaceKeys;
+import com.roguesmp.utils.PlayerUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -23,16 +24,17 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.DoubleChestInventory;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class DungeonRewardService implements IDungeonRewardService {
+
+    /** Modifier bonus-roll cộng thêm cho rương đôi → cơ hội (số lần roll thưởng) tốt hơn. */
+    private static final double DOUBLE_CHEST_LUCK_BONUS = 1.0;
 
     private final ILootService lootService;
     private final IPartyService partyService;
@@ -76,7 +78,7 @@ public class DungeonRewardService implements IDungeonRewardService {
         PersistentDataContainer blockPdc = tileState.getPersistentDataContainer();
         if(blockPdc.has(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING)){
             e.setCancelled(true);
-            DungeonEcho.warn(e.getPlayer(), "Không thể phá rương khi chưa nhận thưởng");
+            DungeonEcho.warn(e.getPlayer(), "Không thể phá rương thưởng");
             return true;
         }
 
@@ -97,13 +99,18 @@ public class DungeonRewardService implements IDungeonRewardService {
         if (cidValue == null || cidValue.isBlank()) return false;
 
         e.setCancelled(true);
-        tileState.getPersistentDataContainer().remove(NameSpaceKeys.REWARD_CID_KEY);
-        tileState.update();
 
         Player player = e.getPlayer();
 
+        if (hasClaimed(block, player)) {
+            chestOpenAnimation.playAlreadyClaimed(player, block);
+            return true;
+        }
+
+        boolean isDouble = getOtherBlock(block) != null;
+
         String tableId;
-        LootContext ctx;
+        LootContext.Builder ctxBuilder = LootContext.builder();
 
         if ("dungeon".equals(cidValue)) {
             Party party = partyService.getPartyByPlayer(player);
@@ -117,13 +124,16 @@ public class DungeonRewardService implements IDungeonRewardService {
 
             tableId = dungeon.getLootTableId();
             int totalScore = instance.getProgress().getScore();
-            ctx = LootContext.builder()
-                    .addRule(new LootRules.DungeonScoreRule(totalScore, 0.01))
-                    .build();
+            ctxBuilder.addRule(new LootRules.DungeonScoreRule(totalScore, 0.01));
         } else {
             tableId = cidValue;
-            ctx = LootContext.builder().build();
         }
+
+        if (isDouble) {
+            ctxBuilder.addRule(new LootRules.Fixed(DOUBLE_CHEST_LUCK_BONUS));
+        }
+
+        LootContext ctx = ctxBuilder.build();
 
         if (!lootService.exists(tableId)) {
             player.sendMessage("§c[Chest] Loot table not found: §f" + tableId);
@@ -132,28 +142,48 @@ public class DungeonRewardService implements IDungeonRewardService {
 
         List<ItemStack> items = lootService.roll(tableId, ctx);
 
-        if (isDoubleSide(block)) {
+        if (isDouble) {
             items.addAll(lootService.roll(tableId, ctx));
         }
 
-        Chest chest = (Chest) block.getState();
-        Inventory inv = chest.getBlockInventory();
-        scatterItems(inv, items);
+        markClaimed(block, player);
 
-        chestOpenAnimation.play(player, block, items);
+        chestOpenAnimation.play(player, block, items, () -> PlayerUtils.giveItem(player, items));
 
         return true;
     }
 
-
-    private boolean isDoubleSide(Block block) {
-        if (!(block.getState() instanceof Chest chest)) return false;
-        if (!(chest.getInventory() instanceof DoubleChestInventory)) return false;
+    private boolean hasClaimed(Block block, Player player) {
+        String id = player.getUniqueId().toString();
+        if (containsClaim(block, id)) return true;
         Block other = getOtherBlock(block);
-        if (other == null || !(other.getState() instanceof TileState ts)) return false;
-        return "dungeon".equals(ts.getPersistentDataContainer()
-                .get(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING));
+        return other != null && containsClaim(other, id);
     }
+
+    private boolean containsClaim(Block block, String id) {
+        if (!(block.getState() instanceof TileState ts)) return false;
+        List<String> list = ts.getPersistentDataContainer()
+                .get(NameSpaceKeys.REWARD_CLAIMED_KEY, PersistentDataType.LIST.strings());
+        return list != null && list.contains(id);
+    }
+
+    private void markClaimed(Block block, Player player) {
+        String id = player.getUniqueId().toString();
+        addClaim(block, id);
+        Block other = getOtherBlock(block);
+        if (other != null) addClaim(other, id);
+    }
+
+    private void addClaim(Block block, String id) {
+        if (!(block.getState() instanceof TileState ts)) return;
+        PersistentDataContainer pdc = ts.getPersistentDataContainer();
+        List<String> current = pdc.get(NameSpaceKeys.REWARD_CLAIMED_KEY, PersistentDataType.LIST.strings());
+        List<String> updated = current == null ? new ArrayList<>() : new ArrayList<>(current);
+        if (!updated.contains(id)) updated.add(id);
+        pdc.set(NameSpaceKeys.REWARD_CLAIMED_KEY, PersistentDataType.LIST.strings(), updated);
+        ts.update();
+    }
+
 
     private Block getOtherBlock(Block block) {
         if (!(block.getState() instanceof Chest chest)) return null;
@@ -165,15 +195,5 @@ public class DungeonRewardService implements IDungeonRewardService {
         if (left  != null && !left.getBlock().equals(block))  return left.getBlock();
         if (right != null && !right.getBlock().equals(block)) return right.getBlock();
         return null;
-    }
-
-    private void scatterItems(Inventory inv, List<ItemStack> items) {
-        inv.clear();
-        List<Integer> slots = new ArrayList<>();
-        for (int i = 0; i < inv.getSize(); i++) slots.add(i);
-        Collections.shuffle(slots);
-        for (int i = 0; i < Math.min(items.size(), slots.size()); i++) {
-            inv.setItem(slots.get(i), items.get(i));
-        }
     }
 }
