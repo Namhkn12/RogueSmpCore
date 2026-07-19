@@ -1,74 +1,105 @@
 package com.roguesmp.gui;
 
+import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.registry.ItemRegistry;
-import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.utils.dialog.DialogBuilder;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class ItemBrowser extends BaseGui {
-    private final List<Map.Entry<String, BaseItem>> entries;
+    private final List<Map.Entry<String, BaseItem>> allEntries;
+    private List<Map.Entry<String, BaseItem>> filteredEntries;
 
-    private final ItemStack filler = ItemStackUtils.hideTooltip(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE));
-    private final ItemStack nextPage = ItemStack.of(Material.ARROW);
-    private final ItemStack prePage = ItemStack.of(Material.ARROW);
     private final ItemStack infoBook = ItemStack.of(Material.BOOK);
+    private final ItemStack searchButton = ItemStack.of(Material.COMPASS);
 
     private final int pageSize = 36;
-    private final int totalPages;
+    private int totalPages;
     private int currentPage = 0;
+    private String searchQuery = null;
 
     public ItemBrowser() {
         super(Utils.fromString("Item Browser"), 6);
 
-        entries = new ArrayList<>(ItemRegistry.getInstance().getRegistry().entrySet());
-        entries.sort(Map.Entry.comparingByKey());
+        this.allEntries = new ArrayList<>(ItemRegistry.getInstance().getRegistry().entrySet());
+        this.allEntries.sort(Map.Entry.comparingByKey());
+        this.filteredEntries = new ArrayList<>(allEntries);
 
-        nextPage.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang kế", NamedTextColor.GREEN));
-        prePage.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang trước", NamedTextColor.GREEN));
         infoBook.setData(DataComponentTypes.ITEM_NAME, Component.text("Item Browser", NamedTextColor.GREEN));
         infoBook.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
                 Utils.text("Bấm vào một item để nhận", NamedTextColor.GREEN),
                 Utils.text("Shift-Click để nhận stack.", NamedTextColor.GREEN))
         ));
-        totalPages = getTotalPages();
+
+        updateSearchFilters();
     }
 
     @Override
     public void setup() {
         clearUi();
+
+        searchButton.setData(DataComponentTypes.ITEM_NAME, Component.text("Tìm kiếm Vật phẩm", NamedTextColor.GOLD));
+        searchButton.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
+                Utils.text("Từ khóa hiện tại: " + (searchQuery == null ? "Trống" : searchQuery), NamedTextColor.YELLOW),
+                Utils.text("Bấm vào để thay đổi từ khóa", NamedTextColor.GRAY),
+                Utils.text("Shift-Click để Xóa bộ lọc", NamedTextColor.RED),
+                Component.empty(),
+                Utils.text("Có thể tìm kiếm qua id, tên vật phẩm (tìm kiếm không dấu)")
+        )));
+
         for (int i = 0; i < 9; i++) {
-            this.addButton(0, i, filler, ClickHandler.noAction());
-            this.addButton(5, i, filler, ClickHandler.noAction());
+            this.addButton(0, i, FILLER_BLACK, ClickHandler.noAction());
+            this.addButton(5, i, FILLER_BLACK, ClickHandler.noAction());
         }
+
         this.addButton(0, 4, infoBook, ClickHandler.noAction());
+
+        this.addButton(0, 8, searchButton, event -> {
+            event.setCancelled(true);
+            Player player = (Player) event.getWhoClicked();
+
+            if (event.getClick().isShiftClick()) {
+                this.searchQuery = null;
+                this.updateSearchFilters();
+                this.setup();
+                return;
+            }
+
+            player.closeInventory();
+            openSearchDialog(player);
+        });
+
         if (totalPages > 1) {
             if (currentPage > 0) {
-                this.addButton(5, 3, prePage, click -> {
+                this.addButton(5, 3, PREV_PAGE_BUTTON, click -> {
                     click.setCancelled(true);
                     currentPage--;
                     this.setup();
                 });
             }
 
-            // Show Next if not on last page
-            if (currentPage < totalPages) {
-                this.addButton(5, 5, nextPage, click -> {
+            if (currentPage < totalPages - 1) {
+                this.addButton(5, 5, NEXT_PAGE_BUTTON, click -> {
                     click.setCancelled(true);
                     currentPage++;
                     this.setup();
@@ -80,6 +111,11 @@ public class ItemBrowser extends BaseGui {
         int i = 9;
         for (var entry : pageEntries) {
             ItemStack itemStack = entry.getValue().generateItemStack(null, 1);
+            ItemLore itemLore = itemStack.getData(DataComponentTypes.LORE);
+            List<Component> itemLoreComp = itemLore == null ? new ArrayList<>() : new ArrayList<>(itemLore.lines());
+            Component itemId = Utils.text("ID: " + entry.getKey(), NamedTextColor.DARK_GRAY);
+            itemLoreComp.addFirst(itemId);
+            itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(itemLoreComp));
             this.addButton(i, itemStack, event -> {
                 event.setCancelled(true);
                 if (event.getClick().isShiftClick()) {
@@ -97,13 +133,13 @@ public class ItemBrowser extends BaseGui {
 
     public List<Map.Entry<String, BaseItem>> getPage(int page) {
         int fromIndex = page * pageSize;
-        int toIndex = Math.min(fromIndex + pageSize, entries.size());
+        int toIndex = Math.min(fromIndex + pageSize, filteredEntries.size());
 
-        if (fromIndex >= entries.size() || fromIndex < 0) {
-            return Collections.emptyList(); // no results on this page
+        if (fromIndex >= filteredEntries.size() || fromIndex < 0) {
+            return Collections.emptyList();
         }
 
-        return entries.subList(fromIndex, toIndex);
+        return filteredEntries.subList(fromIndex, toIndex);
     }
 
     @Override
@@ -111,8 +147,59 @@ public class ItemBrowser extends BaseGui {
         event.setCancelled(true);
     }
 
-    private int getTotalPages() {
-        return (int) Math.ceil((double) entries.size() / pageSize);
+    private void updateSearchFilters() {
+        if (searchQuery == null || searchQuery.isBlank()) {
+            this.filteredEntries = new ArrayList<>(allEntries);
+        } else {
+            // Normalize the search query
+            String query = Utils.removeVietnameseTones(searchQuery.toLowerCase().trim());
+            this.filteredEntries = new ArrayList<>();
+
+            for (var entry : allEntries) {
+                String itemId = Utils.removeVietnameseTones(entry.getKey().toLowerCase());
+                BaseItem baseItem = entry.getValue();
+
+                // 1. Check item_id match
+                if (itemId.contains(query)) {
+                    filteredEntries.add(entry);
+                    continue;
+                }
+
+                // 2. Check Display Name match using Adventure plain text serializer
+                var nameComp = baseItem.getComponent(ComponentKeys.ITEM_NAME);
+                if (nameComp != null) {
+                    Component name = Utils.fromString(nameComp.value());
+                    String plainName = PlainTextComponentSerializer.plainText().serialize(name);
+                    String normalizedName = Utils.removeVietnameseTones(plainName.toLowerCase());
+                    if (normalizedName.contains(query)) {
+                        filteredEntries.add(entry);
+                        continue;
+                    }
+                }
+            }
+        }
+        this.totalPages = (int) Math.ceil((double) filteredEntries.size() / pageSize);
+        this.currentPage = 0;
+    }
+
+    private void openSearchDialog(Player p) {
+        Dialog dialog = DialogBuilder.create(Component.text("Tìm kiếm"))
+                .addTextInput("search_param", Component.text("Nhập từ khóa cần tìm..."))
+                .confirmation()
+                .yesButton(Component.text("Tìm kiếm"), null, (response, audience) -> {
+                    String searchParam = response.getText("search_param");
+
+                    this.searchQuery = searchParam;
+                    this.updateSearchFilters();
+
+                    Utils.runLater(() -> this.showInventory(p));
+                })
+                .noButton(Component.text("Hủy bỏ"), null, (response, audience) -> {
+                    Utils.runLater(() -> this.showInventory(p));
+                })
+                .build();
+
+        p.showDialog(dialog);
     }
 
     public static void registerCommand() {
@@ -127,7 +214,6 @@ public class ItemBrowser extends BaseGui {
                             }
                             player.getInventory().addItem(template.generateItemStack(PlayerManager.getInstance().getSmpPlayer(player.getUniqueId()), (Integer) commandArguments.get("amount")));
                         })
-
                 )
                 .withSubcommand(new CommandAPICommand("view")
                         .executesPlayer((player, commandArguments) -> {
@@ -138,11 +224,10 @@ public class ItemBrowser extends BaseGui {
                         .executesPlayer((player, commandArguments) -> {
                             new BlacksmithGui(player).showInventory(player);
                         }))
-                .withSubcommand(new CommandAPICommand("reload") // WILL CAUSE THE SERVER TO FREEZE
+                .withSubcommand(new CommandAPICommand("reload")
                         .executesPlayer((player1, commandArguments) -> {
                             Utils.runLater(() -> ItemRegistry.getInstance().loadFromFile());
                         }))
                 .register();
     }
-
 }

@@ -24,7 +24,7 @@ public class Focus implements SmpEnchant {
 
     @Override
     public @NotNull Enchants getEnumConstant() {
-        return null;
+        return Enchants.FOCUS;
     }
 
     @Override

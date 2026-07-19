@@ -8,8 +8,6 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 public final class NameComponent implements ItemComponent {
     private final String value;
 

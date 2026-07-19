@@ -76,18 +76,60 @@ public class PlayerUtils {
         giveItem(player, items.toArray(new ItemStack[0]));
     }
 
+    /**
+     * Counts the total quantity of a specific BaseItem in a player's inventory.
+     *
+     * @param player     The player whose inventory will be scanned.
+     * @param baseItemId The base ID of the item to look for.
+     * @return           The total accumulated stack size of all matching items found.
+     */
     public static int countItemsInInventory(Player player, String baseItemId) {
         int total = 0;
         for (ItemStack item : player.getInventory().getContents()) {
             if (!ItemStackUtils.isValidItem(item)) continue;
             String itemId = ItemStackUtils.getBaseId(item);
-            if (itemId != null && itemId.equalsIgnoreCase(baseItemId)) {
+            if (itemId != null && itemId.equals(baseItemId)) {
                 total += item.getAmount();
             }
         }
         return total;
     }
 
+    /**
+     * Counts the total quantity of items in a player's inventory that match a template itemStack (ignoring stack size).
+     *
+     * @param player        The player whose inventory will be scanned.
+     * @param itemTemplate  The template ItemStack to match against via {@link ItemStack#isSimilar}.
+     * @return              The total accumulated stack size of all similar items found.
+     */
+    public static int countItemsInInventory(Player player, ItemStack itemTemplate) {
+        if (itemTemplate == null) {
+            return 0;
+        }
+
+        int total = 0;
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item == null) continue;
+
+            if (item.isSimilar(itemTemplate)) {
+                total += item.getAmount();
+            }
+        }
+        return total;
+    }
+
+    /**
+     * Removes a specific quantity of an item from the player's inventory by its BaseItem ID.
+     * <p>
+     * <b>Note:</b> This method does not
+     * verify if the player possesses the full requested amount, meaning it will drain
+     * all available matches until {@code amountToTake} reaches zero or the inventory runs dry.
+     * </p>
+     *
+     * @param player       The player whose inventory to modify.
+     * @param baseItemId   The BaseItem ID of the item to search for and remove.
+     * @param amountToTake The total number of items to deduct from matching stacks.
+     */
     public static void removeItem(Player player, String baseItemId, int amountToTake) {
         ItemStack[] contents = player.getInventory().getContents();
         for (ItemStack item : contents) {
@@ -95,7 +137,69 @@ public class PlayerUtils {
             if (!ItemStackUtils.isValidItem(item)) continue;
 
             String itemId = ItemStackUtils.getBaseId(item);
-            if (itemId != null && itemId.equalsIgnoreCase(baseItemId)) {
+            if (itemId != null && itemId.equals(baseItemId)) {
+                int currentAmount = item.getAmount();
+                if (currentAmount <= amountToTake) {
+                    amountToTake -= currentAmount;
+                    item.setAmount(0);
+                } else {
+                    item.setAmount(currentAmount - amountToTake);
+                    amountToTake = 0;
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes multiple items from a player's inventory based on a map of item IDs and amounts.
+     * <p>
+     * Iterates through the map entries sequentially, passing each valid key-value pair directly
+     * to {@link #removeItem(Player, String, int)}. Missing or invalid map values are ignored.
+     * </p>
+     *
+     * @param player       The player whose inventory to modify.
+     * @param itemsToTake  A map where the key is the target baseItemId and the value is the amount to remove.
+     */
+    public static void removeItems(Player player, Map<String, Integer> itemsToTake) {
+        if (itemsToTake == null || itemsToTake.isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<String, Integer> entry : itemsToTake.entrySet()) {
+            String baseItemId = entry.getKey();
+            Integer amount = entry.getValue();
+
+            // Skip if the item ID is null or the amount is invalid
+            if (baseItemId == null || amount == null || amount <= 0) {
+                continue;
+            }
+
+            removeItem(player, baseItemId, amount);
+        }
+    }
+
+    /**
+     * Removes a specific amount of items that match the template ItemStack (ignoring stack size).
+     * <p>
+     * This method does not verify if the player has enough items. If the player
+     * has fewer items than requested, it will still take what they have and return false.
+     * Use a count method (like {@link #countItemsInInventory}) beforehand to verify player contents.
+     * </p>
+     * @param player        The player whose inventory to modify.
+     * @param itemTemplate  The template ItemStack to match against.
+     * @param amountToTake  The total quantity to remove.
+     */
+    public static void removeItem(Player player, ItemStack itemTemplate, int amountToTake) {
+        if (itemTemplate == null || amountToTake <= 0) return;
+
+        ItemStack[] contents = player.getInventory().getContents();
+
+        // Deduct the amounts as we find them
+        for (ItemStack item : contents) {
+            if (amountToTake <= 0) break;
+            if (item == null) continue;
+
+            if (item.isSimilar(itemTemplate)) {
                 int currentAmount = item.getAmount();
                 if (currentAmount <= amountToTake) {
                     amountToTake -= currentAmount;

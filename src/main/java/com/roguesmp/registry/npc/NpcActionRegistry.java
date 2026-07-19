@@ -2,6 +2,7 @@ package com.roguesmp.registry.npc;
 
 import com.google.gson.JsonObject;
 import com.roguesmp.npc.action.NpcAction;
+import com.roguesmp.npc.action.OpenGuiInteractAction;
 import com.roguesmp.npc.action.RunCommandInteractAction;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,6 +25,11 @@ public class NpcActionRegistry {
         register("run_command", jsonObject -> {
             String command = jsonObject.get("command") == null ? "" : jsonObject.get("command").getAsString();
             return new RunCommandInteractAction(command);
+        });
+
+        register("open_gui", jsonObject -> {
+            String id = jsonObject.get("gui") == null ? "" : jsonObject.get("gui").getAsString();
+            return new OpenGuiInteractAction(id);
         });
     }
 
