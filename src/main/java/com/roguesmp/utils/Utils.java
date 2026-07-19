@@ -194,6 +194,37 @@ public class Utils {
         return MiniMessage.miniMessage().serialize(component);
     }
 
+    public static String removeVietnameseTones(String str) {
+        if (str == null) return "";
+
+        str = str.replaceAll("[àáạảãâầấậẩẫăằắặẳẵ]", "a");
+        str = str.replaceAll("[èéẹẻẽêềếệểễ]", "e");
+        str = str.replaceAll("[ìíịỉĩ]", "i");
+        str = str.replaceAll("[òóọỏõôồốộổỗơờớợởỡ]", "o");
+        str = str.replaceAll("[ùúụủũưừứựửữ]", "u");
+        str = str.replaceAll("[ỳýỵỷỹ]", "y");
+        str = str.replaceAll("đ", "d");
+        str = str.replaceAll("[ÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴ]", "A");
+        str = str.replaceAll("[ÈÉẸẺẼÊỀẾỆỂỄ]", "E");
+        str = str.replaceAll("[ÌÍỊỈĨ]", "I");
+        str = str.replaceAll("[ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠ]", "O");
+        str = str.replaceAll("[ÙÚỤỦŨƯỪỨỰỬỮ]", "U");
+        str = str.replaceAll("[ÝỲỴỶỸ]", "Y");
+        str = str.replaceAll("Đ", "D");
+
+        // Remove individual UTF-8 combining accent markers
+        str = str.replaceAll("[\\u0300\\u0301\\u0303\\u0309\\u0323]", "");
+        str = str.replaceAll("[\\u02C6\\u0306\\u031B]", "");
+
+        // Remove extra spaces
+        str = str.replaceAll(" + ", " ");
+        str = str.trim();
+
+        // Remove punctuations and special characters
+        str = str.replaceAll("[!@%\\^*()+=<>?/.,:;'\"&#\\[\\]~$`\\-{}|\\\\]", " ");
+        return str;
+    }
+
     public static String locationToString(Location loc){
         if(loc == null || loc.getWorld()==null){
             return null;

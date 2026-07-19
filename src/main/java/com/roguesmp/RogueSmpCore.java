@@ -13,6 +13,7 @@ import com.roguesmp.gui.ItemRepairGui;
 import com.roguesmp.gui.SkinBrowserGui;
 import com.roguesmp.gui.TrashGui;
 import com.roguesmp.gui.ability.AbilityCatalogue;
+import com.roguesmp.gui.crafting.CraftingGui;
 import com.roguesmp.gui.info.SmpWikiMainMenuGui;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.island.IslandManager;
@@ -145,6 +146,7 @@ public final class RogueSmpCore extends JavaPlugin {
         TrashGui.register();
         SmpWikiMainMenuGui.registerCommands();
         ItemRepairGui.registerCommand();
+        CraftingGui.registerCmd();
 
         IslandManager.getInstance().registerCommands();
         QuestManager.getInstance().registerQuestCommand();

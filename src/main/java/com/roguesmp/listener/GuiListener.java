@@ -11,7 +11,7 @@ public class GuiListener implements Listener {
     public void onGuiClick(InventoryClickEvent event) {
         Inventory topInventory = event.getView().getTopInventory();
         if (!(topInventory.getHolder(false) instanceof BaseGui baseGui)) return;
-        if (event.getClick() == ClickType.DOUBLE_CLICK) return; //Double click is weird, so just ignore
+//        if (event.getClick() == ClickType.DOUBLE_CLICK) return; //Double click is weird, so just ignore
         Inventory clickedInventory = event.getClickedInventory();
         if (clickedInventory == null) {
             baseGui.onClickOutsideInventory(event);
