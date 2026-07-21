@@ -4,7 +4,8 @@ import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.loot.manager.LootTableManager;
 import com.roguesmp.loot.repository.ILootTableRepository;
 import com.roguesmp.loot.repository.LootTableRepository;
-import com.roguesmp.loot.rule.LootRules;
+import com.roguesmp.loot.context.LootOrigin;
+import com.roguesmp.loot.event.LootRollEvent;
 import com.roguesmp.loot.service.ILootService;
 import com.roguesmp.loot.service.LootService;
 import com.roguesmp.player.SmpPlayer;
@@ -126,16 +127,33 @@ import java.util.List;
  * Xem {@link #bootstrapExample(Plugin, Gson)} và {@link #rollExamples(ILootService, SmpPlayer)}.
  *
  * ----------------------------------------------------------------------------
- * <h2>4. LOOT RULE & BONUS ROLLS (luck / looting / dungeon tier)</h2>
+ * <h2>4. MODIFIER & BONUS ROLLS (luck / looting / dungeon score)</h2>
  * ----------------------------------------------------------------------------
  * Bonus rolls chỉ áp dụng khi pool có {@code bonus_rolls > 0}. Công thức:
  * <pre>
  *   totalRolls = rolls + floor(bonus_rolls * contextModifier)
- *   contextModifier = tổng của tất cả rule.evaluate(context)  (xem {@link LootContext#getBonusRollModifier()})
+ *   contextModifier = tổng mọi modifier trong context  (xem {@link LootContext#getBonusRollModifier()})
  * </pre>
- * Các rule dựng sẵn trong {@link LootRules}: {@code Fixed}, {@code LootingEnchant},
- * {@code PlayerLuck}, {@code DungeonTier}, {@code DungeonScoreRule}.
- * Xem ví dụ ở {@link #rollWithRulesExample(ILootService, SmpPlayer, ItemStack)}.
+ * Modifier lưu theo {@code source → value}, thêm bằng
+ * {@link LootContext#addModifier(String, double)}.
+ *
+ * ----------------------------------------------------------------------------
+ * <h2>5. HOOK VÀO ROLL TỪ HỆ THỐNG KHÁC — {@link LootRollEvent}</h2>
+ * ----------------------------------------------------------------------------
+ * ĐÂY LÀ CÁCH ĐÚNG để một hệ thống mới ảnh hưởng tới loot. Không sửa nơi gọi roll
+ * (onOpen của rương, listener mob chết...), chỉ cần nghe event:
+ * <pre>{@code
+ * @EventHandler
+ * public void onLootRoll(LootRollEvent e) {
+ *     LootContext ctx = e.getContext();
+ *     if (ctx.getOrigin() != LootOrigin.CHEST) return;   // lọc theo nơi gọi
+ *     Block chest = ctx.getSourceAs(Block.class);        // dữ liệu nơi gọi
+ *     SmpPlayer player = ctx.getPlayer();                // người roll
+ *     ctx.addModifier("my_system", 0.5);                 // đóng góp của mình
+ * }
+ * }</pre>
+ * Huỷ event → lượt roll trả về list rỗng.
+ * Xem thêm {@link #rollWithModifiersExample(ILootService, SmpPlayer, ItemStack)}.
  */
 public final class LootTableGuide {
 
@@ -176,9 +194,11 @@ public final class LootTableGuide {
         // Cách A: roll đơn giản, không cần player/rule (drop thường).
         List<ItemStack> simpleDrops = lootService.roll(tableId);
 
-        // Cách B: roll có context (gắn player để item sinh ra theo người chơi,
-        //         và cho phép rule cộng bonus rolls).
-        LootContext ctx = LootContext.builder(player).build();
+        // Cách B: roll có context — gắn player để item sinh ra theo người chơi,
+        //         và khai báo origin để listener LootRollEvent biết roll đến từ đâu.
+        LootContext ctx = LootContext.builder(player)
+                .origin(LootOrigin.CHEST, null)
+                .build();
         List<ItemStack> drops = lootService.roll(tableId, ctx);
 
         // Kết quả không bao giờ null, chỉ có thể rỗng. Caller tự chịu trách nhiệm
@@ -188,27 +208,30 @@ public final class LootTableGuide {
     }
 
     /**
-     * MỤC 4 — Roll có LootRule để tăng bonus rolls (luck / looting / dungeon tier).
+     * MỤC 4 — Roll có modifier để tăng bonus rolls.
      *
-     * <p>Nhớ: rule chỉ có tác dụng nếu pool trong JSON có {@code bonus_rolls > 0}.
+     * <p>Nhớ: modifier chỉ có tác dụng nếu pool trong JSON có {@code bonus_rolls > 0}.
+     *
+     * <p>Ở đây chỉ nên đặt modifier thuộc về <b>chính nơi gọi</b> (vd rương đôi).
+     * Những thứ đến từ hệ thống khác (điểm dungeon, buff, sự kiện server) hãy để
+     * hệ thống đó tự cộng qua {@link LootRollEvent} — xem MỤC 5.
      */
-    public static List<ItemStack> rollWithRulesExample(
+    public static List<ItemStack> rollWithModifiersExample(
             ILootService lootService,
             SmpPlayer player,
             ItemStack weapon
     ) {
         LootContext ctx = LootContext.builder(player)
+                .origin(LootOrigin.CHEST, null)
                 // Cộng cứng +1.0 modifier (ví dụ rương đôi trong dungeon).
-                .addRule(new LootRules.Fixed(1.0))
-                // Looting III với hệ số 0.5/level → +1.5 modifier.
-                .addRule(new LootRules.LootingEnchant(weapon, 0.5))
-                // Dungeon tier 3, mỗi tier +0.25 → +0.75 modifier.
-                .addRule(new LootRules.DungeonTier(3, 0.25))
-                // Đọc chỉ số luck tuỳ biến từ SmpPlayer của bạn.
-                .addRule(new LootRules.PlayerLuck(player, p -> readLuck(p) * 0.01))
+                .addModifier("double_chest", 1.0)
                 .build();
 
-        // Với pool bonus_rolls=1.0 và tổng modifier ở trên (1.0+1.5+0.75+luck),
+        // Modifier cũng có thể thêm sau khi build, trước khi roll.
+        ctx.addModifier("looting", weapon == null ? 0.0 : 1.5);
+        ctx.addModifier("player_luck", readLuck(player) * 0.01);
+
+        // Với pool bonus_rolls=1.0 và tổng modifier ở trên,
         // số roll thêm = floor(1.0 * modifier).
         return lootService.roll("rogue:dungeons/dungeon_a_reward", ctx);
     }

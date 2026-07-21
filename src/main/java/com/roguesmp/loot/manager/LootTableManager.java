@@ -77,7 +77,7 @@ public class LootTableManager {
     }
 
     /**
-     * Quick check: does the table benefit from LootRules (luck, looting, tier)?
+     * Quick check: does the table benefit from context modifiers (luck, looting, tier)?
      */
     public boolean hasBonusRolls(String id) {
         return tablesWithBonusRolls.contains(id);

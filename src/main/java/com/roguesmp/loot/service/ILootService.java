@@ -12,8 +12,9 @@ import java.util.List;
  *
  * <p>Responsibilities:
  * <ul>
+ *   <li>Fire {@link com.roguesmp.loot.event.LootRollEvent} so other systems can contribute modifiers</li>
  *   <li>Resolve loot table from cache (via LootTableManager)</li>
- *   <li>Apply LootContext rules to compute bonus rolls</li>
+ *   <li>Apply LootContext modifiers to compute bonus rolls</li>
  *   <li>Perform weighted random entry selection per pool</li>
  *   <li>Recursively resolve nested LOOT_TABLE entries</li>
  *   <li>Build final ItemStack list via ItemRegistry + SmpItem</li>
@@ -38,13 +39,17 @@ public interface ILootService {
      * Rolls a loot table and returns the resulting items.
      *
      * @param lootTableId the loot table ID, e.g. {@code "rogue:dungeons/dungeon_a_reward"}
-     * @param context     runtime context carrying player info and active LootRules
+     * <p>Fires a cancellable {@link com.roguesmp.loot.event.LootRollEvent} first — listeners
+     * may add modifiers to {@code context} or cancel the roll entirely (returns empty list).
+     *
+     * @param context     runtime context carrying player info, origin and bonus modifiers
      * @return list of generated ItemStacks. Never null, may be empty.
      */
     List<ItemStack> roll(String lootTableId, LootContext context);
 
     /**
-     * Convenience overload — rolls without any LootContext (no player, no bonus rules).
+     * Convenience overload — rolls with an empty LootContext (no player, no origin).
+     * The event still fires, so listeners can act on it.
      * Useful for simple drops that don't benefit from luck/looting.
      *
      * @param lootTableId the loot table ID
