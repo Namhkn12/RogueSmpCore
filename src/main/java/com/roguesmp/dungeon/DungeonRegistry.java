@@ -9,6 +9,7 @@ import com.roguesmp.dungeon.actor.command.SchemetaCommand;
 import com.roguesmp.dungeon.actor.command.TemplateGenCommand;
 import com.roguesmp.dungeon.actor.listener.DoorInteractListener;
 import com.roguesmp.dungeon.actor.listener.DungeonListener;
+import com.roguesmp.dungeon.actor.listener.DungeonLootListener;
 import com.roguesmp.dungeon.actor.listener.LootTableListener;
 import com.roguesmp.dungeon.actor.listener.SpawnerEventListener;
 import com.roguesmp.dungeon.controller.*;
@@ -215,6 +216,11 @@ public class DungeonRegistry {
 
         pluginManager.registerEvents(
                 new LootTableListener(treasureController),
+                RogueSmpCore.getInstance()
+        );
+
+        pluginManager.registerEvents(
+                new DungeonLootListener(partyService, instanceManager),
                 RogueSmpCore.getInstance()
         );
 

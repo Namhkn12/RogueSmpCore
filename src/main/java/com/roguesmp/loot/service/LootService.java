@@ -6,9 +6,11 @@ import com.roguesmp.loot.LootEntry;
 import com.roguesmp.loot.LootPool;
 import com.roguesmp.loot.LootTable;
 import com.roguesmp.loot.LootRollResult;
+import com.roguesmp.loot.event.LootRollEvent;
 import com.roguesmp.loot.manager.LootTableManager;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.registry.ItemRegistry;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +32,16 @@ public class LootService implements ILootService {
         this.itemRegistry = itemRegistry;
     }
 
+    /**
+     * Bắn {@link LootRollEvent} để mọi hệ thống khác kịp cộng modifier vào context,
+     * sau đó mới roll. Chỉ bắn ở table gốc — table lồng nhau dùng lại context này.
+     */
     @Override
     public List<ItemStack> roll(String lootTableId, LootContext context) {
+        LootRollEvent event = new LootRollEvent(lootTableId, context);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return new ArrayList<>();
+
         List<ItemStack> results = new ArrayList<>();
         rollTable(lootTableId, context, results, 0);
         return results;
@@ -103,8 +113,8 @@ public class LootService implements ILootService {
      *   totalRolls = pool.rolls + floor(pool.bonusRolls * context.getBonusRollModifier())
      * </pre>
      *
-     * <p>Bonus rolls are only applied if this table benefits from them (hasBonusRolls flag).
-     * This avoids unnecessary rule evaluation on tables that ignore luck entirely.
+     * <p>Bonus rolls are only applied if this table benefits from them (hasBonusRolls flag),
+     * so tables that ignore luck entirely never pay for modifier aggregation.
      */
     private int computeTotalRolls(
             LootPool pool,

@@ -2,7 +2,8 @@ package com.roguesmp.dungeon.actor.command;
 
 import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.dungeon.data.definition.spawner.Spawner;
-import com.roguesmp.loot.rule.LootRules;
+import com.roguesmp.loot.context.LootOrigin;
+import com.roguesmp.player.PlayerManager;
 import com.roguesmp.dungeon.manager.DungeonManager;
 import com.roguesmp.loot.manager.LootTableManager;
 import com.roguesmp.dungeon.manager.RoomManager;
@@ -129,7 +130,10 @@ public class TemplateGenCommand {
                                 .withArguments(lootTableIdArgument("tableId"))
                                 .executesPlayer((player, args) -> {
                                     String tableId = (String) args.get("tableId");
-                                    rollAndGive(player, tableId, LootContext.builder().build());
+                                    rollAndGive(player, tableId, LootContext
+                                            .builder(PlayerManager.getInstance().getSmpPlayer(player))
+                                            .origin(LootOrigin.COMMAND, player)
+                                            .build());
                                 })
                 )
                 .withSubcommand(
@@ -142,8 +146,10 @@ public class TemplateGenCommand {
                                 .executesPlayer((player, args) -> {
                                     String tableId = (String) args.get("tableId");
                                     double bonus = (double) args.get("bonusModifier");
-                                    LootContext ctx = LootContext.builder()
-                                            .addRule(new LootRules.Fixed(bonus))
+                                    LootContext ctx = LootContext
+                                            .builder(PlayerManager.getInstance().getSmpPlayer(player))
+                                            .origin(LootOrigin.COMMAND, player)
+                                            .addModifier("command", bonus)
                                             .build();
                                     rollAndGive(player, tableId, ctx);
                                 })

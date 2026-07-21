@@ -39,7 +39,7 @@ public class LootTable {
 
     /**
      * True if any pool in this table (or any nested child table that was resolved)
-     * has bonus_rolls > 0. Used as a quick check before applying LootRules.
+     * has bonus_rolls > 0. Used as a quick check before applying context modifiers.
      */
     public boolean hasBonusRolls() {
         return hasBonusRolls;

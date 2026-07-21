@@ -4,8 +4,9 @@ import com.roguesmp.dungeon.data.definition.Dungeon;
 import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon.data.runtime.Party;
-import com.roguesmp.loot.rule.LootRules;
+import com.roguesmp.loot.context.LootOrigin;
 import com.roguesmp.dungeon.itemdisplay.impl.ChestOpenAnimation;
+import com.roguesmp.player.PlayerManager;
 import com.roguesmp.dungeon.manager.DungeonManager;
 import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.service.*;
@@ -110,7 +111,6 @@ public class DungeonRewardService implements IDungeonRewardService {
         boolean isDouble = getOtherBlock(block) != null;
 
         String tableId;
-        LootContext.Builder ctxBuilder = LootContext.builder();
 
         if ("dungeon".equals(cidValue)) {
             Party party = partyService.getPartyByPlayer(player);
@@ -123,17 +123,19 @@ public class DungeonRewardService implements IDungeonRewardService {
             if (dungeon == null) return false;
 
             tableId = dungeon.getLootTableId();
-            int totalScore = instance.getProgress().getScore();
-            ctxBuilder.addRule(new LootRules.DungeonScoreRule(totalScore, 0.01));
         } else {
             tableId = cidValue;
         }
 
-        if (isDouble) {
-            ctxBuilder.addRule(new LootRules.Fixed(DOUBLE_CHEST_LUCK_BONUS));
-        }
+        // Chỉ khai báo bối cảnh + modifier của riêng cái rương này.
+        // Mọi ảnh hưởng khác (điểm dungeon, buff, sự kiện...) tự cộng vào qua LootRollEvent.
+        LootContext ctx = LootContext.builder(PlayerManager.getInstance().getSmpPlayer(player))
+                .origin(LootOrigin.CHEST, block)
+                .build();
 
-        LootContext ctx = ctxBuilder.build();
+        if (isDouble) {
+            ctx.addModifier("double_chest", DOUBLE_CHEST_LUCK_BONUS);
+        }
 
         if (!lootService.exists(tableId)) {
             player.sendMessage("§c[Chest] Loot table not found: §f" + tableId);
