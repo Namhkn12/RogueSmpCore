@@ -139,6 +139,44 @@ public class SmpPlayer {
         }
     }
 
+    /**
+     * Checks if the player has at least the specified amount of money.
+     */
+    public boolean hasMoney(long amount) {
+        if (amount < 0) return false;
+        PlayerData data = getPlayerData();
+        return data != null && data.getMoney() >= amount;
+    }
+
+    /**
+     * Attempts to withdraw money from the player.
+     * @return true if successful, false if insufficient funds or invalid amount
+     */
+    public boolean takeMoney(long amount) {
+        if (amount <= 0) return false;
+        if (!hasMoney(amount)) return false;
+
+        PlayerData data = getPlayerData();
+        data.setMoney(data.getMoney() - amount);
+        return true;
+    }
+
+    /**
+     * Gives money to the player with overflow protection.
+     */
+    public void giveMoney(long amount) {
+        if (amount <= 0) return;
+
+        PlayerData data = getPlayerData();
+        long current = data.getMoney();
+
+        if (Long.MAX_VALUE - current < amount) {
+            data.setMoney(Long.MAX_VALUE);
+        } else {
+            data.setMoney(current + amount);
+        }
+    }
+
     public @Unmodifiable Map<Enchants, Integer> getActiveEnchants() {
         return activeEnchantsView;
     }

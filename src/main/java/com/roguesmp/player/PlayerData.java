@@ -34,6 +34,7 @@ public class PlayerData{
         for (AbilityType type : AbilityType.values()) {
             equippedAbilities.put(type, new ArrayList<>(Collections.nCopies(type.getMaxSlots(), null)));
         }
+        this.money = 0;
     }
 
     public void setEquippedAbility(AbilityType type, int index, @Nullable String abilityId) {
@@ -80,6 +81,7 @@ public class PlayerData{
     }
     public void setIslandId(@Nullable UUID islandId) {
         this.islandId = islandId;
+        this.dirty = true;
     }
     public int getLevel() { return level; }
     public void setLevel(int level) { this.level = level; this.dirty = true; }
@@ -88,6 +90,7 @@ public class PlayerData{
 
     public void setMoney(long money) {
         this.money = money;
+        this.dirty = true;
     }
 
     public long getMoney() {

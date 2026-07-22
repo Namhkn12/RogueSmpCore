@@ -4,6 +4,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.gui.quest.QuestGui;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.quest.daily.DailyQuestManager;
 import com.roguesmp.registry.quest.QuestRegistry;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -28,11 +29,13 @@ public class QuestManager {
     private final RogueSmpCore plugin;
     private final QuestDataManager questDataManager;
     private final QuestRegistry questRegistry;
+    private final DailyQuestManager dailyQuestManager;
 
     public QuestManager(RogueSmpCore plugin, QuestRegistry questRegistry) {
         this.plugin = plugin;
-        this.questDataManager = new QuestDataManager(plugin, questRegistry);
+        this.questDataManager = new QuestDataManager(plugin, questRegistry, this);
         this.questRegistry = questRegistry;
+        this.dailyQuestManager = new DailyQuestManager(this);
     }
 
     public @Nullable PlayerQuestData getPlayerQuestData(UUID uuid) {
@@ -53,7 +56,7 @@ public class QuestManager {
 
         // Initialize fresh progress for this quest
         QuestProgress newProgress = new QuestProgress(quest);
-        data.addQuestProgress(quest.getId(), newProgress);
+        data.setQuestProgress(quest.getId(), newProgress);
 
         return true;
     }
@@ -106,7 +109,7 @@ public class QuestManager {
             return false;
         }
 
-        progress.setCompleted(true);
+        progress.complete();
         return true;
     }
 
@@ -220,6 +223,10 @@ public class QuestManager {
 
     public QuestDataManager getQuestDataManager() {
         return questDataManager;
+    }
+
+    public DailyQuestManager getDailyQuestManager() {
+        return dailyQuestManager;
     }
 
     public void onKillEntity(EntityDeathEvent event) {

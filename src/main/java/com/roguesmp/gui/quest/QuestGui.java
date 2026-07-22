@@ -1,6 +1,5 @@
 package com.roguesmp.gui.quest;
 
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
@@ -8,6 +7,7 @@ import com.roguesmp.quest.*;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public class QuestGui extends BaseGui {
 
@@ -102,11 +103,12 @@ public class QuestGui extends BaseGui {
                     iconMaterial = Material.CHEST_MINECART;
                     statusPrefix = "<b><green>";
                 } else {
-                    iconMaterial = Material.BOOK;
+                    iconMaterial = quest.getIcon() != null ? quest.getIcon() : Material.BOOK;
                     statusPrefix = "<gold>";
                 }
 
                 ItemStack questItem = ItemStack.of(iconMaterial);
+                questItem.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Set.of(DataComponentTypes.ATTRIBUTE_MODIFIERS)).build());
                 questItem.setData(DataComponentTypes.ITEM_NAME,
                         Utils.fromString(statusPrefix + (quest.getName() != null ? quest.getName() : "Nhiệm vụ không tên")));
 

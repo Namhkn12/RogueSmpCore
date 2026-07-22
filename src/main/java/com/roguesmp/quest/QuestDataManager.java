@@ -3,6 +3,7 @@ package com.roguesmp.quest;
 import com.google.gson.JsonObject;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.registry.quest.QuestRegistry;
+import com.roguesmp.tag.SmpTag;
 import com.roguesmp.utils.Utils;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
@@ -21,10 +22,12 @@ public class QuestDataManager {
 
     private final RogueSmpCore plugin;
     private final QuestRegistry questRegistry;
+    private final QuestManager questManager;
 
-    public QuestDataManager(RogueSmpCore plugin, QuestRegistry questRegistry) {
+    public QuestDataManager(RogueSmpCore plugin, QuestRegistry questRegistry, QuestManager questManager) {
         this.plugin = plugin;
         this.questRegistry = questRegistry;
+        this.questManager = questManager;
     }
 
     public @Blocking PlayerQuestData loadData(UUID uuid) {
@@ -44,53 +47,75 @@ public class QuestDataManager {
         }
 
         try (Reader reader = new FileReader(file)) {
-            JsonObject data = Utils.GSON.fromJson(reader, JsonObject.class);
+            JsonObject rootJson = Utils.GSON.fromJson(reader, JsonObject.class);
 
-            if (data == null) {
+            if (rootJson == null) {
                 RogueSmpCore.LOGGER.info("Player quest data is empty, creating default data");
                 return createDefault(uuid);
             }
 
-            Set<String> questIds = data.keySet();
             Map<String, QuestProgress> progressMap = new HashMap<>();
-            for (String questId : questIds) {
-                Quest quest = questRegistry.getQuest(questId);
-                if (quest == null) {
-                    RogueSmpCore.LOGGER.warn("Player has unknown quest id: {}", questId);
-                    continue;
-                }
 
-                JsonObject questProgressJson = data.getAsJsonObject(questId);
+            if (rootJson.has("questProgress") && rootJson.get("questProgress").isJsonObject()) {
+                JsonObject questsJson = rootJson.getAsJsonObject("questProgress");
 
-                boolean completed = questProgressJson.has("completed") && questProgressJson.get("completed").getAsBoolean();
-                boolean rewardClaimed = questProgressJson.has("rewardClaimed") && questProgressJson.get("rewardClaimed").getAsBoolean();
-
-                JsonObject progressJson = questProgressJson.getAsJsonObject("progress");
-                if (progressJson == null) {
-                    RogueSmpCore.LOGGER.warn("Found no progress data for quest '{}'. Skipping it.", questId);
-                    continue;
-                }
-
-                Map<String, QuestObjective> questObjectiveMap = quest.getObjectives();
-                Map<String, ObjectiveProgress> objectiveProgressMap = new HashMap<>();
-                Set<String> progressIds = progressJson.keySet();
-                for (String progressId : progressIds) {
-                    JsonObject jsonObject = progressJson.getAsJsonObject(progressId);
-                    QuestObjective objective = questObjectiveMap.get(progressId);
-                    if (objective == null) {
-                        RogueSmpCore.LOGGER.warn("Found no matching objective id for progress data id '{}' for quest '{}'. Skipping it.", progressId, questId);
+                for (String questId : questsJson.keySet()) {
+                    Quest quest = questRegistry.getQuest(questId);
+                    if (quest == null) {
+                        RogueSmpCore.LOGGER.warn("Player has unknown quest id: {}", questId);
                         continue;
                     }
-                    ObjectiveProgress objectiveProgress = objective.deserializeProgress(jsonObject);
 
-                    objectiveProgressMap.put(progressId, objectiveProgress);
+                    JsonObject questProgressJson = questsJson.getAsJsonObject(questId);
+
+                    boolean rewardClaimed = questProgressJson.has("rewardClaimed") && questProgressJson.get("rewardClaimed").getAsBoolean();
+                    long acceptTimestamp = questProgressJson.has("acceptTimestamp") ? questProgressJson.get("acceptTimestamp").getAsLong() : -1;
+                    long completedTimestamp = questProgressJson.has("completedTimestamp") ? questProgressJson.get("completedTimestamp").getAsLong() : -1;
+
+                    JsonObject progressJson = questProgressJson.getAsJsonObject("progress");
+                    if (progressJson == null) {
+                        RogueSmpCore.LOGGER.warn("Found no progress data for quest '{}'. Skipping it.", questId);
+                        continue;
+                    }
+
+                    Map<String, QuestObjective> questObjectiveMap = quest.getObjectives();
+                    Map<String, ObjectiveProgress> objectiveProgressMap = new HashMap<>();
+                    Set<String> progressIds = progressJson.keySet();
+                    for (String progressId : progressIds) {
+                        JsonObject jsonObject = progressJson.getAsJsonObject(progressId);
+                        QuestObjective objective = questObjectiveMap.get(progressId);
+                        if (objective == null) {
+                            RogueSmpCore.LOGGER.warn("Found no matching objective id for progress data id '{}' for quest '{}'. Skipping it.", progressId, questId);
+                            continue;
+                        }
+                        ObjectiveProgress objectiveProgress = objective.deserializeProgress(jsonObject);
+
+                        objectiveProgressMap.put(progressId, objectiveProgress);
+                    }
+
+                    progressMap.put(questId, new QuestProgress(quest, rewardClaimed, acceptTimestamp, completedTimestamp, objectiveProgressMap));
                 }
-
-
-                progressMap.put(questId, new QuestProgress(quest, completed, rewardClaimed, objectiveProgressMap));
             }
 
-            PlayerQuestData playerQuestData = new PlayerQuestData(uuid, progressMap);
+            // Deserialize daily completions map
+            Map<String, Integer> dailyCompletionsMap = new HashMap<>();
+            if (rootJson.has("dailyCompletions") && rootJson.get("dailyCompletions").isJsonObject()) {
+                JsonObject dailyCompletionsJson = rootJson.getAsJsonObject("dailyCompletions");
+                for (String tagId : dailyCompletionsJson.keySet()) {
+                    dailyCompletionsMap.put(tagId, dailyCompletionsJson.get(tagId).getAsInt());
+                }
+            }
+
+            long lastDailyCompletionResetTimestamp = rootJson.has("lastDailyCompletionResetTimestamp")
+                    ? rootJson.get("lastDailyCompletionResetTimestamp").getAsLong()
+                    : -1;
+
+            PlayerQuestData playerQuestData = new PlayerQuestData(
+                    uuid,
+                    progressMap,
+                    dailyCompletionsMap,
+                    lastDailyCompletionResetTimestamp
+            );
 
             RogueSmpCore.LOGGER.info("Loaded player quest data (uuid: {})", uuid);
             return playerQuestData;
@@ -102,27 +127,41 @@ public class QuestDataManager {
     }
 
     public @Blocking void saveData(PlayerQuestData playerQuestData) {
-        PlayerQuestData clone = new PlayerQuestData(playerQuestData.getUuid(), playerQuestData.getQuestProgresses());
         File folder = new File(plugin.getDataFolder(), FOLDER_NAME);
-        File file = new File(folder, clone.getUuid() + ".json");
-        RogueSmpCore.LOGGER.info("Saving player quest data (uuid: {})", clone.getUuid());
+        File file = new File(folder, playerQuestData.getUuid() + ".json");
+        RogueSmpCore.LOGGER.info("Saving player quest data (uuid: {})", playerQuestData.getUuid());
+
         try (Writer writer = new FileWriter(file)) {
 
-            JsonObject result = new JsonObject();
-            Map<String, QuestProgress> progressMap = clone.getQuestProgresses();
+            JsonObject rootJson = new JsonObject();
+            JsonObject questsJson = new JsonObject();
+            Map<String, QuestProgress> progressMap = playerQuestData.getQuestProgresses();
 
             for (Map.Entry<String, QuestProgress> entry : progressMap.entrySet()) {
-
                 String questId = entry.getKey();
                 QuestProgress questProgress = entry.getValue();
 
-                result.add(questId, questProgress.serialize());
+                questsJson.add(questId, questProgress.serialize());
             }
 
-            Utils.GSON.toJson(result, writer);
+            rootJson.add("questProgress", questsJson);
+
+            // Serialize daily completions map
+            JsonObject dailyCompletionsJson = new JsonObject();
+            for (SmpTag<Quest> tag : questManager.getDailyQuestManager().getDailyTags()) {
+                int count = playerQuestData.getDailyCompletionsForTag(tag.getId());
+                if (count > 0) {
+                    dailyCompletionsJson.addProperty(tag.getId(), count);
+                }
+            }
+            rootJson.add("dailyCompletions", dailyCompletionsJson);
+
+            rootJson.addProperty("lastDailyCompletionResetTimestamp", playerQuestData.getLastDailyCompletionResetTimestamp());
+
+            Utils.GSON.toJson(rootJson, writer);
 
         } catch (IOException e) {
-            RogueSmpCore.LOGGER.warn("Failed to save player quest data (uuid: {})", clone.getUuid());
+            RogueSmpCore.LOGGER.warn("Failed to save player quest data (uuid: {})", playerQuestData.getUuid());
             e.printStackTrace();
         }
     }

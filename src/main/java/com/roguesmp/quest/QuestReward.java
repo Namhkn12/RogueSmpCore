@@ -2,7 +2,6 @@ package com.roguesmp.quest;
 
 import com.roguesmp.player.SmpPlayer;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 

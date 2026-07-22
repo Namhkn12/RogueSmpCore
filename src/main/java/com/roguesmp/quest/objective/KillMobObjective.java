@@ -30,6 +30,11 @@ public class KillMobObjective implements QuestObjective {
         public void setKilled(int killed) {
             this.killed = killed;
         }
+
+        @Override
+        public boolean isDefault() {
+            return killed == 0;
+        }
     }
 
     private final String mobId;

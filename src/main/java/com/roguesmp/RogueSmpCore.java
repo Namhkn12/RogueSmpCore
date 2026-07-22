@@ -29,6 +29,7 @@ import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.registry.ability.AbilityRegistry;
 import com.roguesmp.registry.npc.NpcRegistry;
 import com.roguesmp.registry.quest.QuestRegistry;
+import com.roguesmp.server.DailyResetScheduler;
 import com.roguesmp.utils.GlowUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -44,6 +45,8 @@ public final class RogueSmpCore extends JavaPlugin {
     public static final Logger LOGGER = LoggerFactory.getLogger("RogueSMP");
 
     private GlobalConfig globalConfig;
+
+    private DailyResetScheduler resetScheduler;
 
     // Init whatever here, called before initListeners
     public void init() {
@@ -87,6 +90,9 @@ public final class RogueSmpCore extends JavaPlugin {
         BlockRegistry.getInstance().registerMachineRecipes();
         //dungeon register
         DungeonRegistry.onEnable(this, ItemRegistry.getInstance());
+
+        this.resetScheduler = new DailyResetScheduler(this);
+        this.resetScheduler.start();
     }
 
     // Load data from files, databases, etc
@@ -174,6 +180,10 @@ public final class RogueSmpCore extends JavaPlugin {
 
         // Plugin shutdown logic
         saveData();
+
+        if (this.resetScheduler != null) {
+            resetScheduler.stop();
+        }
     }
 
     public static RogueSmpCore getInstance() {
