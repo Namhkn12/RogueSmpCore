@@ -2,6 +2,12 @@ package com.roguesmp.registry.npc;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.gui.BlacksmithGui;
+import com.roguesmp.gui.quest.DailyQuestGui;
+import com.roguesmp.gui.quest.QuestGui;
+import com.roguesmp.quest.PlayerQuestData;
+import com.roguesmp.quest.QuestDataManager;
+import com.roguesmp.quest.QuestManager;
+import com.roguesmp.utils.Utils;
 import io.papermc.paper.registry.keys.SoundEventKeys;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -23,6 +29,18 @@ public class GuiOpenActionRegistry {
         register("blacksmith", player -> {
             new BlacksmithGui(player).showInventory(player);
             player.playSound(Sound.sound(SoundEventKeys.ITEM_ARMOR_EQUIP_CHAIN, Sound.Source.PLAYER, 1f, 1.2f));
+        });
+
+        register("quest", player -> {
+//            PlayerQuestData questData = QuestManager.getInstance().getPlayerQuestData(player.getUniqueId());
+//
+//            if (questData == null) {
+//                player.sendMessage(Utils.fromString("<red>Không thể tải dữ liệu nhiệm vụ của bạn lúc này."));
+//                return;
+//            }
+
+            new DailyQuestGui(player).showInventory(player);
+            player.playSound(Sound.sound(SoundEventKeys.ITEM_BOOK_PAGE_TURN, Sound.Source.PLAYER, 1f, 0.9f));
         });
     }
 

@@ -5,6 +5,8 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.utils.Utils;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 
@@ -24,7 +26,20 @@ public class SmpTag<T> {
 
     public void load(RogueSmpCore plugin) {
         File file = new File(plugin.getDataFolder(), "tags/" + id + ".json");
-        if (!file.exists()) return;
+        if (!file.exists()) {
+            try {
+                file.getParentFile().mkdirs();
+                if (file.createNewFile()) {
+                    try (FileWriter writer = new FileWriter(file)) {
+                        Utils.GSON.toJson(Collections.emptyList(), writer);
+                        RogueSmpCore.LOGGER.info("Created default empty tag file for {}", id);
+                    }
+                }
+            } catch (Exception e) {
+                RogueSmpCore.LOGGER.error("Failed to create default tag file for {}", id, e);
+                return;
+            }
+        }
 
         try (FileReader reader = new FileReader(file)) {
             List<String> data = Utils.GSON.fromJson(reader, new TypeToken<List<String>>(){}.getType());
@@ -73,5 +88,9 @@ public class SmpTag<T> {
 
     public @Unmodifiable Set<T> getElements() {
         return Collections.unmodifiableSet(elements);
+    }
+
+    public String getId() {
+        return id;
     }
 }

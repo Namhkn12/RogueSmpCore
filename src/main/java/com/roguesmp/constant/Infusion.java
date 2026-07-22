@@ -8,6 +8,7 @@ public enum Infusion {
     PERSPICACITY(Enchants.PERSPICACITY, "copper_ingot_currency", 30, 5),
     FORTITUDE(Enchants.FORTITUDE, "copper_ingot_currency", 30, 5),
     CELERITY(Enchants.CELERITY, "copper_ingot_currency", 30, 5),
+    FOCUS(Enchants.FOCUS, "copper_ingot_currency", 30, 5)
     ;
 
     private final Enchants enchant;

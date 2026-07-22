@@ -1,6 +1,8 @@
 package com.roguesmp.constant;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.quest.Quest;
+import com.roguesmp.registry.quest.QuestRegistry;
 import com.roguesmp.tag.SmpTag;
 
 import java.util.HashMap;
@@ -13,6 +15,9 @@ public class Tags {
 
     public static final SmpTag<Enchants> IN_ENCHANTABLE = register("in_enchantable", Enchants::fromId);
     public static final SmpTag<Enchants> TOP_ENCHANT = register("top_enchant", Enchants::fromId);
+    public static final SmpTag<Quest> DAILY_EASY_QUEST = register("daily_easy_quest", s -> QuestRegistry.getInstance().getQuest(s));
+    public static final SmpTag<Quest> DAILY_MEDIUM_QUEST = register("daily_medium_quest", s -> QuestRegistry.getInstance().getQuest(s));
+    public static final SmpTag<Quest> DAILY_HARD_QUEST = register("daily_hard_quest", s -> QuestRegistry.getInstance().getQuest(s));
 
 
     private static <T> SmpTag<T> register(String id, Function<String, T> res) {

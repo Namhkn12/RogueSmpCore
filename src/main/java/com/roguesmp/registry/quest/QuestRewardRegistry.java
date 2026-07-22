@@ -1,8 +1,10 @@
 package com.roguesmp.registry.quest;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.roguesmp.quest.QuestReward;
 import com.roguesmp.quest.reward.ItemReward;
+import com.roguesmp.quest.reward.MoneyReward;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +30,11 @@ public class QuestRewardRegistry {
                 items.put(itemId, amount);
             }
             return new ItemReward(items);
+        });
+
+        register("money", jsonObject -> {
+            JsonElement amount = jsonObject.getAsJsonPrimitive("amount");
+            return new MoneyReward(amount.getAsLong());
         });
 
     }

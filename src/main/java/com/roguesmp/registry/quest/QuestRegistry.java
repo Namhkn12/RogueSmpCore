@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.quest.*;
 import com.roguesmp.utils.Utils;
+import org.bukkit.Material;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -33,7 +34,7 @@ public class QuestRegistry {
         registry.put(questId, quest);
     }
 
-    public void loadQuest() {
+    public @Blocking void loadQuest() {
         File folder = new File(plugin.getDataFolder(), FOLDER_NAME);
 
         RogueSmpCore.LOGGER.info("Loading quest registry...");
@@ -59,6 +60,9 @@ public class QuestRegistry {
 
                 String id = jsonObject.get("id").getAsString();
                 String name = jsonObject.has("name") ? jsonObject.get("name").getAsString() : null;
+                String materialStr = jsonObject.has("icon") ? jsonObject.get("icon").getAsString() : null;
+                if (materialStr == null) materialStr = "PAPER";
+                Material materialIcon = Material.valueOf(materialStr);
 
                 List<String> description = new ArrayList<>();
                 if (jsonObject.has("description") && jsonObject.get("description").isJsonArray()) {
@@ -139,7 +143,7 @@ public class QuestRegistry {
                     }
                 }
 
-                Quest quest = new Quest(id, name, description, requirements, objectives, rewards);
+                Quest quest = new Quest(id, name, materialIcon, description, requirements, objectives, rewards);
                 registry.put(id, quest);
                 count++;
 

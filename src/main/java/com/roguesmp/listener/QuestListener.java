@@ -1,10 +1,12 @@
 package com.roguesmp.listener;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.event.DailyResetEvent;
 import com.roguesmp.quest.PlayerQuestData;
-import com.roguesmp.quest.Quest;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.utils.Utils;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -31,12 +33,7 @@ public class QuestListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
-//        Quest quest = questManager.getQuestRegistry().getQuest("legendary_hunter_1");
-//        if (quest == null) {
-//            RogueSmpCore.LOGGER.error("No quest found");
-//            return;
-//        }
-//        questManager.assignQuest(event.getPlayer(), quest);
+        questManager.getDailyQuestManager().onPlayerJoin(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -50,6 +47,14 @@ public class QuestListener implements Listener {
             questManager.getQuestDataManager().saveData(playerQuestData);
         });
 
+    }
+
+    @EventHandler
+    public void onDailyReset(DailyResetEvent event) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            questManager.getDailyQuestManager().onPlayerJoin(player); // Resets quests & repopulates active slots
+            player.sendMessage(Utils.fromString("<green><bold>[!]</bold> Nhiệm vụ hàng ngày đã được làm mới!"));
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

@@ -148,7 +148,7 @@ public class Utils {
 
     private static final DecimalFormat COMMA_FORMATTER = new DecimalFormat("#,###");
 
-    public static String formatMoney(int amount) {
+    public static String formatMoney(long amount) {
         return COMMA_FORMATTER.format(amount);
     }
 
