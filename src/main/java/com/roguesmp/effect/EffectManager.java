@@ -373,38 +373,38 @@ public class EffectManager {
 
         Map<String, NavigableSet<SmpEffect>> result = new HashMap<>();
 
-        try (Reader reader = new FileReader(playerFile)) {
-            JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
-            for (var entry : root.entrySet()) {
-                String key = entry.getKey();
-                JsonArray array = entry.getValue().getAsJsonArray();
-                NavigableSet<SmpEffect> effects = new ConcurrentSkipListSet<>();
-
-                for (JsonElement element : array) {
-                    JsonObject obj = element.getAsJsonObject();
-                    JsonElement idElement = obj.get("id");
-                    if (idElement == null) {
-                        RogueSmpCore.LOGGER.warn("Missing id in effect for player {}", playerId);
-                        continue;
-                    }
-
-                    String id = idElement.getAsString();
-                    EffectCodecRegistry.EffectDeserializer effectDeserializer = EffectCodecRegistry.get(id);
-                    if (effectDeserializer == null) {
-                        RogueSmpCore.LOGGER.warn("Effect id '{}' has no serializer, for player {}", id, playerId);
-                        continue;
-                    }
-                    SmpEffect effect = effectDeserializer.deserialize(obj);
-                    effects.add(effect);
-                }
-                result.put(key, effects);
-                playerFile.delete();
-            }
-
-        } catch (Exception e) {
-            RogueSmpCore.LOGGER.error("FAILED TO LOAD EFFECTS FOR {}", playerId);
-            e.printStackTrace();
-        }
+//        try (Reader reader = new FileReader(playerFile)) {
+//            JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+//            for (var entry : root.entrySet()) {
+//                String key = entry.getKey();
+//                JsonArray array = entry.getValue().getAsJsonArray();
+//                NavigableSet<SmpEffect> effects = new ConcurrentSkipListSet<>();
+//
+//                for (JsonElement element : array) {
+//                    JsonObject obj = element.getAsJsonObject();
+//                    JsonElement idElement = obj.get("id");
+//                    if (idElement == null) {
+//                        RogueSmpCore.LOGGER.warn("Missing id in effect for player {}", playerId);
+//                        continue;
+//                    }
+//
+//                    String id = idElement.getAsString();
+//                    EffectCodecRegistry.EffectDeserializer effectDeserializer = EffectCodecRegistry.get(id);
+//                    if (effectDeserializer == null) {
+//                        RogueSmpCore.LOGGER.warn("Effect id '{}' has no serializer, for player {}", id, playerId);
+//                        continue;
+//                    }
+//                    SmpEffect effect = effectDeserializer.deserialize(obj);
+//                    effects.add(effect);
+//                }
+//                result.put(key, effects);
+//                playerFile.delete();
+//            }
+//
+//        } catch (Exception e) {
+//            RogueSmpCore.LOGGER.error("FAILED TO LOAD EFFECTS FOR {}", playerId);
+//            e.printStackTrace();
+//        }
 
         return result;
     }

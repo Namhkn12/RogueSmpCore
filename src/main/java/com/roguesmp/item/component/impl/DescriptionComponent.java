@@ -1,5 +1,6 @@
 package com.roguesmp.item.component.impl;
 
+import com.roguesmp.codec.Codec;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.utils.Utils;
@@ -11,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record DescriptionComponent(List<String> description) implements ItemComponent {
+
+    public static final Codec<DescriptionComponent> CODEC = Codec.listOf(Codec.STRING).xmap(DescriptionComponent::new, DescriptionComponent::description);
 
     @Override
     public @NotNull ItemComponent copy() {

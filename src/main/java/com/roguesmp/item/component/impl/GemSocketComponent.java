@@ -1,6 +1,7 @@
 package com.roguesmp.item.component.impl;
 
 import com.roguesmp.annotation.GsonIgnore;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.context.ItemLoreContext;
@@ -23,6 +24,9 @@ import java.util.Iterator;
 import java.util.List;
 
 public class GemSocketComponent implements ItemComponent {
+
+    public static final Codec<GemSocketComponent> CODEC = Codec.INT
+            .xmap(GemSocketComponent::new, GemSocketComponent::getSocketCount);
 
     private final int amount;
 

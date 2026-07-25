@@ -5,7 +5,8 @@ import com.roguesmp.gui.quest.QuestGui;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.daily.DailyQuestManager;
-import com.roguesmp.registry.quest.QuestRegistry;
+import com.roguesmp.registry.Registries;
+import com.roguesmp.registry.Registry;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
@@ -28,13 +29,13 @@ public class QuestManager {
 
     private final RogueSmpCore plugin;
     private final QuestDataManager questDataManager;
-    private final QuestRegistry questRegistry;
+    private final Registry<Quest> questRegistry;
     private final DailyQuestManager dailyQuestManager;
 
-    public QuestManager(RogueSmpCore plugin, QuestRegistry questRegistry) {
+    public QuestManager(RogueSmpCore plugin) {
         this.plugin = plugin;
-        this.questDataManager = new QuestDataManager(plugin, questRegistry, this);
-        this.questRegistry = questRegistry;
+        this.questDataManager = new QuestDataManager(plugin);
+        this.questRegistry = Registries.QUEST;
         this.dailyQuestManager = new DailyQuestManager(this);
     }
 
@@ -217,10 +218,6 @@ public class QuestManager {
                 .toList();
     }
 
-    public QuestRegistry getQuestRegistry() {
-        return questRegistry;
-    }
-
     public QuestDataManager getQuestDataManager() {
         return questDataManager;
     }
@@ -245,12 +242,12 @@ public class QuestManager {
         CommandAPICommand infoSubcommand = new CommandAPICommand("info")
                 .withArguments(new StringArgument("quest_id")
                         .replaceSuggestions(ArgumentSuggestions.strings(info ->
-                                questRegistry.getRegistry().keySet().toArray(new String[0])
+                                questRegistry.getAll().keySet().toArray(new String[0])
                         ))
                 )
                 .executesPlayer((player, args) -> {
                     String questId = (String) args.get("quest_id");
-                    Quest quest = questRegistry.getQuest(questId);
+                    Quest quest = questRegistry.get(questId);
 
                     if (quest == null) {
                         player.sendMessage(Utils.fromString("<red>Không tìm thấy nhiệm vụ với ID: <yellow>" + questId));
@@ -301,7 +298,7 @@ public class QuestManager {
                 .withArguments(new EntitySelectorArgument.OnePlayer("target"))
                 .withArguments(new StringArgument("quest_id")
                         .replaceSuggestions(ArgumentSuggestions.strings(info ->
-                                questRegistry.getRegistry().keySet().toArray(new String[0])
+                                questRegistry.getAll().keySet().toArray(new String[0])
                         ))
                 )
                 .executes((sender, args) -> {
@@ -313,7 +310,7 @@ public class QuestManager {
                         return;
                     }
 
-                    Quest quest = questRegistry.getQuest(questId);
+                    Quest quest = questRegistry.get(questId);
                     if (quest == null) {
                         sender.sendMessage(Utils.fromString("<red>Không tìm thấy nhiệm vụ với ID: <yellow>" + questId));
                         return;
@@ -351,8 +348,8 @@ public class QuestManager {
                 .register();
     }
 
-    public static void init(RogueSmpCore plugin, QuestRegistry questRegistry) {
-        INSTANCE = new QuestManager(plugin, questRegistry);
+    public static void init(RogueSmpCore plugin) {
+        INSTANCE = new QuestManager(plugin);
     }
 
     public static QuestManager getInstance() {

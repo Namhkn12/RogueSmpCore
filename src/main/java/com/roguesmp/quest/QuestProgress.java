@@ -1,6 +1,6 @@
 package com.roguesmp.quest;
 
-import com.google.gson.JsonObject;
+import com.roguesmp.codec.Codec;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
@@ -9,6 +9,16 @@ import java.util.*;
  * Represent player progress for a given {@link Quest}
  */
 public class QuestProgress {
+
+    public static final Codec<QuestProgress> CODEC = Codec.composite(
+            Quest.REFERENCE_CODEC.fieldOf("quest").forGetter(QuestProgress::getQuest),
+            Codec.BOOLEAN.optionalFieldOf("rewardClaimed", false).forGetter(QuestProgress::isRewardClaimed),
+            Codec.LONG.fieldOf("acceptTimestamp").forGetter(QuestProgress::getAcceptTimestamp),
+            Codec.LONG.optionalFieldOf("completedTimestamp", -1L).forGetter(QuestProgress::getCompletedTimestamp),
+            Codec.unboundedMap(ObjectiveProgress.CODEC).optionalFieldOf("progress", new HashMap<>()).forGetter(QuestProgress::getSavableProgressMap),
+            QuestProgress::new
+    );
+
     private final Quest quest;
     private boolean rewardClaimed;
     private long acceptTimestamp;
@@ -134,6 +144,12 @@ public class QuestProgress {
         return Collections.unmodifiableSet(incompleteObjectives);
     }
 
+    public @Unmodifiable Map<String, ObjectiveProgress> getSavableProgressMap() {
+        Map<String, ObjectiveProgress> result = new HashMap<>();
+        progress.forEach((id, p) -> { if (!p.isDefault()) result.put(id, p); });
+        return result;
+    }
+
     public Quest getQuest() {
         return quest;
     }
@@ -156,23 +172,5 @@ public class QuestProgress {
 
     public void setRewardClaimed(boolean rewardClaimed) {
         this.rewardClaimed = rewardClaimed;
-    }
-
-    public JsonObject serialize() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("rewardClaimed", rewardClaimed);
-        jsonObject.addProperty("acceptTimestamp", acceptTimestamp);
-        jsonObject.addProperty("completedTimestamp", completedTimestamp);
-
-        JsonObject progressJson = new JsonObject();
-        quest.getObjectives().forEach((s, questObjective) -> {
-            ObjectiveProgress objectiveProgress = this.progress.get(s);
-            if (objectiveProgress != null && !objectiveProgress.isDefault()) {
-                JsonObject progressNode = questObjective.serializeProgress(objectiveProgress);
-                progressJson.add(s, progressNode);
-            }
-        });
-        jsonObject.add("progress", progressJson);
-        return jsonObject;
     }
 }

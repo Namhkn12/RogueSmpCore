@@ -1,5 +1,6 @@
 package com.roguesmp.item.component.impl;
 
+import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.context.ItemLoreContext;
@@ -17,6 +18,15 @@ public class GemDataComponent implements ItemComponent {
 
     private final Map<EquipSlot, Map<Attributes, Double>> attributes = new EnumMap<>(EquipSlot.class);
     private final double successChance;
+
+    public static final Codec<GemDataComponent> CODEC = Codec.composite(
+            Codec.unboundedMap(
+                    Codec.enumOf(EquipSlot.class),
+                    Codec.unboundedMap(Codec.enumOf(Attributes.class), Codec.DOUBLE)
+            ).fieldOf("attributes").forGetter(GemDataComponent::getAttributes),
+            Codec.DOUBLE.optionalFieldOf("success_chance", 1d).forGetter(GemDataComponent::getSuccessChance),
+            GemDataComponent::new
+    );
 
     public GemDataComponent(Map<EquipSlot, Map<Attributes, Double>> attributes, double successChance) {
         if (successChance <= 0d) this.successChance = 0f;

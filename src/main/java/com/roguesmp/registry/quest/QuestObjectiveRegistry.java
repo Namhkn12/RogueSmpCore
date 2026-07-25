@@ -1,44 +1,19 @@
 package com.roguesmp.registry.quest;
 
-import com.google.gson.JsonObject;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.quest.ObjectiveProgress;
 import com.roguesmp.quest.QuestObjective;
 import com.roguesmp.quest.objective.KillMobObjective;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.roguesmp.registry.Registries;
 
 public class QuestObjectiveRegistry {
 
-    @FunctionalInterface
-    public interface Deserializer {
-        @NotNull QuestObjective deserialize(JsonObject jsonObject);
+    public static void bootstrap() {
+        register(KillMobObjective.TYPE_KEY, KillMobObjective.CODEC, KillMobObjective.Progress.CODEC);
     }
 
-    private static final Map<String, Deserializer> registry = new HashMap<>();
-
-    static {
-        register("kill_mob", jsonObject -> {
-            String mobId = jsonObject.get("mobId") == null ? null : jsonObject.get("mobId").getAsString();
-            int amount = jsonObject.get("amount") == null ? -1 : jsonObject.get("amount").getAsInt();
-            if (mobId == null) {
-                return new KillMobObjective("dummy", amount);
-            } else return new KillMobObjective(mobId, amount);
-
-        });
-    }
-
-    public static @Nullable QuestObjective create(String typeName, JsonObject jsonObject) {
-        Deserializer deserializer = registry.get(typeName.toLowerCase());
-        if (deserializer == null) {
-            return null;
-        }
-        return deserializer.deserialize(jsonObject);
-    }
-
-    private static void register(String typeName, Deserializer deserializer) {
-        registry.put(typeName, deserializer);
+    private static <T extends QuestObjective, P extends ObjectiveProgress> void register(String typeName, Codec<T> objCodec, Codec<P> progressCodec) {
+        Registries.QUEST_OBJECTIVE_CODEC.register(typeName, objCodec);
+        Registries.OBJECTIVE_PROGRESS_CODEC.register(typeName, progressCodec);
     }
 }

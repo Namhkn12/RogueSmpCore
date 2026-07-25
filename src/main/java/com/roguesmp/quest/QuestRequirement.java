@@ -1,6 +1,9 @@
 package com.roguesmp.quest;
 
+import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.registry.Registries;
+import com.roguesmp.registry.quest.QuestRequirementRegistry;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 
@@ -11,12 +14,19 @@ import java.util.List;
  */
 public interface QuestRequirement {
 
+    Codec<QuestRequirement> CODEC = Codec.dispatch(
+            QuestRequirement::getTypeId,
+            Registries.QUEST_REQUIREMENT_CODEC::getOrThrow
+    );
+
     List<Component> getDisplay(SmpPlayer smpPlayer);
 
     /**
      * Checks if the player is eligible to accept.
      */
     boolean canMeetRequirement(SmpPlayer smpPlayer);
+
+    String getTypeId();
 
     /**
      * Executed ONLY when the player successfully accepts the quest.

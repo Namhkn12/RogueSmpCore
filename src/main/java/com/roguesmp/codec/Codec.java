@@ -35,6 +35,18 @@ public interface Codec<A> {
      */
     <O> DataResult<A> decode(O input, DynamicOps<O> ops);
 
+    /**
+     * Builds a detailed "field missing" message that also lists which fields ARE present,
+     * so a typo'd/renamed field name is obvious from the log line alone.
+     */
+    private static <O> String missingFieldMessage(String name, O inputMap, DynamicOps<O> ops) {
+        DataResult<Map<String, O>> raw = ops.getMap(inputMap);
+        if (raw.isSuccess()) {
+            return "Missing field '" + name + "' (available fields: " + raw.result().keySet() + ")";
+        }
+        return "Missing field '" + name + "' (input is not an object: " + inputMap + ")";
+    }
+
     // --- PRIMITIVES ---
 
     /** Codec for text strings. */
@@ -212,9 +224,10 @@ public interface Codec<A> {
                 if (!rawList.isSuccess()) return DataResult.error(rawList.error());
 
                 List<E> resultList = new ArrayList<>();
-                for (O item : rawList.result()) {
-                    DataResult<E> res = elementCodec.decode(item, ops);
-                    if (!res.isSuccess()) return DataResult.error(res.error());
+                List<O> rawItems = rawList.result();
+                for (int i = 0; i < rawItems.size(); i++) {
+                    DataResult<E> res = elementCodec.decode(rawItems.get(i), ops);
+                    if (!res.isSuccess()) return DataResult.error("[" + i + "]: " + res.error());
                     resultList.add(res.result());
                 }
                 return DataResult.success(resultList);
@@ -246,8 +259,10 @@ public interface Codec<A> {
             @Override
             public <O> DataResult<A> decodeFields(O inputMap, DynamicOps<O> ops) {
                 DataResult<O> field = ops.getMapField(inputMap, name);
-                if (!field.isSuccess()) return DataResult.error("Missing field: " + name);
-                return parent.decode(field.result(), ops);
+                if (!field.isSuccess()) return DataResult.error(missingFieldMessage(name, inputMap, ops));
+                DataResult<A> decoded = parent.decode(field.result(), ops);
+                if (!decoded.isSuccess()) return DataResult.error("Field '" + name + "': " + decoded.error());
+                return decoded;
             }
         };
     }
@@ -275,7 +290,9 @@ public interface Codec<A> {
             public <O> DataResult<Optional<A>> decodeFields(O inputMap, DynamicOps<O> ops) {
                 DataResult<O> field = ops.getMapField(inputMap, name);
                 if (!field.isSuccess()) return DataResult.success(Optional.empty());
-                return parent.decode(field.result(), ops).map(Optional::of);
+                DataResult<A> decoded = parent.decode(field.result(), ops);
+                if (!decoded.isSuccess()) return DataResult.error("Field '" + name + "': " + decoded.error());
+                return decoded.map(Optional::of);
             }
         };
     }
@@ -316,7 +333,9 @@ public interface Codec<A> {
             public <O> DataResult<A> decodeFields(O inputMap, DynamicOps<O> ops) {
                 DataResult<O> field = ops.getMapField(inputMap, name);
                 if (!field.isSuccess()) return DataResult.success(defaultValueSupplier.get());
-                return parent.decode(field.result(), ops);
+                DataResult<A> decoded = parent.decode(field.result(), ops);
+                if (!decoded.isSuccess()) return DataResult.error("Field '" + name + "': " + decoded.error());
+                return decoded;
             }
         };
     }
@@ -447,16 +466,22 @@ public interface Codec<A> {
                     return DataResult.error("Could not extract polymorphic type key from object: " + input);
                 }
 
-                @SuppressWarnings("unchecked")
-                Codec<T> subCodec = (Codec<T>) codecGetter.apply(key);
+                Codec<T> subCodec;
+                try {
+                    @SuppressWarnings("unchecked")
+                    Codec<T> resolved = (Codec<T>) codecGetter.apply(key);
+                    subCodec = resolved;
+                } catch (Exception e) {
+                    return DataResult.error("No codec registered for type '" + key + "' (field '" + typeFieldName + "'): " + e.getMessage());
+                }
                 if (subCodec == null) {
-                    return DataResult.error("No codec registered for polymorphic type key: " + key);
+                    return DataResult.error("No codec registered for type '" + key + "' (field '" + typeFieldName + "')");
                 }
 
                 // 1. Encode subclass fields using its specific codec
                 DataResult<O> encodedObject = subCodec.encode(input, ops);
                 if (!encodedObject.isSuccess()) {
-                    return DataResult.error(encodedObject.error());
+                    return DataResult.error("type '" + key + "': " + encodedObject.error());
                 }
 
                 // 2. Encode the type identifier
@@ -475,30 +500,38 @@ public interface Codec<A> {
                 // 1. Parse input object as a map
                 DataResult<Map<String, O>> rawMap = ops.getMap(input);
                 if (!rawMap.isSuccess()) {
-                    return DataResult.error("Expected map object for polymorphic dispatch, got: " + input);
+                    return DataResult.error("Expected an object for polymorphic dispatch on field '" + typeFieldName + "', got: " + input);
                 }
 
                 Map<String, O> map = rawMap.result();
                 O typeElement = map.get(typeFieldName);
                 if (typeElement == null) {
-                    return DataResult.error("Missing polymorphic type field '" + typeFieldName + "' in object");
+                    return DataResult.error("Missing polymorphic type field '" + typeFieldName + "' (available fields: " + map.keySet() + ")");
                 }
 
                 // 2. Decode key identifier
                 DataResult<K> decodedKey = keyCodec.decode(typeElement, ops);
                 if (!decodedKey.isSuccess()) {
-                    return DataResult.error("Failed to decode type key: " + decodedKey.error());
+                    return DataResult.error("Failed to decode type field '" + typeFieldName + "': " + decodedKey.error());
                 }
 
                 // 3. Look up registered subclass codec
-                @SuppressWarnings("unchecked")
-                Codec<T> subCodec = (Codec<T>) codecGetter.apply(decodedKey.result());
+                Codec<T> subCodec;
+                try {
+                    @SuppressWarnings("unchecked")
+                    Codec<T> resolved = (Codec<T>) codecGetter.apply(decodedKey.result());
+                    subCodec = resolved;
+                } catch (Exception e) {
+                    return DataResult.error("No codec registered for type '" + decodedKey.result() + "' (field '" + typeFieldName + "'): " + e.getMessage());
+                }
                 if (subCodec == null) {
-                    return DataResult.error("Unknown polymorphic type key: " + decodedKey.result());
+                    return DataResult.error("Unknown type '" + decodedKey.result() + "' for field '" + typeFieldName + "'");
                 }
 
                 // 4. Decode full object using specific subclass codec
-                return subCodec.decode(input, ops);
+                DataResult<T> decoded = subCodec.decode(input, ops);
+                if (!decoded.isSuccess()) return DataResult.error("type '" + decodedKey.result() + "': " + decoded.error());
+                return decoded;
             }
         };
     }
@@ -558,10 +591,16 @@ public interface Codec<A> {
                     K key = entry.getKey();
 
                     // 1. Get the specific value codec for this key
-                    @SuppressWarnings("unchecked")
-                    Codec<V> valueCodec = (Codec<V>) codecGetter.apply(key);
+                    Codec<V> valueCodec;
+                    try {
+                        @SuppressWarnings("unchecked")
+                        Codec<V> resolved = (Codec<V>) codecGetter.apply(key);
+                        valueCodec = resolved;
+                    } catch (Exception e) {
+                        return DataResult.error("['" + key + "']: no codec registered: " + e.getMessage());
+                    }
                     if (valueCodec == null) {
-                        return DataResult.error("Unknown type key in map: " + key);
+                        return DataResult.error("['" + key + "']: unknown type key");
                     }
 
                     // 2. Turn key object K into a serialized string
@@ -573,7 +612,7 @@ public interface Codec<A> {
 
                     // 3. Encode the value
                     DataResult<O> encodedVal = valueCodec.encode(entry.getValue(), ops);
-                    if (!encodedVal.isSuccess()) return DataResult.error(encodedVal.error());
+                    if (!encodedVal.isSuccess()) return DataResult.error("['" + key + "']: " + encodedVal.error());
 
                     targetMap = ops.setMapEntry(targetMap, keyString.result(), encodedVal.result());
                 }
@@ -591,19 +630,25 @@ public interface Codec<A> {
 
                     // 1. Decode key string into key object K
                     DataResult<K> decodedKey = keyCodec.decode(ops.createString(rawKeyString), ops);
-                    if (!decodedKey.isSuccess()) return DataResult.error("Invalid map key: " + decodedKey.error());
+                    if (!decodedKey.isSuccess()) return DataResult.error("['" + rawKeyString + "']: invalid map key: " + decodedKey.error());
                     K key = decodedKey.result();
 
                     // 2. Get the value codec for this key object
-                    @SuppressWarnings("unchecked")
-                    Codec<V> valueCodec = (Codec<V>) codecGetter.apply(key);
+                    Codec<V> valueCodec;
+                    try {
+                        @SuppressWarnings("unchecked")
+                        Codec<V> resolved = (Codec<V>) codecGetter.apply(key);
+                        valueCodec = resolved;
+                    } catch (Exception e) {
+                        return DataResult.error("['" + rawKeyString + "']: no codec registered for type '" + key + "': " + e.getMessage());
+                    }
                     if (valueCodec == null) {
-                        return DataResult.error("Unknown type key in map: " + rawKeyString);
+                        return DataResult.error("['" + rawKeyString + "']: unknown type key '" + key + "'");
                     }
 
                     // 3. Decode the value
                     DataResult<V> decodedVal = valueCodec.decode(entry.getValue(), ops);
-                    if (!decodedVal.isSuccess()) return DataResult.error(decodedVal.error());
+                    if (!decodedVal.isSuccess()) return DataResult.error("['" + rawKeyString + "']: " + decodedVal.error());
 
                     map.put(key, decodedVal.result());
                 }
@@ -626,7 +671,7 @@ public interface Codec<A> {
 
     /**
      * Creates a codec for uniform maps with a custom key type K and a single fixed value codec V
-     * (e.g. Map<String, Integer>, Map<Key, Double>, or Map<UUID, CustomData>).
+     * (e.g. Map(String, Integer), Map(Key, Double), or Map(UUID, CustomData)).
      * <p>
      *     <b>The key must be encoded as String!</b>
      * </p>
@@ -650,7 +695,7 @@ public interface Codec<A> {
                     if (!keyString.isSuccess()) return DataResult.error("Map key did not encode as a string: " + entry.getKey());
 
                     DataResult<O> valEnc = valueCodec.encode(entry.getValue(), ops);
-                    if (!valEnc.isSuccess()) return DataResult.error(valEnc.error());
+                    if (!valEnc.isSuccess()) return DataResult.error("['" + entry.getKey() + "']: " + valEnc.error());
 
                     targetMap = ops.setMapEntry(targetMap, keyString.result(), valEnc.result());
                 }
@@ -665,10 +710,10 @@ public interface Codec<A> {
                 Map<K, V> map = new HashMap<>();
                 for (Map.Entry<String, O> entry : rawMap.result().entrySet()) {
                     DataResult<K> keyDec = keyCodec.decode(ops.createString(entry.getKey()), ops);
-                    if (!keyDec.isSuccess()) return DataResult.error("Invalid map key: " + keyDec.error());
+                    if (!keyDec.isSuccess()) return DataResult.error("['" + entry.getKey() + "']: invalid map key: " + keyDec.error());
 
                     DataResult<V> valDec = valueCodec.decode(entry.getValue(), ops);
-                    if (!valDec.isSuccess()) return DataResult.error(valDec.error());
+                    if (!valDec.isSuccess()) return DataResult.error("['" + entry.getKey() + "']: " + valDec.error());
 
                     map.put(keyDec.result(), valDec.result());
                 }
@@ -678,7 +723,7 @@ public interface Codec<A> {
     }
 
     /**
-     * Creates a codec for uniform maps with String keys (e.g. Map<String, Integer>).
+     * Creates a codec for uniform maps with String keys (e.g. Map(String, Integer)).
      *
      * @param <V> the map value type
      * @param valueCodec fixed codec used for every value in the map

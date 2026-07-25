@@ -1,6 +1,7 @@
 package com.roguesmp.item.component.impl;
 
 import com.roguesmp.annotation.GsonIgnore;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.Enchants;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.context.ItemDataContext;
@@ -22,6 +23,11 @@ import java.util.*;
 public class EnchantComponent implements ItemComponent {
 
     public static final NamespacedKey PLAYER_ENCHANT_KEY = Keys.of("p_enchant");
+
+    public static final Codec<EnchantComponent> CODEC = Codec.composite(
+            Codec.unboundedMap(Codec.enumOf(Enchants.class), Codec.INT).fieldOf("enchants").forGetter(EnchantComponent::getBaseEnchants),
+            EnchantComponent::new
+    );
 
     private final Map<Enchants, Integer> enchants = new EnumMap<>(Enchants.class);
 

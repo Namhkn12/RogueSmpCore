@@ -2,6 +2,7 @@ package com.roguesmp.npc;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.registry.SkinRegistry;
@@ -20,6 +21,19 @@ import java.util.List;
 import java.util.UUID;
 
 public class BaseNpc {
+
+    public static final Codec<BaseNpc> CODEC = Codec.composite(
+            Codec.enumOf(EntityType.class).fieldOf("entityType").forGetter(BaseNpc::getEntityType),
+            Codec.STRING.optionalFieldOf("name", () -> null).forGetter(BaseNpc::getName),
+            Codec.STRING.optionalFieldOf("skinValue", () -> null).forGetter(BaseNpc::getSkinValue),
+            Codec.STRING.optionalFieldOf("skinSignature", () -> null).forGetter(BaseNpc::getSkinSignature),
+            Codec.STRING.optionalFieldOf("skinId", () -> null).forGetter(BaseNpc::getSkinId),
+            Codec.STRING.optionalFieldOf("description", () -> null).forGetter(BaseNpc::getDescription),
+            Codec.STRING.fieldOf("id").forGetter(BaseNpc::getId),
+            Codec.listOf(NpcAction.CODEC).fieldOf("actions").forGetter(BaseNpc::getActions),
+            BaseNpc::new
+    );
+
     private final EntityType entityType;
     private final String name;
     private final String skinValue;
@@ -46,6 +60,26 @@ public class BaseNpc {
 
     public String getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getSkinValue() {
+        return skinValue;
+    }
+
+    public String getSkinSignature() {
+        return skinSignature;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getSkinId() {
+        return skinId;
     }
 
     public List<NpcAction> getActions() {

@@ -1,6 +1,8 @@
 package com.roguesmp.quest;
 
+import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.registry.Registries;
 import net.kyori.adventure.text.Component;
 
 import java.util.List;
@@ -10,7 +12,14 @@ import java.util.List;
  */
 public interface QuestReward {
 
+    Codec<QuestReward> CODEC = Codec.dispatch(
+            QuestReward::getTypeId,
+            Registries.QUEST_REWARD_CODEC::getOrThrow
+    );
+
     List<Component> getDisplay(SmpPlayer smpPlayer);
+
+    String getTypeId();
 
     void giveReward(SmpPlayer smpPlayer);
 }

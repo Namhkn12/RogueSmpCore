@@ -1,47 +1,24 @@
 package com.roguesmp.registry.npc;
 
-import com.google.gson.JsonObject;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.npc.action.OpenGuiInteractAction;
 import com.roguesmp.npc.action.RunCommandInteractAction;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.roguesmp.registry.Registries;
 
 /**
  * Hold action type definition
  */
 public class NpcActionRegistry {
 
-    @FunctionalInterface
-    public interface NpcActionDeserializer {
-        NpcAction deserialize(JsonObject jsonObject);
+    public static void bootstrap() {
+        register(RunCommandInteractAction.TYPE_KEY, RunCommandInteractAction.CODEC);
+        register(OpenGuiInteractAction.TYPE_KEY, OpenGuiInteractAction.CODEC);
     }
 
-    private static final Map<String, NpcActionDeserializer> map = new HashMap<>();
-
-    static {
-        register("run_command", jsonObject -> {
-            String command = jsonObject.get("command") == null ? "" : jsonObject.get("command").getAsString();
-            return new RunCommandInteractAction(command);
-        });
-
-        register("open_gui", jsonObject -> {
-            String id = jsonObject.get("gui") == null ? "" : jsonObject.get("gui").getAsString();
-            return new OpenGuiInteractAction(id);
-        });
+    private static <T extends NpcAction> void register(String key, Codec<T> codec) {
+        Registries.NPC_ACTION_CODEC.register(key, codec);
     }
 
-    private static void register(String key, NpcActionDeserializer deserializer) {
-        map.put(key, deserializer);
-    }
 
-    public static @Nullable NpcAction create(String key, JsonObject object) {
-        NpcActionDeserializer deserializer = map.get(key);
-        if (deserializer == null) {
-            throw new IllegalArgumentException("Unknown npc action type: " + key);
-        }
-        return deserializer.deserialize(object);
-    }
 }

@@ -1,6 +1,7 @@
 package com.roguesmp.item.component.impl;
 
 import com.roguesmp.annotation.GsonIgnore;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.Attributes;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.context.ItemLoreContext;
@@ -13,6 +14,13 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.*;
 
 public class EquipAttributeComponent implements ItemComponent {
+
+    public static final Codec<EquipAttributeComponent> CODEC = Codec.composite(
+            Codec.unboundedMap(Codec.enumOf(Attributes.class), Codec.DOUBLE).fieldOf("attributes")
+                    .forGetter(EquipAttributeComponent::getBaseAttributes),
+            Codec.enumOf(EquipSlot.class).fieldOf("slot").forGetter(EquipAttributeComponent::getSlot),
+            EquipAttributeComponent::new
+    );
 
     private final Map<Attributes, Double> attributes = new EnumMap<>(Attributes.class);
     private final EquipSlot slot;
@@ -33,6 +41,10 @@ public class EquipAttributeComponent implements ItemComponent {
     public @Unmodifiable Map<Attributes, Double> getFinalAttributes() {
         update();
         return Collections.unmodifiableMap(finalAttributes);
+    }
+
+    public @Unmodifiable Map<Attributes, Double> getBaseAttributes() {
+        return Collections.unmodifiableMap(attributes);
     }
 
     public EquipSlot getSlot() {

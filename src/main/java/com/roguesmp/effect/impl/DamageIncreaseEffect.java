@@ -1,6 +1,7 @@
 package com.roguesmp.effect.impl;
 
 import com.google.gson.JsonObject;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.SmpEffect;
@@ -16,12 +17,23 @@ import org.jetbrains.annotations.Nullable;
 
 public class DamageIncreaseEffect extends SmpEffect {
 
+    public static final Codec<DamageIncreaseEffect> CODEC = Codec.composite(
+            SmpEffect.BASE_CODEC.forGetter(SmpEffect::getBaseProperties),
+            Codec.DOUBLE.fieldOf("increase_value").forGetter(DamageIncreaseEffect::getMagnitude),
+            DamageIncreaseEffect::new
+    );
+
     public static final String ID = "damage_increase";
 
     private final double increaseValue;
 
     public DamageIncreaseEffect(int duration, double increaseValue) {
         super(duration, ID);
+        this.increaseValue = increaseValue;
+    }
+
+    public DamageIncreaseEffect(BaseProperties base, double increaseValue) {
+        super(ID, base);
         this.increaseValue = increaseValue;
     }
 

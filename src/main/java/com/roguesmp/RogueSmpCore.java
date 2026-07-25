@@ -21,14 +21,9 @@ import com.roguesmp.listener.*;
 import com.roguesmp.npc.NpcManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.quest.QuestManager;
-import com.roguesmp.registry.BlockRegistry;
-import com.roguesmp.registry.SkinRegistry;
-import com.roguesmp.registry.VanillaCraftingRecipeRegistry;
+import com.roguesmp.registry.*;
 import com.roguesmp.registry.entity.EntityRegistry;
-import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.registry.ability.AbilityRegistry;
-import com.roguesmp.registry.npc.NpcRegistry;
-import com.roguesmp.registry.quest.QuestRegistry;
 import com.roguesmp.server.DailyResetScheduler;
 import com.roguesmp.utils.GlowUtils;
 import net.kyori.adventure.text.Component;
@@ -54,6 +49,8 @@ public final class RogueSmpCore extends JavaPlugin {
         new PlaceholderAPIIntegration(this).register();
         GlowUtils.init(this);
 
+        Registries.boostrap(this);
+
         ComponentKeys.loadClass();
 
         SkinRegistry.init();
@@ -67,8 +64,7 @@ public final class RogueSmpCore extends JavaPlugin {
         IslandManager.init(this, PlayerManager.getInstance());
 
         //Quest
-        QuestRegistry.init(this);
-        QuestManager.init(this, QuestRegistry.getInstance());
+        QuestManager.init(this);
 
         EffectManager.init(this);
         BlockManager.init(this);
@@ -78,7 +74,6 @@ public final class RogueSmpCore extends JavaPlugin {
         EntityManager.init(EntityRegistry.getInstance());
 
         //Npc
-        NpcRegistry.init();
         NpcManager.init();
 
         ItemRegistry.init(this);
@@ -97,21 +92,16 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Load data from files, databases, etc
     public void loadData() {
-        SkinRegistry.getInstance().loadSkin();
-        ItemRegistry.getInstance().loadFromFile();
+        Registries.loadAllData(this);
         EntityRegistry.getInstance().loadFromFile();
         BlockStorage.getInstance().loadFromFile();
         AbilityRegistry.getInstance().loadAll();
-        NpcRegistry.getInstance().loadData();
-        QuestRegistry.getInstance().loadQuest();
 
         Tags.loadTagData(this);
     }
 
     //Run on onDisable
     public void saveData() {
-        SkinRegistry.getInstance().saveSkin();
-        ItemRegistry.getInstance().saveToFile(false);
         BlockStorage.getInstance().saveToFile(true);
 
         PlayerManager.getInstance().onDisable();

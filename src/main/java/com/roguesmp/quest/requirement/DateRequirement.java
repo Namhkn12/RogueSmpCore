@@ -1,6 +1,7 @@
 package com.roguesmp.quest.requirement;
 
 import com.google.gson.JsonObject;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.QuestRequirement;
 import net.kyori.adventure.text.Component;
@@ -15,6 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DateRequirement implements QuestRequirement {
+
+    public static final String TYPE_KEY = "date_single";
+    public static final Codec<DateRequirement> CODEC = Codec.composite(
+            Codec.LONG.fieldOf("targetTimestamp").forGetter(DateRequirement::getTargetTimestamp),
+            DateRequirement::new
+    );
 
     // Định nghĩa múi giờ cố định của Việt Nam (ICT - GMT+7)
     private static final ZoneId VN_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
@@ -58,6 +65,11 @@ public class DateRequirement implements QuestRequirement {
                 .toEpochMilli();
 
         return todayStartMillis == targetTimestamp;
+    }
+
+    @Override
+    public String getTypeId() {
+        return TYPE_KEY;
     }
 
     public long getTargetTimestamp() {

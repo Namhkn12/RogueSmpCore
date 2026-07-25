@@ -1,6 +1,7 @@
 package com.roguesmp.item.component.impl;
 
 import com.roguesmp.annotation.GsonIgnore;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.context.ItemDataContext;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.utils.Utils;
@@ -9,6 +10,10 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 
 public final class NameComponent implements ItemComponent {
+
+    public static final Codec<NameComponent> CODEC = Codec.STRING
+            .xmap(NameComponent::new, NameComponent::value);
+
     private final String value;
 
     @GsonIgnore
