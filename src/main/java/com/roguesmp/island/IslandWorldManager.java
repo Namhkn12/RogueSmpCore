@@ -18,8 +18,8 @@ public class IslandWorldManager {
 
     public static final String WORLD_NAME = "sb_island_world";
 
-    private static final int ISLAND_GAP = 500; // Distance between islands
-    private static final int GRID_WIDTH = 30; // How many islands per row before dropping down
+    private static final int ISLAND_GAP = 400; // Distance between islands
+    private static final int GRID_WIDTH = 50; // How many islands per row before dropping down
     private static final String INDEX_FILE_NAME = "island_grid_index.json";
 
     private int nextAvailableIndex = 0;

@@ -55,11 +55,11 @@ public class InfusionUtil {
     }
 
     public static int getUpgradeExpCost(SmpItem smpItem, Infusion infusion) {
-        return getExpCostForLevel(infusion, getLevel(smpItem, infusion));
+        return getExpCostForLevel(infusion, getLevel(smpItem, infusion) + 1);
     }
 
     public static int getUpgradeMaterialCost(SmpItem smpItem, Infusion infusion) {
-        return getMaterialCostForLevel(infusion, getLevel(smpItem, infusion));
+        return getMaterialCostForLevel(infusion, getLevel(smpItem, infusion) + 1);
     }
 
     public static int getDowngradeExpRefund(SmpItem smpItem, Infusion infusion) {
