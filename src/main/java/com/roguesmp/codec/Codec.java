@@ -1,9 +1,11 @@
 package com.roguesmp.codec;
 
+import com.roguesmp.RogueSmpCore;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Material;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -199,6 +201,13 @@ public interface Codec<A> {
     // --- COMBINATORS ---
 
     /**
+     * Global fallback error message handler for the no-arg overloads of the {@code *Lenient} combinators
+     */
+    BiConsumer<Object, String> errorHandler = (key, error) ->
+            RogueSmpCore.LOGGER.error("Skipped invalid entry '{}': {}", key, error);
+
+
+    /**
      * Creates a codec that handles lists of items.
      *
      * @param <E> the item type in the list
@@ -233,6 +242,57 @@ public interface Codec<A> {
                 return DataResult.success(resultList);
             }
         };
+    }
+
+    /**
+     * Like {@link #listOf(Codec)}, but a single corrupted/invalid element is skipped (reported via
+     * {@code onError}) instead of failing the whole list. Encoding still goes through the strict
+     * {@link #listOf(Codec)} — this is meant for tolerating bad data on read (e.g. player save files),
+     * not for silently dropping data on write.
+     *
+     * @param <E> the item type in the list
+     * @param elementCodec the codec for single list items
+     * @param onError called with (index, error message) for every element that failed to decode
+     * @return a list codec that tolerates individually bad elements
+     */
+    static <E> Codec<List<E>> lenientListOf(Codec<E> elementCodec, BiConsumer<Integer, String> onError) {
+        Codec<List<E>> strict = listOf(elementCodec);
+        return new Codec<>() {
+            @Override
+            public <O> DataResult<O> encode(List<E> input, DynamicOps<O> ops) {
+                return strict.encode(input, ops);
+            }
+
+            @Override
+            public <O> DataResult<List<E>> decode(O input, DynamicOps<O> ops) {
+                DataResult<List<O>> rawList = ops.getList(input);
+                if (!rawList.isSuccess()) return DataResult.error(rawList.error());
+
+                List<E> resultList = new ArrayList<>();
+                List<O> rawItems = rawList.result();
+                for (int i = 0; i < rawItems.size(); i++) {
+                    DataResult<E> res = elementCodec.decode(rawItems.get(i), ops);
+                    if (res.isSuccess()) {
+                        resultList.add(res.result());
+                    } else {
+                        onError.accept(i, res.error());
+                    }
+                }
+                return DataResult.success(resultList);
+            }
+        };
+    }
+
+    /**
+     * Same as {@link #lenientListOf(Codec, BiConsumer)}, using the global {@link #errorHandler}
+     * instead of a per-call handler.
+     *
+     * @param <E> the item type in the list
+     * @param elementCodec the codec for single list items
+     * @return a list codec that tolerates individually bad elements
+     */
+    static <E> Codec<List<E>> lenientListOf(Codec<E> elementCodec) {
+        return lenientListOf(elementCodec, errorHandler::accept);
     }
 
     // --- FIELD CONVERSIONS (Codec -> MapCodec) ---
@@ -731,6 +791,94 @@ public interface Codec<A> {
      */
     static <V> Codec<Map<String, V>> unboundedMap(Codec<V> valueCodec) {
         return unboundedMap(Codec.STRING, valueCodec);
+    }
+
+    /**
+     * Like {@link #unboundedMap(Codec, Codec)}, but a single corrupted/invalid entry (bad key or bad
+     * value) is skipped (reported via {@code onError}) instead of failing the whole map. Encoding still
+     * goes through the strict {@link #unboundedMap(Codec, Codec)} — this is meant for tolerating bad
+     * data on read (e.g. player save files), not for silently dropping data on write.
+     *
+     * @param <K> the map key type
+     * @param <V> the map value type
+     * @param keyCodec codec used to serialize and deserialize the key object
+     * @param valueCodec fixed codec used for every value in the map
+     * @param onError called with (key, error message) for every entry that failed to decode; key is
+     *                {@code null} if the map key itself failed to decode
+     * @return a map codec that tolerates individually bad entries
+     */
+    static <K, V> Codec<Map<K, V>> lenientUnboundedMap(Codec<K> keyCodec, Codec<V> valueCodec, BiConsumer<K, String> onError) {
+        Codec<Map<K, V>> strict = unboundedMap(keyCodec, valueCodec);
+        return new Codec<>() {
+            @Override
+            public <O> DataResult<O> encode(Map<K, V> input, DynamicOps<O> ops) {
+                return strict.encode(input, ops);
+            }
+
+            @Override
+            public <O> DataResult<Map<K, V>> decode(O input, DynamicOps<O> ops) {
+                DataResult<Map<String, O>> rawMap = ops.getMap(input);
+                if (!rawMap.isSuccess()) return DataResult.error(rawMap.error());
+
+                Map<K, V> map = new HashMap<>();
+                for (Map.Entry<String, O> entry : rawMap.result().entrySet()) {
+                    DataResult<K> keyDec = keyCodec.decode(ops.createString(entry.getKey()), ops);
+                    if (!keyDec.isSuccess()) {
+                        onError.accept(null, "['" + entry.getKey() + "']: invalid map key: " + keyDec.error());
+                        continue;
+                    }
+                    K key = keyDec.result();
+
+                    DataResult<V> valDec = valueCodec.decode(entry.getValue(), ops);
+                    if (!valDec.isSuccess()) {
+                        onError.accept(key, valDec.error());
+                        continue;
+                    }
+
+                    map.put(key, valDec.result());
+                }
+                return DataResult.success(map);
+            }
+        };
+    }
+
+    /**
+     * Like {@link #unboundedMap(Codec)}, but a single corrupted/invalid entry is skipped (reported via
+     * {@code onError}) instead of failing the whole map.
+     *
+     * @param <V> the map value type
+     * @param valueCodec fixed codec used for every value in the map
+     * @param onError called with (key, error message) for every entry that failed to decode
+     * @return a lenient string-keyed map codec
+     */
+    static <V> Codec<Map<String, V>> lenientUnboundedMap(Codec<V> valueCodec, BiConsumer<String, String> onError) {
+        return lenientUnboundedMap(Codec.STRING, valueCodec, onError);
+    }
+
+    /**
+     * Same as {@link #lenientUnboundedMap(Codec, Codec, BiConsumer)}, using the global
+     * {@link #errorHandler} instead of a per-call handler.
+     *
+     * @param <K> the map key type
+     * @param <V> the map value type
+     * @param keyCodec codec used to serialize and deserialize the key object
+     * @param valueCodec fixed codec used for every value in the map
+     * @return a map codec that tolerates individually bad entries
+     */
+    static <K, V> Codec<Map<K, V>> lenientUnboundedMap(Codec<K> keyCodec, Codec<V> valueCodec) {
+        return lenientUnboundedMap(keyCodec, valueCodec, errorHandler::accept);
+    }
+
+    /**
+     * Same as {@link #lenientUnboundedMap(Codec, BiConsumer)}, using the global
+     * {@link #errorHandler} instead of a per-call handler.
+     *
+     * @param <V> the map value type
+     * @param valueCodec fixed codec used for every value in the map
+     * @return a lenient string-keyed map codec
+     */
+    static <V> Codec<Map<String, V>> lenientUnboundedMap(Codec<V> valueCodec) {
+        return lenientUnboundedMap(Codec.STRING, valueCodec);
     }
 
     /** Combines 1 field into a composite object MapCodec. */

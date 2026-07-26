@@ -1,16 +1,10 @@
 package com.roguesmp.registry;
 
-import com.google.gson.JsonObject;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.effect.impl.DamageIncreaseEffect;
 import com.roguesmp.effect.impl.ResistanceEffect;
 import com.roguesmp.effect.impl.SpeedEffect;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Codec registry for SmpEffect

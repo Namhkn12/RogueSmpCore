@@ -5,7 +5,6 @@ import com.google.gson.annotations.SerializedName;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.MapCodec;
 import com.roguesmp.event.DamageEvent;
-import com.roguesmp.registry.EffectCodecRegistry;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;

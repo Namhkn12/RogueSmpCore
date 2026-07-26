@@ -2,11 +2,9 @@ package com.roguesmp.registry;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.item.BaseItem;
-import com.roguesmp.item.component.impl.*;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.io.*;
 import java.util.Map;
 
 public class ItemRegistry {

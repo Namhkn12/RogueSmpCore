@@ -1,6 +1,5 @@
 package com.roguesmp.quest;
 
-import com.google.gson.JsonObject;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.Registries;

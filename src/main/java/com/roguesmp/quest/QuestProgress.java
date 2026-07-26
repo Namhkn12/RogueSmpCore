@@ -15,7 +15,7 @@ public class QuestProgress {
             Codec.BOOLEAN.optionalFieldOf("rewardClaimed", false).forGetter(QuestProgress::isRewardClaimed),
             Codec.LONG.fieldOf("acceptTimestamp").forGetter(QuestProgress::getAcceptTimestamp),
             Codec.LONG.optionalFieldOf("completedTimestamp", -1L).forGetter(QuestProgress::getCompletedTimestamp),
-            Codec.unboundedMap(ObjectiveProgress.CODEC).optionalFieldOf("progress", new HashMap<>()).forGetter(QuestProgress::getSavableProgressMap),
+            Codec.lenientUnboundedMap(ObjectiveProgress.CODEC).optionalFieldOf("progress", new HashMap<>()).forGetter(QuestProgress::getSavableProgressMap),
             QuestProgress::new
     );
 

@@ -2,12 +2,11 @@ package com.roguesmp.registry;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
+import com.roguesmp.constant.Enchants;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.ItemComponent;
-import com.roguesmp.item.modifier.ItemModifier;
 import com.roguesmp.npc.BaseNpc;
-import com.roguesmp.npc.SmpNpc;
 import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.quest.*;
 import com.roguesmp.registry.npc.GuiOpenActionRegistry;
@@ -35,8 +34,13 @@ public class Registries {
 
     public static final Registry<SkinRegistry.SkinData> SKIN_DATA = new Registry<>("skins", SkinRegistry.SkinData.CODEC);
 
+    // No bulk JSON entries of its own (Enchants is a hardcoded enum) - only exists so enchants
+    // can have a "enchants/tags/*.json" folder like every other registry.
+    public static final Registry<Enchants> ENCHANTS = new Registry<>("enchants");
+
     public static void loadAllData(RogueSmpCore plugin) {
         Registry.loadAll(plugin);
+        Registry.loadAllTags(plugin); // must run after loadAll, since tags resolve against already-loaded entries
     }
 
     // Create in-memory data here
@@ -50,6 +54,10 @@ public class Registries {
 
         NpcActionRegistry.bootstrap();
         GuiOpenActionRegistry.bootstrap();
+
+        for (Enchants enchant : Enchants.values()) {
+            ENCHANTS.register(enchant.getEnchant().getId(), enchant);
+        }
     }
 
 }

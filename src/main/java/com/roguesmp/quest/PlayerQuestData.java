@@ -18,7 +18,7 @@ public class PlayerQuestData {
 
     public static final Codec<PlayerQuestData> CODEC = Codec.composite(
             Codec.UUID.fieldOf("uuid").forGetter(PlayerQuestData::getUuid),
-            Codec.unboundedMap(QuestProgress.CODEC).optionalFieldOf("questProgress", new HashMap<>()).forGetter(PlayerQuestData::getQuestProgresses),
+            Codec.lenientUnboundedMap(QuestProgress.CODEC).optionalFieldOf("questProgress", new HashMap<>()).forGetter(PlayerQuestData::getQuestProgresses),
             Codec.unboundedMap(Codec.INT).optionalFieldOf("dailyCompletions", new HashMap<>()).forGetter(PlayerQuestData::getDailyCompletions),
             Codec.LONG.optionalFieldOf("lastDailyCompletionResetTimestamp", -1L).forGetter(PlayerQuestData::getLastDailyCompletionResetTimestamp),
             PlayerQuestData::new

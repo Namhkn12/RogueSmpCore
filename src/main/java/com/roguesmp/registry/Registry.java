@@ -5,6 +5,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.JsonOps;
+import com.roguesmp.tag.SmpTag;
 import com.roguesmp.utils.Utils;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
@@ -17,8 +18,12 @@ import java.util.*;
 
 public class Registry<T> {
 
+    private static final Codec<List<String>> TAG_CODEC = Codec.listOf(Codec.STRING);
+
     private final Map<String, T> entries = new HashMap<>();
     private final Map<String, T> unmodifiableEntries = Collections.unmodifiableMap(entries);
+    private final Map<String, SmpTag<T>> tags = new HashMap<>();
+    private final Map<String, SmpTag<T>> unmodifiableTags = Collections.unmodifiableMap(tags);
     private final String locationKey; // Subfolder name inside data folder (e.g., "items", "recipes")
     private final Codec<T> codec;
 
@@ -28,6 +33,17 @@ public class Registry<T> {
     public Registry(String locationKey, Codec<T> codec) {
         this.locationKey = locationKey;
         this.codec = codec;
+        DATA_REGISTRIES.add(this);
+    }
+
+    /**
+     * Constructor for registries whose entries are populated in code (not loaded from a bulk *.json
+     * folder), but which should still auto-discover tag files from {@code <locationKey>/tags/*.json}
+     * (e.g. wrapping an enum like {@code Enchants} so it can be tagged).
+     */
+    public Registry(String locationKey) {
+        this.locationKey = locationKey;
+        this.codec = null;
         DATA_REGISTRIES.add(this);
     }
 
@@ -82,6 +98,63 @@ public class Registry<T> {
     public static void loadAll(RogueSmpCore plugin) {
         for (Registry<?> registry : DATA_REGISTRIES) {
             registry.loadFrom(plugin);
+        }
+    }
+
+    /**
+     * Loads every {@code *.json} file under {@code <dataFolder>/<locationKey>/tags/} as an
+     * {@link SmpTag} of this registry's type, auto-registered by filename and resolved against
+     * this registry's own {@link #get(String)}. Drop a new file in that folder and it's
+     * automatically picked up next load — no manual registration needed.
+     * <p>
+     * Must run after this registry's own entries are loaded/registered, since tag resolution
+     * looks entries up by id via {@link #get(String)}.
+     */
+    public @Blocking void loadTagsFrom(RogueSmpCore plugin) {
+        if (locationKey == null) return;
+
+        File folder = new File(plugin.getDataFolder(), locationKey + "/tags");
+        if (!folder.exists()) {
+            folder.mkdirs();
+            return;
+        }
+
+        File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
+        if (files == null) return;
+
+        tags.clear();
+        for (File file : files) {
+            String id = file.getName().substring(0, file.getName().length() - 5);
+
+            try (FileReader reader = new FileReader(file)) {
+                JsonElement json = Utils.GSON.fromJson(reader, JsonElement.class);
+                if (json == null) continue;
+
+                DataResult<List<String>> result = TAG_CODEC.decode(json, JsonOps.INSTANCE);
+                if (result.isSuccess()) {
+                    tags.put(id.toLowerCase(), new SmpTag<>(id, result.result(), this::get));
+                } else {
+                    RogueSmpCore.LOGGER.error("Failed to decode tag [{}] in '{}/tags': {}", id, locationKey, result.error());
+                }
+            } catch (Exception e) {
+                RogueSmpCore.LOGGER.error("Error reading tag file '{}' in '{}/tags': {}", file.getName(), locationKey, e.getMessage());
+            }
+        }
+
+        // Resolve every tag's elements (and any nested #tag references, scoped to this registry's own tags)
+        for (SmpTag<T> tag : tags.values()) {
+            tag.resolve(tags::get, new HashSet<>());
+        }
+
+        RogueSmpCore.LOGGER.info("Loaded {} tags into registry '{}'", tags.size(), locationKey);
+    }
+
+    /**
+     * Loads tags for ALL data-driven registries. Must run after {@link #loadAll(RogueSmpCore)}.
+     */
+    public static void loadAllTags(RogueSmpCore plugin) {
+        for (Registry<?> registry : DATA_REGISTRIES) {
+            registry.loadTagsFrom(plugin);
         }
     }
 
@@ -163,6 +236,14 @@ public class Registry<T> {
 
     public @Unmodifiable Map<String, T> getAll() {
         return unmodifiableEntries;
+    }
+
+    public @Nullable SmpTag<T> getTag(String id) {
+        return tags.get(id.toLowerCase());
+    }
+
+    public @Unmodifiable Map<String, SmpTag<T>> getTags() {
+        return unmodifiableTags;
     }
 
     public void clear() {

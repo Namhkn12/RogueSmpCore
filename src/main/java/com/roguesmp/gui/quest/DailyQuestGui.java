@@ -1,6 +1,6 @@
 package com.roguesmp.gui.quest;
 
-import com.roguesmp.constant.Tags;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
@@ -18,8 +18,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.time.Duration;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -50,9 +48,9 @@ public class DailyQuestGui extends BaseGui {
             return;
         }
 
-        setupTierRow(1, Tags.DAILY_EASY_QUEST, "<green>Dễ", Material.LIGHT_BLUE_GLAZED_TERRACOTTA, Material.LIME_CONCRETE, playerQuestData);
-        setupTierRow(2, Tags.DAILY_MEDIUM_QUEST, "<yellow>Trung Bình", Material.YELLOW_GLAZED_TERRACOTTA, Material.YELLOW_CONCRETE, playerQuestData);
-        setupTierRow(3, Tags.DAILY_HARD_QUEST, "<red>Khó", Material.RED_GLAZED_TERRACOTTA, Material.RED_CONCRETE, playerQuestData);
+        setupTierRow(1, Registries.QUEST.getTag("daily_easy_quest"), "<green>Dễ", Material.LIGHT_BLUE_GLAZED_TERRACOTTA, Material.LIME_CONCRETE, playerQuestData);
+        setupTierRow(2, Registries.QUEST.getTag("daily_medium_quest"), "<yellow>Trung Bình", Material.YELLOW_GLAZED_TERRACOTTA, Material.YELLOW_CONCRETE, playerQuestData);
+        setupTierRow(3, Registries.QUEST.getTag("daily_hard_quest"), "<red>Khó", Material.RED_GLAZED_TERRACOTTA, Material.RED_CONCRETE, playerQuestData);
 
         fillEmpty();
     }
@@ -76,6 +74,8 @@ public class DailyQuestGui extends BaseGui {
     }
 
     private void setupTierRow(int row, SmpTag<Quest> tag, String tierName, Material labelMaterial, Material questFallbackMat, PlayerQuestData data) {
+        if (tag == null) return; // no quests/tags/<id>.json for this tier yet
+
         List<QuestProgress> activeQuests = dailyQuestManager.getActiveDailyQuestsForTag(data, tag);
         int completedToday = dailyQuestManager.getCompletedCountToday(data, tag);
         int maxLimit = dailyQuestManager.getDailyLimitForTag(tag);

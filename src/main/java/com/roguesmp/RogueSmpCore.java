@@ -3,7 +3,7 @@ package com.roguesmp;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.constant.ComponentKeys;
-import com.roguesmp.constant.Tags;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.dungeon.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
@@ -92,12 +92,10 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Load data from files, databases, etc
     public void loadData() {
-        Registries.loadAllData(this);
+        Registries.loadAllData(this); // also loads/resolves every registry's tags/ folder
         EntityRegistry.getInstance().loadFromFile();
         BlockStorage.getInstance().loadFromFile();
         AbilityRegistry.getInstance().loadAll();
-
-        Tags.loadTagData(this);
     }
 
     //Run on onDisable
