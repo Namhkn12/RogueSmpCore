@@ -17,6 +17,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.util.Vector;
 
 public class DamageListener implements Listener {
     @EventHandler
@@ -82,12 +83,47 @@ public class DamageListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void spawnDisplay(DamageEvent event) {
         if (event.isCancelled()) return;
-        Entity victim = event.getVictim();
 
-        double offsetX = (Utils.RANDOM.nextDouble() - 0.5) * 1.4;
-        double offsetY = (Utils.RANDOM.nextDouble() * 0.8) + 1;
-        double offsetZ = (Utils.RANDOM.nextDouble() - 0.5) * 1.4;
-        Location spawnLoc = victim.getLocation().add(offsetX, offsetY, offsetZ);
+        Entity victim = event.getVictim();
+        Entity attacker = event.getDamager();
+
+        // Start at the center/chest height of the victim
+        Location spawnLoc = victim.getLocation().add(0, victim.getHeight() * 0.5, 0);
+
+        // Identify which player needs to see the display (attacker takes priority)
+        Player viewer = null;
+        if (attacker instanceof Player player) {
+            viewer = player;
+        } else if (attacker instanceof Projectile projectile && projectile.getShooter() instanceof Player pl) {
+            viewer = pl;
+        } else if (victim instanceof Player player) {
+            viewer = player;
+        }
+
+        if (viewer != null) {
+            // Line-of-sight calculation: Move the spawn point slightly towards the player
+            Location playerEyeLoc = viewer.getEyeLocation();
+            Vector directionToPlayer = playerEyeLoc.toVector().subtract(spawnLoc.toVector());
+
+            // Distance factor: 0.0 = at victim, 1.0 = at player.
+            // 0.25 to 0.35 places it nicely in front of the victim toward the player.
+            double distanceFactor = 0.3;
+            spawnLoc.add(directionToPlayer.multiply(distanceFactor));
+
+            // Add a slight random spread so overlapping damage numbers don't stack perfectly
+            double spread = 0.9;
+            spawnLoc.add(
+                    (Utils.RANDOM.nextDouble() - 0.5) * spread,
+                    (Utils.RANDOM.nextDouble() - 0.5) * spread,
+                    (Utils.RANDOM.nextDouble() - 0.5) * spread
+            );
+        } else {
+            // Fallback offset for non-player damage (e.g. mob vs mob)
+            double offsetX = (Utils.RANDOM.nextDouble() - 0.5) * 0.8;
+            double offsetY = (Utils.RANDOM.nextDouble() * 0.4) + (victim.getHeight() * 0.5);
+            double offsetZ = (Utils.RANDOM.nextDouble() - 0.5) * 0.8;
+            spawnLoc = victim.getLocation().add(offsetX, offsetY, offsetZ);
+        }
 
         DamageDisplayUtils.spawnDamageDisplay(
                 spawnLoc,
