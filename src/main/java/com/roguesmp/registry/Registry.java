@@ -65,6 +65,7 @@ public class Registry<T> {
             return;
         }
 
+        RogueSmpCore.LOGGER.info("Loading entries for registry '{}'", locationKey);
         File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
         if (files == null) return;
 
@@ -119,6 +120,7 @@ public class Registry<T> {
             return;
         }
 
+        RogueSmpCore.LOGGER.info("Loading tags for registry '{}'", locationKey);
         File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
         if (files == null) return;
 

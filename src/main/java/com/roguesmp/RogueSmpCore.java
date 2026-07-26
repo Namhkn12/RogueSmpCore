@@ -23,7 +23,7 @@ import com.roguesmp.player.PlayerManager;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.registry.*;
 import com.roguesmp.registry.entity.EntityRegistry;
-import com.roguesmp.registry.ability.AbilityRegistry;
+import com.roguesmp.registry.ability.AbilityInfoRegistry;
 import com.roguesmp.server.DailyResetScheduler;
 import com.roguesmp.utils.GlowUtils;
 import net.kyori.adventure.text.Component;
@@ -54,8 +54,6 @@ public final class RogueSmpCore extends JavaPlugin {
         ComponentKeys.loadClass();
 
         SkinRegistry.init();
-
-        AbilityRegistry.init();
 
         //Player
         PlayerManager.init(this);
@@ -95,7 +93,6 @@ public final class RogueSmpCore extends JavaPlugin {
         Registries.loadAllData(this); // also loads/resolves every registry's tags/ folder
         EntityRegistry.getInstance().loadFromFile();
         BlockStorage.getInstance().loadFromFile();
-        AbilityRegistry.getInstance().loadAll();
     }
 
     //Run on onDisable
@@ -161,17 +158,17 @@ public final class RogueSmpCore extends JavaPlugin {
     @Override
     public void onDisable() {
 
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            player.closeInventory();
-            player.kick(Component.text("Server đang tắt..."));
-        });
-
         // Plugin shutdown logic
         saveData();
 
         if (this.resetScheduler != null) {
             resetScheduler.stop();
         }
+
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            player.closeInventory();
+            player.kick(Component.text("Server đang tắt..."));
+        });
     }
 
     public static RogueSmpCore getInstance() {

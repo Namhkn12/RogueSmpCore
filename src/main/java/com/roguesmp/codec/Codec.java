@@ -204,7 +204,7 @@ public interface Codec<A> {
      * Global fallback error message handler for the no-arg overloads of the {@code *Lenient} combinators
      */
     BiConsumer<Object, String> errorHandler = (key, error) ->
-            RogueSmpCore.LOGGER.error("Skipped invalid entry '{}': {}", key, error);
+            RogueSmpCore.LOGGER.warn("Skipped invalid entry '{}': {}", key, error);
 
 
     /**

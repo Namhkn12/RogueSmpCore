@@ -1,6 +1,7 @@
 package com.roguesmp.item;
 
 import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.DataResult;
 import com.roguesmp.item.component.ComponentKey;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.player.SmpPlayer;
@@ -31,6 +32,18 @@ public class BaseItem {
                     .optionalFieldOf("components", new HashMap<>())
                     .forGetter(BaseItem::getComponents),
             BaseItem::new
+    );
+
+    /**
+     * Codec for referencing an already-registered BaseItem by id (e.g. from another definition's
+     * JSON), instead of embedding a full item definition inline.
+     */
+    public static final Codec<BaseItem> REFERENCE_CODEC = Codec.STRING.comapFlatMap(
+            id -> {
+                BaseItem item = Registries.ITEM.get(id);
+                return item != null ? DataResult.success(item) : DataResult.error("Unknown item: " + id);
+            },
+            BaseItem::getId
     );
 
     public BaseItem(String id, Material base, boolean unique, Map<String, ItemComponent> components) {

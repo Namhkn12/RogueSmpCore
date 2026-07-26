@@ -1,5 +1,6 @@
 package com.roguesmp.player.ability.upgrade;
 
+import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.impl.NameComponent;
@@ -16,12 +17,33 @@ import org.bukkit.inventory.ItemStack;
 
 public class ItemRequirement implements UpgradeRequirement {
 
+    public static final String TYPE_KEY = "item";
+
+    public static final Codec<ItemRequirement> CODEC = Codec.composite(
+            BaseItem.REFERENCE_CODEC.fieldOf("item_id").forGetter(ItemRequirement::getRequiredItem),
+            Codec.INT.fieldOf("amount").forGetter(ItemRequirement::getAmount),
+            ItemRequirement::new
+    );
+
     private final BaseItem requiredItem;
     private final int amount;
 
     public ItemRequirement(BaseItem requiredItem, int amount) {
         this.requiredItem = requiredItem;
         this.amount = amount;
+    }
+
+    @Override
+    public String getTypeId() {
+        return TYPE_KEY;
+    }
+
+    public BaseItem getRequiredItem() {
+        return requiredItem;
+    }
+
+    public int getAmount() {
+        return amount;
     }
 
     @Override
