@@ -6,7 +6,7 @@ import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.AbilityInfo;
-import com.roguesmp.registry.ability.AbilityRegistry;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -57,7 +57,7 @@ public class AbilityCatalogue extends BaseGui {
         nextPage = ItemStack.of(Material.ARROW);
         nextPage.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang sau"));
 
-        abilityList.addAll(AbilityRegistry.getInstance().getAll());
+        abilityList.addAll(Registries.ABILITY.getAll().values());
     }
 
     @Override
@@ -161,7 +161,7 @@ public class AbilityCatalogue extends BaseGui {
                             if (smpPlayer == null) return;
                             PlayerData playerData = smpPlayer.getPlayerData();
                             Map<String, Integer> data = new HashMap<>();
-                            AbilityRegistry.getInstance().getAll().forEach(info -> {
+                            Registries.ABILITY.getAll().values().forEach(info -> {
                                 data.put(info.getId(), 1);
                             });
                             data.forEach(playerData::setAbilityLevel);

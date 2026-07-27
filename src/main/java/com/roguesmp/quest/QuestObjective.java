@@ -1,7 +1,8 @@
 package com.roguesmp.quest;
 
-import com.google.gson.JsonObject;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.registry.Registries;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.entity.EntityDeathEvent;
 
@@ -11,6 +12,11 @@ import java.util.List;
  * An objective that player must do/satisfy to finish the quest. Used for quest definition and event handling. A {@link Quest} can have multiple objectives of the same subclass.
  */
 public interface QuestObjective {
+
+    Codec<QuestObjective> CODEC = Codec.dispatch(
+            QuestObjective::getTypeId,
+            Registries.QUEST_OBJECTIVE_CODEC::getOrThrow
+    );
 
     /**
      * Get objective display with progress data. Can be used to display player's current objective progress for example
@@ -24,15 +30,7 @@ public interface QuestObjective {
 
     boolean isCompleted(ObjectiveProgress progress);
 
-    /**
-     * Used to serialize player objective progress data
-     */
-    JsonObject serializeProgress(ObjectiveProgress progress);
-
-    /**
-     * Used to create progress data from player quest data
-     */
-    ObjectiveProgress deserializeProgress(JsonObject data);
+    String getTypeId();
 
     /**
      * Create new progress instance for this objective. Used for assigning a new quest.

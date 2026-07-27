@@ -5,6 +5,7 @@ import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.gson.JsonObject;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.annotation.GsonIgnore;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.StringArgument;
@@ -17,14 +18,10 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
@@ -33,14 +30,18 @@ import java.util.function.Consumer;
 public class SkinRegistry {
 
     private static SkinRegistry INSTANCE;
-    private static final String FOLDER_NAME = "skins.json";
-
-    private final HashMap<String, SkinData> data = new HashMap<>();
 
     public static final class SkinData {
         private final String value;
         private final String signature;
-        private UUID uuid;
+        private final UUID uuid;
+
+        public static final Codec<SkinData> CODEC = Codec.composite(
+                Codec.STRING.fieldOf("value").forGetter(SkinData::value),
+                Codec.STRING.fieldOf("signature").forGetter(SkinData::signature),
+                Codec.UUID.optionalFieldOf("uuid", UUID::randomUUID).forGetter(SkinData::getUuid),
+                SkinData::new
+        );
 
         @GsonIgnore
         private PlayerProfile profile;
@@ -48,11 +49,11 @@ public class SkinRegistry {
         /**
          * Create a new SkinData, will also generate the uuid and profile for this skin
          */
-        public SkinData(String value, String signature) {
+        public SkinData(String value, String signature, UUID uuid) {
             this.value = value;
             this.signature = signature;
 
-            this.uuid = UUID.randomUUID();
+            this.uuid = uuid;
             this.profile = Bukkit.createProfile(uuid, null);
             profile.setProperty(new ProfileProperty("textures", value, signature));
         }
@@ -66,9 +67,6 @@ public class SkinRegistry {
         }
 
         public UUID getUuid() {
-            if (uuid == null) {
-                this.uuid = UUID.randomUUID();
-            }
             return uuid;
         }
 
@@ -78,15 +76,6 @@ public class SkinRegistry {
 
         public String signature() {
             return signature;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (SkinData) obj;
-            return Objects.equals(this.value, that.value) &&
-                    Objects.equals(this.signature, that.signature);
         }
     }
 
@@ -115,14 +104,14 @@ public class SkinRegistry {
 
                         SkinData skinData = new SkinData(
                                 textureData.get("value").getAsString(),
-                                textureData.get("signature").getAsString()
+                                textureData.get("signature").getAsString(),
+                                UUID.randomUUID()
                         );
 
                         onSuccess.accept(skinId, skinData);
 
                         // Register and Save
-                        registerSkin(skinId, skinData.value, skinData.signature);
-                        saveSkin();
+                        Registries.SKIN_DATA.registerAndSave(RogueSmpCore.getInstance(), skinId, skinData);
 
                     } else {
                         String msg = (json != null && json.has("message"))
@@ -135,66 +124,6 @@ public class SkinRegistry {
                     onError.accept(ex.getMessage());
                     return null;
                 });
-    }
-
-    public void loadSkin() {
-        File file = new File(RogueSmpCore.getInstance().getDataFolder(), FOLDER_NAME);
-
-        if (!file.exists()) {
-            RogueSmpCore.LOGGER.info("There're no files for skins... Creating new");
-
-            if (file.getParentFile() != null) {
-                file.getParentFile().mkdirs();
-            }
-
-            // Create an example entry so the user sees the format
-            HashMap<String, SkinData> defaultData = new HashMap<>();
-            defaultData.put("example", new SkinData("ewogICJ0aW1lc3RhbXAiIDogMTYyMjI1NTc5MzY4MSwKICAicHJvZmlsZUlkIiA6ICI2OTBkMDM2OGM2NTE0OGM5ODZjMzEwN2FjMmRjNjFlYyIsCiAgInByb2ZpbGVOYW1lIiA6ICJ5emZyXzciLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjIyNjBmNDAyZTA1OWM0NDFmMzE1MWUxZGUxNDJhZmVlNzZmOGI2ZDQ5YmM0ODY5YjliY2U0YzBiODc1Yzc3MyIKICAgIH0KICB9Cn0=",
-                    "N3MpewM+OPw+cKgxnKM+KANsZ3CVh6GOSWQa0pyC/Jd2A9d7tKY9QZ7eLD7QqrDFgZ+6N5puAgQOCbXDklnv1K+X5Vz6UBW0ceQIs+H6wm8WEP3oSr849e1uSSmlTSaiXHN/9iEKVnw/LXsyB3EbbIaUEgdJuVrOVSUEybL1MnE/O5BBxuKlZJw3/dLzYnm4LOVpq5pnwb2h8XbzyOOZyiS+DK3Gm84zIgMT6rtTgIt2anz6+AQpvndHtT7qFRv1ptpkn6Q/zCjBXXww9z+ZsyHHbkkvI4oFSjl6ZZnxELdkzxKOWJrqOZQkrQ3b92c8216E3j6I3eC/DFR3BOlaYsAxR6sZxiQGgDt4olmGhT7TucUUqIrDJWpXlV8C5MRqp0fZlehKOgANnj7fq/bxPEUOhK9bOfPvI3u2LvyOezTuoVvXz3GqUhIb4U4cMukPhqZVR3OBuU/guQoVyE9SVD319Aa6NNqk36DmqkCFQo/rLNhn2rps3SzxxMDBJd4lfXC05sfrsd78Pg20yZOjNADmbSPHimbgKvsJTmNawW8vGZ8khfDwUyhlNEFfGK5sQgZpL1tsKqsfUoA//Hx5V78GjsvN5NnqqTscMZXhabyMif2rPO87OtZE0iTEqdW5eptcLhIoBpP6oleAn8CFqOa5X2nOLdo38cDjijUPL8A="));
-
-            try (FileWriter writer = new FileWriter(file)) {
-                Utils.GSON.toJson(defaultData, writer);
-            } catch (IOException e) {
-                RogueSmpCore.LOGGER.error("Could not create default {}!", FOLDER_NAME);
-                e.printStackTrace();
-                return;
-            }
-        }
-
-        // Type token for Map<String, SkinData>
-        Type type = new com.google.gson.reflect.TypeToken<HashMap<String, SkinData>>(){}.getType();
-
-        try (Reader reader = new FileReader(file)) {
-            // Deserialize the JSON map
-            HashMap<String, SkinData> loadedData = Utils.GSON.fromJson(reader, type);
-
-            if (loadedData != null) {
-                data.clear();
-                data.putAll(loadedData);
-                RogueSmpCore.LOGGER.info("Loaded {} skins from {}", data.size(), FOLDER_NAME);
-            }
-        } catch (Exception e) {
-            RogueSmpCore.LOGGER.error("Failed to load {}!", FOLDER_NAME);
-            e.printStackTrace();
-        }
-    }
-
-    public void saveSkin() {
-        File file = new File(RogueSmpCore.getInstance().getDataFolder(), FOLDER_NAME);
-
-        // Ensure the directory exists before writing
-        if (file.getParentFile() != null && !file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
-        }
-
-        try (FileWriter writer = new FileWriter(file)) {
-            // Serialize the current 'data' map back to the file
-            Utils.GSON.toJson(this.data, writer);
-            RogueSmpCore.LOGGER.info("Successfully saved {} skins to {}", data.size(), FOLDER_NAME);
-        } catch (IOException e) {
-            RogueSmpCore.LOGGER.error("Failed to save {}!", FOLDER_NAME);
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -213,15 +142,11 @@ public class SkinRegistry {
     }
 
     public @Nullable SkinData getSkin(String id) {
-        return data.get(id);
+        return Registries.SKIN_DATA.get(id);
     }
 
     public Set<String> getSkinIds() {
-        return data.keySet();
-    }
-
-    public void registerSkin(String id, String value, String signature) {
-        this.data.put(id, new SkinData(value, signature));
+        return Registries.SKIN_DATA.getAll().keySet();
     }
 
     public static void registerSkinFetchCommand() {

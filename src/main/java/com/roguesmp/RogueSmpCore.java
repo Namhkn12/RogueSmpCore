@@ -3,7 +3,7 @@ package com.roguesmp;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.constant.ComponentKeys;
-import com.roguesmp.constant.Tags;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.dungeon.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
@@ -21,14 +21,9 @@ import com.roguesmp.listener.*;
 import com.roguesmp.npc.NpcManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.quest.QuestManager;
-import com.roguesmp.registry.BlockRegistry;
-import com.roguesmp.registry.SkinRegistry;
-import com.roguesmp.registry.VanillaCraftingRecipeRegistry;
+import com.roguesmp.registry.*;
 import com.roguesmp.registry.entity.EntityRegistry;
-import com.roguesmp.registry.ItemRegistry;
-import com.roguesmp.registry.ability.AbilityRegistry;
-import com.roguesmp.registry.npc.NpcRegistry;
-import com.roguesmp.registry.quest.QuestRegistry;
+import com.roguesmp.registry.ability.AbilityInfoRegistry;
 import com.roguesmp.server.DailyResetScheduler;
 import com.roguesmp.utils.GlowUtils;
 import net.kyori.adventure.text.Component;
@@ -54,11 +49,11 @@ public final class RogueSmpCore extends JavaPlugin {
         new PlaceholderAPIIntegration(this).register();
         GlowUtils.init(this);
 
+        Registries.boostrap(this);
+
         ComponentKeys.loadClass();
 
         SkinRegistry.init();
-
-        AbilityRegistry.init();
 
         //Player
         PlayerManager.init(this);
@@ -67,8 +62,7 @@ public final class RogueSmpCore extends JavaPlugin {
         IslandManager.init(this, PlayerManager.getInstance());
 
         //Quest
-        QuestRegistry.init(this);
-        QuestManager.init(this, QuestRegistry.getInstance());
+        QuestManager.init(this);
 
         EffectManager.init(this);
         BlockManager.init(this);
@@ -78,7 +72,6 @@ public final class RogueSmpCore extends JavaPlugin {
         EntityManager.init(EntityRegistry.getInstance());
 
         //Npc
-        NpcRegistry.init();
         NpcManager.init();
 
         ItemRegistry.init(this);
@@ -97,21 +90,13 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Load data from files, databases, etc
     public void loadData() {
-        SkinRegistry.getInstance().loadSkin();
-        ItemRegistry.getInstance().loadFromFile();
+        Registries.loadAllData(this); // also loads/resolves every registry's tags/ folder
         EntityRegistry.getInstance().loadFromFile();
         BlockStorage.getInstance().loadFromFile();
-        AbilityRegistry.getInstance().loadAll();
-        NpcRegistry.getInstance().loadData();
-        QuestRegistry.getInstance().loadQuest();
-
-        Tags.loadTagData(this);
     }
 
     //Run on onDisable
     public void saveData() {
-        SkinRegistry.getInstance().saveSkin();
-        ItemRegistry.getInstance().saveToFile(false);
         BlockStorage.getInstance().saveToFile(true);
 
         PlayerManager.getInstance().onDisable();
@@ -173,17 +158,17 @@ public final class RogueSmpCore extends JavaPlugin {
     @Override
     public void onDisable() {
 
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            player.closeInventory();
-            player.kick(Component.text("Server đang tắt..."));
-        });
-
         // Plugin shutdown logic
         saveData();
 
         if (this.resetScheduler != null) {
             resetScheduler.stop();
         }
+
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            player.closeInventory();
+            player.kick(Component.text("Server đang tắt..."));
+        });
     }
 
     public static RogueSmpCore getInstance() {

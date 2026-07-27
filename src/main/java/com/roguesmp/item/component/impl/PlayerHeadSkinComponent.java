@@ -1,5 +1,6 @@
 package com.roguesmp.item.component.impl;
 
+import com.roguesmp.codec.Codec;
 import com.roguesmp.context.ItemDataContext;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.registry.SkinRegistry;
@@ -8,6 +9,9 @@ import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import org.jetbrains.annotations.NotNull;
 
 public class PlayerHeadSkinComponent implements ItemComponent {
+
+    public static final Codec<PlayerHeadSkinComponent> CODEC = Codec.STRING
+            .xmap(PlayerHeadSkinComponent::new, PlayerHeadSkinComponent::getSkinId);
 
     private final String skinId;
 

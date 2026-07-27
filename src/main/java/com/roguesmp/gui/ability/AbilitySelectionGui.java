@@ -5,7 +5,8 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.player.ability.AbilityType;
-import com.roguesmp.registry.ability.AbilityRegistry;
+import com.roguesmp.registry.Registries;
+import com.roguesmp.registry.ability.AbilityInfoRegistry;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -39,7 +40,7 @@ public class AbilitySelectionGui extends BaseGui {
 
         List<AbilityInfo<?>> list = new ArrayList<>();
         for (String id : smpPlayer.getPlayerData().getUnlockedAbilities().keySet()) {
-            AbilityInfo<?> info = AbilityRegistry.getInstance().getInfo(id);
+            AbilityInfo<?> info = Registries.ABILITY.get(id);
             if (info != null && info.getType() == type) {
                 list.add(info);
             }
@@ -100,7 +101,7 @@ public class AbilitySelectionGui extends BaseGui {
                     return;
                 }
 
-                Ability instance = AbilityRegistry.getInstance().createInstance(info.getId(), smpPlayer, level);
+                Ability instance = AbilityInfoRegistry.createInstance(info.getId(), smpPlayer, level);
                 smpPlayer.getAbilityLoadout().equip(type, instance, targetIndex);
                 Utils.runLater(() -> new AbilityLoadoutGui(smpPlayer).showInventory(smpPlayer.getBukkitPlayer()));
             });

@@ -1,5 +1,8 @@
 package com.roguesmp.quest;
 
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.DataResult;
+import com.roguesmp.registry.Registries;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,6 +14,26 @@ import java.util.*;
  * Represents the definition for a quest.
  */
 public class Quest {
+
+    public static final Codec<Quest> CODEC = Codec.composite(
+            Codec.STRING.fieldOf("id").forGetter(Quest::getId),
+            Codec.STRING.fieldOf("name").forGetter(Quest::getName),
+            Codec.MATERIAL.optionalFieldOf("icon", Material.PAPER).forGetter(Quest::getIcon),
+            Codec.listOf(Codec.STRING).optionalFieldOf("description", new ArrayList<>()).forGetter(Quest::getDescription),
+            Codec.listOf(QuestRequirement.CODEC).optionalFieldOf("requirements", new ArrayList<>()).forGetter(Quest::getRequirements),
+            Codec.unboundedMap(QuestObjective.CODEC).optionalFieldOf("objectives", new HashMap<>()).forGetter(Quest::getObjectives),
+            Codec.listOf(QuestReward.CODEC).fieldOf("rewards").forGetter(Quest::getRewards),
+            Quest::new
+    );
+
+    public static final Codec<Quest> REFERENCE_CODEC = Codec.STRING.comapFlatMap(
+            id -> {
+                Quest q = Registries.QUEST.get(id);
+                return q != null ? DataResult.success(q) : DataResult.error("Unknown quest: " + id);
+            },
+            Quest::getId
+    );
+
     private final String id;
     private final String name;
     private final Material icon;

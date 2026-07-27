@@ -9,6 +9,9 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.TextDisplay;
+import org.bukkit.util.Transformation;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public class DamageDisplayUtils {
 
@@ -23,10 +26,12 @@ public class DamageDisplayUtils {
 
         TextDisplay display = hitLocation.getWorld().spawn(hitLocation, TextDisplay.class, entity -> {
             entity.setPersistent(false);
-
+            Transformation transformation = entity.getTransformation();
+            Transformation newScale = new Transformation(transformation.getTranslation(), transformation.getLeftRotation(), transformation.getScale().mul(0.8f), transformation.getRightRotation());
+            entity.setTransformation(newScale);
             entity.text(text);
             entity.setBillboard(Display.Billboard.CENTER);
-            entity.setBackgroundColor(Color.fromARGB(0, 0, 0, 0));
+            entity.setBackgroundColor(Color.fromARGB(50, 0, 0, 0));
             entity.setShadowed(true);
         });
 

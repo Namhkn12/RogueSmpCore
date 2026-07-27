@@ -3,6 +3,7 @@ package com.roguesmp.effect.impl;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.effect.SmpEffect;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 public class ResistanceEffect extends SmpEffect {
@@ -26,6 +28,19 @@ public class ResistanceEffect extends SmpEffect {
             DamageType.PROJECTILE_ABILITY,
             DamageType.BLAST,
             DamageType.MAGIC);
+
+    public static final Codec<ResistanceEffect> CODEC = Codec.composite(
+            SmpEffect.BASE_CODEC.forGetter(SmpEffect::getBaseProperties),
+            Codec.DOUBLE.fieldOf("value").forGetter(ResistanceEffect::getMagnitude),
+            Codec.listOf(Codec.enumOf(DamageType.class))
+                    .optionalFieldOf("allowed_damage_types", List.copyOf(DEFAULT_DAMAGE_TYPE))
+                    .forGetter(effect -> List.copyOf(effect.allowedDamageType)),
+            (base, value, damageTypesList) -> new ResistanceEffect(
+                    base,
+                    value,
+                    damageTypesList.isEmpty() ? EnumSet.noneOf(DamageType.class) : EnumSet.copyOf(damageTypesList)
+            )
+    );
 
     private final Set<DamageType> allowedDamageType;
     private final double value;
@@ -44,6 +59,12 @@ public class ResistanceEffect extends SmpEffect {
      */
     public ResistanceEffect(int duration, double value, DeathBehavior deathBehavior) {
         this(duration, value, deathBehavior, DEFAULT_DAMAGE_TYPE);
+    }
+
+    public ResistanceEffect(BaseProperties base, double value, Set<DamageType> allowedDamageType) {
+        super(ID, base);
+        this.value = value;
+        this.allowedDamageType = EnumSet.copyOf(allowedDamageType);
     }
 
     @Override

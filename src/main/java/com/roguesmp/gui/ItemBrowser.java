@@ -1,9 +1,11 @@
 package com.roguesmp.gui;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.registry.ItemRegistry;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -20,7 +22,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +42,7 @@ public class ItemBrowser extends BaseGui {
     public ItemBrowser() {
         super(Utils.fromString("Item Browser"), 6);
 
-        this.allEntries = new ArrayList<>(ItemRegistry.getInstance().getRegistry().entrySet());
+        this.allEntries = new ArrayList<>(Registries.ITEM.getAll().entrySet());
         this.allEntries.sort(Map.Entry.comparingByKey());
         this.filteredEntries = new ArrayList<>(allEntries);
 
@@ -226,7 +227,7 @@ public class ItemBrowser extends BaseGui {
                         }))
                 .withSubcommand(new CommandAPICommand("reload")
                         .executesPlayer((player1, commandArguments) -> {
-                            Utils.runLater(() -> ItemRegistry.getInstance().loadFromFile());
+                            Utils.runLater(() -> Registries.ITEM.loadFrom(RogueSmpCore.getInstance()));
                         }))
                 .register();
     }

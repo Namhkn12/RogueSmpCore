@@ -1,6 +1,7 @@
 package com.roguesmp.effect.impl;
 
 import com.google.gson.JsonObject;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.SmpEffect;
@@ -22,6 +23,13 @@ import org.jetbrains.annotations.Nullable;
 public class SpeedEffect extends SmpEffect {
     public static final String EFFECT_ID = "speed";
 
+    public static final Codec<SpeedEffect> CODEC = Codec.composite(
+            SmpEffect.BASE_CODEC.forGetter(SmpEffect::getBaseProperties),
+            Codec.DOUBLE.fieldOf("value").forGetter(SpeedEffect::getMagnitude),
+            Codec.STRING.fieldOf("modifierId").forGetter(SpeedEffect::getModifierId),
+            SpeedEffect::new
+    );
+
     private final double value;
     private final String modifierId;
 
@@ -37,6 +45,12 @@ public class SpeedEffect extends SmpEffect {
         this.modifierId = modifierId;
     }
 
+    public SpeedEffect(BaseProperties baseProperties, double value, String modifierId) {
+        super(EFFECT_ID, baseProperties);
+        this.value = value;
+        this.modifierId = modifierId;
+    }
+
     @Override
     public double getMagnitude() {
         return value;
@@ -45,6 +59,10 @@ public class SpeedEffect extends SmpEffect {
     @Override
     public boolean isPersistent() {
         return true;
+    }
+
+    public String getModifierId() {
+        return modifierId;
     }
 
     @Override

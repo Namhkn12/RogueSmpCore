@@ -9,7 +9,7 @@ import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.player.ability.trigger.AbilityTrigger;
-import com.roguesmp.registry.ability.AbilityRegistry;
+import com.roguesmp.registry.ability.AbilityInfoRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
@@ -74,7 +74,7 @@ public class AbilityLoadout {
                 if (id == null) continue;
 
                 int level = unlocked.getOrDefault(id, 1);
-                Ability ability = AbilityRegistry.getInstance().createInstance(id, smpPlayer, level);
+                Ability ability = AbilityInfoRegistry.createInstance(id, smpPlayer, level);
 
                 if (ability != null) {
                     // Update internal map only (to avoid redundant dirty-flag triggers in PlayerData)

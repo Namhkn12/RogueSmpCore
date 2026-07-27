@@ -1,6 +1,7 @@
 package com.roguesmp.item.component.impl;
 
 import com.roguesmp.annotation.GsonIgnore;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ItemComponent;
@@ -13,12 +14,13 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.List;
 
 public final class DurabilityComponent implements ItemComponent {
 
     public static final NamespacedKey DURABILITY_KEY = new NamespacedKey(Keys.GLOBAL_NAMESPACE, "durability");
+
+    public static final Codec<DurabilityComponent> CODEC = Codec.INT.xmap(DurabilityComponent::new, DurabilityComponent::maxDurability);
 
     private final int maxDurability;
 

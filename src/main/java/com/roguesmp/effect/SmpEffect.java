@@ -2,7 +2,10 @@ package com.roguesmp.effect;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.MapCodec;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -12,6 +15,33 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEffect, Cloneable {
+
+    public static final Codec<SmpEffect> CODEC = Codec.dispatch(
+            "id",
+            SmpEffect::getEffectID,
+            Codec.STRING,
+            Registries.EFFECT_CODEC::getOrThrow
+    );
+
+    /**
+     * A record of common SmpEffect attribute to pass into subclasses codec.
+     */
+    public record BaseProperties(
+            int duration,
+            DeathBehavior deathBehavior,
+            boolean display,
+            boolean displayTime
+    ) {}
+
+    public static final MapCodec<BaseProperties> BASE_CODEC = Codec.composite(
+            Codec.INT.fieldOf("duration").forGetter(BaseProperties::duration),
+            Codec.enumOf(DeathBehavior.class)
+                    .optionalFieldOf("death_behavior", DeathBehavior.REMOVE_ON_DEATH)
+                    .forGetter(BaseProperties::deathBehavior),
+            Codec.BOOLEAN.optionalFieldOf("display", true).forGetter(BaseProperties::display),
+            Codec.BOOLEAN.optionalFieldOf("display_time", true).forGetter(BaseProperties::displayTime),
+            BaseProperties::new
+    );
 
     protected int duration;
     private final String effectID;
@@ -30,6 +60,15 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
         this.duration = duration;
         this.effectID = effectID;
         this.deathBehavior = DeathBehavior.REMOVE_ON_DEATH;
+    }
+
+    // Constructor accepting BaseProperties
+    public SmpEffect(String effectID, BaseProperties base) {
+        this.duration = base.duration();
+        this.effectID = effectID;
+        this.deathBehavior = base.deathBehavior();
+        this.display = base.display();
+        this.displayTime = base.displayTime();
     }
 
     /**
@@ -93,6 +132,10 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
     public boolean tickDuration(int ticks) {
         duration -= ticks;
         return duration <= 0;
+    }
+
+    public BaseProperties getBaseProperties() {
+        return new BaseProperties(duration, deathBehavior, display, displayTime);
     }
 
     public int getDuration() {

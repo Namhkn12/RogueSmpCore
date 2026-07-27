@@ -1,12 +1,10 @@
 package com.roguesmp.constant;
 
-import com.google.common.reflect.TypeToken;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.item.component.ComponentKey;
-import com.roguesmp.registry.ItemComponentCodecRegistry;
+import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.item.component.impl.*;
-import com.roguesmp.item.component.serialize.ComponentCodec;
-
-import java.util.List;
+import com.roguesmp.registry.Registries;
 
 public class ComponentKeys {
 
@@ -26,31 +24,29 @@ public class ComponentKeys {
     public static final ComponentKey<DurabilityRepairComponent> DURABILITY_REPAIR;
 
     static {
-        ITEM_NAME = ItemComponentCodecRegistry.register("name",
-                ComponentCodec.singleArg(String.class, NameComponent::new, NameComponent::value));
-        STACK_SIZE = ItemComponentCodecRegistry.register("stack_size",
-                ComponentCodec.singleArg(Integer.class, StackSizeComponent::new, StackSizeComponent::size));
-        ENCHANT = ItemComponentCodecRegistry.register("enchant", EnchantComponent.class);
-        ATTRIBUTE = ItemComponentCodecRegistry.register("attribute", EquipAttributeComponent.class);
-        DURABILITY = ItemComponentCodecRegistry.register("durability",
-                ComponentCodec.singleArg(Integer.class, DurabilityComponent::new, DurabilityComponent::maxDurability));
-        DESCRIPTION = ItemComponentCodecRegistry.register("description",
-                ComponentCodec.singleArg(new TypeToken<List<String>>(){}.getType(), DescriptionComponent::new, DescriptionComponent::description));
-        GEM_SOCKET = ItemComponentCodecRegistry.register("socket",
-                ComponentCodec.singleArg(Integer.class, GemSocketComponent::new, GemSocketComponent::getSocketCount));
-        GEM_DATA = ItemComponentCodecRegistry.register("gem_data", GemDataComponent.class);
-        CONSUMABLE = ItemComponentCodecRegistry.register("consumable", new ConsumableComponent.Codec());
-        POTION_CONTENT = ItemComponentCodecRegistry.register("potion_content", PotionContentComponent.class);
-        HEAD_SKIN = ItemComponentCodecRegistry.register("head_skin",
-                ComponentCodec.singleArg(String.class, PlayerHeadSkinComponent::new, PlayerHeadSkinComponent::getSkinId));
-        ITEM_MODEL = ItemComponentCodecRegistry.register("item_model",
-                ComponentCodec.singleArg(String.class, ItemModelComponent::new, ItemModelComponent::getModelKey));
+        ITEM_NAME = register("name", NameComponent.CODEC);
+        STACK_SIZE = register("stack_size", StackSizeComponent.CODEC);
+        ENCHANT = register("enchant", EnchantComponent.CODEC);
+        ATTRIBUTE = register("attribute", EquipAttributeComponent.CODEC);
+        DURABILITY = register("durability", DurabilityComponent.CODEC);
+        DESCRIPTION = register("description", DescriptionComponent.CODEC);
+        GEM_SOCKET = register("socket", GemSocketComponent.CODEC);
+        GEM_DATA = register("gem_data", GemDataComponent.CODEC);
+        CONSUMABLE = register("consumable", ConsumableComponent.CODEC);
+        POTION_CONTENT = register("potion_content", PotionContentComponent.CODEC);
+        HEAD_SKIN = register("head_skin", PlayerHeadSkinComponent.CODEC);
+        ITEM_MODEL = register("item_model", ItemModelComponent.CODEC);
         BROKEN = new ComponentKey<>("broken"); //Transient so it has no CODEC.
-        DURABILITY_REPAIR = ItemComponentCodecRegistry.register("durability_repair",
-                ComponentCodec.singleArg(Integer.class, DurabilityRepairComponent::new, DurabilityRepairComponent::getAmount));
+        DURABILITY_REPAIR = register("durability_repair", DurabilityRepairComponent.CODEC);
     }
 
     public static void loadClass() {
 
+    }
+
+    public static <T extends ItemComponent> ComponentKey<T> register(String id, Codec<T> codec) {
+        ComponentKey<T> key = new ComponentKey<>(id);
+        Registries.ITEM_COMPONENT_CODEC.register(id, codec);
+        return key;
     }
 }

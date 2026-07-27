@@ -1,9 +1,5 @@
-package com.roguesmp.registry;
+package com.roguesmp.item.modifier;
 
-import com.roguesmp.item.modifier.BrokenModifier;
-import com.roguesmp.item.modifier.EnchantAttributeModifier;
-import com.roguesmp.item.modifier.GemModifier;
-import com.roguesmp.item.modifier.ItemModifier;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;

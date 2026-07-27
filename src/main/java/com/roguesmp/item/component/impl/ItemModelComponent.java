@@ -1,5 +1,6 @@
 package com.roguesmp.item.component.impl;
 
+import com.roguesmp.codec.Codec;
 import com.roguesmp.context.ItemDataContext;
 import com.roguesmp.item.component.ItemComponent;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -8,9 +9,12 @@ import org.jetbrains.annotations.NotNull;
 
 public class ItemModelComponent implements ItemComponent {
 
-    private final String modelKey;
+    public static final Codec<ItemModelComponent> CODEC = Codec.KEY
+            .xmap(ItemModelComponent::new, ItemModelComponent::getModelKey);
 
-    public ItemModelComponent(String modelKey) {
+    private final Key modelKey;
+
+    public ItemModelComponent(Key modelKey) {
         this.modelKey = modelKey;
     }
 
@@ -21,10 +25,10 @@ public class ItemModelComponent implements ItemComponent {
 
     @Override
     public void modifyStack(ItemDataContext context) {
-        context.newStack().setData(DataComponentTypes.ITEM_MODEL, Key.key(modelKey));
+        context.newStack().setData(DataComponentTypes.ITEM_MODEL, modelKey);
     }
 
-    public String getModelKey() {
+    public Key getModelKey() {
         return modelKey;
     }
 }

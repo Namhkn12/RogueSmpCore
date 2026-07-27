@@ -1,6 +1,7 @@
 package com.roguesmp.quest.objective;
 
 import com.google.gson.JsonObject;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.ObjectiveProgress;
@@ -16,7 +17,14 @@ import java.util.List;
 
 public class KillMobObjective implements QuestObjective {
 
+    public static final String TYPE_KEY = "kill_mob";
+
     public static final class Progress implements ObjectiveProgress {
+        public static final Codec<Progress> CODEC = Codec.composite(
+                Codec.INT.optionalFieldOf("killed", 0).forGetter(Progress::getKilled),
+                Progress::new
+        );
+
         private int killed;
 
         public Progress(int killed) {
@@ -35,10 +43,20 @@ public class KillMobObjective implements QuestObjective {
         public boolean isDefault() {
             return killed == 0;
         }
+
+        @Override
+        public String getTypeId() {
+            return TYPE_KEY;
+        }
     }
 
-    private final String mobId;
+    public static final Codec<KillMobObjective> CODEC = Codec.composite(
+            Codec.STRING.fieldOf("mobId").forGetter(KillMobObjective::getMobId),
+            Codec.INT.fieldOf("amount").forGetter(KillMobObjective::getAmount),
+            KillMobObjective::new
+    );
 
+    private final String mobId;
     private final int amount;
 
     public KillMobObjective(String mobId, int amount) {
@@ -80,16 +98,16 @@ public class KillMobObjective implements QuestObjective {
     }
 
     @Override
-    public JsonObject serializeProgress(ObjectiveProgress progress) {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("killed", ((Progress) progress).killed);
-        return jsonObject;
+    public String getTypeId() {
+        return TYPE_KEY;
     }
 
-    @Override
-    public Progress deserializeProgress(JsonObject data) {
-        int killed = data.get("killed") == null ? 0 : data.get("killed").getAsInt();
-        return new Progress(killed);
+    public int getAmount() {
+        return amount;
+    }
+
+    public String getMobId() {
+        return mobId;
     }
 
     @Override

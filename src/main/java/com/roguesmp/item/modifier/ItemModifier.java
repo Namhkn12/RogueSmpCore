@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  * </p>
  * <p>
  * <strong>Execution Order:</strong> Modifiers are processed sequentially based on their
- * registration order in {@link com.roguesmp.registry.ModifierRegistry}.
+ * registration order in {@link ModifierRegistry}.
  * </p>
  */
 public interface ItemModifier {

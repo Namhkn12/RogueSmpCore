@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class IslandRegionManager {
-    private static final int BORDER_DIAMETER = 250;
+    private static final int BORDER_DIAMETER = 160;
     private static final String REGION_PREFIX = "island_";
 
     /**

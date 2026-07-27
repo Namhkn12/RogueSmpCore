@@ -1,5 +1,6 @@
 package com.roguesmp.item.component.impl;
 
+import com.roguesmp.codec.Codec;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.utils.Utils;
@@ -9,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class DurabilityRepairComponent implements ItemComponent {
+
+    public static final Codec<DurabilityRepairComponent> CODEC = Codec.INT.xmap(DurabilityRepairComponent::new, DurabilityRepairComponent::getAmount);
 
     private final int amount;
 

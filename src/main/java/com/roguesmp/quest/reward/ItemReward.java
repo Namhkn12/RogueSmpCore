@@ -1,5 +1,6 @@
 package com.roguesmp.quest.reward;
 
+import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.impl.NameComponent;
@@ -18,6 +19,12 @@ import java.util.List;
 import java.util.Map;
 
 public class ItemReward implements QuestReward {
+
+    public static final String TYPE_KEY = "item";
+    public static final Codec<ItemReward> CODEC = Codec.composite(
+            Codec.unboundedMap(Codec.INT).fieldOf("item").forGetter(ItemReward::getItems),
+            ItemReward::new
+    );
 
     private final Map<String, Integer> items;
 
@@ -56,6 +63,11 @@ public class ItemReward implements QuestReward {
         });
 
         return displayList;
+    }
+
+    @Override
+    public String getTypeId() {
+        return TYPE_KEY;
     }
 
     @Override

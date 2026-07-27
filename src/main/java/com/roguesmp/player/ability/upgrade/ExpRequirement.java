@@ -1,5 +1,6 @@
 package com.roguesmp.player.ability.upgrade;
 
+import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
@@ -10,12 +11,23 @@ import org.bukkit.entity.Player;
 import java.util.Objects;
 
 public final class ExpRequirement implements UpgradeRequirement {
+
+    public static final String TYPE_KEY = "exp";
+
+    public static final Codec<ExpRequirement> CODEC = Codec.INT.fieldOf("level")
+            .xmap(ExpRequirement::new, ExpRequirement::getLevel).codec();
+
     private final int level;
     private final int expCost;
 
     public ExpRequirement(int level) {
         this.level = level;
         expCost = PlayerUtils.getExpFromLevel(level);
+    }
+
+    @Override
+    public String getTypeId() {
+        return TYPE_KEY;
     }
 
     @Override

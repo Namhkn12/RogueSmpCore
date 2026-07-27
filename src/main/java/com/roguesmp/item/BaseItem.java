@@ -1,14 +1,18 @@
 package com.roguesmp.item;
 
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.DataResult;
 import com.roguesmp.item.component.ComponentKey;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.registry.Registries;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -19,6 +23,28 @@ public class BaseItem {
     private final Material base;
     private final boolean unique;
     private final Map<String, ItemComponent> components;
+
+    public static final Codec<BaseItem> CODEC = Codec.composite(
+            Codec.STRING.fieldOf("id").forGetter(BaseItem::getId),
+            Codec.MATERIAL.fieldOf("base").forGetter(BaseItem::getBase),
+            Codec.BOOLEAN.optionalFieldOf("unique", false).forGetter(BaseItem::isUnique),
+            Codec.<ItemComponent>dispatchedMap(Registries.ITEM_COMPONENT_CODEC::getOrThrow)
+                    .optionalFieldOf("components", new HashMap<>())
+                    .forGetter(BaseItem::getComponents),
+            BaseItem::new
+    );
+
+    /**
+     * Codec for referencing an already-registered BaseItem by id (e.g. from another definition's
+     * JSON), instead of embedding a full item definition inline.
+     */
+    public static final Codec<BaseItem> REFERENCE_CODEC = Codec.STRING.comapFlatMap(
+            id -> {
+                BaseItem item = Registries.ITEM.get(id);
+                return item != null ? DataResult.success(item) : DataResult.error("Unknown item: " + id);
+            },
+            BaseItem::getId
+    );
 
     public BaseItem(String id, Material base, boolean unique, Map<String, ItemComponent> components) {
         this.id = id;

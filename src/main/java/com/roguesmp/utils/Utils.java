@@ -1,11 +1,8 @@
 package com.roguesmp.utils;
 
 import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.annotation.GsonIgnore;
-import com.roguesmp.item.component.ItemComponent;
-import com.roguesmp.item.component.serialize.ComponentMapCodec;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -13,7 +10,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.math.BigDecimal;
@@ -26,7 +22,6 @@ public class Utils {
     public static final Random RANDOM = Random.from(new SplittableRandom());
 
     public static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter( new TypeToken<Map<String, ItemComponent>>() {}.getType(), new ComponentMapCodec())
             .addSerializationExclusionStrategy(new ExclusionStrategy() {
                 @Override
                 public boolean shouldSkipField(FieldAttributes f) {

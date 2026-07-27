@@ -2,7 +2,7 @@ package com.roguesmp.npc;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.Keys;
-import com.roguesmp.registry.npc.NpcRegistry;
+import com.roguesmp.registry.Registries;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.StringArgument;
 import net.kyori.adventure.text.Component;
@@ -32,7 +32,7 @@ public class NpcManager {
         if (npcs.containsKey(entity.getUniqueId())) return null; //If already registered, won't process entity
         String id = entity.getPersistentDataContainer().get(Keys.NPC_ID, PersistentDataType.STRING);
         if (id == null) return null;
-        BaseNpc baseNpc = NpcRegistry.getInstance().getBase(id);
+        BaseNpc baseNpc = Registries.NPC.get(id);
         if (baseNpc == null) return null;
         return new SmpNpc(baseNpc, entity);
     }
@@ -72,7 +72,7 @@ public class NpcManager {
         new CommandAPICommand("smpnpc")
                 .withArguments(new StringArgument("id"))
                 .executesPlayer((sender, args) -> {
-                    BaseNpc npc = NpcRegistry.getInstance().getBase((String) args.get("id"));
+                    BaseNpc npc = Registries.NPC.get((String) args.get("id"));
                     if (npc != null) {
                         npc.spawn(sender.getLocation());
                         sender.sendMessage(Component.text("Spawned NPC", NamedTextColor.GREEN));
