@@ -2,9 +2,11 @@ package com.roguesmp.entity.boss.primordialslime;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageOperation;
+import com.roguesmp.constant.EntityComponentKeys;
 import com.roguesmp.entity.BaseEntity;
-import com.roguesmp.entity.BossBarManager;
 import com.roguesmp.entity.SmpEntity;
+import com.roguesmp.entity.component.impl.BossBarComponent;
+import com.roguesmp.entity.component.impl.SpellComponent;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.entity.spell.SpellManager;
 import com.roguesmp.event.DamageEvent;
@@ -34,7 +36,7 @@ public class PrimordialSlime extends SmpEntity {
     public static final String ID = "primordial_slime";
     public static final double ARENA_SIZE = 100;
 
-    private final Map<Integer, BossBarManager.BossHealthAction> phaseEvents = new HashMap<>();
+    private final Map<Integer, SpellComponent.PhaseManager.BossHealthAction> phaseEvents = new HashMap<>();
     private final Location altarLocation;
 
     private double defenseScaling;
@@ -54,9 +56,12 @@ public class PrimordialSlime extends SmpEntity {
 
     private boolean introFinished;
 
+    private final SpellComponent spellCasting;
 
     public PrimordialSlime(BaseEntity base, LivingEntity entity) {
         super(base, entity);
+        // Preserve a JSON-declared SpellComponent if one exists; only attach an empty one otherwise.
+        spellCasting = getOrCreate(EntityComponentKeys.SPELLS, () -> new SpellComponent(this));
         altarLocation = entity.getLocation();
         setupPhaseTriggers();
         defenseScaling = EntityUtils.healthScalingCoef(getParticipants().size(), 0.7, 0.65);
@@ -100,15 +105,12 @@ public class PrimordialSlime extends SmpEntity {
     }
 
     @Override
-    public void initialize() {
+    protected void onInitialized() {
         if (this.entity instanceof MagmaCube magmaCube) {
             magmaCube.setSize(6);
         }
-        // We DO NOT call super.initialize() yet because that starts spells immediately.
-        // Instead, we manually run the attribute/equipment setup.
-        base.processEntity(this.entity);
-
-        // Start the intro sequence
+        // Real spells don't start here - the intro sequence calls finishIntroduction(),
+        // which starts them once the reveal animation ends.
         playIntroduction();
     }
 
@@ -172,17 +174,15 @@ public class PrimordialSlime extends SmpEntity {
         getParticipants().forEach(player -> player.showTitle(Title.title(Component.text("Ma chất nguyên thủy", NamedTextColor.DARK_RED), Component.text(".......", Style.style(TextDecoration.OBFUSCATED)))));
 
         // Now we initialize the spells and the BossBar
-        BossBarManager bb = new BossBarManager(
-                entity, 25, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS, phaseEvents, true
-        );
+        spellCasting.setBossBar(new BossBarComponent(entity, 25, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS, true));
+        spellCasting.setPhaseManager(new SpellComponent.PhaseManager(phaseEvents, true));
 
         // Sync the BossBar to the existing tasks
-        this.startSpell(new SpellManager(phase1Actives), phase1Passives, 30, bb, 1, 1);
+        spellCasting.startSpell(new SpellManager(phase1Actives), phase1Passives, 30, 1, 1);
 
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_SLIME_JUMP, 2f, 0.5f);
         broadcastBossMessage(Component.text("Ma chất nguyên thủy đã thức tỉnh", NamedTextColor.GREEN));
 
-        this.initialized = true;
         this.introFinished = true;
     }
 
@@ -213,7 +213,7 @@ public class PrimordialSlime extends SmpEntity {
         this.currentPhase = 2;
 
         // 1. Khóa Boss tại chỗ
-        this.changePhase(SpellManager.EMPTY, Collections.emptyList(), null);
+        spellCasting.changePhase(SpellManager.EMPTY, Collections.emptyList(), null);
         entity.setAI(false);
         entity.setInvulnerable(true);
         entity.setGravity(false);
@@ -305,15 +305,15 @@ public class PrimordialSlime extends SmpEntity {
     private void applyPhaseTwoSpells() {
         // Cập nhật SpellManager mới cho Phase 2 tại đây
         // Ví dụ: Tăng tốc độ hoặc thêm kỹ năng mới
-        this.changePhase(new SpellManager(phase2Active), phase2Passive, null);
-        this.forceCastSpell(DoomTotemSpell.class);
+        spellCasting.changePhase(new SpellManager(phase2Active), phase2Passive, null);
+        spellCasting.forceCastSpell(DoomTotemSpell.class);
     }
 
     private void enterPhaseThree() {
         this.currentPhase = 3;
 
         // 1. Khóa Boss hoàn toàn
-        this.changePhase(SpellManager.EMPTY, Collections.emptyList(), null);
+        spellCasting.changePhase(SpellManager.EMPTY, Collections.emptyList(), null);
         entity.setAI(false);
         entity.setInvulnerable(true);
         entity.setGravity(false);
@@ -394,8 +394,8 @@ public class PrimordialSlime extends SmpEntity {
 
     private void applyPhaseThreeSpells() {
 
-        this.changePhase(new SpellManager(phase3Active), phase3Passive, null);
-        this.forceCastSpell(MeteorRainSpell.class);
+        spellCasting.changePhase(new SpellManager(phase3Active), phase3Passive, null);
+        spellCasting.forceCastSpell(MeteorRainSpell.class);
     }
 
     public void broadcastBossMessage(Component text) {
@@ -405,6 +405,6 @@ public class PrimordialSlime extends SmpEntity {
     }
 
     private void spawnMinion() {
-        // Logic to spawn small slimes via your EntityRegistry
+        // Logic to spawn small slimes via EntityManager
     }
 }

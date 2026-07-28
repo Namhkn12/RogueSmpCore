@@ -2,6 +2,7 @@ package com.roguesmp.codec;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A specialized {@link Codec} that operates directly on key-value fields inside a map object,
@@ -69,6 +70,30 @@ public abstract class MapCodec<A> implements Codec<A> {
      */
     public Codec<A> codec() {
         return this;
+    }
+
+    /**
+     * A MapCodec with no fields of its own — decode always succeeds by calling {@code instance},
+     * ignoring whatever else is in the object; encode contributes nothing. Useful for a dispatch
+     * case (see {@link Codec#dispatch}) that only needs its type key and no other data, e.g. a
+     * "no configurable params" spell/effect/requirement variant.
+     *
+     * @param <A> the type produced
+     * @param instance supplies the (typically stateless/singleton-shaped) value to decode to
+     * @return a MapCodec that reads/writes no fields
+     */
+    public static <A> MapCodec<A> unit(Supplier<A> instance) {
+        return new MapCodec<>() {
+            @Override
+            public <O> DataResult<O> encodeFields(A input, O targetMap, DynamicOps<O> ops) {
+                return DataResult.success(targetMap);
+            }
+
+            @Override
+            public <O> DataResult<A> decodeFields(O inputMap, DynamicOps<O> ops) {
+                return DataResult.success(instance.get());
+            }
+        };
     }
 
     // --- BINDING AND COMPOSITES ---

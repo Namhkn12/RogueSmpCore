@@ -1,9 +1,15 @@
 package com.roguesmp.entity;
 
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
+import com.roguesmp.RogueSmpCore;
+import com.roguesmp.constant.EntityComponentKeys;
 import com.roguesmp.constant.Keys;
-import com.roguesmp.registry.entity.EntityRegistry;
+import com.roguesmp.entity.component.impl.SpellComponent;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.ArgumentSuggestions;
+import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -16,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class EntityManager {
@@ -23,10 +30,10 @@ public class EntityManager {
 
     private final Map<UUID, Map<String, Object>> extraData = new HashMap<>();
     private final Map<UUID, SmpEntity> spawnedEntities = new HashMap<>();
-    private final EntityRegistry entityRegistry;
+    private final RogueSmpCore plugin;
 
-    public EntityManager(EntityRegistry entityRegistry) {
-        this.entityRegistry = entityRegistry;
+    private EntityManager(RogueSmpCore plugin) {
+        this.plugin = plugin;
     }
 
     public void unload(Entity entity) {
@@ -49,15 +56,15 @@ public class EntityManager {
         String entityId = entity.getPersistentDataContainer().get(Keys.MOB_ID, PersistentDataType.STRING);
         if (entityId == null) return;
         // Remove special state entity (boss)
-        if (entityRegistry.isSpecialEntity(entityId)) {
+        if (isSpecialEntity(entityId)) {
             Utils.runLater(entity::remove);
             return;
         }
-        BaseEntity base = entityRegistry.getBaseEntity(entityId);
+        BaseEntity base = getBaseEntity(entityId);
         if (base == null) return;
 
         // Wrap, Init, and Register for world-loaded entities
-        SmpEntity smpEntity = entityRegistry.wrap(base, living);
+        SmpEntity smpEntity = wrap(base, living);
         smpEntity.initialize();
         this.register(smpEntity);
     }
@@ -70,7 +77,10 @@ public class EntityManager {
             Location playerLoc = event.getPlayer().getLocation();
             Location entityLoc = smpEntity.entity.getLocation();
             if (!playerLoc.getWorld().getUID().equals(entityLoc.getWorld().getUID())) return;
-            if (playerLoc.distanceSquared(entityLoc) > smpEntity.getDetectionRange() * smpEntity.getDetectionRange()) return;
+
+            SpellComponent spellCasting = smpEntity.getComponent(EntityComponentKeys.SPELLS);
+            int detectionRange = spellCasting != null ? spellCasting.getDetectionRange() : 0;
+            if (playerLoc.distanceSquared(entityLoc) > detectionRange * detectionRange) return;
             smpEntity.onNearbyPlayerDeath(event);
         }
     }
@@ -114,8 +124,40 @@ public class EntityManager {
         return spawnedEntities.containsKey(living.getUniqueId());
     }
 
-    public static void init(EntityRegistry entityRegistry) {
-        INSTANCE = new EntityManager(entityRegistry);
+    public @Nullable SmpEntity spawnEntity(String id, Location location) {
+        BaseEntity base = Registries.ENTITY.get(id);
+        if (base == null) return null;
+        return base.spawn(location);
+    }
+
+    /**
+     * Wrap an Entity within SmpEntity, or its subclasses
+     */
+    public SmpEntity wrap(BaseEntity base, LivingEntity living) {
+        // Default to standard SmpEntity if no special factory exists
+        EntityFactory factory = Registries.ENTITY_FACTORY.get(base.getId());
+        return factory != null ? factory.create(base, living) : new SmpEntity(base, living);
+    }
+
+    public boolean isSpecialEntity(String id) {
+        return Registries.ENTITY_FACTORY.get(id) != null;
+    }
+
+    public BaseEntity getBaseEntity(String id) {
+        return Registries.ENTITY.get(id);
+    }
+
+    public Set<String> getAllIds() {
+        return Registries.ENTITY.getAll().keySet();
+    }
+
+    public void reload() {
+        Registries.ENTITY.clear();
+        Registries.ENTITY.loadFrom(plugin);
+    }
+
+    public static void init(RogueSmpCore plugin) {
+        INSTANCE = new EntityManager(plugin);
     }
 
     public static EntityManager getInstance() {
@@ -123,5 +165,42 @@ public class EntityManager {
             throw new RuntimeException("EntityManager is null");
         }
         return INSTANCE;
+    }
+
+    public static void registerCommand() {
+
+        // Spawn command
+        new CommandAPICommand("smpentity")
+                .withArguments(
+                        new StringArgument("entity_id")
+                                .replaceSuggestions(ArgumentSuggestions.strings(info ->
+                                        EntityManager.getInstance().getAllIds().toArray(String[]::new)
+                                ))
+                )
+                .executesPlayer((player, args) -> {
+
+                    String id = (String) args.get("entity_id");
+
+                    BaseEntity base = EntityManager.getInstance().getBaseEntity(id);
+
+                    if (base == null) {
+                        player.sendMessage("Id not found");
+                        return;
+                    }
+
+                    base.spawn(player.getLocation());
+
+                })
+                .register();
+
+
+        new CommandAPICommand("smpentityreload")
+                .executes((sender, args) -> {
+
+                    getInstance().reload();
+
+                    sender.sendMessage("§aEntity registry reloaded.");
+
+                }).register();
     }
 }

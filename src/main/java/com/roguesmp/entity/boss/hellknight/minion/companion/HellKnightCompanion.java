@@ -20,15 +20,8 @@ public class HellKnightCompanion extends HellKnightMinion {
     }
 
     @Override
-    public void initialize() {
-        if (initialized) return; // Safety check
-
-        // This triggers the logic inside BaseEntity to call startSpell()
-        base.processEntity(this.entity);
-
-        this.startSpell(new SpellManager(List.of(new InfernalTremor(entity, 14, 3, 30,40, 1.2, 30))), Collections.emptyList(), 50, null);
-
-        this.initialized = true;
+    protected void onInitialized() {
+        spellCasting.startSpell(new SpellManager(List.of(new InfernalTremor(entity, 14, 3, 30,40, 1.2, 30))), Collections.emptyList(), 50);
     }
 
     public void setAi(boolean state) {

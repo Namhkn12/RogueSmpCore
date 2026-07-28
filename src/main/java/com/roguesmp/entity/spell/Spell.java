@@ -3,11 +3,8 @@ package com.roguesmp.entity.spell;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.SpellCastEvent;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.*;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -133,11 +130,6 @@ public abstract class Spell implements Cloneable {
     @FunctionalInterface
     public interface GetSpellTargets<V extends Entity> {
         List<? extends V> getTargets();
-    }
-
-    @FunctionalInterface
-    public interface SpellParamReader {
-        @NotNull Spell fromParams(@Nullable Map<String, Object> params, LivingEntity owner);
     }
 
 }

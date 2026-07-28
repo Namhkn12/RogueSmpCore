@@ -1,5 +1,6 @@
 package com.roguesmp.entity;
 
+import com.roguesmp.codec.Codec;
 import com.roguesmp.registry.SkinRegistry;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -21,6 +22,19 @@ import java.util.List;
  * A class to help decorate our entities <3
  */
 public class EntityEquipment {
+
+    public static final Codec<EntityEquipment> CODEC = Codec.composite(
+            Codec.MATERIAL.fieldOf("material").forGetter(EntityEquipment::getMaterial),
+            Codec.STRING.optionalFieldOf("displayName", () -> null).forGetter(EntityEquipment::getDisplayName),
+            Codec.listOf(Codec.STRING).optionalFieldOf("lore", (List<String>) null).forGetter(EntityEquipment::getLore),
+            Codec.BOOLEAN.optionalFieldOf("enchantGlint", false).forGetter(EntityEquipment::isEnchantGlint),
+            Codec.STRING.optionalFieldOf("trimMaterial", (String) null).forGetter(EntityEquipment::getTrimMaterial),
+            Codec.STRING.optionalFieldOf("trimPattern", (String) null).forGetter(EntityEquipment::getTrimPattern),
+            Codec.STRING.optionalFieldOf("dyeColor", (String) null).forGetter(EntityEquipment::getDyeColor),
+            Codec.STRING.optionalFieldOf("headSkin", (String) null).forGetter(EntityEquipment::getHeadSkin),
+            EntityEquipment::new
+    );
+
     private final Material material;
     // Usually only entity weapon need displayName and lore
     private final String displayName;
@@ -100,5 +114,21 @@ public class EntityEquipment {
 
     public boolean isEnchantGlint() {
         return enchantGlint;
+    }
+
+    public @Nullable String getTrimMaterial() {
+        return trimMaterial;
+    }
+
+    public @Nullable String getTrimPattern() {
+        return trimPattern;
+    }
+
+    public @Nullable String getDyeColor() {
+        return dyeColor;
+    }
+
+    public @Nullable String getHeadSkin() {
+        return headSkin;
     }
 }

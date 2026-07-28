@@ -8,7 +8,7 @@ import com.roguesmp.dungeon.data.runtime.Party;
 import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.manager.RoomManager;
 import com.roguesmp.dungeon.service.IPartyService;
-import com.roguesmp.registry.entity.EntityRegistry;
+import com.roguesmp.entity.EntityManager;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -44,7 +44,7 @@ public class BossRoomController {
                                                                 .orElse("fallback here");
         /*Spawn boss*/
         /*Todo: Should have a manager for spawn boss effect */
-        EntityRegistry.getInstance().spawnEntity(bossId, spawn.getLocation().add(0, 3, 0));
+        EntityManager.getInstance().spawnEntity(bossId, spawn.getLocation().add(0, 3, 0));
     }
 
     public void handleTriggerBossRoom(Player player, Block trigger){
@@ -65,7 +65,7 @@ public class BossRoomController {
                 .findFirst()
                 .orElse("fallback here");
         /*Call spawn boss here*/
-        EntityRegistry.getInstance().spawnEntity(bossId, trigger.getLocation().add(0.5 , 3, 0.5));
+        EntityManager.getInstance().spawnEntity(bossId, trigger.getLocation().add(0.5 , 3, 0.5));
         trigger.setType(Material.SPAWNER);
     }
 }

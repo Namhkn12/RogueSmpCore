@@ -1,9 +1,11 @@
 package com.roguesmp.entity.boss.hellknight.minion;
 
+import com.roguesmp.constant.EntityComponentKeys;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.boss.hellknight.HellKnight;
+import com.roguesmp.entity.component.impl.SpellComponent;
 import com.roguesmp.event.DamageEvent;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -17,9 +19,18 @@ public class HellKnightMinion extends SmpEntity {
 
     private HellKnight mainBoss;
 
+    /**
+     * Every minion drives its own spells directly in code (see each subclass's
+     * {@link #onInitialized()} override) rather than via JSON - attached here once so subclasses
+     * don't each need their own field/attachment boilerplate.
+     */
+    protected final SpellComponent spellCasting;
+
     public HellKnightMinion(BaseEntity base, LivingEntity entity) {
         super(base, entity);
         entity.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, Integer.MAX_VALUE, 1));
+        // Preserve a JSON-declared SpellComponent if one exists; only attach an empty one otherwise.
+        spellCasting = getOrCreate(EntityComponentKeys.SPELLS, () -> new SpellComponent(this));
     }
 
     public @Nullable HellKnight getMainBoss() {

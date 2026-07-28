@@ -3,7 +3,6 @@ package com.roguesmp.utils;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
-import com.roguesmp.registry.entity.EntityRegistry;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
@@ -103,6 +102,6 @@ public class EntityUtils {
     public static @Nullable BaseEntity getBaseEntity(Entity entity) {
         String id = entity.getPersistentDataContainer().get(Keys.MOB_ID, PersistentDataType.STRING);
         if (id == null) return null;
-        return EntityRegistry.getInstance().getBaseEntity(id);
+        return EntityManager.getInstance().getBaseEntity(id);
     }
 }

@@ -56,6 +56,10 @@ public class AbilityInfo<T extends Ability> {
         return this;
     }
 
+    public T createInstance(SmpPlayer smpPlayer, int level) {
+        return factory.apply(smpPlayer, level);
+    }
+
     public void bindTrigger(String actionKey, AbilityTrigger trigger) {
         this.triggerMap.put(trigger, actionKey);
     }
@@ -161,10 +165,6 @@ public class AbilityInfo<T extends Ability> {
 
     public Class<T> getAbilityClass() {
         return abilityClass;
-    }
-
-    public BiFunction<SmpPlayer, Integer, T> getFactory() {
-        return factory;
     }
 
     public AbilityType getType() {

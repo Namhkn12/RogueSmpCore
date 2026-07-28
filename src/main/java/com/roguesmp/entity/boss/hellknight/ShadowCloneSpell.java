@@ -2,11 +2,11 @@ package com.roguesmp.entity.boss.hellknight;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageType;
+import com.roguesmp.entity.EntityManager;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.boss.hellknight.minion.HellKnightMinion;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.event.DamageEvent;
-import com.roguesmp.registry.entity.EntityRegistry;
 import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.EntityUtils;
 import com.roguesmp.utils.Utils;
@@ -100,7 +100,7 @@ public class ShadowCloneSpell extends Spell {
     }
 
     private void spawnDifferentClone(Location spawnAt, String id) {
-        SmpEntity entity = EntityRegistry.getInstance().spawnEntity(id, spawnAt);
+        SmpEntity entity = EntityManager.getInstance().spawnEntity(id, spawnAt);
         if (entity == null) return;
         if (entity instanceof HellKnightMinion minion) {
             minion.setMainBoss(this.boss);

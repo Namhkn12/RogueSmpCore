@@ -1,7 +1,7 @@
 package com.roguesmp.entity.boss.hellknight.minion;
 
+import com.roguesmp.entity.EntityManager;
 import com.roguesmp.entity.spell.Spell;
-import com.roguesmp.registry.entity.EntityRegistry;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -32,7 +32,7 @@ public class SummonHordeSpell extends Spell {
     public void onDeath(EntityDeathEvent event) {
         Location location = owner.getLocation();
         for (int i = 0; i < amount; i++) {
-            EntityRegistry.getInstance().spawnEntity(hordeId, location);
+            EntityManager.getInstance().spawnEntity(hordeId, location);
         }
     }
 }

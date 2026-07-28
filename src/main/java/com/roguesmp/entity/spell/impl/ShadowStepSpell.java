@@ -1,6 +1,9 @@
 package com.roguesmp.entity.spell.impl;
 
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.MapCodec;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellParams;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
@@ -8,9 +11,18 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-import java.util.Map;
-
 public class ShadowStepSpell extends Spell {
+
+    public static final String TYPE_KEY = "shadow_step_spell";
+
+    public record Params() implements SpellParams {
+        public static final Codec<Params> CODEC = MapCodec.unit(Params::new).codec();
+
+        @Override
+        public String getTypeId() {
+            return TYPE_KEY;
+        }
+    }
 
     private final LivingEntity owner;
 
@@ -40,7 +52,7 @@ public class ShadowStepSpell extends Spell {
         return 50;
     }
 
-    public static ShadowStepSpell readParam(Map<String, Object> param, LivingEntity owner) {
+    public static ShadowStepSpell create(Params params, LivingEntity owner) {
         return new ShadowStepSpell(owner);
     }
 }
