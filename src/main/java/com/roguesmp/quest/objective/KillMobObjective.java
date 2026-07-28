@@ -3,10 +3,10 @@ package com.roguesmp.quest.objective;
 import com.google.gson.JsonObject;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.BaseEntity;
+import com.roguesmp.entity.EntityManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.ObjectiveProgress;
 import com.roguesmp.quest.QuestObjective;
-import com.roguesmp.registry.entity.EntityRegistry;
 import com.roguesmp.utils.EntityUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -66,7 +66,7 @@ public class KillMobObjective implements QuestObjective {
 
     @Override
     public List<Component> getDisplay(SmpPlayer smpPlayer, ObjectiveProgress progress) {
-        BaseEntity base = EntityRegistry.getInstance().getBaseEntity(mobId);
+        BaseEntity base = EntityManager.getInstance().getBaseEntity(mobId);
         String mobName = (base != null) ? base.getDisplayName() : mobId;
 
         String countColor = isCompleted(progress) ? "<gold>" : "<yellow>";
@@ -82,7 +82,7 @@ public class KillMobObjective implements QuestObjective {
     @Override
     public List<Component> getDisplay(SmpPlayer smpPlayer) {
 
-        BaseEntity base = EntityRegistry.getInstance().getBaseEntity(mobId);
+        BaseEntity base = EntityManager.getInstance().getBaseEntity(mobId);
         String mobName = (base != null) ? base.getDisplayName() : mobId;
 
         String displayString = String.format(

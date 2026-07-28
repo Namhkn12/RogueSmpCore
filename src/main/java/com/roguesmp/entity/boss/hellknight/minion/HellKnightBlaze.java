@@ -13,14 +13,7 @@ public class HellKnightBlaze extends HellKnightMinion {
     }
 
     @Override
-    public void initialize() {
-        if (initialized) return; // Safety check
-
-        // This triggers the logic inside BaseEntity to call startSpell()
-        base.processEntity(this.entity);
-
-        startSpell(new SpellManager(List.of(new InfernalBarrageSpell(this, 6, 20, 3, 30))), Collections.emptyList(), 40, null);
-
-        this.initialized = true;
+    protected void onInitialized() {
+        spellCasting.startSpell(new SpellManager(List.of(new InfernalBarrageSpell(this, 6, 20, 3, 30))), Collections.emptyList(), 40);
     }
 }

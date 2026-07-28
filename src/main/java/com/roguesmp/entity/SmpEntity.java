@@ -1,27 +1,23 @@
 package com.roguesmp.entity;
 
-import com.roguesmp.RogueSmpCore;
-import com.roguesmp.constant.DamageOperation;
-import com.roguesmp.constant.DamageType;
-import com.roguesmp.entity.spell.Spell;
-import com.roguesmp.entity.spell.SpellManager;
+import com.roguesmp.entity.component.EntityComponent;
+import com.roguesmp.entity.component.EntityComponentKey;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.SpellCastEvent;
-import com.roguesmp.utils.EntityUtils;
-import com.roguesmp.utils.PlayerUtils;
-import com.roguesmp.utils.Utils;
-import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.function.Supplier;
 
 /**
- * Represent a BaseEntity that is spawned in the world
+ * Represent a BaseEntity that is spawned in the world. Behavior lives entirely on this instance's
+ * own (copied) {@link EntityComponent}s - there is no separate mechanic layer, dispatch just
+ * forwards events to every component.
  */
 public class SmpEntity {
     public static final int PASSIVE_RUN_INTERVAL_DEFAULT = 5;
@@ -29,218 +25,79 @@ public class SmpEntity {
 
     protected final LivingEntity entity;
     protected final BaseEntity base;
-    private final RogueSmpCore plugin;
 
     protected boolean initialized;
-
-    private int detectionRange;
-    public SpellManager activeSpells;
-    private List<Spell> passiveSpells;
-    private boolean preventSameSpellTwiceInARow;
-    private @Nullable ScheduledTask taskPassive = null;
-    private @Nullable ScheduledTask taskActive = null;
     private boolean unloaded = false;
-    private int nextActiveTimer = 0;
     public boolean dead = false;
-    private int passiveIntervalTicks;
-    private @Nullable BossBarManager bossBar;
+
+    private final Map<String, EntityComponent> componentMap = new HashMap<>();
 
     public SmpEntity(BaseEntity base, LivingEntity entity) {
-        this.plugin = RogueSmpCore.getInstance();
         this.entity = entity;
         this.base = base;
-        activeSpells = SpellManager.EMPTY;
-        passiveSpells = Collections.emptyList();
+
+        for (Map.Entry<String, EntityComponent> entry : base.getComponents().entrySet()) {
+            componentMap.put(entry.getKey(), entry.getValue().copy());
+        }
     }
 
-    public void initialize() {
+    @SuppressWarnings("unchecked")
+    public @Nullable <T extends EntityComponent> T getComponent(EntityComponentKey<T> key) {
+        return (T) componentMap.get(key.id());
+    }
+
+    public @NotNull <T extends EntityComponent> T getOrCreate(EntityComponentKey<T> key, Supplier<T> supplier) {
+        T comp = getComponent(key);
+        if (comp == null) {
+            comp = supplier.get();
+            componentMap.put(key.id(), comp);
+        }
+        return comp;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends EntityComponent> T setComponent(EntityComponentKey<T> key, T component) {
+        return (T) componentMap.put(key.id(), component);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends EntityComponent> T unsetComponent(EntityComponentKey<T> key) {
+        return (T) componentMap.remove(key.id());
+    }
+
+    public <T extends EntityComponent> boolean hasComponent(EntityComponentKey<T> key) {
+        return componentMap.containsKey(key.id());
+    }
+
+    /**
+     * Runs this entity's one-time setup: applies components onto the raw living entity, then lets
+     * every (copied) component run its own spawn logic (e.g. {@code SpellComponent} building and
+     * starting JSON-declared spells). This is {@code final} so every entity gets the same
+     * guaranteed setup - subclasses that need extra startup (intro sequences, phase triggers, ...)
+     * should override {@link #onInitialized()} instead, not this method.
+     */
+    public final void initialize() {
         if (initialized) return; // Safety check
+        initialized = true;
 
-        // This triggers the logic inside BaseEntity to call startSpell()
         base.processEntity(this.entity);
-        base.processSpell(this);
+        // Snapshot first: a component's onSpawn (e.g. SpellComponent) may attach new components.
+        List.copyOf(componentMap.values()).forEach(component -> component.onSpawn(this));
 
-        this.initialized = true;
+        onInitialized();
     }
 
-    public void changePhase(SpellManager activeSpells,
-                            List<Spell> passiveSpells, @Nullable Consumer<LivingEntity> phaseAction) {
+    /**
+     * Called once, after component setup, right before this entity is registered with
+     * {@link EntityManager}. Override for boss/entity-specific startup instead of overriding
+     * {@link #initialize()} - the guard and base component setup always run first regardless.
+     */
+    protected void onInitialized() {
 
-        changePhase(activeSpells, passiveSpells, phaseAction, 0);
-    }
-
-    public void changePhase(SpellManager activeSpells,
-                            List<Spell> passiveSpells, @Nullable Consumer<LivingEntity> phaseAction, int spellDelay) {
-        if (phaseAction != null) {
-            phaseAction.accept(entity);
-        }
-        if (spellDelay > 0) {
-            if (taskActive != null) {
-                taskActive.cancel();
-            }
-            taskActive = entity.getScheduler().runAtFixedRate(
-                    plugin,
-                    task -> runActiveSpellTask(ACTIVE_RUN_INTERVAL_DEFAULT),
-                    this::unload,
-                    spellDelay,
-                    ACTIVE_RUN_INTERVAL_DEFAULT
-            );
-            if (taskPassive != null) {
-                taskPassive.cancel();
-            }
-            taskPassive = entity.getScheduler().runAtFixedRate(
-                    plugin,
-                    task -> runPassiveSpellTask(passiveIntervalTicks),
-                    this::unload,
-                    1L,
-                    passiveIntervalTicks
-            );
-        }
-        this.activeSpells.cancelAll(true);
-        this.activeSpells = activeSpells;
-        this.passiveSpells = passiveSpells;
-    }
-
-    public void changePassivePhase(List<Spell> passiveSpells) {
-        this.passiveSpells = passiveSpells;
-    }
-
-    public void startSpell(Spell activeSpell, int detectionRange) {
-        startSpell(activeSpell, detectionRange, null);
-    }
-
-    public void startSpell(Spell activeSpell, int detectionRange,
-                              @Nullable BossBarManager bossBar) {
-        startSpell(activeSpell, detectionRange, bossBar, 100);
-    }
-
-    public void startSpell(Spell activeSpell, int detectionRange,
-                              @Nullable BossBarManager bossBar, int spellDelay) {
-        startSpell(List.of(activeSpell), Collections.emptyList(), detectionRange, bossBar, spellDelay);
-    }
-
-    public void startSpell(List<Spell> activeSpells, List<Spell> passiveSpells,
-                              int detectionRange, @Nullable BossBarManager bossBar, int spellDelay) {
-        startSpell(new SpellManager(activeSpells), passiveSpells, detectionRange, bossBar, spellDelay);
-    }
-
-    public void startSpell(SpellManager activeSpells, List<Spell> passiveSpells, int detectionRange,
-                              @Nullable BossBarManager bossBar) {
-        startSpell(activeSpells, passiveSpells, detectionRange, bossBar, 100);
-    }
-
-    public void startSpell(SpellManager activeSpells, List<Spell> passiveSpells, int detectionRange,
-                              @Nullable BossBarManager bossBar, int spellDelay) {
-        startSpell(activeSpells, passiveSpells, detectionRange, bossBar, spellDelay, PASSIVE_RUN_INTERVAL_DEFAULT);
-    }
-
-    public void startSpell(SpellManager activeSpells, List<Spell> passiveSpells, int detectionRange,
-                              @Nullable BossBarManager bossBar, int spellDelay, int passiveIntervalTicks) {
-        startSpell(activeSpells, passiveSpells, detectionRange, bossBar, spellDelay, passiveIntervalTicks, false);
-    }
-
-    /* If detectionRange <= 0, will always run regardless of whether players are nearby */
-    public void startSpell(SpellManager activeSpells, List<Spell> passiveSpells,
-                           int detectionRange, @Nullable BossBarManager bossBar, int spellDelay,
-                           int passiveIntervalTicks, boolean preventSameSpellTwiceInARow) {
-        this.detectionRange = detectionRange;
-        this.bossBar = bossBar;
-        this.activeSpells = activeSpells;
-        this.passiveSpells = passiveSpells;
-        this.preventSameSpellTwiceInARow = preventSameSpellTwiceInARow;
-
-        this.passiveIntervalTicks = passiveIntervalTicks;
-        if (passiveSpells != null && !passiveSpells.isEmpty()) {
-            if (taskPassive != null) taskPassive.cancel();
-            taskPassive = entity.getScheduler().runAtFixedRate(
-                    plugin,
-                    task -> runPassiveSpellTask(passiveIntervalTicks),
-                    this::unload,
-                    1L,
-                    passiveIntervalTicks
-            );
-        }
-
-        if (activeSpells != null && !activeSpells.isEmpty()) {
-            if (taskActive != null) taskActive.cancel();
-            taskActive = entity.getScheduler().runAtFixedRate(
-                    plugin,
-                    task -> runActiveSpellTask(ACTIVE_RUN_INTERVAL_DEFAULT),
-                    this::unload,
-                    spellDelay,
-                    ACTIVE_RUN_INTERVAL_DEFAULT
-            );
-        }
-    }
-
-    private void runPassiveSpellTask(int passiveIntervalTicks) {
-        if (bossBar != null && !dead) {
-            bossBar.update();
-        }
-        if (detectionRange > 0 && PlayerUtils.playersInRange(entity.getLocation(), detectionRange, true).isEmpty()) {
-            return;
-        }
-        if (passiveSpells != null) {
-            for (Spell spell : passiveSpells) {
-                spell.run(passiveIntervalTicks);
-            }
-        }
-    }
-
-    private boolean activeDisabled = true;
-
-    private void runActiveSpellTask(int activeInterval) {
-        if (bossBar != null && !dead) {
-            bossBar.update();
-        }
-        nextActiveTimer -= activeInterval;
-
-        if (nextActiveTimer > 0) {
-            return;
-        }
-        if (detectionRange > 0 && PlayerUtils.playersInRange(entity.getLocation(), detectionRange, true).isEmpty()) {
-            if (!activeDisabled) {
-                activeDisabled = true;
-                activeSpells.cancelAll();
-            }
-
-            return;
-        }
-
-        activeDisabled = false;
-        nextActiveTimer = activeSpells.runNextSpell(preventSameSpellTwiceInARow);
-        Spell spell = activeSpells.getLastCastedSpell();
-        if (spell != null) {
-            SpellCastEvent event = new SpellCastEvent(entity, this, spell);
-            Bukkit.getPluginManager().callEvent(event);
-        }
-    }
-
-    public void forceCastRandomSpell() {
-        List<Spell> spells = activeSpells.getSpells();
-        if (!spells.isEmpty()) {
-            Spell spell = spells.get(Utils.RANDOM.nextInt(spells.size()));
-            forceCastSpell(spell.getClass());
-        }
-    }
-
-    public void forceCastSpell(Class<? extends Spell> spell) {
-        nextActiveTimer = activeSpells.forceCastSpell(spell);
-        Spell sp = activeSpells.getLastCastedSpell();
-        if (sp != null) {
-            SpellCastEvent event = new SpellCastEvent(entity, this, sp);
-            Bukkit.getPluginManager().callEvent(event);
-        } else {
-            RogueSmpCore.LOGGER.warn("Warning: Entity '{}' attempted to force cast '{}' but entity does not have this spell!", base.getId(), spell.toString());
-        }
     }
 
     public String getId() {
         return base.getId();
-    }
-
-    public int getDetectionRange() {
-        return detectionRange;
     }
 
     public LivingEntity getEntity() {
@@ -252,112 +109,48 @@ public class SmpEntity {
     }
 
     public void unload() {
-        if (taskPassive != null) {
-            taskPassive.cancel();
-        }
-
-        if (taskActive != null) {
-            taskActive.cancel();
-        }
-
         /* Make sure we don't accidentally call the main unload sequence twice */
         if (!unloaded) {
             unloaded = true;
-
-            activeSpells.cancelAll();
-
-            if (bossBar != null) {
-                bossBar.remove();
-            }
+            componentMap.values().forEach(component -> component.onUnload(this));
         }
     }
 
     public void onDamage(DamageEvent event) {
-        activeSpells.getSpells().forEach(spell -> {
-            spell.onDamage(event);
-        });
-        passiveSpells.forEach(spell -> {
-            spell.onDamage(event);
-        });
+        componentMap.values().forEach(component -> component.onDamage(event, this));
     }
 
     /*
      * Entity was hurt
      */
     public void onHurt(DamageEvent event) {
-        activeSpells.getSpells().forEach(spell -> {
-            spell.onHurt(event);
-        });
-        passiveSpells.forEach(spell -> {
-            spell.onHurt(event);
-        });
-
-        if (entity != null && event.getDamageType() != DamageType.TRUE) {
-            if (bossBar == null || !bossBar.capsDamage()) {
-                return;
-            }
-            bossBar.getNextHealthThreshold().ifPresent(nextHpPercent -> {
-                // Min 1 to make sure we actually go below the threshold but don't kill the boss
-                double setHealth = Math.max(nextHpPercent * EntityUtils.getMaxHealth(entity) / 100, 1);
-                double health = entity.getHealth();
-                if (health - event.getFinalDamage() >= setHealth) {
-                    return;
-                }
-                entity.setHealth(Math.max(0, health - setHealth + 1));
-                event.addDamageModifier(0, DamageOperation.MORE_FINAL);
-            });
-        }
+        componentMap.values().forEach(component -> component.onHurt(event, this));
     }
 
     public void onDeath(EntityDeathEvent event) {
-        activeSpells.getSpells().forEach(spell -> {
-            spell.onDeath(event);
-        });
-        passiveSpells.forEach(spell -> {
-            spell.onDeath(event);
-        });
+        componentMap.values().forEach(component -> component.onDeath(event, this));
     }
 
     /*
      * Entity shot a projectile
      */
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
-        activeSpells.getSpells().forEach(spell -> {
-            spell.onProjectileLaunch(event);
-        });
-        passiveSpells.forEach(spell -> {
-            spell.onProjectileLaunch(event);
-        });
+        componentMap.values().forEach(component -> component.onProjectileLaunch(event, this));
     }
 
     /*
      * Entity-shot projectile hit something
      */
     public void onProjectileHit(ProjectileHitEvent event) {
-        activeSpells.getSpells().forEach(spell -> {
-            spell.onProjectileHit(event);
-        });
-        passiveSpells.forEach(spell -> {
-            spell.onProjectileHit(event);
-        });
+        componentMap.values().forEach(component -> component.onProjectileHit(event, this));
     }
 
     public void onCastSpell(SpellCastEvent event) {
-        activeSpells.getSpells().forEach(spell -> {
-            spell.onCastSpell(event);
-        });
-        passiveSpells.forEach(spell -> {
-            spell.onCastSpell(event);
-        });
+        componentMap.values().forEach(component -> component.onCastSpell(event, this));
     }
 
     public void onTargetEntity(EntityTargetLivingEntityEvent event) {
-        activeSpells.getSpells().forEach(spell -> {
-            spell.onTargetEntity(event);
-        });
-        passiveSpells.forEach(spell -> {
-            spell.onTargetEntity(event);
-        });
+        componentMap.values().forEach(component -> component.onTargetEntity(event, this));
     }
 
     public boolean hasPlayerDeathTrigger() {

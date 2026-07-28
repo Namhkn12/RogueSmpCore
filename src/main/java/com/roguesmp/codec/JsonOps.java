@@ -132,7 +132,11 @@ public enum JsonOps implements DynamicOps<JsonElement> {
     public DataResult<JsonElement> getMapField(JsonElement mapInput, String key) {
         if (mapInput != null && mapInput.isJsonObject()) {
             JsonElement elem = mapInput.getAsJsonObject().get(key);
-            return elem != null ? DataResult.success(elem) : DataResult.error("Field missing: " + key);
+            // Gson represents an explicit "key": null as a JsonNull instance, not Java null -
+            // treat it the same as a missing key so optionalFieldOf falls back to its default
+            // instead of failing to decode null as e.g. a string.
+            if (elem == null || elem.isJsonNull()) return DataResult.error("Field missing: " + key);
+            return DataResult.success(elem);
         }
         return DataResult.error("Not a map object: " + mapInput);
     }

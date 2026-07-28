@@ -1,40 +1,40 @@
 package com.roguesmp.registry.entity;
 
+import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.boss.primordialslime.PrimordialSlimeAltarSpell;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellFactory;
+import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.entity.spell.impl.*;
+import com.roguesmp.registry.Registries;
 import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.function.BiFunction;
 
 public class EntitySpellRegistry {
 
-    private static final Map<String, Spell.SpellParamReader> spellFactories = new HashMap<>();
+    public static void bootstrap() {
+        register(SelfDestructSpell.TYPE_KEY, SelfDestructSpell.Params.CODEC, SelfDestructSpell::create);
+        register(SlowAuraSpell.TYPE_KEY, SlowAuraSpell.Params.CODEC, SlowAuraSpell::create);
+        register(DummyEntitySpell.TYPE_KEY, DummyEntitySpell.Params.CODEC, DummyEntitySpell::create);
+        register(FireAspectSpell.TYPE_KEY, FireAspectSpell.Params.CODEC, FireAspectSpell::create);
+        register(IceAspectSpell.TYPE_KEY, IceAspectSpell.Params.CODEC, IceAspectSpell::create);
+        register(BlindSpell.TYPE_KEY, BlindSpell.Params.CODEC, BlindSpell::create);
+        register(SelfHealSpell.TYPE_KEY, SelfHealSpell.Params.CODEC, SelfHealSpell::create);
+        register(ShadowStepSpell.TYPE_KEY, ShadowStepSpell.Params.CODEC, ShadowStepSpell::create);
+        register(DeathGripSpell.TYPE_KEY, DeathGripSpell.Params.CODEC, DeathGripSpell::create);
+        register(FireRestanceSpell.TYPE_KEY, FireRestanceSpell.Params.CODEC, FireRestanceSpell::create);
 
-    static {
-        register("self_destruct_spell", SelfDestructSpell::readParam);
-        register("slow_aura_spell", SlowAuraSpell::readParam);
-        register("dummy_entity_spell", DummyEntitySpell::factory);
-        register("fire_aspect_spell", FireAspectSpell::readParam);
-        register("ice_aspect_spell", IceAspectSpell::readParam);
-        register("blind_spell", BlindSpell::readParam);
-        register("self_heal_spell", SelfHealSpell::readParam);
-        register("shadow_step_spell", ShadowStepSpell::readParam);
-        register("death_grip_spell", DeathGripSpell::readParam);
-        register("fire_resistance_spell", FireRestanceSpell::readParam);
-
-        register("primordial_slime_altar_spell", PrimordialSlimeAltarSpell::readParam);
+        register(PrimordialSlimeAltarSpell.TYPE_KEY, PrimordialSlimeAltarSpell.Params.CODEC, PrimordialSlimeAltarSpell::create);
     }
 
-    public static @Nullable Spell createSpell(String id, @Nullable Map<String, Object> param, LivingEntity owner) {
-        Spell.SpellParamReader paramReader = spellFactories.get(id);
-        if (paramReader != null) return paramReader.fromParams(param, owner);
-        return null;
+    private static <P extends SpellParams> void register(String id, Codec<P> paramsCodec, BiFunction<P, LivingEntity, Spell> factory) {
+        Registries.ENTITY_SPELL.register(id, new SpellFactory<>(paramsCodec, factory));
     }
 
-    private static void register(String id, Spell.SpellParamReader reader) {
-        spellFactories.put(id, reader);
+    public static @Nullable Spell createSpell(SpellParams params, LivingEntity owner) {
+        SpellFactory<?> factory = Registries.ENTITY_SPELL.get(params.getTypeId());
+        return factory != null ? factory.createSpell(params, owner) : null;
     }
 }

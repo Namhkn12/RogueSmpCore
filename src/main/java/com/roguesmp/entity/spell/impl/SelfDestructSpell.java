@@ -1,16 +1,28 @@
 package com.roguesmp.entity.spell.impl;
 
+import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellParams;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDeathEvent;
 
-import java.util.Map;
-
 public class SelfDestructSpell extends Spell {
 
+    public static final String TYPE_KEY = "self_destruct_spell";
     public static final Integer DEFAULT_COUNT = 10;
+
+    public record Params(int particleCount) implements SpellParams {
+        public static final Codec<Params> CODEC = Codec.INT.optionalFieldOf("particleCount", DEFAULT_COUNT)
+                .xmap(Params::new, Params::particleCount).codec();
+
+        @Override
+        public String getTypeId() {
+            return TYPE_KEY;
+        }
+    }
+
     private int particleCount;
 
     public SelfDestructSpell(int particleCount) {
@@ -33,10 +45,7 @@ public class SelfDestructSpell extends Spell {
         Particle.EXPLOSION.builder().location(event.getEntity().getLocation()).receivers(10).count(particleCount).spawn();
     }
 
-    public static SelfDestructSpell readParam(Map<String, Object> data, LivingEntity owner) {
-        if (data == null) return new SelfDestructSpell(DEFAULT_COUNT);
-        Long count = (Long) data.get("particleCount"); //Gson quirk that make whole number return as Long
-        if (count == null) return new SelfDestructSpell(DEFAULT_COUNT);
-        return new SelfDestructSpell(Math.toIntExact(count));
+    public static SelfDestructSpell create(Params params, LivingEntity owner) {
+        return new SelfDestructSpell(params.particleCount());
     }
 }

@@ -1,14 +1,26 @@
 package com.roguesmp.entity.spell.impl;
 
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.MapCodec;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellParams;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import java.util.Map;
-
 public class DeathGripSpell extends Spell {
+
+    public static final String TYPE_KEY = "death_grip_spell";
+
+    public record Params() implements SpellParams {
+        public static final Codec<Params> CODEC = MapCodec.unit(Params::new).codec();
+
+        @Override
+        public String getTypeId() {
+            return TYPE_KEY;
+        }
+    }
 
     private final LivingEntity owner;
 
@@ -36,7 +48,7 @@ public class DeathGripSpell extends Spell {
         return 60;
     }
 
-    public static DeathGripSpell readParam(Map<String, Object> param, LivingEntity owner) {
+    public static DeathGripSpell create(Params params, LivingEntity owner) {
         return new DeathGripSpell(owner);
     }
 }

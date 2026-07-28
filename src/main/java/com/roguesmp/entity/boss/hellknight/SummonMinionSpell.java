@@ -1,8 +1,8 @@
 package com.roguesmp.entity.boss.hellknight;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.entity.EntityManager;
 import com.roguesmp.entity.spell.Spell;
-import com.roguesmp.registry.entity.EntityRegistry;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -63,7 +63,7 @@ public class SummonMinionSpell extends Spell {
                     spawnLoc.getWorld().spawnParticle(Particle.LARGE_SMOKE, spawnLoc, 10, 0.2, 0.5, 0.2, 0.05);
                     spawnLoc.getWorld().playSound(spawnLoc, Sound.ENTITY_WITHER_SHOOT, 1f, 1.5f);
 
-                    EntityRegistry.getInstance().spawnEntity(selectedId, spawnLoc);
+                    EntityManager.getInstance().spawnEntity(selectedId, spawnLoc);
                 }
             };
             task.runTaskLater(RogueSmpCore.getInstance(), 15L);

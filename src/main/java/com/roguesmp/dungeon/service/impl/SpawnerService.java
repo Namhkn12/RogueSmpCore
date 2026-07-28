@@ -7,7 +7,7 @@ import com.roguesmp.dungeon.manager.SpawnerManager;
 import com.roguesmp.dungeon.service.ISpawnerService;
 import com.roguesmp.dungeon.utils.Log4Craft_;
 import com.roguesmp.entity.BaseEntity;
-import com.roguesmp.registry.entity.EntityRegistry;
+import com.roguesmp.entity.EntityManager;
 import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.spawner.SpawnRule;
@@ -53,7 +53,7 @@ public class SpawnerService implements ISpawnerService {
 
         List<SpawnerEntry> entries = new ArrayList<>();
         template.getMobs().forEach((mid, weight) -> {
-            BaseEntity baseEntity = EntityRegistry.getInstance().getBaseEntity(mid);
+            BaseEntity baseEntity = EntityManager.getInstance().getBaseEntity(mid);
             if (baseEntity == null) return;
             EntitySnapshot snapshot = baseEntity.spawnOnlyEquipmentSnapshot(spawner.getLocation());
             if (snapshot == null) return;

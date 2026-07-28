@@ -2,18 +2,20 @@ package com.roguesmp.entity.boss.hellknight;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageOperation;
+import com.roguesmp.constant.EntityComponentKeys;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.impl.SpeedEffect;
 import com.roguesmp.entity.BaseEntity;
-import com.roguesmp.entity.BossBarManager;
+import com.roguesmp.entity.EntityManager;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.boss.hellknight.minion.LineChargeSpell;
 import com.roguesmp.entity.boss.hellknight.minion.companion.HellKnightCompanion;
 import com.roguesmp.entity.boss.hellknight.minion.companion.InfernalTremor;
+import com.roguesmp.entity.component.impl.BossBarComponent;
+import com.roguesmp.entity.component.impl.SpellComponent;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.entity.spell.SpellManager;
 import com.roguesmp.event.DamageEvent;
-import com.roguesmp.registry.entity.EntityRegistry;
 import com.roguesmp.utils.*;
 import io.papermc.paper.registry.keys.SoundEventKeys;
 import net.kyori.adventure.bossbar.BossBar;
@@ -38,7 +40,7 @@ public class HellKnight extends SmpEntity {
     public static String ID = "hell_knight";
     public static final double ARENA_SIZE = 100;
 
-    private final Map<Integer, BossBarManager.BossHealthAction> phaseEvents = new HashMap<>();
+    private final Map<Integer, SpellComponent.PhaseManager.BossHealthAction> phaseEvents = new HashMap<>();
     private final Location altarLocation;
 
     private final List<Spell> phase1Passives;
@@ -56,8 +58,12 @@ public class HellKnight extends SmpEntity {
     private HellKnightCompanion companion;
     private double defenseScaling;
 
+    private final SpellComponent spellCasting;
+
     public HellKnight(BaseEntity base, LivingEntity entity) {
         super(base, entity);
+        // Preserve a JSON-declared SpellComponent if one exists; only attach an empty one otherwise.
+        spellCasting = getOrCreate(EntityComponentKeys.SPELLS, () -> new SpellComponent(this));
         altarLocation = entity.getLocation();
         setupPhaseTrigger();
 
@@ -102,17 +108,13 @@ public class HellKnight extends SmpEntity {
     }
 
     @Override
-    public void initialize() {
-        base.processEntity(entity);
-
-        initialized = true;
-
+    protected void onInitialized() {
         playIntroduction();
     }
 
     private void setupPhaseTrigger() {
         phaseEvents.put(80, boss -> {
-            this.changePhase(SpellManager.EMPTY, Collections.emptyList(), null);
+            spellCasting.changePhase(SpellManager.EMPTY, Collections.emptyList(), null);
 
             getParticipants().forEach(player -> {
                 player.playSound(entity, org.bukkit.Sound.ENTITY_WITHER_AMBIENT, SoundCategory.HOSTILE, 0.5f, 1.2f);
@@ -131,20 +133,20 @@ public class HellKnight extends SmpEntity {
 
             Utils.runLater(() -> {
                 setAi(true);
-                this.changePhase(new SpellManager(phase2Active), phase2Passive, living -> dialogue("<red><b>Để xem các ngươi xử lí thế nào..."));
-                this.forceCastSpell(ShadowCloneSpell.class); // After this spell ends, boss lose 10% hp, which will transition him to 70% phase
+                spellCasting.changePhase(new SpellManager(phase2Active), phase2Passive, living -> dialogue("<red><b>Để xem các ngươi xử lí thế nào..."));
+                spellCasting.forceCastSpell(ShadowCloneSpell.class); // After this spell ends, boss lose 10% hp, which will transition him to 70% phase
             }, 20);
         });
 
         phaseEvents.put(70, boss -> {
 
-            this.changePhase(new SpellManager(phase3Active), phase3Passive, null);
+            spellCasting.changePhase(new SpellManager(phase3Active), phase3Passive, null);
 
         });
 
         phaseEvents.put(50, boss -> {
 
-            this.changePhase(SpellManager.EMPTY, Collections.emptyList(), living -> {
+            spellCasting.changePhase(SpellManager.EMPTY, Collections.emptyList(), living -> {
                 dialogue(60, List.of("<b><red>Không tồi chút nào...",
                         "<b><red>Chiến mã hãy tới đây!"));
             });
@@ -166,7 +168,7 @@ public class HellKnight extends SmpEntity {
             Utils.runLater(() -> {
                 entity.teleport(altarLocation);
                 summonCompanion();
-                this.changePhase(new SpellManager(phase3Active), phase3Passive, null);
+                spellCasting.changePhase(new SpellManager(phase3Active), phase3Passive, null);
             }, 30);
 
         });
@@ -174,12 +176,12 @@ public class HellKnight extends SmpEntity {
 
         phaseEvents.put(30, boss -> {
 
-            companion.changePhase(SpellManager.EMPTY, Collections.emptyList(), null);
-            this.changePhase(SpellManager.EMPTY, Collections.emptyList(), living -> {
+            companion.getComponent(EntityComponentKeys.SPELLS).changePhase(SpellManager.EMPTY, Collections.emptyList(), null);
+            spellCasting.changePhase(SpellManager.EMPTY, Collections.emptyList(), living -> {
                 dialogue("<b><red>Các ngươi thực sự rất mạnh...");
             });
 
-            this.changePhase(SpellManager.EMPTY, Collections.emptyList(), null);
+            spellCasting.changePhase(SpellManager.EMPTY, Collections.emptyList(), null);
 
             getParticipants().forEach(player -> {
                 player.playSound(entity, org.bukkit.Sound.ENTITY_WITHER_AMBIENT, SoundCategory.HOSTILE, 0.5f, 1.2f);
@@ -216,8 +218,8 @@ public class HellKnight extends SmpEntity {
                     // Re-enable AI or start the next phase movement logic
                     setAi(true);
 
-                    companion.changePhase(new SpellManager(List.of(new InfernalTremor(companion.getEntity(), 14, 2, 30,40, 1.2, 30))), Collections.emptyList(), null);
-                    HellKnight.this.changePhase(new SpellManager(phase4Active), phase4Passive, null);
+                    companion.getComponent(EntityComponentKeys.SPELLS).changePhase(new SpellManager(List.of(new InfernalTremor(companion.getEntity(), 14, 2, 30,40, 1.2, 30))), Collections.emptyList(), null);
+                    HellKnight.this.spellCasting.changePhase(new SpellManager(phase4Active), phase4Passive, null);
                 });
 
             }, 30);
@@ -301,9 +303,10 @@ public class HellKnight extends SmpEntity {
             player.showTitle(Title.title(Utils.fromString("<b><dark_red>Kị sĩ hỏa ngục"), Component.text("......", NamedTextColor.WHITE, TextDecoration.OBFUSCATED)));
         });
 
-        BossBarManager bb = new BossBarManager(this.entity, 60, BossBar.Color.RED, BossBar.Overlay.NOTCHED_10, phaseEvents);
+        spellCasting.setBossBar(new BossBarComponent(this.entity, 60, BossBar.Color.RED, BossBar.Overlay.NOTCHED_10));
+        spellCasting.setPhaseManager(new SpellComponent.PhaseManager(phaseEvents, true));
 
-        startSpell(new SpellManager(phase1Actives), phase1Passives, 60, bb, 40, 2, true);
+        spellCasting.startSpell(new SpellManager(phase1Actives), phase1Passives, 60, 40, 2, true);
     }
 
     private void summonCompanion() {
@@ -317,7 +320,7 @@ public class HellKnight extends SmpEntity {
             public void run() {
                 if (timer >= 60) { // After 3 seconds
 
-                    companion = (HellKnightCompanion) EntityRegistry.getInstance().spawnEntity(HellKnightCompanion.ID, summonLoc);
+                    companion = (HellKnightCompanion) EntityManager.getInstance().spawnEntity(HellKnightCompanion.ID, summonLoc);
                     if (companion == null) {
                         RogueSmpCore.LOGGER.warn("Cannot find files for HellKnightCompanion!");
                         return;

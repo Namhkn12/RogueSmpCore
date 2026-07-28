@@ -31,8 +31,7 @@ import java.util.Map;
 /**
  * Hardcodes every {@link AbilityInfo} into {@link Registries#ABILITY} (behavior/factory), then
  * overlays tunable data (description/scaling/trigger/upgrades) onto them from
- * {@code ability_info/*.json} via {@link #loadAll()} — same hybrid code+JSON pattern as
- * {@code EntityRegistry}. See {@link AbilityConfig} for the JSON shape.
+ * {@code ability_info/*.json} via {@link #loadAll()}. See {@link AbilityConfig} for the JSON shape.
  */
 public class AbilityInfoRegistry {
 
@@ -68,8 +67,7 @@ public class AbilityInfoRegistry {
 
     public static @Nullable Ability createInstance(String id, SmpPlayer smpPlayer, int level) {
         AbilityInfo<?> info = Registries.ABILITY.get(id);
-        if (info == null) return null;
-        return info.getFactory().apply(smpPlayer, level);
+        return info != null ? info.createInstance(smpPlayer, level) : null;
     }
 
     public static @Unmodifiable List<AbilityInfo<?>> getByType(AbilityType type) {

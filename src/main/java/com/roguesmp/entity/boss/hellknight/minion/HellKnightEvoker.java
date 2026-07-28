@@ -16,15 +16,8 @@ public class HellKnightEvoker extends HellKnightMinion {
     }
 
     @Override
-    public void initialize() {
-        if (initialized) return; // Safety check
-
-        // This triggers the logic inside BaseEntity to call startSpell()
-        base.processEntity(this.entity);
-
-        startSpell(SpellManager.EMPTY, List.of(new SummonHordeSpell(entity, 6, "hell_knight_hordes")), 30,null);
-
-        this.initialized = true;
+    protected void onInitialized() {
+        spellCasting.startSpell(SpellManager.EMPTY, List.of(new SummonHordeSpell(entity, 6, "hell_knight_hordes")), 30);
     }
 
     @Override

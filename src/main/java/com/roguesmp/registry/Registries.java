@@ -4,6 +4,11 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.Enchants;
 import com.roguesmp.effect.SmpEffect;
+import com.roguesmp.entity.BaseEntity;
+import com.roguesmp.entity.EntityFactory;
+import com.roguesmp.entity.component.EntityComponent;
+import com.roguesmp.entity.spell.SpellFactory;
+import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.npc.BaseNpc;
@@ -14,6 +19,8 @@ import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
 import com.roguesmp.quest.*;
 import com.roguesmp.registry.ability.AbilityInfoRegistry;
 import com.roguesmp.registry.ability.UpgradeRequirementRegistry;
+import com.roguesmp.registry.entity.EntityFactoryRegistry;
+import com.roguesmp.registry.entity.EntitySpellRegistry;
 import com.roguesmp.registry.npc.GuiOpenActionRegistry;
 import com.roguesmp.registry.npc.NpcActionRegistry;
 import com.roguesmp.registry.quest.QuestObjectiveRegistry;
@@ -23,6 +30,9 @@ import com.roguesmp.registry.quest.QuestRewardRegistry;
 public class Registries {
 
     public static final Registry<Codec<? extends ItemComponent>> ITEM_COMPONENT_CODEC = new Registry<>();
+    public static final Registry<Codec<? extends EntityComponent>> ENTITY_COMPONENT_CODEC = new Registry<>();
+    public static final Registry<SpellFactory<?>> ENTITY_SPELL = new Registry<>();
+    public static final Registry<EntityFactory> ENTITY_FACTORY = new Registry<>();
     public static final Registry<Codec<? extends SmpEffect>> EFFECT_CODEC = new Registry<>();
 
     public static final Registry<Codec<? extends QuestObjective>> QUEST_OBJECTIVE_CODEC = new Registry<>();
@@ -39,11 +49,12 @@ public class Registries {
     public static final Registry<Codec<? extends NpcAction>> NPC_ACTION_CODEC = new Registry<>();
     public static final Registry<GuiOpenActionRegistry.OpenAction> NPC_GUI_OPEN_ACTION = new Registry<>();
 
+    public static final Registry<SkinRegistry.SkinData> SKIN_DATA = new Registry<>("skins", SkinRegistry.SkinData.CODEC);
+
     public static final Registry<BaseItem> ITEM = new Registry<>("items", BaseItem.CODEC);
     public static final Registry<Quest> QUEST = new Registry<>("quests", Quest.CODEC);
     public static final Registry<BaseNpc> NPC = new Registry<>("npcs", BaseNpc.CODEC);
-
-    public static final Registry<SkinRegistry.SkinData> SKIN_DATA = new Registry<>("skins", SkinRegistry.SkinData.CODEC);
+    public static final Registry<BaseEntity> ENTITY = new Registry<>("entities", BaseEntity.CODEC);
 
     // No bulk JSON entries of its own (Enchants is a hardcoded enum) - only exists so enchants
     // can have a "enchants/tags/*.json" folder like every other registry.
@@ -68,6 +79,8 @@ public class Registries {
 
         UpgradeRequirementRegistry.bootstrap();
         AbilityInfoRegistry.bootstrap();
+        EntitySpellRegistry.bootstrap();
+        EntityFactoryRegistry.bootstrap();
 
         NpcActionRegistry.bootstrap();
         GuiOpenActionRegistry.bootstrap();

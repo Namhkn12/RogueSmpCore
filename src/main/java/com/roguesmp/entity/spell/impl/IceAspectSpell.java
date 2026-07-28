@@ -1,12 +1,24 @@
 package com.roguesmp.entity.spell.impl;
 
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.MapCodec;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.event.DamageEvent;
 import org.bukkit.entity.LivingEntity;
 
-import java.util.Map;
-
 public class IceAspectSpell extends Spell {
+
+    public static final String TYPE_KEY = "ice_aspect_spell";
+
+    public record Params() implements SpellParams {
+        public static final Codec<Params> CODEC = MapCodec.unit(Params::new).codec();
+
+        @Override
+        public String getTypeId() {
+            return TYPE_KEY;
+        }
+    }
 
     private final LivingEntity owner;
 
@@ -29,7 +41,7 @@ public class IceAspectSpell extends Spell {
         return 0;
     }
 
-    public static IceAspectSpell readParam(Map<String, Object> param, LivingEntity owner) {
+    public static IceAspectSpell create(Params params, LivingEntity owner) {
         return new IceAspectSpell(owner);
     }
 

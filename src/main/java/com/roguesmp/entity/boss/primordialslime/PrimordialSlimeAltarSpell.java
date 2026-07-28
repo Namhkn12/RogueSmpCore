@@ -1,19 +1,32 @@
 package com.roguesmp.entity.boss.primordialslime;
 
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.MapCodec;
+import com.roguesmp.entity.EntityManager;
 import com.roguesmp.entity.spell.Spell;
-import com.roguesmp.registry.entity.EntityRegistry;
+import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.utils.ItemStackUtils;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Specifically for the boss altar, to check for key item being dropped on the altar
  */
 public class PrimordialSlimeAltarSpell extends Spell {
+
+    public static final String TYPE_KEY = "primordial_slime_altar_spell";
+
+    public record Params() implements SpellParams {
+        public static final Codec<Params> CODEC = MapCodec.unit(Params::new).codec();
+
+        @Override
+        public String getTypeId() {
+            return TYPE_KEY;
+        }
+    }
 
     private final LivingEntity altarEntity;
 
@@ -30,7 +43,7 @@ public class PrimordialSlimeAltarSpell extends Spell {
              Item item = (Item) entity;
              String itemId = ItemStackUtils.getBaseId(item.getItemStack());
              if (itemId != null && itemId.equals(PrimordialSlime.KEY_ITEM_ID)) {
-                 EntityRegistry.getInstance().spawnEntity(PrimordialSlime.ID, item.getLocation());
+                 EntityManager.getInstance().spawnEntity(PrimordialSlime.ID, item.getLocation());
                  altarEntity.getWorld().strikeLightningEffect(item.getLocation());
                  item.remove();
                  altarEntity.remove();
@@ -44,7 +57,7 @@ public class PrimordialSlimeAltarSpell extends Spell {
         return 0;
     }
 
-    public static PrimordialSlimeAltarSpell readParam(Map<String, Object> param, LivingEntity owner) {
+    public static PrimordialSlimeAltarSpell create(Params params, LivingEntity owner) {
         return new PrimordialSlimeAltarSpell(owner);
     }
 }

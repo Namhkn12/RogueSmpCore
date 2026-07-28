@@ -23,12 +23,7 @@ public class HellKnightGolem extends HellKnightMinion {
     }
 
     @Override
-    public void initialize() {
-        if (initialized) return; // Safety check
-
-        // This triggers the logic inside BaseEntity to call startSpell()
-        base.processEntity(this.entity);
-
+    protected void onInitialized() {
         if (entity instanceof IronGolem golem) {
             Bukkit.getMobGoals().removeGoal(golem, VanillaGoal.IRON_GOLEM_DEFEND_VILLAGE);
             golem.setAggressive(true);
@@ -36,9 +31,7 @@ public class HellKnightGolem extends HellKnightMinion {
             PlayerUtils.playersInRange(golem.getLocation(), 50, true).stream().findAny().ifPresent(golem::setTarget);
         }
 
-        startSpell(new SpellManager(List.of(new LineChargeSpell(this, 15, 1.2, 15, 3, 25, 200))), Collections.emptyList(), 40, null);
-
-        this.initialized = true;
+        spellCasting.startSpell(new SpellManager(List.of(new LineChargeSpell(this, 15, 1.2, 15, 3, 25, 200))), Collections.emptyList(), 40);
     }
 
     @Override

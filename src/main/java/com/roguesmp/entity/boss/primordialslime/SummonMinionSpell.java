@@ -1,8 +1,8 @@
 package com.roguesmp.entity.boss.primordialslime;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.entity.EntityManager;
 import com.roguesmp.entity.spell.Spell;
-import com.roguesmp.registry.entity.EntityRegistry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -79,7 +79,7 @@ public class SummonMinionSpell extends Spell {
                     spawnLoc.getWorld().spawnParticle(Particle.LARGE_SMOKE, spawnLoc, 10, 0.2, 0.5, 0.2, 0.05);
                     spawnLoc.getWorld().playSound(spawnLoc, Sound.ENTITY_SLIME_JUMP, 1f, 1.5f);
 
-                    EntityRegistry.getInstance().spawnEntity(selectedId, spawnLoc);
+                    EntityManager.getInstance().spawnEntity(selectedId, spawnLoc);
                 }
             }.runTaskLater(RogueSmpCore.getInstance(), 15L);
         }
