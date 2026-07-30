@@ -1,6 +1,6 @@
 package com.roguesmp.gui;
 
-import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.DurabilityComponent;
 import com.roguesmp.item.component.impl.DurabilityRepairComponent;
@@ -105,7 +105,7 @@ public class ItemRepairGui extends BaseGui {
             return;
         }
 
-        if (clickedSmp.getBaseItem() != null && clickedSmp.hasComponent(ComponentKeys.DURABILITY_REPAIR)) {
+        if (clickedSmp.getBaseItem() != null && clickedSmp.hasComponent(ItemComponentKeys.DURABILITY_REPAIR)) {
             if (repairMaterialItemStack != null) {
                 PlayerUtils.giveItem(player, repairMaterialItemStack);
             }
@@ -128,8 +128,8 @@ public class ItemRepairGui extends BaseGui {
         }
 
         SmpItem targetItem = SmpItem.wrap(itemStack);
-        DurabilityComponent durabilityComponent = targetItem.getComponent(ComponentKeys.DURABILITY);
-        DurabilityRepairComponent repairComponent = repairMaterialItem.getComponent(ComponentKeys.DURABILITY_REPAIR);
+        DurabilityComponent durabilityComponent = targetItem.getComponent(ItemComponentKeys.DURABILITY);
+        DurabilityRepairComponent repairComponent = repairMaterialItem.getComponent(ItemComponentKeys.DURABILITY_REPAIR);
 
         if (durabilityComponent == null || repairComponent == null) return;
 
@@ -174,7 +174,7 @@ public class ItemRepairGui extends BaseGui {
 
     private boolean isRepairable(SmpItem smpItem) {
         if (smpItem.getBaseItem() == null) return false;
-        DurabilityComponent durabilityComponent = smpItem.getComponent(ComponentKeys.DURABILITY);
+        DurabilityComponent durabilityComponent = smpItem.getComponent(ItemComponentKeys.DURABILITY);
         if (durabilityComponent == null) return false;
         return durabilityComponent.currentDurability() < durabilityComponent.maxDurability();
     }

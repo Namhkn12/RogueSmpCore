@@ -1,7 +1,7 @@
 package com.roguesmp.quest.reward;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.player.SmpPlayer;
@@ -47,7 +47,7 @@ public class ItemReward implements QuestReward {
             if (baseItem == null) {
                 itemName = "NOT_FOUND";
             } else {
-                NameComponent component = baseItem.getComponent(ComponentKeys.ITEM_NAME);
+                NameComponent component = baseItem.getComponent(ItemComponentKeys.ITEM_NAME);
                 if (component == null) {
                     itemName = itemId;
                 } else itemName = component.value();

@@ -1,4 +1,4 @@
-package com.roguesmp.constant;
+package com.roguesmp.enchant;
 
 /**
  * Basic enchants that player will add onto their item

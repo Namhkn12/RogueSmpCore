@@ -1,6 +1,6 @@
 package com.roguesmp.player.mechanic;
 
-import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.item.SmpItem;
@@ -22,7 +22,7 @@ public class ItemConsumableMechanic implements PlayerMechanic {
         SmpItem smpItem = SmpItem.wrap(consumed, player);
         smpItem.applyModifiers(player);
 
-        ConsumableComponent consumableComponent = smpItem.getComponent(ComponentKeys.CONSUMABLE);
+        ConsumableComponent consumableComponent = smpItem.getComponent(ItemComponentKeys.CONSUMABLE);
         if (consumableComponent != null) {
             List<SmpEffect> effectList = consumableComponent.getEffects();
             for (SmpEffect smpEffect : effectList) {

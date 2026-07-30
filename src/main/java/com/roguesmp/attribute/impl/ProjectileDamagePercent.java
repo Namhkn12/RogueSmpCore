@@ -1,7 +1,7 @@
 package com.roguesmp.attribute.impl;
 
 import com.roguesmp.attribute.SmpAttribute;
-import com.roguesmp.constant.Attributes;
+import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;

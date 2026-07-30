@@ -1,7 +1,6 @@
-package com.roguesmp.constant;
+package com.roguesmp.enchant;
 
 import com.google.gson.annotations.SerializedName;
-import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.enchant.impl.*;
 import org.jetbrains.annotations.Nullable;
 

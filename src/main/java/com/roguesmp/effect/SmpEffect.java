@@ -84,7 +84,7 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
     public abstract boolean isPersistent();
 
     /**
-     * The class must also have a deserialize method {@link com.roguesmp.registry.EffectCodecRegistry.EffectDeserializer} registered in {@link com.roguesmp.registry.EffectCodecRegistry} <br>
+     * The class must also have its {@code CODEC} registered in {@link EffectCodecs} <br>
      * The id field is automatically added so not need to add it
      */
     public abstract @NotNull JsonObject serialize();

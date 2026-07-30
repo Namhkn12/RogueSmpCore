@@ -1,7 +1,6 @@
 package com.roguesmp.npc.action;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.registry.npc.GuiOpenActionRegistry;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 public class OpenGuiInteractAction implements NpcAction {
@@ -28,6 +27,6 @@ public class OpenGuiInteractAction implements NpcAction {
 
     @Override
     public void onRightClick(PlayerInteractEntityEvent event) {
-        GuiOpenActionRegistry.runOpenAction(id, event.getPlayer());
+        GuiOpenActions.runOpenAction(id, event.getPlayer());
     }
 }

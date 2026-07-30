@@ -2,7 +2,7 @@ package com.roguesmp.entity.boss.hellknight;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageOperation;
-import com.roguesmp.constant.EntityComponentKeys;
+import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.impl.SpeedEffect;
 import com.roguesmp.entity.BaseEntity;
@@ -17,7 +17,6 @@ import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.entity.spell.SpellManager;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.utils.*;
-import io.papermc.paper.registry.keys.SoundEventKeys;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

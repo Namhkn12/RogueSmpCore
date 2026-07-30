@@ -1,20 +1,17 @@
 package com.roguesmp.gui.enchant;
 
-import com.roguesmp.constant.ComponentKeys;
-import com.roguesmp.constant.Enchants;
-import com.roguesmp.constant.Infusion;
+import com.roguesmp.item.component.ItemComponentKeys;
+import com.roguesmp.enchant.Infusion;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
-import com.roguesmp.item.component.impl.EnchantComponent;
 import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.PlayerUtils;
-import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.modification.InfusionUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -154,7 +151,7 @@ public class InfusionGui extends BaseGui {
         BaseItem currencyItem = ItemRegistry.getInstance().getBaseItem(infusion.getCostItemId());
         String currencyName = "UNKNOWN";
         if (currencyItem != null) {
-            NameComponent nameComponent = currencyItem.getComponent(ComponentKeys.ITEM_NAME);
+            NameComponent nameComponent = currencyItem.getComponent(ItemComponentKeys.ITEM_NAME);
             currencyName = (nameComponent != null) ? nameComponent.value() : currencyItem.getId();
         }
 

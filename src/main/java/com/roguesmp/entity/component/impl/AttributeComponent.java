@@ -1,7 +1,7 @@
 package com.roguesmp.entity.component.impl;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.constant.EntityAttribute;
+import com.roguesmp.entity.EntityAttribute;
 import com.roguesmp.entity.component.EntityComponent;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;

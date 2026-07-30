@@ -1,7 +1,7 @@
 package com.roguesmp.player.mechanic;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
-import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.event.DamageEvent;
@@ -13,7 +13,6 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.registry.keys.SoundEventKeys;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -87,9 +86,9 @@ public class DurabilityLossMechanic implements PlayerMechanic {
 
     private static void damageItem(SmpPlayer player, SmpItem smpItem, int amount, EquipSlot equipSlot) {
         if (smpItem == null || amount <= 0) return;
-        if (smpItem.hasComponent(ComponentKeys.BROKEN)) return;
+        if (smpItem.hasComponent(ItemComponentKeys.BROKEN)) return;
 
-        DurabilityComponent durabilityComponent = smpItem.getComponent(ComponentKeys.DURABILITY);
+        DurabilityComponent durabilityComponent = smpItem.getComponent(ItemComponentKeys.DURABILITY);
         if (durabilityComponent == null) return;
 
         Player bukkitPlayer = player.getBukkitPlayer();
@@ -104,7 +103,7 @@ public class DurabilityLossMechanic implements PlayerMechanic {
         EntityEquipment equipment = bukkitPlayer.getEquipment();
         ItemStack currentItem = equipment.getItem(equipmentSlot);
 
-        NameComponent nameComponent = smpItem.getComponent(ComponentKeys.ITEM_NAME);
+        NameComponent nameComponent = smpItem.getComponent(ItemComponentKeys.ITEM_NAME);
         String itemName = "";
         if (nameComponent != null) {
             itemName = nameComponent.value();

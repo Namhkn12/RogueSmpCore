@@ -1,9 +1,12 @@
 package com.roguesmp.player;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
+import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.*;
+import com.roguesmp.enchant.Enchants;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.*;
 import com.roguesmp.player.ability.AbilityLoadout;
@@ -78,7 +81,7 @@ public class SmpPlayer {
         Set<Attributes> affected = new HashSet<>();
 
         if (oldItem != null) {
-            EquipAttributeComponent oldComp = oldItem.getComponent(ComponentKeys.ATTRIBUTE);
+            EquipAttributeComponent oldComp = oldItem.getComponent(ItemComponentKeys.ATTRIBUTE);
             if (oldComp != null && oldComp.getSlot() == slot) {
                 oldComp.getFinalAttributes().forEach((attr, val) -> {
                     affected.add(attr);
@@ -92,8 +95,8 @@ public class SmpPlayer {
             currentEquipment.remove(slot);
         }
 
-        if (newItem != null && !newItem.hasComponent(ComponentKeys.BROKEN)) {
-            EquipAttributeComponent newComp = newItem.getComponent(ComponentKeys.ATTRIBUTE);
+        if (newItem != null && !newItem.hasComponent(ItemComponentKeys.BROKEN)) {
+            EquipAttributeComponent newComp = newItem.getComponent(ItemComponentKeys.ATTRIBUTE);
             if (newComp != null && newComp.getSlot() == slot) {
                 newComp.getFinalAttributes().forEach((attr, val) -> {
                     affected.add(attr);
@@ -118,7 +121,7 @@ public class SmpPlayer {
     }
 
     private void processEnchantDelta(SmpItem item, EquipSlot slot, int multiplier) {
-        EnchantComponent enchantComp = item.getComponent(ComponentKeys.ENCHANT);
+        EnchantComponent enchantComp = item.getComponent(ItemComponentKeys.ENCHANT);
         if (enchantComp == null) return;
 
         enchantComp.getTotalEnchants().forEach((ench, level) -> {

@@ -6,7 +6,6 @@ import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.player.ability.AbilityType;
 import com.roguesmp.registry.Registries;
-import com.roguesmp.registry.ability.AbilityInfoRegistry;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -101,7 +100,7 @@ public class AbilitySelectionGui extends BaseGui {
                     return;
                 }
 
-                Ability instance = AbilityInfoRegistry.createInstance(info.getId(), smpPlayer, level);
+                Ability instance = info.createInstance(smpPlayer, level);
                 smpPlayer.getAbilityLoadout().equip(type, instance, targetIndex);
                 Utils.runLater(() -> new AbilityLoadoutGui(smpPlayer).showInventory(smpPlayer.getBukkitPlayer()));
             });

@@ -2,7 +2,7 @@ package com.roguesmp.item.component.impl;
 
 import com.roguesmp.annotation.GsonIgnore;
 import com.roguesmp.codec.Codec;
-import com.roguesmp.constant.Attributes;
+import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ItemComponent;

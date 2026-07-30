@@ -1,7 +1,7 @@
 package com.roguesmp.player.ability.upgrade;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.player.SmpPlayer;
@@ -85,7 +85,7 @@ public class ItemRequirement implements UpgradeRequirement {
 
         // 1. Get the item name
         Component itemName;
-        NameComponent nameComponent = requiredItem.getComponent(ComponentKeys.ITEM_NAME);
+        NameComponent nameComponent = requiredItem.getComponent(ItemComponentKeys.ITEM_NAME);
         if (nameComponent == null) {
             itemName = Component.text(requiredItem.getId(), NamedTextColor.GRAY);
         } else {

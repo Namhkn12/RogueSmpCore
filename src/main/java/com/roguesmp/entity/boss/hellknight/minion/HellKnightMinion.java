@@ -1,6 +1,6 @@
 package com.roguesmp.entity.boss.hellknight.minion;
 
-import com.roguesmp.constant.EntityComponentKeys;
+import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.entity.SmpEntity;

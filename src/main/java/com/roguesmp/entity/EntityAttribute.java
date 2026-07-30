@@ -1,4 +1,4 @@
-package com.roguesmp.constant;
+package com.roguesmp.entity;
 
 import com.google.gson.annotations.SerializedName;
 import org.bukkit.attribute.Attribute;

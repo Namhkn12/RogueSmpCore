@@ -1,7 +1,7 @@
 package com.roguesmp.utils;
 
-import com.roguesmp.constant.ComponentKeys;
-import com.roguesmp.constant.Enchants;
+import com.roguesmp.item.component.ItemComponentKeys;
+import com.roguesmp.enchant.Enchants;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.EnchantComponent;
@@ -29,7 +29,7 @@ public class SmpItemUtils {
     }
 
     public static void addEnchant(SmpItem smpItem, Map<Enchants, Integer> enchantsData) {
-        EnchantComponent enchantComponent = smpItem.getComponent(ComponentKeys.ENCHANT);
+        EnchantComponent enchantComponent = smpItem.getComponent(ItemComponentKeys.ENCHANT);
 
         if (enchantComponent == null) {
             return;

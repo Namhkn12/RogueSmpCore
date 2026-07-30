@@ -2,11 +2,9 @@ package com.roguesmp.block.impl.type;
 
 import com.roguesmp.block.impl.SmpMachine;
 import com.roguesmp.block.impl.interfaces.IHaveLockedRecipe;
-import com.roguesmp.constant.ComponentKeys;
 import com.roguesmp.gui.MachineGui;
 import com.roguesmp.gui.interfaces.IHaveBlueprint;
 import com.roguesmp.item.BaseItem;
-import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.recipe.BaseRecipe;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;

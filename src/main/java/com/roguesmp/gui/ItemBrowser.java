@@ -1,7 +1,7 @@
 package com.roguesmp.gui;
 
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.registry.ItemRegistry;
@@ -167,7 +167,7 @@ public class ItemBrowser extends BaseGui {
                 }
 
                 // 2. Check Display Name match using Adventure plain text serializer
-                var nameComp = baseItem.getComponent(ComponentKeys.ITEM_NAME);
+                var nameComp = baseItem.getComponent(ItemComponentKeys.ITEM_NAME);
                 if (nameComp != null) {
                     Component name = Utils.fromString(nameComp.value());
                     String plainName = PlainTextComponentSerializer.plainText().serialize(name);
