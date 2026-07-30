@@ -1,7 +1,7 @@
 package com.roguesmp.gui.enchant;
 
-import com.roguesmp.constant.ComponentKeys;
-import com.roguesmp.constant.Enchants;
+import com.roguesmp.item.component.ItemComponentKeys;
+import com.roguesmp.enchant.Enchants;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.item.BaseItem;
@@ -118,7 +118,7 @@ public class EnchantingGui extends BaseGui {
         List<Enchants> allEnchants = new ArrayList<>();
         BaseItem baseItem = SmpItemUtils.getBaseItem(targetItem);
         if (baseItem == null) return;
-        EquipAttributeComponent equipAttributeComponent = baseItem.getComponent(ComponentKeys.ATTRIBUTE);
+        EquipAttributeComponent equipAttributeComponent = baseItem.getComponent(ItemComponentKeys.ATTRIBUTE);
         if (equipAttributeComponent == null) return;
         EquipSlot equipSlot = equipAttributeComponent.getSlot(); //Only enchants that work on this slot will show up
         for (Enchants enchants : Enchants.values()) {

@@ -2,7 +2,7 @@ package com.roguesmp.entity;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
-import com.roguesmp.constant.EntityComponentKeys;
+import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.entity.component.EntityComponent;
 import com.roguesmp.entity.component.EntityComponentKey;

@@ -1,13 +1,12 @@
 package com.roguesmp.block.impl;
 
 import com.roguesmp.block.SmpBlock;
-import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.constant.TransferMode;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.recipe.BaseRecipe;
-import com.roguesmp.recipe.impl.MachineRecipe;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -84,7 +83,7 @@ public abstract class SmpMachine extends SmpBlock {
         return sideConfigs;
     }
 
-    protected NameComponent getMachineName() {return getItem().getComponent(ComponentKeys.ITEM_NAME);}
+    protected NameComponent getMachineName() {return getItem().getComponent(ItemComponentKeys.ITEM_NAME);}
 
     @Override
     public void onBlockInteract(PlayerInteractEvent event) {

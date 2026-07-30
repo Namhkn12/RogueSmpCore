@@ -1,8 +1,8 @@
 package com.roguesmp.utils.modification;
 
-import com.roguesmp.constant.ComponentKeys;
-import com.roguesmp.constant.Enchants;
-import com.roguesmp.constant.Infusion;
+import com.roguesmp.item.component.ItemComponentKeys;
+import com.roguesmp.enchant.Enchants;
+import com.roguesmp.enchant.Infusion;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.EnchantComponent;
@@ -17,13 +17,13 @@ import java.util.Map;
 public class InfusionUtil {
 
     public static int getLevel(SmpItem smpItem, Infusion infusion) {
-        EnchantComponent enchantComponent = smpItem.getComponent(ComponentKeys.ENCHANT);
+        EnchantComponent enchantComponent = smpItem.getComponent(ItemComponentKeys.ENCHANT);
         if (enchantComponent == null) return 0;
         return enchantComponent.getTotalLevel(infusion.getSmpEnchant());
     }
 
     public static @Nullable Infusion getActiveInfusion(SmpItem smpItem) {
-        EnchantComponent enchantComponent = smpItem.getComponent(ComponentKeys.ENCHANT);
+        EnchantComponent enchantComponent = smpItem.getComponent(ItemComponentKeys.ENCHANT);
         if (enchantComponent == null) return null;
 
         for (Infusion inf : Infusion.values()) {
@@ -39,7 +39,7 @@ public class InfusionUtil {
     }
 
     public static boolean isEnchantable(SmpItem smpItem) {
-        return smpItem.getComponent(ComponentKeys.ENCHANT) != null;
+        return smpItem.getComponent(ItemComponentKeys.ENCHANT) != null;
     }
 
     private static int getExpCostForLevel(Infusion infusion, int level) {

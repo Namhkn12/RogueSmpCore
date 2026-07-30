@@ -2,14 +2,13 @@ package com.roguesmp.attribute.impl;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.attribute.SmpAttribute;
-import com.roguesmp.constant.Attributes;
+import com.roguesmp.attribute.Attributes;
 import com.roguesmp.player.PlayerProjectile;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityShootBowEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

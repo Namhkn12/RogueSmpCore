@@ -1,7 +1,7 @@
 package com.roguesmp.player.ability.trigger;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.registry.ability.TriggerOptionRegistry;
+import com.roguesmp.registry.Registries;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ public class AbilityTrigger {
         if (this.key != pressedKey) return false;
 
         for (String optionKey : options) {
-            Predicate<Player> condition = TriggerOptionRegistry.get(optionKey);
+            Predicate<Player> condition = Registries.TRIGGER_OPTION.get(optionKey);
             if (condition != null && !condition.test(player)) return false;
         }
         return true;

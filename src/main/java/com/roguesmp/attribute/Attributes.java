@@ -1,7 +1,6 @@
-package com.roguesmp.constant;
+package com.roguesmp.attribute;
 
 import com.google.gson.annotations.SerializedName;
-import com.roguesmp.attribute.SmpAttribute;
 import com.roguesmp.attribute.impl.*;
 
 public enum Attributes {

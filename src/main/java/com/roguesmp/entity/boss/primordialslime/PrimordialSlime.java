@@ -2,7 +2,7 @@ package com.roguesmp.entity.boss.primordialslime;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageOperation;
-import com.roguesmp.constant.EntityComponentKeys;
+import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.component.impl.BossBarComponent;

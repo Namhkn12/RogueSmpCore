@@ -1,12 +1,10 @@
-package com.roguesmp.constant;
+package com.roguesmp.item.component;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.item.component.ComponentKey;
-import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.item.component.impl.*;
 import com.roguesmp.registry.Registries;
 
-public class ComponentKeys {
+public class ItemComponentKeys {
 
     public static final ComponentKey<NameComponent> ITEM_NAME;
     public static final ComponentKey<StackSizeComponent> STACK_SIZE;

@@ -1,19 +1,16 @@
 package com.roguesmp.gui.gem;
 
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
-import com.roguesmp.item.component.impl.EquipAttributeComponent;
 import com.roguesmp.item.component.impl.GemDataComponent;
-import com.roguesmp.item.component.impl.GemSocketComponent;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.PlayerUtils;
-import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.modification.GemSocketUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -199,7 +196,7 @@ public class GemSocketingGui extends BaseGui {
             return full;
         }
 
-        GemDataComponent gemData = gemItem.getComponent(ComponentKeys.GEM_DATA);
+        GemDataComponent gemData = gemItem.getComponent(ItemComponentKeys.GEM_DATA);
         double successChance = (gemData != null) ? gemData.getSuccessChance() : 1.0;
 
         ItemStack confirm = new ItemStack(Material.ANVIL);
@@ -219,7 +216,7 @@ public class GemSocketingGui extends BaseGui {
 
         SmpItem smpItem = SmpItem.wrap(clicked);
 
-        if (smpItem.hasComponent(ComponentKeys.GEM_DATA) && gemItemStack == null) {
+        if (smpItem.hasComponent(ItemComponentKeys.GEM_DATA) && gemItemStack == null) {
             gemItemStack = clicked.clone();
             gemItemStack.setAmount(1);
             clicked.setAmount(clicked.getAmount() - 1);

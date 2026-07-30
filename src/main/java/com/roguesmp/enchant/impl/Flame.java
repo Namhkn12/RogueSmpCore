@@ -1,7 +1,7 @@
 package com.roguesmp.enchant.impl;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
-import com.roguesmp.constant.Enchants;
+import com.roguesmp.enchant.Enchants;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.player.SmpPlayer;
@@ -12,7 +12,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

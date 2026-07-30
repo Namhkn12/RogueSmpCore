@@ -1,8 +1,6 @@
-package com.roguesmp.constant;
+package com.roguesmp.entity.component;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.entity.component.EntityComponent;
-import com.roguesmp.entity.component.EntityComponentKey;
 import com.roguesmp.entity.component.impl.AttributeComponent;
 import com.roguesmp.entity.component.impl.BehaviorComponent;
 import com.roguesmp.entity.component.impl.BossBarComponent;

@@ -4,15 +4,12 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.constant.DamageType;
-import com.roguesmp.constant.EntityComponentKeys;
+import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.component.EntityComponent;
-import com.roguesmp.entity.spell.Spell;
-import com.roguesmp.entity.spell.SpellManager;
-import com.roguesmp.entity.spell.SpellParams;
+import com.roguesmp.entity.spell.*;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.SpellCastEvent;
-import com.roguesmp.registry.entity.EntitySpellRegistry;
 import com.roguesmp.utils.EntityUtils;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
@@ -113,14 +110,14 @@ public class SpellComponent implements EntityComponent {
 
         List<Spell> activeSpellList = new ArrayList<>();
         activeSpellParams.forEach(params -> {
-            Spell spell = EntitySpellRegistry.createSpell(params, entity);
+            Spell spell = EntitySpells.createSpell(params, owner.getEntity());
             if (spell != null) activeSpellList.add(spell);
         });
         SpellManager spellManager = new SpellManager(activeSpellList);
 
         List<Spell> passiveSpellList = new ArrayList<>();
         passiveSpellParams.forEach(params -> {
-            Spell spell = EntitySpellRegistry.createSpell(params, entity);
+            Spell spell = EntitySpells.createSpell(params, entity);
             if (spell != null) passiveSpellList.add(spell);
         });
 

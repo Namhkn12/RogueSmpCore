@@ -1,6 +1,6 @@
 package com.roguesmp.utils.modification;
 
-import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.EquipAttributeComponent;
@@ -30,14 +30,14 @@ public class GemSocketUtil {
      * Checks if the item is capable of holding gems.
      */
     public static boolean isSocketable(SmpItem smpItem) {
-        return smpItem.getComponent(ComponentKeys.GEM_SOCKET) != null;
+        return smpItem.getComponent(ItemComponentKeys.GEM_SOCKET) != null;
     }
 
     /**
      * Checks if the item has at least one open socket left.
      */
     public static boolean hasAvailableSlots(SmpItem smpItem) {
-        GemSocketComponent gemSocketComponent = smpItem.getComponent(ComponentKeys.GEM_SOCKET);
+        GemSocketComponent gemSocketComponent = smpItem.getComponent(ItemComponentKeys.GEM_SOCKET);
         return gemSocketComponent != null && gemSocketComponent.canFitGem();
     }
 
@@ -47,7 +47,7 @@ public class GemSocketUtil {
     public static boolean isValidGem(String gemId) {
         BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(gemId);
         if (baseItem == null) return false;
-        return baseItem.getComponent(ComponentKeys.GEM_DATA) != null;
+        return baseItem.getComponent(ItemComponentKeys.GEM_DATA) != null;
     }
 
     /**
@@ -57,10 +57,10 @@ public class GemSocketUtil {
         BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(gemId);
         if (baseItem == null) return false;
 
-        GemDataComponent gemData = baseItem.getComponent(ComponentKeys.GEM_DATA);
+        GemDataComponent gemData = baseItem.getComponent(ItemComponentKeys.GEM_DATA);
         if (gemData == null) return false;
 
-        EquipAttributeComponent itemAttr = smpItem.getComponent(ComponentKeys.ATTRIBUTE);
+        EquipAttributeComponent itemAttr = smpItem.getComponent(ItemComponentKeys.ATTRIBUTE);
         if (itemAttr == null) return false;
 
         return gemData.getAttributes().containsKey(itemAttr.getSlot());
@@ -83,7 +83,7 @@ public class GemSocketUtil {
      * Obtains the list of currently socketed gem IDs inside the item.
      */
     public static List<String> getSocketedGems(SmpItem smpItem) {
-        GemSocketComponent gemSocketComponent = smpItem.getComponent(ComponentKeys.GEM_SOCKET);
+        GemSocketComponent gemSocketComponent = smpItem.getComponent(ItemComponentKeys.GEM_SOCKET);
         if (gemSocketComponent == null) {
             return Collections.emptyList();
         }
@@ -95,7 +95,7 @@ public class GemSocketUtil {
      * Gets the maximum capacity of gems this item can hold.
      */
     public static int getMaxSlots(SmpItem smpItem) {
-        GemSocketComponent gemSocketComponent = smpItem.getComponent(ComponentKeys.GEM_SOCKET);
+        GemSocketComponent gemSocketComponent = smpItem.getComponent(ItemComponentKeys.GEM_SOCKET);
         if (gemSocketComponent == null) {
             return 0;
         }
@@ -130,14 +130,14 @@ public class GemSocketUtil {
         if (checkSuccessChance) {
             BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(gemId);
             // Safe to assume non-null here due to the isValidGem check above
-            GemDataComponent gemData = baseItem.getComponent(ComponentKeys.GEM_DATA);
+            GemDataComponent gemData = baseItem.getComponent(ItemComponentKeys.GEM_DATA);
 
             if (Math.random() > gemData.getSuccessChance()) {
                 return SocketResult.ERROR_FAILED_ROLL;
             }
         }
 
-        GemSocketComponent gemSocketComponent = smpItem.getComponent(ComponentKeys.GEM_SOCKET);
+        GemSocketComponent gemSocketComponent = smpItem.getComponent(ItemComponentKeys.GEM_SOCKET);
         gemSocketComponent.addGem(gemId);
 
         return SocketResult.SUCCESS;
@@ -147,7 +147,7 @@ public class GemSocketUtil {
      * Removes a gem. Returns true if successfully removed, false otherwise.
      */
     public static boolean removeGem(SmpItem smpItem, String gemId) {
-        GemSocketComponent gemSocketComponent = smpItem.getComponent(ComponentKeys.GEM_SOCKET);
+        GemSocketComponent gemSocketComponent = smpItem.getComponent(ItemComponentKeys.GEM_SOCKET);
         if (gemSocketComponent == null) {
             return false;
         }

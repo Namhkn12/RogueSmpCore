@@ -1,7 +1,7 @@
 package com.roguesmp.enchant.impl;
 
 import com.roguesmp.constant.DamageType;
-import com.roguesmp.constant.Enchants;
+import com.roguesmp.enchant.Enchants;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.event.DamageEvent;

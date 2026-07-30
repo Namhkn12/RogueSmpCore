@@ -1,7 +1,7 @@
 package com.roguesmp.gui.info;
 
 import com.roguesmp.attribute.SmpAttribute;
-import com.roguesmp.constant.Attributes;
+import com.roguesmp.attribute.Attributes;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;

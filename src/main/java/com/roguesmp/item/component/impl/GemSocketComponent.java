@@ -2,7 +2,7 @@ package com.roguesmp.item.component.impl;
 
 import com.roguesmp.annotation.GsonIgnore;
 import com.roguesmp.codec.Codec;
-import com.roguesmp.constant.ComponentKeys;
+import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.BaseItem;
@@ -72,7 +72,7 @@ public class GemSocketComponent implements ItemComponent {
             if (activeGem.size() >= this.amount) break;
             BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(s);
             if (baseItem == null) continue;
-            GemDataComponent gemDataComponent = baseItem.getComponent(ComponentKeys.GEM_DATA);
+            GemDataComponent gemDataComponent = baseItem.getComponent(ItemComponentKeys.GEM_DATA);
             if (gemDataComponent == null) continue;
             activeGem.add(baseItem);
         }
@@ -125,7 +125,7 @@ public class GemSocketComponent implements ItemComponent {
         baseItemList.forEach(baseItem -> {
             Component gemLine = Component.text("- ", NamedTextColor.DARK_GRAY);
 
-            NameComponent name = baseItem.getComponent(ComponentKeys.ITEM_NAME);
+            NameComponent name = baseItem.getComponent(ItemComponentKeys.ITEM_NAME);
             if (name == null) {
                 gemLine = gemLine.append(Component.text(baseItem.getId()));
             } else {

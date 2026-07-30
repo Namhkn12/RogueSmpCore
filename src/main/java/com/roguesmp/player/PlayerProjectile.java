@@ -1,8 +1,8 @@
 package com.roguesmp.player;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
-import com.roguesmp.constant.Attributes;
-import com.roguesmp.constant.Enchants;
+import com.roguesmp.attribute.Attributes;
+import com.roguesmp.enchant.Enchants;
 import com.roguesmp.event.DamageEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Projectile;

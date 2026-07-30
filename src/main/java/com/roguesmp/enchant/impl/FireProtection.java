@@ -1,6 +1,8 @@
 package com.roguesmp.enchant.impl;
 
+import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.*;
+import com.roguesmp.enchant.Enchants;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;

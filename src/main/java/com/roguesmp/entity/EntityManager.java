@@ -2,7 +2,7 @@ package com.roguesmp.entity;
 
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.constant.EntityComponentKeys;
+import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.entity.component.impl.SpellComponent;
 import com.roguesmp.registry.Registries;
@@ -135,7 +135,7 @@ public class EntityManager {
      */
     public SmpEntity wrap(BaseEntity base, LivingEntity living) {
         // Default to standard SmpEntity if no special factory exists
-        EntityFactory factory = Registries.ENTITY_FACTORY.get(base.getId());
+        EntityFactory<?> factory = Registries.ENTITY_FACTORY.get(base.getId());
         return factory != null ? factory.create(base, living) : new SmpEntity(base, living);
     }
 

@@ -236,6 +236,12 @@ public class Registry<T> {
         return value;
     }
 
+    public T getOrDefault(String id, T defaultVal) {
+        T value = get(id);
+        if (value == null) return defaultVal;
+        return value;
+    }
+
     public @Unmodifiable Map<String, T> getAll() {
         return unmodifiableEntries;
     }

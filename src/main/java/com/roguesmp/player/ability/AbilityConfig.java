@@ -11,8 +11,8 @@ import java.util.Map;
 
 /**
  * The JSON-loadable "tunable data" half of an ability (description/scaling/trigger bindings/upgrade
- * costs), decoded per {@code ability_info/<id>.json} file and applied onto the matching,
- * code-registered {@link AbilityInfo} via {@link AbilityInfo#populate}.
+ * costs), decoded per {@code ability_info/<id>.json} file into {@code Registries.ABILITY_CONFIG}
+ * and kept separately from its matching, code-registered {@link AbilityInfo}.
  */
 public record AbilityConfig(
         List<String> description,
@@ -46,4 +46,7 @@ public record AbilityConfig(
             Codec.unboundedMap(LEVEL_KEY_CODEC, Codec.lenientListOf(UpgradeRequirement.CODEC)).optionalFieldOf("upgrades", Map.of()).forGetter(AbilityConfig::upgrades),
             AbilityConfig::new
     );
+
+    public static final AbilityConfig DEFAULT_CONFIG =
+            new AbilityConfig(List.of(), Map.of(), "", Material.BARRIER, AbilityType.PASSIVE, Map.of(), Map.of());
 }

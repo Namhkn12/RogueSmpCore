@@ -7,6 +7,6 @@ import org.bukkit.entity.LivingEntity;
  * Registered per-id in {@code Registries.ENTITY_FACTORY} so spawning routes through a single lookup.
  */
 @FunctionalInterface
-public interface EntityFactory {
-    SmpEntity create(BaseEntity base, LivingEntity living);
+public interface EntityFactory<T extends SmpEntity> {
+   T create(BaseEntity base, LivingEntity living);
 }

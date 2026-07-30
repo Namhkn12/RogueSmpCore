@@ -1,8 +1,7 @@
 package com.roguesmp.enchant;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
-import com.roguesmp.constant.Attributes;
-import com.roguesmp.constant.Enchants;
+import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;

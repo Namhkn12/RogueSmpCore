@@ -2,7 +2,7 @@ package com.roguesmp.item.component.impl;
 
 import com.roguesmp.annotation.GsonIgnore;
 import com.roguesmp.codec.Codec;
-import com.roguesmp.constant.Enchants;
+import com.roguesmp.enchant.Enchants;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.context.ItemDataContext;
 import com.roguesmp.context.ItemLoreContext;

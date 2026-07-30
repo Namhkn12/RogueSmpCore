@@ -1,10 +1,9 @@
 package com.roguesmp.enchant.impl;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
-import com.roguesmp.constant.Enchants;
+import com.roguesmp.enchant.Enchants;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.SmpEnchant;
-import com.roguesmp.entity.EntityManager;
 import com.roguesmp.player.PlayerProjectile;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.VectorUtils;

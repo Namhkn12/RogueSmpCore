@@ -4,6 +4,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.player.ability.trigger.AbilityTrigger;
 import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -17,7 +18,10 @@ import java.util.*;
 import java.util.function.BiFunction;
 
 /**
- * This class hold static information of an ability (for use in Registry, creating ability instance, description, etc...)
+ * Hardcoded half of an ability: identity, instance factory, and click-action bindings - none of
+ * which can come from JSON (they're Java code). Tunable data (description/scaling/trigger/upgrades)
+ * lives separately in {@link AbilityConfig}, looked up by {@link #getId()} from
+ * {@link Registries#ABILITY_CONFIG} at call time.
  */
 public class AbilityInfo<T extends Ability> {
 
@@ -29,21 +33,9 @@ public class AbilityInfo<T extends Ability> {
     private final String id;
     private final Class<T> abilityClass;
     private final BiFunction<SmpPlayer, Integer, T> factory;
-    private final List<String> description = new ArrayList<>();
-    private String displayName;
-    private Material icon;
-    private AbilityType type;
 
     // Maps "prime" -> PredatorStrike::onPrime
     private final Map<String, AbilityAction<T>> actionRegistry = new HashMap<>();
-
-    // Maps AbilityTrigger -> action key (Filled during JSON loading)
-    private final Map<AbilityTrigger, String> triggerMap = new LinkedHashMap<>();
-
-    // Key: attribute name (e.g., "damage"), Value: List of attribute values for levels [lvl1, lvl2, lvl3]
-    private final Map<String, List<Double>> scaling = new HashMap<>();
-    private final Map<Integer, List<UpgradeRequirement>> upgradeRequirement = new HashMap<>();
-    private boolean loaded = false;
 
     public AbilityInfo(String id, Class<T> abilityClass, BiFunction<SmpPlayer, Integer, T> factory) {
         this.id = id;
@@ -60,16 +52,15 @@ public class AbilityInfo<T extends Ability> {
         return factory.apply(smpPlayer, level);
     }
 
-    public void bindTrigger(String actionKey, AbilityTrigger trigger) {
-        this.triggerMap.put(trigger, actionKey);
+    private AbilityConfig config() {
+        return Registries.ABILITY_CONFIG.getOrDefault(id, AbilityConfig.DEFAULT_CONFIG);
     }
 
     // Part 1: Just find if a trigger matches and return the action key
     public String findMatchingActionKey(Player player, AbilityTrigger.Key pressed) {
-        for (var entry : triggerMap.entrySet()) {
-            if (entry.getKey().matches(player, pressed)) {
-                // Return the first action key (or logic for list-based if needed)
-                return entry.getValue();
+        for (var entry : config().triggers().entrySet()) {
+            if (entry.getValue().matches(player, pressed)) {
+                return entry.getKey();
             }
         }
         return null;
@@ -84,25 +75,8 @@ public class AbilityInfo<T extends Ability> {
         return AbilityResponse.continueChain();
     }
 
-    public void populate(List<String> description,
-                         Map<String, List<Double>> scaling,
-                         String displayName,
-                         Material icon,
-                         AbilityType type,
-                         Map<AbilityTrigger, String> triggerMap,
-                         Map<Integer, List<UpgradeRequirement>> upgradeRequirement) {
-        this.description.addAll(description);
-        this.scaling.putAll(scaling);
-        this.displayName = displayName;
-        this.icon = icon;
-        this.triggerMap.putAll(triggerMap);
-        this.upgradeRequirement.putAll(upgradeRequirement);
-        this.type = type;
-
-        this.loaded = true;
-    }
-
     public List<Component> getFormattedDescription(int level) {
+        Map<String, List<Double>> scaling = getScaling();
         List<TagResolver> resolvers = new ArrayList<>();
 
         for (String key : scaling.keySet()) {
@@ -127,40 +101,41 @@ public class AbilityInfo<T extends Ability> {
         resolvers.add(Placeholder.parsed("level", String.valueOf(level)));
 
         List<Component> result = new ArrayList<>();
-        for (String line : description) {
+        for (String line : config().description()) {
             result.add(MiniMessage.miniMessage().deserialize(line, TagResolver.resolver(resolvers)));
         }
         return result;
     }
 
     public Component getFormattedDisplayName() {
-        return Utils.fromString(displayName);
+        return Utils.fromString(getDisplayName());
     }
 
     /**
      * Level start at 1
      */
     public double getAttributeForLevel(String attr, int level) {
-        List<Double> values = scaling.get(attr);
+        List<Double> values = getScaling().get(attr);
         if (values == null || values.isEmpty()) return 0.0;
         int index = Math.min(Math.max(0, level - 1), values.size() - 1);
         return values.get(index);
     }
 
     public boolean hasNextLevel(int nextLevel) {
-        return scaling.values().stream().anyMatch(list -> list.size() >= nextLevel + 1);
+        return getScaling().values().stream().anyMatch(list -> list.size() >= nextLevel + 1);
     }
 
     public String getId() {
         return id;
     }
 
-    public List<String> getDescription() {
-        return description;
+    public @Unmodifiable List<String> getDescription() {
+        return Collections.unmodifiableList(config().description());
     }
 
     public String getDisplayName() {
-        return displayName;
+        String displayName = config().displayName();
+        return displayName.isEmpty() ? id : displayName;
     }
 
     public Class<T> getAbilityClass() {
@@ -168,30 +143,22 @@ public class AbilityInfo<T extends Ability> {
     }
 
     public AbilityType getType() {
-        return type;
+        return config().type();
     }
 
     public Material getIcon() {
-        return icon;
+        return config().icon();
     }
 
     public @Unmodifiable Map<String, List<Double>> getScaling() {
-        return Collections.unmodifiableMap(scaling);
+        return Collections.unmodifiableMap(config().scaling());
     }
 
     public @Unmodifiable Map<String, AbilityAction<T>> getActionRegistry() {
         return Collections.unmodifiableMap(actionRegistry);
     }
 
-    public @Unmodifiable Map<AbilityTrigger, String> getTriggerMap() {
-        return Collections.unmodifiableMap(triggerMap);
-    }
-
     public @Unmodifiable Map<Integer, List<UpgradeRequirement>> getUpgradeRequirement() {
-        return Collections.unmodifiableMap(upgradeRequirement);
-    }
-
-    public boolean isLoaded() {
-        return loaded;
+        return Collections.unmodifiableMap(config().upgrades());
     }
 }

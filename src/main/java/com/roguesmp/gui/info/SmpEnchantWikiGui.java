@@ -1,6 +1,6 @@
 package com.roguesmp.gui.info;
 
-import com.roguesmp.constant.Enchants;
+import com.roguesmp.enchant.Enchants;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.gui.BaseGui;

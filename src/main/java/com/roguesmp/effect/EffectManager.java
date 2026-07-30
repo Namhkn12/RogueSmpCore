@@ -6,7 +6,6 @@ import com.roguesmp.effect.impl.DamageIncreaseEffect;
 import com.roguesmp.effect.impl.SpeedEffect;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.event.DamageEvent;
-import com.roguesmp.registry.EffectCodecRegistry;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import org.bukkit.Bukkit;

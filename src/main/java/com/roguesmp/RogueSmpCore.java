@@ -2,8 +2,8 @@ package com.roguesmp;
 
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
-import com.roguesmp.constant.ComponentKeys;
-import com.roguesmp.constant.EntityComponentKeys;
+import com.roguesmp.item.component.ItemComponentKeys;
+import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.dungeon.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
@@ -23,7 +23,6 @@ import com.roguesmp.npc.NpcManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.registry.*;
-import com.roguesmp.registry.ability.AbilityInfoRegistry;
 import com.roguesmp.server.DailyResetScheduler;
 import com.roguesmp.utils.GlowUtils;
 import net.kyori.adventure.text.Component;
@@ -51,7 +50,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         Registries.boostrap(this);
 
-        ComponentKeys.loadClass();
+        ItemComponentKeys.loadClass();
         EntityComponentKeys.loadClass();
 
         SkinRegistry.init();
