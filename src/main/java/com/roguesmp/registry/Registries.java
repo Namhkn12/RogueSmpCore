@@ -73,6 +73,7 @@ public class Registries {
     public static void loadAllData(RogueSmpCore plugin) {
         Registry.loadAll(plugin);
         Registry.loadAllTags(plugin); // must run after loadAll, since tags resolve against already-loaded entries
+        Registry.validateAllHolders(); // catch dangling Holder references (bad/typo'd ids) now, not mid-gameplay
     }
 
     // Create in-memory data here

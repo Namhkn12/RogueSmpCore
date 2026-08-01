@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.*;
+import java.util.function.Supplier;
 
 public class Registry<T> {
 
@@ -24,16 +25,19 @@ public class Registry<T> {
     private final Map<String, T> unmodifiableEntries = Collections.unmodifiableMap(entries);
     private final Map<String, SmpTag<T>> tags = new HashMap<>();
     private final Map<String, SmpTag<T>> unmodifiableTags = Collections.unmodifiableMap(tags);
+    private final Map<String, Holder<T>> holders = new HashMap<>();
     private final String locationKey; // Subfolder name inside data folder (e.g., "items", "recipes")
     private final Codec<T> codec;
 
     private static final List<Registry<?>> DATA_REGISTRIES = new ArrayList<>();
+    private static final List<Registry<?>> ALL_REGISTRIES = new ArrayList<>();
 
     // Constructor for Data-Driven Registries
     public Registry(String locationKey, Codec<T> codec) {
         this.locationKey = locationKey;
         this.codec = codec;
         DATA_REGISTRIES.add(this);
+        ALL_REGISTRIES.add(this);
     }
 
     /**
@@ -45,12 +49,14 @@ public class Registry<T> {
         this.locationKey = locationKey;
         this.codec = null;
         DATA_REGISTRIES.add(this);
+        ALL_REGISTRIES.add(this);
     }
 
     // Constructor for In-Memory Only Registries
     public Registry() {
         this.locationKey = null;
         this.codec = null;
+        ALL_REGISTRIES.add(this);
     }
 
     /**
@@ -223,11 +229,74 @@ public class Registry<T> {
 
     public <U extends T> U register(String id, U value) {
         entries.put(id, value);
+        Holder<T> holder = holders.get(id);
+        if (holder != null) holder.bind(value);
         return value;
     }
 
     public @Nullable T get(String id) {
         return entries.get(id);
+    }
+
+    /**
+     * Returns a stable {@link Holder} reference for this id, whether or not anything is
+     * registered under it yet - see {@link Holder} for why that's useful (load-order independence,
+     * reload safety). Repeated calls with the same id return the exact same Holder instance.
+     */
+    public Holder<T> getHolder(String id) {
+        return holders.computeIfAbsent(id, key -> {
+            T existing = entries.get(key);
+            return existing != null ? new Holder<>(key, existing) : new Holder<>(key);
+        });
+    }
+
+    /**
+     * A ready-made codec for referencing an entry of some registry by id as a {@link Holder} - so
+     * you don't need to hand-write {@code Codec.STRING.xmap(registry::getHolder, Holder::getId)}
+     * for every registry that needs one.
+     * <p>
+     * Takes a <b>supplier</b> (e.g. {@code () -> Registries.QUEST}) rather than a {@code Registry<T>}
+     * directly, and never calls it until this codec is actually decoded/encoded. That's not
+     * incidental: a type whose own static field references {@code Registries.SOMETHING} can end up
+     * loaded *during* {@code Registries}'s own {@code <clinit>} (e.g. because constructing
+     * {@code Registries.QUEST} itself needs {@code Quest.CODEC}, which forces {@code Quest} to load
+     * first) - at that point {@code Registries.SOMETHING} may not be assigned yet, and reading it
+     * eagerly throws a {@code NullPointerException}. Deferring the read into a supplier, invoked
+     * only once real decoding happens (always well after every class has finished loading), makes
+     * this safe to use anywhere, regardless of load order.
+     */
+    public static <T> Codec<Holder<T>> referenceCodec(Supplier<Registry<T>> registrySupplier) {
+        return Codec.STRING.xmap(
+                id -> registrySupplier.get().getHolder(id),
+                Holder::getId
+        );
+    }
+
+    /**
+     * @return every id that's been asked for via {@link #getHolder(String)} but never registered -
+     * i.e. a dangling reference. Empty in the common case.
+     */
+    public @Unmodifiable List<String> getUnboundHolderIds() {
+        List<String> unresolved = new ArrayList<>();
+        holders.forEach((id, holder) -> {
+            if (!holder.isBound()) unresolved.add(id);
+        });
+        return List.copyOf(unresolved);
+    }
+
+    /**
+     * Checks every registry (data-driven or in-memory) for holders nobody ever registered a value
+     * for, and logs a warning for each. Call once, after all loading/bootstrapping finishes, to
+     * catch a bad/typo'd reference id at startup instead of a {@link Holder#value()} exception
+     * deep in gameplay code.
+     */
+    public static void validateAllHolders() {
+        for (Registry<?> registry : ALL_REGISTRIES) {
+            for (String id : registry.getUnboundHolderIds()) {
+                RogueSmpCore.LOGGER.warn("Unresolved reference '{}' in registry '{}' - nothing is registered under this id",
+                        id, registry.locationKey != null ? registry.locationKey : "<in-memory>");
+            }
+        }
     }
 
     public T getOrThrow(String id) {
@@ -256,5 +325,8 @@ public class Registry<T> {
 
     public void clear() {
         entries.clear();
+        // Unbind rather than drop: existing Holder references stay valid objects and simply pick
+        // up their new value once this registry repopulates, instead of pointing at a stale entry.
+        holders.values().forEach(Holder::unbind);
     }
 }
