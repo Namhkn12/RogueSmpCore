@@ -14,6 +14,7 @@ Mọi thứ đều khởi động từ [`RogueSmpCore`](../src/main/java/com/rog
 6. **[Entity, Boss & Spell System](Entity-Boss-Spell-System.md)** — mô hình định nghĩa/runtime của `BaseEntity`/`SmpEntity`, lịch chạy spell an toàn với Folia, chuyển pha (phase) của boss, và bề mặt hook của `Spell`.
 7. **[Player Ability System](Player-Ability-System.md)** — `Ability` + `AbilityInfo`, gán trigger từ JSON, chuỗi xử lý cast (cast chain) của `AbilityLoadout` và cơ chế capture/interceptor.
 8. **[Dungeon System](Dungeon-System.md)** — subsystem lớn nhất: bảy tầng phân lớp nghiêm ngặt (definition → runtime → repository → manager → service → controller → actor), tất cả được nối tay trong `DungeonRegistry`.
+9. **[Fx System](Fx-System.md)** — hiệu ứng particle/block/item-display: `FxShape` (hình học tĩnh) + `FxMotion` (transform hiện tại → kế tiếp, không path cố định) + `FxRenderer`, gộp thành `FxPart`/`FxEffect` qua `FxEngine`. Fx thuần hiển thị — hit-detection/gameplay logic đi qua accessor đọc-only (`currentTransform()`), không nằm trong package này.
 
 ## Các convention xuyên suốt (áp dụng ở mọi nơi, không chỉ 1 trang)
 
@@ -22,6 +23,7 @@ Mọi thứ đều khởi động từ [`RogueSmpCore`](../src/main/java/com/rog
 - **PDC key** đi qua `constant/Keys.java` dưới namespace dùng chung `"smp"` — không tự tạo `NamespacedKey` ở nơi khác.
 - **Định danh/codec của item component** đi qua `constant/ComponentKeys.java` — xem [Item System](Item-System.md).
 - **GUI** đi qua `BaseGui` + `GuiListener` — không đăng ký thêm listener `InventoryClickEvent` thô; xem [GUI Framework](GUI-Framework.md).
+- **Fx (`com.roguesmp.fx`) thuần hiển thị** — không import `DamageUtils`/`DamageEvent` hay bất kỳ gameplay logic nào vào package này. Code cần phản ứng theo vị trí 1 effect/part đọc `currentTransform()` (accessor đọc-only) từ vòng lặp tick của riêng mình; xem [Fx System](Fx-System.md#pattern-đọc-vị-trí-hiện-tại--read-only-accessor).
 
 ## Build & chạy
 

@@ -3,6 +3,7 @@ package com.roguesmp.quest;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.registry.Registries;
+import com.roguesmp.registry.Registry;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,12 +27,17 @@ public class Quest {
             Quest::new
     );
 
-    public static final Codec<Quest> REFERENCE_CODEC = Codec.STRING.comapFlatMap(
-            id -> {
-                Quest q = Registries.QUEST.get(id);
-                return q != null ? DataResult.success(q) : DataResult.error("Unknown quest: " + id);
-            },
-            Quest::getId
+    /**
+     * Unwraps the {@link com.roguesmp.registry.Holder} eagerly to a plain {@code Quest} (rather
+     * than exposing the Holder itself) since every current decode of this - per-player quest
+     * progress, loaded on join - always runs well after {@code QUEST} has finished loading. Stays
+     * a graceful {@link DataResult#error} (not a thrown exception) so a single bad/typo'd quest id
+     * only drops that one entry via {@code Codec.lenientUnboundedMap} instead of failing the whole
+     * player's data.
+     */
+    public static final Codec<Quest> REFERENCE_CODEC = Registry.referenceCodec(() -> Registries.QUEST).comapFlatMap(
+            holder -> holder.isBound() ? DataResult.success(holder.value()) : DataResult.error("Unknown quest: " + holder.getId()),
+            quest -> Registries.QUEST.getHolder(quest.getId())
     );
 
     private final String id;

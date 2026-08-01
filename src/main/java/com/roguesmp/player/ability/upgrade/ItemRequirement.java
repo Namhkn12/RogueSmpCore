@@ -5,6 +5,9 @@ import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.registry.Holder;
+import com.roguesmp.registry.Registries;
+import com.roguesmp.registry.Registry;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
@@ -14,21 +17,22 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 public class ItemRequirement implements UpgradeRequirement {
 
     public static final String TYPE_KEY = "item";
 
     public static final Codec<ItemRequirement> CODEC = Codec.composite(
-            BaseItem.REFERENCE_CODEC.fieldOf("item_id").forGetter(ItemRequirement::getRequiredItem),
+            Registry.referenceCodec(() -> Registries.ITEM).fieldOf("item_id").forGetter(ItemRequirement::getRequiredItemHolder),
             Codec.INT.fieldOf("amount").forGetter(ItemRequirement::getAmount),
             ItemRequirement::new
     );
 
-    private final BaseItem requiredItem;
+    private final Holder<BaseItem> requiredItem;
     private final int amount;
 
-    public ItemRequirement(BaseItem requiredItem, int amount) {
+    public ItemRequirement(Holder<BaseItem> requiredItem, int amount) {
         this.requiredItem = requiredItem;
         this.amount = amount;
     }
@@ -38,8 +42,18 @@ public class ItemRequirement implements UpgradeRequirement {
         return TYPE_KEY;
     }
 
-    public BaseItem getRequiredItem() {
+    public Holder<BaseItem> getRequiredItemHolder() {
         return requiredItem;
+    }
+
+    /**
+     * Unbound (returns {@code null}) if nothing is registered under this item id - which, thanks
+     * to {@link Holder}, can never happen just because ITEM hasn't loaded yet by the time this
+     * requirement itself decodes; only a genuinely bad/typo'd id ever leaves this unbound (see
+     * {@code Registry#validateAllHolders} for how that gets caught at startup).
+     */
+    public @Nullable BaseItem getRequiredItem() {
+        return requiredItem.isBound() ? requiredItem.value() : null;
     }
 
     public int getAmount() {
@@ -53,6 +67,7 @@ public class ItemRequirement implements UpgradeRequirement {
 
     @Override
     public void consume(SmpPlayer player) {
+        BaseItem requiredItem = getRequiredItem();
         Player bukkitPlayer = player.getBukkitPlayer();
         if (bukkitPlayer == null) return;
 
@@ -81,6 +96,7 @@ public class ItemRequirement implements UpgradeRequirement {
 
     @Override
     public Component getDisplay(SmpPlayer player) {
+        BaseItem requiredItem = getRequiredItem();
         if (requiredItem == null) return Component.text("Item Error", NamedTextColor.RED);
 
         // 1. Get the item name
@@ -109,6 +125,7 @@ public class ItemRequirement implements UpgradeRequirement {
     }
 
     private int getCurrentAmount(SmpPlayer player) {
+        BaseItem requiredItem = getRequiredItem();
         Player bukkitPlayer = player.getBukkitPlayer();
         if (bukkitPlayer == null) return 0;
 

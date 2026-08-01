@@ -2,6 +2,7 @@ package com.roguesmp.enchant;
 
 import com.google.gson.annotations.SerializedName;
 import com.roguesmp.enchant.impl.*;
+import com.roguesmp.registry.Registries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -107,6 +108,12 @@ public enum Enchants {
 
     public static @Nullable Enchants fromId(String id) {
         return reverseMap.get(id);
+    }
+
+    public static void bootstrap() {
+        for (Enchants enchant : Enchants.values()) {
+            Registries.ENCHANTS.register(enchant.getEnchant().getId(), enchant);
+        }
     }
 
     static {

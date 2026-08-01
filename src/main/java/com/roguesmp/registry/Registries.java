@@ -37,8 +37,6 @@ public class Registries {
 
     public static final Registry<Codec<? extends ItemComponent>> ITEM_COMPONENT_CODEC = register(registry -> ItemComponentKeys.loadClass());
     public static final Registry<Codec<? extends EntityComponent>> ENTITY_COMPONENT_CODEC = register(registry -> EntityComponentKeys.loadClass());
-    public static final Registry<SpellFactory<? extends SpellParams>> ENTITY_SPELL = register(registry -> EntitySpells.loadClass());
-    public static final Registry<EntityFactory<? extends SmpEntity>> ENTITY_FACTORY = register(registry -> SpecialEntities.loadClass());
     public static final Registry<Codec<? extends SmpEffect>> EFFECT_CODEC = register(registry -> EffectCodecs.loadClass());
 
     public static final Registry<Codec<? extends QuestObjective>> QUEST_OBJECTIVE_CODEC = register(registry -> QuestObjectives.loadClass());
@@ -50,11 +48,19 @@ public class Registries {
 
     public static final Registry<Codec<? extends UpgradeRequirement>> ABILITY_UPGRADE_REQUIREMENT_CODEC = register(registry -> UpgradeRequirements.loadClass());
 
+    public static final Registry<Codec<? extends NpcAction>> NPC_ACTION_CODEC = register(registry -> NpcActions.loadClass());
+
+    // No bulk JSON entries of its own (Enchants is a hardcoded enum) - only exists so enchants
+    // can have a "enchants/tags/*.json" folder like every other registry.
+    public static final Registry<Enchants> ENCHANTS = register("enchants", registry -> Enchants.bootstrap());
+
+    public static final Registry<SpellFactory<? extends SpellParams>> ENTITY_SPELL = register(registry -> EntitySpells.loadClass());
+    public static final Registry<EntityFactory<? extends SmpEntity>> ENTITY_FACTORY = register(registry -> SpecialEntities.loadClass());
+
     public static final Registry<AbilityInfo<? extends Ability>> ABILITY = register(registry -> AbilityInfos.loadClass());
     public static final Registry<AbilityConfig> ABILITY_CONFIG = new Registry<>("ability_info", AbilityConfig.CODEC);
     public static final Registry<Predicate<Player>> TRIGGER_OPTION = register(registry -> TriggerOptions.loadClass());
 
-    public static final Registry<Codec<? extends NpcAction>> NPC_ACTION_CODEC = register(registry -> NpcActions.loadClass());
     public static final Registry<GuiOpenActions.OpenAction> NPC_GUI_OPEN_ACTION = register(registry -> GuiOpenActions.loadClass());
 
     public static final Registry<SkinRegistry.SkinData> SKIN_DATA = new Registry<>("skins", SkinRegistry.SkinData.CODEC);
@@ -64,23 +70,16 @@ public class Registries {
     public static final Registry<BaseNpc> NPC = new Registry<>("npcs", BaseNpc.CODEC);
     public static final Registry<BaseEntity> ENTITY = new Registry<>("entities", BaseEntity.CODEC);
 
-    // No bulk JSON entries of its own (Enchants is a hardcoded enum) - only exists so enchants
-    // can have a "enchants/tags/*.json" folder like every other registry.
-    public static final Registry<Enchants> ENCHANTS = new Registry<>("enchants");
-
     public static void loadAllData(RogueSmpCore plugin) {
         Registry.loadAll(plugin);
         Registry.loadAllTags(plugin); // must run after loadAll, since tags resolve against already-loaded entries
+        Registry.validateAllHolders(); // catch dangling Holder references (bad/typo'd ids) now, not mid-gameplay
     }
 
     // Create in-memory data here
     public static void boostrap(RogueSmpCore plugin) {
         // Every registry declared via register(Bootstrapper<T>) above runs its loadClass() here.
         BOOTSTRAPPERS.forEach(consumer -> consumer.accept(plugin));
-
-        for (Enchants enchant : Enchants.values()) {
-            ENCHANTS.register(enchant.getEnchant().getId(), enchant);
-        }
     }
 
     /**
