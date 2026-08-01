@@ -152,4 +152,4 @@ Mọi class ở tầng actor đều mỏng: hoặc phản ứng với 1 event/co
 - **Đừng quên phần dọn dẹp trong `onDisable()`** khi thêm 1 manager stateful mới — bất kỳ thứ gì giữ state phiên chơi in-memory cần sống sót qua 1 lần restart đều cần được thêm vào chuỗi save của `DungeonRegistry.onDisable()` (hoặc phải reachable gián tiếp từ thứ gì đó đã có sẵn ở đó).
 
 ---
-◀ [Player Ability System](Player-Ability-System.md) · Về [Trang chủ](Home.md)
+◀ [Player Ability System](Player-Ability-System.md) · Về [Trang chủ](Home.md) · Tiếp theo: [Fx System](Fx-System.md)

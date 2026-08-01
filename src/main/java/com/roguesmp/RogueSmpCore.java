@@ -8,6 +8,8 @@ import com.roguesmp.registry.Registries;
 import com.roguesmp.dungeon.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
+import com.roguesmp.fx.FxCommand;
+import com.roguesmp.fx.FxEngine;
 import com.roguesmp.goal.zombified_piglin.PigZombieSpawnListener;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.gui.ItemRepairGui;
@@ -49,6 +51,8 @@ public final class RogueSmpCore extends JavaPlugin {
         GlowUtils.init(this);
 
         Registries.boostrap(this);
+
+        FxEngine.init(this);
 
         ItemComponentKeys.loadClass();
         EntityComponentKeys.loadClass();
@@ -128,6 +132,7 @@ public final class RogueSmpCore extends JavaPlugin {
         ItemBrowser.registerCommand();
         EffectManager.registerCommand();
         EntityManager.registerCommand();
+        FxCommand.register();
         NpcManager.getInstance().registerCommand();
 
         AbilityCatalogue.register();
@@ -158,6 +163,8 @@ public final class RogueSmpCore extends JavaPlugin {
 
         // Plugin shutdown logic
         saveData();
+
+        FxEngine.getInstance().shutdown();
 
         if (this.resetScheduler != null) {
             resetScheduler.stop();

@@ -103,9 +103,11 @@ public class Registry<T> {
      * Loads ALL data-driven registries from plugin data folder
      */
     public static void loadAll(RogueSmpCore plugin) {
+        RogueSmpCore.LOGGER.info("----LOADING REGISTRY ENTRIES----");
         for (Registry<?> registry : DATA_REGISTRIES) {
             registry.loadFrom(plugin);
         }
+        RogueSmpCore.LOGGER.info("----DONE LOADING REGISTRY----");
     }
 
     /**
@@ -161,9 +163,11 @@ public class Registry<T> {
      * Loads tags for ALL data-driven registries. Must run after {@link #loadAll(RogueSmpCore)}.
      */
     public static void loadAllTags(RogueSmpCore plugin) {
+        RogueSmpCore.LOGGER.info("----LOADING REGISTRY TAG ENTRIES----");
         for (Registry<?> registry : DATA_REGISTRIES) {
             registry.loadTagsFrom(plugin);
         }
+        RogueSmpCore.LOGGER.info("----DONE LOADING TAG----");
     }
 
     /**

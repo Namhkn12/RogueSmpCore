@@ -34,12 +34,13 @@ public class DamageEvent extends Event implements Cancellable {
             this.ignoreIframe = ignoreIframe;
         }
 
+        // FIXED: Explicitly maps abilityId to third argument
         public Metadata(@Nullable String abilityId, DamageType damageType) {
-            this(damageType, null, abilityId);
+            this(null, abilityId, damageType, false);
         }
 
         public Metadata(DamageType damageType, @Nullable String mobSpellId) {
-            this(damageType, mobSpellId, null);
+            this(mobSpellId, null, damageType, false);
         }
 
         public Metadata(DamageType damageType, @Nullable String mobSpellId, @Nullable String abilityId) {
@@ -80,7 +81,7 @@ public class DamageEvent extends Event implements Cancellable {
     private final double initialDamage;
     private final Metadata metadata;
 
-    private boolean needUpdateDmg = true; // For recalculating dmg value
+    private boolean needUpdateDmg = true;
     private boolean needUpdateDef = true;
 
     private boolean isBlocked;
@@ -127,6 +128,7 @@ public class DamageEvent extends Event implements Cancellable {
 
     public void addDefenseModifier(double value, DamageOperation operation) {
         needUpdateDef = true;
+        needUpdateDmg = true; // Defense changes require recalculating damage
         switch (operation) {
             case BASE -> baseDef = value;
             case ADD_BASE -> addBaseDef += value;
@@ -147,7 +149,7 @@ public class DamageEvent extends Event implements Cancellable {
         finalDamage *= moreFinal;
 
         // Vanilla mechanics
-        if (metadata.damageType == DamageType.MELEE && damager instanceof Player bukkitPlayer) {
+        if (metadata.damageType == DamageType.MELEE && damager instanceof Player) {
             if (isCritical) finalDamage *= 1.5;
         }
 
@@ -158,8 +160,9 @@ public class DamageEvent extends Event implements Cancellable {
             finalDamage = applyDefense(finalDamage, totalDef);
         }
 
+        finalDamage = Math.max(0.001, finalDamage); // Prevent negative damage in state
         needUpdateDmg = false;
-        return Math.max(0.001, finalDamage); // Prevent negative damage
+        return finalDamage;
     }
 
     private double calculateFinalDefense() {
@@ -169,6 +172,7 @@ public class DamageEvent extends Event implements Cancellable {
         finalDef *= moreBaseDef;
         finalDef *= moreFinalDef;
         finalDef += addFinalDef;
+        needUpdateDef = false;
         return finalDef;
     }
 
@@ -178,7 +182,10 @@ public class DamageEvent extends Event implements Cancellable {
     }
 
     public void setCritical(boolean critical) {
-        isCritical = critical;
+        if (this.isCritical != critical) {
+            this.isCritical = critical;
+            this.needUpdateDmg = true; //Invalidate damage cache on critical state change
+        }
     }
 
     @Override
@@ -231,7 +238,6 @@ public class DamageEvent extends Event implements Cancellable {
     public void setBlocked(boolean blocked) {
         this.isBlocked = blocked;
         if (blocked) {
-            // Leave it as complete negation for now, might add a percent reduction in the future
             this.addDamageModifier(0, DamageOperation.MORE_FINAL);
         }
     }

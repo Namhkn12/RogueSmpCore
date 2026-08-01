@@ -70,8 +70,15 @@ public class DamageListener implements Listener {
         } else {
             Entity victim = event.getEntity();
             if (victim instanceof Item) return; //Somehow item burning also call damage event
-            DamageType damageType = DamageType.getType(event.getCause());
-            DamageEvent damageEvent = new DamageEvent(victim, null, event.getDamage(), new DamageEvent.Metadata(damageType));
+
+            DamageEvent damageEvent;
+            if (DamageUtils.nextMetadata != null) { // Damage caused by plugin via DamageUtils
+                damageEvent = new DamageEvent(victim, null, event.getDamage(), DamageUtils.nextMetadata);
+                DamageUtils.nextMetadata = null;
+            } else {
+                DamageType damageType = DamageType.getType(event.getCause());
+                damageEvent = new DamageEvent(victim, null, event.getDamage(), new DamageEvent.Metadata(damageType));
+            }
 
             Bukkit.getPluginManager().callEvent(damageEvent);
             event.setCancelled(damageEvent.isCancelled());
@@ -87,8 +94,8 @@ public class DamageListener implements Listener {
         Entity victim = event.getVictim();
         Entity attacker = event.getDamager();
 
-        // Start at the center/chest height of the victim
-        Location spawnLoc = victim.getLocation().add(0, victim.getHeight() * 0.5, 0);
+        // Start a bit above the victim's chest-center — high enough to clear the model, low enough not to float off the head
+        Location spawnLoc = victim.getLocation().add(0, victim.getHeight() * 0.6, 0);
 
         // Identify which player needs to see the display (attacker takes priority)
         Player viewer = null;
@@ -106,23 +113,26 @@ public class DamageListener implements Listener {
             Vector directionToPlayer = playerEyeLoc.toVector().subtract(spawnLoc.toVector());
 
             // Distance factor: 0.0 = at victim, 1.0 = at player.
-            // 0.25 to 0.35 places it nicely in front of the victim toward the player.
-            double distanceFactor = 0.3;
+            // Pulled further toward the viewer than the victim's own position so it reads as popping
+            // out at the camera instead of sitting flush on the model.
+            double distanceFactor = 0.5;
             spawnLoc.add(directionToPlayer.multiply(distanceFactor));
 
             // Add a slight random spread so overlapping damage numbers don't stack perfectly
-            double spread = 0.9;
+            double spread = 1.1;
             spawnLoc.add(
                     (Utils.RANDOM.nextDouble() - 0.5) * spread,
                     (Utils.RANDOM.nextDouble() - 0.5) * spread,
                     (Utils.RANDOM.nextDouble() - 0.5) * spread
             );
         } else {
-            // Fallback offset for non-player damage (e.g. mob vs mob)
-            double offsetX = (Utils.RANDOM.nextDouble() - 0.5) * 0.8;
-            double offsetY = (Utils.RANDOM.nextDouble() * 0.4) + (victim.getHeight() * 0.5);
-            double offsetZ = (Utils.RANDOM.nextDouble() - 0.5) * 0.8;
-            spawnLoc = victim.getLocation().add(offsetX, offsetY, offsetZ);
+            // Fallback offset for non-player damage (e.g. mob vs mob) — there's no viewer to pop
+            // toward here, so lean on a wider jitter instead to stay comparably prominent.
+            double spread = 1.3;
+            double offsetX = (Utils.RANDOM.nextDouble() - 0.5) * spread;
+            double offsetY = (Utils.RANDOM.nextDouble() - 0.5) * spread;
+            double offsetZ = (Utils.RANDOM.nextDouble() - 0.5) * spread;
+            spawnLoc = victim.getLocation().add(offsetX, victim.getHeight() * 0.6 + offsetY, offsetZ);
         }
 
         DamageDisplayUtils.spawnDamageDisplay(
