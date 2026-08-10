@@ -527,9 +527,8 @@ public class ItemCreatorGui {
                     String slotId = response.getText("slot");
                     EquipSlot chosen = slotId == null ? currentSlot : EquipSlot.valueOf(slotId);
                     boolean matchesChosenSlot = current != null && current.getSlot() == chosen;
-                    Map<Attributes, Double> initialValues = matchesChosenSlot
-                            ? new EnumMap<>(current.getBaseAttributes())
-                            : new EnumMap<>(Attributes.class);
+                    Map<Attributes, Double> initialValues = new EnumMap<>(Attributes.class);
+                    if (matchesChosenSlot) initialValues.putAll(current.getBaseAttributes());
                     Utils.runLater(() -> player.showDialog(new AttributeEditorGui(this, chosen, initialValues, matchesChosenSlot).buildListDialog(player)));
                 })
                 .noButton(Component.text("Huỷ"), null, (response, audience) -> Utils.runLater(() -> openMainDialog(player)))
@@ -538,7 +537,8 @@ public class ItemCreatorGui {
 
     private Dialog buildEnchantDialog(Player player) {
         EnchantComponent current = (EnchantComponent) components.get(ItemComponentKeys.ENCHANT.id());
-        Map<Enchants, Integer> initialValues = current == null ? new EnumMap<>(Enchants.class) : new EnumMap<>(current.getBaseEnchants());
+        Map<Enchants, Integer> initialValues = new EnumMap<>(Enchants.class);
+        if (current != null) initialValues.putAll(current.getBaseEnchants());
 
         return new EnchantEditorGui(this, initialValues, current != null).buildListDialog(player);
     }

@@ -37,7 +37,8 @@ public class AttributeEditorGui {
     public AttributeEditorGui(ItemCreatorGui parent, EquipSlot slot, Map<Attributes, Double> initialValues, boolean present) {
         this.parent = parent;
         this.slot = slot;
-        this.values = new EnumMap<>(initialValues);
+        this.values = new EnumMap<>(Attributes.class);
+        this.values.putAll(initialValues);
         this.present = present;
     }
 

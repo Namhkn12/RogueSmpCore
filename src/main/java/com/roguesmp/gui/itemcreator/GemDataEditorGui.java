@@ -37,7 +37,13 @@ public class GemDataEditorGui {
         this.present = current != null;
         this.successChance = current == null ? 1d : current.getSuccessChance();
         this.attributes = new EnumMap<>(EquipSlot.class);
-        if (current != null) current.getAttributes().forEach((slot, map) -> attributes.put(slot, new EnumMap<>(map)));
+        if (current != null) {
+            current.getAttributes().forEach((slot, map) -> {
+                Map<Attributes, Double> copy = new EnumMap<>(Attributes.class);
+                copy.putAll(map);
+                attributes.put(slot, copy);
+            });
+        }
     }
 
     public Dialog buildHubDialog(Player player) {
