@@ -24,11 +24,7 @@ public class ItemConsumableMechanic implements PlayerMechanic {
 
         ConsumableComponent consumableComponent = smpItem.getComponent(ItemComponentKeys.CONSUMABLE);
         if (consumableComponent != null) {
-            List<SmpEffect> effectList = consumableComponent.getEffects();
-            for (SmpEffect smpEffect : effectList) {
-                String source = "consumable_" + smpEffect.getEffectID();
-                EffectManager.getInstance().addEffect(player.getBukkitPlayer(), source, smpEffect); //Use clone
-            }
+            consumableComponent.applyEffects(player.getBukkitPlayer());
         }
     }
 }
