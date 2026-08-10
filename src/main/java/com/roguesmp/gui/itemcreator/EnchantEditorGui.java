@@ -34,7 +34,8 @@ public class EnchantEditorGui {
 
     public EnchantEditorGui(ItemCreatorGui parent, Map<Enchants, Integer> initialValues, boolean present) {
         this.parent = parent;
-        this.values = new EnumMap<>(initialValues);
+        this.values = new EnumMap<>(Enchants.class);
+        this.values.putAll(initialValues);
         this.present = present;
     }
 

@@ -4,6 +4,7 @@ import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.effect.impl.DamageIncreaseEffect;
 import com.roguesmp.effect.impl.ResistanceEffect;
 import com.roguesmp.effect.impl.SpeedEffect;
+import com.roguesmp.item.component.impl.ConsumableComponent;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;

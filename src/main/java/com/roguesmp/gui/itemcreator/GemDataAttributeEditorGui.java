@@ -30,7 +30,8 @@ public class GemDataAttributeEditorGui {
     public GemDataAttributeEditorGui(GemDataEditorGui parent, EquipSlot slot, Map<Attributes, Double> initialValues) {
         this.parent = parent;
         this.slot = slot;
-        this.values = new EnumMap<>(initialValues);
+        this.values = new EnumMap<>(Attributes.class);
+        this.values.putAll(initialValues);
     }
 
     public Dialog buildListDialog(Player player) {
