@@ -114,7 +114,7 @@ public class ConsumableComponent implements ItemComponent {
         List<SmpEffect> effectList = getEffects();
         for (SmpEffect smpEffect : effectList) {
             String source = "consumable_" + smpEffect.getEffectID();
-            EffectManager.getInstance().addEffect(player, source, smpEffect); //Use clone
+            EffectManager.getInstance().addEffect(player, source, smpEffect.clone());
         }
 
     }

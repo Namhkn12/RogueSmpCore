@@ -36,7 +36,7 @@ public final class ParticleRenderer implements FxRenderer {
                 builder.location(world, worldPos.x(), worldPos.y(), worldPos.z());
                 if (viewers != null) {
                     builder.receivers(viewers);
-                } else builder.receivers(100);
+                }
                 builder.spawn();
             }
         }
