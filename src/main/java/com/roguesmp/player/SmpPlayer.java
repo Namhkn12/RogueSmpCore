@@ -72,6 +72,7 @@ public class SmpPlayer {
         mechanics.add(new ProjectileMechanic());
         mechanics.add(new ItemConsumableMechanic());
         mechanics.add(new DurabilityLossMechanic());
+        mechanics.add(new ItemComponentInteractionMechanic());
 
         mechanics.sort(Comparator.comparingInt(PlayerMechanic::getPriority));
     }
@@ -272,6 +273,12 @@ public class SmpPlayer {
     public void onInteract(PlayerInteractEvent event) {
         for (PlayerMechanic mechanic : mechanics) {
             mechanic.onInteract(event, this);
+        }
+    }
+
+    public void onEntityInteract(PlayerInteractEntityEvent event) {
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onEntityInteract(event, this);
         }
     }
 

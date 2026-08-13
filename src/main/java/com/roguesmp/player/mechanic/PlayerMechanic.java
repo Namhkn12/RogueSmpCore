@@ -26,6 +26,8 @@ public interface PlayerMechanic {
 
     default void onInteract(PlayerInteractEvent event, SmpPlayer player) {}
 
+    default void onEntityInteract(PlayerInteractEntityEvent event, SmpPlayer player) {}
+
     default void onSwapHand(PlayerSwapHandItemsEvent event, SmpPlayer player) {}
 
     default void onInput(PlayerInputEvent event, SmpPlayer player) {}

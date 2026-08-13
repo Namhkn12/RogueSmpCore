@@ -112,7 +112,6 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Register Listener here
     public void initListeners() {
-        registerListener(new ItemInteractionListener());
         registerListener(new GuiListener());
         registerListener(new BlockListener());
 
