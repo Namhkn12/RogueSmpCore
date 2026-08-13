@@ -8,6 +8,7 @@ import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.ComponentKey;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.item.component.ItemComponentKeys;
+import com.roguesmp.item.component.UniqueTrackingComponent;
 import com.roguesmp.item.component.impl.*;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.registry.SkinRegistry;
@@ -52,24 +53,30 @@ public class ItemCreatorGui {
 
     private @Nullable String id;
     private Material base;
-    private boolean unique;
     private final Map<String, ItemComponent> components = new HashMap<>();
 
     public ItemCreatorGui() {
-        this(null, Material.PAPER, false, Map.of());
+        this(null, Material.PAPER, Map.of());
     }
 
-    private ItemCreatorGui(@Nullable String id, Material base, boolean unique, Map<String, ItemComponent> components) {
+    private ItemCreatorGui(@Nullable String id, Material base, Map<String, ItemComponent> components) {
         this.id = id;
         this.base = base;
-        this.unique = unique;
         this.components.putAll(components);
     }
 
     public static ItemCreatorGui editExisting(BaseItem item) {
         Map<String, ItemComponent> copy = new HashMap<>();
         item.getComponents().forEach((key, value) -> copy.put(key, value.copy()));
-        return new ItemCreatorGui(item.getId(), item.getBase(), item.isUnique(), copy);
+        return new ItemCreatorGui(item.getId(), item.getBase(), copy);
+    }
+
+    /**
+     * Mirrors {@link BaseItem}'s derived uniqueness: true if any current draft component is a
+     * {@link UniqueTrackingComponent}.
+     */
+    private boolean isUnique() {
+        return components.values().stream().anyMatch(component -> component instanceof UniqueTrackingComponent);
     }
 
     public void openMainDialog(Player player) {
@@ -78,7 +85,7 @@ public class ItemCreatorGui {
                 .addItemBody(buildPreviewItem())
                 .addTextBody(Component.text("ID: " + (id == null ? "(chưa đặt)" : id)
                         + "  |  Material: " + (base == null ? "(chưa đặt)" : base.name())
-                        + "  |  Unique: " + (unique ? "Bật" : "Tắt")));
+                        + "  |  Unique: " + (isUnique() ? "Bật (tự động)" : "Tắt")));
 
         DialogTypeBuilder.MultiAction multi = builder.multiAction();
 
@@ -86,8 +93,6 @@ public class ItemCreatorGui {
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildIdDialog(player))));
         multi.addButton(Component.text("material", base == null ? NamedTextColor.RED : NamedTextColor.GREEN), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildMaterialDialog(player))));
-        multi.addButton(Component.text("unique", unique ? NamedTextColor.GREEN : NamedTextColor.GRAY), null,
-                (response, audience) -> Utils.runLater(() -> player.showDialog(buildUniqueDialog(player))));
 
         multi.addButton(componentLabel(ItemComponentKeys.ITEM_NAME),
                 tooltip("Đặt CUSTOM_NAME cho item.", "Mặc định không in nghiêng nên không cần <!i>"),
@@ -208,7 +213,7 @@ public class ItemCreatorGui {
     private ItemStack buildPreviewItem() {
         Map<String, ItemComponent> copy = new HashMap<>();
         components.forEach((key, value) -> copy.put(key, value.copy()));
-        BaseItem draft = new BaseItem(id == null ? "preview" : id, base, unique, copy);
+        BaseItem draft = new BaseItem(id == null ? "preview" : id, base, copy);
         return draft.generateItemStack(1);
     }
 
@@ -258,7 +263,7 @@ public class ItemCreatorGui {
         Map<String, ItemComponent> toSave = new HashMap<>();
         components.forEach((key, value) -> toSave.put(key, value.copy()));
 
-        BaseItem item = new BaseItem(id, base, unique, toSave);
+        BaseItem item = new BaseItem(id, base, toSave);
         Registries.ITEM.registerAndSave(RogueSmpCore.getInstance(), id, item);
 
         player.sendMessage(Utils.text("Đã lưu vật phẩm '" + id + "'.", NamedTextColor.GREEN));
@@ -299,19 +304,6 @@ public class ItemCreatorGui {
                     Utils.runLater(() -> openMainDialog(player));
                 })
                 .noButton(Component.text("Huỷ"), null, (response, audience) -> Utils.runLater(() -> openMainDialog(player)))
-                .build();
-    }
-
-    private Dialog buildUniqueDialog(Player player) {
-        return DialogBuilder.create(Component.text("unique"))
-                .canCloseWithEscape(false)
-                .externalTitle(Component.text("unique", unique ? NamedTextColor.GREEN : NamedTextColor.GRAY))
-                .addTextBody(Component.text("Hiện tại: " + (unique ? "Bật" : "Tắt")))
-                .notice()
-                .button(Component.text(unique ? "Tắt" : "Bật"), null, (response, audience) -> {
-                    unique = !unique;
-                    Utils.runLater(() -> openMainDialog(player));
-                })
                 .build();
     }
 

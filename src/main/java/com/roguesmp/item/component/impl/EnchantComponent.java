@@ -7,6 +7,7 @@ import com.roguesmp.constant.Keys;
 import com.roguesmp.context.ItemDataContext;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ItemComponent;
+import com.roguesmp.item.component.UniqueTrackingComponent;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemEnchantments;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -20,7 +21,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 
-public class EnchantComponent implements ItemComponent {
+public class EnchantComponent implements UniqueTrackingComponent {
 
     public static final NamespacedKey PLAYER_ENCHANT_KEY = Keys.of("p_enchant");
 
