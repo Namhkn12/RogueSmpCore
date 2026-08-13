@@ -19,6 +19,7 @@ import com.roguesmp.gui.ability.AbilityCatalogue;
 import com.roguesmp.gui.crafting.CraftingGui;
 import com.roguesmp.gui.info.SmpWikiMainMenuGui;
 import com.roguesmp.gui.itemcreator.ItemCreatorGui;
+import com.roguesmp.gui.entitycreator.EntityCreatorGui;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
@@ -132,6 +133,7 @@ public final class RogueSmpCore extends JavaPlugin {
         SkinBrowserGui.registerCommand();
         ItemBrowser.registerCommand();
         ItemCreatorGui.registerCommand();
+        EntityCreatorGui.registerCommand();
         EffectManager.registerCommand();
         EntityManager.registerCommand();
         FxCommand.register();
