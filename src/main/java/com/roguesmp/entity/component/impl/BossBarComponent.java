@@ -4,6 +4,8 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.component.EntityComponent;
+import com.roguesmp.entity.component.TickingComponent;
+import com.roguesmp.utils.EntityUtils;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -19,15 +21,18 @@ import java.util.function.Function;
 
 /**
  * Renders a boss's health bar to nearby players - purely visual (viewer range, title, color, fog,
- * progress). Health-threshold phase triggers live separately in {@code SpellComponent.PhaseManager};
- * this component only draws whatever progress value it's told.
+ * progress). Self-sufficient via {@link TickingComponent}: computes its own health ratio and
+ * refreshes the bar every shared tick, no external driver needed. Health-threshold phase triggers
+ * are a separate {@link PhaseComponent} that this has no dependency on - when a threshold crossing
+ * forces the entity's real HP to a specific value, this just reads that already-updated
+ * {@code entity.getHealth()} on its own next tick like any other health change.
  * <p>
  * JSON-declarable via {@link #CODEC} (range/color/style/bossFog, centered on the entity itself -
  * the bar is built lazily in {@link #onSpawn}). Code-driven bosses that need a custom center
  * location instead use {@link #BossBarComponent(LivingEntity, int, BossBar.Color, BossBar.Overlay, boolean, Function)},
  * which builds immediately since no {@code onSpawn} call comes for a component attached after spawn.
  */
-public class BossBarComponent implements EntityComponent {
+public class BossBarComponent implements TickingComponent {
 
     public static final Codec<BossBarComponent> CODEC = Codec.composite(
             Codec.INT.optionalFieldOf("range", 30).forGetter(BossBarComponent::getRange),
@@ -123,11 +128,21 @@ public class BossBarComponent implements EntityComponent {
         bar.color(barColor);
     }
 
+    @Override
+    public void tick(SmpEntity smpEntity, int interval) {
+        if (smpEntity.dead || entity == null) return;
+
+        double maxHealth = EntityUtils.getMaxHealth(entity);
+        double progress = maxHealth <= 0 ? 0 : entity.getHealth() / maxHealth;
+        update(progress);
+    }
+
     /**
-     * Refreshes viewer visibility by range and sets the bar's progress.
+     * Refreshes viewer visibility by range and sets the bar's progress. Called every shared tick
+     * via {@link #tick} with the entity's own current HP ratio; still public so code-driven bosses
+     * can force a specific display value on their own (e.g. a shield-overlay effect) if needed.
      *
-     * @param progress health percentage in [0, 1] to display - typically the entity's own HP
-     *                 ratio, or a forced value from {@code PhaseManager} when capping damage.
+     * @param progress health percentage in [0, 1] to display
      */
     public void update(double progress) {
         if (entity.getHealth() <= 0) {
