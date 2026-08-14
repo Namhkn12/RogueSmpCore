@@ -128,7 +128,7 @@ public class DurabilityLossMechanic implements PlayerMechanic {
                 double threshold = 0.05; // 5%
 
                 if (oldPercent > threshold && newPercent <= threshold) {
-                    bukkitPlayer.sendMessage(Utils.fromString("<red>CHÚ Ý! " + itemName + "<red> của bạn sắp hỏng. Các chỉ số của " + itemName + "<red> sẽ bị vô hiệu khi bị hỏng!"));
+                    bukkitPlayer.sendMessage(Utils.fromString("<red>CHÚ Ý! " + itemName + "<red> của bạn sắp hỏng (Còn " + newDurability + " độ bền). Các chỉ số của " + itemName + "<red> sẽ bị vô hiệu khi bị hỏng!"));
                     bukkitPlayer.playSound(Sound.sound(SoundEventKeys.ENTITY_ITEM_BREAK, Sound.Source.PLAYER, 0.5f, 1.5f));
                 }
             }

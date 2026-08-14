@@ -28,7 +28,8 @@ public interface EntityComponent {
     /**
      * Apply this component's data onto a freshly spawned living entity (attributes, equipment,
      * vanilla flags, etc). Called once, during {@link com.roguesmp.entity.BaseEntity#processEntity}.
-     * Runs on the raw {@code LivingEntity} - no {@link SmpEntity} wrapper exists yet at this point.
+     * Runs on the raw {@code LivingEntity} - no {@link SmpEntity} wrapper exists yet at this point. Do not spawn
+     * other entities here, run the spawning code a tick later
      */
     default void apply(LivingEntity entity) {
 
@@ -37,7 +38,8 @@ public interface EntityComponent {
     /**
      * Called once per {@link SmpEntity} instance during {@link SmpEntity#initialize()}, after
      * {@link #apply}. Unlike {@code apply}, the full {@code SmpEntity} wrapper is available here -
-     * use this for setup that needs event dispatch, scheduling, or other components.
+     * use this for setup that needs event dispatch, scheduling, or other components. Do not spawn
+     * other entities here, run the spawning code a tick later.
      */
     default void onSpawn(SmpEntity entity) {
 
@@ -45,6 +47,7 @@ public interface EntityComponent {
 
     /**
      * Called once when the owning {@link SmpEntity} unloads - cancel schedules, remove boss bars, etc.
+     * Do not remove other entities here, run the remove code a tick later.
      */
     default void onUnload(SmpEntity entity) {
 

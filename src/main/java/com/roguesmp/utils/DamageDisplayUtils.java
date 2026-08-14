@@ -39,7 +39,6 @@ public class DamageDisplayUtils {
             entity.text(text);
             entity.setBillboard(Display.Billboard.CENTER);
             entity.setBackgroundColor(Color.fromARGB(50, 0, 0, 0));
-            entity.setShadowed(true);
             entity.setTransformation(scaled(new Vector3f(), POP_START_SCALE));
         });
 

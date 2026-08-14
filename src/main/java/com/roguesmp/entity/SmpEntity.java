@@ -1,9 +1,12 @@
 package com.roguesmp.entity;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.entity.component.EntityComponent;
 import com.roguesmp.entity.component.EntityComponentKey;
+import com.roguesmp.entity.component.TickingComponent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.SpellCastEvent;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.*;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +23,7 @@ import java.util.function.Supplier;
  * forwards events to every component.
  */
 public class SmpEntity {
-    public static final int PASSIVE_RUN_INTERVAL_DEFAULT = 5;
+    public static final int PASSIVE_RUN_INTERVAL_DEFAULT = 2;
     public static final int ACTIVE_RUN_INTERVAL_DEFAULT = 2;
 
     protected final LivingEntity entity;
@@ -31,6 +34,7 @@ public class SmpEntity {
     public boolean dead = false;
 
     private final Map<String, EntityComponent> componentMap = new HashMap<>();
+    private @Nullable ScheduledTask tickTask;
 
     public SmpEntity(BaseEntity base, LivingEntity entity) {
         this.entity = entity;
@@ -84,7 +88,34 @@ public class SmpEntity {
         // Snapshot first: a component's onSpawn (e.g. SpellComponent) may attach new components.
         List.copyOf(componentMap.values()).forEach(component -> component.onSpawn(this));
 
+        startTicking();
+
         onInitialized();
+    }
+
+    /**
+     * Starts the single shared {@link TickingComponent} dispatch task, but only if at least one
+     * (copied) component actually implements it
+     */
+    private void startTicking() {
+        boolean hasTickingComponent = componentMap.values().stream().anyMatch(component -> component instanceof TickingComponent);
+        if (!hasTickingComponent) return;
+
+        tickTask = entity.getScheduler().runAtFixedRate(
+                RogueSmpCore.getInstance(),
+                task -> tickComponents(),
+                this::unload,
+                PASSIVE_RUN_INTERVAL_DEFAULT,
+                PASSIVE_RUN_INTERVAL_DEFAULT
+        );
+    }
+
+    private void tickComponents() {
+        for (EntityComponent component : componentMap.values()) {
+            if (component instanceof TickingComponent tickingComponent) {
+                tickingComponent.tick(this, PASSIVE_RUN_INTERVAL_DEFAULT);
+            }
+        }
     }
 
     /**
@@ -112,6 +143,7 @@ public class SmpEntity {
         /* Make sure we don't accidentally call the main unload sequence twice */
         if (!unloaded) {
             unloaded = true;
+            if (tickTask != null) tickTask.cancel();
             componentMap.values().forEach(component -> component.onUnload(this));
         }
     }
