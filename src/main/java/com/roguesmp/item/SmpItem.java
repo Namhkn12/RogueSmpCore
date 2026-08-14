@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -30,7 +31,6 @@ public class SmpItem {
     private final BaseItem baseItem;
     private final UUID uuid;
     private ItemStack itemStack;
-    private boolean loadedModifiers = false;
 
     private final Map<String, ItemComponent> componentMap = new HashMap<>();
 
@@ -108,6 +108,10 @@ public class SmpItem {
 
     public <T extends ItemComponent> boolean hasComponent(ComponentKey<T> key) {
         return componentMap.containsKey(key.id());
+    }
+
+    public @Unmodifiable Map<String, ItemComponent> getComponents() {
+        return Collections.unmodifiableMap(componentMap);
     }
 
     public BaseItem getBaseItem() {

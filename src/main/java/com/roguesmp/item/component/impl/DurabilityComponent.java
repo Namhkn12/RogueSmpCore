@@ -5,6 +5,7 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ItemComponent;
+import com.roguesmp.item.component.UniqueTrackingComponent;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public final class DurabilityComponent implements ItemComponent {
+public final class DurabilityComponent implements UniqueTrackingComponent {
 
     public static final NamespacedKey DURABILITY_KEY = new NamespacedKey(Keys.GLOBAL_NAMESPACE, "durability");
 

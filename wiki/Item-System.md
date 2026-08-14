@@ -6,13 +6,12 @@ Mô hình 2 tầng: 1 template JSON bất biến (`BaseItem`) và 1 wrapper runt
 
 ## `BaseItem` — template
 
-[`BaseItem.java`](../src/main/java/com/roguesmp/item/BaseItem.java) là prototype bất biến, định nghĩa bằng JSON: `id`, `base` (Material), `unique` (boolean), và `Map<String, ItemComponent> components`. Nó thuộc sở hữu của [`Registries.ITEM`](Registry-System.md) và không bao giờ tự thay đổi — `generateItemStack(...)` chỉ đơn giản tạo 1 `new SmpItem(this)` tạm thời rồi ủy quyền:
+[`BaseItem.java`](../src/main/java/com/roguesmp/item/BaseItem.java) là prototype bất biến, định nghĩa bằng JSON: `id`, `base` (Material), và `Map<String, ItemComponent> components`. Nó thuộc sở hữu của [`Registries.ITEM`](Registry-System.md) và không bao giờ tự thay đổi — `generateItemStack(...)` chỉ đơn giản tạo 1 `new SmpItem(this)` tạm thời rồi ủy quyền:
 
 ```java
 public static final Codec<BaseItem> CODEC = Codec.composite(
         Codec.STRING.fieldOf("id").forGetter(BaseItem::getId),
         Codec.MATERIAL.fieldOf("base").forGetter(BaseItem::getBase),
-        Codec.BOOLEAN.optionalFieldOf("unique", false).forGetter(BaseItem::isUnique),
         Codec.<ItemComponent>dispatchedMap(Registries.ITEM_COMPONENT_CODEC::getOrThrow)
                 .optionalFieldOf("components", Map.of())
                 .forGetter(BaseItem::getComponents),
@@ -21,6 +20,8 @@ public static final Codec<BaseItem> CODEC = Codec.composite(
 ```
 
 Xem [Codec System → ví dụ BaseItem](Codec-System.md#full-worked-example--baseitem-dispatch--dispatchedmap--registry-loading) để biết `dispatchedMap` ở đây tra codec của từng component như thế nào, và [Registry System](Registry-System.md) để biết các file `*.json` dưới `plugin.getDataFolder()/items/` được decode vào `Registries.ITEM` lúc khởi động ra sao.
+
+`isUnique()` không còn là field JSON — nó được tính tự động trong constructor: `true` nếu bất kỳ component nào trong `components` implement marker interface [`UniqueTrackingComponent`](../src/main/java/com/roguesmp/item/component/UniqueTrackingComponent.java). Component nào giữ state per-instance (lưu/đọc qua PDC bằng `save`/`load`, vd. `DurabilityComponent`, `EnchantComponent`, `GemSocketComponent`) nên implement interface này thay vì `ItemComponent` — item chứa nó sẽ tự động unique, không cần khai báo `"unique": true` thủ công nữa.
 
 ## `SmpItem` — wrapper sống
 

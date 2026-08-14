@@ -7,6 +7,7 @@ import com.roguesmp.constant.Keys;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.ItemComponent;
+import com.roguesmp.item.component.UniqueTrackingComponent;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -23,7 +24,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class GemSocketComponent implements ItemComponent {
+public class GemSocketComponent implements UniqueTrackingComponent {
 
     public static final Codec<GemSocketComponent> CODEC = Codec.INT
             .xmap(GemSocketComponent::new, GemSocketComponent::getSocketCount);

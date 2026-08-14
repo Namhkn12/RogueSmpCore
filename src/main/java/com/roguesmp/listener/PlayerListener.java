@@ -137,6 +137,13 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onEntityInteract(PlayerInteractEntityEvent event) {
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
+        if (smpPlayer == null) return;
+        smpPlayer.onEntityInteract(event);
+    }
+
+    @EventHandler
     public void onInput(PlayerInputEvent event) {
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
         if (smpPlayer == null) return;

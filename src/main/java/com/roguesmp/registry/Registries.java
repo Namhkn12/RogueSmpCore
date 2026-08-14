@@ -11,7 +11,7 @@ import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityFactory;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.component.EntityComponent;
-import com.roguesmp.entity.spell.SpellFactory;
+import com.roguesmp.entity.spell.SpellType;
 import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.ItemComponent;
@@ -54,7 +54,7 @@ public class Registries {
     // can have a "enchants/tags/*.json" folder like every other registry.
     public static final Registry<Enchants> ENCHANTS = register("enchants", registry -> Enchants.bootstrap());
 
-    public static final Registry<SpellFactory<? extends SpellParams>> ENTITY_SPELL = register(registry -> EntitySpells.loadClass());
+    public static final Registry<SpellType<? extends SpellParams>> ENTITY_SPELL = register(registry -> EntitySpells.loadClass());
     public static final Registry<EntityFactory<? extends SmpEntity>> ENTITY_FACTORY = register(registry -> SpecialEntities.loadClass());
 
     public static final Registry<AbilityInfo<? extends Ability>> ABILITY = register(registry -> AbilityInfos.loadClass());

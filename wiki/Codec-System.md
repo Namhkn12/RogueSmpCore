@@ -255,7 +255,6 @@ JSON kết quả (field của `BASE_CODEC` và của `SpeedEffect` nằm phẳng
 public static final Codec<BaseItem> CODEC = Codec.composite(
         Codec.STRING.fieldOf("id").forGetter(BaseItem::getId),
         Codec.MATERIAL.fieldOf("base").forGetter(BaseItem::getBase),
-        Codec.BOOLEAN.optionalFieldOf("unique", false).forGetter(BaseItem::isUnique),
         Codec.<ItemComponent>dispatchedMap(Registries.ITEM_COMPONENT_CODEC::getOrThrow)
                 .optionalFieldOf("components", Map.of())
                 .forGetter(BaseItem::getComponents),
@@ -265,12 +264,12 @@ public static final Codec<BaseItem> CODEC = Codec.composite(
 
 - Mỗi component đăng ký `Codec` của nó vào `Registries.ITEM_COMPONENT_CODEC` qua [`ItemComponentCodecRegistry.register(id, codec)`](../src/main/java/com/roguesmp/registry/ItemComponentCodecRegistry.java), được gọi từ static initializer của [`ComponentKeys`](../src/main/java/com/roguesmp/constant/ComponentKeys.java) (vd. `ITEM_NAME = ItemComponentCodecRegistry.register("name", NameComponent.CODEC);`). Xem [Item System](Item-System.md) để có bức tranh đầy đủ.
 - Khác với `dispatch()` (đọc type-id từ 1 field cố định *bên trong* value, vd. `"id"`), `dispatchedMap` dùng **chính key của map** (`"name"`, `"durability"`, ...) làm type-id.
+- `"unique"` không còn là field JSON riêng: `BaseItem` tự tính `isUnique()` từ việc có component nào implement `UniqueTrackingComponent` hay không (vd. `durability` bên dưới → `DurabilityComponent implements UniqueTrackingComponent` → item này tự động unique).
 
 ```json
 {
   "id": "fire_sword",
   "base": "NETHERITE_SWORD",
-  "unique": true,
   "components": {
     "name": "<gold>Fire Sword",
     "durability": 500,

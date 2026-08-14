@@ -308,7 +308,6 @@ public class BaseItem {
     public static final Codec<BaseItem> CODEC = Codec.composite(
             Codec.STRING.fieldOf("id").forGetter(BaseItem::getId),
             Codec.MATERIAL.fieldOf("base").forGetter(BaseItem::getBase),
-            Codec.BOOLEAN.optionalFieldOf("unique", false).forGetter(BaseItem::isUnique),
             Codec.<ItemComponent>dispatchedMap(Registries.ITEM_COMPONENT_CODEC::getOrThrow)
                     .optionalFieldOf("components", Map.of())
                     .forGetter(BaseItem::getComponents),
@@ -320,6 +319,7 @@ public class BaseItem {
 
 - Mỗi component (`NameComponent`, `DurabilityComponent`, `EquipAttributeComponent`, ...) đăng ký `Codec` của nó vào `Registries.ITEM_COMPONENT_CODEC` thông qua [`ItemComponentCodecRegistry.register(id, codec)`](../registry/ItemComponentCodecRegistry.java), được gọi từ static initializer của [`ComponentKeys`](../constant/ComponentKeys.java) (vd. `ITEM_NAME = ItemComponentCodecRegistry.register("name", NameComponent.CODEC);`).
 - Khi decode `"components"`, `dispatchedMap` dùng chính **tên key** (`"name"`, `"durability"`, ...) làm type-key để tra ra đúng `Codec` cho từng entry — khác với `dispatch()` ở mục 7 vốn đọc type-key từ 1 field cố định (`"id"`/`"type"`) **bên trong** value.
+- `BaseItem` không còn field `"unique"` trong JSON — `isUnique()` được tính tự động: true nếu bất kỳ component nào trong `"components"` implement marker interface [`UniqueTrackingComponent`](../item/component/UniqueTrackingComponent.java) (vd. `DurabilityComponent`, `EnchantComponent`, `GemSocketComponent` — những component có state per-instance lưu qua PDC). Không cần khai báo unique thủ công nữa.
 
 JSON ví dụ của 1 `BaseItem`:
 
@@ -327,7 +327,6 @@ JSON ví dụ của 1 `BaseItem`:
 {
   "id": "fire_sword",
   "base": "NETHERITE_SWORD",
-  "unique": true,
   "components": {
     "name": "<gold>Fire Sword",
     "durability": 500,
