@@ -30,9 +30,14 @@ public class GemModifier implements ItemModifier {
             attributeMap.forEach((attributes, aDouble) -> {
                 modifiers.merge(attributes, aDouble, Double::sum);
             });
-
-            equipAttributeComponent.putModifier("gem_attribute_modifier", modifiers);
         });
 
+        // Unconditional put-or-remove: if the last gem was taken out, modifiers ends up empty and
+        // must still clear the previous entry, not just skip re-applying it.
+        if (modifiers.isEmpty()) {
+            equipAttributeComponent.removeModifier("gem_attribute_modifier");
+        } else {
+            equipAttributeComponent.putModifier("gem_attribute_modifier", modifiers);
+        }
     }
 }

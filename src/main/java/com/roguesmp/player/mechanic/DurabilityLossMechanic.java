@@ -13,6 +13,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.registry.keys.SoundEventKeys;
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.GameMode;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -85,6 +86,7 @@ public class DurabilityLossMechanic implements PlayerMechanic {
     }
 
     private static void damageItem(SmpPlayer player, SmpItem smpItem, int amount, EquipSlot equipSlot) {
+        if (player.getBukkitPlayer().getGameMode() == GameMode.CREATIVE) return;
         if (smpItem == null || amount <= 0) return;
         if (smpItem.hasComponent(ItemComponentKeys.BROKEN)) return;
 
@@ -126,7 +128,7 @@ public class DurabilityLossMechanic implements PlayerMechanic {
                 double threshold = 0.05; // 5%
 
                 if (oldPercent > threshold && newPercent <= threshold) {
-                    bukkitPlayer.sendMessage(Utils.fromString("<red>CHÚ Ý! " + itemName + "<red> của bạn sắp hỏng. Các chỉ số của " + itemName + " sẽ bị vô hiệu khi bị hỏng!"));
+                    bukkitPlayer.sendMessage(Utils.fromString("<red>CHÚ Ý! " + itemName + "<red> của bạn sắp hỏng. Các chỉ số của " + itemName + "<red> sẽ bị vô hiệu khi bị hỏng!"));
                     bukkitPlayer.playSound(Sound.sound(SoundEventKeys.ENTITY_ITEM_BREAK, Sound.Source.PLAYER, 0.5f, 1.5f));
                 }
             }
