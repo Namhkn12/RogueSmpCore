@@ -1,7 +1,6 @@
 package com.roguesmp.entity.spell;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.entity.boss.primordialslime.PrimordialSlimeAltarSpell;
 import com.roguesmp.entity.spell.impl.*;
 import com.roguesmp.registry.Registries;
 import org.bukkit.entity.LivingEntity;
@@ -36,8 +35,8 @@ public class EntitySpells {
             register(DeathGripSpell.TYPE_KEY, DeathGripSpell.Params.CODEC, DeathGripSpell::create, SpellUsage.ACTIVE);
     public static final SpellType<FireRestanceSpell.Params> FIRE_RESISTANCE =
             register(FireRestanceSpell.TYPE_KEY, FireRestanceSpell.Params.CODEC, FireRestanceSpell::create, SpellUsage.PASSIVE);
-    public static final SpellType<PrimordialSlimeAltarSpell.Params> PRIMORDIAL_SLIME_ALTAR =
-            register(PrimordialSlimeAltarSpell.TYPE_KEY, PrimordialSlimeAltarSpell.Params.CODEC, PrimordialSlimeAltarSpell::create, SpellUsage.PASSIVE);
+//    public static final SpellType<PrimordialSlimeAltarSpell.Params> PRIMORDIAL_SLIME_ALTAR =
+//            register(PrimordialSlimeAltarSpell.TYPE_KEY, PrimordialSlimeAltarSpell.Params.CODEC, PrimordialSlimeAltarSpell::create, SpellUsage.PASSIVE);
 
     public static void loadClass() {
 
