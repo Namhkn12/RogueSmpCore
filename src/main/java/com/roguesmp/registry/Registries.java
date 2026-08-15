@@ -14,6 +14,8 @@ import com.roguesmp.entity.component.EntityComponent;
 import com.roguesmp.entity.spell.SpellType;
 import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.item.BaseItem;
+import com.roguesmp.item.ability.ItemAbility;
+import com.roguesmp.item.ability.ItemAbilities;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.npc.BaseNpc;
 import com.roguesmp.npc.action.NpcAction;
@@ -38,6 +40,7 @@ public class Registries {
     public static final Registry<Codec<? extends ItemComponent>> ITEM_COMPONENT_CODEC = register(registry -> ItemComponentKeys.loadClass());
     public static final Registry<Codec<? extends EntityComponent>> ENTITY_COMPONENT_CODEC = register(registry -> EntityComponentKeys.loadClass());
     public static final Registry<Codec<? extends SmpEffect>> EFFECT_CODEC = register(registry -> EffectCodecs.loadClass());
+    public static final Registry<Codec<? extends ItemAbility>> ITEM_ABILITY = register(registry -> ItemAbilities.loadClass());
 
     public static final Registry<Codec<? extends QuestObjective>> QUEST_OBJECTIVE_CODEC = register(registry -> QuestObjectives.loadClass());
     public static final Registry<Codec<? extends QuestRequirement>> QUEST_REQUIREMENT_CODEC = register(registry -> QuestRequirements.loadClass());
@@ -73,7 +76,7 @@ public class Registries {
     public static void loadAllData(RogueSmpCore plugin) {
         Registry.loadAll(plugin);
         Registry.loadAllTags(plugin); // must run after loadAll, since tags resolve against already-loaded entries
-        Registry.validateAllHolders(); // catch dangling Holder references (bad/typo'd ids) now, not mid-gameplay
+        Registry.validateAllHolders(); // catch dangling Holder references (bad/typo'd ids)
     }
 
     // Create in-memory data here

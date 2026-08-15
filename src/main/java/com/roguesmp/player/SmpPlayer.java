@@ -43,6 +43,12 @@ public class SmpPlayer {
     private final Map<UUID, PlayerProjectile> projectiles = new HashMap<>();
     private int projectileCleanupTimer = 0;
 
+    // Wall-clock (not tick-count) cooldown tracking for passive item abilities (ItemAbility) -
+    // lives here rather than on the ability/component instance since non-unique SmpItems (and
+    // thus their components/abilities) get rebuilt fresh on every wrap and would otherwise lose
+    // any cooldown state constantly.
+    private final Map<String, Long> abilityCooldowns = new HashMap<>();
+
     public SmpPlayer(UUID uuid) {
         this.uuid = uuid;
         abilityLoadout = new AbilityLoadout(this);
@@ -73,6 +79,7 @@ public class SmpPlayer {
         mechanics.add(new ItemConsumableMechanic());
         mechanics.add(new DurabilityLossMechanic());
         mechanics.add(new ItemComponentInteractionMechanic());
+        mechanics.add(new ItemAbilityMechanic());
 
         mechanics.sort(Comparator.comparingInt(PlayerMechanic::getPriority));
     }
@@ -207,6 +214,18 @@ public class SmpPlayer {
 
     public @Nullable SmpItem getItemAtEquipSlot(EquipSlot equipSlot) {
         return currentEquipment.get(equipSlot);
+    }
+
+    /**
+     * @param key a caller-chosen unique key, typically {@code abilityTypeId + ":" + itemId}
+     */
+    public boolean isAbilityOnCooldown(String key) {
+        Long expiry = abilityCooldowns.get(key);
+        return expiry != null && expiry > System.currentTimeMillis();
+    }
+
+    public void setAbilityCooldown(String key, long durationMillis) {
+        abilityCooldowns.put(key, System.currentTimeMillis() + durationMillis);
     }
 
     public UUID getUuid() {
