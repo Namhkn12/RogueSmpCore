@@ -27,7 +27,7 @@ public class ItemAbilities {
     }
 
     private static <T extends ItemAbility> Codec<T> register(String id, Codec<T> codec) {
-        Registries.ITEM_ABILITY.register(id, codec);
+        Registries.ITEM_ABILITY_CODEC.register(id, codec);
         return codec;
     }
 }

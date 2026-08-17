@@ -7,7 +7,6 @@ import com.roguesmp.constant.Keys;
 import com.roguesmp.entity.component.EntityComponent;
 import com.roguesmp.entity.component.EntityComponentKey;
 import com.roguesmp.entity.component.impl.DisplayNameComponent;
-import com.roguesmp.entity.component.impl.NameplateComponent;
 import com.roguesmp.registry.Registries;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -20,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -44,20 +42,7 @@ public class BaseEntity {
     public BaseEntity(String id, EntityType entityType, Map<String, EntityComponent> components) {
         this.id = id;
         this.entityType = entityType;
-        this.components = withDefaultNameplate(components);
-    }
-
-    /**
-     * Every entity gets a default {@link NameplateComponent} unless it declares its own -
-     * JSON authors (or the entity creator GUI) override it simply by declaring a
-     * {@code "nameplate"} entry themselves.
-     */
-    private static Map<String, EntityComponent> withDefaultNameplate(Map<String, EntityComponent> components) {
-        if (components.containsKey(EntityComponentKeys.NAMEPLATE.id())) return components;
-
-        Map<String, EntityComponent> withDefault = new HashMap<>(components);
-        withDefault.put(EntityComponentKeys.NAMEPLATE.id(), NameplateComponent.createDefault());
-        return withDefault;
+        this.components = components;
     }
 
     @SuppressWarnings("unchecked")

@@ -2,14 +2,10 @@ package com.roguesmp.entity.component.impl;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
-import com.roguesmp.codec.DataResult;
-import com.roguesmp.codec.JsonOps;
-import com.roguesmp.effect.EffectManager;
-import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.component.EntityComponent;
 import com.roguesmp.entity.component.EntityComponentKeys;
-import com.roguesmp.entity.component.TickingComponent;
+import com.roguesmp.event.DamageEvent;
 import com.roguesmp.utils.EntityUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -20,7 +16,6 @@ import org.bukkit.Color;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.TextDisplay;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,44 +25,52 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NameplateComponent implements TickingComponent {
+/**
+ * Lazily updated - unlike most visual entity components, this does not tick itself. Whoever
+ * changes something the nameplate displays (health, name, ...) is responsible for calling
+ * {@link #update(SmpEntity)} afterward. This component covers the most common case itself -
+ * {@link #onHurt} refreshes on damage taken - but anything else that mutates health/name outside
+ * a {@link DamageEvent} (e.g. {@code PhaseComponent} forcing HP to a threshold) must call it too.
+ */
+public class NameplateComponent implements EntityComponent {
 
     public static final Codec<NameplateComponent> CODEC = Codec.composite(
             Codec.BOOLEAN.optionalFieldOf("showHealth", true).forGetter(NameplateComponent::showHealth),
             Codec.BOOLEAN.optionalFieldOf("showName", true).forGetter(NameplateComponent::showName),
             Codec.DOUBLE.optionalFieldOf("heightOffset", 0.3).forGetter(NameplateComponent::heightOffset),
-            Codec.INT.optionalFieldOf("updateInterval", SmpEntity.PASSIVE_RUN_INTERVAL_DEFAULT).forGetter(NameplateComponent::updateInterval),
             NameplateComponent::new
     );
 
     private final boolean showHealth;
     private final boolean showName;
     private final double heightOffset;
-    private final int updateInterval;
 
     private @Nullable LivingEntity entity;
     private @Nullable TextDisplay display;
-    private int ticksUntilUpdate = 0;
 
-    public NameplateComponent(boolean showHealth, boolean showName, double heightOffset, int updateInterval) {
+    public NameplateComponent(boolean showHealth, boolean showName, double heightOffset) {
         this.showHealth = showHealth;
         this.showName = showName;
         this.heightOffset = heightOffset;
-        this.updateInterval = updateInterval;
     }
 
     public static NameplateComponent createDefault() {
-        return new NameplateComponent(true, true, 0.3, SmpEntity.PASSIVE_RUN_INTERVAL_DEFAULT);
+        return new NameplateComponent(true, true, 0.3);
     }
 
     @Override
     public @NotNull EntityComponent copy() {
-        return new NameplateComponent(showHealth, showName, heightOffset, updateInterval);
+        return new NameplateComponent(showHealth, showName, heightOffset);
     }
 
     @Override
     public void onSpawn(SmpEntity smpEntity) {
         this.entity = smpEntity.getEntity();
+        // Hides the vanilla nametag so it doesn't stack with this floating one. Done here rather
+        // than apply(LivingEntity) since this component can be attached directly to a live
+        // SmpEntity (e.g. SmpEntity's own default-nameplate injection) without ever going through
+        // BaseEntity#processEntity, which is the only thing that calls apply().
+        entity.customName(null);
 
         entity.getScheduler().run(RogueSmpCore.getInstance(), task -> {
             if (!showHealth && !showName) return;
@@ -97,19 +100,25 @@ public class NameplateComponent implements TickingComponent {
         update(smpEntity);
     }
 
+    /**
+     * The wielder just took damage. The underlying entity's health hasn't actually been reduced
+     * yet at this point ({@code DamageListener} fires this custom event before applying
+     * {@code getFinalDamage()} to the real Bukkit health), so refreshing synchronously here would
+     * just redraw the pre-hit value - defer one tick via the entity's own scheduler so the real
+     * damage (and anything else's {@code onHurt}, e.g. {@code PhaseComponent}'s damage cap) has
+     * already landed by the time this actually re-reads {@code entity.getHealth()}.
+     */
     @Override
-    public void tick(SmpEntity smpEntity, int interval) {
-        ticksUntilUpdate -= interval;
-        if (ticksUntilUpdate > 0) return;
-        ticksUntilUpdate = effectiveUpdateInterval();
-        update(smpEntity);
+    public void onHurt(DamageEvent event, SmpEntity smpEntity) {
+        if (entity == null) return;
+        entity.getScheduler().run(RogueSmpCore.getInstance(), task -> update(smpEntity), null);
     }
 
-    private int effectiveUpdateInterval() {
-        return updateInterval <= 0 ? SmpEntity.PASSIVE_RUN_INTERVAL_DEFAULT : updateInterval;
-    }
-
-    private void update(SmpEntity smpEntity) {
+    /**
+     * Repositions nothing (riding handles that) - just rebuilds and re-renders the display text.
+     * Call this whenever something the nameplate shows has changed; it is not called periodically.
+     */
+    public void update(SmpEntity smpEntity) {
         if (display == null || entity == null || !entity.isValid() || entity.isDead()) {
             remove();
             return;
@@ -146,11 +155,9 @@ public class NameplateComponent implements TickingComponent {
         NamedTextColor healthColor;
         if (percent >= 0.75) healthColor = NamedTextColor.GREEN;
         else if (percent >= 0.4) healthColor = NamedTextColor.YELLOW;
-        else if (percent >= 0.15) healthColor = NamedTextColor.GOLD;
         else healthColor = NamedTextColor.RED;
 
-        return Component.text(Math.round(currentHealth) + "/" + Math.round(maxHealth) + " ❤", healthColor)
-                .decoration(TextDecoration.ITALIC, false);
+        return Component.text(Math.round(currentHealth), healthColor).append(Component.text("/")).append(Component.text(Math.round(maxHealth) + "❤"));
     }
 
     private void remove() {
@@ -170,11 +177,6 @@ public class NameplateComponent implements TickingComponent {
         remove();
     }
 
-    @Override
-    public void apply(LivingEntity entity) {
-        entity.customName(null);
-    }
-
     public boolean showHealth() {
         return showHealth;
     }
@@ -185,9 +187,5 @@ public class NameplateComponent implements TickingComponent {
 
     public double heightOffset() {
         return heightOffset;
-    }
-
-    public int updateInterval() {
-        return updateInterval;
     }
 }

@@ -40,7 +40,7 @@ public class Registries {
     public static final Registry<Codec<? extends ItemComponent>> ITEM_COMPONENT_CODEC = register(registry -> ItemComponentKeys.loadClass());
     public static final Registry<Codec<? extends EntityComponent>> ENTITY_COMPONENT_CODEC = register(registry -> EntityComponentKeys.loadClass());
     public static final Registry<Codec<? extends SmpEffect>> EFFECT_CODEC = register(registry -> EffectCodecs.loadClass());
-    public static final Registry<Codec<? extends ItemAbility>> ITEM_ABILITY = register(registry -> ItemAbilities.loadClass());
+    public static final Registry<Codec<? extends ItemAbility>> ITEM_ABILITY_CODEC = register(registry -> ItemAbilities.loadClass());
 
     public static final Registry<Codec<? extends QuestObjective>> QUEST_OBJECTIVE_CODEC = register(registry -> QuestObjectives.loadClass());
     public static final Registry<Codec<? extends QuestRequirement>> QUEST_REQUIREMENT_CODEC = register(registry -> QuestRequirements.loadClass());

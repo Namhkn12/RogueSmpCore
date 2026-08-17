@@ -3,7 +3,9 @@ package com.roguesmp.entity;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.entity.component.EntityComponent;
 import com.roguesmp.entity.component.EntityComponentKey;
+import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.entity.component.TickingComponent;
+import com.roguesmp.entity.component.impl.NameplateComponent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.SpellCastEvent;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
@@ -42,6 +44,13 @@ public class SmpEntity {
 
         for (Map.Entry<String, EntityComponent> entry : base.getComponents().entrySet()) {
             componentMap.put(entry.getKey(), entry.getValue().copy());
+        }
+
+        // Every entity gets a default NameplateComponent unless it declares its own - injected
+        // here (spawn time) rather than baked into BaseEntity itself, so changing the code-level
+        // default applies to every entity immediately instead of only ones re-saved after the change.
+        if (!componentMap.containsKey(EntityComponentKeys.NAMEPLATE.id())) {
+            componentMap.put(EntityComponentKeys.NAMEPLATE.id(), NameplateComponent.createDefault());
         }
     }
 

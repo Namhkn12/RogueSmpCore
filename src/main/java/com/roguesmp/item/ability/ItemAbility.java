@@ -10,7 +10,7 @@ public interface ItemAbility {
 
     Codec<ItemAbility> CODEC = Codec.dispatch(
             ItemAbility::getTypeId,
-            id -> Registries.ITEM_ABILITY.getOrThrow(id)
+            Registries.ITEM_ABILITY_CODEC::getOrThrow
     );
 
     String getTypeId();
