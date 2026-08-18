@@ -5,7 +5,7 @@ import com.roguesmp.tab.TabContext;
 import java.util.Set;
 import java.util.function.Function;
 
-/** Plain lambda-backed {@link TabElement}, produced by {@link TabElement}'s static factories. */
+/** A {@link TabElement} backed by a plain function. Produced by {@link TabElement#of}, {@link TabElement#ticking}, and {@link TabElement#constant}. */
 final class FunctionElement implements TabElement {
 
     private final Function<TabContext, String> renderer;
