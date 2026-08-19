@@ -174,6 +174,7 @@ public final class TabEngine implements Listener {
         Player player = (Player) viewer.getPlayer();
         Utils.runLater(() -> { //Run later so that other system have time to initialize
             GlobalInfoTab.tabListView(player).show();
+            GlobalInfoTab.scoreboardView(player).show();
             Objects.requireNonNull(TabAPI.getInstance().getScoreboardManager()).showScoreboard(viewer, defaultScoreboard(player));
         });
     }

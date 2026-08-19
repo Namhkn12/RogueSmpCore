@@ -1,7 +1,5 @@
 package com.roguesmp.effect;
 
-import com.google.gson.JsonObject;
-import com.google.gson.annotations.SerializedName;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.MapCodec;
 import com.roguesmp.event.DamageEvent;
@@ -10,11 +8,21 @@ import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEffect, Cloneable {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Every subclass must declare its own {@code Codec<T>} (built from {@link #BASE_CODEC} plus its
+ * own fields via {@link Codec#composite}) and register it in {@link EffectCodecs} under a unique
+ * effect id - that's what {@link #CODEC}'s polymorphic dispatch resolves against.
+ */
+public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
 
     public static final Codec<SmpEffect> CODEC = Codec.dispatch(
             "id",
@@ -29,8 +37,7 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
     public record BaseProperties(
             int duration,
             DeathBehavior deathBehavior,
-            boolean display,
-            boolean displayTime
+            DisplayMode displayMode
     ) {}
 
     public static final MapCodec<BaseProperties> BASE_CODEC = Codec.composite(
@@ -38,28 +45,29 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
             Codec.enumOf(DeathBehavior.class)
                     .optionalFieldOf("death_behavior", DeathBehavior.REMOVE_ON_DEATH)
                     .forGetter(BaseProperties::deathBehavior),
-            Codec.BOOLEAN.optionalFieldOf("display", true).forGetter(BaseProperties::display),
-            Codec.BOOLEAN.optionalFieldOf("display_time", true).forGetter(BaseProperties::displayTime),
+            Codec.enumOf(DisplayMode.class)
+                    .optionalFieldOf("display_mode", DisplayMode.WITH_TIME)
+                    .forGetter(BaseProperties::displayMode),
             BaseProperties::new
     );
 
     protected int duration;
     private final String effectID;
     private final DeathBehavior deathBehavior;
-
-    private boolean display = true;
-    private boolean displayTime = true;
+    private final DisplayMode displayMode;
 
     public SmpEffect(int duration, String effectID, DeathBehavior deathBehavior) {
         this.duration = duration;
         this.effectID = effectID;
         this.deathBehavior = deathBehavior;
+        this.displayMode = DisplayMode.WITH_TIME;
     }
 
     public SmpEffect(int duration, String effectID) {
         this.duration = duration;
         this.effectID = effectID;
         this.deathBehavior = DeathBehavior.REMOVE_ON_DEATH;
+        this.displayMode = DisplayMode.WITH_TIME;
     }
 
     // Constructor accepting BaseProperties
@@ -67,8 +75,7 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
         this.duration = base.duration();
         this.effectID = effectID;
         this.deathBehavior = base.deathBehavior();
-        this.display = base.display();
-        this.displayTime = base.displayTime();
+        this.displayMode = base.displayMode();
     }
 
     /**
@@ -84,43 +91,26 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
     public abstract boolean isPersistent();
 
     /**
-     * The class must also have its {@code CODEC} registered in {@link EffectCodecs} <br>
-     * The id field is automatically added so not need to add it
-     */
-    public abstract @NotNull JsonObject serialize();
-
-    /**
-     * Effect display, return null for no display
+     * This effect's own display content, regardless of {@link #getDisplayMode()} - return null for
+     * no display.
      * @return Component
      */
-    @Override
-    public abstract @Nullable Component getDisplay();
-
-    @Override
-    public int getDisplayPriority() {
-        if (!displayTime) {
-            return -1;
-        }
-        return duration;
-    }
+    public abstract @Nullable Component getDisplayComponent();
 
     /**
-     * Display effect with remaining time generally used in tab list, return null to not display
+     * Display effect with remaining time generally used in tab list, return null to not display.
      * @return Component
      */
-    @Override
     public @Nullable Component getDisplayWithTime() {
-        if (display) {
-            Component displayWithoutTime = getDisplay();
-            if (displayWithoutTime != null) {
-                Component display = displayWithoutTime;
-                if (displayTime) {
-                    display = display.append(Component.text(" " + Utils.intToMinuteAndSeconds(duration / 20), NamedTextColor.GRAY));
-                }
-                return display;
-            }
+        if (displayMode == DisplayMode.HIDDEN) return null;
+
+        Component content = getDisplayComponent();
+        if (content == null) return null;
+
+        if (displayMode == DisplayMode.WITH_TIME) {
+            return content.append(Component.text(" " + Utils.intToMinuteAndSeconds(duration / 20), NamedTextColor.GRAY));
         }
-        return null;
+        return content;
     }
 
     /**
@@ -135,7 +125,7 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
     }
 
     public BaseProperties getBaseProperties() {
-        return new BaseProperties(duration, deathBehavior, display, displayTime);
+        return new BaseProperties(duration, deathBehavior, displayMode);
     }
 
     public int getDuration() {
@@ -154,20 +144,8 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
         return deathBehavior;
     }
 
-    public void setDisplay(boolean display) {
-        this.display = display;
-    }
-
-    public void setDisplayTime(boolean displayTime) {
-        this.displayTime = displayTime;
-    }
-
-    public boolean isDisplay() {
-        return display;
-    }
-
-    public boolean isDisplayTime() {
-        return displayTime;
+    public DisplayMode getDisplayMode() {
+        return displayMode;
     }
 
     @Override
@@ -186,12 +164,18 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
     }
 
     public enum DeathBehavior {
-        @SerializedName("halves_on_death")
         HALVES_ON_DEATH,
-        @SerializedName("remove_on_death")
         REMOVE_ON_DEATH,
-        @SerializedName("keep_on_death")
         KEEP_ON_DEATH,
+    }
+
+    /**
+     * Whether/how this effect shows up in a rendered effect list (tab list, PlaceholderAPI).
+     */
+    public enum DisplayMode {
+        HIDDEN,
+        WITH_TIME,
+        WITHOUT_TIME
     }
 
     public void onTick(Entity entity, boolean oneHz, boolean twoHz) {
@@ -216,5 +200,38 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, DisplayableEff
 
     public void onHurt(DamageEvent event) {
 
+    }
+
+    static List<SmpEffect> getEffects(LivingEntity entity) {
+        List<SmpEffect> effects = new ArrayList<>(EffectManager.getInstance().getActiveEffects(entity).values());
+        effects.removeIf(Objects::isNull);
+        return effects;
+    }
+
+    static List<SmpEffect> getSortedEffects(LivingEntity entity) {
+        List<SmpEffect> effects = getEffects(entity);
+        effects.sort((a, b) -> Integer.compare(sortWeight(b), sortWeight(a)));
+        return effects;
+    }
+
+    /**
+     * Sorts by remaining duration - effects not shown with a time suffix (hidden or timeless)
+     * always sort last, since remaining duration has no visible meaning for them.
+     */
+    private static int sortWeight(SmpEffect effect) {
+        return effect.displayMode == DisplayMode.WITH_TIME ? effect.duration : -1;
+    }
+
+    static List<Component> getSortedEffectDisplayComponents(LivingEntity entity) {
+        return getSortedEffects(entity).stream().map(SmpEffect::getDisplayWithTime).filter(Objects::nonNull).toList();
+    }
+
+    /**
+     * The rendered, sorted effect lines for one entity - memoized per-tick via
+     * {@link EffectDisplayCache} since callers (tab list, PlaceholderAPI) ask for this once per
+     * rendered line/placeholder.
+     */
+    public static List<Component> getSortedEffectDisplays(LivingEntity entity) {
+        return EffectDisplayCache.get(entity);
     }
 }

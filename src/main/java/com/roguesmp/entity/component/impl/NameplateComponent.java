@@ -157,7 +157,7 @@ public class NameplateComponent implements EntityComponent {
         else if (percent >= 0.4) healthColor = NamedTextColor.YELLOW;
         else healthColor = NamedTextColor.RED;
 
-        return Component.text(Math.round(currentHealth), healthColor).append(Component.text("/")).append(Component.text(Math.round(maxHealth) + "❤"));
+        return Component.text(Math.round(currentHealth), healthColor).append(Component.text("/", NamedTextColor.WHITE)).append(Component.text(Math.round(maxHealth) + "❤", NamedTextColor.GREEN));
     }
 
     private void remove() {

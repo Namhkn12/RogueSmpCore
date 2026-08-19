@@ -1,12 +1,13 @@
 package com.roguesmp.tab;
 
-import com.roguesmp.effect.DisplayableEffect;
+import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityLoadout;
 import com.roguesmp.player.ability.AbilityType;
 import com.roguesmp.tab.element.TabElement;
+import com.roguesmp.tab.scoreboard.TabScoreboardView;
 import com.roguesmp.tab.tablist.TabListView;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -33,7 +34,7 @@ public class GlobalInfoTab {
     private static final int MAX_EFFECT_LINES = 10;
     private static final int[] PLAYER_LIST_SLOTS = IntStream.rangeClosed(41, 80).toArray();
 
-    private static final String MARQUEE_TEXT = "  ✦ Chào mừng đến với RogueSMP — máy chủ sinh tồn tùy chỉnh ✦  ";
+    private static final String MARQUEE_TEXT = "  ✦ Chào mừng đến với RogueSMP - máy chủ pro vip ✦  ";
     private static final int MARQUEE_WINDOW = 40;
     private static final int BOUNCE_WIDTH = 20;
 
@@ -50,7 +51,7 @@ public class GlobalInfoTab {
                         TabElement.ticking(20, c -> msptLine()),
                         TabElement.ticking(20, c -> pingLine(player)),
                         TabElement.ticking(2, c -> bounce())))
-                .slot(EFFECT_COLUMN_BASE + 1, TabElement.constant("<bold><yellow>Hiệu ứng</yellow></bold>"))
+                .slot(EFFECT_COLUMN_BASE + 1, TabElement.constant("<bold><yellow>Hiệu ứng            </yellow></bold>"))
                 .slot(ABILITY_COLUMN_BASE + 1, TabElement.constant("<bold><yellow>Kỹ năng</yellow></bold>"));
 
         for (int i = 0; i < MAX_EFFECT_LINES; i++) {
@@ -69,9 +70,24 @@ public class GlobalInfoTab {
             view.slot(ABILITY_COLUMN_BASE + row++, TabElement.ticking(20, c -> abilityLine(loadout, AbilityType.LIFELINE, index)));
         }
 
-        view.group("global_info_players", PLAYER_LIST_SLOTS);
+        view.group("null", PLAYER_LIST_SLOTS);
 
         return view;
+    }
+
+    public static TabScoreboardView scoreboardView(Player player) {
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+        TabContext context = new TabContext();
+
+        TabScoreboardView scoreboardView = TabScoreboardView.builder(player, "global_scoreboard_tab")
+                .title("<aqua>✦ RogueSMP ✦")
+                .line("<dark_gray>――――――――――――</dark_gray>")
+                .line("")
+                .line(TabElement.ticking(10, tabContext -> "<gold>Xu: " + Utils.formatMoney(smpPlayer.getPlayerData().getMoney())))
+                .line("")
+                .build(context);
+
+        return scoreboardView;
     }
 
     /** Scrolls MARQUEE_TEXT through a fixed-width window; frame advances independently of how often it's sampled. */
@@ -109,13 +125,13 @@ public class GlobalInfoTab {
     }
 
     private static String effectLine(Player player, int index) {
-        List<Component> effects = DisplayableEffect.getSortedEffectDisplays(player);
+        List<Component> effects = SmpEffect.getSortedEffectDisplays(player);
         return index < effects.size() ? Utils.toString(effects.get(index)) : "";
     }
 
     /** Mirrors PlaceholderAPIIntegration's {@code effect_more}: the 11th effect if there's exactly one extra, otherwise a "N more" line. */
     private static String effectOverflow(Player player) {
-        List<Component> effects = DisplayableEffect.getSortedEffectDisplays(player);
+        List<Component> effects = SmpEffect.getSortedEffectDisplays(player);
         int extra = effects.size() - MAX_EFFECT_LINES;
         if (extra == 1) {
             return Utils.toString(effects.get(MAX_EFFECT_LINES));
