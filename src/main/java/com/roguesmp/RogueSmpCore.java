@@ -28,6 +28,8 @@ import com.roguesmp.player.PlayerManager;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.registry.*;
 import com.roguesmp.server.DailyResetScheduler;
+import com.roguesmp.tab.TabDemoCommand;
+import com.roguesmp.tab.TabEngine;
 import com.roguesmp.utils.GlowUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -91,6 +93,8 @@ public final class RogueSmpCore extends JavaPlugin {
 
         this.resetScheduler = new DailyResetScheduler(this);
         this.resetScheduler.start();
+
+        TabEngine.init(this);
     }
 
     // Load data from files, databases, etc
@@ -147,6 +151,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         IslandManager.getInstance().registerCommands();
         QuestManager.getInstance().registerQuestCommand();
+        TabDemoCommand.register();
     }
 
     @Override
@@ -168,6 +173,7 @@ public final class RogueSmpCore extends JavaPlugin {
         saveData();
 
         FxEngine.getInstance().shutdown();
+        TabEngine.getInstance().shutdown();
 
         if (this.resetScheduler != null) {
             resetScheduler.stop();

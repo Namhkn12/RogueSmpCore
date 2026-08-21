@@ -47,4 +47,8 @@ public enum DamageType {
     public static boolean isProjectileDamage(DamageType type) {
         return type == PROJECTILE || type == PROJECTILE_ABILITY;
     }
+
+    public static boolean isRegicideAffected(DamageType type) {
+        return isMeleeDamage(type) || isProjectileDamage(type) || type == MAGIC;
+    }
 }

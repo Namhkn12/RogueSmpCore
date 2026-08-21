@@ -1,7 +1,7 @@
 package com.roguesmp.integration;
 
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.effect.DisplayableEffect;
+import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
@@ -45,7 +45,7 @@ public class PlaceholderAPIIntegration extends PlaceholderExpansion {
     @Override
     public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
         if (params.startsWith("effect_")) {
-            List<Component> effectDisplays = DisplayableEffect.getSortedEffectDisplays(player);
+            List<Component> effectDisplays = SmpEffect.getSortedEffectDisplays(player);
             if (params.startsWith("effect_more")) {
                 int extra = effectDisplays.size() - 10;
                 if (extra == 1) {

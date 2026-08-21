@@ -2,7 +2,12 @@ package com.roguesmp.effect;
 
 import com.google.gson.*;
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.DataResult;
+import com.roguesmp.codec.JsonOps;
+import com.roguesmp.effect.impl.BleedingEffect;
 import com.roguesmp.effect.impl.DamageIncreaseEffect;
+import com.roguesmp.effect.impl.PotentPoisonEffect;
 import com.roguesmp.effect.impl.SpeedEffect;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.event.DamageEvent;
@@ -24,14 +29,13 @@ import org.jetbrains.annotations.Nullable;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 /*
- * The first map layer use UUID for identifying entities from each other.
+ * The first map layer uses UUID for identifying entities from each other.
  *
- * The second map layer uses String keys as "sources" of the effects, and ordered sets of effects as values.
- * Sources could be specific to an ability, like "PowerInjectionPercentSpeedEffect",
- * or more generic, like "VulnerabilityEffect" (increased damage, given by a variety of spells).
+ * The second layer, EntityEffects, holds one EffectStack per "source" of the effects. Sources
+ * could be specific to an ability, like "PowerInjectionPercentSpeedEffect", or more generic, like
+ * "VulnerabilityEffect" (increased damage, given by a variety of spells).
  *
  * Importantly, only the Effect with the highest "magnitude" from any given source is applied. Thus, all
  * spell specific buffs will stack with each other, while generic Vulnerability will only have the strongest
@@ -40,9 +44,9 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * Effects from the SAME SOURCE should ALWAYS be the SAME TYPE, and only ever have
  * differing durations and magnitudes.
  *
- * The ordered sets themselves are sorted by magnitude. While only the top Effect is ever applied, all Effects
- * are tracked and ticked down by the over-arching runnable, meaning that after a stronger Effect wears off,
- * longer lasting weaker Effects are still active and will be applied.
+ * Each EffectStack tracks and ticks down every effect it holds, not just the active one, meaning
+ * that after a stronger Effect wears off, longer lasting weaker Effects are still active and will
+ * be applied.
  */
 public class EffectManager {
     public static final int PERIOD = 5;
@@ -50,8 +54,8 @@ public class EffectManager {
 
     private static EffectManager INSTANCE;
 
-    private final Map<UUID, Map<String, NavigableSet<SmpEffect>>> allEffects = new ConcurrentHashMap<>();
-    private final Map<UUID, Map<String, NavigableSet<SmpEffect>>> playerCache = new ConcurrentHashMap<>();
+    private final Map<UUID, EntityEffects> allEffects = new ConcurrentHashMap<>();
+    private final Map<UUID, EntityEffects> playerCache = new ConcurrentHashMap<>();
 
     private final BukkitRunnable runnable;
 
@@ -78,44 +82,7 @@ public class EffectManager {
                         continue;
                     }
 
-                    var sourceEffects = entry.getValue();
-                    var sourceIterator = sourceEffects.entrySet().iterator();
-
-                    while (sourceIterator.hasNext()) {
-                        var smpEffectsEntry = sourceIterator.next();
-                        var effects = smpEffectsEntry.getValue();
-                        if (effects.isEmpty()) {
-                            sourceIterator.remove();
-                            continue;
-                        }
-
-                        var effectIterator = effects.descendingIterator();
-                        SmpEffect currentActiveEffect = effects.getLast(); //Only last effect (highest magnitude) is active
-                        currentActiveEffect.onTick(entity, oneHz, twoHz);
-                        boolean currentEffectRemoved = false;
-                        while (effectIterator.hasNext()) {
-                            SmpEffect effect = effectIterator.next();
-                            if (currentEffectRemoved) {
-                                currentActiveEffect.onGainEffect(entity);
-                                currentEffectRemoved = false;
-                            }
-
-                            boolean tickResult = effect.tickDuration(PERIOD);
-                            if (tickResult) {
-                                if (currentActiveEffect == effect) { //If the expired effect is currently active effect
-                                    //The entity could be dead after tickEffect was called
-                                    if (entity.isValid() && !entity.isDead()) effect.onLoseEffect(entity);
-                                    currentEffectRemoved = true;
-                                }
-
-                                effectIterator.remove(); //Remove expired effect
-
-                                if (!effects.isEmpty()) { //If there's still pending effect, set it as currently active effect
-                                    currentActiveEffect = effects.getLast();
-                                }
-                            }
-                        }
-                    }
+                    entry.getValue().tick(entity, PERIOD, oneHz, twoHz);
                 }
             }
         };
@@ -127,101 +94,42 @@ public class EffectManager {
         new CommandAPICommand("smpeffect")
                 .withSubcommand(new CommandAPICommand("add")
                         .withSubcommand(DamageIncreaseEffect.registerCommand())
-                        .withSubcommand(SpeedEffect.registerCommand()))
+                        .withSubcommand(SpeedEffect.registerCommand())
+                        .withSubcommand(BleedingEffect.registerCommand())
+                        .withSubcommand(PotentPoisonEffect.registerCommand()))
 
                 .register();
     }
 
     public void addEffect(Entity entity, String sourceId, SmpEffect smpEffect) {
-        UUID uuid = entity.getUniqueId();
-        // Get or create the inner map for this entity
-        Map<String, NavigableSet<SmpEffect>> entityEffects = allEffects.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>());
-
-        // Get or create the NavigableSet for this effect type
-        NavigableSet<SmpEffect> effects = entityEffects.computeIfAbsent(sourceId, k -> new ConcurrentSkipListSet<>());
-        if (!effects.isEmpty()) {
-            SmpEffect currentActiveEffect = effects.getLast();
-            // Iterate through effects to check if there is already an effect with existing magnitude but less duration.
-            boolean foundEffect = false;
-            for (SmpEffect effect : effects) {
-                if (effect.compareTo(smpEffect) == 0 && effect.getDuration() < smpEffect.getDuration() && effect.getDeathBehavior() == smpEffect.getDeathBehavior()) {
-                    //Update its duration
-                    if (effect == currentActiveEffect) {
-                        effect.onLoseEffect(entity);
-                        effect.onGainEffect(entity);
-                    }
-                    effect.setDuration(smpEffect.getDuration());
-                    foundEffect = true;
-                    break;
-                }
-            }
-
-            if (!foundEffect) {
-                effects.add(smpEffect);
-            }
-
-            if (effects.getLast() == smpEffect) {
-                currentActiveEffect.onLoseEffect(entity);
-                smpEffect.onGainEffect(entity);
-            }
-        } else {
-            effects.add(smpEffect);
-            smpEffect.onGainEffect(entity);
-        }
-
+        EntityEffects entityEffects = allEffects.computeIfAbsent(entity.getUniqueId(), k -> new EntityEffects());
+        entityEffects.getOrCreateStack(sourceId).add(entity, smpEffect);
     }
 
-    @SuppressWarnings("PMD.EmptyCatchBlock")
     public Map<String, SmpEffect> getActiveEffects(Entity entity) {
-        Map<String, NavigableSet<SmpEffect>> effects = allEffects.get(entity.getUniqueId());
-        HashMap<String, SmpEffect> output = new HashMap<>();
-        if (effects != null) {
-            for (Map.Entry<String, NavigableSet<SmpEffect>> entry : effects.entrySet()) {
-                try {
-                    SmpEffect effect = entry.getValue().last();
-                    if (effect != null) {
-                        output.put(entry.getKey(), effect);
-                    }
-                } catch (NoSuchElementException e) {
-                    // ignore - effect was probably removed in another thread (and this method can be called by the tab list from arbitrary threads)
-                }
-            }
-        }
-        return output;
+        EntityEffects entityEffects = allEffects.get(entity.getUniqueId());
+        return entityEffects == null ? Map.of() : entityEffects.activeEffects();
     }
 
     public void onPlayerJoin(PlayerJoinEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
-        Map<String, NavigableSet<SmpEffect>> effectMap = playerCache.get(uuid);
-        if (effectMap == null) {
-            Utils.runAsync(() -> {
-                Map<String, NavigableSet<SmpEffect>> effects = loadPlayerEffectsFromFile(uuid);
-                if (effects != null) {
-                    Utils.runLater(() -> {
-                        allEffects.put(uuid, effects);
-                        effects.forEach((s, smpEffects) -> {
-                            if (smpEffects.isEmpty()) return;
-                            smpEffects.getLast().onLoseEffect(event.getPlayer());
-                            smpEffects.getLast().onGainEffect(event.getPlayer());
-                        });
-                        RogueSmpCore.LOGGER.info("Loaded effect for {}", event.getPlayer().getName());
-                    });
-                }
-            });
+        EntityEffects cached = playerCache.remove(uuid);
+        if (cached != null) {
+            allEffects.put(uuid, cached);
+            cached.refresh(event.getPlayer());
             return;
         }
 
-        allEffects.put(uuid, effectMap);
-
-        effectMap.forEach((s, smpEffects) -> {
-            if (smpEffects.isEmpty()) return;
-            SmpEffect effect = smpEffects.getLast();
-            effect.onLoseEffect(event.getPlayer());
-            effect.onGainEffect(event.getPlayer());
+        Utils.runAsync(() -> {
+            EntityEffects loaded = loadPlayerEffectsFromFile(uuid);
+            if (loaded != null) {
+                Utils.runLater(() -> {
+                    allEffects.put(uuid, loaded);
+                    loaded.refresh(event.getPlayer());
+                    RogueSmpCore.LOGGER.info("Loaded effect for {}", event.getPlayer().getName());
+                });
+            }
         });
-
-        playerCache.remove(uuid);
-
     }
 
     public void onPlayerQuit(PlayerQuitEvent event) {
@@ -230,27 +138,12 @@ public class EffectManager {
 
     public void onEntityDeath(EntityDeathEvent event) {
         LivingEntity le = event.getEntity();
-        Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(le.getUniqueId());
-        if (effectMap == null) return;
+        EntityEffects entityEffects = allEffects.get(le.getUniqueId());
+        if (entityEffects == null) return;
         if (le instanceof Player) {
-            effectMap.forEach((s, smpEffects) -> {
-                if (smpEffects.isEmpty()) return;
-                smpEffects.getLast().onDeath(event);
-                var effectIter = smpEffects.descendingIterator();
-                while (effectIter.hasNext()) {
-                    SmpEffect smpEffect = effectIter.next();
-                    if (smpEffect.getDeathBehavior() == SmpEffect.DeathBehavior.HALVES_ON_DEATH) {
-                        smpEffect.setDuration(smpEffect.getDuration() / 2);
-                    } else if (smpEffect.getDeathBehavior() == SmpEffect.DeathBehavior.REMOVE_ON_DEATH) {
-                        effectIter.remove();
-                    }
-                }
-            });
+            entityEffects.onPlayerDeath(event);
         } else {
-            effectMap.forEach((s, smpEffects) -> {
-                if (smpEffects.isEmpty()) return;
-                smpEffects.getLast().onDeath(event);
-            });
+            entityEffects.onNonPlayerDeath(event);
             allEffects.remove(le.getUniqueId());
         }
     }
@@ -258,39 +151,24 @@ public class EffectManager {
     public void handleDamageEvent(DamageEvent event) {
         Entity entity = event.getDamager();
         if (entity != null) {
+            UUID sourceUuid = null;
             if (entity instanceof EvokerFangs fangs) {
-                if (fangs.getOwner() != null) {
-                    Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(fangs.getOwner().getUniqueId());
-                    if (effectMap != null) {
-                        effectMap.forEach((s, smpEffects) -> {
-                            if (smpEffects.isEmpty()) return;
-                            smpEffects.getLast().onDamageEntity(event);
-                        });
-                    }
-                }
+                if (fangs.getOwner() != null) sourceUuid = fangs.getOwner().getUniqueId();
             } else {
-                Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(entity.getUniqueId());
-                if (effectMap != null) {
-                    effectMap.forEach((s, smpEffects) -> {
-                        if (smpEffects.isEmpty()) return;
-                        smpEffects.getLast().onDamageEntity(event);
-                    });
-                }
+                sourceUuid = entity.getUniqueId();
+            }
+
+            if (sourceUuid != null) {
+                EntityEffects entityEffects = allEffects.get(sourceUuid);
+                if (entityEffects != null) entityEffects.onDamageEntity(event);
             }
         }
 
         Entity victim = event.getVictim();
         if (victim != null) {
-            Map<String, NavigableSet<SmpEffect>> effectMap = allEffects.get(victim.getUniqueId());
-            if (effectMap != null) {
-                effectMap.forEach((s, smpEffects) -> {
-                    if (smpEffects.isEmpty()) return;
-                    smpEffects.getLast().onHurt(event);
-                });
-            }
-
+            EntityEffects entityEffects = allEffects.get(victim.getUniqueId());
+            if (entityEffects != null) entityEffects.onHurt(event);
         }
-
     }
 
     public static void init(RogueSmpCore plugin) {
@@ -299,61 +177,52 @@ public class EffectManager {
 
     public static EffectManager getInstance() {
         if (INSTANCE == null) {
-            throw new NullPointerException("EffectManager is null!");
+            throw new IllegalStateException("EffectManager is null!");
         }
         return INSTANCE;
     }
 
     private void cachePlayerAndScheduleRemoval(Player player) {
         UUID uuid = player.getUniqueId();
-        var effects = allEffects.get(uuid);
-        if (effects == null) return;
-        playerCache.put(uuid, effects);
+        EntityEffects entityEffects = allEffects.get(uuid);
+        if (entityEffects == null) return;
+        playerCache.put(uuid, entityEffects);
 
         Utils.runLater(() -> {
             //Player logged in before removal is run
             if (Bukkit.getEntity(uuid) != null) return;
-            Map<String, NavigableSet<SmpEffect>> effectsMap = playerCache.remove(uuid);
-            if (effectsMap != null) {
-                effectsMap.forEach((s, smpEffects) -> {
-                    var effectIter = smpEffects.descendingIterator();
-                    while (effectIter.hasNext()) {
-                        SmpEffect effect = effectIter.next();
-                        if (!effect.isPersistent()) effectIter.remove();
-                    }
-                });
+            EntityEffects cached = playerCache.remove(uuid);
+            if (cached != null) {
+                cached.removeNonPersistent();
                 Utils.runAsync(() -> {
-                    if (effectsMap.isEmpty()) return;
-                    savePlayerEffectToFile(uuid, effectsMap);
+                    if (cached.isEmpty()) return;
+                    savePlayerEffectToFile(uuid, cached);
                 });
             }
         }, 100); //Remove after 5s
     }
 
-    private static void savePlayerEffectToFile(UUID playerId, @NotNull Map<String, NavigableSet<SmpEffect>> effectsMap) {
+    private static void savePlayerEffectToFile(UUID playerId, @NotNull EntityEffects entityEffects) {
         File folder = new File(RogueSmpCore.getInstance().getDataFolder(), DATA_FOLDER);
         if (!folder.exists()) {
             folder.mkdirs();
         }
 
-        File playerFile = new File(folder, playerId.toString() + ".json");
+        File playerFile = new File(folder, playerId + ".json");
         try (Writer writer = new FileWriter(playerFile)) {
-            Gson gson = Utils.GSON;
             JsonObject root = new JsonObject();
-            for (var entry : effectsMap.entrySet()) {
+            for (var entry : entityEffects.snapshot().entrySet()) {
                 String key = entry.getKey();
-                JsonArray array = new JsonArray();
+                List<SmpEffect> effects = entry.getValue().stream().filter(Objects::nonNull).toList();
 
-                for (SmpEffect effect : entry.getValue()) {
-                    if (effect == null) continue;
-                    // Convert effect directly to JsonObject
-                    JsonObject object = effect.serialize();
-                    object.addProperty("id", effect.getEffectID());
-                    array.add(object);
+                DataResult<JsonElement> encoded = Codec.listOf(SmpEffect.CODEC).encode(effects, JsonOps.INSTANCE);
+                if (!encoded.isSuccess()) {
+                    RogueSmpCore.LOGGER.warn("Failed to encode effects for {} (source '{}'): {}", playerId, key, encoded.error());
+                    continue;
                 }
-                root.add(key, array);
+                root.add(key, encoded.result());
             }
-            gson.toJson(root, writer);
+            Utils.GSON.toJson(root, writer);
             RogueSmpCore.LOGGER.info("Saved effects for {}", playerId);
 
         } catch (Exception e) {
@@ -362,7 +231,7 @@ public class EffectManager {
         }
     }
 
-    private static @Nullable Map<String, NavigableSet<SmpEffect>> loadPlayerEffectsFromFile(@NotNull UUID playerId) {
+    private static @Nullable EntityEffects loadPlayerEffectsFromFile(@NotNull UUID playerId) {
         File folder = new File(RogueSmpCore.getInstance().getDataFolder(), DATA_FOLDER);
         File playerFile = new File(folder, playerId + ".json");
 
@@ -370,41 +239,30 @@ public class EffectManager {
             return null;
         }
 
-        Map<String, NavigableSet<SmpEffect>> result = new HashMap<>();
+        Map<String, List<SmpEffect>> result = new HashMap<>();
 
-//        try (Reader reader = new FileReader(playerFile)) {
-//            JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
-//            for (var entry : root.entrySet()) {
-//                String key = entry.getKey();
-//                JsonArray array = entry.getValue().getAsJsonArray();
-//                NavigableSet<SmpEffect> effects = new ConcurrentSkipListSet<>();
-//
-//                for (JsonElement element : array) {
-//                    JsonObject obj = element.getAsJsonObject();
-//                    JsonElement idElement = obj.get("id");
-//                    if (idElement == null) {
-//                        RogueSmpCore.LOGGER.warn("Missing id in effect for player {}", playerId);
-//                        continue;
-//                    }
-//
-//                    String id = idElement.getAsString();
-//                    EffectCodecRegistry.EffectDeserializer effectDeserializer = EffectCodecRegistry.get(id);
-//                    if (effectDeserializer == null) {
-//                        RogueSmpCore.LOGGER.warn("Effect id '{}' has no serializer, for player {}", id, playerId);
-//                        continue;
-//                    }
-//                    SmpEffect effect = effectDeserializer.deserialize(obj);
-//                    effects.add(effect);
-//                }
-//                result.put(key, effects);
-//                playerFile.delete();
-//            }
-//
-//        } catch (Exception e) {
-//            RogueSmpCore.LOGGER.error("FAILED TO LOAD EFFECTS FOR {}", playerId);
-//            e.printStackTrace();
-//        }
+        try (Reader reader = new FileReader(playerFile)) {
+            JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+            Codec<List<SmpEffect>> listCodec = Codec.lenientListOf(SmpEffect.CODEC,
+                    (index, error) -> RogueSmpCore.LOGGER.warn("Skipped invalid effect [{}] for {}: {}", index, playerId, error));
 
-        return result;
+            for (var entry : root.entrySet()) {
+                String key = entry.getKey();
+                DataResult<List<SmpEffect>> decoded = listCodec.decode(entry.getValue(), JsonOps.INSTANCE);
+                if (decoded.isSuccess()) {
+                    result.put(key, decoded.result());
+                } else {
+                    RogueSmpCore.LOGGER.warn("Failed to decode effects for {} (source '{}'): {}", playerId, key, decoded.error());
+                    result.put(key, List.of());
+                }
+            }
+
+            playerFile.delete();
+        } catch (Exception e) {
+            RogueSmpCore.LOGGER.error("FAILED TO LOAD EFFECTS FOR {}", playerId);
+            e.printStackTrace();
+        }
+
+        return EntityEffects.fromSnapshot(result);
     }
 }

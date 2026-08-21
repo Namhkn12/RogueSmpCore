@@ -1,6 +1,7 @@
 package com.roguesmp.attribute;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
+import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
@@ -59,7 +60,21 @@ public interface SmpAttribute {
 
     }
 
+    /**
+     * Called whenever this attribute's active value on the player changes - gear granting it for
+     * the first time, swapping to gear with a different value while it stays active, or losing it
+     * entirely ({@code value == 0}). Only fires when the resulting value actually differs from
+     * before, not on every equipment change.
+     */
+    default void onEquipmentChange(@NotNull SmpPlayer player, double value) {
+
+    }
+
     default void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
+
+    }
+
+    default void onDamageEntityFinal(DamageEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 
@@ -71,7 +86,15 @@ public interface SmpAttribute {
 
     }
 
+    default void onHurtFinal(DamageEvent event, double value, @NotNull SmpPlayer player) {
+
+    }
+
     default void onHurtFatal(DamageEvent event, double value, @NotNull SmpPlayer player) {
+
+    }
+
+    default void onAbilityCast(AbilityCastEvent event, double value, @NotNull SmpPlayer player) {
 
     }
 

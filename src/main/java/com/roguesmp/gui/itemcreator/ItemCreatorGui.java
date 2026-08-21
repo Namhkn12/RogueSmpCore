@@ -43,11 +43,11 @@ import java.util.*;
  * <p>
  * Every {@link ItemComponent} kind is editable here except {@code BrokenComponent}, which has no
  * codec and is runtime-only. {@code attribute}, {@code enchant}, {@code consumable},
- * {@code potion_content} and {@code gem_data} have too many fields/entries for a single dialog
- * and hand off to their own sub-editor ({@link AttributeEditorGui}, {@link EnchantEditorGui},
- * {@link ConsumableEditorGui}, {@link PotionContentEditorGui}, {@link GemDataEditorGui}), each
- * of which commits straight back into this draft on every leaf edit rather than requiring a
- * separate top-level apply step.
+ * {@code potion_content}, {@code gem_data} and {@code passive_ability} have too many fields/entries
+ * for a single dialog and hand off to their own sub-editor ({@link AttributeEditorGui},
+ * {@link EnchantEditorGui}, {@link ConsumableEditorGui}, {@link PotionContentEditorGui},
+ * {@link GemDataEditorGui}, {@link ItemAbilityListEditorGui}), each of which commits straight back
+ * into this draft on every leaf edit rather than requiring a separate top-level apply step.
  */
 public class ItemCreatorGui {
 
@@ -133,6 +133,9 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.GEM_DATA),
                 tooltip("Dùng để chứa dữ liệu ngọc.", "Khi một item có component này, nó có thể dùng để khảm ngọc cho item có cùng equipAttribute slot"),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildGemDataDialog(player))));
+        multi.addButton(componentLabel(ItemComponentKeys.PASSIVE_ABILITY),
+                tooltip("Đặt các ability bị động cho item.", null),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(buildPassiveAbilityDialog(player))));
 
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
@@ -200,6 +203,14 @@ public class ItemCreatorGui {
 
     void removeGemData() {
         components.remove(ItemComponentKeys.GEM_DATA.id());
+    }
+
+    void applyPassiveAbility(PassiveAbilityComponent component) {
+        components.put(ItemComponentKeys.PASSIVE_ABILITY.id(), component);
+    }
+
+    void removePassiveAbility() {
+        components.remove(ItemComponentKeys.PASSIVE_ABILITY.id());
     }
 
     void reopen(Player player) {
@@ -548,6 +559,11 @@ public class ItemCreatorGui {
     private Dialog buildGemDataDialog(Player player) {
         GemDataComponent current = (GemDataComponent) components.get(ItemComponentKeys.GEM_DATA.id());
         return new GemDataEditorGui(this, current).buildHubDialog(player);
+    }
+
+    private Dialog buildPassiveAbilityDialog(Player player) {
+        PassiveAbilityComponent current = (PassiveAbilityComponent) components.get(ItemComponentKeys.PASSIVE_ABILITY.id());
+        return new ItemAbilityListEditorGui(this, current).buildListDialog(player);
     }
 
     // ==========================================

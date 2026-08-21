@@ -21,6 +21,7 @@ public class ItemComponentKeys {
     public static final ComponentKey<BrokenComponent> BROKEN;
     public static final ComponentKey<DurabilityRepairComponent> DURABILITY_REPAIR;
     public static final ComponentKey<WrenchComponent> WRENCH;
+    public static final ComponentKey<PassiveAbilityComponent> PASSIVE_ABILITY;
 
     static {
         ITEM_NAME = register("name", NameComponent.CODEC);
@@ -38,6 +39,7 @@ public class ItemComponentKeys {
         BROKEN = new ComponentKey<>("broken"); //Transient so it has no CODEC.
         DURABILITY_REPAIR = register("durability_repair", DurabilityRepairComponent.CODEC);
         WRENCH = register("wrench", WrenchComponent.CODEC);
+        PASSIVE_ABILITY = register("passive_ability", PassiveAbilityComponent.CODEC);
     }
 
     public static void loadClass() {

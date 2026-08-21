@@ -15,6 +15,7 @@ public class ModifierRegistry {
     static {
         modifiers.add(new GemModifier());
         modifiers.add(new EnchantAttributeModifier());
+        modifiers.add(new ItemAbilityModifier());
 
         modifiers.add(new BrokenModifier());
 

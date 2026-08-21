@@ -498,6 +498,37 @@ public interface Codec<A> {
         };
     }
 
+    /**
+     * Tries {@code primary} first; if decoding fails, falls back to {@code alternative}. Encoding
+     * always goes through {@code primary} - meant for accepting an old/shorthand input format
+     * alongside a newer canonical one (e.g. a bare int shorthand alongside a full object form)
+     * without every such component hand-rolling the same try/fallback dance.
+     *
+     * @param <A> the decoded object type
+     * @param primary the canonical codec, tried first and always used for encoding
+     * @param alternative the fallback codec, tried only if {@code primary} fails to decode
+     * @return a codec accepting either serialized shape
+     */
+    static <A> Codec<A> withAlternative(Codec<A> primary, Codec<A> alternative) {
+        return new Codec<>() {
+            @Override
+            public <O> DataResult<O> encode(A input, DynamicOps<O> ops) {
+                return primary.encode(input, ops);
+            }
+
+            @Override
+            public <O> DataResult<A> decode(O input, DynamicOps<O> ops) {
+                DataResult<A> primaryResult = primary.decode(input, ops);
+                if (primaryResult.isSuccess()) return primaryResult;
+
+                DataResult<A> alternativeResult = alternative.decode(input, ops);
+                if (alternativeResult.isSuccess()) return alternativeResult;
+
+                return DataResult.error(primaryResult.error() + " (alternative also failed: " + alternativeResult.error() + ")");
+            }
+        };
+    }
+
     // --- POLYMORPHIC DISPATCH ---
 
     /**

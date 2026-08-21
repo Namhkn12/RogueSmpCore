@@ -4,7 +4,6 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityAttribute;
 import com.roguesmp.entity.EntityEquipment;
-import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.component.EntityComponent;
 import com.roguesmp.entity.component.EntityComponentKey;
 import com.roguesmp.entity.component.EntityComponentKeys;
@@ -52,7 +51,7 @@ public class EntityCreatorGui {
     private final Map<String, EntityComponent> components = new HashMap<>();
 
     public EntityCreatorGui() {
-        this(null, EntityType.ZOMBIE, Map.of(EntityComponentKeys.NAMEPLATE.id(), NameplateComponent.createDefault()));
+        this(null, EntityType.ZOMBIE, Map.of());
     }
 
     private EntityCreatorGui(@Nullable String id, EntityType entityType, Map<String, EntityComponent> components) {
@@ -100,7 +99,7 @@ public class EntityCreatorGui {
                 tooltip("Hiện thanh máu (boss bar) cho entity.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildBossBarDialog(player))));
         multi.addButton(componentLabel(EntityComponentKeys.NAMEPLATE),
-                tooltip("Hiện bảng tên/máu/hiệu ứng nổi phía trên đầu entity.", null),
+                tooltip("Hiện bảng tên/máu/hiệu ứng nổi phía trên đầu entity.", "Xám = chưa ghi đè, entity vẫn có bảng tên mặc định lúc spawn"),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildNameplateDialog(player))));
 
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
@@ -385,21 +384,18 @@ public class EntityCreatorGui {
                 .canCloseWithEscape(false)
                 .addCheckboxInput("show_name", Component.text("Hiện tên"), current == null || current.showName(), "true", "false")
                 .addCheckboxInput("show_health", Component.text("Hiện máu"), current == null || current.showHealth(), "true", "false")
-                .addTextInput("height_offset", Component.text("Độ cao thêm phía trên đầu (block)"), b -> b.initial(String.valueOf(current == null ? 0.3 : current.heightOffset())).maxLength(16))
-                .addTextInput("update_interval", Component.text("Chu kỳ cập nhật (tick, để trống dùng mặc định)"), b -> b.initial(String.valueOf(current == null ? SmpEntity.PASSIVE_RUN_INTERVAL_DEFAULT : current.updateInterval())).maxLength(16));
+                .addTextInput("height_offset", Component.text("Độ cao thêm phía trên đầu (block)"), b -> b.initial(String.valueOf(current == null ? 0.3 : current.heightOffset())).maxLength(16));
 
         return wrapComponentDialog(player, EntityComponentKeys.NAMEPLATE, builder,
                 (response, audience) -> {
                     Boolean showName = response.getBoolean("show_name");
                     Boolean showHealth = response.getBoolean("show_health");
                     Float heightOffset = DialogInputUtils.parseFloat(response.getText("height_offset"), -5f, 10f);
-                    Float updateInterval = DialogInputUtils.parseFloat(response.getText("update_interval"), 1f, 200f);
 
                     components.put(EntityComponentKeys.NAMEPLATE.id(), new NameplateComponent(
                             showHealth == null || showHealth,
                             showName == null || showName,
-                            heightOffset == null ? 0.3 : heightOffset,
-                            updateInterval == null ? SmpEntity.PASSIVE_RUN_INTERVAL_DEFAULT : Math.round(updateInterval)));
+                            heightOffset == null ? 0.3 : heightOffset));
                     Utils.runLater(() -> openMainDialog(player));
                 },
                 (response, audience) -> {

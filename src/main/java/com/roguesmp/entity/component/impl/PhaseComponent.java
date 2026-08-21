@@ -4,6 +4,7 @@ import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.component.EntityComponent;
+import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.entity.component.TickingComponent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.utils.EntityUtils;
@@ -64,16 +65,18 @@ public class PhaseComponent implements TickingComponent {
     @Override
     public void tick(SmpEntity smpEntity, int interval) {
         if (smpEntity.dead) return;
-        checkThresholds(smpEntity.getEntity());
+        checkThresholds(smpEntity);
     }
 
     /**
      * Runs (and consumes) every threshold the entity's current HP% has crossed since the last
      * check, in descending order. If {@link #capDamage}, stops after the first crossed threshold
      * and forces HP to align exactly with it (matching the old {@code PhaseManager} contract:
-     * one threshold crossing "spent" per check when damage capping is on).
+     * one threshold crossing "spent" per check when damage capping is on) - since that HP change
+     * doesn't go through a {@link DamageEvent}, refresh the nameplate ourselves if one is attached.
      */
-    private void checkThresholds(LivingEntity entity) {
+    private void checkThresholds(SmpEntity smpEntity) {
+        LivingEntity entity = smpEntity.getEntity();
         double maxHealth = EntityUtils.getMaxHealth(entity);
         if (maxHealth <= 0) return;
         double currentPercent = entity.getHealth() / maxHealth * 100;
@@ -87,9 +90,15 @@ public class PhaseComponent implements TickingComponent {
 
             if (capDamage) {
                 entity.setHealth(maxHealth * (entry.getKey() / 100.0));
+                refreshNameplate(smpEntity);
                 return;
             }
         }
+    }
+
+    private void refreshNameplate(SmpEntity smpEntity) {
+        NameplateComponent nameplate = smpEntity.getComponent(EntityComponentKeys.NAMEPLATE);
+        if (nameplate != null) nameplate.update(smpEntity);
     }
 
     /**
@@ -111,6 +120,7 @@ public class PhaseComponent implements TickingComponent {
             }
             entity.setHealth(Math.max(0, health - setHealth + 1));
             event.addDamageModifier(0, DamageOperation.MORE_FINAL);
+            refreshNameplate(smpEntity);
         });
     }
 

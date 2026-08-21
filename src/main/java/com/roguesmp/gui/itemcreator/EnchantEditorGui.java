@@ -105,11 +105,11 @@ public class EnchantEditorGui {
         DialogBuilder builder = DialogBuilder.create(Component.text("Phù phép: " + enchant.name()))
                 .canCloseWithEscape(false)
                 .externalTitle(Component.text(enchant.name(), valuePresent ? NamedTextColor.GREEN : NamedTextColor.GRAY))
-                .addTextInput("value", Component.text("Cấp độ (0-10)"), b -> b.initial(String.valueOf(current)).maxLength(16));
+                .addTextInput("value", Component.text("Cấp độ (>= 0)"), b -> b.initial(String.valueOf(current)).maxLength(16));
 
         DialogTypeBuilder.MultiAction multi = builder.multiAction();
         multi.addButton(Component.text("Lưu"), null, (response, audience) -> {
-            Float value = DialogInputUtils.parseFloat(response.getText("value"), 0f, 10f);
+            Float value = DialogInputUtils.parseFloat(response.getText("value"), 0f, Float.MAX_VALUE);
             if (value != null) {
                 int level = Math.round(value);
                 if (level <= 0) values.remove(enchant);

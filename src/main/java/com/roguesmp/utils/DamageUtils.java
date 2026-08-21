@@ -6,8 +6,6 @@ import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,15 +20,27 @@ public class DamageUtils {
 
         int originalIFrame = victim.getNoDamageTicks();
         double originalLastDamage = victim.getLastDamage();
+
         if (bypassIFrame) {
             victim.setNoDamageTicks(0);
-            victim.damage(damage, damager);
-            nextMetadata = null;
+        }
+
+        if (damager != null) {
+            if (metadata.isDoKnockback()) {
+                victim.damage(damage, damager);
+            } else {
+                // DamageType.GENERIC doesn't do knockback so we use that, kinda hacky tho
+                DamageSource damageSource = DamageSource.builder(DamageType.GENERIC).withDirectEntity(damager).build();
+                victim.damage(damage, damageSource);
+            }
+        } else {
+            victim.damage(damage, (Entity) null);
+        }
+
+        nextMetadata = null;
+        if (bypassIFrame) {
             victim.setNoDamageTicks(originalIFrame);
             victim.setLastDamage(originalLastDamage);
-        } else {
-            victim.damage(damage, damager);
-            nextMetadata = null;
         }
     }
 

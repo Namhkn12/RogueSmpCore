@@ -2,8 +2,10 @@ package com.roguesmp.listener;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.EquipSlot;
+import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.event.DurabilityChangedEvent;
 import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.item.SmpItem;
@@ -43,12 +45,12 @@ public class PlayerListener implements Listener {
         UUID uuid = event.getUniqueId();
         PlayerData playerData = playerDataManager.loadPlayerData(uuid);
         IslandData islandData = islandManager.getIslandDataManager().loadIslandData(playerData.getIslandId());
-        Utils.runLater(() -> {
-            playerDataManager.cacheData(playerData);
-            if (islandData != null) {
-                islandManager.getIslandDataManager().cache(islandData);
-            }
-        });
+
+        playerDataManager.cacheData(playerData);
+        if (islandData != null) {
+            islandManager.getIslandDataManager().cache(islandData);
+        }
+
     }
 
     @EventHandler
@@ -151,10 +153,24 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onAbilityCast(AbilityCastEvent event) {
+        SmpPlayer smpPlayer = event.getSmpPlayer();
+        if (smpPlayer == null) return;
+        smpPlayer.onAbilityCast(event);
+    }
+
+    @EventHandler
     public void onSwapHand(PlayerSwapHandItemsEvent event) {
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
         if (smpPlayer == null) return;
         smpPlayer.onSwapHand(event);
+    }
+
+    @EventHandler
+    public void onDurabilityChange(DurabilityChangedEvent event) {
+        SmpPlayer smpPlayer = event.getPlayer();
+        if (smpPlayer == null) return;
+        smpPlayer.onDurabilityChange(event);
     }
 
     @EventHandler

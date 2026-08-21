@@ -89,7 +89,7 @@ public class ConsumableComponent implements ItemComponent {
         lore.add(Utils.text("Khi sử dụng:", NamedTextColor.GRAY));
 
         for (SmpEffect smpEffect : effects) {
-            Component display = smpEffect.getDisplay();
+            Component display = smpEffect.getDisplayComponent();
             if (display == null) continue;
             lore.add(Component.space().append(display.decoration(TextDecoration.ITALIC, false)).append(Utils.text(" (" + Utils.intToMinuteAndSeconds(smpEffect.getDuration() / 20) +")", NamedTextColor.GRAY)));
         }
@@ -146,64 +146,4 @@ public class ConsumableComponent implements ItemComponent {
     public boolean hasParticles() {
         return hasParticles;
     }
-
-//    public static class Codec implements ComponentCodec<ConsumableComponent> {
-//
-//        @Override
-//        public ConsumableComponent deserialize(JsonElement json, JsonDeserializationContext ctx) {
-//            List<SmpEffect> effectList = new ArrayList<>();
-//            JsonObject obj = json.getAsJsonObject();
-//
-//            if (obj.has("effects")) {
-//                JsonArray array = obj.getAsJsonArray("effects");
-//                for (JsonElement element : array) {
-//                    JsonObject effectJson = element.getAsJsonObject();
-//
-//                    // 1. Get the ID to determine the type
-//                    String id = effectJson.get("id").getAsString();
-//
-//                    // 2. Route to the correct deserialization logic
-//                    // You can use your EffectCodecRegistry here if you prefer
-//                    EffectCodecRegistry.EffectDeserializer deserializer = EffectCodecRegistry.get(id);
-//                    if (deserializer == null) continue;
-//                    SmpEffect effect = deserializer.deserialize(effectJson);
-//
-//                    effectList.add(effect);
-//                }
-//            }
-//
-//            // Deserialize new fields with defaults if missing
-//            return new ConsumableComponent(
-//                    effectList,
-//                    obj.has("hunger") ? obj.get("hunger").getAsInt() : 0,
-//                    obj.has("saturation") ? obj.get("saturation").getAsFloat() : 0.0f,
-//                    obj.has("canAlwaysEat") && obj.get("canAlwaysEat").getAsBoolean(),
-//                    obj.has("consumeSeconds") ? obj.get("consumeSeconds").getAsFloat() : 1.6f,
-//                    obj.has("animation") ? ItemUseAnimation.valueOf(obj.get("animation").getAsString().toUpperCase()) : ItemUseAnimation.EAT,
-//                    obj.has("sound") ? Key.key(obj.get("sound").getAsString()) : SoundEventKeys.ENTITY_GENERIC_EAT,
-//                    !obj.has("hasParticles") || obj.get("hasParticles").getAsBoolean()
-//            );
-//        }
-//
-//        @Override
-//        public JsonElement serialize(ConsumableComponent component, JsonSerializationContext ctx) {
-//            JsonObject json = new JsonObject();
-//            json.addProperty("hunger", component.hunger);
-//            json.addProperty("saturation", component.saturation);
-//            json.addProperty("canAlwaysEat", component.canAlwaysEat);
-//            json.addProperty("consumeSeconds", component.consumeSeconds);
-//            json.addProperty("animation", component.animation.name());
-//            json.addProperty("sound", component.sound.asString());
-//            json.addProperty("hasParticles", component.hasParticles);
-//
-//            JsonArray effects = new JsonArray();
-//            for (SmpEffect effect : component.getEffects()) {
-//                JsonObject effJson = effect.serialize();
-//                effJson.addProperty("id", effect.getEffectID());
-//                effects.add(effJson);
-//            }
-//            json.add("effects", effects);
-//            return json;
-//        }
-//    }
 }

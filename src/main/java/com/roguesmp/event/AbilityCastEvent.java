@@ -29,6 +29,14 @@ public class AbilityCastEvent extends Event implements Cancellable {
         return HANDLERS;
     }
 
+    public SmpPlayer getSmpPlayer() {
+        return smpPlayer;
+    }
+
+    public Ability getAbility() {
+        return ability;
+    }
+
     @Override
     public boolean isCancelled() {
         return cancelled;

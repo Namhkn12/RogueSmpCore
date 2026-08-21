@@ -1,6 +1,5 @@
 package com.roguesmp.effect.impl;
 
-import com.google.gson.JsonObject;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.effect.EffectManager;
@@ -12,7 +11,6 @@ import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class DamageIncreaseEffect extends SmpEffect {
@@ -28,7 +26,7 @@ public class DamageIncreaseEffect extends SmpEffect {
     private final double increaseValue;
 
     public DamageIncreaseEffect(int duration, double increaseValue) {
-        super(duration, ID);
+        super(ID, duration);
         this.increaseValue = increaseValue;
     }
 
@@ -48,35 +46,9 @@ public class DamageIncreaseEffect extends SmpEffect {
     }
 
     @Override
-    public @NotNull JsonObject serialize() {
-        JsonObject json = new JsonObject();
-
-        // Parent/Base fields
-        json.addProperty("duration", this.duration);
-
-        // DamageIncreaseEffect specific fields
-        json.addProperty("increaseValue", this.increaseValue);
-
-        return json;
-    }
-
-    public static DamageIncreaseEffect deserialize(JsonObject json) {
-        // 1. Extract Parent Data
-        int duration = json.has("duration") ? json.get("duration").getAsInt() : 0;
-
-        // 2. Extract DamageIncreaseEffect Data
-        double increaseValue = json.has("increaseValue") ? json.get("increaseValue").getAsDouble() : 0.0;
-
-        // 3. Construct the effect
-        // Note: Since your constructor only takes (duration, increaseValue),
-        // we use a setter for the behavior or ensure the constructor handles it.
-
-        return new DamageIncreaseEffect(duration, increaseValue);
-    }
-
-    @Override
-    public @Nullable Component getDisplay() {
-        return Component.text("+" + increaseValue + " sát thương", NamedTextColor.GREEN);
+    public @Nullable Component getDisplayComponent() {
+        if (increaseValue <= 0) return Component.text(increaseValue * 100 + "% sát thương", NamedTextColor.RED);
+        return Component.text(increaseValue * 100 + "% sát thương", NamedTextColor.GREEN);
     }
 
     @Override

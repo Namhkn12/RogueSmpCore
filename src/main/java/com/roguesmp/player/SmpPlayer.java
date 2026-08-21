@@ -4,8 +4,10 @@ import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.*;
 import com.roguesmp.enchant.Enchants;
+import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.event.DurabilityChangedEvent;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.*;
@@ -36,12 +38,27 @@ public class SmpPlayer {
 
     private final Map<EquipSlot, SmpItem> currentEquipment = new EnumMap<>(EquipSlot.class);
 
+    // What updateSlotStat actually folded into activeAttributes/activeEnchants for each slot last
+    // time, as owned copies - not live references into the item's components. Removing a slot's
+    // contribution subtracts THIS snapshot rather than re-reading the (possibly already-mutated)
+    // item live, so it stays correct even when the "old" and "new" SmpItem for a slot turn out to
+    // be the same cached instance (e.g. a unique item whose attributes changed in place - see
+    // UnyieldingEdge - then got its stack regenerated and re-equipped with itself).
+    private final Map<EquipSlot, Map<Attributes, Double>> lastAppliedAttributes = new EnumMap<>(EquipSlot.class);
+    private final Map<EquipSlot, Map<Enchants, Integer>> lastAppliedEnchants = new EnumMap<>(EquipSlot.class);
+
     private final AbilityLoadout abilityLoadout;
 
     private final List<PlayerMechanic> mechanics = new ArrayList<>();
 
     private final Map<UUID, PlayerProjectile> projectiles = new HashMap<>();
     private int projectileCleanupTimer = 0;
+
+    // Wall-clock (not tick-count) cooldown tracking for passive item abilities (ItemAbility) -
+    // lives here rather than on the ability/component instance since non-unique SmpItems (and
+    // thus their components/abilities) get rebuilt fresh on every wrap and would otherwise lose
+    // any cooldown state constantly.
+    private final Map<String, Long> abilityCooldowns = new HashMap<>();
 
     public SmpPlayer(UUID uuid) {
         this.uuid = uuid;
@@ -73,41 +90,58 @@ public class SmpPlayer {
         mechanics.add(new ItemConsumableMechanic());
         mechanics.add(new DurabilityLossMechanic());
         mechanics.add(new ItemComponentInteractionMechanic());
+        mechanics.add(new ItemAbilityMechanic());
 
         mechanics.sort(Comparator.comparingInt(PlayerMechanic::getPriority));
     }
 
     public void updateSlotStat(Player player, EquipSlot slot, @Nullable SmpItem newItem) {
-        SmpItem oldItem = currentEquipment.get(slot);
         Set<Attributes> affected = new HashSet<>();
 
-        if (oldItem != null) {
-            EquipAttributeComponent oldComp = oldItem.getComponent(ItemComponentKeys.ATTRIBUTE);
-            if (oldComp != null && oldComp.getSlot() == slot) {
-                oldComp.getFinalAttributes().forEach((attr, val) -> {
-                    affected.add(attr);
-                    activeAttributes.merge(attr, -val, (oldV, delta) -> {
-                        double res = oldV + delta;
-                        return Utils.isEffectiveZero(res) ? null : res;
-                    });
+        Map<Attributes, Double> previousAttributes = lastAppliedAttributes.remove(slot);
+        if (previousAttributes != null) {
+            previousAttributes.forEach((attr, val) -> {
+                affected.add(attr);
+                activeAttributes.merge(attr, -val, (oldV, delta) -> {
+                    double res = oldV + delta;
+                    return Utils.isEffectiveZero(res) ? null : res;
                 });
-            }
-            processEnchantDelta(oldItem, slot, -1);
-            currentEquipment.remove(slot);
+            });
         }
+
+        Map<Enchants, Integer> previousEnchants = lastAppliedEnchants.remove(slot);
+        if (previousEnchants != null) {
+            previousEnchants.forEach((ench, level) -> activeEnchants.merge(ench, -level, (oldVal, delta) -> {
+                int result = oldVal + delta;
+                return result <= 0 ? null : result;
+            }));
+        }
+
+        currentEquipment.remove(slot);
 
         if (newItem != null && !newItem.hasComponent(ItemComponentKeys.BROKEN)) {
             EquipAttributeComponent newComp = newItem.getComponent(ItemComponentKeys.ATTRIBUTE);
             if (newComp != null && newComp.getSlot() == slot) {
-                newComp.getFinalAttributes().forEach((attr, val) -> {
+                // Owned copy, not the live unmodifiable view - must stay a fixed point-in-time
+                // snapshot even after the component's own finalAttributes mutate further.
+                Map<Attributes, Double> snapshot = new EnumMap<>(newComp.getFinalAttributes());
+                snapshot.forEach((attr, val) -> {
                     affected.add(attr);
                     activeAttributes.merge(attr, val, (oldV, delta) -> {
                         double res = oldV + delta;
                         return Utils.isEffectiveZero(res) ? null : res;
                     });
                 });
+                if (!snapshot.isEmpty()) lastAppliedAttributes.put(slot, snapshot);
             }
-            processEnchantDelta(newItem, slot, 1);
+
+            Map<Enchants, Integer> enchantSnapshot = collectApplicableEnchants(newItem, slot);
+            enchantSnapshot.forEach((ench, level) -> activeEnchants.merge(ench, level, (oldVal, delta) -> {
+                int result = oldVal + delta;
+                return result <= 0 ? null : result;
+            }));
+            if (!enchantSnapshot.isEmpty()) lastAppliedEnchants.put(slot, enchantSnapshot);
+
             currentEquipment.put(slot, newItem);
         }
 
@@ -119,21 +153,24 @@ public class SmpPlayer {
                 attr.getAttribute().addVanillaAttribute(player, total);
             }
         }
+
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onEquipmentChange(slot, newItem, this);
+        }
     }
 
-    private void processEnchantDelta(SmpItem item, EquipSlot slot, int multiplier) {
+    private Map<Enchants, Integer> collectApplicableEnchants(SmpItem item, EquipSlot slot) {
         EnchantComponent enchantComp = item.getComponent(ItemComponentKeys.ENCHANT);
-        if (enchantComp == null) return;
+        if (enchantComp == null) return Map.of();
 
+        Map<Enchants, Integer> result = new EnumMap<>(Enchants.class);
         enchantComp.getTotalEnchants().forEach((ench, level) -> {
             // Only apply if the enchant is valid for the current equipment slot
             if (ench.getEnchant().getActiveSlots().contains(slot)) {
-                activeEnchants.merge(ench, level * multiplier, (oldVal, delta) -> {
-                    int result = oldVal + delta;
-                    return result <= 0 ? null : result;
-                });
+                result.put(ench, level);
             }
         });
+        return result;
     }
 
     public void registerMechanic(PlayerMechanic mechanic) {
@@ -207,6 +244,18 @@ public class SmpPlayer {
 
     public @Nullable SmpItem getItemAtEquipSlot(EquipSlot equipSlot) {
         return currentEquipment.get(equipSlot);
+    }
+
+    /**
+     * @param key a caller-chosen unique key, typically {@code abilityTypeId + ":" + itemId}
+     */
+    public boolean isAbilityOnCooldown(String key) {
+        Long expiry = abilityCooldowns.get(key);
+        return expiry != null && expiry > System.currentTimeMillis();
+    }
+
+    public void setAbilityCooldown(String key, long durationMillis) {
+        abilityCooldowns.put(key, System.currentTimeMillis() + durationMillis);
     }
 
     public UUID getUuid() {
@@ -294,11 +343,25 @@ public class SmpPlayer {
         }
     }
 
+    public void onAbilityCast(AbilityCastEvent event) {
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onAbilityCast(event, this);
+        }
+    }
+
+    public void onDurabilityChange(DurabilityChangedEvent event) {
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onDurabilityChange(event, this);
+        }
+    }
+
     public void onDamageEntity(DamageEvent event) {
         for (PlayerMechanic mechanic : mechanics) {
             mechanic.onDamageEntity(event, this);
         }
-
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onDamageEntityFinal(event, this);
+        }
     }
 
     public void onKillEntity(EntityDeathEvent event) {
@@ -310,6 +373,9 @@ public class SmpPlayer {
     public void onHurt(DamageEvent event) {
         for (PlayerMechanic mechanic : mechanics) {
             mechanic.onHurt(event, this);
+        }
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onHurtFinal(event, this);
         }
     }
 
