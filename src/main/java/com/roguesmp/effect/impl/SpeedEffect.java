@@ -32,13 +32,13 @@ public class SpeedEffect extends SmpEffect {
     private final String modifierId;
 
     public SpeedEffect(int duration, double value, DeathBehavior behavior, String modifierId) {
-        super(duration, EFFECT_ID, behavior);
+        super(EFFECT_ID, duration, behavior);
         this.value = value;
         this.modifierId = modifierId;
     }
 
     public SpeedEffect(int duration, double value, String modifierId) {
-        super(duration, EFFECT_ID);
+        super(EFFECT_ID, duration);
         this.value = value;
         this.modifierId = modifierId;
     }

@@ -5,6 +5,7 @@ import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.event.DurabilityChangedEvent;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.DurabilityComponent;
 import com.roguesmp.item.component.impl.NameComponent;
@@ -13,7 +14,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.registry.keys.SoundEventKeys;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.GameMode;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -86,7 +87,6 @@ public class DurabilityLossMechanic implements PlayerMechanic {
     }
 
     private static void damageItem(SmpPlayer player, SmpItem smpItem, int amount, EquipSlot equipSlot) {
-        if (player.getBukkitPlayer().getGameMode() == GameMode.CREATIVE) return;
         if (smpItem == null || amount <= 0) return;
         if (smpItem.hasComponent(ItemComponentKeys.BROKEN)) return;
 
@@ -99,7 +99,17 @@ public class DurabilityLossMechanic implements PlayerMechanic {
 
         int maxDurability = durabilityComponent.maxDurability();
         int oldDurability = durabilityComponent.currentDurability();
-        int newDurability = Math.max(0, durabilityComponent.currentDurability() - amount);
+
+        // Fired before anything is applied - ItemAbilityMechanic (via PlayerListener/SmpPlayer)
+        // dispatches this synchronously to every ItemAbility on this item, so by the time
+        // callEvent returns, an ability may have adjusted the change amount (reduce/increase
+        // wear) or vetoed it outright by zeroing it.
+        DurabilityChangedEvent durabilityChangedEvent = new DurabilityChangedEvent(smpItem, player, -amount);
+        Bukkit.getPluginManager().callEvent(durabilityChangedEvent);
+
+        int newDurability = Math.max(0, Math.min(maxDurability, oldDurability + durabilityChangedEvent.getChangeAmount()));
+        if (newDurability == oldDurability) return; // Nothing actually changed
+
         durabilityComponent.setCurrentDurability(newDurability);
 
         EntityEquipment equipment = bukkitPlayer.getEquipment();
@@ -112,27 +122,27 @@ public class DurabilityLossMechanic implements PlayerMechanic {
         }
 
         if (newDurability == 0) {
-            // Handle broken item replacement
-            ItemStack brokenItemStack = smpItem.generateItemStack(player, currentItem.getAmount());
-            equipment.setItem(equipmentSlot, brokenItemStack);
+            // Always regenerates - the item is always swapped to its broken form.
+            equipment.setItem(equipmentSlot, smpItem.generateItemStack(player, currentItem.getAmount()));
 
             bukkitPlayer.sendMessage(Utils.fromString("<red>HỎNG! " + itemName + "<red> của bạn đã hỏng hoàn toàn. Các chỉ số sẽ bị vô hiệu!"));
             bukkitPlayer.playSound(Sound.sound(SoundEventKeys.ENTITY_ITEM_BREAK, Sound.Source.PLAYER, 1f, 1f));
+        } else if (durabilityChangedEvent.shouldUpdateItem()) {
+            equipment.setItem(equipmentSlot, smpItem.generateItemStack(player, currentItem.getAmount()));
         } else {
-            // Save the new durability to the Persistent Data Container
+            // Cheap path - persist the new durability without rebuilding the whole stack.
             currentItem.editPersistentDataContainer(durabilityComponent::save);
-
-            if (maxDurability > 0) {
-                double oldPercent = (double) oldDurability / maxDurability;
-                double newPercent = (double) newDurability / maxDurability;
-                double threshold = 0.05; // 5%
-
-                if (oldPercent > threshold && newPercent <= threshold) {
-                    bukkitPlayer.sendMessage(Utils.fromString("<red>CHÚ Ý! " + itemName + "<red> của bạn sắp hỏng (Còn " + newDurability + " độ bền). Các chỉ số của " + itemName + "<red> sẽ bị vô hiệu khi bị hỏng!"));
-                    bukkitPlayer.playSound(Sound.sound(SoundEventKeys.ENTITY_ITEM_BREAK, Sound.Source.PLAYER, 0.5f, 1.5f));
-                }
-            }
         }
 
+        if (newDurability != 0 && maxDurability > 0) {
+            double oldPercent = (double) oldDurability / maxDurability;
+            double newPercent = (double) newDurability / maxDurability;
+            double threshold = 0.05; // 5%
+
+            if (oldPercent > threshold && newPercent <= threshold) {
+                bukkitPlayer.sendMessage(Utils.fromString("<red>CHÚ Ý! " + itemName + "<red> của bạn sắp hỏng (Còn " + newDurability + " độ bền). Các chỉ số của " + itemName + "<red> sẽ bị vô hiệu khi bị hỏng!"));
+                bukkitPlayer.playSound(Sound.sound(SoundEventKeys.ENTITY_ITEM_BREAK, Sound.Source.PLAYER, 0.5f, 1.5f));
+            }
+        }
     }
 }

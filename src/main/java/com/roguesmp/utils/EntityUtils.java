@@ -3,6 +3,8 @@ package com.roguesmp.utils;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
+import com.roguesmp.registry.Registries;
+import com.roguesmp.tag.SmpTag;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
@@ -77,6 +79,34 @@ public class EntityUtils {
     public static boolean isUndead(Entity entity) {
         return entity instanceof AbstractSkeleton || entity instanceof Zombie ||
                 entity instanceof Wither || entity instanceof Phantom;
+    }
+
+    public static boolean isFire(Entity entity) {
+        return entity instanceof MagmaCube || entity instanceof Blaze;
+    }
+
+    public static boolean isElite(Entity entity) {
+        SmpTag<BaseEntity> baseTag = Registries.ENTITY.getTag("elite");
+        if (baseTag == null) return false;
+        BaseEntity base = getBaseEntity(entity);
+        if (base == null) return false;
+        return baseTag.contains(base);
+    }
+
+    public static boolean isBoss(Entity entity) {
+        SmpTag<BaseEntity> baseTag = Registries.ENTITY.getTag("boss");
+        if (baseTag == null) return false;
+        BaseEntity base = getBaseEntity(entity);
+        if (base == null) return false;
+        return baseTag.contains(base);
+    }
+
+    public static boolean isAngelic(Entity entity) {
+        SmpTag<BaseEntity> baseTag = Registries.ENTITY.getTag("angelic");
+        if (baseTag == null) return false;
+        BaseEntity base = getBaseEntity(entity);
+        if (base == null) return false;
+        return baseTag.contains(base);
     }
 
     public static void clearAllMetadata(Entity entity) {

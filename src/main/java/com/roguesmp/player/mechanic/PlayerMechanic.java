@@ -1,13 +1,18 @@
 package com.roguesmp.player.mechanic;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
+import com.roguesmp.constant.EquipSlot;
+import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.event.DurabilityChangedEvent;
+import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.SmpPlayer;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
+import org.jetbrains.annotations.Nullable;
 
 public interface PlayerMechanic {
 
@@ -32,11 +37,17 @@ public interface PlayerMechanic {
 
     default void onInput(PlayerInputEvent event, SmpPlayer player) {}
 
+    default void onAbilityCast(AbilityCastEvent event, SmpPlayer player) {}
+
     default void onDamageEntity(DamageEvent event, SmpPlayer player) {}
+
+    default void onDamageEntityFinal(DamageEvent event, SmpPlayer player) {}
 
     default void onKillEntity(EntityDeathEvent event, SmpPlayer player) {}
 
     default void onHurt(DamageEvent event, SmpPlayer player) {}
+
+    default void onHurtFinal(DamageEvent event, SmpPlayer player) {}
 
     default void onHurtFatal(DamageEvent event, SmpPlayer player) {}
 
@@ -65,4 +76,14 @@ public interface PlayerMechanic {
     default void onShootArrow(EntityShootBowEvent event, SmpPlayer player) {}
 
     default void onConsumeArrow(ArrowConsumeEvent event, SmpPlayer player) {}
+
+    default void onDurabilityChange(DurabilityChangedEvent event, SmpPlayer player) {}
+
+    /**
+     * Called once per {@code SmpPlayer.updateSlotStat} call, after the slot's item has actually
+     * been swapped - a generic "this equipment slot changed" notification, distinct from
+     * {@code SmpEnchant}/{@code SmpAttribute}'s own {@code onEquipmentChange} (which fires
+     * per-type, only when that type's resolved level/value actually differs from before).
+     */
+    default void onEquipmentChange(EquipSlot slot, @Nullable SmpItem newItem, SmpPlayer player) {}
 }

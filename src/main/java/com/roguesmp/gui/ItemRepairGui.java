@@ -1,9 +1,11 @@
 package com.roguesmp.gui;
 
+import com.roguesmp.enchant.Enchants;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.DurabilityComponent;
 import com.roguesmp.item.component.impl.DurabilityRepairComponent;
+import com.roguesmp.item.component.impl.EnchantComponent;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.ItemStackUtils;
@@ -96,6 +98,12 @@ public class ItemRepairGui extends BaseGui {
         SmpItem clickedSmp = SmpItem.wrap(clicked);
 
         if (isRepairable(clickedSmp)) {
+            if (isIrreparable(clickedSmp)) {
+                event.getWhoClicked().sendMessage(Component.text("Vật phẩm này bị nguyền, không thể sửa chữa!", NamedTextColor.RED));
+                event.getWhoClicked().playSound(Sound.sound(SoundEventKeys.ENTITY_SHULKER_HURT_CLOSED, Sound.Source.PLAYER, 1f, 1f));
+                return;
+            }
+
             if (itemStack != null) {
                 PlayerUtils.giveItem(player, itemStack);
             }
@@ -177,6 +185,11 @@ public class ItemRepairGui extends BaseGui {
         DurabilityComponent durabilityComponent = smpItem.getComponent(ItemComponentKeys.DURABILITY);
         if (durabilityComponent == null) return false;
         return durabilityComponent.currentDurability() < durabilityComponent.maxDurability();
+    }
+
+    private boolean isIrreparable(SmpItem smpItem) {
+        EnchantComponent enchantComponent = smpItem.getComponent(ItemComponentKeys.ENCHANT);
+        return enchantComponent != null && enchantComponent.getTotalLevel(Enchants.IRREPARABLE) > 0;
     }
 
     @Override

@@ -38,6 +38,8 @@ public class GlobalInfoTab {
     private static final int MARQUEE_WINDOW = 40;
     private static final int BOUNCE_WIDTH = 20;
 
+    private static final int ABILITY_REFRESH_TICKS = 2;
+
     public static TabListView tabListView(Player player) {
         SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
         AbilityLoadout loadout = smpPlayer == null ? null : smpPlayer.getAbilityLoadout();
@@ -63,14 +65,14 @@ public class GlobalInfoTab {
         int row = 2;
         for (int i = 0; i < AbilityType.ACTIVE.getMaxSlots(); i++) {
             int index = i;
-            view.slot(ABILITY_COLUMN_BASE + row++, TabElement.ticking(20, c -> abilityLine(loadout, AbilityType.ACTIVE, index)));
+            view.slot(ABILITY_COLUMN_BASE + row++, TabElement.ticking(ABILITY_REFRESH_TICKS, c -> abilityLine(loadout, AbilityType.ACTIVE, index)));
         }
         for (int i = 0; i < AbilityType.LIFELINE.getMaxSlots(); i++) {
             int index = i;
-            view.slot(ABILITY_COLUMN_BASE + row++, TabElement.ticking(20, c -> abilityLine(loadout, AbilityType.LIFELINE, index)));
+            view.slot(ABILITY_COLUMN_BASE + row++, TabElement.ticking(ABILITY_REFRESH_TICKS, c -> abilityLine(loadout, AbilityType.LIFELINE, index)));
         }
 
-        view.group("null", PLAYER_LIST_SLOTS);
+        view.group(null, PLAYER_LIST_SLOTS);
 
         return view;
     }

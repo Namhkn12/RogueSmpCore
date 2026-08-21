@@ -22,6 +22,7 @@ public class DamageEvent extends Event implements Cancellable {
         private final DamageType damageType;
         private boolean isBlockable = true;
         private boolean ignoreIframe;
+        private boolean doKnockback = true;
 
         public Metadata(DamageType damageType) {
             this(damageType, null, null);
@@ -73,6 +74,14 @@ public class DamageEvent extends Event implements Cancellable {
 
         public void setBlockable(boolean blockable) {
             isBlockable = blockable;
+        }
+
+        public boolean isDoKnockback() {
+            return doKnockback;
+        }
+
+        public void setDoKnockback(boolean doKnockback) {
+            this.doKnockback = doKnockback;
         }
     }
 

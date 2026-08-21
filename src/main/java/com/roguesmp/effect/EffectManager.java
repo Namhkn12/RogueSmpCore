@@ -5,7 +5,9 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.JsonOps;
+import com.roguesmp.effect.impl.BleedingEffect;
 import com.roguesmp.effect.impl.DamageIncreaseEffect;
+import com.roguesmp.effect.impl.PotentPoisonEffect;
 import com.roguesmp.effect.impl.SpeedEffect;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.event.DamageEvent;
@@ -92,7 +94,9 @@ public class EffectManager {
         new CommandAPICommand("smpeffect")
                 .withSubcommand(new CommandAPICommand("add")
                         .withSubcommand(DamageIncreaseEffect.registerCommand())
-                        .withSubcommand(SpeedEffect.registerCommand()))
+                        .withSubcommand(SpeedEffect.registerCommand())
+                        .withSubcommand(BleedingEffect.registerCommand())
+                        .withSubcommand(PotentPoisonEffect.registerCommand()))
 
                 .register();
     }

@@ -50,7 +50,10 @@ public class PlayerManager {
         SmpPlayer smpPlayer = new SmpPlayer(uuid);
         players.put(uuid, smpPlayer);
         PlayerData playerData = dataManager.getData(uuid);
-        if (playerData == null) return;
+        if (playerData == null) {
+            RogueSmpCore.LOGGER.warn("PlayerData for uuid {} is not loaded!", uuid);
+            return;
+        }
         smpPlayer.loadData(playerData);
     }
 

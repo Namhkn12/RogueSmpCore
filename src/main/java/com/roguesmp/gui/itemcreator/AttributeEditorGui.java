@@ -48,7 +48,8 @@ public class AttributeEditorGui {
                 .externalTitle(Component.text(ItemComponentKeys.ATTRIBUTE.id(), present ? NamedTextColor.GREEN : NamedTextColor.GRAY))
                 .addTextBody(Component.text(present
                         ? "Vật phẩm có thể thay đổi attribute (" + values.size() + " chỉ số cơ bản)"
-                        : "Chưa đánh dấu có thể thay đổi attribute"));
+                        : "Chưa đánh dấu có thể thay đổi attribute"))
+                .addTextBody(Component.text("Lưu ý: với hầu hết chỉ số dạng %, 1 = 100%", NamedTextColor.GRAY));
 
         DialogTypeBuilder.MultiAction multi = builder.multiAction();
 
@@ -108,6 +109,7 @@ public class AttributeEditorGui {
         DialogBuilder builder = DialogBuilder.create(Component.text("Chỉ số: " + attribute.name()))
                 .canCloseWithEscape(false)
                 .externalTitle(Component.text(attribute.name(), valuePresent ? NamedTextColor.GREEN : NamedTextColor.GRAY))
+                .addTextBody(Component.text("Lưu ý: với hầu hết chỉ số dạng %, 1 = 100%", NamedTextColor.GRAY))
                 .addTextInput("value", Component.text("Giá trị (-1000 đến 1000)"), b -> b.initial(Utils.formatDecimal(current)).maxLength(16));
 
         DialogTypeBuilder.MultiAction multi = builder.multiAction();

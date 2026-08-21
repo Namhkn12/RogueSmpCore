@@ -4,23 +4,13 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.item.ability.impl.*;
 import com.roguesmp.registry.Registries;
 
-/**
- * Item ability codecs, keyed by type id - same shape as
- * {@link com.roguesmp.item.component.ItemComponentKeys}/{@code EntityComponentKeys} (a plain
- * {@code Codec<? extends ItemAbility>} per id, no separate params/factory wrapper needed since
- * {@link ItemAbility} decodes straight into a finished, usable instance - see its own javadoc for
- * why that's safe here but not for {@code Spell}). Call {@link #loadClass()} to force the static
- * initializer (and thus every registration below) to run.
- * <p>
- * Add a new passive ability by writing an {@link ItemAbility} implementation with its own
- * {@code CODEC} (see {@link BurnOnHitAbility}/{@link PeriodicSelfHealAbility}) and registering it here.
- */
 public class ItemAbilities {
 
-    public static final Codec<BurnOnHitAbility> BURN_ON_HIT =
-            register(BurnOnHitAbility.TYPE_KEY, BurnOnHitAbility.CODEC);
-    public static final Codec<PeriodicSelfHealAbility> PERIODIC_SELF_HEAL =
-            register(PeriodicSelfHealAbility.TYPE_KEY, PeriodicSelfHealAbility.CODEC);
+    public static final Codec<UnyieldingEdge> UNYIELDING_EDGE =
+            register(UnyieldingEdge.TYPE_KEY, UnyieldingEdge.CODEC);
+
+    public static final Codec<Barking> BARKING =
+            register(Barking.TYPE_KEY, Barking.CODEC);
 
     public static void loadClass() {
 

@@ -45,9 +45,9 @@ public class ResistanceEffect extends SmpEffect {
      * @param value Value used for percentage (0.4, 0.5, etc...)
      */
     public ResistanceEffect(int duration, double value, DeathBehavior deathBehavior, Set<DamageType> allowedDamageType) {
-        super(duration, ID, deathBehavior);
+        super(ID, duration, deathBehavior);
         this.value = value;
-        this.allowedDamageType = allowedDamageType;
+        this.allowedDamageType = EnumSet.copyOf(allowedDamageType);
     }
 
     /**

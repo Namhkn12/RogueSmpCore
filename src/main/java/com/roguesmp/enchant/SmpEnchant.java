@@ -3,8 +3,10 @@ package com.roguesmp.enchant;
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.EquipSlot;
+import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.event.DurabilityChangedEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -66,7 +68,24 @@ public interface SmpEnchant {
 
     }
 
+    /**
+     * Called whenever this enchant's active level on the player changes - gear granting it for
+     * the first time, swapping to gear with a different level while it stays active, or losing
+     * it entirely ({@code level == 0}). Only fires when the resulting level actually differs from
+     * before, not on every equipment change.
+     */
+    default void onEquipmentChange(@NotNull SmpPlayer player, int level) {
+
+    }
+
     default void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
+
+    }
+
+    /**
+     * Called after onDamageEntity is done processing, should only be used to read final value only.
+     */
+    default void onDamageEntityFinal(DamageEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 
@@ -78,7 +97,15 @@ public interface SmpEnchant {
 
     }
 
+    default void onHurtFinal(DamageEvent event, int level, @NotNull SmpPlayer player) {
+
+    }
+
     default void onHurtFatal(DamageEvent event, int level, @NotNull SmpPlayer player) {
+
+    }
+
+    default void onAbilityCast(AbilityCastEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 
@@ -121,6 +148,15 @@ public interface SmpEnchant {
     }
 
     default void onConsumeArrow(ArrowConsumeEvent event, int level, @NotNull SmpPlayer player) {
+
+    }
+
+    /**
+     * The player's item's durability is about to change (see {@link DurabilityChangedEvent} for
+     * the pre-commit/adjustable-changeAmount contract). Currently not called for repairs done
+     * through {@code ItemRepairGui}, which mutates durability directly.
+     */
+    default void onDurabilityChange(DurabilityChangedEvent event, int level, @NotNull SmpPlayer player) {
 
     }
 

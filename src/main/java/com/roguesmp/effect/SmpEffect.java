@@ -56,26 +56,19 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
     private final DeathBehavior deathBehavior;
     private final DisplayMode displayMode;
 
-    public SmpEffect(int duration, String effectID, DeathBehavior deathBehavior) {
-        this.duration = duration;
-        this.effectID = effectID;
-        this.deathBehavior = deathBehavior;
-        this.displayMode = DisplayMode.WITH_TIME;
-    }
-
-    public SmpEffect(int duration, String effectID) {
-        this.duration = duration;
-        this.effectID = effectID;
-        this.deathBehavior = DeathBehavior.REMOVE_ON_DEATH;
-        this.displayMode = DisplayMode.WITH_TIME;
-    }
-
-    // Constructor accepting BaseProperties
     public SmpEffect(String effectID, BaseProperties base) {
         this.duration = base.duration();
         this.effectID = effectID;
         this.deathBehavior = base.deathBehavior();
         this.displayMode = base.displayMode();
+    }
+
+    public SmpEffect(String effectID, int duration, DeathBehavior deathBehavior) {
+        this(effectID, new BaseProperties(duration, deathBehavior, DisplayMode.WITH_TIME));
+    }
+
+    public SmpEffect(String effectID, int duration) {
+        this(effectID, duration, DeathBehavior.REMOVE_ON_DEATH);
     }
 
     /**

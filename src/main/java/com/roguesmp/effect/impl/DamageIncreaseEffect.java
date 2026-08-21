@@ -26,7 +26,7 @@ public class DamageIncreaseEffect extends SmpEffect {
     private final double increaseValue;
 
     public DamageIncreaseEffect(int duration, double increaseValue) {
-        super(duration, ID);
+        super(ID, duration);
         this.increaseValue = increaseValue;
     }
 
@@ -47,7 +47,8 @@ public class DamageIncreaseEffect extends SmpEffect {
 
     @Override
     public @Nullable Component getDisplayComponent() {
-        return Component.text("+" + increaseValue + " sát thương", NamedTextColor.GREEN);
+        if (increaseValue <= 0) return Component.text(increaseValue * 100 + "% sát thương", NamedTextColor.RED);
+        return Component.text(increaseValue * 100 + "% sát thương", NamedTextColor.GREEN);
     }
 
     @Override
