@@ -17,6 +17,14 @@ import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.ability.ItemAbility;
 import com.roguesmp.item.ability.ItemAbilities;
 import com.roguesmp.item.component.ItemComponent;
+import com.roguesmp.loot.LootConfig;
+import com.roguesmp.loot.LootEntry;
+import com.roguesmp.loot.LootTable;
+import com.roguesmp.loot.condition.LootCondition;
+import com.roguesmp.loot.condition.LootConditions;
+import com.roguesmp.loot.entry.LootEntries;
+import com.roguesmp.loot.function.LootFunction;
+import com.roguesmp.loot.function.LootFunctions;
 import com.roguesmp.npc.BaseNpc;
 import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.npc.action.NpcActions;
@@ -53,6 +61,10 @@ public class Registries {
 
     public static final Registry<Codec<? extends NpcAction>> NPC_ACTION_CODEC = register(registry -> NpcActions.loadClass());
 
+    public static final Registry<Codec<? extends LootCondition>> LOOT_CONDITION_CODEC = register(registry -> LootConditions.loadClass());
+    public static final Registry<Codec<? extends LootFunction>> LOOT_FUNCTION_CODEC = register(registry -> LootFunctions.loadClass());
+    public static final Registry<Codec<? extends LootEntry>> LOOT_ENTRY_CODEC = register(registry -> LootEntries.loadClass());
+
     // No bulk JSON entries of its own (Enchants is a hardcoded enum) - only exists so enchants
     // can have a "enchants/tags/*.json" folder like every other registry.
     public static final Registry<Enchants> ENCHANTS = register("enchants", registry -> Enchants.bootstrap());
@@ -72,6 +84,8 @@ public class Registries {
     public static final Registry<Quest> QUEST = new Registry<>("quests", Quest.CODEC);
     public static final Registry<BaseNpc> NPC = new Registry<>("npcs", BaseNpc.CODEC);
     public static final Registry<BaseEntity> ENTITY = new Registry<>("entities", BaseEntity.CODEC);
+
+    public static final Registry<LootTable> LOOT_TABLE = new Registry<>(LootConfig.LOOT_TABLE_FOLDER, LootTable.CODEC);
 
     public static void loadAllData(RogueSmpCore plugin) {
         Registry.loadAll(plugin);

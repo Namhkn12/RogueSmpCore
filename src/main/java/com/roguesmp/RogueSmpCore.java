@@ -23,6 +23,8 @@ import com.roguesmp.gui.entitycreator.EntityCreatorGui;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
+import com.roguesmp.loot.manager.LootTableManager;
+import com.roguesmp.loot.service.LootService;
 import com.roguesmp.npc.NpcManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.quest.QuestManager;
@@ -78,6 +80,9 @@ public final class RogueSmpCore extends JavaPlugin {
         //Entity
         EntityManager.init(this);
 
+        //Loot - plugin-wide singleton so any system (mob death, chests, quests, ...) can roll
+        LootService.init(new LootTableManager());
+
         //Npc
         NpcManager.init();
 
@@ -89,7 +94,7 @@ public final class RogueSmpCore extends JavaPlugin {
         BlockStorage.init(this, BlockManager.getInstance());
         BlockRegistry.getInstance().registerMachineRecipes();
         //dungeon register
-        DungeonRegistry.onEnable(this, ItemRegistry.getInstance());
+        DungeonRegistry.onEnable(this);
 
         this.resetScheduler = new DailyResetScheduler(this);
         this.resetScheduler.start();

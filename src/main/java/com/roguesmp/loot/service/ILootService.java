@@ -38,7 +38,7 @@ public interface ILootService {
     /**
      * Rolls a loot table and returns the resulting items.
      *
-     * @param lootTableId the loot table ID, e.g. {@code "rogue:dungeons/dungeon_a_reward"}
+     * @param lootTableId the loot table ID, e.g. {@code "dungeons/dungeon_a_reward"}
      * <p>Fires a cancellable {@link com.roguesmp.loot.event.LootRollEvent} first — listeners
      * may add modifiers to {@code context} or cancel the roll entirely (returns empty list).
      *

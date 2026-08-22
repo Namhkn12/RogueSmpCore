@@ -1,6 +1,7 @@
 package com.roguesmp.loot;
 
-import com.roguesmp.loot.context.LootContext;
+import com.roguesmp.codec.Codec;
+import com.roguesmp.loot.condition.LootCondition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -12,45 +13,45 @@ import java.util.List;
  *
  * <p>When a pool is rolled:
  * <ol>
- *   <li>Compute total rolls = {@code rolls} + bonus derived from the context modifier</li>
- *   <li>For each roll, pick one entry by weighted random</li>
+ *   <li>If any of {@code conditions} fails, the whole pool is skipped — no rolls happen at
+ *       all, not even {@code EMPTY} ones.</li>
+ *   <li>For each of {@code rolls} rolls, pick one entry by weighted random</li>
  *   <li>Execute the chosen entry (drop item / delegate to nested table / do nothing)</li>
  * </ol>
- *
- * <p>{@code bonusRolls} is the base multiplier. The actual bonus applied depends on the
- * modifiers registered on the {@link LootContext} — contributed by the roll's caller and
- * by listeners of {@link com.roguesmp.loot.event.LootRollEvent}.
  */
 public class LootPool {
 
-    private final int rolls;
-    private final double bonusRolls;
-    private final @NotNull List<LootEntry> entries;
+    public static final Codec<LootPool> CODEC = Codec.composite(
+            Codec.INT.optionalFieldOf("rolls", 1).forGetter(LootPool::getRolls),
+            Codec.listOf(LootEntry.CODEC).fieldOf("entries").forGetter(LootPool::getEntries),
+            Codec.listOf(LootCondition.CODEC).optionalFieldOf("conditions", List.of()).forGetter(LootPool::getConditions),
+            LootPool::new
+    );
 
-    public LootPool(int rolls, double bonusRolls, @NotNull List<LootEntry> entries) {
+    private final int rolls;
+    private final @NotNull List<LootEntry> entries;
+    private final @NotNull List<LootCondition> conditions;
+
+    public LootPool(int rolls, @NotNull List<LootEntry> entries, @NotNull List<LootCondition> conditions) {
         this.rolls = rolls;
-        this.bonusRolls = bonusRolls;
         this.entries = Collections.unmodifiableList(entries);
+        this.conditions = Collections.unmodifiableList(conditions);
     }
 
     public int getRolls() {
         return rolls;
     }
 
-    /**
-     * Base bonus rolls value (from JSON).
-     * Actual bonus is: floor(bonusRolls * contextModifier) where contextModifier
-     * comes from {@link LootContext#getBonusRollModifier()}.
-     */
-    public double getBonusRolls() {
-        return bonusRolls;
-    }
-
     public @NotNull @Unmodifiable List<LootEntry> getEntries() {
         return entries;
     }
 
-    public boolean hasBonusRolls() {
-        return bonusRolls > 0.0;
+    /**
+     * Gates the entire pool — see {@link LootCondition}. Unlike an entry's own conditions
+     * (which only remove that one entry from the weighted pick), a failing pool condition
+     * skips the pool outright: no rolls, no weighted pick, nothing added to the results.
+     */
+    public @NotNull @Unmodifiable List<LootCondition> getConditions() {
+        return conditions;
     }
 }

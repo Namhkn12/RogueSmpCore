@@ -60,7 +60,12 @@ public class Registry<T> {
     }
 
     /**
-     * Loads all .json files from the subfolder matching this registry's locationKey.
+     * Loads every {@code .json} file under this registry's locationKey folder, recursing into
+     * subfolders. The registry id for each file is its path relative to that folder with the
+     * extension stripped, so nesting is reflected directly in the id and the id always points
+     * straight back at its own file - e.g. {@code items/weapons/fire_sword.json} -> id
+     * {@code "weapons/fire_sword"}. A flat folder (no subfolders) behaves exactly as before:
+     * relative path of a top-level file is just its own filename.
      */
     public @Blocking void loadFrom(RogueSmpCore plugin) {
         if (locationKey == null || codec == null) return;
@@ -72,13 +77,32 @@ public class Registry<T> {
         }
 
         RogueSmpCore.LOGGER.info("Loading entries for registry '{}'", locationKey);
-        File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
+        int[] count = {0};
+        loadFromRecursive(folder, folder, count);
+        RogueSmpCore.LOGGER.info("Loaded {} entries into registry '{}'", count[0], locationKey);
+    }
+
+    /**
+     * @param root current registry's data folder - ids are derived relative to this
+     * @param dir  folder currently being walked - {@code root} on the initial call, a subfolder
+     *             on recursive calls
+     */
+    private void loadFromRecursive(File root, File dir, int[] count) {
+        File[] files = dir.listFiles();
         if (files == null) return;
 
-        int count = 0;
         for (File file : files) {
-            // Strip ".json" extension to use as registry ID (e.g., "fire_sword.json" -> "fire_sword")
-            String id = file.getName().substring(0, file.getName().length() - 5);
+            if (file.isDirectory()) {
+                // "tags" is reserved for loadTagsFrom - never walk into it as regular entries,
+                // or every tag file (a bare JSON array) would also be attempted as an entry and
+                // fail to decode.
+                if (file.getName().equalsIgnoreCase("tags")) continue;
+                loadFromRecursive(root, file, count);
+                continue;
+            }
+            if (!file.getName().toLowerCase().endsWith(".json")) continue;
+
+            String id = relativeId(root, file);
 
             try (FileReader reader = new FileReader(file)) {
                 JsonElement json = Utils.GSON.fromJson(reader, JsonElement.class);
@@ -87,7 +111,7 @@ public class Registry<T> {
                 DataResult<T> result = codec.decode(json, JsonOps.INSTANCE);
                 if (result.isSuccess()) {
                     register(id, result.result());
-                    count++;
+                    count[0]++;
                 } else {
                     RogueSmpCore.LOGGER.error("Failed to decode [{}] in '{}': {}", id, locationKey, result.error());
                 }
@@ -95,8 +119,14 @@ public class Registry<T> {
                 RogueSmpCore.LOGGER.error("Error reading file '{}' in '{}': {}", file.getName(), locationKey, e.getMessage());
             }
         }
+    }
 
-        RogueSmpCore.LOGGER.info("Loaded {} entries into registry '{}'", count, locationKey);
+    /**
+     * File path relative to {@code root}, extension stripped - e.g. {@code weapons/fire_sword}.
+     */
+    private String relativeId(File root, File file) {
+        String relative = root.toURI().relativize(file.toURI()).getPath();
+        return relative.replaceAll("\\.json$", "");
     }
 
     /**
@@ -221,6 +251,12 @@ public class Registry<T> {
         }
 
         File file = new File(folder, id + ".json");
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists() && !parent.mkdirs()) {
+            RogueSmpCore.LOGGER.error("Failed to create directory structure for '{}'", parent.getPath());
+            return false;
+        }
+
         try (FileWriter writer = new FileWriter(file)) {
             Utils.GSON.toJson(result.result(), writer);
             RogueSmpCore.LOGGER.info("Saved entry '{}' to '{}/{}.json'", id, locationKey, id);
