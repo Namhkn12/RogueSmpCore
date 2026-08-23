@@ -9,7 +9,6 @@ import com.roguesmp.dungeon.actor.command.SchemetaCommand;
 import com.roguesmp.dungeon.actor.command.TemplateGenCommand;
 import com.roguesmp.dungeon.actor.listener.DoorInteractListener;
 import com.roguesmp.dungeon.actor.listener.DungeonListener;
-import com.roguesmp.dungeon.actor.listener.DungeonLootListener;
 import com.roguesmp.dungeon.actor.listener.LootTableListener;
 import com.roguesmp.dungeon.actor.listener.SpawnerEventListener;
 import com.roguesmp.dungeon.controller.*;
@@ -28,11 +27,8 @@ import com.roguesmp.dungeon.task.TaskScheduler;
 import com.roguesmp.dungeon.utils.Log4Craft_;
 import com.roguesmp.dungeon.utils.adapter.UUIDTypeAdapter;
 import com.roguesmp.loot.manager.LootTableManager;
-import com.roguesmp.loot.repository.ILootTableRepository;
-import com.roguesmp.loot.repository.LootTableRepository;
 import com.roguesmp.loot.service.ILootService;
 import com.roguesmp.loot.service.LootService;
-import com.roguesmp.registry.ItemRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -48,7 +44,7 @@ public class DungeonRegistry {
     private static InstanceManager instanceManager;
     private static ReviveManager reviveManager;
 
-    public static void onEnable(Plugin plugin, ItemRegistry itemRegistry) {
+    public static void onEnable(Plugin plugin) {
         Gson gson = new GsonBuilder().registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
                 .setPrettyPrinting()
                 .create();
@@ -85,7 +81,6 @@ public class DungeonRegistry {
         ISpawnerRepository spawnerRepository = new SpawnerRepository(plugin, gson, logger);
         IPartyRepository partyRepository = new PartyRepository(plugin, gson, logger);
         IInstanceRepository instanceRepository = new InstanceRepository(plugin, gson, logger);
-        ILootTableRepository lootTableRepository = new LootTableRepository(plugin, gson);
 
         /*Manager*/
         SchemetaManager schemetaManager = new SchemetaManager(schemetaRepository, schematicRepository);
@@ -94,7 +89,7 @@ public class DungeonRegistry {
         RoomManager roomManager = new RoomManager(roomRepository, logger);
         DungeonManager dungeonManager = new DungeonManager(dungeonRepository, logger);
         SpawnerManager spawnerManager = new SpawnerManager(spawnerRepository, logger);
-        LootTableManager lootTableManager = new LootTableManager(lootTableRepository);
+        LootTableManager lootTableManager = new LootTableManager();
         RevivePointPresenter revivePointPresenter = new RevivePointPresenter();
         reviveManager = new ReviveManager(taskScheduler, revivePointPresenter);
 
@@ -111,7 +106,7 @@ public class DungeonRegistry {
         ISpawnerService spawnerService = new SpawnerService(spawnerManager, spawnerInstanceManager, logger);
         IInstanceService instanceService = new InstanceService(instanceManager,
                 dungeonManager, roomManager, regionService, dungeonService, partyService, roomService, schematicService);
-        ILootService lootService = new LootService(lootTableManager, ItemRegistry.getInstance());
+        ILootService lootService = LootService.getInstance();
         IDungeonRewardService rewardService = new DungeonRewardService(
                 lootService,
                 partyService,
@@ -216,11 +211,6 @@ public class DungeonRegistry {
 
         pluginManager.registerEvents(
                 new LootTableListener(treasureController),
-                RogueSmpCore.getInstance()
-        );
-
-        pluginManager.registerEvents(
-                new DungeonLootListener(partyService, instanceManager),
                 RogueSmpCore.getInstance()
         );
 

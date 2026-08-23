@@ -13,6 +13,7 @@ public class ModifierRegistry {
     private static final List<ItemModifier> UNMODIFIABLE_MODIFIERS;
 
     static {
+        modifiers.add(new RandomStatModifier());
         modifiers.add(new GemModifier());
         modifiers.add(new EnchantAttributeModifier());
         modifiers.add(new ItemAbilityModifier());

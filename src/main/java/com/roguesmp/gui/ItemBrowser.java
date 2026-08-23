@@ -119,7 +119,7 @@ public class ItemBrowser extends BaseGui {
             itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(itemLoreComp));
             this.addButton(i, itemStack, event -> {
                 event.setCancelled(true);
-                ItemStack toGive = entry.getValue().generateItemStack(null, 1);
+                ItemStack toGive = entry.getValue().generateItemStack(PlayerManager.getInstance().getSmpPlayer(event.getWhoClicked().getUniqueId()), 1);
                 if (event.getClick().isShiftClick()) {
                     toGive.setAmount(itemStack.getDataOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1));
                     event.getWhoClicked().getInventory().addItem(toGive);

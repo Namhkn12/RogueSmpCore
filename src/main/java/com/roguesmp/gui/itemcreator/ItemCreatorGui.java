@@ -112,12 +112,21 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.ITEM_MODEL),
                 tooltip("Để thay đổi model item.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildItemModelDialog(player))));
+        multi.addButton(componentLabel(ItemComponentKeys.ENCHANT_GLINT),
+                tooltip("Buộc bật/tắt hiệu ứng lấp lánh phù phép.", "Ghi đè bất kể item có phù phép hay không"),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(buildEnchantGlintDialog(player))));
         multi.addButton(componentLabel(ItemComponentKeys.HEAD_SKIN),
                 tooltip("Thay đổi head texture.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildHeadSkinDialog(player))));
         multi.addButton(componentLabel(ItemComponentKeys.GEM_SOCKET),
                 tooltip("Đặt item có x ô khảm ngọc.", "Khi dùng trong SmpItem cũng sẽ dùng để lưu trữ/xử lí ngọc đã khảm"),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildGemSocketDialog(player))));
+        multi.addButton(componentLabel(ItemComponentKeys.MAGIC_POWER),
+                tooltip("Đặt ma lực tối đa cho item.", "Giá trị hiện tại (current) được tính bởi RandomStatModifier nếu item có random_stat"),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(buildMagicPowerDialog(player))));
+        multi.addButton(componentLabel(ItemComponentKeys.RANDOM_STAT),
+                tooltip("Đánh dấu item có chất lượng ngẫu nhiên (roll khi tạo).", "Chất lượng làm giảm tối đa 20% các chỉ số melee/projectile/defense base khi thấp"),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(buildRandomStatDialog(player))));
         multi.addButton(componentLabel(ItemComponentKeys.ATTRIBUTE),
                 tooltip("Đặt attribute cho item, phải có slot.", "Để trống \"attributes\" để đánh dấu item có thể thay đổi được attribute (từ gem, etc...)"),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildAttributeDialog(player))));
@@ -369,7 +378,7 @@ public class ItemCreatorGui {
         String initial = current == null ? "" : String.join("\n", current.description());
         DialogBuilder builder = DialogBuilder.create(Component.text("Mô tả vật phẩm"))
                 .canCloseWithEscape(false)
-                .addTextInput("value", Component.text("Mỗi dòng là một dòng lore"), b -> b.initial(initial).maxLength(1000).multiline(TextDialogInput.MultilineOptions.create(10, 100)));
+                .addTextInput("value", Component.text("Mỗi dòng là một dòng lore"), b -> b.initial(initial).maxLength(3000).multiline(TextDialogInput.MultilineOptions.create(10, 100)));
 
         return wrapComponentDialog(player, ItemComponentKeys.DESCRIPTION, builder,
                 (response, audience) -> {
@@ -467,6 +476,26 @@ public class ItemCreatorGui {
                 });
     }
 
+    private Dialog buildEnchantGlintDialog(Player player) {
+        EnchantGlintComponent current = (EnchantGlintComponent) components.get(ItemComponentKeys.ENCHANT_GLINT.id());
+        boolean initial = current == null || current.glint();
+        DialogBuilder builder = DialogBuilder.create(Component.text("Ghi đè hiệu ứng phù phép (glint)"))
+                .canCloseWithEscape(false)
+                .addTextBody(Component.text("Buộc bật/tắt hiệu ứng lấp lánh phù phép, bất kể item có phù phép hay không."))
+                .addCheckboxInput("value", Component.text("Bật glint"), b -> b.initial(initial));
+
+        return wrapComponentDialog(player, ItemComponentKeys.ENCHANT_GLINT, builder,
+                (response, audience) -> {
+                    Boolean value = response.getBoolean("value");
+                    components.put(ItemComponentKeys.ENCHANT_GLINT.id(), new EnchantGlintComponent(value != null && value));
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.ENCHANT_GLINT.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
+    }
+
     private Dialog buildHeadSkinDialog(Player player) {
         PlayerHeadSkinComponent current = (PlayerHeadSkinComponent) components.get(ItemComponentKeys.HEAD_SKIN.id());
         DialogBuilder builder = DialogBuilder.create(Component.text("Skin đầu người"))
@@ -508,6 +537,45 @@ public class ItemCreatorGui {
                 },
                 (response, audience) -> {
                     components.remove(ItemComponentKeys.GEM_SOCKET.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
+    }
+
+    private Dialog buildMagicPowerDialog(Player player) {
+        MagicPowerComponent current = (MagicPowerComponent) components.get(ItemComponentKeys.MAGIC_POWER.id());
+        int initial = current == null ? 0 : current.getMax();
+        DialogBuilder builder = DialogBuilder.create(Component.text("Ma lực tối đa"))
+                .canCloseWithEscape(false)
+                .addTextInput("value", Component.text("Ma lực tối đa (>= 0)"), b -> b.initial(String.valueOf(initial)).maxLength(16));
+
+        return wrapComponentDialog(player, ItemComponentKeys.MAGIC_POWER, builder,
+                (response, audience) -> {
+                    Float value = DialogInputUtils.parseFloat(response.getText("value"), 0f, Float.MAX_VALUE);
+                    if (value != null) components.put(ItemComponentKeys.MAGIC_POWER.id(), new MagicPowerComponent(Math.round(value)));
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.MAGIC_POWER.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
+    }
+
+    private Dialog buildRandomStatDialog(Player player) {
+        RandomStatComponent current = (RandomStatComponent) components.get(ItemComponentKeys.RANDOM_STAT.id());
+        boolean initial = current != null && current.hasRandomQuality();
+        DialogBuilder builder = DialogBuilder.create(Component.text("Chất lượng ngẫu nhiên"))
+                .canCloseWithEscape(false)
+                .addTextBody(Component.text("Mỗi item được tạo ra sẽ roll một chất lượng ngẫu nhiên, làm giảm tối đa 20% một số chỉ số base khi chất lượng thấp."))
+                .addCheckboxInput("value", Component.text("Có chất lượng ngẫu nhiên"), b -> b.initial(initial));
+
+        return wrapComponentDialog(player, ItemComponentKeys.RANDOM_STAT, builder,
+                (response, audience) -> {
+                    Boolean value = response.getBoolean("value");
+                    components.put(ItemComponentKeys.RANDOM_STAT.id(), new RandomStatComponent(value != null && value));
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.RANDOM_STAT.id());
                     Utils.runLater(() -> openMainDialog(player));
                 });
     }

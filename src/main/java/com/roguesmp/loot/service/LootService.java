@@ -6,30 +6,52 @@ import com.roguesmp.loot.LootEntry;
 import com.roguesmp.loot.LootPool;
 import com.roguesmp.loot.LootTable;
 import com.roguesmp.loot.LootRollResult;
+import com.roguesmp.loot.condition.LootCondition;
+import com.roguesmp.loot.entry.ItemEntry;
+import com.roguesmp.loot.entry.NestedTableEntry;
+import com.roguesmp.loot.event.LootEntryResultEvent;
+import com.roguesmp.loot.event.LootPoolPickEvent;
+import com.roguesmp.loot.event.LootRollCompleteEvent;
 import com.roguesmp.loot.event.LootRollEvent;
+import com.roguesmp.loot.function.LootFunction;
 import com.roguesmp.loot.manager.LootTableManager;
 import com.roguesmp.item.BaseItem;
-import com.roguesmp.registry.ItemRegistry;
+import com.roguesmp.registry.Registries;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class LootService implements ILootService {
 
+    private static @Nullable ILootService INSTANCE;
+
     /** Maximum recursion depth for nested loot_table entries. */
     private static final int MAX_DEPTH = 8;
 
     private final LootTableManager lootTableManager;
-    private final ItemRegistry itemRegistry;
 
-    public LootService(
-           LootTableManager lootTableManager,
-           ItemRegistry itemRegistry
-    ) {
+    public LootService(LootTableManager lootTableManager) {
         this.lootTableManager = lootTableManager;
-        this.itemRegistry = itemRegistry;
+    }
+
+    /**
+     * Plugin-wide singleton, wired once in {@code RogueSmpCore.init()} — anything (dungeon
+     * chests, mob death, quests, ...) can roll loot without needing its own instance injected.
+     */
+    public static void init(LootTableManager lootTableManager) {
+        INSTANCE = new LootService(lootTableManager);
+    }
+
+    public static ILootService getInstance() {
+        if (INSTANCE == null) {
+            throw new IllegalStateException("LootService is not initialized!");
+        }
+        return INSTANCE;
     }
 
     /**
@@ -44,7 +66,10 @@ public class LootService implements ILootService {
 
         List<ItemStack> results = new ArrayList<>();
         rollTable(lootTableId, context, results, 0);
-        return results;
+
+        LootRollCompleteEvent completeEvent = new LootRollCompleteEvent(lootTableId, context, results);
+        Bukkit.getPluginManager().callEvent(completeEvent);
+        return completeEvent.getItems();
     }
 
     @Override
@@ -86,8 +111,9 @@ public class LootService implements ILootService {
     }
 
     /**
-     * Rolls a single pool. Computes total rolls (base + bonus), then picks
-     * one weighted entry per roll.
+     * Rolls a single pool. If the pool's own {@link LootCondition}s don't all pass, the pool is
+     * skipped entirely — no rolls happen, not even {@code EMPTY} ones. Otherwise computes total
+     * rolls (base + bonus), then picks one weighted entry per roll.
      */
     private void rollPool(
             LootPool pool,
@@ -96,109 +122,176 @@ public class LootService implements ILootService {
             List<ItemStack> results,
             int depth
     ) {
-        int totalRolls = computeTotalRolls(pool, parentTable, context);
+        if (!passesConditions(pool.getConditions(), context)) return;
+
+        int totalRolls = computeTotalRolls(pool);
 
         for (int i = 0; i < totalRolls; i++) {
-            LootEntry entry = pickWeightedEntry(pool);
+            LootEntry entry = pickWeightedEntry(pool, parentTable, context);
             if (entry == null) continue;
 
             LootRollResult result = executeEntry(entry, context, depth);
-            results.addAll(result.getItems());
+            List<ItemStack> items = applyFunctions(entry, result.getItems(), context);
+            results.addAll(fireEntryResultEvent(entry, context, items));
         }
     }
 
     /**
-     * Computes total rolls for a pool:
-     * <pre>
-     *   totalRolls = pool.rolls + floor(pool.bonusRolls * context.getBonusRollModifier())
-     * </pre>
-     *
-     * <p>Bonus rolls are only applied if this table benefits from them (hasBonusRolls flag),
-     * so tables that ignore luck entirely never pay for modifier aggregation.
+     * Total rolls for a pool is just {@code max(1, pool.rolls)} — to vary this dynamically
+     * (luck, dungeon score, ...), listen to {@link LootPoolPickEvent} and force-exclude/include
+     * candidates per pick instead, or fire extra {@link com.roguesmp.loot.service.ILootService#roll}
+     * calls from the caller.
      */
-    private int computeTotalRolls(
-            LootPool pool,
-            LootTable parentTable,
-            LootContext context
-    ) {
-        int base = Math.max(1, pool.getRolls());
-
-        if (!pool.hasBonusRolls() || !lootTableManager.hasBonusRolls(parentTable.getId())) {
-            return base;
-        }
-
-        double modifier = context.getBonusRollModifier();
-        int bonus = (int) Math.floor(pool.getBonusRolls() * modifier);
-        return base + Math.max(0, bonus);
+    private int computeTotalRolls(LootPool pool) {
+        return Math.max(1, pool.getRolls());
     }
 
     /**
      * Picks one entry from the pool using weighted random selection.
      *
-     * <p>Algorithm: sum all weights, pick a random value in [0, totalWeight),
-     * walk entries subtracting weights until the value goes below zero.
+     * <p>Algorithm: compute each entry's baseline {@code weight}/{@code eligible} from its JSON
+     * {@link LootCondition}s (see {@link #buildCandidates(LootPool, LootContext)}), let any
+     * {@link LootPoolPickEvent} listener override those per-entry before picking, sum the
+     * resulting weights of eligible entries, pick a random value in [0, totalWeight), and walk
+     * entries subtracting weights until the value goes below zero.
      *
-     * @return the selected entry, or null if the pool has no entries with positive weight
+     * @return the selected entry, or null if no entry is eligible / all eligible weights are zero
      */
-    private LootEntry pickWeightedEntry(LootPool pool) {
+    private LootEntry pickWeightedEntry(LootPool pool, LootTable parentTable, LootContext context) {
         List<LootEntry> entries = pool.getEntries();
         if (entries.isEmpty()) return null;
 
-        int totalWeight = entries.stream().mapToInt(LootEntry::getWeight).sum();
+        List<LootPoolPickEvent.Candidate> candidates = buildCandidates(pool, context);
+        Bukkit.getPluginManager().callEvent(new LootPoolPickEvent(parentTable, pool, context, candidates));
+
+        List<LootEntry> eligible = new ArrayList<>(candidates.size());
+        List<Integer> weights = new ArrayList<>(candidates.size());
+        int totalWeight = 0;
+
+        for (LootPoolPickEvent.Candidate candidate : candidates) {
+            if (!candidate.isEligible() || candidate.getWeight() <= 0) continue;
+
+            eligible.add(candidate.getEntry());
+            weights.add(candidate.getWeight());
+            totalWeight += candidate.getWeight();
+        }
+
         if (totalWeight <= 0) {
-            RogueSmpCore.LOGGER.debug("[LootService] Pool has zero total weight — skipping.");
+            RogueSmpCore.LOGGER.debug("[LootService] Pool has zero total weight after conditions/quality/listeners — skipping.");
             return null;
         }
 
         int roll = ThreadLocalRandom.current().nextInt(totalWeight);
-        for (LootEntry entry : entries) {
-            roll -= entry.getWeight();
-            if (roll < 0) return entry;
+        for (int i = 0; i < eligible.size(); i++) {
+            roll -= weights.get(i);
+            if (roll < 0) return eligible.get(i);
         }
 
         // Fallback (should not reach here)
-        return entries.get(entries.size() - 1);
+        return eligible.get(eligible.size() - 1);
+    }
+
+    private List<LootPoolPickEvent.Candidate> buildCandidates(LootPool pool, LootContext context) {
+        List<LootEntry> entries = pool.getEntries();
+        List<LootPoolPickEvent.Candidate> candidates = new ArrayList<>(entries.size());
+
+        for (LootEntry entry : entries) {
+            boolean eligible = passesConditions(entry.getConditions(), context);
+            int weight = eligible ? entry.getWeight() : 0;
+            candidates.add(new LootPoolPickEvent.Candidate(entry, weight, eligible));
+        }
+
+        return candidates;
+    }
+
+    private boolean passesConditions(List<LootCondition> conditions, LootContext context) {
+        for (LootCondition condition : conditions) {
+            if (!condition.test(context)) return false;
+        }
+        return true;
     }
 
     /**
-     * Executes a single selected entry and returns the items it produces.
+     * Runs an entry's {@link LootFunction}s in order over the items it produced, each function
+     * receiving the previous one's output.
+     */
+    private List<ItemStack> applyFunctions(LootEntry entry, List<ItemStack> items, LootContext context) {
+        if (entry.getFunctions().isEmpty()) return items;
+
+        List<ItemStack> current = items;
+        for (LootFunction function : entry.getFunctions()) {
+            current = function.apply(current, context);
+        }
+        return current;
+    }
+
+    /**
+     * Programmatic counterpart to {@link LootFunction} — lets any listener mutate a picked
+     * entry's produced items directly, without needing a registered {@code LootFunction} type.
+     */
+    private List<ItemStack> fireEntryResultEvent(LootEntry entry, LootContext context, List<ItemStack> items) {
+        LootEntryResultEvent event = new LootEntryResultEvent(entry, context, items);
+        Bukkit.getPluginManager().callEvent(event);
+        return event.getItems();
+    }
+
+    /**
+     * Executes a single selected entry and returns the items it produces. Any entry kind not
+     * explicitly handled (currently just {@code EmptyEntry}) produces nothing.
      */
     private LootRollResult executeEntry(
             LootEntry entry,
             LootContext context,
             int depth
     ) {
-        return switch (entry.getType()) {
-            case ITEM -> executeItemEntry(entry, context);
-            case LOOT_TABLE -> executeNestedTableEntry(entry, context, depth);
-            case EMPTY -> LootRollResult.empty();
-        };
+        if (entry instanceof ItemEntry item) return executeItemEntry(item, context);
+        if (entry instanceof NestedTableEntry nested) return executeNestedTableEntry(nested, context, depth);
+        return LootRollResult.empty();
     }
 
+    /** Item ids under this prefix resolve to a plain vanilla ItemStack, bypassing BaseItem/SmpItem entirely. */
+    private static final String VANILLA_ITEM_PREFIX = "minecraft:";
+
     /**
-     * Resolves an ITEM entry — looks up BaseItem via ItemRegistry,
-     * picks a random amount in [min, max], builds the ItemStack via SmpItem.
+     * Resolves an ITEM entry — {@code "minecraft:"}-prefixed ids build a plain vanilla ItemStack
+     * (see {@link #executeVanillaItemEntry}); everything else looks up a BaseItem via
+     * {@link Registries#ITEM} and builds the stack via SmpItem. Either way, amount is a random
+     * value in [min, max].
      */
     private LootRollResult executeItemEntry(
-            LootEntry entry,
+            ItemEntry entry,
             LootContext context
     ) {
         String itemId = entry.getItemId();
-        if (itemId == null) {
-            RogueSmpCore.LOGGER.debug("[LootService] ITEM entry has null item_id — skipping.");
-            return LootRollResult.empty();
+        int amount = randomAmount(entry.getMinAmount(), entry.getMaxAmount());
+
+        if (itemId.startsWith(VANILLA_ITEM_PREFIX)) {
+            return executeVanillaItemEntry(itemId, amount);
         }
 
-        BaseItem baseItem = itemRegistry.getBaseItem(itemId);
+        BaseItem baseItem = Registries.ITEM.get(itemId);
         if (baseItem == null) {
             RogueSmpCore.LOGGER.debug("[LootService] Unknown item_id '" + itemId + "' — skipping.");
             return LootRollResult.empty();
         }
 
-        int amount = randomAmount(entry.getMinAmount(), entry.getMaxAmount());
         ItemStack stack = baseItem.generateItemStack(context.getPlayer(), amount);
-
         return LootRollResult.of(stack);
+    }
+
+    /**
+     * Resolves a {@code "minecraft:"}-prefixed item_id to a plain vanilla {@link ItemStack} via
+     * {@link Material#matchMaterial} — same match-by-name logic {@code Codec.MATERIAL} uses
+     * elsewhere in the plugin. No SmpItem/BaseItem involved, so no components/lore/etc.
+     */
+    private LootRollResult executeVanillaItemEntry(String itemId, int amount) {
+        Material material = Material.matchMaterial(itemId);
+        if (material == null) {
+            RogueSmpCore.LOGGER.debug("[LootService] Unknown vanilla item_id '" + itemId + "' — skipping.");
+            return LootRollResult.empty();
+        }
+
+        return LootRollResult.of(new ItemStack(material, amount));
     }
 
     /**
@@ -206,18 +299,12 @@ public class LootService implements ILootService {
      * Results are collected directly into the parent results list via the recursive call.
      */
     private LootRollResult executeNestedTableEntry(
-            LootEntry entry,
+            NestedTableEntry entry,
             LootContext context,
             int depth
     ) {
-        String nestedId = entry.getNestedTableId();
-        if (nestedId == null) {
-            RogueSmpCore.LOGGER.debug("[LootService] LOOT_TABLE entry has null nested table id — skipping.");
-            return LootRollResult.empty();
-        }
-
         List<ItemStack> nestedResults = new ArrayList<>();
-        rollTable(nestedId, context, nestedResults, depth + 1);
+        rollTable(entry.getNestedTableId(), context, nestedResults, depth + 1);
         return LootRollResult.of(nestedResults);
     }
 

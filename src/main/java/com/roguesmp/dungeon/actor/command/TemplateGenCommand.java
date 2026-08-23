@@ -137,24 +137,6 @@ public class TemplateGenCommand {
                                 })
                 )
                 .withSubcommand(
-                        new CommandAPICommand("rollbonus")
-                                .withRequirement(inBuildingWorld())
-                                .withArguments(
-                                        new DoubleArgument("bonusModifier", 0.0),
-                                        lootTableIdArgument("tableId")  // GreedyString ở cuối
-                                )
-                                .executesPlayer((player, args) -> {
-                                    String tableId = (String) args.get("tableId");
-                                    double bonus = (double) args.get("bonusModifier");
-                                    LootContext ctx = LootContext
-                                            .builder(PlayerManager.getInstance().getSmpPlayer(player))
-                                            .origin(LootOrigin.COMMAND, player)
-                                            .addModifier("command", bonus)
-                                            .build();
-                                    rollAndGive(player, tableId, ctx);
-                                })
-                )
-                .withSubcommand(
                         new CommandAPICommand("check")
                                 .withRequirement(inBuildingWorld())
                                 .withArguments(lootTableIdArgument("tableId"))

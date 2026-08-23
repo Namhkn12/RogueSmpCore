@@ -1,5 +1,6 @@
 package com.roguesmp.loot;
 
+import com.roguesmp.codec.Codec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -9,39 +10,28 @@ import java.util.List;
 /**
  * Represents a full loot table loaded from a JSON file.
  *
- * <p>ID format mirrors the file path relative to the loot_tables root:
- * {@code "rogue:dungeons/dungeon_a_reward"} maps to
- * {@code plugins/RogueSmp/loot_tables/dungeons/dungeon_a_reward.json}
+ * <p>Carries no id of its own - its id is purely the {@link com.roguesmp.registry.Registry} key
+ * it's stored under ({@link com.roguesmp.registry.Registries#LOOT_TABLE}, key = file path
+ * relative to the loot table root, no extension, no namespace):
+ * {@code plugins/RogueSmp/loottable/dungeons/dungeon_a_reward.json} maps to id
+ * {@code "dungeons/dungeon_a_reward"}.
  *
- * <p>This is an immutable data object. Instances are created by
- * {@link com.roguesmp.loot.repository.LootTableRepository} and cached by
- * {@link com.roguesmp.loot.manager.LootTableManager}.
+ * <p>This is an immutable data object, decoded via {@link #CODEC}.
  */
 public class LootTable {
 
-    private final @NotNull String id;
+    public static final Codec<LootTable> CODEC = Codec.composite(
+            Codec.listOf(LootPool.CODEC).fieldOf("pools").forGetter(LootTable::getPools),
+            LootTable::new
+    );
+
     private final @NotNull List<LootPool> pools;
-    private final boolean hasBonusRolls; // cached flag, propagated from children
 
-    public LootTable(@NotNull String id, @NotNull List<LootPool> pools) {
-        this.id = id;
+    public LootTable(@NotNull List<LootPool> pools) {
         this.pools = Collections.unmodifiableList(pools);
-        this.hasBonusRolls = pools.stream().anyMatch(LootPool::hasBonusRolls);
-    }
-
-    public @NotNull String getId() {
-        return id;
     }
 
     public @NotNull @Unmodifiable List<LootPool> getPools() {
         return pools;
-    }
-
-    /**
-     * True if any pool in this table (or any nested child table that was resolved)
-     * has bonus_rolls > 0. Used as a quick check before applying context modifiers.
-     */
-    public boolean hasBonusRolls() {
-        return hasBonusRolls;
     }
 }

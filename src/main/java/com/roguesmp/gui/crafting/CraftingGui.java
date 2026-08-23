@@ -1,6 +1,9 @@
 package com.roguesmp.gui.crafting;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.crafting.CraftingManager;
+import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.CraftingRecipes;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
@@ -18,10 +21,20 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+/**
+ * A vanilla-style 3x3 crafting table, backed by the real {@link CraftingManager} - matches shaped
+ * recipes first, then shapeless (see {@link #matchRecipe}), same priority {@code CraftingManager}'s
+ * own multi-key {@code match} convenience documents.
+ */
 public class CraftingGui extends BaseGui {
 
     private static final int[] CRAFT_SLOTS = new int[]{10, 11, 12, 19, 20, 21, 28, 29, 30};
     private static final int RESULT_SLOT = 23;
+    private static final int GRID_WIDTH = 3;
+    private static final int GRID_HEIGHT = 3;
+
+    /** Safety cap on shift-click multi-craft simulation - no vanilla stack exceeds 64, so no single-slot-depleting recipe ever needs more than that. */
+    private static final int MAX_SIMULATED_CRAFTS = 64;
 
     // Visual lore for the preview in the GUI
     private static final List<Component> RESULT_LORE = List.of(Utils.text("------------------", NamedTextColor.DARK_GRAY),
@@ -56,10 +69,9 @@ public class CraftingGui extends BaseGui {
     @Override
     public void setup() {
         int currentHash = computeGridHash();
-        ItemStack resultItem = (state.lastGridHash() == currentHash)
-                ? state.lastResult()
-                : calculateCraftingResult(getCurrentRecipeStacks());
+        CraftingRecipe matched = (state.lastGridHash() == currentHash) ? state.lastRecipe() : matchRecipe(getCurrentItems());
 
+        ItemStack resultItem = matched == null ? null : matched.getResultStack();
         boolean hasValidRecipe = resultItem != null && !resultItem.getType().isAir();
 
         Material borderMaterial = hasValidRecipe ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
@@ -76,6 +88,21 @@ public class CraftingGui extends BaseGui {
             ItemStack barrier = ItemStack.of(Material.BARRIER);
             addButton(RESULT_SLOT, barrier, ClickHandler.noAction());
         }
+    }
+
+    /**
+     * Shaped takes priority over shapeless. Queried separately (rather than through
+     * {@code CraftingManager}'s multi-key {@code match} convenience) because shapeless recipes don't
+     * care about position - they must be looked up with {@code width}/{@code height} of {@code 0, 0}
+     * (see {@link CraftingManager#match(com.roguesmp.crafting.recipe.RecipeKey, ItemStack[], int, int)}),
+     * same as {@code FusionGui} does for fusion recipes; passing the grid's actual 3x3 dimensions for
+     * both keys would build a positional trie path that a shapeless recipe (indexed unordered) can
+     * never match.
+     */
+    private static @Nullable CraftingRecipe matchRecipe(ItemStack[] items) {
+        CraftingRecipe shaped = CraftingManager.getInstance().match(CraftingRecipes.SHAPED, items, GRID_WIDTH, GRID_HEIGHT);
+        if (shaped != null) return shaped;
+        return CraftingManager.getInstance().match(CraftingRecipes.SHAPELESS, items, 0, 0);
     }
 
     private void applyResultLore(ItemStack item) {
@@ -134,23 +161,24 @@ public class CraftingGui extends BaseGui {
         int newHash = computeGridHash();
         if (state.lastGridHash() == newHash) return;
 
-        ItemStack newResult = calculateCraftingResult(getCurrentRecipeStacks());
+        CraftingRecipe newRecipe = matchRecipe(getCurrentItems());
+        if (state.lastRecipe() == newRecipe) return; // same recipe object (or both null) - nothing actually changed
 
-        if (state.lastGridHash() == newHash && Objects.equals(state.lastResult(), newResult)) {
-            return;
-        }
-
-        this.state = new CraftingState(newHash, newResult);
+        this.state = new CraftingState(newHash, newRecipe);
         setup();
     }
 
     private void handleCraft(InventoryClickEvent event) {
         event.setCancelled(true);
 
-        ItemStack cleanCachedResult = state.lastResult();
-        if (cleanCachedResult == null || cleanCachedResult.getType().isAir()) return;
+        CraftingRecipe recipe = state.lastRecipe();
+        if (recipe == null) return;
 
-        ItemStack cleanResultItem = cleanCachedResult.clone();
+        ItemStack result = recipe.getResultStack();
+        if (result == null) return;
+
+        ItemStack cleanResultItem = result.clone();
+        ItemStack[] items = getCurrentItems();
 
         ItemStack cursor = event.getView().getCursor();
         boolean isShift = event.isShiftClick();
@@ -166,58 +194,37 @@ public class CraftingGui extends BaseGui {
                 cursor.setAmount(cursor.getAmount() + cleanResultItem.getAmount());
             }
 
-            consumeIngredients(1);
+            applyConsumedItems(recipe.consume(items, GRID_WIDTH, GRID_HEIGHT));
         } else {
-            int maxCrafts = getMaxCraftsByInventory(cleanResultItem);
+            int maxCrafts = getMaxCraftsByInventory(recipe, items, cleanResultItem);
             if (maxCrafts <= 0) return;
 
-            int actualCraftsCompleted = 0;
-
             for (int i = 0; i < maxCrafts; i++) {
-                ItemStack craftedUnit = cleanResultItem.clone();
-
-                player.getInventory().addItem(craftedUnit);
-                actualCraftsCompleted++;
+                player.getInventory().addItem(cleanResultItem.clone());
             }
 
-            if (actualCraftsCompleted > 0) {
-                consumeIngredients(actualCraftsCompleted);
+            ItemStack[] leftover = items;
+            for (int i = 0; i < maxCrafts; i++) {
+                leftover = recipe.consume(leftover, GRID_WIDTH, GRID_HEIGHT);
             }
+            applyConsumedItems(leftover);
         }
 
         Utils.runLater(this::checkAndSyncState);
     }
 
-    private void consumeIngredients(int amountToConsume) {
+    private void applyConsumedItems(ItemStack[] leftover) {
         Inventory inv = getInventory();
-        for (int slot : CRAFT_SLOTS) {
-            ItemStack item = inv.getItem(slot);
-            if (item != null && !item.getType().isAir()) {
-                int newAmount = item.getAmount() - amountToConsume;
-                if (newAmount <= 0) {
-                    inv.setItem(slot, null);
-                } else {
-                    item.setAmount(newAmount);
-                }
-            }
+        for (int i = 0; i < CRAFT_SLOTS.length; i++) {
+            inv.setItem(CRAFT_SLOTS[i], leftover[i]);
         }
     }
 
-    private int getMaxCraftsByInventory(ItemStack resultItem) {
-        int maxCraftsByGrid = Integer.MAX_VALUE;
-        Inventory inv = getInventory();
+    private int getMaxCraftsByInventory(CraftingRecipe recipe, ItemStack[] items, ItemStack resultItem) {
+        int maxCraftsByGrid = simulateMaxCrafts(recipe, items);
+        if (maxCraftsByGrid <= 0) return 0;
 
-        // 1. Calculate how many we can craft based purely on available grid ingredients
-        for (int slot : CRAFT_SLOTS) {
-            ItemStack item = inv.getItem(slot);
-            if (item != null && !item.getType().isAir()) {
-                maxCraftsByGrid = Math.min(maxCraftsByGrid, item.getAmount());
-            }
-        }
-
-        if (maxCraftsByGrid == Integer.MAX_VALUE || maxCraftsByGrid <= 0) return 0;
-
-        // 2. Calculate the total individual item capacity of the player's inventory
+        // Calculate the total individual item capacity of the player's inventory
         int maxStackSize = resultItem.getMaxStackSize();
         int availableCapacityInUnits = 0;
 
@@ -231,12 +238,28 @@ public class CraftingGui extends BaseGui {
             }
         }
 
-        // 3. How many full craft executions fit in that capacity?
+        // How many full craft executions fit in that capacity?
         // (e.g. if we have room for 6 individual diamonds, and the recipe yields 4, we can only run 1 craft)
         int yieldPerCraft = resultItem.getAmount();
         int maxCraftsBySpace = availableCapacityInUnits / yieldPerCraft;
 
         return Math.min(maxCraftsByGrid, maxCraftsBySpace);
+    }
+
+    /**
+     * Repeatedly consumes a scratch copy of {@code items} against {@code recipe} until it no longer
+     * matches, counting how many times that took - correctly accounts for per-cell amounts and
+     * remainders (e.g. a slot that turns into a still-valid ingredient after one craft), unlike a
+     * naive "divide each slot's amount by what one craft needs" estimate.
+     */
+    private static int simulateMaxCrafts(CraftingRecipe recipe, ItemStack[] items) {
+        ItemStack[] current = items;
+        int crafts = 0;
+        while (crafts < MAX_SIMULATED_CRAFTS && recipe.matches(current, GRID_WIDTH, GRID_HEIGHT)) {
+            current = recipe.consume(current, GRID_WIDTH, GRID_HEIGHT);
+            crafts++;
+        }
+        return crafts;
     }
 
     private int computeGridHash() {
@@ -248,20 +271,18 @@ public class CraftingGui extends BaseGui {
                 hash = 31 * hash;
                 continue;
             }
-            hash = 31 * hash + item.getType().hashCode();
-            hash = 31 * hash + item.getAmount();
+            hash = 31 * hash + item.hashCode();
         }
         return hash;
     }
 
-    private ItemStack[] getCurrentRecipeStacks() {
-        ItemStack[] stacks = new ItemStack[9];
+    private ItemStack[] getCurrentItems() {
+        ItemStack[] items = new ItemStack[CRAFT_SLOTS.length];
         Inventory inv = getInventory();
         for (int i = 0; i < CRAFT_SLOTS.length; i++) {
-            ItemStack item = inv.getItem(CRAFT_SLOTS[i]);
-            stacks[i] = (item == null) ? ItemStack.of(Material.AIR) : item;
+            items[i] = inv.getItem(CRAFT_SLOTS[i]);
         }
-        return stacks;
+        return items;
     }
 
     @Override
@@ -275,22 +296,13 @@ public class CraftingGui extends BaseGui {
         }
     }
 
-    private @Nullable ItemStack calculateCraftingResult(ItemStack[] grid) {
-        for (ItemStack item : grid) {
-            if (item == null || item.getType() != Material.COAL) {
-                return null;
-            }
-        }
-        return ItemStack.of(Material.DIAMOND, 32);
-    }
-
     private ItemStack createCloseButton() {
         ItemStack barrier = ItemStack.of(Material.BARRIER);
         barrier.setData(DataComponentTypes.ITEM_NAME, Component.text("Đóng", NamedTextColor.RED));
         return barrier;
     }
 
-    public record CraftingState(int lastGridHash, @Nullable ItemStack lastResult) {
+    public record CraftingState(int lastGridHash, @Nullable CraftingRecipe lastRecipe) {
     }
 
     public static void registerCmd() {

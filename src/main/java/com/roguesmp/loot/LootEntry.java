@@ -1,103 +1,74 @@
 package com.roguesmp.loot;
 
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.MapCodec;
+import com.roguesmp.loot.condition.LootCondition;
+import com.roguesmp.loot.function.LootFunction;
+import com.roguesmp.registry.Registries;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.util.List;
 
 /**
- * Represents a single entry inside a {@link LootPool}.
+ * Base type for a single entry inside a {@link LootPool}. Concrete kinds
+ * ({@code com.roguesmp.loot.entry.ItemEntry}, {@code NestedTableEntry}, {@code EmptyEntry})
+ * live in {@code com.roguesmp.loot.entry}, registered into {@link Registries#LOOT_ENTRY_CODEC}
+ * (see {@code com.roguesmp.loot.entry.LootEntries}) — same polymorphic dispatch pattern as
+ * {@code SmpEffect}/{@code ItemComponent} elsewhere in the plugin (see
+ * {@code com.roguesmp.codec.INFO.md} section 7).
  *
- * <p>Depending on {@code type}:
+ * <p>Every entry, regardless of kind, carries:
  * <ul>
- *   <li>ITEM       — {@code itemId}, {@code minAmount}, {@code maxAmount} are used</li>
- *   <li>LOOT_TABLE — {@code nestedTableId} is used (resolved lazily at roll time)</li>
- *   <li>EMPTY      — no extra fields are used, just the weight</li>
+ *   <li>{@code weight} — used for the weighted pick within its pool.</li>
+ *   <li>{@code conditions} — every {@link LootCondition} must {@link LootCondition#test} true
+ *       for the entry to even enter the weighted pick; a failing entry is excluded from the
+ *       pool's weight sum entirely, not just zero-weighted.</li>
+ *   <li>{@code functions} — every {@link LootFunction}, run in order, post-processes the
+ *       {@link org.bukkit.inventory.ItemStack}s this entry produces once picked.</li>
  * </ul>
+ *
+ * <p>To influence weight/eligibility or the produced items programmatically instead of through
+ * JSON, listen to {@link com.roguesmp.loot.event.LootPoolPickEvent} /
+ * {@link com.roguesmp.loot.event.LootEntryResultEvent}.
  */
-public class LootEntry {
+public abstract class LootEntry {
 
-    private final @NotNull LootEntryType type;
-    private final int weight;
+    public static final Codec<LootEntry> CODEC = Codec.dispatch(LootEntry::getTypeId, Registries.LOOT_ENTRY_CODEC::getOrThrow);
 
-    // Used when type == ITEM
-    private final @Nullable String itemId;
-    private final int minAmount;
-    private final int maxAmount;
+    /** Fields shared by every entry kind. */
+    public record BaseProperties(int weight, List<LootCondition> conditions, List<LootFunction> functions) {}
 
-    // Used when type == LOOT_TABLE
-    private final @Nullable String nestedTableId;
+    public static final MapCodec<BaseProperties> BASE_CODEC = Codec.composite(
+            Codec.INT.optionalFieldOf("weight", 1).forGetter(BaseProperties::weight),
+            Codec.listOf(LootCondition.CODEC).optionalFieldOf("conditions", List.of()).forGetter(BaseProperties::conditions),
+            Codec.listOf(LootFunction.CODEC).optionalFieldOf("functions", List.of()).forGetter(BaseProperties::functions),
+            BaseProperties::new
+    );
 
-    private LootEntry(Builder builder) {
-        this.type = builder.type;
-        this.weight = builder.weight;
-        this.itemId = builder.itemId;
-        this.minAmount = builder.minAmount;
-        this.maxAmount = builder.maxAmount;
-        this.nestedTableId = builder.nestedTableId;
+    private final BaseProperties base;
+
+    protected LootEntry(@NotNull BaseProperties base) {
+        // Defensive copy - Codec.listOf's decode returns plain mutable ArrayLists.
+        this.base = new BaseProperties(base.weight(), List.copyOf(base.conditions()), List.copyOf(base.functions()));
     }
 
-    // --- Getters ---
+    /** JSON {@code "type"} dispatch key - {@code "item"}/{@code "loot_table"}/{@code "empty"} for the built-in kinds. */
+    public abstract @NotNull String getTypeId();
 
-    public @NotNull LootEntryType getType() {
-        return type;
+    public @NotNull BaseProperties getBaseProperties() {
+        return base;
     }
 
     public int getWeight() {
-        return weight;
+        return base.weight();
     }
 
-    public @Nullable String getItemId() {
-        return itemId;
+    public @NotNull @Unmodifiable List<LootCondition> getConditions() {
+        return base.conditions();
     }
 
-    public int getMinAmount() {
-        return minAmount;
-    }
-
-    public int getMaxAmount() {
-        return maxAmount;
-    }
-
-    public @Nullable String getNestedTableId() {
-        return nestedTableId;
-    }
-
-    // --- Builder ---
-
-    public static Builder builder(@NotNull LootEntryType type, int weight) {
-        return new Builder(type, weight);
-    }
-
-    public static class Builder {
-        private final LootEntryType type;
-        private final int weight;
-        private String itemId;
-        private int minAmount = 1;
-        private int maxAmount = 1;
-        private String nestedTableId;
-
-        private Builder(LootEntryType type, int weight) {
-            this.type = type;
-            this.weight = weight;
-        }
-
-        public Builder itemId(String itemId) {
-            this.itemId = itemId;
-            return this;
-        }
-
-        public Builder amount(int min, int max) {
-            this.minAmount = min;
-            this.maxAmount = max;
-            return this;
-        }
-
-        public Builder nestedTableId(String nestedTableId) {
-            this.nestedTableId = nestedTableId;
-            return this;
-        }
-
-        public LootEntry build() {
-            return new LootEntry(this);
-        }
+    public @NotNull @Unmodifiable List<LootFunction> getFunctions() {
+        return base.functions();
     }
 }

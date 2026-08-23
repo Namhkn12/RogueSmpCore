@@ -34,9 +34,6 @@ import java.util.List;
 
 public class DungeonRewardService implements IDungeonRewardService {
 
-    /** Modifier bonus-roll cộng thêm cho rương đôi → cơ hội (số lần roll thưởng) tốt hơn. */
-    private static final double DOUBLE_CHEST_LUCK_BONUS = 1.0;
-
     private final ILootService lootService;
     private final IPartyService partyService;
     private final InstanceManager instanceManager;
@@ -127,15 +124,9 @@ public class DungeonRewardService implements IDungeonRewardService {
             tableId = cidValue;
         }
 
-        // Chỉ khai báo bối cảnh + modifier của riêng cái rương này.
-        // Mọi ảnh hưởng khác (điểm dungeon, buff, sự kiện...) tự cộng vào qua LootRollEvent.
         LootContext ctx = LootContext.builder(PlayerManager.getInstance().getSmpPlayer(player))
                 .origin(LootOrigin.CHEST, block)
                 .build();
-
-        if (isDouble) {
-            ctx.addModifier("double_chest", DOUBLE_CHEST_LUCK_BONUS);
-        }
 
         if (!lootService.exists(tableId)) {
             player.sendMessage("§c[Chest] Loot table not found: §f" + tableId);

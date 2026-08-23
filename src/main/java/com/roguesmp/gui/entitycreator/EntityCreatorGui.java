@@ -101,6 +101,9 @@ public class EntityCreatorGui {
         multi.addButton(componentLabel(EntityComponentKeys.NAMEPLATE),
                 tooltip("Hiện bảng tên/máu/hiệu ứng nổi phía trên đầu entity.", "Xám = chưa ghi đè, entity vẫn có bảng tên mặc định lúc spawn"),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildNameplateDialog(player))));
+        multi.addButton(componentLabel(EntityComponentKeys.LOOT_TABLE),
+                tooltip("Danh sách loot table roll khi entity chết (mỗi table roll độc lập).", null),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(buildLootTableDialog(player))));
 
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
@@ -148,6 +151,14 @@ public class EntityCreatorGui {
 
     void removeSpells() {
         components.remove(EntityComponentKeys.SPELLS.id());
+    }
+
+    void applyLootTable(LootTableComponent component) {
+        components.put(EntityComponentKeys.LOOT_TABLE.id(), component);
+    }
+
+    void removeLootTable() {
+        components.remove(EntityComponentKeys.LOOT_TABLE.id());
     }
 
     void reopen(Player player) {
@@ -419,6 +430,11 @@ public class EntityCreatorGui {
     private Dialog buildSpellsDialog(Player player) {
         SpellComponent current = (SpellComponent) components.get(EntityComponentKeys.SPELLS.id());
         return new EntitySpellListEditorGui(this, current).buildHubDialog(player);
+    }
+
+    private Dialog buildLootTableDialog(Player player) {
+        LootTableComponent current = (LootTableComponent) components.get(EntityComponentKeys.LOOT_TABLE.id());
+        return new LootTableComponentEditorGui(this, current).buildHubDialog(player);
     }
 
     // ==========================================

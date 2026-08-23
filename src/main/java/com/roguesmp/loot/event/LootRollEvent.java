@@ -9,19 +9,25 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Bắn ra ngay trước khi {@link com.roguesmp.loot.service.LootService} bắt đầu roll một loot table.
  *
- * <p>Đây là điểm cắm duy nhất để mọi hệ thống (dungeon, buff, sự kiện server, item luck...)
- * ảnh hưởng tới kết quả roll mà <b>không phải sửa nơi gọi roll</b>. Listener đọc
- * {@link LootContext#getOrigin()} / {@link LootContext#getSource()} để biết roll đến từ đâu,
- * rồi gọi {@link LootContext#addModifier(String, double)} để đóng góp modifier của mình.
+ * <p>Dùng event này để <b>huỷ cả lượt roll</b> dựa trên nơi gọi — listener đọc
+ * {@link LootContext#getOrigin()} / {@link LootContext#getSource()} để biết roll đến từ đâu, rồi
+ * {@link #setCancelled(boolean)} nếu muốn chặn:
  *
  * <pre>{@code
  * @EventHandler
  * public void onLootRoll(LootRollEvent e) {
  *     LootContext ctx = e.getContext();
  *     if (ctx.getOrigin() != LootOrigin.CHEST) return;
- *     ctx.addModifier("my_system", 0.25);
+ *     if (isOnCooldown(ctx.getPlayer())) e.setCancelled(true);
  * }
  * }</pre>
+ *
+ * <p>Muốn ảnh hưởng ENTRY nào được chọn hoặc ITEM sinh ra, dùng
+ * {@link com.roguesmp.loot.event.LootPoolPickEvent} /
+ * {@link com.roguesmp.loot.event.LootEntryResultEvent} /
+ * {@link com.roguesmp.loot.event.LootRollCompleteEvent} thay vì event này — chúng đi thẳng vào
+ * dữ liệu thật (LootEntry/ItemStack), event này chỉ có quyền huỷ toàn bộ, không sửa được gì bên
+ * trong lượt roll.
  *
  * <p>Huỷ event ({@link #setCancelled(boolean)}) khiến lượt roll trả về danh sách rỗng.
  *
@@ -41,7 +47,7 @@ public class LootRollEvent extends Event implements Cancellable {
         this.context = context;
     }
 
-    /** ID của loot table gốc đang được roll, vd {@code "rogue:dungeons/dungeon_a_reward"}. */
+    /** ID của loot table gốc đang được roll, vd {@code "dungeons/dungeon_a_reward"}. */
     public @NotNull String getLootTableId() {
         return lootTableId;
     }
