@@ -17,6 +17,8 @@ import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.ability.ItemAbility;
 import com.roguesmp.item.ability.ItemAbilities;
 import com.roguesmp.item.component.ItemComponent;
+import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.CraftingRecipes;
 import com.roguesmp.loot.LootConfig;
 import com.roguesmp.loot.LootEntry;
 import com.roguesmp.loot.LootTable;
@@ -86,6 +88,9 @@ public class Registries {
     public static final Registry<BaseEntity> ENTITY = new Registry<>("entities", BaseEntity.CODEC);
 
     public static final Registry<LootTable> LOOT_TABLE = new Registry<>(LootConfig.LOOT_TABLE_FOLDER, LootTable.CODEC);
+
+    public static final Registry<Codec<? extends CraftingRecipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());
+    public static final Registry<CraftingRecipe> CRAFTING_RECIPE = new Registry<>("crafting_recipes", CraftingRecipe.CODEC);
 
     public static void loadAllData(RogueSmpCore plugin) {
         Registry.loadAll(plugin);

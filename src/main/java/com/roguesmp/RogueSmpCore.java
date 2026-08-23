@@ -2,6 +2,8 @@ package com.roguesmp;
 
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
+import com.roguesmp.gui.crafting.FusionGui;
+import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.registry.Registries;
@@ -11,6 +13,7 @@ import com.roguesmp.entity.EntityManager;
 import com.roguesmp.fx.FxCommand;
 import com.roguesmp.fx.FxEngine;
 import com.roguesmp.goal.zombified_piglin.PigZombieSpawnListener;
+import com.roguesmp.gui.CreatorHubGui;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.gui.ItemRepairGui;
 import com.roguesmp.gui.SkinBrowserGui;
@@ -23,6 +26,8 @@ import com.roguesmp.gui.entitycreator.EntityCreatorGui;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
+import com.roguesmp.gui.loottablecreator.LootTableGuiCreator;
+import com.roguesmp.gui.recipecreator.RecipeCreatorGui;
 import com.roguesmp.loot.manager.LootTableManager;
 import com.roguesmp.loot.service.LootService;
 import com.roguesmp.npc.NpcManager;
@@ -106,6 +111,8 @@ public final class RogueSmpCore extends JavaPlugin {
     public void loadData() {
         Registries.loadAllData(this); // also loads/resolves every registry's tags/ folder
         BlockStorage.getInstance().loadFromFile();
+
+        CraftingManager.init(); // indexes Registries.CRAFTING_RECIPE - must run after it's loaded above
     }
 
     //Run on onDisable
@@ -140,19 +147,29 @@ public final class RogueSmpCore extends JavaPlugin {
         SkinRegistry.registerSkinFetchCommand();
         SkinBrowserGui.registerCommand();
         ItemBrowser.registerCommand();
+
         ItemCreatorGui.registerCommand();
         EntityCreatorGui.registerCommand();
+        LootTableGuiCreator.registerCommand();
+        RecipeCreatorGui.registerCommand();
+        CreatorHubGui.registerCommand();
+
         EffectManager.registerCommand();
         EntityManager.registerCommand();
+
         FxCommand.register();
+
         NpcManager.getInstance().registerCommand();
 
         AbilityCatalogue.register();
 
         TrashGui.register();
+
         SmpWikiMainMenuGui.registerCommands();
+
         ItemRepairGui.registerCommand();
         CraftingGui.registerCmd();
+        FusionGui.register();
 
         IslandManager.getInstance().registerCommands();
         QuestManager.getInstance().registerQuestCommand();
