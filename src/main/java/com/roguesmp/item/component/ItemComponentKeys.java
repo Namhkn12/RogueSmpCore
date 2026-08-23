@@ -6,41 +6,24 @@ import com.roguesmp.registry.Registries;
 
 public class ItemComponentKeys {
 
-    public static final ComponentKey<NameComponent> ITEM_NAME;
-    public static final ComponentKey<StackSizeComponent> STACK_SIZE;
-    public static final ComponentKey<EnchantComponent> ENCHANT;
-    public static final ComponentKey<EquipAttributeComponent> ATTRIBUTE;
-    public static final ComponentKey<DurabilityComponent> DURABILITY;
-    public static final ComponentKey<DescriptionComponent> DESCRIPTION;
-    public static final ComponentKey<GemSocketComponent> GEM_SOCKET;
-    public static final ComponentKey<GemDataComponent> GEM_DATA;
-    public static final ComponentKey<ConsumableComponent> CONSUMABLE;
-    public static final ComponentKey<PotionContentComponent> POTION_CONTENT;
-    public static final ComponentKey<PlayerHeadSkinComponent> HEAD_SKIN;
-    public static final ComponentKey<ItemModelComponent> ITEM_MODEL;
-    public static final ComponentKey<BrokenComponent> BROKEN;
-    public static final ComponentKey<DurabilityRepairComponent> DURABILITY_REPAIR;
-    public static final ComponentKey<WrenchComponent> WRENCH;
-    public static final ComponentKey<PassiveAbilityComponent> PASSIVE_ABILITY;
-
-    static {
-        ITEM_NAME = register("name", NameComponent.CODEC);
-        STACK_SIZE = register("stack_size", StackSizeComponent.CODEC);
-        ENCHANT = register("enchant", EnchantComponent.CODEC);
-        ATTRIBUTE = register("attribute", EquipAttributeComponent.CODEC);
-        DURABILITY = register("durability", DurabilityComponent.CODEC);
-        DESCRIPTION = register("description", DescriptionComponent.CODEC);
-        GEM_SOCKET = register("socket", GemSocketComponent.CODEC);
-        GEM_DATA = register("gem_data", GemDataComponent.CODEC);
-        CONSUMABLE = register("consumable", ConsumableComponent.CODEC);
-        POTION_CONTENT = register("potion_content", PotionContentComponent.CODEC);
-        HEAD_SKIN = register("head_skin", PlayerHeadSkinComponent.CODEC);
-        ITEM_MODEL = register("item_model", ItemModelComponent.CODEC);
-        BROKEN = new ComponentKey<>("broken"); //Transient so it has no CODEC.
-        DURABILITY_REPAIR = register("durability_repair", DurabilityRepairComponent.CODEC);
-        WRENCH = register("wrench", WrenchComponent.CODEC);
-        PASSIVE_ABILITY = register("passive_ability", PassiveAbilityComponent.CODEC);
-    }
+    public static final ComponentKey<NameComponent> ITEM_NAME = register("name", NameComponent.CODEC);
+    public static final ComponentKey<StackSizeComponent> STACK_SIZE = register("stack_size", StackSizeComponent.CODEC);
+    public static final ComponentKey<EnchantComponent> ENCHANT = register("enchant", EnchantComponent.CODEC);
+    public static final ComponentKey<EquipAttributeComponent> ATTRIBUTE = register("attribute", EquipAttributeComponent.CODEC);
+    public static final ComponentKey<DurabilityComponent> DURABILITY = register("durability", DurabilityComponent.CODEC);
+    public static final ComponentKey<DescriptionComponent> DESCRIPTION = register("description", DescriptionComponent.CODEC);
+    public static final ComponentKey<GemSocketComponent> GEM_SOCKET = register("socket", GemSocketComponent.CODEC);
+    public static final ComponentKey<GemDataComponent> GEM_DATA = register("gem_data", GemDataComponent.CODEC);
+    public static final ComponentKey<ConsumableComponent> CONSUMABLE = register("consumable", ConsumableComponent.CODEC);
+    public static final ComponentKey<PotionContentComponent> POTION_CONTENT = register("potion_content", PotionContentComponent.CODEC);
+    public static final ComponentKey<PlayerHeadSkinComponent> HEAD_SKIN = register("head_skin", PlayerHeadSkinComponent.CODEC);
+    public static final ComponentKey<ItemModelComponent> ITEM_MODEL = register("item_model", ItemModelComponent.CODEC);
+    //Transient so it has no CODEC.
+    public static final ComponentKey<BrokenComponent> BROKEN = new ComponentKey<>("broken");
+    public static final ComponentKey<DurabilityRepairComponent> DURABILITY_REPAIR = register("durability_repair", DurabilityRepairComponent.CODEC);
+    public static final ComponentKey<WrenchComponent> WRENCH = register("wrench", WrenchComponent.CODEC);
+    public static final ComponentKey<PassiveAbilityComponent> PASSIVE_ABILITY = register("passive_ability", PassiveAbilityComponent.CODEC);
+    public static final ComponentKey<EnchantGlintComponent> ENCHANT_GLINT = register("glint", EnchantGlintComponent.CODEC);
 
     public static void loadClass() {
 

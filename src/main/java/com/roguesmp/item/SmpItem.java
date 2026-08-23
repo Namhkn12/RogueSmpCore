@@ -157,6 +157,7 @@ public class SmpItem {
         result.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Set.of(DataComponentTypes.ENCHANTMENTS, DataComponentTypes.ATTRIBUTE_MODIFIERS, DataComponentTypes.UNBREAKABLE)).build());
         result.unsetData(DataComponentTypes.ATTRIBUTE_MODIFIERS);
         result.setData(DataComponentTypes.UNBREAKABLE);
+        result.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false);
 //        result.setData(DataComponentTypes.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.itemAttributes().build());
 
         PersistentDataContainerView oldData = itemStack.getPersistentDataContainer();

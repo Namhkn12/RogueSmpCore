@@ -2,6 +2,7 @@ package com.roguesmp;
 
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
+import com.roguesmp.command.ReloadCommand;
 import com.roguesmp.gui.crafting.FusionGui;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.item.component.ItemComponentKeys;
@@ -115,6 +116,26 @@ public final class RogueSmpCore extends JavaPlugin {
         CraftingManager.init(); // indexes Registries.CRAFTING_RECIPE - must run after it's loaded above
     }
 
+    // Live-reload every data-driven registry (items, entities, quests, npcs, loot tables,
+    // crafting recipes, ability configs, ...) from disk without restarting the server
+    public void reloadData() {
+        Registries.reloadAllData(this); // also loads/resolves every registry's tags/ folder
+
+        CraftingManager.getInstance().rebuild(); // re-derives from Registries.CRAFTING_RECIPE - must run after it's reloaded above
+    }
+
+    /**
+     * Live-reloads a single data-driven registry by its location key (e.g. "items", "entities"),
+     * see {@link Registry#getReloadableKeys()}. Returns false if unknown.
+     */
+    public boolean reloadRegistry(String locationKey) {
+        boolean found = Registry.reloadOne(locationKey, this);
+        if (found && locationKey.equalsIgnoreCase(Registries.CRAFTING_RECIPE.getLocationKey())) {
+            CraftingManager.getInstance().rebuild(); // re-derives from Registries.CRAFTING_RECIPE - must run after it's reloaded above
+        }
+        return found;
+    }
+
     //Run on onDisable
     public void saveData() {
         BlockStorage.getInstance().saveToFile(true);
@@ -174,6 +195,8 @@ public final class RogueSmpCore extends JavaPlugin {
         IslandManager.getInstance().registerCommands();
         QuestManager.getInstance().registerQuestCommand();
         TabDemoCommand.register();
+
+        ReloadCommand.register();
     }
 
     @Override

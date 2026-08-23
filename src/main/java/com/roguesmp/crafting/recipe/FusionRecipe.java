@@ -2,30 +2,36 @@ package com.roguesmp.crafting.recipe;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.crafting.CraftingIngredient;
-import com.roguesmp.crafting.input.FusionMatrix;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * A recipe for a "fusion altar" style GUI: a distinguished {@code "input"} item plus a flat,
- * position-independent list of {@code "ingredients"} (e.g. 8 pedestal slots surrounding the input -
- * see {@link FusionMatrix}'s doc for the shape this is meant for). Unlike {@link ShapelessCraftingRecipe},
- * matching is <b>exact</b>: the input's key and amount must match precisely, and the ingredient
- * slots' total count per key must match precisely too - no extra ingredient types, no more or less
- * of a listed one, and no fewer/more of the input than required.
+ * position-independent list of {@code "ingredients"} (e.g. 8 pedestal slots surrounding the input).
+ * Unlike {@link ShapelessCraftingRecipe}, matching is <b>exact</b>: the input's key and amount must
+ * match precisely, and the ingredient slots' total count per key must match precisely too - no
+ * extra ingredient types, no more or less of a listed one, and no fewer/more of the input than
+ * required.
+ * <p>
+ * Ignores {@code width}/{@code height} (see {@link CraftingRecipe}'s class doc) - by convention,
+ * {@code items[0]} is always the input slot and {@code items[1..]} are the ingredient slots; a
+ * caller building the array (e.g. a GUI) is responsible for keeping that order.
  * <p>
  * The result replaces the input slot itself (it isn't consumed/emptied the way an ingredient can
- * be) - see {@link #getResultStack()} from the base class for what to put there.
+ * be) - see {@link #getResultStack()} from the base class for what to put there. {@link #consume}
+ * still resolves index 0 the same as any other slot (the input is "fully used" against its own
+ * declared amount, so it becomes a resolved remainder or {@code null}) - the caller overwrites that
+ * slot with {@link #getResultStack()} afterward, same as it would write any other kind's result
+ * into its own separate output slot.
  */
 public final class FusionRecipe extends CraftingRecipe {
 
@@ -61,32 +67,25 @@ public final class FusionRecipe extends CraftingRecipe {
         return TYPE_KEY;
     }
 
-    /**
-     * Builds the trie path for an arbitrary input key + ingredient key set - identity only, no
-     * counts (exact amounts are checked by {@link #matches}). Used both by {@link #getIndexPath()}
-     * and by the crafting manager to turn a runtime {@link FusionMatrix}'s input/ingredient keys
-     * into a query path directly comparable against a registered recipe's own path.
-     */
-    public static @NotNull List<String> toIndexPath(@NotNull String inputKey, @NotNull Set<String> ingredientKeys) {
-        List<String> path = new ArrayList<>(ingredientKeys.size() + 1);
-        path.add(inputKey);
-        path.addAll(new TreeSet<>(ingredientKeys));
-        return path;
+    /** The input plus every ingredient, identity only (order doesn't matter - {@link RecipeInput#toIndexPath()} sorts it) - exact amounts are checked separately by {@link #matches}. */
+    @Override
+    public @NotNull List<RecipeInput> getIndexInputs() {
+        List<CraftingIngredient> slots = new ArrayList<>(ingredients.size() + 1);
+        slots.add(input);
+        slots.addAll(ingredients);
+        return List.of(RecipeInput.unordered(slots));
     }
 
-    /** Trie path: the input key first, then one segment per distinct ingredient key, sorted. */
-    public @NotNull List<String> getIndexPath() {
-        return toIndexPath(input.key(), requiredCounts.keySet());
-    }
+    @Override
+    public boolean matches(@NotNull ItemStack @NotNull [] items, int width, int height) {
+        if (items.length == 0) return false;
 
-    public boolean matches(@NotNull FusionMatrix matrix) {
-        String inputKey = matrix.inputKey();
+        ItemStack inputStack = items[0];
+        String inputKey = CraftingIngredient.resolveKey(inputStack);
         if (inputKey == null || !inputKey.equals(input.key())) return false;
+        if (inputStack.getAmount() != input.count()) return false; // exact, not "at least"
 
-        ItemStack inputStack = matrix.input();
-        if (inputStack == null || inputStack.getAmount() != input.count()) return false; // exact, not "at least"
-
-        Map<String, Integer> actual = matrix.aggregateIngredientCounts();
+        Map<String, Integer> actual = CraftingIngredient.aggregateCounts(ingredientsOf(items));
         if (actual.size() != requiredCounts.size()) return false; // an unlisted ingredient type is present, or one's missing entirely
 
         for (Map.Entry<String, Integer> entry : requiredCounts.entrySet()) {
@@ -97,18 +96,19 @@ public final class FusionRecipe extends CraftingRecipe {
     }
 
     /**
-     * Resolves what each ingredient slot of {@code matrix} should become after one fusion - same
-     * indices as {@link FusionMatrix#ingredients()}. The input slot isn't part of this array; the
-     * caller replaces it directly with {@link #getResultStack()}. Undefined if {@code matrix}
+     * Resolves what each index of {@code items} should become after one fusion - index 0 (the
+     * input) resolves like any fully-used ingredient (a declared remainder, or {@code null}); the
+     * caller overwrites it with {@link #getResultStack()} afterward. Undefined if {@code items}
      * doesn't actually {@link #matches} - check that first.
      */
-    public @NotNull ItemStack[] consume(@NotNull FusionMatrix matrix) {
-        ItemStack[] ingredientStacks = matrix.ingredients();
-        int[] amountsToConsume = new int[ingredientStacks.length];
-        Map<String, Integer> stillNeeded = new HashMap<>(requiredCounts);
+    @Override
+    public @NotNull ItemStack[] consume(@NotNull ItemStack @NotNull [] items, int width, int height) {
+        int[] amountsToConsume = new int[items.length];
+        if (items.length > 0) amountsToConsume[0] = input.count(); // the input is always fully used
 
-        for (int i = 0; i < ingredientStacks.length; i++) {
-            ItemStack stack = ingredientStacks[i];
+        Map<String, Integer> stillNeeded = new HashMap<>(requiredCounts);
+        for (int i = 1; i < items.length; i++) {
+            ItemStack stack = items[i];
             String key = CraftingIngredient.resolveKey(stack);
             if (key == null) continue;
 
@@ -120,7 +120,11 @@ public final class FusionRecipe extends CraftingRecipe {
             stillNeeded.put(key, needed - take);
         }
 
-        return applyConsumption(ingredientStacks, amountsToConsume);
+        return applyConsumption(items, amountsToConsume);
+    }
+
+    private static ItemStack[] ingredientsOf(ItemStack[] items) {
+        return items.length <= 1 ? new ItemStack[0] : Arrays.copyOfRange(items, 1, items.length);
     }
 
     public @NotNull CraftingIngredient getInput() {

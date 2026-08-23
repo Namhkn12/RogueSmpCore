@@ -1,7 +1,7 @@
 package com.roguesmp.gui.crafting;
 
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.crafting.input.FusionMatrix;
+import com.roguesmp.crafting.recipe.CraftingRecipes;
 import com.roguesmp.crafting.recipe.FusionRecipe;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.gui.BaseGui;
@@ -53,7 +53,6 @@ public class FusionGui extends BaseGui {
 
     private static final int[] INGREDIENT_SLOTS = {2, 4, 6, 19, 25, 38, 40, 42};
     private static final int INPUT_SLOT = 22;
-    private static final int GUIDE_SLOT = 45;
     private static final int FUSE_BUTTON_SLOT = 49;
     private static final int CLOSE_SLOT = 53;
 
@@ -99,7 +98,6 @@ public class FusionGui extends BaseGui {
         Set<Integer> reserved = new HashSet<>();
         for (int slot : INGREDIENT_SLOTS) reserved.add(slot);
         reserved.add(INPUT_SLOT);
-        reserved.add(GUIDE_SLOT);
         reserved.add(FUSE_BUTTON_SLOT);
         reserved.add(CLOSE_SLOT);
         for (int[] path : INGREDIENT_PATHS.values()) {
@@ -193,8 +191,8 @@ public class FusionGui extends BaseGui {
         for (int slot : INGREDIENT_SLOTS) addAction(slot, event -> {});
         addAction(INPUT_SLOT, event -> {});
 
-        FusionMatrix matrix = currentMatrix();
-        FusionRecipe matched = CraftingManager.getInstance().matchFusion(matrix);
+        ItemStack[] items = currentItems();
+        FusionRecipe matched = CraftingManager.getInstance().match(CraftingRecipes.FUSION, items, 0, 0);
 
         addButton(FUSE_BUTTON_SLOT, fuseButtonItem(matched), matched != null ? this::onFuseButtonClick : ClickHandler.noAction());
         renderIngredientTrails(matched != null);
@@ -236,18 +234,18 @@ public class FusionGui extends BaseGui {
         event.setCancelled(true);
         if (state != State.IDLE) return;
 
-        FusionMatrix matrix = currentMatrix(); // a defensive clone of every slot - the animation is about to overwrite the live ones
-        FusionRecipe matched = CraftingManager.getInstance().matchFusion(matrix);
+        ItemStack[] items = currentItems(); // a defensive clone of every slot - the animation is about to overwrite the live ones
+        FusionRecipe matched = CraftingManager.getInstance().match(CraftingRecipes.FUSION, items, 0, 0);
         if (matched == null) return;
 
         ItemStack result = matched.getResultStack();
         if (result == null) return;
 
         state = State.PROCESSING;
-        frozenInputForClose = matrix.input();
+        frozenInputForClose = items[0];
         freezeSlots();
-        hideInputBehindPlaceholder(matrix.input());
-        animateFusion(matrix, result);
+        hideInputBehindPlaceholder(items[0]);
+        animateFusion(items, result);
     }
 
     /** Cancels every fusion-slot handler so nothing can be moved while {@link #animateFusion} plays. */
@@ -272,12 +270,12 @@ public class FusionGui extends BaseGui {
      * flip-book-of-items approach instead (see {@code GemSocketingGui} for the same technique
      * elsewhere in this plugin).
      */
-    private void animateFusion(FusionMatrix matrix, ItemStack result) {
+    private void animateFusion(ItemStack[] items, ItemStack result) {
         player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.4f);
 
         Map<Integer, ItemStack> iconBySlot = new HashMap<>();
         for (int i = 0; i < INGREDIENT_SLOTS.length; i++) {
-            iconBySlot.put(INGREDIENT_SLOTS[i], matrix.ingredients()[i]);
+            iconBySlot.put(INGREDIENT_SLOTS[i], items[i + 1]); // items[0] is the input slot, ingredients start at 1
         }
 
         new BukkitRunnable() {
@@ -383,16 +381,23 @@ public class FusionGui extends BaseGui {
         }
     }
 
-    /** A defensive clone of every fusion slot, so the returned snapshot survives the live inventory being overwritten by the animation. */
-    private FusionMatrix currentMatrix() {
+    /**
+     * A defensive clone of every fusion slot as a flat array - index 0 is the input slot, 1.. are
+     * the ingredient pedestals in {@link #INGREDIENT_SLOTS} order (the convention {@link FusionRecipe}
+     * expects). Survives the live inventory being overwritten by the animation.
+     */
+    private ItemStack[] currentItems() {
         Inventory inv = getInventory();
-        ItemStack[] ingredients = new ItemStack[INGREDIENT_SLOTS.length];
+        ItemStack[] items = new ItemStack[INGREDIENT_SLOTS.length + 1];
+
+        ItemStack input = inv.getItem(INPUT_SLOT);
+        items[0] = input != null ? input.clone() : null;
+
         for (int i = 0; i < INGREDIENT_SLOTS.length; i++) {
             ItemStack stack = inv.getItem(INGREDIENT_SLOTS[i]);
-            ingredients[i] = stack != null ? stack.clone() : null;
+            items[i + 1] = stack != null ? stack.clone() : null;
         }
-        ItemStack input = inv.getItem(INPUT_SLOT);
-        return new FusionMatrix(input != null ? input.clone() : null, ingredients);
+        return items;
     }
 
     private ItemStack fuseButtonItem(@Nullable FusionRecipe matched) {

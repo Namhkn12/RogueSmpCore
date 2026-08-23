@@ -98,6 +98,12 @@ public class Registries {
         Registry.validateAllHolders(); // catch dangling Holder references (bad/typo'd ids)
     }
 
+    /** Clears then re-reads every data-driven registry from disk - use for a live reload. */
+    public static void reloadAllData(RogueSmpCore plugin) {
+        Registry.clearAll();
+        loadAllData(plugin);
+    }
+
     // Create in-memory data here
     public static void boostrap(RogueSmpCore plugin) {
         // Every registry declared via register(Bootstrapper<T>) above runs its loadClass() here.

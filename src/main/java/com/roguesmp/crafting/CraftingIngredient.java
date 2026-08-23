@@ -7,7 +7,11 @@ import com.roguesmp.registry.Registries;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * A single crafting ingredient/result reference by id, plus how many are required/produced.
@@ -73,5 +77,21 @@ public record CraftingIngredient(String key, int count) {
 
         BaseItem baseItem = Registries.ITEM.get(key);
         return baseItem == null ? null : baseItem.generateItemStack(amount);
+    }
+
+    /**
+     * Sums stack sizes per resolved {@link #key()} across an array of slots (nulls/empty stacks
+     * ignored) - the one place this "aggregate a runtime item array by crafting-key" logic lives,
+     * shared by every recipe kind's own {@code matches(ItemStack[], int, int)} that needs a
+     * position-independent count (shapeless/fusion/scrapping-style).
+     */
+    public static @NotNull Map<String, Integer> aggregateCounts(@NotNull ItemStack @NotNull [] stacks) {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        for (ItemStack stack : stacks) {
+            String key = resolveKey(stack);
+            if (key == null) continue;
+            counts.merge(key, stack.getAmount(), Integer::sum);
+        }
+        return counts;
     }
 }

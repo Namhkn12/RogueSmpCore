@@ -369,4 +369,50 @@ public class Registry<T> {
         // up their new value once this registry repopulates, instead of pointing at a stale entry.
         holders.values().forEach(Holder::unbind);
     }
+
+    /**
+     * Clears every data-driven registry's entries - call immediately before {@link #loadAll} to
+     * reload from disk without leaving stale entries for a file removed since the last load.
+     */
+    public static void clearAll() {
+        for (Registry<?> registry : DATA_REGISTRIES) {
+            registry.clear();
+        }
+    }
+
+    public @Nullable String getLocationKey() {
+        return locationKey;
+    }
+
+    /**
+     * Location key of every registry that's actually file-backed (has a codec) - e.g. "items",
+     * "entities". Excludes code-populated registries (e.g. {@code enchants}) whose entries come
+     * from a bootstrapper, not a {@code *.json} folder, and so would just be wiped by a reload
+     * rather than repopulated.
+     */
+    public static @Unmodifiable List<String> getReloadableKeys() {
+        List<String> keys = new ArrayList<>();
+        for (Registry<?> registry : DATA_REGISTRIES) {
+            if (registry.locationKey != null && registry.codec != null) keys.add(registry.locationKey);
+        }
+        return List.copyOf(keys);
+    }
+
+    /**
+     * Clears and reloads (entries + tags) the single data-driven registry matching
+     * {@code locationKey} (case-insensitive). Returns {@code false} if no reloadable registry has
+     * that key.
+     */
+    public static boolean reloadOne(String locationKey, RogueSmpCore plugin) {
+        for (Registry<?> registry : DATA_REGISTRIES) {
+            if (registry.codec != null && locationKey.equalsIgnoreCase(registry.locationKey)) {
+                registry.clear();
+                registry.loadFrom(plugin);
+                registry.loadTagsFrom(plugin);
+                Registry.validateAllHolders();
+                return true;
+            }
+        }
+        return false;
+    }
 }

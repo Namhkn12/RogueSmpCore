@@ -112,6 +112,9 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.ITEM_MODEL),
                 tooltip("Để thay đổi model item.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildItemModelDialog(player))));
+        multi.addButton(componentLabel(ItemComponentKeys.ENCHANT_GLINT),
+                tooltip("Buộc bật/tắt hiệu ứng lấp lánh phù phép.", "Ghi đè bất kể item có phù phép hay không"),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(buildEnchantGlintDialog(player))));
         multi.addButton(componentLabel(ItemComponentKeys.HEAD_SKIN),
                 tooltip("Thay đổi head texture.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildHeadSkinDialog(player))));
@@ -463,6 +466,26 @@ public class ItemCreatorGui {
                 },
                 (response, audience) -> {
                     components.remove(ItemComponentKeys.ITEM_MODEL.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
+    }
+
+    private Dialog buildEnchantGlintDialog(Player player) {
+        EnchantGlintComponent current = (EnchantGlintComponent) components.get(ItemComponentKeys.ENCHANT_GLINT.id());
+        boolean initial = current == null || current.glint();
+        DialogBuilder builder = DialogBuilder.create(Component.text("Ghi đè hiệu ứng phù phép (glint)"))
+                .canCloseWithEscape(false)
+                .addTextBody(Component.text("Buộc bật/tắt hiệu ứng lấp lánh phù phép, bất kể item có phù phép hay không."))
+                .addCheckboxInput("value", Component.text("Bật glint"), b -> b.initial(initial));
+
+        return wrapComponentDialog(player, ItemComponentKeys.ENCHANT_GLINT, builder,
+                (response, audience) -> {
+                    Boolean value = response.getBoolean("value");
+                    components.put(ItemComponentKeys.ENCHANT_GLINT.id(), new EnchantGlintComponent(value != null && value));
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.ENCHANT_GLINT.id());
                     Utils.runLater(() -> openMainDialog(player));
                 });
     }

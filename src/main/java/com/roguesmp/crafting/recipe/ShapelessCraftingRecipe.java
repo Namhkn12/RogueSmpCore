@@ -2,27 +2,31 @@ package com.roguesmp.crafting.recipe;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.crafting.CraftingIngredient;
-import com.roguesmp.crafting.input.CraftingMatrix;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * A recipe matched by ingredient composition alone, regardless of position - a flat
- * {@code "ingredients"} list, where the same key may appear more than once (its counts are summed).
- * Matches when the grid's total count per resolved key (see {@link CraftingMatrix#aggregateCounts()})
- * is at least this recipe's required count for every listed ingredient, and has no item of any other
- * type - a stack bigger than what's required is fine (extra just stays in the grid after crafting,
- * see {@link #consume}), it's an unlisted ingredient *type* that's rejected.
+ * {@code "ingredients"} list, where the same key may appear more than once. A duplicate key is a
+ * <b>distinct</b> requirement, not summed into one total: two {@code "minecraft:redstone"} entries
+ * with counts 4 and 6 require exactly two occupied slots holding at least 4 and at least 6
+ * respectively (which slot satisfies which requirement doesn't matter - that's the "shapeless" part -
+ * but one big stack of 10 does <i>not</i> satisfy both, and neither does a third occupied redstone
+ * slot showing up alongside the two that do). Matches when, for every distinct key, the grid holds
+ * <b>exactly</b> as many occupied slots of that key as there are declared requirements for it, each
+ * assignable to a requirement it's large enough to cover (see {@link #matches}) - an extra slot of an
+ * already-listed key is rejected the same as an entirely unlisted key. A slot's stack may still be
+ * bigger than the requirement it's assigned to (the leftover amount just stays in that same slot
+ * after crafting, see {@link #consume}). Ignores {@code width}/{@code height} entirely (see
+ * {@link CraftingRecipe}'s class doc).
  */
 public final class ShapelessCraftingRecipe extends CraftingRecipe {
 
@@ -34,38 +38,29 @@ public final class ShapelessCraftingRecipe extends CraftingRecipe {
             ShapelessCraftingRecipe::new
     );
 
-    /**
-     * Builds the trie path for an arbitrary set of ingredient keys (sorted, one segment each) -
-     * identity only, no counts. Used both by {@link #getIndexPath()} and by the crafting manager to
-     * turn a runtime grid's {@link CraftingMatrix#aggregateCounts()} keys into a query path that's
-     * directly comparable against a registered recipe's own path. Counts aren't part of the path
-     * because matching is a "least count" threshold (see the class doc) - two recipes needing
-     * different amounts of the same ingredient set legitimately share one path, disambiguated by
-     * {@link #matches} same as {@link ShapedCraftingRecipe}'s per-cell amount check.
-     */
-    public static @NotNull List<String> toIndexPath(@NotNull Set<String> keys) {
-        return new ArrayList<>(new TreeSet<>(keys));
-    }
-
     private final List<CraftingIngredient> ingredients;
 
-    /** {@code ingredients} merged by key (duplicates summed), sorted by key for a stable trie path. */
-    private final Map<String, Integer> requiredCounts;
+    /** {@code ingredients} grouped by key (duplicates kept separate, not summed) - each key's own counts sorted descending, so matching/consuming can greedily pair the largest requirement with the largest occupied slot. */
+    private final Map<String, List<Integer>> requiredCountsByKey;
 
     public ShapelessCraftingRecipe(@NotNull BaseProperties base, @NotNull List<CraftingIngredient> ingredients) {
         super(base);
         this.ingredients = List.copyOf(ingredients);
 
-        Map<String, Integer> merged = new TreeMap<>();
+        Map<String, List<Integer>> grouped = new TreeMap<>();
         for (CraftingIngredient ingredient : ingredients) {
-            merged.merge(ingredient.key(), ingredient.count(), Integer::sum);
+            grouped.computeIfAbsent(ingredient.key(), key -> new ArrayList<>()).add(ingredient.count());
         }
-        this.requiredCounts = Collections.unmodifiableMap(merged);
+        for (List<Integer> counts : grouped.values()) {
+            counts.sort(Comparator.reverseOrder());
+        }
+        this.requiredCountsByKey = Collections.unmodifiableMap(grouped);
     }
 
-    /** Trie path: one segment per distinct required ingredient key, sorted - identity only, no counts. */
-    public @NotNull List<String> getIndexPath() {
-        return toIndexPath(requiredCounts.keySet());
+    /** Identity only (one segment per distinct required key, sorted by {@link RecipeInput#toIndexPath()}) - counts are checked separately by {@link #matches}. */
+    @Override
+    public @NotNull List<RecipeInput> getIndexInputs() {
+        return List.of(RecipeInput.unordered(ingredients));
     }
 
     @Override
@@ -73,50 +68,73 @@ public final class ShapelessCraftingRecipe extends CraftingRecipe {
         return TYPE_KEY;
     }
 
-    /** Whether this recipe's ingredients are satisfied by the given grid. */
-    public boolean matches(@NotNull CraftingMatrix matrix) {
-        Map<String, Integer> actual = matrix.aggregateCounts();
-        if (actual.size() != requiredCounts.size()) return false; // an unlisted item type is present, or one's missing entirely
+    @Override
+    public boolean matches(@NotNull ItemStack @NotNull [] items, int width, int height) {
+        Map<String, List<SlotAmount>> actual = groupSlotsByKey(items);
+        if (actual.size() != requiredCountsByKey.size()) return false; // an unlisted item type is present, or one's missing entirely
 
-        for (Map.Entry<String, Integer> entry : requiredCounts.entrySet()) {
-            Integer have = actual.get(entry.getKey());
-            if (have == null || have < entry.getValue()) return false;
+        for (Map.Entry<String, List<Integer>> entry : requiredCountsByKey.entrySet()) {
+            List<SlotAmount> haveSlots = actual.get(entry.getKey());
+            List<Integer> required = entry.getValue();
+            // Exactly as many occupied slots of this key as declared requirements - an extra slot
+            // of an already-listed key is just as much a mismatch as a missing one.
+            if (haveSlots == null || haveSlots.size() != required.size()) return false;
+
+            // Both lists are sorted descending - pairing them index-for-index is a valid feasibility
+            // check for "each requirement needs its own slot with at least that much" (an exchange
+            // argument shows any other pairing that works implies this sorted one works too).
+            for (int i = 0; i < required.size(); i++) {
+                if (haveSlots.get(i).amount() < required.get(i)) return false;
+            }
         }
         return true;
     }
 
     /**
-     * Greedily takes from occupied cells in row-major order until each key's required total is met
-     * - a slot's stack may end up only partially consumed (leftover stays, no remainder) if it holds
-     * more than what's still needed once earlier slots have already contributed.
+     * Pairs each key's requirements with that key's occupied slots (same sorted pairing
+     * {@link #matches} validated - one-to-one, since matching already requires equal counts),
+     * consuming exactly the declared amount from each assigned slot - a slot's stack may end up only
+     * partially consumed (leftover stays) if it's bigger than the requirement it's paired with.
      */
-    public @NotNull ItemStack[] consume(@NotNull CraftingMatrix matrix) {
-        int[] amountsToConsume = new int[matrix.width() * matrix.height()];
-        Map<String, Integer> stillNeeded = new HashMap<>(requiredCounts);
+    @Override
+    public @NotNull ItemStack[] consume(@NotNull ItemStack @NotNull [] items, int width, int height) {
+        int[] amountsToConsume = new int[items.length];
+        Map<String, List<SlotAmount>> grouped = groupSlotsByKey(items);
 
-        for (int row = 0; row < matrix.height(); row++) {
-            for (int col = 0; col < matrix.width(); col++) {
-                String key = matrix.keyAt(col, row);
-                if (key == null) continue;
+        for (Map.Entry<String, List<Integer>> entry : requiredCountsByKey.entrySet()) {
+            List<SlotAmount> haveSlots = grouped.get(entry.getKey());
+            if (haveSlots == null) continue; // shouldn't happen if matches() was checked first
 
-                Integer needed = stillNeeded.get(key);
-                if (needed == null || needed <= 0) continue;
-
-                ItemStack stack = matrix.stackAt(col, row);
-                int take = Math.min(needed, stack.getAmount());
-                amountsToConsume[row * matrix.width() + col] = take;
-                stillNeeded.put(key, needed - take);
+            List<Integer> required = entry.getValue();
+            for (int i = 0; i < required.size() && i < haveSlots.size(); i++) {
+                amountsToConsume[haveSlots.get(i).index()] = required.get(i);
             }
         }
 
-        return applyConsumption(matrix.cellsView(), amountsToConsume);
+        return applyConsumption(items, amountsToConsume);
+    }
+
+    /** One occupied slot's index into {@code items} plus its stack amount - {@link #groupSlotsByKey} groups these by resolved key, sorted descending by amount, so the largest slot pairs with the largest requirement. */
+    private record SlotAmount(int index, int amount) {}
+
+    private static @NotNull Map<String, List<SlotAmount>> groupSlotsByKey(@NotNull ItemStack[] items) {
+        Map<String, List<SlotAmount>> grouped = new TreeMap<>();
+        for (int i = 0; i < items.length; i++) {
+            String key = CraftingIngredient.resolveKey(items[i]);
+            if (key == null) continue;
+            grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(new SlotAmount(i, items[i].getAmount()));
+        }
+        for (List<SlotAmount> slots : grouped.values()) {
+            slots.sort(Comparator.comparingInt(SlotAmount::amount).reversed());
+        }
+        return grouped;
     }
 
     public @NotNull @Unmodifiable List<CraftingIngredient> getIngredients() {
         return ingredients;
     }
 
-    public @NotNull @Unmodifiable Map<String, Integer> getRequiredCounts() {
-        return requiredCounts;
+    public @NotNull @Unmodifiable Map<String, List<Integer>> getRequiredCountsByKey() {
+        return requiredCountsByKey;
     }
 }
