@@ -134,6 +134,9 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.ENCHANT),
                 tooltip("Đặt enchants cho item.", "Để trống \"enchants\" để đánh dấu item là \"có thể enchant được\""),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildEnchantDialog(player))));
+        multi.addButton(componentLabel(ItemComponentKeys.USAGE_TIMER),
+                tooltip("Đặt thời gian sử dụng khi người dùng trang bị, khi hết thời gian vật phẩm sẽ biến mất", null),
+                (response, audience) -> player.showDialog(buildUsageTimerDialog(player)));
         multi.addButton(componentLabel(ItemComponentKeys.CONSUMABLE),
                 tooltip("Biến một vật phẩm thành vật phẩm có thể ăn uống được.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildConsumableDialog(player))));
@@ -235,7 +238,7 @@ public class ItemCreatorGui {
         Map<String, ItemComponent> copy = new HashMap<>();
         components.forEach((key, value) -> copy.put(key, value.copy()));
         BaseItem draft = new BaseItem(id == null ? "preview" : id, base, copy);
-        return draft.generateItemStack(1);
+        return draft.generatePreviewStack(1);
     }
 
     private Dialog buildSaveDialog(Player player) {
@@ -633,6 +636,25 @@ public class ItemCreatorGui {
     private Dialog buildPassiveAbilityDialog(Player player) {
         PassiveAbilityComponent current = (PassiveAbilityComponent) components.get(ItemComponentKeys.PASSIVE_ABILITY.id());
         return new ItemAbilityListEditorGui(this, current).buildListDialog(player);
+    }
+
+    private Dialog buildUsageTimerDialog(Player player) {
+        UsageTimerComponent current = (UsageTimerComponent) components.get(ItemComponentKeys.USAGE_TIMER.id());
+        int initial = current == null ? 200 : current.getBaseTickDuration();
+        DialogBuilder builder = DialogBuilder.create(Component.text("Thời gian sử dụng tối đa"))
+                .canCloseWithEscape(false)
+                .addTextInput("value", Component.text("Thời gian sử dụng tối đa, đơn vị tick (>= 20)"), b -> b.initial(String.valueOf(initial)).maxLength(16));
+
+        return wrapComponentDialog(player, ItemComponentKeys.USAGE_TIMER, builder,
+                (response, audience) -> {
+                    Integer value = DialogInputUtils.parseInt(response.getText("value"), 20, Integer.MAX_VALUE);
+                    if (value != null) components.put(ItemComponentKeys.USAGE_TIMER.id(), new UsageTimerComponent(value));
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.USAGE_TIMER.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
     }
 
     // ==========================================

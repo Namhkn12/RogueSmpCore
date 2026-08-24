@@ -80,10 +80,8 @@ public interface PlayerMechanic {
     default void onDurabilityChange(DurabilityChangedEvent event, SmpPlayer player) {}
 
     /**
-     * Called once per {@code SmpPlayer.updateSlotStat} call, after the slot's item has actually
-     * been swapped - a generic "this equipment slot changed" notification, distinct from
-     * {@code SmpEnchant}/{@code SmpAttribute}'s own {@code onEquipmentChange} (which fires
-     * per-type, only when that type's resolved level/value actually differs from before).
+     * Called once per {@code SmpPlayer.updateSlotStat} call, after the slot's item has already
+     * been swapped - a generic "this equipment slot changed" notification.
      */
     default void onEquipmentChange(EquipSlot slot, @Nullable SmpItem newItem, SmpPlayer player) {}
 }

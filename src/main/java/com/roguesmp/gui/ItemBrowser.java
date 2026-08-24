@@ -1,6 +1,7 @@
 package com.roguesmp.gui;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.gui.itemcreator.ItemCreatorGui;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.PlayerManager;
@@ -19,6 +20,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -48,7 +50,8 @@ public class ItemBrowser extends BaseGui {
 
         infoBook.setData(DataComponentTypes.ITEM_NAME, Component.text("Item Browser", NamedTextColor.GREEN));
         infoBook.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
-                Utils.text("Bấm vào một item để nhận", NamedTextColor.GREEN),
+                Utils.text("Chuột trái một item để nhận", NamedTextColor.GREEN),
+                Utils.text("Chuột phải để mở edit gui cho item.", NamedTextColor.GREEN),
                 Utils.text("Shift-Click để nhận stack.", NamedTextColor.GREEN))
         ));
 
@@ -111,7 +114,7 @@ public class ItemBrowser extends BaseGui {
         var pageEntries = getPage(currentPage);
         int i = 9;
         for (var entry : pageEntries) {
-            ItemStack itemStack = entry.getValue().generateItemStack(null, 1);
+            ItemStack itemStack = entry.getValue().generatePreviewStack(1);
             ItemLore itemLore = itemStack.getData(DataComponentTypes.LORE);
             List<Component> itemLoreComp = itemLore == null ? new ArrayList<>() : new ArrayList<>(itemLore.lines());
             Component itemId = Utils.text("ID: " + entry.getKey(), NamedTextColor.DARK_GRAY);
@@ -119,6 +122,10 @@ public class ItemBrowser extends BaseGui {
             itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(itemLoreComp));
             this.addButton(i, itemStack, event -> {
                 event.setCancelled(true);
+                if (event.getClick() == ClickType.RIGHT) {
+                    openEditDialog((Player) event.getWhoClicked(), entry.getValue());
+                    return;
+                }
                 ItemStack toGive = entry.getValue().generateItemStack(PlayerManager.getInstance().getSmpPlayer(event.getWhoClicked().getUniqueId()), 1);
                 if (event.getClick().isShiftClick()) {
                     toGive.setAmount(itemStack.getDataOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1));
@@ -201,6 +208,11 @@ public class ItemBrowser extends BaseGui {
                 .build();
 
         p.showDialog(dialog);
+    }
+
+    private void openEditDialog(Player p, BaseItem baseItem) {
+        p.closeInventory();
+        ItemCreatorGui.editExisting(baseItem).openMainDialog(p);
     }
 
     public static void registerCommand() {

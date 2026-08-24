@@ -17,5 +17,12 @@ import org.jetbrains.annotations.Nullable;
  * </p>
  */
 public interface ItemModifier {
-    void collectAndApply(SmpItem smpItem, @Nullable SmpPlayer player);
+    /**
+     * @param isPreview true for a display-only stack (GUI icon/preview) that should show
+     *                   best-case values rather than an item-specific roll - not simply "player is
+     *                   null", since plenty of real generation (loot drops with no attributable
+     *                   killer, recipe-template items, block drops) also has no player and must
+     *                   still use the item's actual rolled values.
+     */
+    void collectAndApply(SmpItem smpItem, @Nullable SmpPlayer player, boolean isPreview);
 }

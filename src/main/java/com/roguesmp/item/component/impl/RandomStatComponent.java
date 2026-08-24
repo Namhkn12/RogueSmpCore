@@ -29,7 +29,8 @@ public class RandomStatComponent implements ItemComponent, UniqueTrackingCompone
     private final boolean hasQuality;
 
     private double currentQuality = 0;
-    private int currentMagicPower = 0;
+    private int currentMagicPower = -1;
+    private boolean freshlyRolled = false;
 
     public RandomStatComponent(boolean hasQuality) {
         this.hasQuality = hasQuality;
@@ -67,8 +68,29 @@ public class RandomStatComponent implements ItemComponent, UniqueTrackingCompone
     @Override
     public void load(PersistentDataContainerView pdc) {
         Double currentQuality = pdc.get(QUALITY_KEY, PersistentDataType.DOUBLE);
-        if (currentQuality == null) this.currentQuality = Utils.RANDOM.nextDouble();
-        else this.currentQuality = currentQuality;
+        if (currentQuality == null) {
+            this.currentQuality = Utils.RANDOM.nextDouble();
+            this.freshlyRolled = true;
+        } else {
+            this.currentQuality = currentQuality;
+            this.freshlyRolled = false;
+        }
+    }
+
+    /**
+     * True only right after a brand new quality was just rolled (no {@code QUALITY_KEY} was
+     * persisted yet for this item) - the correct one-time signal for "this is this item's actual
+     * first-ever load", since a genuinely fresh decode always recomputes it from persisted PDC
+     * state. Call {@link #consumeFreshRoll()} once acted on, so re-running one-time setup logic
+     * (e.g. a quality-based durability reduction) on a later {@code generateItemStack} call for
+     * the same cached instance doesn't repeat it.
+     */
+    public boolean wasFreshlyRolled() {
+        return freshlyRolled;
+    }
+
+    public void consumeFreshRoll() {
+        freshlyRolled = false;
     }
 
     @Override

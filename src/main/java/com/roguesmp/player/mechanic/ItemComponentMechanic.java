@@ -4,21 +4,27 @@ import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.InteractableComponent;
 import com.roguesmp.item.component.ItemComponent;
+import com.roguesmp.item.component.TickingComponent;
 import com.roguesmp.player.SmpPlayer;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-/**
- * Fans {@link PlayerInteractEvent}/{@link PlayerInteractEntityEvent} out to every
- * {@link InteractableComponent} on the interacting hand's {@code SmpItem} - same
- * instanceof-mixin shape {@link com.roguesmp.item.component.UniqueTrackingComponent} established,
- * as an actual per-event callback instead of a presence check.
- */
-public class ItemComponentInteractionMechanic implements PlayerMechanic {
+public class ItemComponentMechanic implements PlayerMechanic {
 
     @Override
     public int getPriority() {
         return 505;
+    }
+
+    @Override
+    public void tick(int periodIncrement, SmpPlayer player) {
+        player.getCurrentEquipment().forEach((equipSlot, smpItem) -> {
+            for (ItemComponent component : smpItem.getComponents().values()) {
+                if (component instanceof TickingComponent ticking) {
+                    ticking.tick(player, smpItem, equipSlot, periodIncrement);
+                }
+            }
+        });
     }
 
     @Override
