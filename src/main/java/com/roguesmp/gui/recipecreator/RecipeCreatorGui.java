@@ -181,7 +181,7 @@ public class RecipeCreatorGui {
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
 
         multi.columns(3);
-        multi.exitButton(Component.text("Đóng"), null);
+        multi.exitButton(Component.text("Đóng"), (v, a) -> a.closeDialog());
 
         player.showDialog(multi.build());
     }

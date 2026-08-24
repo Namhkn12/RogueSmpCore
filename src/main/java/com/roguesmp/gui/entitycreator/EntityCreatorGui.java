@@ -109,7 +109,7 @@ public class EntityCreatorGui {
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
 
         multi.columns(3);
-        multi.exitButton(Component.text("Đóng"), null);
+        multi.exitButton(Component.text("Đóng"), (response, audience) -> audience.closeDialog());
 
         player.showDialog(multi.build());
     }

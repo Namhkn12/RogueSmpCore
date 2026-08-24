@@ -225,10 +225,6 @@ public class ItemBrowser extends BaseGui {
                         .executesPlayer((player, commandArguments) -> {
                             new BlacksmithGui(player).showInventory(player);
                         }))
-                .withSubcommand(new CommandAPICommand("reload")
-                        .executesPlayer((player1, commandArguments) -> {
-                            Utils.runLater(() -> Registries.ITEM.loadFrom(RogueSmpCore.getInstance()));
-                        }))
                 .register();
     }
 }

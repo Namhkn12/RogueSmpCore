@@ -30,13 +30,16 @@ public class RandomStatModifier implements ItemModifier {
         double quality = rdc.getCurrentQuality();
         if (player == null) quality = 1d;
 
+        double multiplier = -0.20 * (1.0 - quality);
+
         // Update lore provider state for MagicPowerComponent
         MagicPowerComponent magicPowerComponent = smpItem.getComponent(ItemComponentKeys.MAGIC_POWER);
         if (magicPowerComponent != null) {
             magicPowerComponent.setShouldProvideLore(false);
 
             // Calculate current magical power based on Quality %
-            int calculatedMp = (int) Math.round(magicPowerComponent.getMax() * quality);
+            int maxMp = magicPowerComponent.getMax();
+            int calculatedMp = (int) Math.round(maxMp + (maxMp * multiplier));
             magicPowerComponent.setCurrent(calculatedMp);
 
             // Update with new mp
@@ -46,8 +49,6 @@ public class RandomStatModifier implements ItemModifier {
         // Apply Attribute Modifier
         EquipAttributeComponent attributeComponent = smpItem.getComponent(ItemComponentKeys.ATTRIBUTE);
         if (attributeComponent == null) return;
-
-        double multiplier = -0.20 * (1.0 - quality);
 
         Map<Attributes, Double> attributeModifiers = new EnumMap<>(Attributes.class);
         Map<Attributes, Double> baseAttributes = attributeComponent.getBaseAttributes();

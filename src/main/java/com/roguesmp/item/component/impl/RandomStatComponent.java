@@ -4,6 +4,7 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ItemComponent;
+import com.roguesmp.item.component.UniqueTrackingComponent;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
@@ -20,7 +21,7 @@ import java.util.List;
 /**
  * Control how base attribute scale, from -0.2 to 0 bonus
  */
-public class RandomStatComponent implements ItemComponent {
+public class RandomStatComponent implements ItemComponent, UniqueTrackingComponent {
 
     public static final Codec<RandomStatComponent> CODEC = Codec.BOOLEAN.xmap(RandomStatComponent::new, RandomStatComponent::hasRandomQuality);
 
@@ -104,7 +105,7 @@ public class RandomStatComponent implements ItemComponent {
         return Component.text(qualityName, color)
                 .append(Component.space())
                 .append(Component.text("(", NamedTextColor.GRAY))
-                .append(Component.text(Utils.formatDecimal(quality) + "%", color))
+                .append(Component.text(Utils.formatDecimal(quality * 100) + "%", color))
                 .append(Component.text(")", NamedTextColor.GRAY));
     }
 

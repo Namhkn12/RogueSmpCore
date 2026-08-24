@@ -2,11 +2,10 @@ package com.roguesmp.command;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.registry.Registry;
+import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 
 public final class ReloadCommand {
 
@@ -17,9 +16,7 @@ public final class ReloadCommand {
         new CommandAPICommand("smpreload")
                 .withArguments(
                         new StringArgument("registry")
-                                .replaceSuggestions(ArgumentSuggestions.strings(info ->
-                                        Registry.getReloadableKeys().toArray(String[]::new)
-                                ))
+                                .replaceSuggestions(ArgumentSuggestions.strings(Registry.getReloadableKeys()))
                 )
                 .executes((sender, args) -> {
 
@@ -28,9 +25,9 @@ public final class ReloadCommand {
                     boolean found = RogueSmpCore.getInstance().reloadRegistry(key);
 
                     if (found) {
-                        sender.sendMessage("§aRegistry '" + key + "' reloaded.");
+                        sender.sendMessage(Utils.fromString("<green>Registry '" + key + "' reloaded."));
                     } else {
-                        sender.sendMessage("§cNo reloadable registry named '" + key + "'.");
+                        sender.sendMessage(Utils.fromString("<red>No reloadable registry named '" + key + "'."));
                     }
 
                 }).register();

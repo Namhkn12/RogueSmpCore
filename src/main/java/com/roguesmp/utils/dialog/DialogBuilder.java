@@ -15,11 +15,14 @@ import java.util.function.Consumer;
 
 /**
  * A builder class providing a fluent API to configure base dialog settings, content bodies, and inputs.
+ * <p>
+ *     Default DialogAfterAction is initially NONE, and pause = false so that mouse don't flicker between dialogs.
+ * </p>
  */
 public class DialogBuilder {
     private final Component title;
     private Component externalTitle = null;
-    private DialogBase.DialogAfterAction afterAction = null;
+    private DialogBase.DialogAfterAction afterAction = DialogBase.DialogAfterAction.NONE;
     private boolean closeWithEscape = true;
 
     private final List<DialogBody> bodies = new ArrayList<>();
@@ -324,11 +327,12 @@ public class DialogBuilder {
 
     private DialogBase buildBase() {
         DialogBase.Builder baseBuilder = DialogBase.builder(title)
+                .pause(false)
                 .canCloseWithEscape(closeWithEscape)
                 .body(bodies)
                 .inputs(inputs);
         if (externalTitle != null) baseBuilder.externalTitle(externalTitle);
-        if (afterAction != null) baseBuilder.afterAction(afterAction);
+        baseBuilder.afterAction(afterAction);
         return baseBuilder.build();
     }
 }

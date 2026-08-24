@@ -48,7 +48,7 @@ public class CraftingGui extends BaseGui {
             InventoryAction.PLACE_ALL_INTO_BUNDLE,
             InventoryAction.PICKUP_SOME_INTO_BUNDLE,
             InventoryAction.PLACE_SOME_INTO_BUNDLE
-    ); //Also include drag, inside InventoryDragEvent
+    );
 
     private final Player player;
     private CraftingState state;
@@ -133,14 +133,8 @@ public class CraftingGui extends BaseGui {
             return;
         }
 
-        int slot = event.getSlot();
-
-        if (isCraftingGridSlot(slot)) {
-            Utils.runLater(this::checkAndSyncState);
-            return;
-        }
-
         super.onClickTopInventory(event);
+        Utils.runLater(this::checkAndSyncState);
     }
 
     @Override
@@ -154,7 +148,7 @@ public class CraftingGui extends BaseGui {
 
     @Override
     public void onDragInventory(InventoryDragEvent event) {
-        event.setCancelled(true);
+        Utils.runLater(this::checkAndSyncState);
     }
 
     private void checkAndSyncState() {

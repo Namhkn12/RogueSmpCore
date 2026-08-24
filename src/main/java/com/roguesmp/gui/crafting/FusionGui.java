@@ -5,6 +5,7 @@ import com.roguesmp.crafting.recipe.CraftingRecipes;
 import com.roguesmp.crafting.recipe.FusionRecipe;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.gui.BaseGui;
+import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -16,6 +17,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -24,11 +26,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * {@code /fusiondemo} GUI - a player-fillable {@link FusionRecipe} layout: 8 ingredient pedestals
@@ -110,11 +108,22 @@ public class FusionGui extends BaseGui {
     private static final int CONVERGE_FRAMES = MAX_JOURNEY_LENGTH; // frames 0..CONVERGE_FRAMES, last one finishes clearing the longest trail
     private static final long ANIMATION_FRAME_INTERVAL = 2L;
 
+    private static final Set<InventoryAction> DISALLOWED_ACTION = EnumSet.of(
+            InventoryAction.PICKUP_FROM_BUNDLE,
+            InventoryAction.PLACE_FROM_BUNDLE,
+            InventoryAction.PICKUP_ALL_INTO_BUNDLE,
+            InventoryAction.PLACE_ALL_INTO_BUNDLE,
+            InventoryAction.PICKUP_SOME_INTO_BUNDLE,
+            InventoryAction.PLACE_SOME_INTO_BUNDLE
+    );
+
     private enum State {IDLE, PROCESSING, AWAITING_PICKUP}
 
     private final Player player;
 
     private State state = State.IDLE;
+
+    private GuiState guiState = new GuiState(0, null);
 
     /** The real input item, captured right before animating - lets {@link #onCloseInventory} give back the actual item instead of the "Đang hợp nhất" placeholder if the GUI closes mid-fusion. */
     private @Nullable ItemStack frozenInputForClose;
@@ -126,10 +135,16 @@ public class FusionGui extends BaseGui {
 
     @Override
     public void setup() {
+        int newHash = calculateIngredientHash();
+        if (guiState.slotHash() != newHash) {
+            ItemStack[] items = currentItems();
+            FusionRecipe recipe = CraftingManager.getInstance().match(CraftingRecipes.FUSION, items, 0, 0);
+            this.guiState = new GuiState(newHash, recipe);
+        }
 
         addButton(CLOSE_SLOT, closeButton(), event -> player.closeInventory());
         fillBackground();
-        render();
+        processAndRender();
     }
 
     /** Fills every slot except the ingredient pedestals, their trails, input/output, and the bottom-row buttons. */
@@ -143,18 +158,22 @@ public class FusionGui extends BaseGui {
 
     @Override
     public void onClickTopInventory(InventoryClickEvent event) {
+        if (DISALLOWED_ACTION.contains(event.getAction())) {
+            event.setCancelled(true);
+            return;
+        }
         super.onClickTopInventory(event);
-        Utils.runLater(this::render);
+        Utils.runLater(this::checkAndSyncState);
     }
 
     @Override
     public void onClickBottomInventory(InventoryClickEvent event) {
-        Utils.runLater(this::render);
+        Utils.runLater(this::checkAndSyncState);
     }
 
     @Override
     public void onDragInventory(InventoryDragEvent event) {
-        event.setCancelled(true);
+        Utils.runLater(this::checkAndSyncState);
     }
 
     @Override
@@ -171,8 +190,8 @@ public class FusionGui extends BaseGui {
         if (input != null && !input.getType().isAir()) PlayerUtils.giveItem(player, input);
     }
 
-    private void render() {
-        if (state == State.PROCESSING) return; // the animation owns every fusion slot until it finishes
+    private void processAndRender() {
+        if (state == State.PROCESSING) return;
 
         if (state == State.AWAITING_PICKUP) {
             ItemStack current = getInventory().getItem(INPUT_SLOT);
@@ -191,8 +210,8 @@ public class FusionGui extends BaseGui {
         for (int slot : INGREDIENT_SLOTS) addAction(slot, event -> {});
         addAction(INPUT_SLOT, event -> {});
 
-        ItemStack[] items = currentItems();
-        FusionRecipe matched = CraftingManager.getInstance().match(CraftingRecipes.FUSION, items, 0, 0);
+        // Use cached recipe from state
+        FusionRecipe matched = guiState.recipe();
 
         addButton(FUSE_BUTTON_SLOT, fuseButtonItem(matched), matched != null ? this::onFuseButtonClick : ClickHandler.noAction());
         renderIngredientTrails(matched != null);
@@ -361,7 +380,8 @@ public class FusionGui extends BaseGui {
 
         frozenInputForClose = null;
         state = State.AWAITING_PICKUP;
-        render();
+
+        Utils.runLater(this::checkAndSyncState);
     }
 
     /** Covers the background, the trails and the (now-empty) ingredient pedestals themselves in green - a "success" screen around the result. */
@@ -429,6 +449,57 @@ public class FusionGui extends BaseGui {
         ItemStack item = ItemStack.of(Material.BARRIER);
         item.setData(DataComponentTypes.ITEM_NAME, Utils.text("Close", NamedTextColor.RED));
         return item;
+    }
+
+    public record GuiState(int slotHash, @Nullable FusionRecipe recipe) {}
+
+    /**
+     * Check back-end state of the gui against current inventory state and re-render if needed. <br>
+     * Needed since a lot of processing happen a tick after the click has already happened.
+     */
+    private void checkAndSyncState() {
+        if (state == State.PROCESSING) return;
+
+        int newHash = calculateIngredientHash();
+
+        if (guiState.slotHash() == newHash) {
+            return;
+        }
+
+        // Match recipe against current inventory
+        ItemStack[] items = currentItems();
+        FusionRecipe newRecipe = CraftingManager.getInstance().match(CraftingRecipes.FUSION, items, 0, 0);
+
+        // Skip update if state hasn't effectively changed
+        if (guiState.slotHash() == newHash && guiState.recipe() == newRecipe) {
+            return;
+        }
+
+        // Update cached state and re-render GUI components
+        this.guiState = new GuiState(newHash, newRecipe);
+        setup();
+    }
+
+    private int calculateIngredientHash() {
+        int hash = 1;
+        Inventory inv = getInventory();
+
+        // Include input slot
+        ItemStack input = inv.getItem(INPUT_SLOT);
+        if (!ItemStackUtils.isValidItem(input)) {
+            hash = 31 * hash;
+        } else hash = 31 * input.hashCode();
+        // Include ingredient slots in
+        for (int slot : INGREDIENT_SLOTS) {
+            ItemStack itemStack = inv.getItem(slot);
+            if (!ItemStackUtils.isValidItem(itemStack)) {
+                hash = 31 * hash;
+            } else {
+                hash = 31 * hash + itemStack.hashCode();
+            }
+        }
+
+        return hash;
     }
 
     public static void register() {

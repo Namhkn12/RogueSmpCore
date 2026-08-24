@@ -15,18 +15,18 @@ import org.joml.Vector3f;
 
 public class DamageDisplayUtils {
 
-    private static final float BASE_SCALE = 1f;
+    private static final float BASE_SCALE = 0.65f;
     private static final float POP_START_SCALE = BASE_SCALE * 0.4f;
-    private static final float PEAK_SCALE_MULTIPLIER = 1.35f;
+    private static final float PEAK_SCALE_MULTIPLIER = 1.3f;
     private static final float END_SCALE = 0.01f;
-    private static final float CRIT_SCALE_MULTIPLIER = 1.3f;
-    private static final float RISE_MID_HEIGHT = 0.4f;
-    private static final float RISE_HEIGHT = 0.9f;
-    private static final float DRIFT_RANGE = 0.25f;
+    private static final float CRIT_SCALE_MULTIPLIER = 1.2f;
+    private static final float RISE_MID_HEIGHT = 0.35f;
+    private static final float RISE_HEIGHT = 0.85f;
+    private static final float DRIFT_RANGE = 0.2f;
 
     private static final int POP_TICKS = 3;
-    private static final int GROW_TICKS = 6;
-    private static final int SHRINK_TICKS = 8;
+    private static final int GROW_TICKS = 5;
+    private static final int SHRINK_TICKS = 7;
     private static final int REMOVE_TICKS = POP_TICKS + GROW_TICKS + SHRINK_TICKS + 1;
 
     public static void spawnDamageDisplay(Location hitLocation, double damage, DamageType type, boolean isCritical) {
@@ -38,7 +38,7 @@ public class DamageDisplayUtils {
             entity.setPersistent(false);
             entity.text(text);
             entity.setBillboard(Display.Billboard.CENTER);
-            entity.setBackgroundColor(Color.fromARGB(50, 0, 0, 0));
+            entity.setBackgroundColor(Color.fromARGB(40, 0, 0, 0));
             entity.setTransformation(scaled(new Vector3f(), POP_START_SCALE));
         });
 
@@ -103,9 +103,9 @@ public class DamageDisplayUtils {
 
         // Crit is indicated by scale (see targetScale above) plus this marker, applied on top of
         // whatever type icon/color is already showing — kept separate so it doesn't crowd out the type.
-        String suffix = isCritical ? " ‼" : "";
+        String suffix = isCritical ? "‼" : "";
 
-        return Component.text(prefix + val + suffix, color, TextDecoration.BOLD)
+        return Component.text(prefix + val + suffix, color)
                 .decoration(TextDecoration.ITALIC, type.name().contains("ABILITY"));
     }
 }
