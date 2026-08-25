@@ -47,7 +47,7 @@ public final class CreatorHubGui {
                 (response, audience) -> Utils.runLater(() -> new RecipeCreatorGui().openKindPickerDialog(player)));
 
         multi.columns(2);
-        multi.exitButton(Component.text("Đóng"), null);
+        multi.exitButton(Component.text("Đóng"), (response, audience) -> audience.closeDialog());
 
         player.showDialog(multi.build());
     }

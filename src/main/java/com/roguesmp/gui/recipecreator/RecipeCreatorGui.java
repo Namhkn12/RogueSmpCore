@@ -108,7 +108,7 @@ public class RecipeCreatorGui {
             });
         }
         multi.columns(3);
-        multi.exitButton(Component.text("Huỷ"), null);
+        multi.exitButton(Component.text("Huỷ"), (s, v) -> v.closeDialog());
 
         player.showDialog(multi.build());
     }
