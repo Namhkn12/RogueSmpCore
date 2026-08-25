@@ -53,7 +53,7 @@ public class RandomStatModifier implements ItemModifier {
         Map<Attributes, Double> attributeModifiers = new EnumMap<>(Attributes.class);
         Map<Attributes, Double> baseAttributes = attributeComponent.getBaseAttributes();
 
-        double attributeMultiplier = -0.20 * (1.0 - quality);
+        double attributeMultiplier = -0.3 * (1.0 - quality);
         for (Attributes attr : AFFECTED_ATTRIBUTE) {
             Double baseValue = baseAttributes.get(attr);
             if (baseValue != null && !Utils.isEffectiveZero(baseValue)) {
