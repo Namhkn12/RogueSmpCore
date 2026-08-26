@@ -7,11 +7,13 @@ import com.roguesmp.crafting.recipe.FusionRecipe;
 import com.roguesmp.crafting.recipe.ShapedCraftingRecipe;
 import com.roguesmp.crafting.recipe.ShapelessCraftingRecipe;
 import com.roguesmp.crafting.CraftingManager;
+import com.roguesmp.gui.crafting.RecipeBrowserGui;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -180,10 +182,29 @@ public class RecipeCreatorGui {
         multi.addButton(Component.text("save", NamedTextColor.GOLD), Component.text("Lưu công thức này vào registry (ghi đè nếu ID đã tồn tại)."),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
 
+        multi.addButton(Component.text("delete", NamedTextColor.RED), null,
+                (response, audience) -> audience.showDialog(buildDeleteDialog()));
         multi.columns(3);
         multi.exitButton(Component.text("Đóng"), (v, a) -> a.closeDialog());
 
         player.showDialog(multi.build());
+    }
+
+    private Dialog buildDeleteDialog() {
+        DialogBuilder builder = DialogBuilder.create(Component.text("Xác nhận xóa?"))
+                .addTextBody(Component.text("Xác nhận xóa? Hành động này không thể hoàn tác."));
+        Dialog dialog = builder.confirmation()
+                .yesButton(Component.text("Vẫn xóa"), null, (response, audience) -> {
+                    Registries.CRAFTING_RECIPE.removeAndDeleteFiles(RogueSmpCore.getInstance(), id);
+                    CraftingManager.getInstance().rebuild();
+                    audience.sendMessage(Component.text("Deleted entry: " + id, NamedTextColor.RED));
+                    new RecipeBrowserGui((Player) audience).showInventory((Player) audience);
+                })
+                .noButton(Component.text("Thôi, không xóa nữa"), null, (response, audience) -> {
+                    openMainDialog((Player) audience);
+                }).build();
+
+        return dialog;
     }
 
     /** {@code itemId} (or "chưa đặt"/red for a blank/unresolvable one) with its count - used as both button tooltips and body text wherever an ingredient reference needs a human-readable, validity-colored label. */
@@ -633,7 +654,7 @@ public class RecipeCreatorGui {
                             new RecipeCreatorGui().openKindPickerDialog(player);
                         }))
                 .withSubcommand(new CommandAPICommand("edit")
-                        .withArguments(new StringArgument("recipe_id"))
+                        .withArguments(new StringArgument("recipe_id").replaceSuggestions(ArgumentSuggestions.strings(Registries.CRAFTING_RECIPE.getAll().keySet())))
                         .executesPlayer((player, args) -> {
                             String recipeId = (String) args.get("recipe_id");
                             CraftingRecipe existing = Registries.CRAFTING_RECIPE.get(recipeId);

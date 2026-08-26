@@ -35,6 +35,7 @@ public class ItemBrowser extends BaseGui {
 
     private final ItemStack infoBook = ItemStack.of(Material.BOOK);
     private final ItemStack searchButton = ItemStack.of(Material.COMPASS);
+    private final ItemStack createNew = ItemStack.of(Material.EMERALD);
 
     private final int pageSize = 36;
     private int totalPages;
@@ -54,6 +55,7 @@ public class ItemBrowser extends BaseGui {
                 Utils.text("Chuột phải để mở edit gui cho item.", NamedTextColor.GREEN),
                 Utils.text("Shift-Click để nhận stack.", NamedTextColor.GREEN))
         ));
+
 
         updateSearchFilters();
     }
@@ -76,6 +78,11 @@ public class ItemBrowser extends BaseGui {
             this.addButton(5, i, FILLER_BLACK, ClickHandler.noAction());
         }
 
+        createNew.setData(DataComponentTypes.ITEM_NAME, Component.text("Tạo mới", NamedTextColor.GREEN));
+        this.addButton(0, 7, createNew, event -> {
+            event.setCancelled(true);
+            new ItemCreatorGui().openMainDialog((Player) event.getWhoClicked());
+        });
         this.addButton(0, 4, infoBook, ClickHandler.noAction());
 
         this.addButton(0, 8, searchButton, event -> {

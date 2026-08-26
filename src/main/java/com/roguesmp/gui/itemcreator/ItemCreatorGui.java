@@ -4,6 +4,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.Enchants;
+import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.ComponentKey;
 import com.roguesmp.item.component.ItemComponent;
@@ -149,14 +150,34 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.PASSIVE_ABILITY),
                 tooltip("Đặt các ability bị động cho item.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildPassiveAbilityDialog(player))));
+        multi.addButton(componentLabel(ItemComponentKeys.COMMAND_EXECUTOR),
+                tooltip("Vật phẩm này có thể dùng lưu lệnh cho tiện lợi", null),
+                (response, audience) -> player.showDialog(buildCommandExecutorDialog(player)));
 
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
-
+        multi.addButton(Component.text("delete", NamedTextColor.RED), null,
+                (response, audience) -> audience.showDialog(buildDeleteDialog()));
         multi.columns(3);
         multi.exitButton(Component.text("Đóng"), (response, audience) -> player.closeDialog());
 
         player.showDialog(multi.build());
+    }
+
+    private Dialog buildDeleteDialog() {
+        DialogBuilder builder = DialogBuilder.create(Component.text("Xác nhận xóa?"))
+                .addTextBody(Component.text("Xác nhận xóa? Hành động này không thể hoàn tác."));
+        Dialog dialog = builder.confirmation()
+                .yesButton(Component.text("Vẫn xóa"), null, (response, audience) -> {
+                    Registries.ITEM.removeAndDeleteFiles(RogueSmpCore.getInstance(), id);
+                    audience.sendMessage(Component.text("Deleted entry: " + id, NamedTextColor.RED));
+                    new ItemBrowser().showInventory((Player) audience);
+                })
+                .noButton(Component.text("Thôi, không xóa nữa"), null, (response, audience) -> {
+                    openMainDialog((Player) audience);
+                }).build();
+
+        return dialog;
     }
 
     private Component componentLabel(ComponentKey<?> key) {
@@ -657,6 +678,23 @@ public class ItemCreatorGui {
                 });
     }
 
+    private Dialog buildCommandExecutorDialog(Player player) {
+        CommandExecutorComponent current = (CommandExecutorComponent) components.get(ItemComponentKeys.COMMAND_EXECUTOR.id());
+        DialogBuilder builder = DialogBuilder.create(Component.text("Đặt Command"))
+                .canCloseWithEscape(false)
+                .addTextInput("value", Component.text("Lệnh ban đầu, có thể đổi sau."));
+
+        return wrapComponentDialog(player, ItemComponentKeys.COMMAND_EXECUTOR, builder,
+                (response, audience) -> {
+                    String value = response.getText("value");
+                    components.put(ItemComponentKeys.COMMAND_EXECUTOR.id(), new CommandExecutorComponent(value));
+                    openMainDialog(player);
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.COMMAND_EXECUTOR.id());
+                    openMainDialog(player);
+                });
+    }
     // ==========================================
     // COMMAND
     // ==========================================

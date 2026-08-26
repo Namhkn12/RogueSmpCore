@@ -27,6 +27,7 @@ public class ItemComponentKeys {
     public static final ComponentKey<MagicPowerComponent> MAGIC_POWER = register("magic_power", MagicPowerComponent.CODEC);
     public static final ComponentKey<RandomStatComponent> RANDOM_STAT = register("random_stat", RandomStatComponent.CODEC);
     public static final ComponentKey<UsageTimerComponent> USAGE_TIMER = register("usage_timer", UsageTimerComponent.CODEC);
+    public static final ComponentKey<CommandExecutorComponent> COMMAND_EXECUTOR = register("command_executor", CommandExecutorComponent.CODEC);
 
     public static void loadClass() {
 

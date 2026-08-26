@@ -107,11 +107,29 @@ public class EntityCreatorGui {
 
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
+        multi.addButton(Component.text("delete", NamedTextColor.RED), null,
+                (response, audience) -> Utils.runLater(() -> player.showDialog(buildDeleteDialog())));
 
         multi.columns(3);
         multi.exitButton(Component.text("Đóng"), (response, audience) -> audience.closeDialog());
 
         player.showDialog(multi.build());
+    }
+
+    private Dialog buildDeleteDialog() {
+        DialogBuilder builder = DialogBuilder.create(Component.text("Xác nhận xóa?"))
+                .addTextBody(Component.text("Xác nhận xóa? Hành động này không thể hoàn tác."));
+        Dialog dialog = builder.confirmation()
+                .yesButton(Component.text("Vẫn xóa"), null, (response, audience) -> {
+                    Registries.LOOT_TABLE.removeAndDeleteFiles(RogueSmpCore.getInstance(), id);
+                    audience.sendMessage(Component.text("Deleted entry: " + id, NamedTextColor.RED));
+                    new EntityBrowserGui((Player) audience).showInventory((Player) audience);
+                })
+                .noButton(Component.text("Thôi, không xóa nữa"), null, (response, audience) -> {
+                    openMainDialog((Player) audience);
+                }).build();
+
+        return dialog;
     }
 
     private Component componentLabel(EntityComponentKey<?> key) {

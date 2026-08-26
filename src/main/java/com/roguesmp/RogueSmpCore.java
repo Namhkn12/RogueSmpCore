@@ -3,7 +3,9 @@ package com.roguesmp;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.command.ReloadCommand;
+import com.roguesmp.command.SmpBrowserCommand;
 import com.roguesmp.gui.crafting.FusionGui;
+import com.roguesmp.gui.crafting.RecipeBrowserGui;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.entity.component.EntityComponentKeys;
@@ -27,7 +29,10 @@ import com.roguesmp.gui.entitycreator.EntityCreatorGui;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
+import com.roguesmp.gui.loottablecreator.LootTableBrowserGui;
 import com.roguesmp.gui.loottablecreator.LootTableGuiCreator;
+import com.roguesmp.gui.npccreator.NpcBrowserGui;
+import com.roguesmp.gui.npccreator.NpcCreatorGui;
 import com.roguesmp.gui.recipecreator.RecipeCreatorGui;
 import com.roguesmp.loot.manager.LootTableManager;
 import com.roguesmp.loot.service.LootService;
@@ -172,6 +177,7 @@ public final class RogueSmpCore extends JavaPlugin {
         ItemCreatorGui.registerCommand();
         EntityCreatorGui.registerCommand();
         LootTableGuiCreator.registerCommand();
+        LootTableBrowserGui.registerCommand();
         RecipeCreatorGui.registerCommand();
         CreatorHubGui.registerCommand();
 
@@ -181,6 +187,8 @@ public final class RogueSmpCore extends JavaPlugin {
         FxCommand.register();
 
         NpcManager.getInstance().registerCommand();
+        NpcCreatorGui.registerCommand();
+        NpcBrowserGui.registerCommand();
 
         AbilityCatalogue.register();
 
@@ -191,6 +199,8 @@ public final class RogueSmpCore extends JavaPlugin {
         ItemRepairGui.registerCommand();
         CraftingGui.registerCmd();
         FusionGui.register();
+        SmpBrowserCommand.register();
+        RecipeBrowserGui.registerCommand();
 
         IslandManager.getInstance().registerCommands();
         QuestManager.getInstance().registerQuestCommand();
