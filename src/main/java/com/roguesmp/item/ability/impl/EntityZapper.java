@@ -1,6 +1,7 @@
 package com.roguesmp.item.ability.impl;
 
 import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.MapCodec;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.ability.ItemAbility;
 import com.roguesmp.player.SmpPlayer;
@@ -11,6 +12,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +21,7 @@ import java.util.List;
 
 public class EntityZapper implements ItemAbility {
 
-    public static final Codec<EntityZapper> CODEC = Codec.BOOLEAN.xmap(aBoolean -> new EntityZapper(), EntityZapper::isFlag);
+    public static final Codec<EntityZapper> CODEC = Codec.unit(EntityZapper::new);
     public static final String TYPE_KEY = "entity_zapper";
 
     @Override
@@ -46,9 +48,7 @@ public class EntityZapper implements ItemAbility {
             return;
         }
         event.getRightClicked().remove();
-    }
-
-    public boolean isFlag() {
-        return true;
+        player.sendMessage(Component.text("Úm ba la xì bùa", NamedTextColor.AQUA));
+        player.getBukkitPlayer().spawnParticle(Particle.EXPLOSION, event.getRightClicked().getLocation().add(0, 0.5, 0), 5);
     }
 }

@@ -185,7 +185,7 @@ public interface Codec<A> {
      * @param clazz the enum class
      * @return a codec for the specified enum
      */
-    public static <E extends Enum<E>> Codec<E> enumOf(Class<E> clazz) {
+    static <E extends Enum<E>> Codec<E> enumOf(Class<E> clazz) {
         return Codec.STRING.comapFlatMap(
                 name -> {
                     try {
@@ -196,6 +196,20 @@ public interface Codec<A> {
                 },
                 Enum::name
         );
+    }
+
+    /**
+     * A MapCodec with no fields of its own — decode always succeeds by calling {@code instance},
+     * ignoring whatever else is in the object; encode contributes nothing. Useful for a dispatch
+     * case (see {@link Codec#dispatch}) that only needs its type key and no other data, e.g. a
+     * "no configurable params" spell/effect/requirement variant.
+     *
+     * @param <E> the type produced
+     * @param constructor supplies the (typically stateless/singleton-shaped) value to decode to
+     * @return a MapCodec that reads/writes no fields
+     */
+    static <E> Codec<E> unit(Supplier<E> constructor) {
+        return MapCodec.unit(constructor).codec();
     }
 
     // --- COMBINATORS ---

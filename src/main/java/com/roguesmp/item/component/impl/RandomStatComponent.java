@@ -23,23 +23,21 @@ import java.util.List;
  */
 public class RandomStatComponent implements ItemComponent, UniqueTrackingComponent {
 
-    public static final Codec<RandomStatComponent> CODEC = Codec.BOOLEAN.xmap(RandomStatComponent::new, RandomStatComponent::hasRandomQuality);
+    public static final Codec<RandomStatComponent> CODEC = Codec.unit(RandomStatComponent::new);
 
     private static final NamespacedKey QUALITY_KEY = Keys.of("quality");
-    private final boolean hasQuality;
 
     private double currentQuality = 0;
     private int currentMagicPower = -1;
     private boolean freshlyRolled = false;
 
-    public RandomStatComponent(boolean hasQuality) {
-        this.hasQuality = hasQuality;
+    public RandomStatComponent() {
     }
 
 
     @Override
     public @NotNull ItemComponent copy() {
-        return new RandomStatComponent(hasQuality);
+        return new RandomStatComponent();
     }
 
     @Override
@@ -50,17 +48,16 @@ public class RandomStatComponent implements ItemComponent, UniqueTrackingCompone
             line = line.append(mpLine);
         }
 
-        if (hasQuality) {
-            if (context.player() == null) {
-                line = line.append(Component.text("Chất lượng: ", NamedTextColor.GRAY))
-                        .append(buildQualityText(1d));
-            } else {
-                line = line.append(Component.text("Chất lượng: ", NamedTextColor.GRAY))
-                        .append(buildQualityText(currentQuality));
-            }
 
-            context.builder().putLines(0, List.of(line));
+        if (context.player() == null) {
+            line = line.append(Component.text("Chất lượng: ", NamedTextColor.GRAY))
+                    .append(buildQualityText(1d));
+        } else {
+            line = line.append(Component.text("Chất lượng: ", NamedTextColor.GRAY))
+                    .append(buildQualityText(currentQuality));
         }
+        context.builder().putLines(0, List.of(line));
+
 
 
     }
@@ -129,10 +126,6 @@ public class RandomStatComponent implements ItemComponent, UniqueTrackingCompone
                 .append(Component.text("(", NamedTextColor.GRAY))
                 .append(Component.text(Utils.formatDecimal(quality * 100) + "%", color))
                 .append(Component.text(")", NamedTextColor.GRAY));
-    }
-
-    public boolean hasRandomQuality() {
-        return hasQuality;
     }
 
     public double getCurrentQuality() {

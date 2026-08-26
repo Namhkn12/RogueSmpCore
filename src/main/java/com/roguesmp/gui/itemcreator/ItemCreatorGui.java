@@ -586,17 +586,13 @@ public class ItemCreatorGui {
     }
 
     private Dialog buildRandomStatDialog(Player player) {
-        RandomStatComponent current = (RandomStatComponent) components.get(ItemComponentKeys.RANDOM_STAT.id());
-        boolean initial = current != null && current.hasRandomQuality();
         DialogBuilder builder = DialogBuilder.create(Component.text("Chất lượng ngẫu nhiên"))
                 .canCloseWithEscape(false)
-                .addTextBody(Component.text("Mỗi item được tạo ra sẽ roll một chất lượng ngẫu nhiên, làm giảm tối đa 20% một số chỉ số base khi chất lượng thấp."))
-                .addCheckboxInput("value", Component.text("Có chất lượng ngẫu nhiên"), b -> b.initial(initial));
+                .addTextBody(Component.text("Mỗi item được tạo ra sẽ roll một chất lượng ngẫu nhiên, làm giảm tối đa 30% một số chỉ số base khi chất lượng thấp."));
 
         return wrapComponentDialog(player, ItemComponentKeys.RANDOM_STAT, builder,
                 (response, audience) -> {
-                    Boolean value = response.getBoolean("value");
-                    components.put(ItemComponentKeys.RANDOM_STAT.id(), new RandomStatComponent(value != null && value));
+                    components.put(ItemComponentKeys.RANDOM_STAT.id(), new RandomStatComponent());
                     Utils.runLater(() -> openMainDialog(player));
                 },
                 (response, audience) -> {

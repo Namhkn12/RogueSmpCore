@@ -91,7 +91,7 @@ public class CommandExecutorComponent implements ItemComponent, InteractableComp
 
     private void openSetCommandDialog(ItemStack neededToSet, Player player) {
         Dialog dialog = DialogBuilder.create(Component.text("Command"))
-                .addTextInput("cmd", Component.text("Command không dấu /"))
+                .addTextInput("cmd", Component.text("Command không dấu /"), builder -> builder.initial(loadedCommand))
                 .confirmation()
                 .yesButton(Component.text("Đặt làm command mới"), null,
                         (response, audience) -> {
