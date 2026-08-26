@@ -12,6 +12,8 @@ public class ItemAbilities {
     public static final Codec<Barking> BARKING =
             register(Barking.TYPE_KEY, Barking.CODEC);
 
+    public static final Codec<EntityZapper> ZAPPER = register(EntityZapper.TYPE_KEY, EntityZapper.CODEC);
+
     public static void loadClass() {
 
     }

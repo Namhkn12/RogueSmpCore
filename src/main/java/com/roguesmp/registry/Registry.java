@@ -274,6 +274,57 @@ public class Registry<T> {
         return value;
     }
 
+    /**
+     * Removes an entry from memory and deletes its associated {@code .json} file from disk.
+     * Unbinds any existing {@link Holder} associated with this ID. See {@link #unregister(String)} for remove from memory only.
+     *
+     * @param plugin The plugin instance (used to locate the data folder)
+     * @param id     The registry key/filename (without .json extension)
+     * @return true if the entry was removed from memory and the file was successfully deleted (or didn't exist)
+     */
+    public @Blocking boolean removeAndDeleteFiles(RogueSmpCore plugin, String id) {
+        if (locationKey == null) {
+            RogueSmpCore.LOGGER.warn("Attempted to delete file for in-memory registry '{}'", "<in-memory>");
+            return unregister(id);
+        }
+
+        // 1. Remove from in-memory maps
+        boolean wasRegistered = unregister(id);
+
+        // 2. Delete file from disk
+        File folder = new File(plugin.getDataFolder(), locationKey);
+        File file = new File(folder, id + ".json");
+
+        if (!file.exists()) {
+            RogueSmpCore.LOGGER.warn("File '{}.json' in '{}' did not exist on disk during deletion", id, locationKey);
+            return wasRegistered;
+        }
+
+        boolean deleted = file.delete();
+        if (deleted) {
+            RogueSmpCore.LOGGER.info("Deleted entry file '{}/{}.json'", locationKey, id);
+        } else {
+            RogueSmpCore.LOGGER.error("Failed to delete file '{}/{}.json'", locationKey, id);
+        }
+
+        return deleted;
+    }
+
+    /**
+     * Removes an entry from in-memory maps and unbinds its {@link Holder}.
+     *
+     * @param id The registry key to unregister
+     * @return true if an entry was previously registered under this ID
+     */
+    public boolean unregister(String id) {
+        T removed = entries.remove(id);
+        Holder<T> holder = holders.get(id);
+        if (holder != null) {
+            holder.unbind();
+        }
+        return removed != null;
+    }
+
     public @Nullable T get(String id) {
         return entries.get(id);
     }

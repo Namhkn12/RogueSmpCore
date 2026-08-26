@@ -6,8 +6,10 @@ import com.roguesmp.event.DurabilityChangedEvent;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.ability.ItemAbility;
 import com.roguesmp.item.component.ItemComponentKeys;
+import com.roguesmp.item.component.impl.EquipAttributeComponent;
 import com.roguesmp.item.component.impl.PassiveAbilityComponent;
 import com.roguesmp.player.SmpPlayer;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 import java.util.function.BiConsumer;
 
@@ -41,14 +43,13 @@ public class ItemAbilityMechanic implements PlayerMechanic {
     }
 
     @Override
-    public void onDurabilityChange(DurabilityChangedEvent event, SmpPlayer player) {
-        SmpItem item = event.getItem();
-        PassiveAbilityComponent component = item.getComponent(ItemComponentKeys.PASSIVE_ABILITY);
-        if (component == null) return;
+    public void onEntityInteract(PlayerInteractEntityEvent event, SmpPlayer player) {
+        forEachAbility(player, (smpItem, itemAbility) -> itemAbility.onInteractEntity(player, smpItem, event));
+    }
 
-        for (ItemAbility ability : component.getAbilities()) {
-            ability.onDurabilityChange(player, item, event);
-        }
+    @Override
+    public void onDurabilityChange(DurabilityChangedEvent event, SmpPlayer player) {
+        forEachAbility(player, (smpItem, itemAbility) -> itemAbility.onDurabilityChange(player, smpItem, event));
     }
 
     private void forEachAbility(SmpPlayer player, BiConsumer<SmpItem, ItemAbility> consumer) {
@@ -58,10 +59,21 @@ public class ItemAbilityMechanic implements PlayerMechanic {
 
             PassiveAbilityComponent component = item.getComponent(ItemComponentKeys.PASSIVE_ABILITY);
             if (component == null) continue;
-
-            for (ItemAbility ability : component.getAbilities()) {
-                consumer.accept(item, ability);
+            EquipAttributeComponent equipAttributeComponent = item.getComponent(ItemComponentKeys.ATTRIBUTE);
+            if (equipAttributeComponent == null) {
+                for (ItemAbility ability : component.getAbilities()) {
+                    consumer.accept(item, ability);
+                }
+            } else {
+                EquipSlot equipSlot = equipAttributeComponent.getSlot();
+                if (equipSlot == slot) {
+                    for (ItemAbility ability : component.getAbilities()) {
+                        consumer.accept(item, ability);
+                    }
+                }
             }
+
+
         }
     }
 }

@@ -27,6 +27,8 @@ public class DialogTypeBuilder {
                 .lifetime(ClickCallback.DEFAULT_LIFETIME)
                 .build();
     }
+    
+    private static final int DEFAULT_BUTTON_WIDTH = 100;
 
     // ==========================================
     // 1. NOTICE LAYOUT BUILDER
@@ -42,14 +44,14 @@ public class DialogTypeBuilder {
         public Notice(DialogBase base) { this.base = base; }
 
         /**
-         * Sets the button for the notice dialog with a default width of 100.
+         * Sets the button for the notice dialog with a default width of DEFAULT_BUTTON_WIDTH.
          *
          * @param label   the button text
          * @param handler the action to run when clicked
          * @return this builder
          */
         public Notice button(Component label, Component tooltip, DialogActionCallback handler) {
-            return button(label, tooltip, 100, handler);
+            return button(label, tooltip, DEFAULT_BUTTON_WIDTH, handler);
         }
 
         /**
@@ -94,7 +96,7 @@ public class DialogTypeBuilder {
         public Confirmation(DialogBase base) { this.base = base; }
 
         /**
-         * Sets the confirmation button with a default width of 100.
+         * Sets the confirmation button with a default width of DEFAULT_BUTTON_WIDTH.
          *
          * @param label   the button text
          * @param tooltip the button tooltip, or null if not set
@@ -102,7 +104,7 @@ public class DialogTypeBuilder {
          * @return this builder
          */
         public Confirmation yesButton(Component label, @Nullable Component tooltip, DialogActionCallback handler) {
-            return yesButton(label, tooltip, 100, handler);
+            return yesButton(label, tooltip, DEFAULT_BUTTON_WIDTH, handler);
         }
 
         /**
@@ -121,7 +123,7 @@ public class DialogTypeBuilder {
         }
 
         /**
-         * Sets the cancellation button with a default width of 100.
+         * Sets the cancellation button with a default width of DEFAULT_BUTTON_WIDTH.
          *
          * @param label   the button text
          * @param tooltip the button tooltip, or null if not set
@@ -129,7 +131,7 @@ public class DialogTypeBuilder {
          * @return this builder
          */
         public Confirmation noButton(Component label, @Nullable Component tooltip, DialogActionCallback handler) {
-            return noButton(label, tooltip, 100, handler);
+            return noButton(label, tooltip, DEFAULT_BUTTON_WIDTH, handler);
         }
 
         /**
@@ -176,7 +178,7 @@ public class DialogTypeBuilder {
         public MultiAction(DialogBase base) { this.base = base; }
 
         /**
-         * Adds an action button to the dialog grid with a default width of 100.
+         * Adds an action button to the dialog grid with a default width of DEFAULT_BUTTON_WIDTH.
          *
          * @param label   the button text
          * @param tooltip the button tooltip, or null if not set
@@ -184,7 +186,7 @@ public class DialogTypeBuilder {
          * @return this builder
          */
         public MultiAction addButton(Component label, @Nullable Component tooltip, DialogActionCallback handler) {
-            return addButton(label, tooltip, 100, handler);
+            return addButton(label, tooltip, DEFAULT_BUTTON_WIDTH, handler);
         }
 
         /**
@@ -214,14 +216,14 @@ public class DialogTypeBuilder {
         }
 
         /**
-         * Sets the exit button for the dialog with a default width of 100.
+         * Sets the exit button for the dialog with a default width of DEFAULT_BUTTON_WIDTH.
          *
          * @param label   the exit button text
          * @param handler the action to run when clicked
          * @return this builder
          */
         public MultiAction exitButton(Component label, DialogActionCallback handler) {
-            return exitButton(label, 100, handler);
+            return exitButton(label, DEFAULT_BUTTON_WIDTH, handler);
         }
 
         /**
@@ -266,7 +268,7 @@ public class DialogTypeBuilder {
         private final ArrayList<Dialog> dialogs = new ArrayList<>();
         private ActionButton exitButton = null;
         private int columns = 1;
-        private int buttonWidth = 100;
+        private int buttonWidth = DEFAULT_BUTTON_WIDTH;
 
         public DialogList(DialogBase base) {
             this.base = base;
@@ -295,14 +297,14 @@ public class DialogTypeBuilder {
         }
 
         /**
-         * Sets the exit button for the dialog with a default width of 100.
+         * Sets the exit button for the dialog with a default width of DEFAULT_BUTTON_WIDTH.
          *
          * @param label   the exit button text
          * @param handler the action to run when clicked
          * @return this builder
          */
         public DialogList exitButton(Component label, DialogActionCallback handler) {
-            return exitButton(label, 100, handler);
+            return exitButton(label, DEFAULT_BUTTON_WIDTH, handler);
         }
 
         /**
@@ -358,7 +360,7 @@ public class DialogTypeBuilder {
         private final DialogBase base;
         private ActionButton exitButton = null;
         private int columns = 1;
-        private int buttonWidth = 100;
+        private int buttonWidth = DEFAULT_BUTTON_WIDTH;
 
         public ServerLinks(DialogBase base) { this.base = base; }
 
@@ -385,14 +387,14 @@ public class DialogTypeBuilder {
         }
 
         /**
-         * Sets the exit button for the dialog with a default width of 100.
+         * Sets the exit button for the dialog with a default width of DEFAULT_BUTTON_WIDTH.
          *
          * @param label   the exit button text
          * @param handler the action to run when clicked
          * @return this builder
          */
         public ServerLinks exitButton(Component label, DialogActionCallback handler) {
-            return exitButton(label, 100, handler);
+            return exitButton(label, DEFAULT_BUTTON_WIDTH, handler);
         }
 
         /**

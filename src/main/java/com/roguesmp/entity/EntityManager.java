@@ -192,15 +192,5 @@ public class EntityManager {
 
                 })
                 .register();
-
-
-        new CommandAPICommand("smpentityreload")
-                .executes((sender, args) -> {
-
-                    getInstance().reload();
-
-                    sender.sendMessage("§aEntity registry reloaded.");
-
-                }).register();
     }
 }

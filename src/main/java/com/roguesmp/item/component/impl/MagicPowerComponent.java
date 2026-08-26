@@ -5,6 +5,7 @@ import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ItemComponent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -17,10 +18,11 @@ public class MagicPowerComponent implements ItemComponent {
 
     //Current is determined by QualityComponent in ItemModifier
     private int current;
-    private boolean shouldProvideLore; //If RandomStat exist, this will be false.
+    private boolean shouldProvideLore = true; //If RandomStat exist, this will be false.
 
     public MagicPowerComponent(int max) {
         this.max = max;
+        this.current = max;
     }
 
     @Override
@@ -31,7 +33,7 @@ public class MagicPowerComponent implements ItemComponent {
     @Override
     public void contributeLore(ItemLoreContext context) {
         if (!shouldProvideLore) return;
-        Component mpLine = Component.text("Ma lực: ", NamedTextColor.GRAY).append(Component.text(current, NamedTextColor.AQUA));
+        Component mpLine = Component.text("Ma lực: ", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE).append(Component.text(current, NamedTextColor.AQUA));
         context.builder().putLines(0, List.of(mpLine));
     }
 

@@ -4,6 +4,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.Enchants;
+import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.ComponentKey;
 import com.roguesmp.item.component.ItemComponent;
@@ -16,6 +17,7 @@ import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.registry.data.dialog.action.DialogActionCallback;
@@ -133,6 +135,9 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.ENCHANT),
                 tooltip("Đặt enchants cho item.", "Để trống \"enchants\" để đánh dấu item là \"có thể enchant được\""),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildEnchantDialog(player))));
+        multi.addButton(componentLabel(ItemComponentKeys.USAGE_TIMER),
+                tooltip("Đặt thời gian sử dụng khi người dùng trang bị, khi hết thời gian vật phẩm sẽ biến mất", null),
+                (response, audience) -> player.showDialog(buildUsageTimerDialog(player)));
         multi.addButton(componentLabel(ItemComponentKeys.CONSUMABLE),
                 tooltip("Biến một vật phẩm thành vật phẩm có thể ăn uống được.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildConsumableDialog(player))));
@@ -145,14 +150,34 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.PASSIVE_ABILITY),
                 tooltip("Đặt các ability bị động cho item.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildPassiveAbilityDialog(player))));
+        multi.addButton(componentLabel(ItemComponentKeys.COMMAND_EXECUTOR),
+                tooltip("Vật phẩm này có thể dùng lưu lệnh cho tiện lợi", null),
+                (response, audience) -> player.showDialog(buildCommandExecutorDialog(player)));
 
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
-
+        multi.addButton(Component.text("delete", NamedTextColor.RED), null,
+                (response, audience) -> audience.showDialog(buildDeleteDialog()));
         multi.columns(3);
-        multi.exitButton(Component.text("Đóng"), null);
+        multi.exitButton(Component.text("Đóng"), (response, audience) -> player.closeDialog());
 
         player.showDialog(multi.build());
+    }
+
+    private Dialog buildDeleteDialog() {
+        DialogBuilder builder = DialogBuilder.create(Component.text("Xác nhận xóa?"))
+                .addTextBody(Component.text("Xác nhận xóa? Hành động này không thể hoàn tác."));
+        Dialog dialog = builder.confirmation()
+                .yesButton(Component.text("Vẫn xóa"), null, (response, audience) -> {
+                    Registries.ITEM.removeAndDeleteFiles(RogueSmpCore.getInstance(), id);
+                    audience.sendMessage(Component.text("Deleted entry: " + id, NamedTextColor.RED));
+                    new ItemBrowser().showInventory((Player) audience);
+                })
+                .noButton(Component.text("Thôi, không xóa nữa"), null, (response, audience) -> {
+                    openMainDialog((Player) audience);
+                }).build();
+
+        return dialog;
     }
 
     private Component componentLabel(ComponentKey<?> key) {
@@ -234,7 +259,7 @@ public class ItemCreatorGui {
         Map<String, ItemComponent> copy = new HashMap<>();
         components.forEach((key, value) -> copy.put(key, value.copy()));
         BaseItem draft = new BaseItem(id == null ? "preview" : id, base, copy);
-        return draft.generateItemStack(1);
+        return draft.generatePreviewStack(1);
     }
 
     private Dialog buildSaveDialog(Player player) {
@@ -561,17 +586,13 @@ public class ItemCreatorGui {
     }
 
     private Dialog buildRandomStatDialog(Player player) {
-        RandomStatComponent current = (RandomStatComponent) components.get(ItemComponentKeys.RANDOM_STAT.id());
-        boolean initial = current != null && current.hasRandomQuality();
         DialogBuilder builder = DialogBuilder.create(Component.text("Chất lượng ngẫu nhiên"))
                 .canCloseWithEscape(false)
-                .addTextBody(Component.text("Mỗi item được tạo ra sẽ roll một chất lượng ngẫu nhiên, làm giảm tối đa 20% một số chỉ số base khi chất lượng thấp."))
-                .addCheckboxInput("value", Component.text("Có chất lượng ngẫu nhiên"), b -> b.initial(initial));
+                .addTextBody(Component.text("Mỗi item được tạo ra sẽ roll một chất lượng ngẫu nhiên, làm giảm tối đa 30% một số chỉ số base khi chất lượng thấp."));
 
         return wrapComponentDialog(player, ItemComponentKeys.RANDOM_STAT, builder,
                 (response, audience) -> {
-                    Boolean value = response.getBoolean("value");
-                    components.put(ItemComponentKeys.RANDOM_STAT.id(), new RandomStatComponent(value != null && value));
+                    components.put(ItemComponentKeys.RANDOM_STAT.id(), new RandomStatComponent());
                     Utils.runLater(() -> openMainDialog(player));
                 },
                 (response, audience) -> {
@@ -634,6 +655,42 @@ public class ItemCreatorGui {
         return new ItemAbilityListEditorGui(this, current).buildListDialog(player);
     }
 
+    private Dialog buildUsageTimerDialog(Player player) {
+        UsageTimerComponent current = (UsageTimerComponent) components.get(ItemComponentKeys.USAGE_TIMER.id());
+        int initial = current == null ? 200 : current.getBaseTickDuration();
+        DialogBuilder builder = DialogBuilder.create(Component.text("Thời gian sử dụng tối đa"))
+                .canCloseWithEscape(false)
+                .addTextInput("value", Component.text("Thời gian sử dụng tối đa, đơn vị tick (>= 20)"), b -> b.initial(String.valueOf(initial)).maxLength(16));
+
+        return wrapComponentDialog(player, ItemComponentKeys.USAGE_TIMER, builder,
+                (response, audience) -> {
+                    Integer value = DialogInputUtils.parseInt(response.getText("value"), 20, Integer.MAX_VALUE);
+                    if (value != null) components.put(ItemComponentKeys.USAGE_TIMER.id(), new UsageTimerComponent(value));
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.USAGE_TIMER.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
+    }
+
+    private Dialog buildCommandExecutorDialog(Player player) {
+        CommandExecutorComponent current = (CommandExecutorComponent) components.get(ItemComponentKeys.COMMAND_EXECUTOR.id());
+        DialogBuilder builder = DialogBuilder.create(Component.text("Đặt Command"))
+                .canCloseWithEscape(false)
+                .addTextInput("value", Component.text("Lệnh ban đầu, có thể đổi sau."));
+
+        return wrapComponentDialog(player, ItemComponentKeys.COMMAND_EXECUTOR, builder,
+                (response, audience) -> {
+                    String value = response.getText("value");
+                    components.put(ItemComponentKeys.COMMAND_EXECUTOR.id(), new CommandExecutorComponent(value));
+                    openMainDialog(player);
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.COMMAND_EXECUTOR.id());
+                    openMainDialog(player);
+                });
+    }
     // ==========================================
     // COMMAND
     // ==========================================
@@ -645,7 +702,7 @@ public class ItemCreatorGui {
                             new ItemCreatorGui().openMainDialog(player);
                         }))
                 .withSubcommand(new CommandAPICommand("edit")
-                        .withArguments(new StringArgument("item_id"))
+                        .withArguments(new StringArgument("item_id").replaceSuggestions(ArgumentSuggestions.strings(Registries.ITEM.getAll().keySet())))
                         .executesPlayer((player, args) -> {
                             String itemId = (String) args.get("item_id");
                             BaseItem existing = Registries.ITEM.get(itemId);
@@ -654,6 +711,17 @@ public class ItemCreatorGui {
                                 return;
                             }
                             ItemCreatorGui.editExisting(existing).openMainDialog(player);
+                        }))
+                .withSubcommand(new CommandAPICommand("delete")
+                        .withArguments(new StringArgument("item_id").replaceSuggestions(ArgumentSuggestions.strings(Registries.ITEM.getAll().keySet())))
+                        .executesPlayer((player, commandArguments) -> {
+                            String itemId = (String) commandArguments.get("item_id");
+                            BaseItem existing = Registries.ITEM.get(itemId);
+                            if (existing == null) {
+                                player.sendMessage(Utils.text("Không tìm thấy vật phẩm với ID '" + itemId + "'.", NamedTextColor.RED));
+                                return;
+                            }
+                            Registries.ITEM.removeAndDeleteFiles(RogueSmpCore.getInstance(), itemId);
                         }))
                 .register();
     }

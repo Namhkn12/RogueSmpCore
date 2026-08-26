@@ -8,6 +8,7 @@ import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.Registries;
 import net.kyori.adventure.text.Component;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,6 +62,10 @@ public interface ItemAbility {
     }
 
     default void onTick(SmpPlayer player, SmpItem item, int interval) {
+
+    }
+
+    default void onInteractEntity(SmpPlayer player, SmpItem item, PlayerInteractEntityEvent event) {
 
     }
 }

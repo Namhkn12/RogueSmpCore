@@ -33,6 +33,7 @@ public class SmpItem {
     private ItemStack itemStack;
 
     private final Map<String, ItemComponent> componentMap = new HashMap<>();
+    private final Map<String, ItemComponent> componentMapView = Collections.unmodifiableMap(componentMap);
 
     /**
      * Create an SmpItem instance, and load base data from {@link BaseItem} and pdc. To fully update the components, call {@link SmpItem#applyModifiers(SmpPlayer)} <br>
@@ -111,7 +112,7 @@ public class SmpItem {
     }
 
     public @Unmodifiable Map<String, ItemComponent> getComponents() {
-        return Collections.unmodifiableMap(componentMap);
+        return componentMapView;
     }
 
     public BaseItem getBaseItem() {
@@ -150,11 +151,24 @@ public class SmpItem {
      * @return A fully processed ItemStack with custom lore and PDC data.
      */
     public ItemStack generateItemStack(@Nullable SmpPlayer player, int stackAmount) {
+        return generateItemStack(player, stackAmount, false);
+    }
+
+    /**
+     * Display-only stack (GUI icon/preview) - shows best-case values (e.g. a "perfect" random
+     * roll) instead of this item's actual rolled stats, since a preview never represents one real
+     * instance of the item.
+     */
+    public ItemStack generatePreviewStack(int stackAmount) {
+        return generateItemStack(null, stackAmount, true);
+    }
+
+    private ItemStack generateItemStack(@Nullable SmpPlayer player, int stackAmount, boolean isPreview) {
         if (baseItem == null) return itemStack;
 
         ItemStack result = ItemStack.of(baseItem.getBase(), stackAmount);
 
-        result.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Set.of(DataComponentTypes.ENCHANTMENTS, DataComponentTypes.ATTRIBUTE_MODIFIERS, DataComponentTypes.UNBREAKABLE)).build());
+        result.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Set.of(DataComponentTypes.ENCHANTMENTS, DataComponentTypes.ATTRIBUTE_MODIFIERS, DataComponentTypes.UNBREAKABLE, DataComponentTypes.POTION_CONTENTS, DataComponentTypes.FIREWORKS)).build());
         result.unsetData(DataComponentTypes.ATTRIBUTE_MODIFIERS);
         result.setData(DataComponentTypes.UNBREAKABLE);
         result.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false);
@@ -170,7 +184,7 @@ public class SmpItem {
             ItemDataContext dataContext = new ItemDataContext(this, player, result, pdc);
             ItemLoreContext loreContext = new ItemLoreContext(this, player, loreBuilder, pdc);
 
-            applyModifiers(player);
+            applyModifiers(player, isPreview);
 
             for (Map.Entry<String, ItemComponent> entry : componentMap.entrySet()) {
                 ItemComponent itemComponent = entry.getValue();
@@ -189,15 +203,18 @@ public class SmpItem {
 
     /**
      * Applies all registered {@link ItemModifier}s to this item.
-     * <p>
-     * <strong>Note:</strong> This method uses a guard flag. It will only execute logic once
-     * per instance. Subsequent calls will do nothing to prevent duplicate stat stacking.
-     * </p>
      */
     public void applyModifiers(@Nullable SmpPlayer player) {
+        applyModifiers(player, false);
+    }
+
+    /**
+     * @param isPreview see {@link ItemModifier#collectAndApply(SmpItem, SmpPlayer, boolean)}.
+     */
+    public void applyModifiers(@Nullable SmpPlayer player, boolean isPreview) {
         List<ItemModifier> modifierList = ModifierRegistry.getModifiers();
         for (ItemModifier itemModifier : modifierList) {
-            itemModifier.collectAndApply(this, player);
+            itemModifier.collectAndApply(this, player, isPreview);
         }
     }
 

@@ -145,7 +145,7 @@ public abstract class BaseGui implements InventoryHolder {
     }
 
     /**
-     * Called when user click on our gui's inventory
+     * Called when user click on our gui's inventory, used for processing buttons, override if needed more control.
      */
     public void onClickTopInventory(InventoryClickEvent event) {
         int slot = event.getSlot();

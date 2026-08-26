@@ -95,7 +95,7 @@ public class ItemRepairGui extends BaseGui {
         ItemStack clicked = event.getCurrentItem();
         if (!ItemStackUtils.isValidItem(clicked)) return;
 
-        SmpItem clickedSmp = SmpItem.wrap(clicked);
+        SmpItem clickedSmp = SmpItem.wrap(clicked, smpPlayer);
 
         if (isRepairable(clickedSmp)) {
             if (isIrreparable(clickedSmp)) {
@@ -135,7 +135,7 @@ public class ItemRepairGui extends BaseGui {
             return;
         }
 
-        SmpItem targetItem = SmpItem.wrap(itemStack);
+        SmpItem targetItem = SmpItem.wrap(itemStack, smpPlayer);
         DurabilityComponent durabilityComponent = targetItem.getComponent(ItemComponentKeys.DURABILITY);
         DurabilityRepairComponent repairComponent = repairMaterialItem.getComponent(ItemComponentKeys.DURABILITY_REPAIR);
 

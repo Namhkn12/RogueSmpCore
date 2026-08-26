@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class EnchantAttributeModifier implements ItemModifier {
     @Override
-    public void collectAndApply(SmpItem smpItem, @Nullable SmpPlayer player) {
+    public void collectAndApply(SmpItem smpItem, @Nullable SmpPlayer player, boolean isPreview) {
         EquipAttributeComponent equipAttributeComponent = smpItem.getComponent(ItemComponentKeys.ATTRIBUTE);
         if (equipAttributeComponent == null) return;
 

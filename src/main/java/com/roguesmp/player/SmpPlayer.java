@@ -37,6 +37,7 @@ public class SmpPlayer {
     private final Map<Attributes, Double> activeAttributesView;
 
     private final Map<EquipSlot, SmpItem> currentEquipment = new EnumMap<>(EquipSlot.class);
+    private final Map<EquipSlot, SmpItem> currentEquipmentView = Collections.unmodifiableMap(currentEquipment);
 
     // What updateSlotStat actually folded into activeAttributes/activeEnchants for each slot last
     // time, as owned copies - not live references into the item's components. Removing a slot's
@@ -89,7 +90,7 @@ public class SmpPlayer {
         mechanics.add(new ProjectileMechanic());
         mechanics.add(new ItemConsumableMechanic());
         mechanics.add(new DurabilityLossMechanic());
-        mechanics.add(new ItemComponentInteractionMechanic());
+        mechanics.add(new ItemComponentMechanic());
         mechanics.add(new ItemAbilityMechanic());
 
         mechanics.sort(Comparator.comparingInt(PlayerMechanic::getPriority));
@@ -244,6 +245,10 @@ public class SmpPlayer {
 
     public @Nullable SmpItem getItemAtEquipSlot(EquipSlot equipSlot) {
         return currentEquipment.get(equipSlot);
+    }
+
+    public @Unmodifiable Map<EquipSlot, SmpItem> getCurrentEquipment() {
+        return currentEquipmentView;
     }
 
     /**

@@ -21,4 +21,14 @@ final class DialogInputUtils {
             return null;
         }
     }
+
+    static @Nullable Integer parseInt(@Nullable String text, int min, int max) {
+        if (text == null || text.isBlank()) return null;
+        try {
+            int value = Integer.parseInt(text.trim());
+            return Math.max(min, Math.min(max, value));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 }

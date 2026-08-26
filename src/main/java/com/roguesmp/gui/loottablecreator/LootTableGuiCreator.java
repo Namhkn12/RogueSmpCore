@@ -19,6 +19,7 @@ import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
 import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.Component;
@@ -135,10 +136,28 @@ public class LootTableGuiCreator {
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
 
+        multi.addButton(Component.text("delete", NamedTextColor.RED), null,
+                (response, audience) -> audience.showDialog(buildDeleteDialog()));
         multi.columns(3);
-        multi.exitButton(Component.text("Đóng"), null);
+        multi.exitButton(Component.text("Đóng"), (response, audience) -> audience.closeDialog());
 
         player.showDialog(multi.build());
+    }
+
+    private Dialog buildDeleteDialog() {
+        DialogBuilder builder = DialogBuilder.create(Component.text("Xác nhận xóa?"))
+                .addTextBody(Component.text("Xác nhận xóa? Hành động này không thể hoàn tác."));
+        Dialog dialog = builder.confirmation()
+                .yesButton(Component.text("Vẫn xóa"), null, (response, audience) -> {
+                    Registries.LOOT_TABLE.removeAndDeleteFiles(RogueSmpCore.getInstance(), id);
+                    audience.sendMessage(Component.text("Deleted entry: " + id, NamedTextColor.RED));
+
+                })
+                .noButton(Component.text("Thôi, không xóa nữa"), null, (response, audience) -> {
+                    openMainDialog((Player) audience);
+                }).build();
+
+        return dialog;
     }
 
     private static Component describePoolTooltip(PoolDraft pool) {
@@ -658,7 +677,7 @@ public class LootTableGuiCreator {
                             new LootTableGuiCreator().openMainDialog(player);
                         }))
                 .withSubcommand(new CommandAPICommand("edit")
-                        .withArguments(new StringArgument("table_id"))
+                        .withArguments(new StringArgument("table_id").replaceSuggestions(ArgumentSuggestions.strings(Registries.LOOT_TABLE.getAll().keySet())))
                         .executesPlayer((player, args) -> {
                             String tableId = (String) args.get("table_id");
                             LootTable existing = Registries.LOOT_TABLE.get(tableId);

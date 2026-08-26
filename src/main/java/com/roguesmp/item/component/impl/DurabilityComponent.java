@@ -1,6 +1,5 @@
 package com.roguesmp.item.component.impl;
 
-import com.roguesmp.annotation.GsonIgnore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.context.ItemLoreContext;
@@ -25,7 +24,6 @@ public final class DurabilityComponent implements UniqueTrackingComponent {
 
     private final int maxDurability;
 
-    @GsonIgnore
     private int currentDurability;
 
     public DurabilityComponent(int maxDurability) {

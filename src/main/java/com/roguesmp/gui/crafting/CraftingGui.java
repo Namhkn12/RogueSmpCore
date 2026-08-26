@@ -4,7 +4,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
 import com.roguesmp.crafting.recipe.CraftingRecipes;
-import com.roguesmp.gui.BaseGui;
+import com.roguesmp.gui.ReactiveGui;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -22,11 +22,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 /**
- * A vanilla-style 3x3 crafting table, backed by the real {@link CraftingManager} - matches shaped
- * recipes first, then shapeless (see {@link #matchRecipe}), same priority {@code CraftingManager}'s
- * own multi-key {@code match} convenience documents.
+ * A vanilla-style 3x3 crafting table, backed by {@link CraftingManager} - matches shaped
+ * recipes first, then shapeless (see {@link #matchRecipe})
  */
-public class CraftingGui extends BaseGui {
+public class CraftingGui extends ReactiveGui<CraftingGui.CraftingState> {
 
     private static final int[] CRAFT_SLOTS = new int[]{10, 11, 12, 19, 20, 21, 28, 29, 30};
     private static final int RESULT_SLOT = 23;
@@ -48,15 +47,14 @@ public class CraftingGui extends BaseGui {
             InventoryAction.PLACE_ALL_INTO_BUNDLE,
             InventoryAction.PICKUP_SOME_INTO_BUNDLE,
             InventoryAction.PLACE_SOME_INTO_BUNDLE
-    ); //Also include drag, inside InventoryDragEvent
+    );
 
     private final Player player;
-    private CraftingState state;
 
     public CraftingGui(Player player) {
         super(Component.text("Bàn Chế Tạo", NamedTextColor.DARK_GRAY), 6);
         this.player = player;
-        this.state = new CraftingState(0, null);
+        initState(new CraftingState(0, null));
     }
 
     private boolean isCraftingGridSlot(int slot) {
@@ -67,10 +65,16 @@ public class CraftingGui extends BaseGui {
     }
 
     @Override
-    public void setup() {
+    protected CraftingState computeState() {
         int currentHash = computeGridHash();
-        CraftingRecipe matched = (state.lastGridHash() == currentHash) ? state.lastRecipe() : matchRecipe(getCurrentItems());
+        CraftingState current = getState();
+        CraftingRecipe matched = (current.lastGridHash() == currentHash) ? current.lastRecipe() : matchRecipe(getCurrentItems());
+        return new CraftingState(currentHash, matched);
+    }
 
+    @Override
+    protected void render(CraftingState state) {
+        CraftingRecipe matched = state.lastRecipe();
         ItemStack resultItem = matched == null ? null : matched.getResultStack();
         boolean hasValidRecipe = resultItem != null && !resultItem.getType().isAir();
 
@@ -133,13 +137,6 @@ public class CraftingGui extends BaseGui {
             return;
         }
 
-        int slot = event.getSlot();
-
-        if (isCraftingGridSlot(slot)) {
-            Utils.runLater(this::checkAndSyncState);
-            return;
-        }
-
         super.onClickTopInventory(event);
     }
 
@@ -149,29 +146,13 @@ public class CraftingGui extends BaseGui {
             event.setCancelled(true);
             return;
         }
-        Utils.runLater(this::checkAndSyncState);
-    }
-
-    @Override
-    public void onDragInventory(InventoryDragEvent event) {
-        event.setCancelled(true);
-    }
-
-    private void checkAndSyncState() {
-        int newHash = computeGridHash();
-        if (state.lastGridHash() == newHash) return;
-
-        CraftingRecipe newRecipe = matchRecipe(getCurrentItems());
-        if (state.lastRecipe() == newRecipe) return; // same recipe object (or both null) - nothing actually changed
-
-        this.state = new CraftingState(newHash, newRecipe);
-        setup();
+        super.onClickBottomInventory(event);
     }
 
     private void handleCraft(InventoryClickEvent event) {
         event.setCancelled(true);
 
-        CraftingRecipe recipe = state.lastRecipe();
+        CraftingRecipe recipe = getState().lastRecipe();
         if (recipe == null) return;
 
         ItemStack result = recipe.getResultStack();
@@ -210,7 +191,7 @@ public class CraftingGui extends BaseGui {
             applyConsumedItems(leftover);
         }
 
-        Utils.runLater(this::checkAndSyncState);
+        Utils.runLater(this::syncStateInventory);
     }
 
     private void applyConsumedItems(ItemStack[] leftover) {

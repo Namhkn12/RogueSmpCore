@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public class ItemAbilityModifier implements ItemModifier {
     @Override
-    public void collectAndApply(SmpItem smpItem, @Nullable SmpPlayer player) {
+    public void collectAndApply(SmpItem smpItem, @Nullable SmpPlayer player, boolean isPreview) {
         PassiveAbilityComponent abilityComponent = smpItem.getComponent(ItemComponentKeys.PASSIVE_ABILITY);
         if (abilityComponent == null) return;
 

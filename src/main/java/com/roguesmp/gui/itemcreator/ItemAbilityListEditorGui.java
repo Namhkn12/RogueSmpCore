@@ -5,6 +5,7 @@ import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.JsonOps;
 import com.roguesmp.item.ability.ItemAbility;
 import com.roguesmp.item.ability.impl.Barking;
+import com.roguesmp.item.ability.impl.EntityZapper;
 import com.roguesmp.item.ability.impl.UnyieldingEdge;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.component.impl.PassiveAbilityComponent;
@@ -110,8 +111,30 @@ public class ItemAbilityListEditorGui {
 
         if (ability instanceof UnyieldingEdge unyieldingEdge) return buildUnyieldingEdgeDialog(player, index, unyieldingEdge);
         if (ability instanceof Barking barking) return buildBarkingDialog(player, index, barking);
+        if (ability instanceof EntityZapper zapper) return buildZapperDialog(player, index, zapper);
 
         return buildGenericEntryDialog(player, index, ability);
+    }
+
+    private Dialog buildZapperDialog(Player player, int index, EntityZapper zapper) {
+        DialogBuilder builder = DialogBuilder.create(Component.text("Ability: " + zapper.getTypeId()))
+                .canCloseWithEscape(false);
+        Dialog dialog = builder.multiAction()
+                .addButton(Component.text("Thêm"), null, (s, audience) -> {
+                    abilities.remove(index);
+                    commit();
+                    Utils.runLater(() -> player.showDialog(buildListDialog(player)));
+                })
+                .addButton(Component.text("Xóa"), null, (response, audience) -> {
+                    abilities.set(index, new EntityZapper());
+                    commit();
+                    Utils.runLater(() -> player.showDialog(buildListDialog(player)));
+                })
+                .columns(3)
+                .exitButton(Component.text("« Quay lại"), (response, audience) -> Utils.runLater(() -> player.showDialog(buildListDialog(player))))
+                .build();
+
+        return dialog;
     }
 
     private Dialog buildUnyieldingEdgeDialog(Player player, int index, UnyieldingEdge current) {

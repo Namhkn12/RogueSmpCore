@@ -195,7 +195,6 @@ public class EffectManager {
             if (cached != null) {
                 cached.removeNonPersistent();
                 Utils.runAsync(() -> {
-                    if (cached.isEmpty()) return;
                     savePlayerEffectToFile(uuid, cached);
                 });
             }

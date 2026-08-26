@@ -19,6 +19,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -328,12 +329,12 @@ public class SpellComponent implements EntityComponent {
         passiveSpells.forEach(spell -> spell.onTargetEntity(event));
     }
 
-    public List<SpellParams> getActiveSpellParams() {
-        return activeSpellParams;
+    public @Unmodifiable List<SpellParams> getActiveSpellParams() {
+        return Collections.unmodifiableList(activeSpellParams);
     }
 
-    public List<SpellParams> getPassiveSpellParams() {
-        return passiveSpellParams;
+    public @Unmodifiable List<SpellParams> getPassiveSpellParams() {
+        return Collections.unmodifiableList(passiveSpellParams);
     }
 
     public int getPassiveIntervalConfig() {
