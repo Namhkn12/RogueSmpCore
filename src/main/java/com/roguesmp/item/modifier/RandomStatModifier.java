@@ -24,12 +24,12 @@ public class RandomStatModifier implements ItemModifier {
     );
 
     @Override
-    public void collectAndApply(SmpItem smpItem, @Nullable SmpPlayer player, boolean isPreview) {
+    public void collectAndApply(SmpItem smpItem, @Nullable SmpPlayer player) {
         RandomStatComponent rdc = smpItem.getComponent(ItemComponentKeys.RANDOM_STAT);
         if (rdc == null) return;
 
         double quality = rdc.getCurrentQuality();
-        if (isPreview) quality = 1d;
+        if (player == null) quality = 1d;
 
         // Update lore provider state for MagicPowerComponent
         MagicPowerComponent magicPowerComponent = smpItem.getComponent(ItemComponentKeys.MAGIC_POWER);

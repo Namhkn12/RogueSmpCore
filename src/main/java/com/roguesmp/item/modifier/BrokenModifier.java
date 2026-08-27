@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BrokenModifier implements ItemModifier {
     @Override
-    public void collectAndApply(SmpItem smpItem, @Nullable SmpPlayer player, boolean isPreview) {
+    public void collectAndApply(SmpItem smpItem, @Nullable SmpPlayer player) {
         DurabilityComponent durabilityComponent = smpItem.getComponent(ItemComponentKeys.DURABILITY);
         if (durabilityComponent != null) {
             int current = durabilityComponent.currentDurability();

@@ -259,7 +259,7 @@ public class ItemCreatorGui {
         Map<String, ItemComponent> copy = new HashMap<>();
         components.forEach((key, value) -> copy.put(key, value.copy()));
         BaseItem draft = new BaseItem(id == null ? "preview" : id, base, copy);
-        return draft.generatePreviewStack(1);
+        return draft.generateItemStack(1);
     }
 
     private Dialog buildSaveDialog(Player player) {

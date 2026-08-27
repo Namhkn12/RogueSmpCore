@@ -57,10 +57,6 @@ public class BaseItem {
         return new SmpItem(this).generateItemStack(stackAmount);
     }
 
-    public ItemStack generatePreviewStack(int stackAmount) {
-        return new SmpItem(this).generatePreviewStack(stackAmount);
-    }
-
     public @Unmodifiable Map<String, ItemComponent> getComponents() {
         return Collections.unmodifiableMap(components);
     }

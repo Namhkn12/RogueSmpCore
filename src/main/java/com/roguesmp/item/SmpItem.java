@@ -151,19 +151,6 @@ public class SmpItem {
      * @return A fully processed ItemStack with custom lore and PDC data.
      */
     public ItemStack generateItemStack(@Nullable SmpPlayer player, int stackAmount) {
-        return generateItemStack(player, stackAmount, false);
-    }
-
-    /**
-     * Display-only stack (GUI icon/preview) - shows best-case values (e.g. a "perfect" random
-     * roll) instead of this item's actual rolled stats, since a preview never represents one real
-     * instance of the item.
-     */
-    public ItemStack generatePreviewStack(int stackAmount) {
-        return generateItemStack(null, stackAmount, true);
-    }
-
-    private ItemStack generateItemStack(@Nullable SmpPlayer player, int stackAmount, boolean isPreview) {
         if (baseItem == null) return itemStack;
 
         ItemStack result = ItemStack.of(baseItem.getBase(), stackAmount);
@@ -184,7 +171,7 @@ public class SmpItem {
             ItemDataContext dataContext = new ItemDataContext(this, player, result, pdc);
             ItemLoreContext loreContext = new ItemLoreContext(this, player, loreBuilder, pdc);
 
-            applyModifiers(player, isPreview);
+            applyModifiers(player);
 
             for (Map.Entry<String, ItemComponent> entry : componentMap.entrySet()) {
                 ItemComponent itemComponent = entry.getValue();
@@ -201,20 +188,14 @@ public class SmpItem {
         return result;
     }
 
+
     /**
      * Applies all registered {@link ItemModifier}s to this item.
      */
     public void applyModifiers(@Nullable SmpPlayer player) {
-        applyModifiers(player, false);
-    }
-
-    /**
-     * @param isPreview see {@link ItemModifier#collectAndApply(SmpItem, SmpPlayer, boolean)}.
-     */
-    public void applyModifiers(@Nullable SmpPlayer player, boolean isPreview) {
         List<ItemModifier> modifierList = ModifierRegistry.getModifiers();
         for (ItemModifier itemModifier : modifierList) {
-            itemModifier.collectAndApply(this, player, isPreview);
+            itemModifier.collectAndApply(this, player);
         }
     }
 
