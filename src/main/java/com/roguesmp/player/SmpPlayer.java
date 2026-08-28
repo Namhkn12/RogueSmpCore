@@ -83,7 +83,7 @@ public class SmpPlayer {
 
     private void initMechanic() {
         mechanics.add(new OffhandBlockerMechanic());
-        mechanics.add(new CustomBlockPlacementMechanic());
+        mechanics.add(new BaseInteractionMechanic());
         mechanics.add(new EnchantMechanic());
         mechanics.add(new AttributeMechanic());
         mechanics.add(new AbilityLoadoutMechanic());

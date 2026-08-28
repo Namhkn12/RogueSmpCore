@@ -58,7 +58,7 @@ public final class DurabilityComponent implements UniqueTrackingComponent {
         newStack.unsetData(DataComponentTypes.UNBREAKABLE);
         newStack.setData(DataComponentTypes.MAX_DAMAGE, 100);
         int percent = Math.max(1, (int) (((float) currentDurability / maxDurability) * 100));
-        newStack.setData(DataComponentTypes.DAMAGE, Math.max(1, 100 - percent));
+        newStack.setData(DataComponentTypes.DAMAGE, Math.max(0, 100 - percent));
     }
 
     @Override
