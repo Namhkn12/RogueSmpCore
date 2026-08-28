@@ -91,6 +91,15 @@ public class PlayerListener implements Listener {
         });
     }
 
+    //We use custom durability so this event is always cancelled for custom items
+    @EventHandler
+    public void onItemDamage(PlayerItemDamageEvent event) {
+        String baseId = ItemStackUtils.getBaseId(event.getItem());
+        if (baseId != null) {
+            event.setCancelled(true);
+        }
+    }
+
     @EventHandler
     public void onEquipmentChange(EntityEquipmentChangedEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
