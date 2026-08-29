@@ -5,6 +5,7 @@ import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.DoubleArgument;
 import dev.jorel.commandapi.arguments.IntegerArgument;
@@ -47,13 +48,13 @@ public class DamageIncreaseEffect extends SmpEffect {
 
     @Override
     public @Nullable Component getDisplayComponent() {
-        if (increaseValue <= 0) return Component.text(increaseValue * 100 + "% sát thương", NamedTextColor.RED);
-        return Component.text(increaseValue * 100 + "% sát thương", NamedTextColor.GREEN);
+        if (increaseValue <= 0) return Component.text(Utils.formatDecimal(increaseValue * 100) + "% sát thương", NamedTextColor.RED);
+        return Component.text(Utils.formatDecimal(increaseValue * 100) + "% sát thương", NamedTextColor.GREEN);
     }
 
     @Override
     public void onDamageEntity(DamageEvent event) {
-        event.addDamageModifier(increaseValue, DamageOperation.ADD_FINAL);
+        event.addDamageModifier(increaseValue, DamageOperation.INCREASE_BASE);
     }
 
     public static CommandAPICommand registerCommand() {

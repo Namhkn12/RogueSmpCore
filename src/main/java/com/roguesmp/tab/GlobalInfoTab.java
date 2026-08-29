@@ -65,11 +65,11 @@ public class GlobalInfoTab {
         int row = 2;
         for (int i = 0; i < AbilityType.ACTIVE.getMaxSlots(); i++) {
             int index = i;
-            view.slot(ABILITY_COLUMN_BASE + row++, TabElement.ticking(ABILITY_REFRESH_TICKS, c -> abilityLine(loadout, AbilityType.ACTIVE, index)));
+            view.slot(ABILITY_COLUMN_BASE + row++, TabElement.ticking(20, c -> abilityLine(loadout, AbilityType.ACTIVE, index)));
         }
         for (int i = 0; i < AbilityType.LIFELINE.getMaxSlots(); i++) {
             int index = i;
-            view.slot(ABILITY_COLUMN_BASE + row++, TabElement.ticking(ABILITY_REFRESH_TICKS, c -> abilityLine(loadout, AbilityType.LIFELINE, index)));
+            view.slot(ABILITY_COLUMN_BASE + row++, TabElement.ticking(20, c -> abilityLine(loadout, AbilityType.LIFELINE, index)));
         }
 
         view.group(null, PLAYER_LIST_SLOTS);
