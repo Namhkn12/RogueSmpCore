@@ -9,6 +9,7 @@ import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.player.ability.trigger.AbilityTrigger;
+import com.roguesmp.player.classes.PlayerClass;
 import com.roguesmp.registry.Registries;
 import org.bukkit.Bukkit;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -47,11 +48,25 @@ public class AbilityLoadout {
     public void equip(AbilityType type, @Nullable Ability ability, int index) {
         Ability[] slots = abilityMap.get(type);
         if (slots == null || index < 0 || index >= slots.length) return;
+        if (ability != null && !isAllowedForCurrentClass(ability.getId())) return;
 
         slots[index] = ability;
 
         String id = (ability == null) ? null : ability.getId();
         smpPlayer.getPlayerData().setEquippedAbility(type, index, id);
+    }
+
+    /**
+     * Whether the given ability belongs to the player's currently selected {@link PlayerClass} -
+     * abilities can only be equipped while their owning class is active, though once unlocked
+     * their level is permanent regardless of class switches (see {@link PlayerClass}).
+     */
+    public boolean isAllowedForCurrentClass(String abilityId) {
+        String classId = smpPlayer.getPlayerData().getClassId();
+        if (classId == null) return false;
+
+        PlayerClass playerClass = Registries.PLAYER_CLASS.get(classId);
+        return playerClass != null && playerClass.hasAbility(abilityId);
     }
 
     /**

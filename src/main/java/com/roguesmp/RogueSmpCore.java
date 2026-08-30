@@ -22,6 +22,7 @@ import com.roguesmp.gui.ItemRepairGui;
 import com.roguesmp.gui.SkinBrowserGui;
 import com.roguesmp.gui.TrashGui;
 import com.roguesmp.gui.ability.AbilityCatalogue;
+import com.roguesmp.gui.classes.ClassSelectionGui;
 import com.roguesmp.gui.crafting.CraftingGui;
 import com.roguesmp.gui.info.SmpWikiMainMenuGui;
 import com.roguesmp.gui.itemcreator.ItemCreatorGui;
@@ -198,6 +199,7 @@ public final class RogueSmpCore extends JavaPlugin {
         NpcBrowserGui.registerCommand();
 
         AbilityCatalogue.register();
+        ClassSelectionGui.register();
 
         TrashGui.register();
 

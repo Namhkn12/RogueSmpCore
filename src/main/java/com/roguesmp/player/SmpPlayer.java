@@ -11,8 +11,12 @@ import com.roguesmp.event.DurabilityChangedEvent;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.*;
+import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityLoadout;
+import com.roguesmp.player.ability.AbilityType;
+import com.roguesmp.player.classes.PlayerClass;
 import com.roguesmp.player.mechanic.*;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -241,6 +245,40 @@ public class SmpPlayer {
 
     public AbilityLoadout getAbilityLoadout() {
         return abilityLoadout;
+    }
+
+    public @Nullable PlayerClass getPlayerClass() {
+        String classId = getPlayerData().getClassId();
+        if (classId == null) return null;
+        return Registries.PLAYER_CLASS.get(classId);
+    }
+
+    /**
+     * Selects (or switches to) a class. Idempotent for abilities already unlocked: only abilities
+     * not yet unlocked get granted at the class's default level, so switching back to a
+     * previously-held class never touches existing ability levels. Any currently equipped ability
+     * that doesn't belong to the new class gets unequipped (its level is untouched - see
+     * {@link AbilityLoadout#isAllowedForCurrentClass(String)}).
+     */
+    public void setPlayerClass(PlayerClass playerClass) {
+        PlayerData data = getPlayerData();
+        data.setClassId(playerClass.getId());
+
+        playerClass.getDefaultAbilities().forEach((abilityId, level) -> {
+            if (data.getAbilityLevel(abilityId) <= 0) {
+                data.setAbilityLevel(abilityId, level);
+            }
+        });
+
+        for (AbilityType type : AbilityType.values()) {
+            Ability[] equipped = abilityLoadout.getAbilities(type);
+            for (int i = 0; i < equipped.length; i++) {
+                Ability ability = equipped[i];
+                if (ability != null && !playerClass.hasAbility(ability.getId())) {
+                    abilityLoadout.equip(type, null, i);
+                }
+            }
+        }
     }
 
     public @Nullable SmpItem getItemAtEquipSlot(EquipSlot equipSlot) {

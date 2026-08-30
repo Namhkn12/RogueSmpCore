@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Base type for a custom crafting recipe. Concrete kinds ({@link ShapedCraftingRecipe},
@@ -47,8 +46,8 @@ public abstract class CraftingRecipe {
 
     public static final MapCodec<BaseProperties> BASE_CODEC = Codec.composite(
             Codec.STRING.fieldOf("id").forGetter(BaseProperties::id),
-            CraftingIngredient.CODEC.optionalFieldOf("result").forGetter(props -> Optional.ofNullable(props.result())),
-            (id, result) -> new BaseProperties(id, result.orElse(null))
+            CraftingIngredient.CODEC.optionalFieldOf("result", (CraftingIngredient) null).forGetter(BaseProperties::result),
+            BaseProperties::new
     );
 
     private final BaseProperties base;

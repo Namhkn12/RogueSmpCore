@@ -40,7 +40,7 @@ public class AbilitySelectionGui extends BaseGui {
         List<AbilityInfo<?>> list = new ArrayList<>();
         for (String id : smpPlayer.getPlayerData().getUnlockedAbilities().keySet()) {
             AbilityInfo<?> info = Registries.ABILITY.get(id);
-            if (info != null && info.getType() == type) {
+            if (info != null && info.getType() == type && smpPlayer.getAbilityLoadout().isAllowedForCurrentClass(id)) {
                 list.add(info);
             }
         }

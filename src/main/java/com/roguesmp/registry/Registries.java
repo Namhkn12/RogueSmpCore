@@ -32,6 +32,7 @@ import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.npc.action.NpcActions;
 import com.roguesmp.player.ability.*;
 import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
+import com.roguesmp.player.classes.PlayerClass;
 import com.roguesmp.quest.*;
 import com.roguesmp.player.ability.upgrade.UpgradeRequirements;
 import com.roguesmp.entity.SpecialEntities;
@@ -76,6 +77,7 @@ public class Registries {
 
     public static final Registry<AbilityInfo<? extends Ability>> ABILITY = register(registry -> AbilityInfos.loadClass());
     public static final Registry<AbilityConfig> ABILITY_CONFIG = new Registry<>("ability_info", AbilityConfig.CODEC);
+    public static final Registry<PlayerClass> PLAYER_CLASS = new Registry<>("classes", PlayerClass.CODEC);
     public static final Registry<Predicate<Player>> TRIGGER_OPTION = register(registry -> TriggerOptions.loadClass());
 
     public static final Registry<GuiOpenActions.OpenAction> NPC_GUI_OPEN_ACTION = register(registry -> GuiOpenActions.loadClass());
