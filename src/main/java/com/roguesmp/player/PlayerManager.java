@@ -68,6 +68,7 @@ public class PlayerManager {
             PlayerData playerData = dataManager.removeCachedData(smpPlayer.getUuid());
             dataManager.savePlayerData(playerData);
         });
+        dataManager.close();
     }
 
     public PlayerDataManager getDataManager() {

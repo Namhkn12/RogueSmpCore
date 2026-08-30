@@ -7,58 +7,108 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Handle saving/loading island data to/from a global SQLite database
+ * (replaces the old one-json-file-per-island storage, which had no
+ * locking against concurrent saves from multiple online island members).
+ */
 public class IslandDataManager {
 
-    public static final String FOLDER_NAME = "sb_island_data";
+    private static final String DB_FILE_NAME = "island_data.db";
 
-    private final RogueSmpCore plugin;
     private final Map<UUID, IslandData> islandDataCache = new HashMap<>();
+    private final Connection connection;
 
     public IslandDataManager(RogueSmpCore plugin) {
-        this.plugin = plugin;
+        this.connection = openConnection(plugin);
+        createTable();
     }
 
-    public @Blocking void saveIslandData(IslandData islandData) {
+    private Connection openConnection(RogueSmpCore plugin) {
+        File dbFile = new File(plugin.getDataFolder(), DB_FILE_NAME);
+        File parent = dbFile.getParentFile();
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+
+        try {
+            return DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to open island data database", e);
+        }
+    }
+
+    private void createTable() {
+        String sql = """
+                CREATE TABLE IF NOT EXISTS island_data (
+                    island_id TEXT PRIMARY KEY NOT NULL,
+                    data BLOB NOT NULL
+                )
+                """;
+
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(sql);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to create island_data table", e);
+        }
+    }
+
+    public @Blocking synchronized void saveIslandData(IslandData islandData) {
         if (islandData == null) return;
         IslandData clone = new IslandData(islandData);
         RogueSmpCore.LOGGER.info("Saving island data with ID: {}", clone.getIslandId());
-        File dataFolder = new File(plugin.getDataFolder(), FOLDER_NAME);
-        if (!dataFolder.exists()) {
-            dataFolder.mkdirs();
-        }
 
-        File file = new File(dataFolder, clone.getIslandId().toString() + ".json");
+        String sql = """
+                INSERT INTO island_data (island_id, data)
+                VALUES (?, jsonb(?))
+                ON CONFLICT(island_id) DO UPDATE SET data = excluded.data
+                """;
 
-        try (FileWriter writer = new FileWriter(file)) {
-            Utils.GSON.toJson(clone, writer);
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, clone.getIslandId().toString());
+            statement.setString(2, Utils.GSON.toJson(clone));
+            statement.executeUpdate();
+            islandData.setDirty(false);
             RogueSmpCore.LOGGER.info("Saved island data with ID: {}", clone.getIslandId());
-        } catch (Exception e) {
+        } catch (SQLException e) {
             RogueSmpCore.LOGGER.error("Failed to save island data for ID: {}", clone.getIslandId(), e);
         }
     }
 
-    public @Nullable @Blocking IslandData loadIslandData(UUID islandId) {
+    public @Nullable @Blocking synchronized IslandData loadIslandData(UUID islandId) {
         if (islandId == null) return null;
         RogueSmpCore.LOGGER.info("Loading island data with ID: {}", islandId);
         if (islandDataCache.containsKey(islandId)) {
             RogueSmpCore.LOGGER.info("Island data with ID {} is already cached.", islandId);
             return islandDataCache.get(islandId);
         }
-        File dataFolder = new File(plugin.getDataFolder(), FOLDER_NAME);
-        File file = new File(dataFolder, islandId + ".json");
-        IslandData islandData;
-        try (FileReader reader = new FileReader(file)) {
-            islandData = Utils.GSON.fromJson(reader, IslandData.class);
-            RogueSmpCore.LOGGER.info("Loaded island data with ID: {}", islandId);
-            return islandData;
-        } catch (Exception e) {
+
+        String sql = "SELECT json(data) AS data FROM island_data WHERE island_id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, islandId.toString());
+
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    return null;
+                }
+
+                IslandData islandData = Utils.GSON.fromJson(result.getString("data"), IslandData.class);
+                RogueSmpCore.LOGGER.info("Loaded island data with ID: {}", islandId);
+                return islandData;
+            }
+        } catch (SQLException e) {
             RogueSmpCore.LOGGER.error("Failed to load island data with ID: {}", islandId, e);
         }
         return null;
@@ -85,6 +135,7 @@ public class IslandDataManager {
 
     public void onDisable() {
         saveAllIslandData();
+        close();
     }
 
     public void saveAllIslandData() {
@@ -98,6 +149,14 @@ public class IslandDataManager {
             saveIslandData(islandData);
         }
 
-        RogueSmpCore.LOGGER.info("All island data files have been written successfully.");
+        RogueSmpCore.LOGGER.info("All island data has been saved.");
+    }
+
+    public void close() {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            RogueSmpCore.LOGGER.error("Failed to close island data database", e);
+        }
     }
 }

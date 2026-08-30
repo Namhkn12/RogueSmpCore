@@ -13,7 +13,7 @@ import java.util.*;
 public class IslandData {
 
     @GsonIgnore
-    private boolean dirty;
+    private boolean dirty = true;
 
     private boolean archived;
     private final UUID islandId;
@@ -71,6 +71,7 @@ public class IslandData {
 
     public <T> void setSettingValue(Setting<T> setting, T value) {
         this.settings.put(setting.id(), value);
+        this.dirty = true;
     }
 
     public UUID getIslandId() {
@@ -83,10 +84,12 @@ public class IslandData {
 
     public void addMember(UUID playerUuid) {
         members.add(playerUuid);
+        this.dirty = true;
     }
 
     public void removeMember(UUID playerUuid) {
         members.remove(playerUuid);
+        this.dirty = true;
     }
 
     public int getGridIndex() {
@@ -100,6 +103,7 @@ public class IslandData {
         int yaw = (int) location.getYaw();
         int pitch = (int) location.getPitch();
         this.spawnLocation = x + "," + y + "," + z + "," + yaw + "," + pitch;
+        this.dirty = true;
     }
 
     public String getSpawnLocation() {
@@ -132,6 +136,7 @@ public class IslandData {
 
     public void setArchived(boolean archived) {
         this.archived = archived;
+        this.dirty = true;
     }
 
     public void setDirty(boolean dirty) {
