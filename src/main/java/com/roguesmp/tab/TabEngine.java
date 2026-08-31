@@ -165,17 +165,15 @@ public final class TabEngine implements Listener {
     }
 
     /**
-     * Shows the server's global tablist ({@link GlobalInfoTab}, which sets its own header/footer) and
-     * the library default scoreboard as soon as TAB finishes loading a player. Uses TAB's own load event,
-     * not Bukkit's join event, since TAB isn't ready to show anything yet at the point Bukkit's join event fires.
+     * Shows the server's global tablist and scoreboard ({@link GlobalInfoTab}, which sets its own
+     * header/footer) as soon as TAB finishes loading a player. Uses TAB's own load event, not Bukkit's
+     * join event, since TAB isn't ready to show anything yet at the point Bukkit's join event fires.
      */
     private void onLoad(PlayerLoadEvent event) {
-        TabPlayer viewer = event.getPlayer();
-        Player player = (Player) viewer.getPlayer();
+        Player player = (Player) event.getPlayer().getPlayer();
         Utils.runLater(() -> { //Run later so that other system have time to initialize
             GlobalInfoTab.tabListView(player).show();
             GlobalInfoTab.scoreboardView(player).show();
-            Objects.requireNonNull(TabAPI.getInstance().getScoreboardManager()).showScoreboard(viewer, defaultScoreboard(player));
         });
     }
 }

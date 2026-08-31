@@ -50,16 +50,15 @@ public final class ExpRequirement implements UpgradeRequirement {
         if (bukkitPlayer == null) return Component.text("- " + level + " Exp Level", NamedTextColor.GRAY);
 
         int currentTotalExp = PlayerUtils.getExp(bukkitPlayer);
-        int currentLevel = bukkitPlayer.getLevel();
         boolean hasEnough = currentTotalExp >= expCost;
 
         // Build: • 30 Cấp độ Exp (25/30)
         return Component.text(" • ", NamedTextColor.DARK_GRAY)
-                .append(Component.text(level + " Cấp Exp", hasEnough ? NamedTextColor.GREEN : NamedTextColor.YELLOW))
+                .append(Component.text(Utils.formatMoney(currentTotalExp) + " Exp", hasEnough ? NamedTextColor.GREEN : NamedTextColor.YELLOW))
                 .append(Component.text(" (", NamedTextColor.GRAY))
-                .append(Component.text(currentLevel, hasEnough ? NamedTextColor.GREEN : NamedTextColor.RED))
+                .append(Component.text(Utils.formatMoney(currentTotalExp), hasEnough ? NamedTextColor.GREEN : NamedTextColor.RED))
                 .append(Component.text("/", NamedTextColor.GRAY))
-                .append(Component.text(level, NamedTextColor.GRAY))
+                .append(Component.text(Utils.formatMoney(expCost), NamedTextColor.GRAY))
                 .append(Component.text(")", NamedTextColor.GRAY));
     }
 
