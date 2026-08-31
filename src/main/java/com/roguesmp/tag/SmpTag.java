@@ -74,6 +74,15 @@ public class SmpTag<T> {
         return elements.contains(value);
     }
 
+    /**
+     * The tag's raw, unresolved entries - element ids and {@code #otherTagId} references exactly
+     * as written in the tag file. Unlike {@link #getElements()} this doesn't require (or reflect)
+     * resolution, and is what an editor should read/write back rather than the resolved set.
+     */
+    public @Unmodifiable List<String> getRawEntries() {
+        return Collections.unmodifiableList(rawEntries);
+    }
+
     public @Unmodifiable Set<T> getElements() {
         return Collections.unmodifiableSet(elements);
     }

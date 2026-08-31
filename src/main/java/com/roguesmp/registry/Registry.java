@@ -201,6 +201,72 @@ public class Registry<T> {
     }
 
     /**
+     * Writes {@code rawEntries} to {@code <locationKey>/tags/<tagId>.json} and reloads this
+     * registry's tags so {@link #getTag} / {@link #getTags} immediately reflect the change
+     * (including re-resolving any {@code #tagId} reference to/from it). Works for any tag-capable
+     * registry, not just file-backed ones (see the {@link #Registry(String)} constructor) - only
+     * {@code locationKey} matters here, same as {@link #loadTagsFrom}.
+     *
+     * @return true if the file was written successfully
+     */
+    public @Blocking boolean saveTag(RogueSmpCore plugin, String tagId, List<String> rawEntries) {
+        if (locationKey == null) {
+            RogueSmpCore.LOGGER.warn("Attempted to save a tag on a registry with no locationKey");
+            return false;
+        }
+
+        File folder = new File(plugin.getDataFolder(), locationKey + "/tags");
+        if (!folder.exists() && !folder.mkdirs()) {
+            RogueSmpCore.LOGGER.error("Failed to create tags directory for '{}'", locationKey);
+            return false;
+        }
+
+        DataResult<JsonElement> result = TAG_CODEC.encode(rawEntries, JsonOps.INSTANCE);
+        if (!result.isSuccess()) {
+            RogueSmpCore.LOGGER.error("Failed to encode tag [{}] in '{}/tags': {}", tagId, locationKey, result.error());
+            return false;
+        }
+
+        File file = new File(folder, tagId + ".json");
+        try (FileWriter writer = new FileWriter(file)) {
+            Utils.GSON.toJson(result.result(), writer);
+        } catch (Exception e) {
+            RogueSmpCore.LOGGER.error("Error writing tag file '{}.json' in '{}/tags': {}", tagId, locationKey, e.getMessage());
+            return false;
+        }
+
+        loadTagsFrom(plugin); // re-resolve so getTag/getTags reflect the write immediately
+        return true;
+    }
+
+    /**
+     * Deletes {@code <locationKey>/tags/<tagId>.json} and reloads this registry's tags. Returns
+     * true if the file didn't exist to begin with, same "already gone counts as done" shape as
+     * {@link #removeAndDeleteFiles}.
+     */
+    public @Blocking boolean deleteTag(RogueSmpCore plugin, String tagId) {
+        if (locationKey == null) return false;
+
+        File file = new File(plugin.getDataFolder(), locationKey + "/tags/" + tagId + ".json");
+        if (!file.exists()) return true;
+
+        boolean deleted = file.delete();
+        if (deleted) loadTagsFrom(plugin);
+        else RogueSmpCore.LOGGER.error("Failed to delete tag file '{}/tags/{}.json'", locationKey, tagId);
+        return deleted;
+    }
+
+    /**
+     * Every registry that can have a {@code <locationKey>/tags/*.json} folder - i.e. every
+     * data-driven registry, file-backed or not (see the {@link #Registry(String)} constructor).
+     * Unlike {@link #getReloadableKeys()} this is not limited to file-backed registries, since
+     * tagging doesn't require one.
+     */
+    public static @Unmodifiable List<Registry<?>> getTaggableRegistries() {
+        return Collections.unmodifiableList(DATA_REGISTRIES);
+    }
+
+    /**
      * Saves a specific entry to disk as a .json file.
      *
      * @param plugin The plugin instance (used to locate the data folder)
