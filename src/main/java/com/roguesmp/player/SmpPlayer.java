@@ -34,6 +34,7 @@ import java.util.*;
 public class SmpPlayer {
 
     private final UUID uuid;
+    private final PlayerData playerData;
     private final Map<Enchants, Integer> activeEnchants;
     private final Map<Attributes, Double> activeAttributes;
 
@@ -58,6 +59,7 @@ public class SmpPlayer {
 
     private final Map<UUID, PlayerProjectile> projectiles = new HashMap<>();
     private int projectileCleanupTimer = 0;
+    private @Nullable PlayerClass playerClass;
 
     // Wall-clock (not tick-count) cooldown tracking for passive item abilities (ItemAbility) -
     // lives here rather than on the ability/component instance since non-unique SmpItems (and
@@ -65,8 +67,9 @@ public class SmpPlayer {
     // any cooldown state constantly.
     private final Map<String, Long> abilityCooldowns = new HashMap<>();
 
-    public SmpPlayer(UUID uuid) {
-        this.uuid = uuid;
+    public SmpPlayer(PlayerData playerData) {
+        this.uuid = playerData.getUuid();
+        this.playerData = playerData;
         abilityLoadout = new AbilityLoadout(this);
         activeEnchants = new EnumMap<>(Enchants.class);
         activeAttributes = new EnumMap<>(Attributes.class);
@@ -75,14 +78,10 @@ public class SmpPlayer {
         activeAttributesView = Collections.unmodifiableMap(activeAttributes);
 
         initMechanic();
-    }
 
-    public SmpPlayer(Player bukkitPlayer) {
-        this(bukkitPlayer.getUniqueId());
-    }
-
-    public void loadData(PlayerData playerData) {
         abilityLoadout.loadData(playerData);
+        String classId = playerData.getClassId();
+        this.playerClass = classId == null ? null : Registries.PLAYER_CLASS.get(classId);
     }
 
     private void initMechanic() {
@@ -248,9 +247,7 @@ public class SmpPlayer {
     }
 
     public @Nullable PlayerClass getPlayerClass() {
-        String classId = getPlayerData().getClassId();
-        if (classId == null) return null;
-        return Registries.PLAYER_CLASS.get(classId);
+        return playerClass;
     }
 
     /**
@@ -263,6 +260,7 @@ public class SmpPlayer {
     public void setPlayerClass(PlayerClass playerClass) {
         PlayerData data = getPlayerData();
         data.setClassId(playerClass.getId());
+        this.playerClass = playerClass;
 
         playerClass.getDefaultAbilities().forEach((abilityId, level) -> {
             if (data.getAbilityLevel(abilityId) <= 0) {
@@ -306,7 +304,7 @@ public class SmpPlayer {
     }
 
     public PlayerData getPlayerData() {
-        return PlayerManager.getInstance().getDataManager().getData(uuid);
+        return playerData;
     }
 
     public @Nullable Player getBukkitPlayer() {

@@ -163,6 +163,9 @@ public class Registry<T> {
         if (files == null) return;
 
         tags.clear();
+        // Every entry Holder's reverse tag index is about to go stale - cleared here and rebuilt
+        // below once tags are freshly resolved (see the loop after tag.resolve(...)).
+        holders.values().forEach(Holder::clearTags);
         for (File file : files) {
             String id = file.getName().substring(0, file.getName().length() - 5);
 
@@ -186,7 +189,20 @@ public class Registry<T> {
             tag.resolve(tags::get, new HashSet<>());
         }
 
+        // Rebuild the reverse index on every already-requested entry Holder (see getHolder) - which
+        // tags does this entry now belong to. Only a handful of holders ever get requested, and this
+        // runs at (re)load time only, so an O(holders * tags) scan here is fine.
+        for (Holder<T> holder : holders.values()) {
+            if (holder.isBound()) linkHolderTags(holder);
+        }
+
         RogueSmpCore.LOGGER.info("Loaded {} tags into registry '{}'", tags.size(), locationKey);
+    }
+
+    private void linkHolderTags(Holder<T> holder) {
+        tags.forEach((tagId, tag) -> {
+            if (tag.contains(holder.value())) holder.addTag(tagId);
+        });
     }
 
     /**
@@ -403,7 +419,11 @@ public class Registry<T> {
     public Holder<T> getHolder(String id) {
         return holders.computeIfAbsent(id, key -> {
             T existing = entries.get(key);
-            return existing != null ? new Holder<>(key, existing) : new Holder<>(key);
+            if (existing == null) return new Holder<>(key);
+
+            Holder<T> holder = new Holder<>(key, existing);
+            linkHolderTags(holder); // tags may already be loaded by the time this id is first requested
+            return holder;
         });
     }
 

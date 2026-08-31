@@ -1,6 +1,11 @@
 package com.roguesmp.registry;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A stable, identity-preserving reference to a {@link Registry} entry by id - mirrors Minecraft's
@@ -13,6 +18,12 @@ import org.jetbrains.annotations.Nullable;
  * This also makes references survive {@link Registry#clear()}/reload: a raw cached {@code T}
  * value goes stale the moment the registry reloads under it, but a Holder is the same object
  * before and after - it just gets unbound then rebound as the registry repopulates.
+ * <p>
+ * Also carries a reverse index of every tag id this entry currently belongs to (see
+ * {@link #getTagIds()}), kept in sync by {@link Registry#loadTagsFrom} the same way {@link #value}
+ * is kept in sync by {@link Registry#register} - so code that needs "which tags is this specific
+ * entry tagged under" (e.g. a weapon-restriction check keyed off the wielded item) doesn't have to
+ * scan every tag in the registry to find out.
  *
  * @param <T> the type of value held
  */
@@ -20,6 +31,7 @@ public class Holder<T> {
 
     private final String id;
     private @Nullable T value;
+    private final Set<String> tagIds = new HashSet<>();
 
     Holder(String id) {
         this.id = id;
@@ -36,6 +48,19 @@ public class Holder<T> {
 
     void unbind() {
         this.value = null;
+        tagIds.clear();
+    }
+
+    void addTag(String tagId) {
+        tagIds.add(tagId);
+    }
+
+    void clearTags() {
+        tagIds.clear();
+    }
+
+    public @Unmodifiable Set<String> getTagIds() {
+        return Collections.unmodifiableSet(tagIds);
     }
 
     public boolean isBound() {
