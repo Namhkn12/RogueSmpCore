@@ -30,7 +30,7 @@ public class ClassSelectionGui extends BaseGui {
     private final List<PlayerClass> classes;
 
     public ClassSelectionGui(SmpPlayer smpPlayer) {
-        super(Component.text("Chọn Lớp Nhân Vật"), 4);
+        super(Component.text("Chọn Lớp Nhân Vật"), 3);
         this.smpPlayer = smpPlayer;
         this.classes = new ArrayList<>(Registries.PLAYER_CLASS.getAll().values());
     }

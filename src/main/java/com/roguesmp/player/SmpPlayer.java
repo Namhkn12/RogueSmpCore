@@ -8,9 +8,7 @@ import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.DurabilityChangedEvent;
-import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.SmpItem;
-import com.roguesmp.item.component.impl.*;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityLoadout;
 import com.roguesmp.player.ability.AbilityType;
@@ -43,15 +41,6 @@ public class SmpPlayer {
 
     private final Map<EquipSlot, SmpItem> currentEquipment = new EnumMap<>(EquipSlot.class);
     private final Map<EquipSlot, SmpItem> currentEquipmentView = Collections.unmodifiableMap(currentEquipment);
-
-    // What updateSlotStat actually folded into activeAttributes/activeEnchants for each slot last
-    // time, as owned copies - not live references into the item's components. Removing a slot's
-    // contribution subtracts THIS snapshot rather than re-reading the (possibly already-mutated)
-    // item live, so it stays correct even when the "old" and "new" SmpItem for a slot turn out to
-    // be the same cached instance (e.g. a unique item whose attributes changed in place - see
-    // UnyieldingEdge - then got its stack regenerated and re-equipped with itself).
-    private final Map<EquipSlot, Map<Attributes, Double>> lastAppliedAttributes = new EnumMap<>(EquipSlot.class);
-    private final Map<EquipSlot, Map<Enchants, Integer>> lastAppliedEnchants = new EnumMap<>(EquipSlot.class);
 
     private final AbilityLoadout abilityLoadout;
 
@@ -86,6 +75,8 @@ public class SmpPlayer {
 
     private void initMechanic() {
         mechanics.add(new OffhandBlockerMechanic());
+        mechanics.add(new ClassRestrictionMechanic());
+        mechanics.add(new EquipmentStatMechanic());
         mechanics.add(new BaseInteractionMechanic());
         mechanics.add(new EnchantMechanic());
         mechanics.add(new AttributeMechanic());
@@ -99,82 +90,54 @@ public class SmpPlayer {
         mechanics.sort(Comparator.comparingInt(PlayerMechanic::getPriority));
     }
 
+    /**
+     * Entry point for a slot's item changing - the actual attribute/enchant recomputation lives in
+     * {@link EquipmentStatMechanic#onEquipSlotChange}, which runs (for every mechanic, though only
+     * that one does anything) before {@link PlayerMechanic#onEquipmentChange} is broadcast, since
+     * every other mechanic reacting to that broadcast expects {@link #getActiveAttributes()} /
+     * {@link #getActiveEnchants()} to already reflect the change.
+     */
     public void updateSlotStat(Player player, EquipSlot slot, @Nullable SmpItem newItem) {
-        Set<Attributes> affected = new HashSet<>();
-
-        Map<Attributes, Double> previousAttributes = lastAppliedAttributes.remove(slot);
-        if (previousAttributes != null) {
-            previousAttributes.forEach((attr, val) -> {
-                affected.add(attr);
-                activeAttributes.merge(attr, -val, (oldV, delta) -> {
-                    double res = oldV + delta;
-                    return Utils.isEffectiveZero(res) ? null : res;
-                });
-            });
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onEquipSlotChange(player, slot, newItem, this);
         }
-
-        Map<Enchants, Integer> previousEnchants = lastAppliedEnchants.remove(slot);
-        if (previousEnchants != null) {
-            previousEnchants.forEach((ench, level) -> activeEnchants.merge(ench, -level, (oldVal, delta) -> {
-                int result = oldVal + delta;
-                return result <= 0 ? null : result;
-            }));
-        }
-
-        currentEquipment.remove(slot);
-
-        if (newItem != null && !newItem.hasComponent(ItemComponentKeys.BROKEN)) {
-            EquipAttributeComponent newComp = newItem.getComponent(ItemComponentKeys.ATTRIBUTE);
-            if (newComp != null && newComp.getSlot() == slot) {
-                // Owned copy, not the live unmodifiable view - must stay a fixed point-in-time
-                // snapshot even after the component's own finalAttributes mutate further.
-                Map<Attributes, Double> snapshot = new EnumMap<>(newComp.getFinalAttributes());
-                snapshot.forEach((attr, val) -> {
-                    affected.add(attr);
-                    activeAttributes.merge(attr, val, (oldV, delta) -> {
-                        double res = oldV + delta;
-                        return Utils.isEffectiveZero(res) ? null : res;
-                    });
-                });
-                if (!snapshot.isEmpty()) lastAppliedAttributes.put(slot, snapshot);
-            }
-
-            Map<Enchants, Integer> enchantSnapshot = collectApplicableEnchants(newItem, slot);
-            enchantSnapshot.forEach((ench, level) -> activeEnchants.merge(ench, level, (oldVal, delta) -> {
-                int result = oldVal + delta;
-                return result <= 0 ? null : result;
-            }));
-            if (!enchantSnapshot.isEmpty()) lastAppliedEnchants.put(slot, enchantSnapshot);
-
-            currentEquipment.put(slot, newItem);
-        }
-
-        for (Attributes attr : affected) {
-            Double total = activeAttributes.get(attr); // Null if pruned above
-            if (total == null) {
-                attr.getAttribute().removeVanillaAttribute(player);
-            } else {
-                attr.getAttribute().addVanillaAttribute(player, total);
-            }
-        }
-
         for (PlayerMechanic mechanic : mechanics) {
             mechanic.onEquipmentChange(slot, newItem, this);
         }
     }
 
-    private Map<Enchants, Integer> collectApplicableEnchants(SmpItem item, EquipSlot slot) {
-        EnchantComponent enchantComp = item.getComponent(ItemComponentKeys.ENCHANT);
-        if (enchantComp == null) return Map.of();
-
-        Map<Enchants, Integer> result = new EnumMap<>(Enchants.class);
-        enchantComp.getTotalEnchants().forEach((ench, level) -> {
-            // Only apply if the enchant is valid for the current equipment slot
-            if (ench.getEnchant().getActiveSlots().contains(slot)) {
-                result.put(ench, level);
-            }
+    /**
+     * Folds {@code delta} into this attribute's active total, pruning the entry once it's
+     * effectively zero - used by {@link EquipmentStatMechanic} for both adding a slot's
+     * contribution (positive delta) and removing it (negative delta).
+     */
+    public void mergeAttributeDelta(Attributes attribute, double delta) {
+        activeAttributes.merge(attribute, delta, (oldV, d) -> {
+            double res = oldV + d;
+            return Utils.isEffectiveZero(res) ? null : res;
         });
-        return result;
+    }
+
+    /**
+     * Folds {@code delta} into this enchant's active level, pruning the entry once it's at or
+     * below zero - used by {@link EquipmentStatMechanic} for both adding a slot's contribution
+     * (positive delta) and removing it (negative delta).
+     */
+    public void mergeEnchantDelta(Enchants enchant, int delta) {
+        activeEnchants.merge(enchant, delta, (oldVal, d) -> {
+            int result = oldVal + d;
+            return result <= 0 ? null : result;
+        });
+    }
+
+    /**
+     * Sets (or, if {@code item} is null, clears) what's tracked as equipped in this slot - used by
+     * {@link EquipmentStatMechanic}, separately from the attribute/enchant bookkeeping, since a
+     * broken item still occupies the slot visually but is tracked here as empty.
+     */
+    public void setEquipmentSlot(EquipSlot slot, @Nullable SmpItem item) {
+        if (item == null) currentEquipment.remove(slot);
+        else currentEquipment.put(slot, item);
     }
 
     public void registerMechanic(PlayerMechanic mechanic) {

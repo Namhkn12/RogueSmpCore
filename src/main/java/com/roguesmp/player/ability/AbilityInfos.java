@@ -1,6 +1,7 @@
 package com.roguesmp.player.ability;
 
 import com.roguesmp.player.ability.impl.active.*;
+import com.roguesmp.player.ability.impl.assassin.DaggerThrow;
 import com.roguesmp.player.ability.impl.lifeline.LastBreath;
 import com.roguesmp.player.ability.impl.passive.Dodging;
 import com.roguesmp.player.ability.impl.passive.Sharpshooter;
@@ -15,6 +16,7 @@ public class AbilityInfos {
 
     public static final AbilityInfo<InfernalOverdrive> INFERNAL_OVERDRIVE = register(InfernalOverdrive.INFO);
     public static final AbilityInfo<AetherStance> AETHER_STANCE = register(AetherStance.INFO);
+    public static final AbilityInfo<DaggerThrow> DAGGER_THROW = register(DaggerThrow.INFO);
     public static final AbilityInfo<IgneousRune> IGNEOUS_RUNE = register(IgneousRune.INFO);
     public static final AbilityInfo<Scrapshot> SCRAPSHOT = register(Scrapshot.INFO);
     public static final AbilityInfo<Sidearm> SIDEARM = register(Sidearm.INFO);

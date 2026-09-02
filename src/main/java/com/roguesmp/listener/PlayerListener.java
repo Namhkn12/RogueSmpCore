@@ -62,11 +62,6 @@ public class PlayerListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         playerManager.loadAndTrackPlayer(player.getUniqueId());
-
-        SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
-        if (smpPlayer != null && smpPlayer.getPlayerData().getClassId() == null) {
-            Utils.runLater(() -> new ClassSelectionGui(smpPlayer).showInventory(player));
-        }
     }
 
     @EventHandler

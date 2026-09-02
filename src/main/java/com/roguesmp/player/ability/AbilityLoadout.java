@@ -88,7 +88,9 @@ public class AbilityLoadout {
                 String id = equippedIds.get(i);
                 if (id == null) continue;
 
-                int level = unlocked.getOrDefault(id, 1);
+                int level = unlocked.getOrDefault(id, 0);
+                if (level <= 0) continue; // Not unlocked (e.g. unlocked ability was later revoked) - drop from the loadout
+
                 AbilityInfo<?> info = Registries.ABILITY.get(id);
                 if (info == null) continue;
                 Ability ability = info.createInstance(smpPlayer, level);

@@ -1,5 +1,8 @@
 package com.roguesmp.player.ability;
 
+import com.roguesmp.constant.EquipSlot;
+import com.roguesmp.item.SmpItem;
+import com.roguesmp.player.PlayerManager;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.ItemStackUtils;
 import org.bukkit.entity.Player;
@@ -12,6 +15,24 @@ import java.util.function.Predicate;
  * to happen.
  */
 public class TriggerOptions {
+
+    public static final Predicate<Player> HOLDING_WEAPON_AXE = register("holding_axe", player -> {
+        SmpItem mainhandSmp = PlayerManager.getInstance().getSmpPlayer(player).getItemAtEquipSlot(EquipSlot.MAINHAND);
+        if (mainhandSmp == null) return false;
+        return Registries.ITEM.getHolder(mainhandSmp.getId()).getTagIds().contains("weapon_axes");
+    });
+
+    public static final Predicate<Player> HOLDING_WEAPON_SWORD = register("holding_sword", player -> {
+        SmpItem mainhandSmp = PlayerManager.getInstance().getSmpPlayer(player).getItemAtEquipSlot(EquipSlot.MAINHAND);
+        if (mainhandSmp == null) return false;
+        return Registries.ITEM.getHolder(mainhandSmp.getId()).getTagIds().contains("weapon_swords");
+    });
+
+    public static final Predicate<Player> HOLDING_WEAPON_ORB = register("holding_orb", player -> {
+        SmpItem mainhandSmp = PlayerManager.getInstance().getSmpPlayer(player).getItemAtEquipSlot(EquipSlot.MAINHAND);
+        if (mainhandSmp == null) return false;
+        return Registries.ITEM.getHolder(mainhandSmp.getId()).getTagIds().contains("weapon_orbs");
+    });
 
     public static final Predicate<Player> SNEAKING = register("sneaking", Player::isSneaking);
     public static final Predicate<Player> NOT_SNEAKING = register("not_sneaking", p -> !p.isSneaking());

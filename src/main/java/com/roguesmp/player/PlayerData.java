@@ -97,7 +97,12 @@ public class PlayerData{
         this.islandId = islandId;
         this.money = money;
         this.classId = classId;
-        this.unlockedAbilities = new HashMap<>(unlockedAbilities);
+        this.unlockedAbilities = new HashMap<>();
+        // level <= 0 means "not unlocked" (see setAbilityLevel) - keep that invariant even for
+        // data that bypassed setAbilityLevel (e.g. a hand-edited or stale DB record).
+        unlockedAbilities.forEach((abilityId, abilityLevel) -> {
+            if (abilityLevel > 0) this.unlockedAbilities.put(abilityId, abilityLevel);
+        });
 
         this.equippedAbilities = new EnumMap<>(AbilityType.class);
         for (AbilityType type : AbilityType.values()) {

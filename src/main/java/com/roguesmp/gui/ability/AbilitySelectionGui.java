@@ -5,6 +5,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.player.ability.AbilityType;
+import com.roguesmp.player.classes.PlayerClass;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -37,15 +38,25 @@ public class AbilitySelectionGui extends BaseGui {
         this.type = type;
         this.targetIndex = index;
 
+        // Every ability in the current class's roster (unlocked or not) - not just unlocked ones -
+        // so a not-yet-unlocked ability still shows here (locked, unselectable) rather than being
+        // invisible until the player goes and unlocks it elsewhere first.
+        PlayerClass playerClass = smpPlayer.getPlayerClass();
         List<AbilityInfo<?>> list = new ArrayList<>();
-        for (String id : smpPlayer.getPlayerData().getUnlockedAbilities().keySet()) {
-            AbilityInfo<?> info = Registries.ABILITY.get(id);
-            if (info != null && info.getType() == type && smpPlayer.getAbilityLoadout().isAllowedForCurrentClass(id)) {
-                list.add(info);
+        if (playerClass != null) {
+            for (String id : playerClass.getDefaultAbilities().keySet()) {
+                AbilityInfo<?> info = Registries.ABILITY.get(id);
+                if (info != null && info.getType() == type) {
+                    list.add(info);
+                }
             }
         }
 
         list.sort((a, b) -> {
+            boolean aUnlocked = isUnlocked(a.getId());
+            boolean bUnlocked = isUnlocked(b.getId());
+            if (aUnlocked != bUnlocked) return Boolean.compare(bUnlocked, aUnlocked);
+
             boolean aEquipped = smpPlayer.getAbilityLoadout().isEquipped(a.getId(), type);
             boolean bEquipped = smpPlayer.getAbilityLoadout().isEquipped(b.getId(), type);
             if (aEquipped != bEquipped) return Boolean.compare(bEquipped, aEquipped);
@@ -86,14 +97,20 @@ public class AbilitySelectionGui extends BaseGui {
         // --- 3. Selection Bank (Starting from index 10 to keep within borders) ---
         for (int i = 0; i < available.size(); i++) {
             AbilityInfo<?> info = available.get(i);
-            int level = smpPlayer.getPlayerData().getUnlockedAbilities().get(info.getId());
+            boolean unlocked = isUnlocked(info.getId());
+            int level = smpPlayer.getPlayerData().getAbilityLevel(info.getId());
 
             // Logic to calculate slot (skipping borders)
             int row = (i / 7) + 1;
             int col = (i % 7) + 1;
 
-            addButton(row, col, createSelectIcon(info, level), event -> {
+            addButton(row, col, createSelectIcon(info, level, unlocked), event -> {
                 event.setCancelled(true);
+
+                if (!unlocked) {
+                    smpPlayer.getBukkitPlayer().sendMessage(Component.text("⚠ Kĩ năng này chưa được mở khóa! Hãy dùng /ability catalogue để mở khóa.", NamedTextColor.RED));
+                    return;
+                }
 
                 if (isEquippedElsewhere(info.getId())) {
                     smpPlayer.getBukkitPlayer().sendMessage(Component.text("⚠ Kĩ năng này đã được trang bị ở ô khác!", NamedTextColor.RED));
@@ -118,7 +135,13 @@ public class AbilitySelectionGui extends BaseGui {
         return false;
     }
 
-    private ItemStack createSelectIcon(AbilityInfo<?> info, int level) {
+    private boolean isUnlocked(String abilityId) {
+        return smpPlayer.getPlayerData().getAbilityLevel(abilityId) > 0;
+    }
+
+    private ItemStack createSelectIcon(AbilityInfo<?> info, int level, boolean unlocked) {
+        if (!unlocked) return createLockedIcon(info);
+
         ItemStack item = ItemStack.of(info.getIcon());
         item.setData(DataComponentTypes.ITEM_NAME, info.getFormattedDisplayName());
 
@@ -148,6 +171,20 @@ public class AbilitySelectionGui extends BaseGui {
         } else if (!isHere) {
             lore.add(Utils.text("Click để chọn", NamedTextColor.YELLOW));
         }
+
+        item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+        return item;
+    }
+
+    private ItemStack createLockedIcon(AbilityInfo<?> info) {
+        ItemStack item = ItemStack.of(Material.COAL_BLOCK);
+        item.setData(DataComponentTypes.ITEM_NAME, info.getFormattedDisplayName().decoration(TextDecoration.STRIKETHROUGH, true));
+
+        List<Component> lore = new ArrayList<>();
+        lore.add(Utils.text("🔒 Chưa mở khóa", NamedTextColor.GRAY).decoration(TextDecoration.BOLD, true));
+        lore.add(Utils.text("Phân loại: " + type.getDisplay(), NamedTextColor.DARK_GRAY));
+        lore.add(Component.empty());
+        lore.add(Utils.text("Hãy dùng /ability catalogue để mở khóa", NamedTextColor.YELLOW));
 
         item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
         return item;

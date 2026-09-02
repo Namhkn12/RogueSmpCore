@@ -1,6 +1,7 @@
 package com.roguesmp.player.classes;
 
 import com.roguesmp.codec.Codec;
+import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.jetbrains.annotations.Unmodifiable;
@@ -18,13 +19,17 @@ import java.util.Set;
  * {@link #defaultAbilities} doubles as this class's full ability roster: it's both what gets
  * granted (at the given level) the first time a player picks this class, and the set of ability
  * ids a player is allowed to equip while this class is active - see
- * {@link com.roguesmp.player.ability.AbilityLoadout#isAllowedForCurrentClass(String)}.
+ * {@link com.roguesmp.player.ability.AbilityLoadout#isAllowedForCurrentClass(String)}. A level of
+ * {@code 0} means "in this class's roster but not auto-granted" -
+ * {@link com.roguesmp.player.SmpPlayer#setPlayerClass} won't unlock it for free, so it shows as
+ * locked in {@link com.roguesmp.gui.ability.AbilityCatalogue} until the player unlocks it
+ * themselves, while still being equippable (once unlocked) like any other ability in the roster.
  */
 public class PlayerClass {
 
     public static final Codec<PlayerClass> CODEC = Codec.composite(
             Codec.STRING.fieldOf("id").forGetter(PlayerClass::getId),
-            Codec.STRING.optionalFieldOf("display_name", "").forGetter(PlayerClass::getDisplayNameRaw),
+            Codec.STRING.optionalFieldOf("display_name", "").forGetter(PlayerClass::getDisplayName),
             Codec.MATERIAL.optionalFieldOf("icon", Material.BARRIER).forGetter(PlayerClass::getIcon),
             Codec.listOf(Codec.STRING).optionalFieldOf("description", List.of()).forGetter(PlayerClass::getDescription),
             Codec.lenientUnboundedMap(Codec.INT).optionalFieldOf("default_abilities", Map.of()).forGetter(PlayerClass::getDefaultAbilities),
@@ -57,16 +62,12 @@ public class PlayerClass {
         return id;
     }
 
-    private String getDisplayNameRaw() {
-        return displayName;
-    }
-
     public String getDisplayName() {
         return displayName.isEmpty() ? id : displayName;
     }
 
     public Component getFormattedDisplayName() {
-        return Component.text(getDisplayName());
+        return Utils.fromString(getDisplayName());
     }
 
     public Material getIcon() {
