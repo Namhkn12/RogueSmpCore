@@ -22,6 +22,7 @@ import com.roguesmp.gui.ItemRepairGui;
 import com.roguesmp.gui.SkinBrowserGui;
 import com.roguesmp.gui.TrashGui;
 import com.roguesmp.gui.ability.AbilityCatalogue;
+import com.roguesmp.gui.classes.ClassSelectionGui;
 import com.roguesmp.gui.crafting.CraftingGui;
 import com.roguesmp.gui.info.SmpWikiMainMenuGui;
 import com.roguesmp.gui.itemcreator.ItemCreatorGui;
@@ -41,6 +42,7 @@ import com.roguesmp.player.PlayerManager;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.registry.*;
 import com.roguesmp.server.DailyResetScheduler;
+import com.roguesmp.server.PlayerDataAutoSaveScheduler;
 import com.roguesmp.tab.TabDemoCommand;
 import com.roguesmp.tab.TabEngine;
 import com.roguesmp.utils.GlowUtils;
@@ -60,6 +62,7 @@ public final class RogueSmpCore extends JavaPlugin {
     private GlobalConfig globalConfig;
 
     private DailyResetScheduler resetScheduler;
+    private PlayerDataAutoSaveScheduler autoSaveScheduler;
 
     // Init whatever here, called before initListeners
     public void init() {
@@ -110,6 +113,9 @@ public final class RogueSmpCore extends JavaPlugin {
         this.resetScheduler = new DailyResetScheduler(this);
         this.resetScheduler.start();
 
+        this.autoSaveScheduler = new PlayerDataAutoSaveScheduler(this);
+        this.autoSaveScheduler.start();
+
         TabEngine.init(this);
     }
 
@@ -150,6 +156,8 @@ public final class RogueSmpCore extends JavaPlugin {
 
         IslandManager.getInstance().onDisable();
         QuestManager.getInstance().onDisable();
+
+        EffectManager.getInstance().close();
     }
 
     // Register Listener here
@@ -191,6 +199,7 @@ public final class RogueSmpCore extends JavaPlugin {
         NpcBrowserGui.registerCommand();
 
         AbilityCatalogue.register();
+        ClassSelectionGui.register();
 
         TrashGui.register();
 
@@ -224,15 +233,19 @@ public final class RogueSmpCore extends JavaPlugin {
     @Override
     public void onDisable() {
 
+        // Stop periodic tasks first so they can't race the final save/close below
+        if (this.autoSaveScheduler != null) {
+            autoSaveScheduler.stop();
+        }
+        if (this.resetScheduler != null) {
+            resetScheduler.stop();
+        }
+
         // Plugin shutdown logic
         saveData();
 
         FxEngine.getInstance().shutdown();
         TabEngine.getInstance().shutdown();
-
-        if (this.resetScheduler != null) {
-            resetScheduler.stop();
-        }
 
         Bukkit.getOnlinePlayers().forEach(player -> {
             player.closeInventory();

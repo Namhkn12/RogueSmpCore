@@ -121,7 +121,7 @@ public class ItemBrowser extends BaseGui {
         var pageEntries = getPage(currentPage);
         int i = 9;
         for (var entry : pageEntries) {
-            ItemStack itemStack = entry.getValue().generatePreviewStack(1);
+            ItemStack itemStack = entry.getValue().generateItemStack(1);
             ItemLore itemLore = itemStack.getData(DataComponentTypes.LORE);
             List<Component> itemLoreComp = itemLore == null ? new ArrayList<>() : new ArrayList<>(itemLore.lines());
             Component itemId = Utils.text("ID: " + entry.getKey(), NamedTextColor.DARK_GRAY);

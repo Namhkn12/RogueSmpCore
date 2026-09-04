@@ -6,6 +6,7 @@ import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ItemComponent;
+import com.roguesmp.item.component.UniqueTrackingComponent;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 
-public class EquipAttributeComponent implements ItemComponent {
+public class EquipAttributeComponent implements ItemComponent, UniqueTrackingComponent {
 
     public static final Codec<EquipAttributeComponent> CODEC = Codec.composite(
             Codec.unboundedMap(Codec.enumOf(Attributes.class), Codec.DOUBLE).fieldOf("attributes")

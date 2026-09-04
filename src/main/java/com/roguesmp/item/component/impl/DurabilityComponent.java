@@ -2,14 +2,17 @@ package com.roguesmp.item.component.impl;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.Keys;
+import com.roguesmp.context.ItemDataContext;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.item.component.UniqueTrackingComponent;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -47,6 +50,15 @@ public final class DurabilityComponent implements UniqueTrackingComponent {
     @Override
     public void save(PersistentDataContainer pdc) {
         pdc.set(DURABILITY_KEY, PersistentDataType.INTEGER, currentDurability);
+    }
+
+    @Override
+    public void modifyStack(ItemDataContext context) {
+        ItemStack newStack = context.newStack();
+        newStack.unsetData(DataComponentTypes.UNBREAKABLE);
+        newStack.setData(DataComponentTypes.MAX_DAMAGE, 100);
+        int percent = Math.max(1, (int) (((float) currentDurability / maxDurability) * 100));
+        newStack.setData(DataComponentTypes.DAMAGE, Math.max(0, 100 - percent));
     }
 
     @Override

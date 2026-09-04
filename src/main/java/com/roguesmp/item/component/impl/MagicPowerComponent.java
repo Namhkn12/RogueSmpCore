@@ -34,7 +34,7 @@ public class MagicPowerComponent implements ItemComponent {
     public void contributeLore(ItemLoreContext context) {
         if (!shouldProvideLore) return;
         Component mpLine = Component.text("Ma lực: ", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE).append(Component.text(current, NamedTextColor.AQUA));
-        context.builder().putLines(0, List.of(mpLine));
+        context.builder().putLines(1, List.of(mpLine));
     }
 
     public int getMax() {

@@ -5,6 +5,7 @@ import com.roguesmp.gui.crafting.RecipeBrowserGui;
 import com.roguesmp.gui.entitycreator.EntityBrowserGui;
 import com.roguesmp.gui.loottablecreator.LootTableBrowserGui;
 import com.roguesmp.gui.npccreator.NpcBrowserGui;
+import com.roguesmp.gui.tageditor.TagEditorGui;
 import dev.jorel.commandapi.CommandAPICommand;
 
 public class SmpBrowserCommand {
@@ -36,12 +37,18 @@ public class SmpBrowserCommand {
                     new NpcBrowserGui(player).showInventory(player);
                 });
 
+        CommandAPICommand tagCommand = new CommandAPICommand("tag")
+                .executesPlayer((player, args) -> {
+                    TagEditorGui.open(player);
+                });
+
         new CommandAPICommand("smpbrowser")
                 .withSubcommand(itemCommand)
                 .withSubcommand(recipeCommand)
                 .withSubcommand(entityCommand)
                 .withSubcommand(lootCommand)
                 .withSubcommand(npcCommand)
+                .withSubcommand(tagCommand)
                 .register();
     }
 }

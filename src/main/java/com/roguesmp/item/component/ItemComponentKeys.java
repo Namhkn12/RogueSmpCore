@@ -20,6 +20,8 @@ public class ItemComponentKeys {
     public static final ComponentKey<ItemModelComponent> ITEM_MODEL = register("item_model", ItemModelComponent.CODEC);
     //Transient so it has no CODEC.
     public static final ComponentKey<BrokenComponent> BROKEN = new ComponentKey<>("broken");
+    public static final ComponentKey<ItemTypeComponent> ITEM_TYPE = new ComponentKey<>("item_type");
+
     public static final ComponentKey<DurabilityRepairComponent> DURABILITY_REPAIR = register("durability_repair", DurabilityRepairComponent.CODEC);
     public static final ComponentKey<WrenchComponent> WRENCH = register("wrench", WrenchComponent.CODEC);
     public static final ComponentKey<PassiveAbilityComponent> PASSIVE_ABILITY = register("passive_ability", PassiveAbilityComponent.CODEC);

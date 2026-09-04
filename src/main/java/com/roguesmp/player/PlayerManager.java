@@ -47,14 +47,13 @@ public class PlayerManager {
     }
 
     public void loadAndTrackPlayer(UUID uuid) {
-        SmpPlayer smpPlayer = new SmpPlayer(uuid);
-        players.put(uuid, smpPlayer);
         PlayerData playerData = dataManager.getData(uuid);
         if (playerData == null) {
             RogueSmpCore.LOGGER.warn("PlayerData for uuid {} is not loaded!", uuid);
             return;
         }
-        smpPlayer.loadData(playerData);
+        SmpPlayer smpPlayer = new SmpPlayer(playerData);
+        players.put(uuid, smpPlayer);
     }
 
     public void untrackPlayer(UUID uuid) {
@@ -68,6 +67,7 @@ public class PlayerManager {
             PlayerData playerData = dataManager.removeCachedData(smpPlayer.getUuid());
             dataManager.savePlayerData(playerData);
         });
+        dataManager.close();
     }
 
     public PlayerDataManager getDataManager() {

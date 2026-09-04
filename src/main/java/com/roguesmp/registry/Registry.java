@@ -163,6 +163,9 @@ public class Registry<T> {
         if (files == null) return;
 
         tags.clear();
+        // Every entry Holder's reverse tag index is about to go stale - cleared here and rebuilt
+        // below once tags are freshly resolved (see the loop after tag.resolve(...)).
+        holders.values().forEach(Holder::clearTags);
         for (File file : files) {
             String id = file.getName().substring(0, file.getName().length() - 5);
 
@@ -186,7 +189,20 @@ public class Registry<T> {
             tag.resolve(tags::get, new HashSet<>());
         }
 
+        // Rebuild the reverse index on every already-requested entry Holder (see getHolder) - which
+        // tags does this entry now belong to. Only a handful of holders ever get requested, and this
+        // runs at (re)load time only, so an O(holders * tags) scan here is fine.
+        for (Holder<T> holder : holders.values()) {
+            if (holder.isBound()) linkHolderTags(holder);
+        }
+
         RogueSmpCore.LOGGER.info("Loaded {} tags into registry '{}'", tags.size(), locationKey);
+    }
+
+    private void linkHolderTags(Holder<T> holder) {
+        tags.forEach((tagId, tag) -> {
+            if (tag.contains(holder.value())) holder.addTag(tagId);
+        });
     }
 
     /**
@@ -198,6 +214,72 @@ public class Registry<T> {
             registry.loadTagsFrom(plugin);
         }
         RogueSmpCore.LOGGER.info("----DONE LOADING TAG----");
+    }
+
+    /**
+     * Writes {@code rawEntries} to {@code <locationKey>/tags/<tagId>.json} and reloads this
+     * registry's tags so {@link #getTag} / {@link #getTags} immediately reflect the change
+     * (including re-resolving any {@code #tagId} reference to/from it). Works for any tag-capable
+     * registry, not just file-backed ones (see the {@link #Registry(String)} constructor) - only
+     * {@code locationKey} matters here, same as {@link #loadTagsFrom}.
+     *
+     * @return true if the file was written successfully
+     */
+    public @Blocking boolean saveTag(RogueSmpCore plugin, String tagId, List<String> rawEntries) {
+        if (locationKey == null) {
+            RogueSmpCore.LOGGER.warn("Attempted to save a tag on a registry with no locationKey");
+            return false;
+        }
+
+        File folder = new File(plugin.getDataFolder(), locationKey + "/tags");
+        if (!folder.exists() && !folder.mkdirs()) {
+            RogueSmpCore.LOGGER.error("Failed to create tags directory for '{}'", locationKey);
+            return false;
+        }
+
+        DataResult<JsonElement> result = TAG_CODEC.encode(rawEntries, JsonOps.INSTANCE);
+        if (!result.isSuccess()) {
+            RogueSmpCore.LOGGER.error("Failed to encode tag [{}] in '{}/tags': {}", tagId, locationKey, result.error());
+            return false;
+        }
+
+        File file = new File(folder, tagId + ".json");
+        try (FileWriter writer = new FileWriter(file)) {
+            Utils.GSON.toJson(result.result(), writer);
+        } catch (Exception e) {
+            RogueSmpCore.LOGGER.error("Error writing tag file '{}.json' in '{}/tags': {}", tagId, locationKey, e.getMessage());
+            return false;
+        }
+
+        loadTagsFrom(plugin); // re-resolve so getTag/getTags reflect the write immediately
+        return true;
+    }
+
+    /**
+     * Deletes {@code <locationKey>/tags/<tagId>.json} and reloads this registry's tags. Returns
+     * true if the file didn't exist to begin with, same "already gone counts as done" shape as
+     * {@link #removeAndDeleteFiles}.
+     */
+    public @Blocking boolean deleteTag(RogueSmpCore plugin, String tagId) {
+        if (locationKey == null) return false;
+
+        File file = new File(plugin.getDataFolder(), locationKey + "/tags/" + tagId + ".json");
+        if (!file.exists()) return true;
+
+        boolean deleted = file.delete();
+        if (deleted) loadTagsFrom(plugin);
+        else RogueSmpCore.LOGGER.error("Failed to delete tag file '{}/tags/{}.json'", locationKey, tagId);
+        return deleted;
+    }
+
+    /**
+     * Every registry that can have a {@code <locationKey>/tags/*.json} folder - i.e. every
+     * data-driven registry, file-backed or not (see the {@link #Registry(String)} constructor).
+     * Unlike {@link #getReloadableKeys()} this is not limited to file-backed registries, since
+     * tagging doesn't require one.
+     */
+    public static @Unmodifiable List<Registry<?>> getTaggableRegistries() {
+        return Collections.unmodifiableList(DATA_REGISTRIES);
     }
 
     /**
@@ -337,7 +419,11 @@ public class Registry<T> {
     public Holder<T> getHolder(String id) {
         return holders.computeIfAbsent(id, key -> {
             T existing = entries.get(key);
-            return existing != null ? new Holder<>(key, existing) : new Holder<>(key);
+            if (existing == null) return new Holder<>(key);
+
+            Holder<T> holder = new Holder<>(key, existing);
+            linkHolderTags(holder); // tags may already be loaded by the time this id is first requested
+            return holder;
         });
     }
 

@@ -4,14 +4,13 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
 import com.roguesmp.crafting.recipe.RecipeInput;
 import com.roguesmp.crafting.recipe.RecipeKey;
+import com.roguesmp.crafting.recipe.ShapedCraftingRecipe;
 import com.roguesmp.registry.Registries;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * Read-facing index over {@link Registries#CRAFTING_RECIPE}: a single {@link Trie} holding every

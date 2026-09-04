@@ -24,16 +24,22 @@ public class PlayerQuestData {
             PlayerQuestData::new
     );
 
+    private boolean dirty = true;
+
     private final UUID uuid;
     private final Map<String, QuestProgress> progresses = new HashMap<>(); //String is quest id
     private final Map<String, Integer> dailyCompletions = new HashMap<>();
     private long lastDailyCompletionResetTimestamp = -1;
 
+    /**
+     * Reconstruction constructor used when decoding from storage (see {@link #CODEC}).
+     */
     public PlayerQuestData(UUID uuid, Map<String, QuestProgress> progresses, Map<String, Integer> dailyCompletions, long lastDailyCompletionResetTimestamp) {
         this.uuid = uuid;
         this.progresses.putAll(progresses);
         this.dailyCompletions.putAll(dailyCompletions) ;
         this.lastDailyCompletionResetTimestamp = lastDailyCompletionResetTimestamp;
+        this.dirty = false;
     }
 
     public PlayerQuestData(PlayerQuestData toClone) {
@@ -69,9 +75,11 @@ public class PlayerQuestData {
 
     public void setQuestProgress(String questId, QuestProgress progress) {
         progresses.put(questId, progress);
+        this.dirty = true;
     }
 
     public @Nullable QuestProgress removeQuestProgress(String questId) {
+        this.dirty = true;
         return progresses.remove(questId);
     }
 
@@ -81,10 +89,12 @@ public class PlayerQuestData {
 
     public void incrementDailyCompletionForTag(String tagId) {
         dailyCompletions.put(tagId, getDailyCompletionsForTag(tagId) + 1);
+        this.dirty = true;
     }
 
     public void clearDailyCompletions() {
         dailyCompletions.clear();
+        this.dirty = true;
     }
 
     public long getLastDailyCompletionResetTimestamp() {
@@ -93,5 +103,14 @@ public class PlayerQuestData {
 
     public void setLastDailyCompletionResetTimestamp(long timestamp) {
         this.lastDailyCompletionResetTimestamp = timestamp;
+        this.dirty = true;
+    }
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
     }
 }

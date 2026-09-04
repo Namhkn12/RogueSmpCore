@@ -8,6 +8,7 @@ import com.roguesmp.item.component.UniqueTrackingComponent;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ObjectComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -43,23 +44,24 @@ public class RandomStatComponent implements ItemComponent, UniqueTrackingCompone
     @Override
     public void contributeLore(ItemLoreContext context) {
         Component line = Component.empty().decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
-        if (currentMagicPower >= 0) {
+        if (context.player() == null) {
+            if (currentMagicPower >= 0) {
+                Component mpLine = Component.text("Ma lực: ", NamedTextColor.GRAY).append(Component.text(currentMagicPower, NamedTextColor.AQUA)).append(Component.text(" - ", NamedTextColor.DARK_GRAY));
+                line = line.append(mpLine);
+            }
+        } else if (currentMagicPower >= 0) {
             Component mpLine = Component.text("Ma lực: ", NamedTextColor.GRAY).append(Component.text(currentMagicPower, NamedTextColor.AQUA)).append(Component.text(" - ", NamedTextColor.DARK_GRAY));
             line = line.append(mpLine);
         }
 
-
         if (context.player() == null) {
             line = line.append(Component.text("Chất lượng: ", NamedTextColor.GRAY))
-                    .append(buildQualityText(1d));
+                    .append(buildQualityText(-1d)); //-1 for a '???' preview
         } else {
             line = line.append(Component.text("Chất lượng: ", NamedTextColor.GRAY))
                     .append(buildQualityText(currentQuality));
         }
-        context.builder().putLines(0, List.of(line));
-
-
-
+        context.builder().putLines(1, List.of(line));
     }
 
     @Override
@@ -96,6 +98,9 @@ public class RandomStatComponent implements ItemComponent, UniqueTrackingCompone
     }
 
     private static Component buildQualityText(double quality) {
+        if (quality < 0) {
+            return Component.text("???", NamedTextColor.DARK_GRAY, TextDecoration.OBFUSCATED);
+        }
         double percent = (int) Math.round(quality * 100);
 
         String qualityName;

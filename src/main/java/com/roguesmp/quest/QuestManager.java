@@ -80,9 +80,11 @@ public class QuestManager {
                 boolean doneQuest = questProgress.updateObjectiveProgress(objectiveId, objectiveProgress -> {
                     objectiveConsumer.accept(objective, objectiveProgress);
                 });
+                playerQuestData.setDirty(true);
 
                 if (doneQuest) {
                     sendQuestDoneNotification(player, quest);
+                    saveQuestDataImmediately(playerQuestData);
                 }
             });
         }
@@ -111,7 +113,18 @@ public class QuestManager {
         }
 
         progress.complete();
+        data.setDirty(true);
+        saveQuestDataImmediately(data);
         return true;
+    }
+
+    /**
+     * Persists a player's quest data right away instead of waiting for the periodic
+     * autosave/quit save - used whenever a quest transitions to a completed state, so a
+     * crash shortly after completion doesn't lose it.
+     */
+    private void saveQuestDataImmediately(PlayerQuestData data) {
+        Utils.runAsync(() -> questDataManager.saveData(data));
     }
 
     /**
@@ -236,6 +249,7 @@ public class QuestManager {
 
     public void onDisable() {
         questDataManager.saveAllData();
+        questDataManager.close();
     }
 
     public void registerQuestCommand() {

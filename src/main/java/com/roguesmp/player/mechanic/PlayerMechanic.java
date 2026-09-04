@@ -8,6 +8,7 @@ import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.DurabilityChangedEvent;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.SmpPlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
@@ -84,4 +85,13 @@ public interface PlayerMechanic {
      * been swapped - a generic "this equipment slot changed" notification.
      */
     default void onEquipmentChange(EquipSlot slot, @Nullable SmpItem newItem, SmpPlayer player) {}
+
+    /**
+     * Called once per {@code SmpPlayer.updateSlotStat} call, for every mechanic, BEFORE
+     * {@link #onEquipmentChange} is broadcast to any of them - the one place that actually
+     * recomputes what a slot's new item contributes (see {@code EquipmentStatMechanic}), so every
+     * other mechanic's {@code onEquipmentChange} can assume {@code SmpPlayer.getActiveAttributes()}
+     * / {@code getActiveEnchants()} already reflect the change by the time it runs.
+     */
+    default void onEquipSlotChange(Player player, EquipSlot slot, @Nullable SmpItem newItem, SmpPlayer smpPlayer) {}
 }

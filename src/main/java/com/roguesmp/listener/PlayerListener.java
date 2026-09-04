@@ -6,11 +6,14 @@ import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.DurabilityChangedEvent;
+import com.roguesmp.gui.classes.ClassSelectionGui;
 import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandManager;
+import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.*;
 import com.roguesmp.utils.ItemStackUtils;
+import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.event.entity.EntityEquipmentChangedEvent;
 import org.bukkit.Bukkit;
@@ -21,7 +24,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -91,6 +96,15 @@ public class PlayerListener implements Listener {
         });
     }
 
+    //We use custom durability so this event is always cancelled for custom items
+    @EventHandler
+    public void onItemDamage(PlayerItemDamageEvent event) {
+        String baseId = ItemStackUtils.getBaseId(event.getItem());
+        if (baseId != null) {
+            event.setCancelled(true);
+        }
+    }
+
     @EventHandler
     public void onEquipmentChange(EntityEquipmentChangedEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
@@ -136,6 +150,21 @@ public class PlayerListener implements Listener {
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
         if (smpPlayer == null) return;
         smpPlayer.onInteract(event);
+    }
+
+    @EventHandler
+    public void onPrepareCraft(PrepareItemCraftEvent event) {
+        CraftingInventory inventory = event.getInventory();
+        ItemStack[] matrix = inventory.getMatrix();
+        if (matrix == null) return;
+        for (ItemStack itemStack : matrix) {
+            if (!ItemStackUtils.isValidItem(itemStack)) continue;
+            BaseItem baseItem = SmpItemUtils.getBaseItem(itemStack);
+            if (baseItem != null) {
+                inventory.setResult(null);
+                break;
+            }
+        }
     }
 
     @EventHandler

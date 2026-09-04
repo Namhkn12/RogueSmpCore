@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class GemModifier implements ItemModifier {
     @Override
-    public void collectAndApply(SmpItem smpItem, @Nullable SmpPlayer player, boolean isPreview) {
+    public void collectAndApply(SmpItem smpItem, @Nullable SmpPlayer player) {
 
         GemSocketComponent gemSocketComponent = smpItem.getComponent(ItemComponentKeys.GEM_SOCKET);
         if (gemSocketComponent == null) return;

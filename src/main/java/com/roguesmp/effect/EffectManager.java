@@ -26,7 +26,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -50,7 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EffectManager {
     public static final int PERIOD = 5;
-    public static final String DATA_FOLDER = "player_effect_tmp";
+    private static final String DB_FILE_NAME = "player_effect_data.db";
 
     private static EffectManager INSTANCE;
 
@@ -58,8 +64,11 @@ public class EffectManager {
     private final Map<UUID, EntityEffects> playerCache = new ConcurrentHashMap<>();
 
     private final BukkitRunnable runnable;
+    private final Connection connection;
 
     private EffectManager(JavaPlugin plugin) {
+        this.connection = openConnection(plugin);
+        createTable();
 
         runnable = new BukkitRunnable() {
             int mTicks = 0;
@@ -88,6 +97,43 @@ public class EffectManager {
         };
 
         runnable.runTaskTimer(plugin, 0, PERIOD);
+    }
+
+    private Connection openConnection(JavaPlugin plugin) {
+        File dbFile = new File(plugin.getDataFolder(), DB_FILE_NAME);
+        File parent = dbFile.getParentFile();
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+
+        try {
+            return DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to open player effect data database", e);
+        }
+    }
+
+    private void createTable() {
+        String sql = """
+                CREATE TABLE IF NOT EXISTS player_effect_data (
+                    uuid TEXT PRIMARY KEY NOT NULL,
+                    data BLOB NOT NULL
+                )
+                """;
+
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(sql);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to create player_effect_data table", e);
+        }
+    }
+
+    public void close() {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            RogueSmpCore.LOGGER.error("Failed to close player effect data database", e);
+        }
     }
 
     public static void registerCommand() {
@@ -121,7 +167,7 @@ public class EffectManager {
         }
 
         Utils.runAsync(() -> {
-            EntityEffects loaded = loadPlayerEffectsFromFile(uuid);
+            EntityEffects loaded = loadPlayerEffectData(uuid);
             if (loaded != null) {
                 Utils.runLater(() -> {
                     allEffects.put(uuid, loaded);
@@ -195,71 +241,80 @@ public class EffectManager {
             if (cached != null) {
                 cached.removeNonPersistent();
                 Utils.runAsync(() -> {
-                    savePlayerEffectToFile(uuid, cached);
+                    savePlayerEffectData(uuid, cached);
                 });
             }
         }, 100); //Remove after 5s
     }
 
-    private static void savePlayerEffectToFile(UUID playerId, @NotNull EntityEffects entityEffects) {
-        File folder = new File(RogueSmpCore.getInstance().getDataFolder(), DATA_FOLDER);
-        if (!folder.exists()) {
-            folder.mkdirs();
+    private synchronized void savePlayerEffectData(UUID playerId, @NotNull EntityEffects entityEffects) {
+        JsonObject root = new JsonObject();
+        for (var entry : entityEffects.snapshot().entrySet()) {
+            String key = entry.getKey();
+            List<SmpEffect> effects = entry.getValue().stream().filter(Objects::nonNull).toList();
+
+            DataResult<JsonElement> encoded = Codec.listOf(SmpEffect.CODEC).encode(effects, JsonOps.INSTANCE);
+            if (!encoded.isSuccess()) {
+                RogueSmpCore.LOGGER.warn("Failed to encode effects for {} (source '{}'): {}", playerId, key, encoded.error());
+                continue;
+            }
+            root.add(key, encoded.result());
         }
 
-        File playerFile = new File(folder, playerId + ".json");
-        try (Writer writer = new FileWriter(playerFile)) {
-            JsonObject root = new JsonObject();
-            for (var entry : entityEffects.snapshot().entrySet()) {
-                String key = entry.getKey();
-                List<SmpEffect> effects = entry.getValue().stream().filter(Objects::nonNull).toList();
+        String sql = """
+                INSERT INTO player_effect_data (uuid, data)
+                VALUES (?, jsonb(?))
+                ON CONFLICT(uuid) DO UPDATE SET data = excluded.data
+                """;
 
-                DataResult<JsonElement> encoded = Codec.listOf(SmpEffect.CODEC).encode(effects, JsonOps.INSTANCE);
-                if (!encoded.isSuccess()) {
-                    RogueSmpCore.LOGGER.warn("Failed to encode effects for {} (source '{}'): {}", playerId, key, encoded.error());
-                    continue;
-                }
-                root.add(key, encoded.result());
-            }
-            Utils.GSON.toJson(root, writer);
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, playerId.toString());
+            statement.setString(2, Utils.GSON.toJson(root));
+            statement.executeUpdate();
             RogueSmpCore.LOGGER.info("Saved effects for {}", playerId);
-
-        } catch (Exception e) {
-            RogueSmpCore.LOGGER.error("FAILED TO SAVE EFFECT FOR {}", playerId);
-            e.printStackTrace();
+        } catch (SQLException e) {
+            RogueSmpCore.LOGGER.error("FAILED TO SAVE EFFECT FOR {}", playerId, e);
         }
     }
 
-    private static @Nullable EntityEffects loadPlayerEffectsFromFile(@NotNull UUID playerId) {
-        File folder = new File(RogueSmpCore.getInstance().getDataFolder(), DATA_FOLDER);
-        File playerFile = new File(folder, playerId + ".json");
+    private synchronized @Nullable EntityEffects loadPlayerEffectData(@NotNull UUID playerId) {
+        String selectSql = "SELECT json(data) AS data FROM player_effect_data WHERE uuid = ?";
+        Map<String, List<SmpEffect>> result = new HashMap<>();
 
-        if (!playerFile.exists()) {
+        try (PreparedStatement statement = connection.prepareStatement(selectSql)) {
+            statement.setString(1, playerId.toString());
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    return null;
+                }
+
+                JsonObject root = JsonParser.parseString(resultSet.getString("data")).getAsJsonObject();
+                Codec<List<SmpEffect>> listCodec = Codec.lenientListOf(SmpEffect.CODEC,
+                        (index, error) -> RogueSmpCore.LOGGER.warn("Skipped invalid effect [{}] for {}: {}", index, playerId, error));
+
+                for (var entry : root.entrySet()) {
+                    String key = entry.getKey();
+                    DataResult<List<SmpEffect>> decoded = listCodec.decode(entry.getValue(), JsonOps.INSTANCE);
+                    if (decoded.isSuccess()) {
+                        result.put(key, decoded.result());
+                    } else {
+                        RogueSmpCore.LOGGER.warn("Failed to decode effects for {} (source '{}'): {}", playerId, key, decoded.error());
+                        result.put(key, List.of());
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            RogueSmpCore.LOGGER.error("FAILED TO LOAD EFFECTS FOR {}", playerId, e);
             return null;
         }
 
-        Map<String, List<SmpEffect>> result = new HashMap<>();
-
-        try (Reader reader = new FileReader(playerFile)) {
-            JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
-            Codec<List<SmpEffect>> listCodec = Codec.lenientListOf(SmpEffect.CODEC,
-                    (index, error) -> RogueSmpCore.LOGGER.warn("Skipped invalid effect [{}] for {}: {}", index, playerId, error));
-
-            for (var entry : root.entrySet()) {
-                String key = entry.getKey();
-                DataResult<List<SmpEffect>> decoded = listCodec.decode(entry.getValue(), JsonOps.INSTANCE);
-                if (decoded.isSuccess()) {
-                    result.put(key, decoded.result());
-                } else {
-                    RogueSmpCore.LOGGER.warn("Failed to decode effects for {} (source '{}'): {}", playerId, key, decoded.error());
-                    result.put(key, List.of());
-                }
-            }
-
-            playerFile.delete();
-        } catch (Exception e) {
-            RogueSmpCore.LOGGER.error("FAILED TO LOAD EFFECTS FOR {}", playerId);
-            e.printStackTrace();
+        // This data only exists to bridge a relog - once read back, it's consumed.
+        try (PreparedStatement delete = connection.prepareStatement("DELETE FROM player_effect_data WHERE uuid = ?")) {
+            delete.setString(1, playerId.toString());
+            delete.executeUpdate();
+        } catch (SQLException e) {
+            RogueSmpCore.LOGGER.error("FAILED TO DELETE CONSUMED EFFECT DATA FOR {}", playerId, e);
         }
 
         return EntityEffects.fromSnapshot(result);
