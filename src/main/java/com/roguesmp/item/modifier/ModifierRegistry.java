@@ -18,6 +18,7 @@ public class ModifierRegistry {
         modifiers.add(new EnchantAttributeModifier());
         modifiers.add(new ItemAbilityModifier());
 
+        modifiers.add(new ItemTypeModifier());
         modifiers.add(new BrokenModifier());
 
         UNMODIFIABLE_MODIFIERS = Collections.unmodifiableList(modifiers);

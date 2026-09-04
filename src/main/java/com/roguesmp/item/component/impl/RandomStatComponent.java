@@ -61,7 +61,7 @@ public class RandomStatComponent implements ItemComponent, UniqueTrackingCompone
             line = line.append(Component.text("Chất lượng: ", NamedTextColor.GRAY))
                     .append(buildQualityText(currentQuality));
         }
-        context.builder().putLines(0, List.of(line));
+        context.builder().putLines(1, List.of(line));
     }
 
     @Override

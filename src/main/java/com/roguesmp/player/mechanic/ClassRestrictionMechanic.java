@@ -2,7 +2,6 @@ package com.roguesmp.player.mechanic;
 
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.event.AbilityCastEvent;
-import com.roguesmp.event.DamageEvent;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.SmpPlayer;
@@ -16,18 +15,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 
 /**
- * Denies stat bonuses from a weapon that isn't allowed for the
+ * Denies ability cast from a weapon that isn't allowed for the
  * player's current {@link PlayerClass}.
- * <p>
- * Only items tagged {@value #WEAPON_TAG_ID} are ever in scope - everything else (tools, vanilla
- * progression gear, unclassified customs) is always usable and always contributes its stats,
- * regardless of class. Among {@value #WEAPON_TAG_ID}-tagged items, one is allowed only if at least
- * one of its own tag ids also appears in the player's current class's
- * {@link PlayerClass#getAllowedWeapons()}.
- * <p>
  * {@link #isRestrictedWeapon} is also called directly by
- * {@link SmpPlayer#updateSlotStat} to suppress a disallowed mainhand weapon's
- * {@code EquipAttributeComponent} bonus - wielding the wrong weapon type doesn't buff you.
+ * {@link SmpPlayer#updateSlotStat} to suppress a disallowed mainhand weapon's stat
+ * bonus.
  */
 public class ClassRestrictionMechanic implements PlayerMechanic {
 
@@ -35,13 +27,22 @@ public class ClassRestrictionMechanic implements PlayerMechanic {
 
     @Override public int getPriority() { return 10; } // High restriction priority
 
+    private boolean removeOldBar = false; //Work around to action bar staying too long, by sending an empty text bar...
+
     @Override
     public void tick(int periodIncrement, SmpPlayer player) {
         SmpItem weapon = player.getItemAtEquipSlot(EquipSlot.MAINHAND);
-        if (!isRestrictedWeapon(player, weapon == null ? null : weapon.getBaseItem())) return;
-
         Player bukkitPlayer = player.getBukkitPlayer();
+        if (!isRestrictedWeapon(player, weapon == null ? null : weapon.getBaseItem())) {
+            if (removeOldBar) {
+                bukkitPlayer.sendActionBar(Component.empty());
+                removeOldBar = false;
+            }
+            return;
+        }
+
         if (bukkitPlayer != null) {
+            removeOldBar = true;
             bukkitPlayer.sendActionBar(Component.text("⚠ Vũ khí này không phù hợp với class của bạn!", NamedTextColor.RED));
         }
     }
