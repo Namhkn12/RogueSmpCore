@@ -2,6 +2,7 @@ package com.roguesmp.tab.element;
 
 import com.roguesmp.tab.TabContext;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,35 +16,52 @@ final class JoinedElement implements TabElement {
 
     private final String separator;
     private final List<TabElement> parts;
+    private final Set<String> cachedDependencies;
+    private final int cachedRefreshTicks;
 
     JoinedElement(String separator, List<TabElement> parts) {
         this.separator = separator;
-        this.parts = parts;
-    }
+        this.parts = List.copyOf(parts);
 
-    @Override
-    public String render(TabContext context) {
-        return parts.stream().map(part -> part.render(context)).collect(Collectors.joining(separator));
-    }
-
-    @Override
-    public Set<String> dependencies() {
-        Set<String> dependencies = new HashSet<>();
-        for (TabElement part : parts) {
-            dependencies.addAll(part.dependencies());
+        // Pre-compute dependencies
+        Set<String> deps = new HashSet<>();
+        for (TabElement part : this.parts) {
+            deps.addAll(part.dependencies());
         }
-        return dependencies;
-    }
+        this.cachedDependencies = Collections.unmodifiableSet(deps);
 
-    @Override
-    public int refreshTicks() {
+        // Pre-compute tightest refresh interval
         int tightest = 0;
-        for (TabElement part : parts) {
+        for (TabElement part : this.parts) {
             int ticks = part.refreshTicks();
             if (ticks > 0 && (tightest == 0 || ticks < tightest)) {
                 tightest = ticks;
             }
         }
-        return tightest;
+        this.cachedRefreshTicks = tightest;
+    }
+
+    @Override
+    public String render(TabContext context) {
+        if (parts.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(parts.getFirst().render(context));
+        for (int i = 1; i < parts.size(); i++) {
+            sb.append(separator).append(parts.get(i).render(context));
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public Set<String> dependencies() {
+        return cachedDependencies;
+    }
+
+    @Override
+    public int refreshTicks() {
+        return cachedRefreshTicks;
     }
 }
