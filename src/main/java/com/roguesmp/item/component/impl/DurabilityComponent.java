@@ -56,6 +56,7 @@ public final class DurabilityComponent implements UniqueTrackingComponent {
     public void modifyStack(ItemDataContext context) {
         ItemStack newStack = context.newStack();
         newStack.unsetData(DataComponentTypes.UNBREAKABLE);
+        newStack.setData(DataComponentTypes.MAX_STACK_SIZE, 1);
         newStack.setData(DataComponentTypes.MAX_DAMAGE, 100);
         int percent = Math.max(1, (int) (((float) currentDurability / maxDurability) * 100));
         newStack.setData(DataComponentTypes.DAMAGE, Math.max(0, 100 - percent));
