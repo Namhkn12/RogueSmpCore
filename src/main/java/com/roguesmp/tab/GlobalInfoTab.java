@@ -6,6 +6,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityLoadout;
 import com.roguesmp.player.ability.AbilityType;
+import com.roguesmp.player.ability.AbilityWithCharge;
 import com.roguesmp.tab.element.TabElement;
 import com.roguesmp.tab.scoreboard.TabScoreboardView;
 import com.roguesmp.tab.tablist.TabListView;
@@ -152,7 +153,14 @@ public class GlobalInfoTab {
         }
         Ability ability = abilities[index];
         String name = Utils.toString(ability.getAbilityInfo().getFormattedDisplayName());
-        if (ability.isOnCooldown()) {
+        if (ability instanceof AbilityWithCharge charged) {
+            String color = charged.getCharges() > 0 ? "green" : "red";
+            String text = "<" + color + ">" + charged.getCharges() + "/" + charged.getMaxCharges() + "</" + color + ">";
+            if (charged.getCharges() < charged.getMaxCharges()) {
+                text += " <gray>(" + Utils.formatDecimal(ability.getCooldownTick() / 20.0) + "s)</gray>";
+            }
+            return name + " " + text;
+        } else if (ability.isOnCooldown()) {
             return name + " <red>" + Utils.formatDecimal(ability.getCooldownTick() / 20.0) + "s</red>";
         }
         return name + " <green>Sẵn sàng</green>";

@@ -109,6 +109,10 @@ public class EntityUtils {
         return baseTag.contains(base);
     }
 
+    public static boolean isInStealth(Entity entity) {
+        return EntityManager.getInstance().hasMetadata(entity, Keys.IN_STEALTH_META_KEY);
+    }
+
     public static void clearAllMetadata(Entity entity) {
         EntityManager.getInstance().clearAllMetadata(entity);
     }

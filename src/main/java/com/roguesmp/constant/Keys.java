@@ -29,4 +29,7 @@ public class Keys {
     public static final NamespacedKey MOB_ID = of("id");
 
     public static final NamespacedKey NPC_ID = of("npc");
+
+    //Metadata key
+    public static final String IN_STEALTH_META_KEY = "in_stealth";
 }

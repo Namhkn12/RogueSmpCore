@@ -52,49 +52,27 @@ public class AbilityUpgradeGui extends BaseGui {
     }
 
     private void renderUpgradePreview(int nextLevel, List<UpgradeRequirement> requirements) {
-        // 1. Prepare TagResolvers for the comparison
-        List<TagResolver> comparisonResolvers = new ArrayList<>();
+        // Same scaling-tag resolver AbilityInfo#getFormattedDescription uses (old -> new
+        // comparison when the value changes between levels) - a new :format kind only needs
+        // adding once, in AbilityInfo#formatScalingValue, for both to pick it up.
+        TagResolver resolvers = TagResolver.resolver(
+                info.scalingTagResolver(currentLevel, nextLevel),
+                Placeholder.parsed("level", String.valueOf(nextLevel))
+        );
 
-        for (String key : info.getScaling().keySet()) {
-            double oldVal = info.getAttributeForLevel(key, currentLevel);
-            double newVal = info.getAttributeForLevel(key, nextLevel);
-
-            Component valueComponent;
-            if (oldVal != newVal) {
-                // Build the: Old (Strikethrough) -> New comparison
-                valueComponent = MiniMessage.miniMessage().deserialize(
-                        "<gray><st>" + Utils.formatDecimal(oldVal) + "</st></gray> " +
-                                "<gray>»</gray> <green>" + Utils.formatDecimal(newVal) + "</green>"
-                );
-            } else {
-                // If the value hasn't changed for this level, just show the current value in green
-                valueComponent = Component.text(Utils.formatDecimal(newVal), NamedTextColor.GREEN);
-            }
-
-            // Map the key (e.g., <damage>) to our comparison component
-            comparisonResolvers.add(Placeholder.component(key, valueComponent));
-        }
-
-        // Add level placeholder for completeness
-        comparisonResolvers.add(Placeholder.parsed("level", String.valueOf(nextLevel)));
-
-        // 2. Render Description using the resolvers
         List<Component> previewLore = new ArrayList<>();
         previewLore.add(Utils.text("Xem trước nâng cấp (Cấp " + nextLevel + "):", NamedTextColor.GOLD));
         previewLore.add(Component.empty());
 
-        // Deserialize each line using the custom comparison placeholders
         for (String line : info.getDescription()) {
-            previewLore.add(MiniMessage.miniMessage().deserialize(line, TagResolver.resolver(comparisonResolvers)));
+            previewLore.add(MiniMessage.miniMessage().deserialize(line, resolvers));
         }
 
-        // 3. Display the Preview Icon
         ItemStack previewItem = ItemStack.of(info.getIcon());
         previewItem.setData(DataComponentTypes.ITEM_NAME, info.getFormattedDisplayName());
         previewItem.setData(DataComponentTypes.LORE, ItemLore.lore(previewLore));
         addItem(1, 4, previewItem);
 
-        // 4. Render Requirements Item & Confirm Button
         renderRequirementsAndConfirm(requirements, nextLevel);
     }
 

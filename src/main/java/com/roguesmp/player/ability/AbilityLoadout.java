@@ -16,8 +16,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -107,8 +107,8 @@ public class AbilityLoadout {
 
     public void cast(AbilityTrigger.Key key) {
         int currentTick = Bukkit.getCurrentTick();
-        if (lastCastTick == currentTick) return;
-        lastCastTick = currentTick; //Only allow 1 key trigger per tick
+        if (currentTick - lastCastTick <= 2) return;
+        lastCastTick = currentTick; //Only allow 1 key trigger per 2 tick
         // 1. Give Context Owner priority (Interceptor pattern)
         if (contextOwner != null) {
             if (execute(contextOwner, key)) return;
@@ -251,5 +251,13 @@ public class AbilityLoadout {
 
     public void onConsumeArrow(ArrowConsumeEvent event) {
         forEachAbility(ability -> ability.onConsumeArrow(event));
+    }
+
+    public void onTeleport(PlayerTeleportEvent event) {
+        forEachAbility(ability -> ability.onTeleport(event));
+    }
+
+    public void onDeath(PlayerDeathEvent event) {
+        forEachAbility(ability -> ability.onDeath(event));
     }
 }

@@ -81,7 +81,7 @@ public class EquipmentStatMechanic implements PlayerMechanic {
                 if (!snapshot.isEmpty()) lastAppliedAttributes.put(slot, snapshot);
             }
 
-            Map<Enchants, Integer> enchantSnapshot = collectApplicableEnchants(newItem, slot);
+            Map<Enchants, Integer> enchantSnapshot = collectApplicableEnchants(newItem, slot, weaponRestricted);
             enchantSnapshot.forEach(smpPlayer::mergeEnchantDelta);
             if (!enchantSnapshot.isEmpty()) lastAppliedEnchants.put(slot, enchantSnapshot);
         }
@@ -96,9 +96,9 @@ public class EquipmentStatMechanic implements PlayerMechanic {
         }
     }
 
-    private Map<Enchants, Integer> collectApplicableEnchants(SmpItem item, EquipSlot slot) {
+    private Map<Enchants, Integer> collectApplicableEnchants(SmpItem item, EquipSlot slot, boolean weaponRestricted) {
         EnchantComponent enchantComp = item.getComponent(ItemComponentKeys.ENCHANT);
-        if (enchantComp == null) return Map.of();
+        if (enchantComp == null || weaponRestricted) return Map.of();
 
         Map<Enchants, Integer> result = new EnumMap<>(Enchants.class);
         enchantComp.getTotalEnchants().forEach((ench, level) -> {

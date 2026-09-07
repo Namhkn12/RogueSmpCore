@@ -8,6 +8,7 @@ import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.DurabilityChangedEvent;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.SmpPlayer;
+import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -33,6 +34,10 @@ public interface PlayerMechanic {
     default void onInteract(PlayerInteractEvent event, SmpPlayer player) {}
 
     default void onEntityInteract(PlayerInteractEntityEvent event, SmpPlayer player) {}
+
+    default void onArmSwing(PlayerArmSwingEvent event, SmpPlayer player) {}
+
+    default void onDropItem(PlayerDropItemEvent event, SmpPlayer player) {}
 
     default void onSwapHand(PlayerSwapHandItemsEvent event, SmpPlayer player) {}
 
@@ -77,6 +82,10 @@ public interface PlayerMechanic {
     default void onShootArrow(EntityShootBowEvent event, SmpPlayer player) {}
 
     default void onConsumeArrow(ArrowConsumeEvent event, SmpPlayer player) {}
+
+    default void onTeleport(PlayerTeleportEvent event, SmpPlayer player) {}
+
+    default void onDeath(PlayerDeathEvent event, SmpPlayer player) {}
 
     default void onDurabilityChange(DurabilityChangedEvent event, SmpPlayer player) {}
 

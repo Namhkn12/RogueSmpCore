@@ -29,8 +29,11 @@ public final class FxTransform {
         return new FxTransform(new Vector3f((float) x, (float) y, (float) z), new Quaternionf(), new Vector3f(1, 1, 1));
     }
 
+    /** Yaw-then-pitch, both negated — same convention as {@code ParticleUtils.spawnShape}, so a directional shape (e.g. {@code LineShape}) points exactly where {@code loc} is facing, tilt included. */
     public static FxTransform at(Location loc) {
-        Quaternionf rotation = new Quaternionf().rotateY((float) FastMath.toRadians(-loc.getYaw()));
+        Quaternionf rotation = new Quaternionf()
+                .rotateY((float) FastMath.toRadians(-loc.getYaw()))
+                .rotateX((float) FastMath.toRadians(-loc.getPitch()));
         return new FxTransform(new Vector3f((float) loc.getX(), (float) loc.getY(), (float) loc.getZ()), rotation, new Vector3f(1, 1, 1));
     }
 

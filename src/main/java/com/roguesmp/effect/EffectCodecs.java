@@ -1,14 +1,7 @@
 package com.roguesmp.effect;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.effect.impl.BleedingEffect;
-import com.roguesmp.effect.impl.DamageIncreaseEffect;
-import com.roguesmp.effect.impl.EmpoweredStrikeEffect;
-import com.roguesmp.effect.impl.PotentPoisonEffect;
-import com.roguesmp.effect.impl.ResistanceEffect;
-import com.roguesmp.effect.impl.SilenceEffect;
-import com.roguesmp.effect.impl.SpeedEffect;
-import com.roguesmp.effect.impl.VulnerabilityEffect;
+import com.roguesmp.effect.impl.*;
 import com.roguesmp.registry.Registries;
 
 /**
@@ -26,6 +19,7 @@ public class EffectCodecs {
     public static final Codec<VulnerabilityEffect> VULNERABILITY = register(VulnerabilityEffect.ID, VulnerabilityEffect.CODEC);
     public static final Codec<SilenceEffect> SILENCE = register(SilenceEffect.ID, SilenceEffect.CODEC);
     public static final Codec<EmpoweredStrikeEffect> EMPOWERED_STRIKE = register(EmpoweredStrikeEffect.ID, EmpoweredStrikeEffect.CODEC);
+    public static final Codec<StealthEffect> STEALTH = register(StealthEffect.KEY, StealthEffect.CODEC);
 
     public static void loadClass() {
 

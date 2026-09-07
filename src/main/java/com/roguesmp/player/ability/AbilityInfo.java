@@ -7,11 +7,17 @@ import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.Context;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.ParsingException;
+import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
@@ -75,34 +81,55 @@ public class AbilityInfo<T extends Ability> {
         return AbilityResponse.continueChain();
     }
 
+    /**
+     * Resolves any {@code <key>} tag matching a scaling attribute, with an optional
+     * {@code <key:format>} argument controlling display - e.g. {@code <cooldown:second>} (ticks ->
+     * seconds), {@code <damage_boost:percent>} (0.25 -> 25), or bare {@code <damage>} for the raw
+     * value (see {@link #formatScalingValue}).
+     * <p>
+     * When {@code fromLevel != toLevel} and the value actually changes between them, it renders as
+     * a struck-through old value followed by the new one (upgrade preview).
+     */
+    public TagResolver scalingTagResolver(int fromLevel, int toLevel) {
+        return new TagResolver() {
+            @Override
+            public @Nullable Tag resolve(String name, ArgumentQueue arguments, Context ctx) throws ParsingException {
+                if (!getScaling().containsKey(name)) return null;
+
+                double oldValue = getAttributeForLevel(name, fromLevel);
+                double newValue = getAttributeForLevel(name, toLevel);
+                String format = arguments.hasNext() ? arguments.pop().value() : "";
+                String formattedNew = formatScalingValue(newValue, format);
+
+                if (oldValue == newValue) return Tag.inserting(Component.text(formattedNew));
+
+                Component comparison = MiniMessage.miniMessage().deserialize(
+                        "<gray><st>" + formatScalingValue(oldValue, format) + "</st></gray> <gray>»</gray> <green>" + formattedNew + "</green>"
+                );
+                return Tag.inserting(comparison);
+            }
+
+            @Override
+            public boolean has(String name) {
+                return getScaling().containsKey(name);
+            }
+        };
+    }
+
+    private static String formatScalingValue(double value, String format) {
+        return switch (format.toLowerCase()) {
+            case "second", "s" -> Utils.formatDecimal(value / 20);
+            case "percent", "p" -> Utils.formatDecimal(value * 100);
+            default -> Utils.formatDecimal(value);
+        };
+    }
+
     public List<Component> getFormattedDescription(int level) {
-        Map<String, List<Double>> scaling = getScaling();
-        List<TagResolver> resolvers = new ArrayList<>();
-
-        for (String key : scaling.keySet()) {
-            double value = getAttributeForLevel(key, level);
-
-            if (key.startsWith("cooldown")) { //Special handling for cooldown/duration tick formating
-                String formattedCooldown = Utils.formatDecimal(value / 20);
-                resolvers.add(Placeholder.parsed(key, formattedCooldown));
-                continue;
-            }
-            if (key.startsWith("duration")) {
-                String formattedDuration = Utils.formatDecimal(value / 20);
-                resolvers.add(Placeholder.parsed(key, formattedDuration));
-                continue;
-            }
-            String formattedValue = Utils.formatDecimal(value);
-            // This maps <key> to the value (e.g., <dmg> -> 10.5)
-            resolvers.add(Placeholder.parsed(key, formattedValue));
-        }
-
-        // Add any "Global" placeholders if needed (like the level itself)
-        resolvers.add(Placeholder.parsed("level", String.valueOf(level)));
+        TagResolver resolvers = TagResolver.resolver(scalingTagResolver(level, level), Placeholder.parsed("level", String.valueOf(level)));
 
         List<Component> result = new ArrayList<>();
         for (String line : config().description()) {
-            result.add(MiniMessage.miniMessage().deserialize(line, TagResolver.resolver(resolvers)));
+            result.add(MiniMessage.miniMessage().deserialize(line, resolvers).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         }
         return result;
     }

@@ -106,6 +106,11 @@ public final class FxEffect {
             return this;
         }
 
+        public Builder part(FxPart... parts) {
+            this.parts.addAll(List.of(parts));
+            return this;
+        }
+
         /** Motion the whole effect advances every tick, relative to wherever it currently is. */
         public Builder rootMotion(FxMotion motion) {
             this.rootMotion = motion;

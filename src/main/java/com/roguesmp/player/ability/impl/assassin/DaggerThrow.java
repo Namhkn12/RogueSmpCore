@@ -17,9 +17,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.player.ability.trigger.AbilityResponse;
-import com.roguesmp.utils.DamageUtils;
-import com.roguesmp.utils.Utils;
-import com.roguesmp.utils.VectorUtils;
+import com.roguesmp.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FluidCollisionMode;
@@ -40,16 +38,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Throws a fan of {@value #DAGGER_COUNT} daggers, damaging and silencing ({@link SilenceEffect})
+ * Throws a fan of daggers, damaging and silencing ({@link SilenceEffect})
  * whatever each one first hits, and granting the caster {@link EmpoweredStrikeEffect} (bonus damage
- * on their next melee hit) per dagger landed. The thrown daggers can always be recalled - either by
+ * on their next melee hit) per dagger landed. The thrown daggers can be recalled - either by
  * casting again within the recast window, or automatically once it elapses - for a second,
  * reduced-damage hit on the way back.
  */
 public class DaggerThrow extends Ability {
     public static final String ID = "dagger_throw";
 
-    private static final int DAGGER_COUNT = 3;
     private static final double SPREAD_DEGREES = 25;
     private static final int RECAST_INPUT_DELAY = 2; // Ticks - ignore an accidental instant re-press
 
@@ -63,6 +60,7 @@ public class DaggerThrow extends Ability {
             DaggerThrow::new
     ).registerAction("cast", DaggerThrow::cast);
 
+    private final int daggerCount;
     private final double damage;
     private final double range;
     private final int cooldown;
@@ -78,6 +76,7 @@ public class DaggerThrow extends Ability {
 
     public DaggerThrow(SmpPlayer smpPlayer, int level) {
         super(smpPlayer, level);
+        daggerCount = (int) getAbilityInfo().getAttributeForLevel("dagger_count", level);
         damage = getAbilityInfo().getAttributeForLevel("damage", level);
         range = getAbilityInfo().getAttributeForLevel("range", level);
         cooldown = (int) getAbilityInfo().getAttributeForLevel("cooldown", level);
@@ -108,7 +107,7 @@ public class DaggerThrow extends Ability {
         Vector dir = startLoc.getDirection();
         playThrowSound(world, startLoc);
 
-        for (int a = -(DAGGER_COUNT / 2); a <= DAGGER_COUNT / 2; a++) {
+        for (int a = -(daggerCount / 2); a <= daggerCount / 2; a++) {
             Vector daggerDir = VectorUtils.rotateYAxis(dir.clone(), a * SPREAD_DEGREES).normalize();
             Location endLoc = throwDagger(world, startLoc, daggerDir, range, p, 1.0);
             daggerEndPoints.add(endLoc);
@@ -128,22 +127,27 @@ public class DaggerThrow extends Ability {
      * possible recall later.
      */
     private Location throwDagger(World world, Location start, Vector dir, double maxDistance, Player attacker, double damageMultiplier) {
-        RayTraceResult result = world.rayTrace(start, dir, maxDistance, FluidCollisionMode.NEVER, true, 0.5,
-                e -> e instanceof LivingEntity && !(e instanceof Player));
-
-        Location endLoc = (result != null && result.getHitPosition() != null)
-                ? result.getHitPosition().toLocation(world)
-                : start.clone().add(dir.clone().multiply(maxDistance));
-
-        spawnTracer(start, endLoc);
-
-        if (result != null && result.getHitEntity() instanceof LivingEntity target) {
-            DamageUtils.damage(target, attacker, damage * damageMultiplier, new DamageEvent.Metadata(ID, DamageType.PROJECTILE_ABILITY));
-            EffectManager.getInstance().addEffect(attacker, EmpoweredStrikeEffect.ID, new EmpoweredStrikeEffect(damageBoostDuration, damageBoost));
-            EffectManager.getInstance().addEffect(target, SilenceEffect.ID, new SilenceEffect(silenceDuration));
+        RayTraceResult result = world.rayTraceBlocks(start, dir, maxDistance, FluidCollisionMode.NEVER, true);
+        Location endLoc;
+        if (result == null) {
+            endLoc = start.clone().add(dir.clone().multiply(maxDistance));
+        } else {
+            endLoc = result.getHitPosition().toLocation(world);
+            spawnImpact(endLoc);
         }
+        spawnTracer(start.clone().add(dir), endLoc);
 
-        spawnImpact(endLoc);
+        for (LivingEntity mob : Hitbox.approximateCylinder(start, endLoc, 0.7, true).accuracy(0.5).getHitMobs()) {
+            String key = "dagger_hit:" + attacker.getName();
+            if (EntityUtils.hasMetadata(mob, key) && (Integer) EntityUtils.getMetadataValue(mob, key) == Bukkit.getCurrentTick()) continue;
+            EntityUtils.addMetadata(mob, key, Bukkit.getCurrentTick());
+
+            DamageEvent.Metadata metadata = new DamageEvent.Metadata(ID, DamageType.MELEE_ABILITY);
+            metadata.setDoKnockback(false);
+            DamageUtils.damage(mob, attacker, damage * damageMultiplier, metadata);
+            EffectManager.getInstance().addEffect(attacker, EmpoweredStrikeEffect.ID, new EmpoweredStrikeEffect(damageBoostDuration, damageBoost));
+            EffectManager.getInstance().addEffect(mob, SilenceEffect.ID, new SilenceEffect(silenceDuration));
+        }
         return endLoc;
     }
 
@@ -156,9 +160,6 @@ public class DaggerThrow extends Ability {
         if (distance < 0.01) return;
         direction.normalize();
 
-        // FxTransform.at(origin) only bakes in yaw, not pitch - so the line's real 3D direction
-        // (which does vary in pitch, matching wherever the player was looking) is carried entirely
-        // by this part's own local rotation instead, aligned onto a rotation-neutral (yaw/pitch 0) origin.
         Quaternionf rotation = new Quaternionf().rotationTo(
                 new Vector3f(0, 0, 1),
                 new Vector3f((float) direction.getX(), (float) direction.getY(), (float) direction.getZ())
@@ -173,10 +174,9 @@ public class DaggerThrow extends Ability {
         FxEngine.getInstance().play(FxEffect.builder(origin).duration(1).part(trail).build());
     }
 
-    /** A small impact burst wherever a dagger ends up, hit or not. */
     private void spawnImpact(Location loc) {
         FxPart burst = new FxPart(new PointShape(),
-                new ParticleRenderer(new ParticleBuilder(Particle.SWEEP_ATTACK).count(3).offset(0.3, 0.3, 0.3).extra(0.1)))
+                new ParticleRenderer(new ParticleBuilder(Particle.SWEEP_ATTACK).count(1).offset(0.3, 0.3, 0.3).extra(0.1)))
                 .once();
 
         FxEngine.getInstance().play(FxEffect.builder(loc).duration(1).part(burst).build());
