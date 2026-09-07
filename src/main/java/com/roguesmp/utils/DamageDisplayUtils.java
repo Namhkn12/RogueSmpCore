@@ -105,7 +105,6 @@ public class DamageDisplayUtils {
         // whatever type icon/color is already showing — kept separate so it doesn't crowd out the type.
         String suffix = isCritical ? "‼" : "";
 
-        return Component.text(prefix + val + suffix, color)
-                .decoration(TextDecoration.ITALIC, type.name().contains("ABILITY"));
+        return Component.text(prefix + val + suffix, color);
     }
 }
