@@ -14,6 +14,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class Ability {
@@ -89,70 +90,54 @@ public abstract class Ability {
     }
 
     /**
+     * Convenient method that query the attribute value for this ability level, without having to call INFO.getAttributeForLevel(level)
+     * @param attribute String id of the config attribute.
+     */
+    public double getBaseAttributeValue(String attribute) {
+        return getAbilityInfo().getAttributeForLevel(attribute, getLevel());
+    }
+
+    /**
      * Ticking, run every 'periodIncrement' ticks
      *
      * @param periodIncrement The period in tick from the last call to current
      */
-    public void tick(int periodIncrement) {
+    public void tick(int periodIncrement) {}
 
-    }
+    public void onDamageEntity(DamageEvent event) {}
 
-    public void onDamageEntity(DamageEvent event) {
+    public void onKillEntity(EntityDeathEvent event) {}
 
-    }
+    public void onHurt(DamageEvent event) {}
 
-    public void onKillEntity(EntityDeathEvent event) {
+    public void onHurtFatal(DamageEvent event) {}
 
-    }
+    public void onConsume(PlayerItemConsumeEvent event) {}
 
-    public void onHurt(DamageEvent event) {
+    public void onExpChange(PlayerExpChangeEvent event) {}
 
-    }
-
-    public void onHurtFatal(DamageEvent event) {
-
-    }
-
-    public void onConsume(PlayerItemConsumeEvent event) {
-
-    }
-
-    public void onExpChange(PlayerExpChangeEvent event) {
-
-    }
-
-    public void onBlockBreak(BlockBreakEvent event) {
-
-    }
+    public void onBlockBreak(BlockBreakEvent event) {}
 
     /**
      * Called when player is put on fire (either from block, entity, etc...)
      */
-    public void onCombust(EntityCombustEvent event) {
-
-    }
+    public void onCombust(EntityCombustEvent event) {}
 
     /**
      * Called when player put other entities on fire (directly hit, or from arrow, etc.,...)
      */
-    public void onCombustEntity(EntityCombustByEntityEvent event) {
+    public void onCombustEntity(EntityCombustByEntityEvent event) {}
 
-    }
+    public void onProjectileHit(ProjectileHitEvent event) {}
 
-    public void onProjectileHit(ProjectileHitEvent event) {
+    public void onProjectileLaunch(PlayerLaunchProjectileEvent event) {}
 
-    }
+    public void onShootArrow(EntityShootBowEvent event) {}
 
-    public void onProjectileLaunch(PlayerLaunchProjectileEvent event) {
+    public void onConsumeArrow(ArrowConsumeEvent event) {}
 
-    }
+    public void onTeleport(PlayerTeleportEvent event) {}
 
-    public void onShootArrow(EntityShootBowEvent event) {
-
-    }
-
-    public void onConsumeArrow(ArrowConsumeEvent event) {
-
-    }
+    public void onDeath(PlayerDeathEvent event) {}
 
 }

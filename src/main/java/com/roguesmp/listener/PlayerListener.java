@@ -16,6 +16,7 @@ import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.event.entity.EntityEquipmentChangedEvent;
+import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -182,6 +183,20 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerArmSwing(PlayerArmSwingEvent event) {
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
+        if (smpPlayer == null) return;
+        smpPlayer.onArmSwing(event);
+    }
+
+    @EventHandler
+    public void onDropItem(PlayerDropItemEvent event) {
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
+        if (smpPlayer == null) return;
+        smpPlayer.onDropItem(event);
+    }
+
+    @EventHandler
     public void onAbilityCast(AbilityCastEvent event) {
         SmpPlayer smpPlayer = event.getSmpPlayer();
         if (smpPlayer == null) return;
@@ -333,6 +348,20 @@ public class PlayerListener implements Listener {
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
         if (smpPlayer == null) return;
         smpPlayer.onConsumeArrow(event);
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent event) {
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
+        if (smpPlayer == null) return;
+        smpPlayer.onTeleport(event);
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent event) {
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
+        if (smpPlayer == null) return;
+        smpPlayer.onDeath(event);
     }
 
     @EventHandler

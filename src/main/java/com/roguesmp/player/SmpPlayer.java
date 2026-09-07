@@ -16,6 +16,7 @@ import com.roguesmp.player.classes.PlayerClass;
 import com.roguesmp.player.mechanic.*;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
+import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -335,6 +336,18 @@ public class SmpPlayer {
         }
     }
 
+    public void onArmSwing(PlayerArmSwingEvent event) {
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onArmSwing(event, this);
+        }
+    }
+
+    public void onDropItem(PlayerDropItemEvent event) {
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onDropItem(event, this);
+        }
+    }
+
     public void onSwapHand(PlayerSwapHandItemsEvent event) {
         for (PlayerMechanic mechanic : mechanics) {
             mechanic.onSwapHand(event, this);
@@ -452,6 +465,18 @@ public class SmpPlayer {
     public void onConsumeArrow(ArrowConsumeEvent event) {
         for (PlayerMechanic mechanic : mechanics) {
             mechanic.onConsumeArrow(event, this);
+        }
+    }
+
+    public void onTeleport(PlayerTeleportEvent event) {
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onTeleport(event, this);
+        }
+    }
+
+    public void onDeath(PlayerDeathEvent event) {
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onDeath(event, this);
         }
     }
 }
