@@ -5,12 +5,15 @@ import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.tag.SmpTag;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.*;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.RayTraceResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -41,6 +44,20 @@ public class EntityUtils {
     public static List<LivingEntity> getNearbyMobs(Location loc, double rx, double ry, double rz, Predicate<LivingEntity> predicate) {
         return new ArrayList<>(loc.getWorld().getNearbyLivingEntities(loc, rx, ry, rz,
                 entity -> entity.isValid() && !(entity instanceof Player) && predicate.test(entity)));
+    }
+
+    public static @Nullable LivingEntity getEntityAtCursor(Player player, double range, @Nullable Predicate<Entity> filter, double hitboxSize) {
+        World world = player.getWorld();
+        Location eyeLoc = player.getEyeLocation();
+        RayTraceResult result = world.rayTrace(eyeLoc, eyeLoc.getDirection(), range, FluidCollisionMode.NEVER, true, hitboxSize,
+                e -> (filter == null || filter.test(e))
+                        // verify that the entity is actually ahead of the player (in case a large hitbox overlaps from behind)
+                        && player.getLocation().getDirection().dot(e.getLocation().subtract(player.getLocation()).toVector()) > 0);
+        // the raySize parameter changes the size of entity bounding boxes, so the entity may actually be outside the max range, hence the range check here
+        if (result != null && result.getHitEntity() instanceof LivingEntity le && le.getLocation().distanceSquared(player.getLocation()) < range * range) {
+            return le;
+        }
+        return null;
     }
 
     public static void healPercent(LivingEntity living, double percentToHeal) {
