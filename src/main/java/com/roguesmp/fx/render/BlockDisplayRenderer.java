@@ -5,10 +5,10 @@ import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Display;
 import org.joml.Vector3f;
 
+import java.util.function.BiConsumer;
+
 /** Renders a shape as real {@link BlockDisplay} entities, one per point. */
 public final class BlockDisplayRenderer extends AbstractDisplayRenderer<BlockDisplay> {
-
-    private final BlockData blockData;
 
     public BlockDisplayRenderer(BlockData blockData) {
         this(blockData, new Vector3f(0.3f, 0.3f, 0.3f));
@@ -19,13 +19,16 @@ public final class BlockDisplayRenderer extends AbstractDisplayRenderer<BlockDis
     }
 
     public BlockDisplayRenderer(BlockData blockData, Vector3f displaySize, int interpolationTicks) {
-        super(BlockDisplay.class, displaySize, interpolationTicks);
-        this.blockData = blockData;
+        this(displaySize, interpolationTicks, (display, point) -> display.setBlock(blockData));
+    }
+
+    /** Full control: {@code onRender} is called every tick, per point, to set the block and/or nudge {@link FxPoint#position()}. */
+    public BlockDisplayRenderer(Vector3f displaySize, int interpolationTicks, BiConsumer<BlockDisplay, FxPoint> onRender) {
+        super(BlockDisplay.class, displaySize, interpolationTicks, onRender);
     }
 
     @Override
     protected void configure(BlockDisplay display) {
-        display.setBlock(blockData);
         display.setBillboard(Display.Billboard.FIXED);
     }
 }

@@ -3,6 +3,7 @@ package com.roguesmp.player.ability;
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.event.PlayerStartBlockAttackEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.registry.keys.SoundEventKeys;
@@ -135,6 +136,8 @@ public abstract class Ability {
     public void onShootArrow(EntityShootBowEvent event) {}
 
     public void onConsumeArrow(ArrowConsumeEvent event) {}
+
+    public void onStartBlocking(PlayerStartBlockAttackEvent event) {}
 
     public void onTeleport(PlayerTeleportEvent event) {}
 

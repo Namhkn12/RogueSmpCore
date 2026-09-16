@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.event.PlayerStartBlockAttackEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.trigger.AbilityTrigger;
 import com.roguesmp.utils.EntityUtils;
@@ -147,6 +148,11 @@ public class AbilityLoadoutMechanic implements PlayerMechanic {
     @Override
     public void onConsumeArrow(ArrowConsumeEvent event, SmpPlayer player) {
         player.getAbilityLoadout().onConsumeArrow(event);
+    }
+
+    @Override
+    public void onStartBlocking(PlayerStartBlockAttackEvent event, SmpPlayer player) {
+        player.getAbilityLoadout().onStartBlocking(event);
     }
 
     @Override

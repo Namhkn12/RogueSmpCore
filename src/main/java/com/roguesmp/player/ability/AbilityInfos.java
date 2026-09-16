@@ -8,6 +8,8 @@ import com.roguesmp.player.ability.impl.assassin.DaggerThrow;
 import com.roguesmp.player.ability.impl.lifeline.LastBreath;
 import com.roguesmp.player.ability.impl.passive.Dodging;
 import com.roguesmp.player.ability.impl.passive.Sharpshooter;
+import com.roguesmp.player.ability.impl.warrior.GloriousBattle;
+import com.roguesmp.player.ability.impl.warrior.ShieldBash;
 import com.roguesmp.registry.Registries;
 
 /**
@@ -46,6 +48,10 @@ public class AbilityInfos {
     public static final AbilityInfo<BodkinBlitz> BODKIN_BLITZ = register(BodkinBlitz.INFO);
     public static final AbilityInfo<AdvancingShadow> ADVANCING_SHADOW = register(AdvancingShadow.INFO);
     public static final AbilityInfo<CloakOfShadows> CLOAK_OF_SHADOWS = register(CloakOfShadows.INFO);
+
+    //Warrior
+    public static final AbilityInfo<ShieldBash> SHIELD_BASH = register(ShieldBash.INFO);
+    public static final AbilityInfo<GloriousBattle> GLORIOUS_BATTLE = register(GloriousBattle.INFO);
 
     public static void loadClass() {
 

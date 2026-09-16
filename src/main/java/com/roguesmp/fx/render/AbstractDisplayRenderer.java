@@ -15,6 +15,7 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * Keeps one real display entity per shape point, repositioning/reorienting them as the shape's
@@ -25,15 +26,17 @@ abstract class AbstractDisplayRenderer<T extends Display> implements FxRenderer 
     private final Class<T> type;
     private final Vector3f displaySize;
     private final int interpolationTicks;
+    private final BiConsumer<T, FxPoint> onRender;
     private final List<T> entities = new ArrayList<>();
 
-    protected AbstractDisplayRenderer(Class<T> type, Vector3f displaySize, int interpolationTicks) {
+    protected AbstractDisplayRenderer(Class<T> type, Vector3f displaySize, int interpolationTicks, BiConsumer<T, FxPoint> onRender) {
         this.type = type;
         this.displaySize = displaySize;
         this.interpolationTicks = interpolationTicks;
+        this.onRender = onRender;
     }
 
-    /** Applies renderer-specific setup (block/item, billboard, etc.) to a freshly spawned entity. */
+    /** Applies renderer-specific, one-time setup (billboard mode, etc.) to a freshly spawned entity. */
     protected abstract void configure(T display);
 
     @Override
@@ -55,6 +58,10 @@ abstract class AbstractDisplayRenderer<T extends Display> implements FxRenderer 
         for (int i = 0; i < localPoints.size(); i++) {
             Vector3f worldPos = transform.apply(localPoints.get(i));
             T display = entities.get(i);
+
+            // Mutates worldPos in place if the callback wants to nudge this point (a bob, etc.),
+            // and/or mutates the display itself (which block/item it shows this tick).
+            onRender.accept(display, new FxPoint(world, worldPos, i, tick));
 
             display.teleport(new Location(world, worldPos.x(), worldPos.y(), worldPos.z()));
             display.setTransformation(new Transformation(halfSize, rotation, displaySize, new Quaternionf()));

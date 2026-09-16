@@ -93,7 +93,7 @@ public final class FxEffect {
         private final Location origin;
         private final List<FxPart> parts = new ArrayList<>();
         private FxMotion rootMotion;
-        private int durationTicks = -1;
+        private int durationTicks = 1;
         private Runnable onComplete;
         private Collection<Player> viewers;
 
@@ -117,7 +117,7 @@ public final class FxEffect {
             return this;
         }
 
-        /** Ticks after which the effect stops itself and cleans up. -1 (default) runs until stopped externally. */
+        /** Ticks after which the effect stops itself and cleans up. -1 runs until stopped externally. 1 is default */
         public Builder duration(int ticks) {
             this.durationTicks = ticks;
             return this;

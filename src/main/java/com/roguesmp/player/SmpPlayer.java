@@ -4,10 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.*;
 import com.roguesmp.enchant.Enchants;
-import com.roguesmp.event.AbilityCastEvent;
-import com.roguesmp.event.ArrowConsumeEvent;
-import com.roguesmp.event.DamageEvent;
-import com.roguesmp.event.DurabilityChangedEvent;
+import com.roguesmp.event.*;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityLoadout;
@@ -465,6 +462,12 @@ public class SmpPlayer {
     public void onConsumeArrow(ArrowConsumeEvent event) {
         for (PlayerMechanic mechanic : mechanics) {
             mechanic.onConsumeArrow(event, this);
+        }
+    }
+
+    public void onStartBlocking(PlayerStartBlockAttackEvent event) {
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onStartBlocking(event, this);
         }
     }
 

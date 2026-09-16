@@ -52,7 +52,7 @@ public class AdvancingShadow extends Ability {
     public AbilityResponse cast() {
         if (isOnCooldown()) return AbilityResponse.continueChain();
 
-        LivingEntity entity = EntityUtils.getEntityAtCursor(player, range, null, 0.425);
+        LivingEntity entity = EntityUtils.getLivingEntityAtCursor(player, range, entity1 -> entity1.getType() != player.getType(), 0.425);
         if (entity == null) return AbilityResponse.continueChain();
 
         double originDistance = player.getLocation().distance(entity.getLocation());

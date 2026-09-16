@@ -46,7 +46,15 @@ public class EntityUtils {
                 entity -> entity.isValid() && !(entity instanceof Player) && predicate.test(entity)));
     }
 
-    public static @Nullable LivingEntity getEntityAtCursor(Player player, double range, @Nullable Predicate<Entity> filter, double hitboxSize) {
+    public static @Nullable LivingEntity getLivingEntityAtCursorExcludePlayers(Player player, double range) {
+        return getLivingEntityAtCursorExcludePlayers(player, range, 0.425);
+    }
+
+    public static @Nullable LivingEntity getLivingEntityAtCursorExcludePlayers(Player player, double range, double hitboxSize) {
+        return getLivingEntityAtCursor(player, range, entity -> entity.getType() != EntityType.PLAYER, hitboxSize);
+    }
+
+    public static @Nullable LivingEntity getLivingEntityAtCursor(Player player, double range, @Nullable Predicate<Entity> filter, double hitboxSize) {
         World world = player.getWorld();
         Location eyeLoc = player.getEyeLocation();
         RayTraceResult result = world.rayTrace(eyeLoc, eyeLoc.getDirection(), range, FluidCollisionMode.NEVER, true, hitboxSize,

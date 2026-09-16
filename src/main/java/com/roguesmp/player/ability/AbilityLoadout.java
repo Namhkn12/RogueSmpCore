@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.event.PlayerStartBlockAttackEvent;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
@@ -251,6 +252,10 @@ public class AbilityLoadout {
 
     public void onConsumeArrow(ArrowConsumeEvent event) {
         forEachAbility(ability -> ability.onConsumeArrow(event));
+    }
+
+    public void onStartBlocking(PlayerStartBlockAttackEvent event) {
+        forEachAbility(ability -> ability.onStartBlocking(event));
     }
 
     public void onTeleport(PlayerTeleportEvent event) {

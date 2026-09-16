@@ -81,7 +81,7 @@ public final class EffectStack {
 
         effects.add(smpEffect);
         if (highest() == smpEffect) {
-            activeBefore.onLoseEffect(entity);
+            if (activeBefore != null) activeBefore.onLoseEffect(entity);
             smpEffect.onGainEffect(entity);
         }
     }
@@ -117,13 +117,17 @@ public final class EffectStack {
      * only mattered for players.
      */
     public void onPlayerDeath(EntityDeathEvent event) {
+        Entity entity = event.getEntity();
         SmpEffect active = highest();
         if (active != null) active.onDeath(event);
 
         for (SmpEffect effect : effects) {
             switch (effect.getDeathBehavior()) {
                 case HALVES_ON_DEATH -> effect.setDuration(effect.getDuration() / 2);
-                case REMOVE_ON_DEATH -> effects.remove(effect);
+                case REMOVE_ON_DEATH -> {
+                    if (effect == active) effect.onLoseEffect(entity);
+                    effects.remove(effect);
+                }
                 case KEEP_ON_DEATH -> {}
             }
         }
@@ -141,7 +145,10 @@ public final class EffectStack {
 
     public void onDeath(EntityDeathEvent event) {
         SmpEffect active = highest();
-        if (active != null) active.onDeath(event);
+        if (active == null) return;
+
+        active.onDeath(event);
+        active.onLoseEffect(event.getEntity());
     }
 
     /**

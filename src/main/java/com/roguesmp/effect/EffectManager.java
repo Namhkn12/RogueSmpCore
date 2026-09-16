@@ -152,6 +152,12 @@ public class EffectManager {
         entityEffects.getOrCreateStack(sourceId).add(entity, smpEffect);
     }
 
+    public @Nullable EffectStack clearEffects(Entity entity, String sourceId) {
+        EntityEffects entityEffects = allEffects.get(entity.getUniqueId());
+        if (entityEffects == null) return null;
+        return entityEffects.removeEffects(entity, sourceId);
+    }
+
     public Map<String, SmpEffect> getActiveEffects(Entity entity) {
         EntityEffects entityEffects = allEffects.get(entity.getUniqueId());
         return entityEffects == null ? Map.of() : entityEffects.activeEffects();
