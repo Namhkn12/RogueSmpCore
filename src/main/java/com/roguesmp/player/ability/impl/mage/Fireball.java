@@ -1,4 +1,4 @@
-package com.roguesmp.player.ability.impl.active;
+package com.roguesmp.player.ability.impl.mage;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageType;

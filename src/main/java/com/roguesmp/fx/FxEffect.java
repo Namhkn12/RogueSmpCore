@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 /**
  * A group of {@link FxPart}s anchored to a world location and ticked together. If given a root
@@ -31,6 +32,7 @@ public final class FxEffect {
     private final FxMotion rootMotion;
     private final int durationTicks;
     private final Runnable onComplete;
+    private final BooleanSupplier stopCondition;
     private final Collection<Player> viewers;
 
     private FxTransform rootTransform;
@@ -43,6 +45,7 @@ public final class FxEffect {
         this.rootMotion = builder.rootMotion;
         this.durationTicks = builder.durationTicks;
         this.onComplete = builder.onComplete;
+        this.stopCondition = builder.stopCondition;
         this.viewers = builder.viewers;
         this.rootTransform = FxTransform.at(origin);
         this.parts.forEach(part -> part.primeWorldTransform(rootTransform));
@@ -62,6 +65,11 @@ public final class FxEffect {
 
         World world = origin.getWorld();
         if (world == null) { // world unloaded (e.g. Multiverse) out from under a running effect
+            stop();
+            return;
+        }
+
+        if (stopCondition != null && stopCondition.getAsBoolean()) {
             stop();
             return;
         }
@@ -95,6 +103,7 @@ public final class FxEffect {
         private FxMotion rootMotion;
         private int durationTicks = 1;
         private Runnable onComplete;
+        private BooleanSupplier stopCondition;
         private Collection<Player> viewers;
 
         private Builder(Location origin) {
@@ -125,6 +134,17 @@ public final class FxEffect {
 
         public Builder onComplete(Runnable onComplete) {
             this.onComplete = onComplete;
+            return this;
+        }
+
+        /**
+         * Checked at the start of every tick, before anything renders - the effect stops (and
+         * {@link #onComplete} runs) as soon as this returns true, in addition to stopping after
+         * {@link #duration}. Pair with {@code duration(-1)} for an effect that lives only as long as
+         * the condition holds.
+         */
+        public Builder stopWhen(BooleanSupplier stopCondition) {
+            this.stopCondition = stopCondition;
             return this;
         }
 

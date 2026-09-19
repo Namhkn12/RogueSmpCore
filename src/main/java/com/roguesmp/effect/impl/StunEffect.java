@@ -64,10 +64,11 @@ public class StunEffect extends SmpEffect {
         FxEffect effect = FxEffect.builder(entity.getLocation())
                 .rootMotion(new OrbitMotion(() -> headCenter(entity), ORBIT_RADIUS, ORBIT_SPEED_DEGREES_PER_TICK))
                 .part(star)
-                .duration(600) //Max duration just in case
+                .duration(-1)
+                .stopWhen(() -> !entity.isValid() || entity.isDead())
                 .build();
 
-        orbitHandle = FxEngine.getInstance().play(effect);
+        FxEngine.getInstance().play(effect);
     }
 
     @Override

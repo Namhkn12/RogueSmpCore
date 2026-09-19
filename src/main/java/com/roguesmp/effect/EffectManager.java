@@ -86,7 +86,15 @@ public class EffectManager {
                     var entry = entryIterator.next();
                     UUID uuid = entry.getKey();
                     Entity entity = Bukkit.getEntity(uuid);
+                    if (entity instanceof Player player) {
+                        // A player on the death screen reads as dead/invalid, but their KEEP/HALVES_ON_DEATH
+                        // effects must survive until respawn. Death is handled by onPlayerDeath.
+                        if (player.isValid() && !player.isDead()) entry.getValue().tick(player, PERIOD, oneHz, twoHz);
+                        continue;
+                    }
                     if (entity == null || !entity.isValid() || entity.isDead()) {
+                        // Entity still resolvable but gone (removed/despawned without a death event) - unwind its effects.
+                        if (entity != null) entry.getValue().removeAll(entity);
                         entryIterator.remove();
                         continue;
                     }
@@ -148,6 +156,8 @@ public class EffectManager {
     }
 
     public void addEffect(Entity entity, String sourceId, SmpEffect smpEffect) {
+        // e.g. an ability's damage killed it before its effect was applied - nothing would ever clean this up
+        if (entity.isDead()) return;
         EntityEffects entityEffects = allEffects.computeIfAbsent(entity.getUniqueId(), k -> new EntityEffects());
         entityEffects.getOrCreateStack(sourceId).add(entity, smpEffect);
     }
@@ -196,6 +206,7 @@ public class EffectManager {
             entityEffects.onPlayerDeath(event);
         } else {
             entityEffects.onNonPlayerDeath(event);
+            entityEffects.removeAll(le);
             allEffects.remove(le.getUniqueId());
         }
     }

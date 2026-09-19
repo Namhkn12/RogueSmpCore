@@ -1,4 +1,4 @@
-package com.roguesmp.player.ability.impl.active;
+package com.roguesmp.player.ability.impl.mage;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageType;
@@ -8,10 +8,6 @@ import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.utils.DamageUtils;
-import com.roguesmp.utils.Utils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.*;
 import org.bukkit.entity.LivingEntity;
@@ -19,8 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public class Flamestrike extends Ability {
     public static final String ID = "flamestrike";

@@ -1,4 +1,4 @@
-package com.roguesmp.player.ability.impl.active;
+package com.roguesmp.player.ability.impl.archer;
 
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
@@ -7,11 +7,7 @@ import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.utils.DamageUtils;
-import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.VectorUtils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -19,17 +15,13 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class Scrapshot extends Ability {
     public static final String ID = "scrapshot";
 
-    // Cached Attributes
     private final double baseDamage;
     private final double range;
     private final int cooldown;
 
-    // Mechanics Constants
     private static final double RECOIL_VELOCITY = 1.0;
     private static final double SHRAPNEL_DAMAGE_PERCENT = 0.33;
     private static final double SHRAPNEL_RANGE = 4.0;
@@ -46,7 +38,6 @@ public class Scrapshot extends Ability {
 
     public Scrapshot(SmpPlayer player, int level) {
         super(player, level);
-        // Cache attributes from JSON
         this.baseDamage = getAbilityInfo().getAttributeForLevel("damage", level);
         this.range = getAbilityInfo().getAttributeForLevel("range", level);
         this.cooldown = (int) getAbilityInfo().getAttributeForLevel("cooldown", level);

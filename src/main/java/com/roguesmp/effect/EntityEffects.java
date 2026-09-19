@@ -80,6 +80,13 @@ public final class EntityEffects {
         stacks.values().forEach(stack -> stack.onHurt(event));
     }
 
+    /**
+     * Removes every stack, firing {@code onLoseEffect} for each one's active effect.
+     */
+    public void removeAll(Entity entity) {
+        stacks.keySet().forEach(source -> removeEffects(entity, source));
+    }
+
     public void removeNonPersistent() {
         stacks.values().forEach(stack -> stack.removeIf(effect -> !effect.isPersistent()));
     }

@@ -69,7 +69,8 @@ public final class EffectStack {
         for (SmpEffect existing : effects) {
             if (Double.compare(existing.getMagnitude(), smpEffect.getMagnitude()) == 0
                     && existing.getDeathBehavior() == smpEffect.getDeathBehavior()
-                    && existing.getDuration() < smpEffect.getDuration()) {
+                    && !existing.isInfinite()
+                    && (smpEffect.isInfinite() || existing.getDuration() < smpEffect.getDuration())) {
                 if (existing == activeBefore) {
                     existing.onLoseEffect(entity);
                     existing.onGainEffect(entity);
@@ -117,19 +118,24 @@ public final class EffectStack {
      * only mattered for players.
      */
     public void onPlayerDeath(EntityDeathEvent event) {
-        Entity entity = event.getEntity();
-        SmpEffect active = highest();
-        if (active != null) active.onDeath(event);
+        SmpEffect activeBefore = highest();
+        if (activeBefore != null) activeBefore.onDeath(event);
 
         for (SmpEffect effect : effects) {
             switch (effect.getDeathBehavior()) {
-                case HALVES_ON_DEATH -> effect.setDuration(effect.getDuration() / 2);
-                case REMOVE_ON_DEATH -> {
-                    if (effect == active) effect.onLoseEffect(entity);
-                    effects.remove(effect);
+                case HALVES_ON_DEATH -> {
+                    if (!effect.isInfinite()) effect.setDuration(effect.getDuration() / 2);
                 }
+                case REMOVE_ON_DEATH -> effects.remove(effect);
                 case KEEP_ON_DEATH -> {}
             }
+        }
+
+        if (activeBefore != null && !effects.contains(activeBefore)) {
+            Entity entity = event.getEntity();
+            activeBefore.onLoseEffect(entity);
+            SmpEffect activeAfter = highest();
+            if (activeAfter != null) activeAfter.onGainEffect(entity);
         }
     }
 
@@ -145,10 +151,7 @@ public final class EffectStack {
 
     public void onDeath(EntityDeathEvent event) {
         SmpEffect active = highest();
-        if (active == null) return;
-
-        active.onDeath(event);
-        active.onLoseEffect(event.getEntity());
+        if (active != null) active.onDeath(event);
     }
 
     /**

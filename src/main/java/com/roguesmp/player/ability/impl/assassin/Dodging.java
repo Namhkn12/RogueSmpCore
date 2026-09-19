@@ -1,11 +1,10 @@
-package com.roguesmp.player.ability.impl.passive;
+package com.roguesmp.player.ability.impl.assassin;
 
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
-import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -19,20 +18,12 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class Dodging extends Ability {
     public static final String ID = "dodging";
 
-    // Cached Attributes
     private final int cooldown;
     private int lastTriggerTick = -1;
 
-    /**
-     * Action-based INFO shell.
-     * Note: Passive abilities often use "execute" as a manual trigger for
-     * debugging or external force-triggers.
-     */
     public static final AbilityInfo<Dodging> INFO = new AbilityInfo<>(
             ID,
             Dodging.class,
@@ -41,13 +32,9 @@ public class Dodging extends Ability {
 
     public Dodging(SmpPlayer player, int level) {
         super(player, level);
-        // Cache cooldown from JSON
         this.cooldown = (int) getAbilityInfo().getAttributeForLevel("cooldown_ticks", level);
     }
 
-    /**
-     * Internal logic to check if a dodge should occur.
-     */
     private boolean attemptDodge() {
         Player p = smpPlayer.getBukkitPlayer();
         int currentTick = p.getTicksLived();

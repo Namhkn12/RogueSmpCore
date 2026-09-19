@@ -99,6 +99,20 @@ public abstract class Ability {
     }
 
     /**
+     * Called when this Ability is equipped to loadout
+     */
+    public void onEquip() {
+
+    }
+
+    /**
+     * Called when this Ability is removed from loadout
+     */
+    public void onUnequip() {
+
+    }
+
+    /**
      * Ticking, run every 'periodIncrement' ticks
      *
      * @param periodIncrement The period in tick from the last call to current

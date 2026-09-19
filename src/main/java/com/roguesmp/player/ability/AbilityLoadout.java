@@ -51,10 +51,17 @@ public class AbilityLoadout {
         if (slots == null || index < 0 || index >= slots.length) return;
         if (ability != null && !isAllowedForCurrentClass(ability.getId())) return;
 
+        Ability oldAbility = slots[index];
         slots[index] = ability;
 
         String id = (ability == null) ? null : ability.getId();
         smpPlayer.getPlayerData().setEquippedAbility(type, index, id);
+        if (oldAbility != null) {
+            oldAbility.onUnequip();
+        }
+        if (ability != null) {
+            ability.onEquip();
+        }
     }
 
     /**
