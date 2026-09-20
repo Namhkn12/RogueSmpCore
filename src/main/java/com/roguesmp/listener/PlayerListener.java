@@ -10,6 +10,7 @@ import com.roguesmp.island.IslandManager;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.*;
+import com.roguesmp.server.ResourcePackManager;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
@@ -62,6 +63,7 @@ public class PlayerListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         playerManager.loadAndTrackPlayer(player.getUniqueId());
+        ResourcePackManager.sendResourcePack(player);
     }
 
     @EventHandler

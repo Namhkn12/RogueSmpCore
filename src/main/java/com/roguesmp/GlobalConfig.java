@@ -8,16 +8,22 @@ import java.io.*;
 public class GlobalConfig {
 
     private final String mineskinApiKey;
+    private final String resourcePackUrl;
+    private final String resourcePackHash;
     private long lastDailyReset; // Removed final to allow updates
 
-    public GlobalConfig(String mineskinApiKey, long lastDailyReset) {
+    public GlobalConfig(String mineskinApiKey, String resourcePackUrl, String resourcePackHash, long lastDailyReset) {
         this.mineskinApiKey = mineskinApiKey;
+        this.resourcePackUrl = resourcePackUrl;
+        this.resourcePackHash = resourcePackHash;
         this.lastDailyReset = lastDailyReset;
     }
 
     public GlobalConfig() {
         this.lastDailyReset = 0;
         this.mineskinApiKey = "mineSkinApiKey";
+        this.resourcePackUrl = "https://cdn.minepack.fr/pack/cd5754e4-701d-4037-a815-935b1a2f1290";
+        this.resourcePackHash = "c6d5dcd8b725ca5793471bb71fb6639e27d85540";
     }
 
     public static @Blocking GlobalConfig loadGlobalConfig(RogueSmpCore plugin) {
@@ -73,5 +79,13 @@ public class GlobalConfig {
 
     public void setLastDailyReset(long lastDailyReset) {
         this.lastDailyReset = lastDailyReset;
+    }
+
+    public String getResourcePackHash() {
+        return resourcePackHash;
+    }
+
+    public String getResourcePackUrl() {
+        return resourcePackUrl;
     }
 }
