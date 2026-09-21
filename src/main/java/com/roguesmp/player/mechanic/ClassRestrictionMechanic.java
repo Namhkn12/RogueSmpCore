@@ -7,6 +7,7 @@ import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.classes.PlayerClass;
 import com.roguesmp.registry.Registries;
+import com.roguesmp.tag.Tags;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
@@ -22,8 +23,6 @@ import java.util.Set;
  * bonus.
  */
 public class ClassRestrictionMechanic implements PlayerMechanic {
-
-    public static final String WEAPON_TAG_ID = "weapons";
 
     @Override public int getPriority() { return 10; } // High restriction priority
 
@@ -55,15 +54,16 @@ public class ClassRestrictionMechanic implements PlayerMechanic {
     }
 
     /**
-     * Whether {@code baseItem} is a weapon (tagged {@value #WEAPON_TAG_ID}) that {@code player}'s
+     * Whether {@code baseItem} is a weapon (tagged {@link Tags#WEAPONS}) that {@code player}'s
      * current class does NOT allow - always {@code false} for an item not tagged
-     * {@value #WEAPON_TAG_ID} at all, regardless of class.
+     * {@link Tags#WEAPONS} at all, regardless of class.
      */
     public static boolean isRestrictedWeapon(SmpPlayer player, @Nullable BaseItem baseItem) {
         if (baseItem == null) return false;
 
+        if (!Tags.WEAPONS.contains(baseItem)) return false; // Not a weapon-type item at all
+
         Set<String> itemTagIds = Registries.ITEM.getHolder(baseItem.getId()).getTagIds();
-        if (!itemTagIds.contains(WEAPON_TAG_ID)) return false; // Not a weapon-type item at all
 
         PlayerClass playerClass = player.getPlayerClass();
         Set<String> allowed = playerClass == null ? Set.of() : playerClass.getAllowedWeapons();

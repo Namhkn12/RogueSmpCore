@@ -37,6 +37,7 @@ import com.roguesmp.player.ability.trigger.TriggerOptions;
 import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
 import com.roguesmp.player.classes.PlayerClass;
 import com.roguesmp.quest.*;
+import com.roguesmp.tag.Tags;
 import com.roguesmp.player.ability.upgrade.UpgradeRequirements;
 import com.roguesmp.entity.SpecialEntities;
 import com.roguesmp.entity.spell.EntitySpells;
@@ -112,6 +113,7 @@ public class Registries {
     public static void boostrap(RogueSmpCore plugin) {
         // Every registry declared via register(Bootstrapper<T>) above runs its loadClass() here.
         BOOTSTRAPPERS.forEach(consumer -> consumer.accept(plugin));
+        Tags.bootstrap(); // built-in tags must be declared before any registry's tags are loaded
     }
 
     /**

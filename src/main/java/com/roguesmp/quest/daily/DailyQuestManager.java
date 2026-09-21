@@ -5,6 +5,7 @@ import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.*;
 import com.roguesmp.tag.SmpTag;
+import com.roguesmp.tag.Tags;
 import com.roguesmp.utils.DateUtils;
 import com.roguesmp.utils.Utils;
 import org.bukkit.entity.Player;
@@ -16,9 +17,6 @@ public class DailyQuestManager {
 
     public static final int QUESTS_PER_TIER = 3;
 
-    private static final String EASY_TAG_ID = "daily_easy_quest";
-    private static final String MEDIUM_TAG_ID = "daily_medium_quest";
-    private static final String HARD_TAG_ID = "daily_hard_quest";
 
     private static final int EASY_DAILY_LIMIT = 3;
     private static final int MEDIUM_DAILY_LIMIT = 3;
@@ -158,9 +156,9 @@ public class DailyQuestManager {
     }
 
     public int getDailyLimitForTag(SmpTag<Quest> tag) {
-        if (tag.getId().equals(EASY_TAG_ID)) return EASY_DAILY_LIMIT;
-        if (tag.getId().equals(MEDIUM_TAG_ID)) return MEDIUM_DAILY_LIMIT;
-        if (tag.getId().equals(HARD_TAG_ID)) return HARD_DAILY_LIMIT;
+        if (tag == Tags.DAILY_EASY_QUEST) return EASY_DAILY_LIMIT;
+        if (tag == Tags.DAILY_MEDIUM_QUEST) return MEDIUM_DAILY_LIMIT;
+        if (tag == Tags.DAILY_HARD_QUEST) return HARD_DAILY_LIMIT;
         return 3;
     }
 
@@ -177,14 +175,13 @@ public class DailyQuestManager {
 
     /**
      * Resolves the 3 daily quest tiers from {@link Registries#QUEST}. A tier is skipped (not
-     * included) until an admin drops a matching {@code quests/tags/<id>.json} file — see
-     * {@link com.roguesmp.registry.Registry#loadTagsFrom}.
+     * included) until an admin drops a matching {@code quests/tags/<id>.json} file with quests in
+     * it — the tags themselves always exist (see {@link Tags}), just empty until then.
      */
     public List<SmpTag<Quest>> getDailyTags() {
         List<SmpTag<Quest>> tags = new ArrayList<>();
-        for (String id : List.of(EASY_TAG_ID, MEDIUM_TAG_ID, HARD_TAG_ID)) {
-            SmpTag<Quest> tag = Registries.QUEST.getTag(id);
-            if (tag != null) tags.add(tag);
+        for (SmpTag<Quest> tag : List.of(Tags.DAILY_EASY_QUEST, Tags.DAILY_MEDIUM_QUEST, Tags.DAILY_HARD_QUEST)) {
+            if (!tag.getElements().isEmpty()) tags.add(tag);
         }
         return tags;
     }

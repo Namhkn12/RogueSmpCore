@@ -13,12 +13,15 @@ import java.util.function.Function;
  * A named, resolved collection of {@code T} elements, defined by a flat list of raw string entries
  * (element ids, or {@code #otherTagId} to include another tag's elements). Owned by a {@link com.roguesmp.registry.Registry}
  * — see {@link com.roguesmp.registry.Registry#loadTagsFrom} for how tag files get turned into these.
+ * <p>
+ * Tags declared in code (see {@link Tags}) are long-lived: the registry keeps the same instance
+ * across reloads and just {@link #reset}s and re-resolves it, so code can hold one directly.
  */
 public class SmpTag<T> {
     private final String id;
-    private final List<String> rawEntries;
     private final Function<String, T> resolver;
-    private final Set<T> elements = new HashSet<>();
+    private List<String> rawEntries;
+    private Set<T> elements = Set.of();
 
     private boolean resolved = false;
 
@@ -26,6 +29,16 @@ public class SmpTag<T> {
         this.id = id.toLowerCase();
         this.rawEntries = rawEntries;
         this.resolver = resolver;
+    }
+
+    /**
+     * Discards the resolved elements and swaps in new raw entries, so this same instance can be
+     * re-resolved after a reload. Call {@link #resolve} afterwards.
+     */
+    public void reset(List<String> rawEntries) {
+        this.rawEntries = rawEntries;
+        this.elements = Set.of();
+        this.resolved = false;
     }
 
     /**
@@ -47,6 +60,7 @@ public class SmpTag<T> {
 
         stack.add(this.id);
 
+        Set<T> resolvedElements = new HashSet<>();
         for (String entry : rawEntries) {
             if (entry.startsWith("#")) {
                 String nestedId = entry.substring(1).toLowerCase();
@@ -55,18 +69,19 @@ public class SmpTag<T> {
                 if (nestedTag != null) {
                     // Recursive call: force the child to calculate its elements first
                     nestedTag.resolve(tagLookup, stack);
-                    this.elements.addAll(nestedTag.elements);
+                    resolvedElements.addAll(nestedTag.elements);
                 } else {
                     RogueSmpCore.LOGGER.warn("Tag '{}' references unknown nested tag '#{}'", this.id, nestedId);
                 }
             } else {
                 T obj = resolver.apply(entry);
-                if (obj != null) this.elements.add(obj);
+                if (obj != null) resolvedElements.add(obj);
                 else RogueSmpCore.LOGGER.warn("Tag '{}' references unknown entry '{}'", this.id, entry);
             }
         }
 
         stack.remove(this.id);
+        this.elements = resolvedElements;
         this.resolved = true;
     }
 

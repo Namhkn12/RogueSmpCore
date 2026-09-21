@@ -3,9 +3,8 @@ package com.roguesmp.utils;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
-import com.roguesmp.registry.Holder;
-import com.roguesmp.registry.Registries;
 import com.roguesmp.tag.SmpTag;
+import com.roguesmp.tag.Tags;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -113,34 +112,24 @@ public class EntityUtils {
     }
 
     public static boolean isElite(Entity entity) {
-        SmpTag<BaseEntity> baseTag = Registries.ENTITY.getTag("elite");
-        if (baseTag == null) return false;
-        BaseEntity base = getBaseEntity(entity);
-        if (base == null) return false;
-        return baseTag.contains(base);
+        return hasEntityTag(entity, Tags.ELITE);
     }
 
     public static boolean isBoss(Entity entity) {
-        SmpTag<BaseEntity> baseTag = Registries.ENTITY.getTag("boss");
-        if (baseTag == null) return false;
-        BaseEntity base = getBaseEntity(entity);
-        if (base == null) return false;
-        return baseTag.contains(base);
+        return hasEntityTag(entity, Tags.BOSS);
     }
 
     public static boolean isAngelic(Entity entity) {
-        SmpTag<BaseEntity> baseTag = Registries.ENTITY.getTag("angelic");
-        if (baseTag == null) return false;
-        BaseEntity base = getBaseEntity(entity);
-        if (base == null) return false;
-        return baseTag.contains(base);
+        return hasEntityTag(entity, Tags.ANGELIC);
     }
 
     public static boolean isFriendly(Entity entity) {
-        String id = getBaseEntityId(entity);
-        if (id == null) return false;
-        Holder<BaseEntity> holder = Registries.ENTITY.getHolder(id);
-        return holder.getTagIds().contains("friendly");
+        return hasEntityTag(entity, Tags.FRIENDLY);
+    }
+
+    private static boolean hasEntityTag(Entity entity, SmpTag<BaseEntity> tag) {
+        BaseEntity base = getBaseEntity(entity);
+        return base != null && tag.contains(base);
     }
 
     public static boolean isInStealth(Entity entity) {

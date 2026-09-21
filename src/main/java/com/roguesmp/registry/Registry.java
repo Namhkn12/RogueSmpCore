@@ -26,6 +26,7 @@ public class Registry<T> {
     private final Map<String, SmpTag<T>> tags = new HashMap<>();
     private final Map<String, SmpTag<T>> unmodifiableTags = Collections.unmodifiableMap(tags);
     private final Map<String, Holder<T>> holders = new HashMap<>();
+    private final Map<String, SmpTag<T>> builtInTags = new LinkedHashMap<>();
     private final String locationKey; // Subfolder name inside data folder (e.g., "items", "recipes")
     private final Codec<T> codec;
 
@@ -141,6 +142,20 @@ public class Registry<T> {
     }
 
     /**
+     * Declares a tag that must always exist on this registry (see {@link com.roguesmp.tag.Tags}).
+     * {@link #loadTagsFrom} keeps this exact instance across reloads - resetting it to the entries
+     * of {@code tags/<id>.json}, or to empty when there's no such file - instead of creating a new
+     * {@link SmpTag}, so code can hold it directly.
+     */
+    public void registerBuiltInTag(SmpTag<T> tag) {
+        if (locationKey == null) {
+            RogueSmpCore.LOGGER.warn("Built-in tag '{}' declared on a registry that can't have tags", tag.getId());
+            return;
+        }
+        builtInTags.put(tag.getId(), tag);
+    }
+
+    /**
      * Loads every {@code *.json} file under {@code <dataFolder>/<locationKey>/tags/} as an
      * {@link SmpTag} of this registry's type, auto-registered by filename and resolved against
      * this registry's own {@link #get(String)}. Drop a new file in that folder and it's
@@ -153,14 +168,11 @@ public class Registry<T> {
         if (locationKey == null) return;
 
         File folder = new File(plugin.getDataFolder(), locationKey + "/tags");
-        if (!folder.exists()) {
-            folder.mkdirs();
-            return;
-        }
+        if (!folder.exists()) folder.mkdirs();
 
         RogueSmpCore.LOGGER.info("Loading tags for registry '{}'", locationKey);
         File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
-        if (files == null) return;
+        if (files == null) files = new File[0];
 
         tags.clear();
         // Every entry Holder's reverse tag index is about to go stale - cleared here and rebuilt
@@ -182,6 +194,15 @@ public class Registry<T> {
             } catch (Exception e) {
                 RogueSmpCore.LOGGER.error("Error reading tag file '{}' in '{}/tags': {}", file.getName(), locationKey, e.getMessage());
             }
+        }
+
+        // Built-in tags always exist and keep their identity across reloads (see registerBuiltInTag):
+        // reset each to its file's entries (or empty) and swap it in for the throwaway loaded above.
+        // Must happen before the resolve loop below, so a "#builtin" reference resolves fresh contents.
+        for (SmpTag<T> builtIn : builtInTags.values()) {
+            SmpTag<T> loaded = tags.get(builtIn.getId());
+            builtIn.reset(loaded != null ? loaded.getRawEntries() : List.of());
+            tags.put(builtIn.getId(), builtIn);
         }
 
         // Resolve every tag's elements (and any nested #tag references, scoped to this registry's own tags)

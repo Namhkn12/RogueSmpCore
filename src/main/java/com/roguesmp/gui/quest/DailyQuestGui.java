@@ -7,6 +7,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.*;
 import com.roguesmp.quest.daily.DailyQuestManager;
 import com.roguesmp.tag.SmpTag;
+import com.roguesmp.tag.Tags;
 import com.roguesmp.utils.DateUtils;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -48,9 +49,9 @@ public class DailyQuestGui extends BaseGui {
             return;
         }
 
-        setupTierRow(1, Registries.QUEST.getTag("daily_easy_quest"), "<green>Dễ", Material.LIGHT_BLUE_GLAZED_TERRACOTTA, Material.LIME_CONCRETE, playerQuestData);
-        setupTierRow(2, Registries.QUEST.getTag("daily_medium_quest"), "<yellow>Trung Bình", Material.YELLOW_GLAZED_TERRACOTTA, Material.YELLOW_CONCRETE, playerQuestData);
-        setupTierRow(3, Registries.QUEST.getTag("daily_hard_quest"), "<red>Khó", Material.RED_GLAZED_TERRACOTTA, Material.RED_CONCRETE, playerQuestData);
+        setupTierRow(1, Tags.DAILY_EASY_QUEST, "<green>Dễ", Material.LIGHT_BLUE_GLAZED_TERRACOTTA, Material.LIME_CONCRETE, playerQuestData);
+        setupTierRow(2, Tags.DAILY_MEDIUM_QUEST, "<yellow>Trung Bình", Material.YELLOW_GLAZED_TERRACOTTA, Material.YELLOW_CONCRETE, playerQuestData);
+        setupTierRow(3, Tags.DAILY_HARD_QUEST, "<red>Khó", Material.RED_GLAZED_TERRACOTTA, Material.RED_CONCRETE, playerQuestData);
 
         fillEmpty();
     }
@@ -74,7 +75,7 @@ public class DailyQuestGui extends BaseGui {
     }
 
     private void setupTierRow(int row, SmpTag<Quest> tag, String tierName, Material labelMaterial, Material questFallbackMat, PlayerQuestData data) {
-        if (tag == null) return; // no quests/tags/<id>.json for this tier yet
+        if (tag.getElements().isEmpty()) return; // no quests/tags/<id>.json with quests for this tier yet
 
         List<QuestProgress> activeQuests = dailyQuestManager.getActiveDailyQuestsForTag(data, tag);
         int completedToday = dailyQuestManager.getCompletedCountToday(data, tag);
