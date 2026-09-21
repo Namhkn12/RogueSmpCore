@@ -3,6 +3,7 @@ package com.roguesmp.utils;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
+import com.roguesmp.registry.Holder;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.tag.SmpTag;
 import org.bukkit.FluidCollisionMode;
@@ -17,6 +18,7 @@ import org.bukkit.util.RayTraceResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -134,6 +136,13 @@ public class EntityUtils {
         return baseTag.contains(base);
     }
 
+    public static boolean isFriendly(Entity entity) {
+        String id = getBaseEntityId(entity);
+        if (id == null) return false;
+        Holder<BaseEntity> holder = Registries.ENTITY.getHolder(id);
+        return holder.getTagIds().contains("friendly");
+    }
+
     public static boolean isInStealth(Entity entity) {
         return EntityManager.getInstance().hasMetadata(entity, Keys.IN_STEALTH_META_KEY);
     }
@@ -162,5 +171,26 @@ public class EntityUtils {
         String id = entity.getPersistentDataContainer().get(Keys.MOB_ID, PersistentDataType.STRING);
         if (id == null) return null;
         return EntityManager.getInstance().getBaseEntity(id);
+    }
+
+    public static @Nullable String getBaseEntityId(Entity entity) {
+        return entity.getPersistentDataContainer().get(Keys.MOB_ID, PersistentDataType.STRING);
+    }
+
+    public static @Nullable LivingEntity getNearestMob(Location loc, double radius, Predicate<LivingEntity> predicate) {
+        return getNearestMob(loc, getNearbyMobs(loc, radius, radius, radius, predicate));
+    }
+
+    public static @Nullable <T extends LivingEntity> T getNearestMob(Location loc, List<T> nearbyMobs) {
+        boolean seen = false;
+        T best = null;
+        Comparator<T> comparator = Comparator.comparingDouble(e -> e.getLocation().distanceSquared(loc));
+        for (T nearbyMob : nearbyMobs) {
+            if (!seen || comparator.compare(nearbyMob, best) < 0) {
+                seen = true;
+                best = nearbyMob;
+            }
+        }
+        return seen ? best : null;
     }
 }

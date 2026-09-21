@@ -81,7 +81,7 @@ public class Smash implements SmpEnchant {
         Hitbox.SphereHitbox hurtbox = new Hitbox.SphereHitbox(victim.getLocation().add(0, 0.75, 0), RADIUS);
         for (LivingEntity entity : hurtbox.getHitMobs()) {
             if (entity == victim) continue;
-            DamageUtils.damage(entity, bukkitPlayer, event.getFinalDamage() * RATIO_PER_LEVEL * level, new DamageEvent.Metadata(DamageType.TRUE));
+            DamageUtils.damage(entity, bukkitPlayer, event.getFinalDamage() * RATIO_PER_LEVEL * level, new DamageEvent.Metadata(DamageType.UNSCALABLE_ENCHANT));
         }
     }
 }

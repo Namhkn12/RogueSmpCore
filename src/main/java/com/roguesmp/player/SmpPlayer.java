@@ -11,6 +11,7 @@ import com.roguesmp.player.ability.AbilityLoadout;
 import com.roguesmp.player.ability.AbilityType;
 import com.roguesmp.player.classes.PlayerClass;
 import com.roguesmp.player.mechanic.*;
+import com.roguesmp.registry.Holder;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
@@ -46,7 +47,7 @@ public class SmpPlayer {
 
     private final Map<UUID, PlayerProjectile> projectiles = new HashMap<>();
     private int projectileCleanupTimer = 0;
-    private @Nullable PlayerClass playerClass;
+    private @Nullable Holder<PlayerClass> playerClass;
 
     // Wall-clock (not tick-count) cooldown tracking for passive item abilities (ItemAbility) -
     // lives here rather than on the ability/component instance since non-unique SmpItems (and
@@ -68,7 +69,7 @@ public class SmpPlayer {
 
         abilityLoadout.loadData(playerData);
         String classId = playerData.getClassId();
-        this.playerClass = classId == null ? null : Registries.PLAYER_CLASS.get(classId);
+        this.playerClass = classId == null ? null : Registries.PLAYER_CLASS.getHolder(classId);
     }
 
     private void initMechanic() {
@@ -208,7 +209,7 @@ public class SmpPlayer {
     }
 
     public @Nullable PlayerClass getPlayerClass() {
-        return playerClass;
+        return playerClass != null && playerClass.isBound() ? playerClass.value() : null;
     }
 
     /**
@@ -219,9 +220,23 @@ public class SmpPlayer {
      * {@link AbilityLoadout#isAllowedForCurrentClass(String)}).
      */
     public void setPlayerClass(PlayerClass playerClass) {
+        getPlayerData().setClassId(playerClass.getId());
+        this.playerClass = Registries.PLAYER_CLASS.getHolder(playerClass.getId());
+        applyClassRoster(playerClass);
+    }
+
+    /**
+     * Re-applies the current class's roster (grants newly added abilities, unequips removed ones) -
+     * call after {@link Registries#PLAYER_CLASS} is live-reloaded. The class reference itself
+     * needs no refresh, since it's a {@link Holder}.
+     */
+    public void syncClassRoster() {
+        PlayerClass current = getPlayerClass();
+        if (current != null) applyClassRoster(current);
+    }
+
+    private void applyClassRoster(PlayerClass playerClass) {
         PlayerData data = getPlayerData();
-        data.setClassId(playerClass.getId());
-        this.playerClass = playerClass;
 
         playerClass.getDefaultAbilities().forEach((abilityId, level) -> {
             if (data.getAbilityLevel(abilityId) <= 0) {
