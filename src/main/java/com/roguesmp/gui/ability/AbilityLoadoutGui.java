@@ -71,6 +71,8 @@ public class AbilityLoadoutGui extends BaseGui {
 
         // Split description into lines
         lore.addAll(info.getFormattedDescription(ability.getLevel()));
+        lore.add(Component.empty());
+        lore.addAll(info.getFormattedActivation());
 
         lore.add(Component.empty());
         lore.add(Utils.text("Click để thay đổi kĩ năng", NamedTextColor.YELLOW));

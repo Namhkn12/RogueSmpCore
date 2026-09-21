@@ -160,6 +160,8 @@ public class AbilitySelectionGui extends BaseGui {
         lore.add(Component.empty());
 
         lore.addAll(info.getFormattedDescription(level));
+        lore.add(Component.empty());
+        lore.addAll(info.getFormattedActivation());
 
         lore.add(Component.empty());
         if (isElsewhere) {

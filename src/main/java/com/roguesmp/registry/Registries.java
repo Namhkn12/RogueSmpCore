@@ -32,6 +32,8 @@ import com.roguesmp.npc.BaseNpc;
 import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.npc.action.NpcActions;
 import com.roguesmp.player.ability.*;
+import com.roguesmp.player.ability.trigger.TriggerOption;
+import com.roguesmp.player.ability.trigger.TriggerOptions;
 import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
 import com.roguesmp.player.classes.PlayerClass;
 import com.roguesmp.quest.*;
@@ -39,12 +41,10 @@ import com.roguesmp.player.ability.upgrade.UpgradeRequirements;
 import com.roguesmp.entity.SpecialEntities;
 import com.roguesmp.entity.spell.EntitySpells;
 import com.roguesmp.npc.action.GuiOpenActions;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 public class Registries {
     private static final List<Consumer<RogueSmpCore>> BOOTSTRAPPERS = new ArrayList<>();
@@ -79,7 +79,7 @@ public class Registries {
     public static final Registry<AbilityInfo<? extends Ability>> ABILITY = register(registry -> AbilityInfos.loadClass());
     public static final Registry<AbilityConfig> ABILITY_CONFIG = new Registry<>("ability_info", AbilityConfig.CODEC);
     public static final Registry<PlayerClass> PLAYER_CLASS = new Registry<>("classes", PlayerClass.CODEC);
-    public static final Registry<Predicate<Player>> TRIGGER_OPTION = register(registry -> TriggerOptions.loadClass());
+    public static final Registry<TriggerOption> TRIGGER_OPTION =register(registry -> TriggerOptions.loadClass());
 
     public static final Registry<GuiOpenActions.OpenAction> NPC_GUI_OPEN_ACTION = register(registry -> GuiOpenActions.loadClass());
 

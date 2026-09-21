@@ -134,6 +134,24 @@ public class AbilityInfo<T extends Ability> {
         return result;
     }
 
+    /**
+     * One activation line per configured trigger (key + conditions), or a single Passive line
+     * for an ability with no trigger
+     */
+    public List<Component> getFormattedActivation() {
+        Collection<AbilityTrigger> triggers = config().triggers().values();
+        if (triggers.isEmpty()) {
+            return List.of(Utils.fromString("<gold>Kích hoạt: <white>Bị động")
+                    .decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        }
+
+        List<Component> lines = new ArrayList<>();
+        for (AbilityTrigger trigger : triggers) {
+            lines.add(trigger.getFormattedActivation());
+        }
+        return lines;
+    }
+
     public Component getFormattedDisplayName() {
         return Utils.fromString(getDisplayName());
     }
