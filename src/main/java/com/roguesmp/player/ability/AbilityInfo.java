@@ -169,10 +169,6 @@ public class AbilityInfo<T extends Ability> {
         return abilityClass;
     }
 
-    public AbilityType getType() {
-        return config().type();
-    }
-
     public Material getIcon() {
         return config().icon();
     }

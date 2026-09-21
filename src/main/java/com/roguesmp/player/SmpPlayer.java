@@ -8,7 +8,6 @@ import com.roguesmp.event.*;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityLoadout;
-import com.roguesmp.player.ability.AbilityType;
 import com.roguesmp.player.classes.PlayerClass;
 import com.roguesmp.player.mechanic.*;
 import com.roguesmp.registry.Holder;
@@ -244,13 +243,11 @@ public class SmpPlayer {
             }
         });
 
-        for (AbilityType type : AbilityType.values()) {
-            Ability[] equipped = abilityLoadout.getAbilities(type);
-            for (int i = 0; i < equipped.length; i++) {
-                Ability ability = equipped[i];
-                if (ability != null && !playerClass.hasAbility(ability.getId())) {
-                    abilityLoadout.equip(type, null, i);
-                }
+        Ability[] equipped = abilityLoadout.getAbilities();
+        for (int i = 0; i < equipped.length; i++) {
+            Ability ability = equipped[i];
+            if (ability != null && !playerClass.hasAbility(ability.getId())) {
+                abilityLoadout.equip(null, i);
             }
         }
     }

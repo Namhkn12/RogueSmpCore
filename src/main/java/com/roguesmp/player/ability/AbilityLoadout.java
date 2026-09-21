@@ -24,10 +24,11 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class AbilityLoadout {
+    public static final int SLOT_COUNT = 4;
+
     private final SmpPlayer smpPlayer;
 
-    // Internal runtime storage: Fast array access per type
-    private final Map<AbilityType, Ability[]> abilityMap = new EnumMap<>(AbilityType.class);
+    private final Ability[] slots = new Ability[SLOT_COUNT];
 
     // State Management for abilities that "intercept" inputs (e.g., aiming modes)
     private Ability contextOwner = null;
@@ -35,27 +36,21 @@ public class AbilityLoadout {
 
     public AbilityLoadout(SmpPlayer smpPlayer) {
         this.smpPlayer = smpPlayer;
-
-        // Initialize arrays based on Enum definitions
-        for (AbilityType type : AbilityType.values()) {
-            abilityMap.put(type, new Ability[type.getMaxSlots()]);
-        }
     }
 
     /**
      * Unified equip method.
      * Automatically syncs the runtime Ability instance and the PlayerData persistence.
      */
-    public void equip(AbilityType type, @Nullable Ability ability, int index) {
-        Ability[] slots = abilityMap.get(type);
-        if (slots == null || index < 0 || index >= slots.length) return;
+    public void equip(@Nullable Ability ability, int index) {
+        if (index < 0 || index >= slots.length) return;
         if (ability != null && !isAllowedForCurrentClass(ability.getId())) return;
 
         Ability oldAbility = slots[index];
         slots[index] = ability;
 
         String id = (ability == null) ? null : ability.getId();
-        smpPlayer.getPlayerData().setEquippedAbility(type, index, id);
+        smpPlayer.getPlayerData().setEquippedAbility(index, id);
         if (oldAbility != null) {
             oldAbility.onUnequip();
         }
@@ -77,36 +72,28 @@ public class AbilityLoadout {
         return playerClass != null && playerClass.hasAbility(abilityId);
     }
 
-    /**
-     * Helper to check if an ability ID is already equipped in a specific category.
-     */
-    public boolean isEquipped(String abilityId, AbilityType type) {
-        Ability[] slots = abilityMap.get(type);
-        if (slots == null) return false;
+    public boolean isEquipped(String abilityId) {
         return Arrays.stream(slots).anyMatch(a -> a != null && a.getId().equals(abilityId));
     }
 
     public void loadData(PlayerData data) {
         Map<String, Integer> unlocked = data.getUnlockedAbilities();
+        List<String> equippedIds = data.getEquippedAbilities();
 
-        for (AbilityType type : AbilityType.values()) {
-            List<String> equippedIds = data.getEquippedByType(type);
+        for (int i = 0; i < equippedIds.size(); i++) {
+            String id = equippedIds.get(i);
+            if (id == null) continue;
 
-            for (int i = 0; i < equippedIds.size(); i++) {
-                String id = equippedIds.get(i);
-                if (id == null) continue;
+            int level = unlocked.getOrDefault(id, 0);
+            if (level <= 0) continue; // Not unlocked (e.g. unlocked ability was later revoked) - drop from the loadout
 
-                int level = unlocked.getOrDefault(id, 0);
-                if (level <= 0) continue; // Not unlocked (e.g. unlocked ability was later revoked) - drop from the loadout
+            AbilityInfo<?> info = Registries.ABILITY.get(id);
+            if (info == null) continue;
+            Ability ability = info.createInstance(smpPlayer, level);
 
-                AbilityInfo<?> info = Registries.ABILITY.get(id);
-                if (info == null) continue;
-                Ability ability = info.createInstance(smpPlayer, level);
-
-                if (ability != null) {
-                    // Update internal map only (to avoid redundant dirty-flag triggers in PlayerData)
-                    abilityMap.get(type)[i] = ability;
-                }
+            if (ability != null) {
+                // Update internal array only (to avoid redundant dirty-flag triggers in PlayerData)
+                slots[i] = ability;
             }
         }
     }
@@ -122,9 +109,8 @@ public class AbilityLoadout {
             if (execute(contextOwner, key)) return;
         }
 
-        // 2. Check all Active abilities in order
-        Ability[] actives = abilityMap.get(AbilityType.ACTIVE);
-        for (Ability ability : actives) {
+        // 2. Check every equipped ability in slot order - ones with no bound trigger just don't match
+        for (Ability ability : slots) {
             if (ability == null || ability == contextOwner) continue;
             if (execute(ability, key)) return;
         }
@@ -167,8 +153,12 @@ public class AbilityLoadout {
 
     // --- Getters ---
 
-    public Ability[] getAbilities(AbilityType type) {
-        return abilityMap.getOrDefault(type, new Ability[0]);
+    /**
+     * The live slot array (length {@link #SLOT_COUNT}, empty slots are null) - read-only by
+     * convention, equip through {@link #equip}.
+     */
+    public Ability[] getAbilities() {
+        return slots;
     }
 
     public SmpPlayer getSmpPlayer() {
@@ -176,15 +166,12 @@ public class AbilityLoadout {
     }
 
     /**
-     * A private helper to execute logic on every non-null ability
-     * in the loadout, regardless of type.
+     * A private helper to execute logic on every non-null ability in the loadout.
      */
     private void forEachAbility(Consumer<Ability> action) {
-        for (Ability[] abilities : abilityMap.values()) {
-            for (Ability ability : abilities) {
-                if (ability != null) {
-                    action.accept(ability);
-                }
+        for (Ability ability : slots) {
+            if (ability != null) {
+                action.accept(ability);
             }
         }
     }
