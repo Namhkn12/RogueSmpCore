@@ -24,6 +24,7 @@ import java.util.Objects;
  */
 public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
 
+    public static final int INFINITE = -1;
     public static final Codec<SmpEffect> CODEC = Codec.dispatch(
             "id",
             SmpEffect::getEffectID,
@@ -101,7 +102,8 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
         if (content == null) return null;
 
         if (displayMode == DisplayMode.WITH_TIME) {
-            return content.append(Component.text(" " + Utils.intToMinuteAndSeconds(duration / 20), NamedTextColor.GRAY));
+            String time = isInfinite() ? "--:--" : Utils.intToMinuteAndSeconds(duration / 20);
+            return content.append(Component.text(" " + time, NamedTextColor.GRAY));
         }
         return content;
     }
@@ -113,6 +115,7 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
      * @return Returns true if effect has expired and should be removed by the EffectManager
      */
     public boolean tickDuration(int ticks) {
+        if (isInfinite()) return false;
         duration -= ticks;
         return duration <= 0;
     }
@@ -139,6 +142,10 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
 
     public DisplayMode getDisplayMode() {
         return displayMode;
+    }
+
+    public boolean isInfinite() {
+        return duration == INFINITE;
     }
 
     @Override
@@ -209,9 +216,11 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
 
     /**
      * Sorts by remaining duration - effects not shown with a time suffix (hidden or timeless)
-     * always sort last, since remaining duration has no visible meaning for them.
+     * always sort last, since remaining duration has no visible meaning for them. Infinite
+     * effects sort after everything else.
      */
     private static int sortWeight(SmpEffect effect) {
+        if (effect.isInfinite()) return Integer.MIN_VALUE;
         return effect.displayMode == DisplayMode.WITH_TIME ? effect.duration : -1;
     }
 

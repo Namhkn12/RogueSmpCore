@@ -3,6 +3,7 @@ package com.roguesmp.player.ability;
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.event.PlayerStartBlockAttackEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.registry.keys.SoundEventKeys;
@@ -98,6 +99,20 @@ public abstract class Ability {
     }
 
     /**
+     * Called when this Ability is equipped to loadout
+     */
+    public void onEquip() {
+
+    }
+
+    /**
+     * Called when this Ability is removed from loadout
+     */
+    public void onUnequip() {
+
+    }
+
+    /**
      * Ticking, run every 'periodIncrement' ticks
      *
      * @param periodIncrement The period in tick from the last call to current
@@ -135,6 +150,8 @@ public abstract class Ability {
     public void onShootArrow(EntityShootBowEvent event) {}
 
     public void onConsumeArrow(ArrowConsumeEvent event) {}
+
+    public void onStartBlocking(PlayerStartBlockAttackEvent event) {}
 
     public void onTeleport(PlayerTeleportEvent event) {}
 

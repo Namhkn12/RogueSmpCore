@@ -79,7 +79,8 @@ public boolean matches(Player player, Key pressedKey) {
 [`player/ability/AbilityLoadout.java`](../src/main/java/com/roguesmp/player/ability/AbilityLoadout.java):
 
 ```java
-private final Map<AbilityType, Ability[]> abilityMap = new EnumMap<>(AbilityType.class); // mảng có kích thước theo AbilityType.getMaxSlots()
+public static final int SLOT_COUNT = 4;
+private final Ability[] slots = new Ability[SLOT_COUNT]; // 1 mảng duy nhất, không còn phân loại Active/Passive/Lifeline
 private Ability contextOwner = null;   // interceptor: bắt input tiếp theo
 private int contextTicksLeft = 0;
 ```
@@ -93,7 +94,7 @@ public void cast(AbilityTrigger.Key key) {
     if (contextOwner != null) {
         if (execute(contextOwner, key)) return;   // interceptor được ưu tiên trước
     }
-    for (Ability ability : abilityMap.get(AbilityType.ACTIVE)) {
+    for (Ability ability : slots) {   // ability không có trigger nào thì findMatchingActionKey trả null → bỏ qua
         if (ability == null || ability == contextOwner) continue;
         if (execute(ability, key)) return;         // chuỗi: dừng ở ability đầu tiên "xử lý" được
     }

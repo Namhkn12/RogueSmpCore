@@ -18,6 +18,7 @@ public class ItemComponentKeys {
     public static final ComponentKey<PotionContentComponent> POTION_CONTENT = register("potion_content", PotionContentComponent.CODEC);
     public static final ComponentKey<PlayerHeadSkinComponent> HEAD_SKIN = register("head_skin", PlayerHeadSkinComponent.CODEC);
     public static final ComponentKey<ItemModelComponent> ITEM_MODEL = register("item_model", ItemModelComponent.CODEC);
+    public static final ComponentKey<EquippableComponent> EQUIPPABLE = register("equippable", EquippableComponent.CODEC);
     //Transient so it has no CODEC.
     public static final ComponentKey<BrokenComponent> BROKEN = new ComponentKey<>("broken");
     public static final ComponentKey<ItemTypeComponent> ITEM_TYPE = new ComponentKey<>("item_type");

@@ -5,7 +5,6 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.player.ability.AbilityLoadout;
-import com.roguesmp.player.ability.AbilityType;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -43,32 +42,22 @@ public class AbilityLoadoutGui extends BaseGui {
         // 1. Fill background with deep black
         fillEmpty(FILLER_BLACK);
 
-        // 3. Render Active Slots (Row 1, Slots 1-4)
-        Ability[] actives = loadout.getAbilities(AbilityType.ACTIVE);
-        for (int i = 0; i < AbilityType.ACTIVE.getMaxSlots(); i++) {
-            renderSlot(1, i + 1, actives[i], AbilityType.ACTIVE, i);
+        // 2. Render the ability slots, spaced across the middle row (columns 1, 3, 5, 7)
+        Ability[] abilities = loadout.getAbilities();
+        for (int i = 0; i < AbilityLoadout.SLOT_COUNT; i++) {
+            renderSlot(2, 1 + i * 2, abilities[i], i);
         }
 
-        // 4. Render Passive Slots (Row 3, Slots 1-4)
-        Ability[] passives = loadout.getAbilities(AbilityType.PASSIVE);
-        for (int i = 0; i < AbilityType.PASSIVE.getMaxSlots(); i++) {
-            renderSlot(3, i + 1, passives[i], AbilityType.PASSIVE, i);
-        }
-
-        // 5. Render Lifeline Slot (Row 1, Slot 7)
-        Ability[] lifeline = loadout.getAbilities(AbilityType.LIFELINE);
-        renderSlot(1, 7, lifeline[0], AbilityType.LIFELINE, 0);
-
-        // 6. Navigation/Info Button
+        // 3. Navigation/Info Button
         addButton(5, 4, createInfoButton(), event -> event.setCancelled(true));
     }
 
-    private void renderSlot(int row, int col, @Nullable Ability ability, AbilityType type, int index) {
-        ItemStack icon = (ability != null) ? createEquippedIcon(ability, type) : createEmptyIcon(type, index);
-        addButton(row, col, icon, ClickHandler.openGui(new AbilitySelectionGui(smpPlayer, type, index)));
+    private void renderSlot(int row, int col, @Nullable Ability ability, int index) {
+        ItemStack icon = (ability != null) ? createEquippedIcon(ability) : createEmptyIcon(index);
+        addButton(row, col, icon, ClickHandler.openGui(new AbilitySelectionGui(smpPlayer, index)));
     }
 
-    private ItemStack createEquippedIcon(Ability ability, AbilityType type) {
+    private ItemStack createEquippedIcon(Ability ability) {
         AbilityInfo<?> info = ability.getAbilityInfo();
         ItemStack item = ItemStack.of(info.getIcon());
 
@@ -77,12 +66,13 @@ public class AbilityLoadoutGui extends BaseGui {
                 .decoration(TextDecoration.BOLD, true));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Utils.text("✨ " + type.getDisplay(), NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, true));
         lore.add(Utils.text("⭐ Cấp độ: " + ability.getLevel(), NamedTextColor.GOLD));
         lore.add(Component.empty());
 
         // Split description into lines
         lore.addAll(info.getFormattedDescription(ability.getLevel()));
+        lore.add(Component.empty());
+        lore.addAll(info.getFormattedActivation());
 
         lore.add(Component.empty());
         lore.add(Utils.text("Click để thay đổi kĩ năng", NamedTextColor.YELLOW));
@@ -91,15 +81,9 @@ public class AbilityLoadoutGui extends BaseGui {
         return item;
     }
 
-    private ItemStack createEmptyIcon(AbilityType type, int index) {
-        // Different colors for empty slot types
-        Material material = switch (type) {
-            case ACTIVE, PASSIVE -> Material.LIME_STAINED_GLASS_PANE;
-            case LIFELINE -> Material.PINK_STAINED_GLASS_PANE;
-        };
-
-        ItemStack item = new ItemStack(material);
-        item.setData(DataComponentTypes.ITEM_NAME, Component.text("➕ Ô Trống: " + type.getDisplay(), NamedTextColor.WHITE));
+    private ItemStack createEmptyIcon(int index) {
+        ItemStack item = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
+        item.setData(DataComponentTypes.ITEM_NAME, Component.text("➕ Ô Trống", NamedTextColor.WHITE));
 
         List<Component> lore = new ArrayList<>();
         lore.add(Utils.text("Vị trí: #" + (index + 1), NamedTextColor.DARK_GRAY));
@@ -116,9 +100,8 @@ public class AbilityLoadoutGui extends BaseGui {
         ItemStack item = new ItemStack(Material.BOOK);
         item.setData(DataComponentTypes.ITEM_NAME, Component.text("Hướng Dẫn", NamedTextColor.YELLOW, TextDecoration.BOLD));
         item.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
-                Utils.text("• Kĩ năng Chủ Động: Sử dụng bằng các tổ hợp hành động.", NamedTextColor.GRAY),
-                Utils.text("• Kĩ năng Bị Động: Luôn tự động kích hoạt.", NamedTextColor.GRAY),
-                Utils.text("• Kĩ năng Sinh Tử: Kích hoạt khi gặp nguy cấp.", NamedTextColor.GRAY)
+                Utils.text("• Bạn có " + AbilityLoadout.SLOT_COUNT + " ô kĩ năng.", NamedTextColor.GRAY),
+                Utils.text("• Mỗi kĩ năng có cách kích hoạt riêng: bằng tổ hợp hành động hoặc tự động.", NamedTextColor.GRAY)
         )));
         return item;
     }

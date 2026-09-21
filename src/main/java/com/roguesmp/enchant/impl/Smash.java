@@ -74,14 +74,14 @@ public class Smash implements SmpEnchant {
 
         Particle.EXPLOSION.builder().location(victim.getLocation().add(0, 0.75, 0)).count(0).offset(1.5, 0, 0).spawn();
         world.playSound(Sound.sound(SoundEventKeys.ENTITY_DRAGON_FIREBALL_EXPLODE, Sound.Source.PLAYER,0.2f, 0.6f), victim);
-        world.playSound(Sound.sound(SoundEventKeys.ENTITY_PLAYER_ATTACK_CRIT, Sound.Source.PLAYER, 1f, 0.5f));
-        world.playSound(Sound.sound(SoundEventKeys.ENTITY_PLAYER_ATTACK_STRONG, Sound.Source.PLAYER, 1f, 0.5f));
-        world.playSound(Sound.sound(SoundEventKeys.ENTITY_BLAZE_HURT, Sound.Source.PLAYER, 0.2f, 0.5f));
+        world.playSound(Sound.sound(SoundEventKeys.ENTITY_PLAYER_ATTACK_CRIT, Sound.Source.PLAYER, 1f, 0.5f), victim);
+        world.playSound(Sound.sound(SoundEventKeys.ENTITY_PLAYER_ATTACK_STRONG, Sound.Source.PLAYER, 1f, 0.5f), victim);
+        world.playSound(Sound.sound(SoundEventKeys.ENTITY_BLAZE_HURT, Sound.Source.PLAYER, 0.2f, 0.5f), victim);
 
         Hitbox.SphereHitbox hurtbox = new Hitbox.SphereHitbox(victim.getLocation().add(0, 0.75, 0), RADIUS);
         for (LivingEntity entity : hurtbox.getHitMobs()) {
             if (entity == victim) continue;
-            DamageUtils.damage(entity, bukkitPlayer, event.getFinalDamage() * RATIO_PER_LEVEL * level, new DamageEvent.Metadata(DamageType.TRUE));
+            DamageUtils.damage(entity, bukkitPlayer, event.getFinalDamage() * RATIO_PER_LEVEL * level, new DamageEvent.Metadata(DamageType.UNSCALABLE_ENCHANT));
         }
     }
 }

@@ -41,6 +41,8 @@ public class AbilityDetailGui extends BaseGui {
         information.add(Utils.text("Cấp độ hiện tại: " + level, NamedTextColor.GRAY));
         information.add(Component.empty());
         information.addAll(info.getFormattedDescription(level));
+        information.add(Component.empty());
+        information.addAll(info.getFormattedActivation());
         icon.setData(DataComponentTypes.LORE, ItemLore.lore(information));
         addItem(1, 2, icon);
 

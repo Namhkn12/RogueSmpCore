@@ -3,6 +3,7 @@ package com.roguesmp.effect;
 import com.roguesmp.event.DamageEvent;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,15 @@ public final class EntityEffects {
         return result;
     }
 
+    public @Nullable EffectStack removeEffects(Entity entity, String sourceId) {
+        EffectStack stack = stacks.remove(sourceId);
+        if (stack != null) {
+            SmpEffect highest = stack.highest();
+            if (highest != null) highest.onLoseEffect(entity);
+        }
+        return stack;
+    }
+
     /**
      * Ticks every stack down, pruning any that end up empty.
      */
@@ -68,6 +78,13 @@ public final class EntityEffects {
 
     public void onHurt(DamageEvent event) {
         stacks.values().forEach(stack -> stack.onHurt(event));
+    }
+
+    /**
+     * Removes every stack, firing {@code onLoseEffect} for each one's active effect.
+     */
+    public void removeAll(Entity entity) {
+        stacks.keySet().forEach(source -> removeEffects(entity, source));
     }
 
     public void removeNonPersistent() {

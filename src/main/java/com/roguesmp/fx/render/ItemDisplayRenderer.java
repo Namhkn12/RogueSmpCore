@@ -5,10 +5,10 @@ import org.bukkit.entity.ItemDisplay;
 import org.bukkit.inventory.ItemStack;
 import org.joml.Vector3f;
 
+import java.util.function.BiConsumer;
+
 /** Renders a shape as real {@link ItemDisplay} entities, one per point. */
 public final class ItemDisplayRenderer extends AbstractDisplayRenderer<ItemDisplay> {
-
-    private final ItemStack item;
 
     public ItemDisplayRenderer(ItemStack item) {
         this(item, new Vector3f(0.5f, 0.5f, 0.5f));
@@ -19,13 +19,16 @@ public final class ItemDisplayRenderer extends AbstractDisplayRenderer<ItemDispl
     }
 
     public ItemDisplayRenderer(ItemStack item, Vector3f displaySize, int interpolationTicks) {
-        super(ItemDisplay.class, displaySize, interpolationTicks);
-        this.item = item;
+        this(displaySize, interpolationTicks, (display, point) -> display.setItemStack(item));
+    }
+
+    /** Full control: {@code onRender} is called every tick, per point, to set the item and/or nudge {@link FxPoint#position()}. */
+    public ItemDisplayRenderer(Vector3f displaySize, int interpolationTicks, BiConsumer<ItemDisplay, FxPoint> onRender) {
+        super(ItemDisplay.class, displaySize, interpolationTicks, onRender);
     }
 
     @Override
     protected void configure(ItemDisplay display) {
-        display.setItemStack(item);
         display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.FIXED);
         display.setBillboard(Display.Billboard.FIXED);
     }

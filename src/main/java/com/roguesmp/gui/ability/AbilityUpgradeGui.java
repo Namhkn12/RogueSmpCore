@@ -67,6 +67,8 @@ public class AbilityUpgradeGui extends BaseGui {
         for (String line : info.getDescription()) {
             previewLore.add(MiniMessage.miniMessage().deserialize(line, resolvers));
         }
+        previewLore.add(Component.empty());
+        previewLore.addAll(info.getFormattedActivation());
 
         ItemStack previewItem = ItemStack.of(info.getIcon());
         previewItem.setData(DataComponentTypes.ITEM_NAME, info.getFormattedDisplayName());

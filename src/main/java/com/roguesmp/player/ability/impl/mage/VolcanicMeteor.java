@@ -1,4 +1,4 @@
-package com.roguesmp.player.ability.impl.active;
+package com.roguesmp.player.ability.impl.mage;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import com.roguesmp.RogueSmpCore;
@@ -12,10 +12,6 @@ import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.ParticleUtils;
-import com.roguesmp.utils.Utils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;

@@ -133,6 +133,7 @@ public final class RogueSmpCore extends JavaPlugin {
         Registries.reloadAllData(this); // also loads/resolves every registry's tags/ folder
 
         CraftingManager.getInstance().rebuild(); // re-derives from Registries.CRAFTING_RECIPE - must run after it's reloaded above
+        PlayerManager.getInstance().syncClassRosters(); // grant/unequip against the reloaded class rosters
     }
 
     /**
@@ -143,6 +144,9 @@ public final class RogueSmpCore extends JavaPlugin {
         boolean found = Registry.reloadOne(locationKey, this);
         if (found && locationKey.equalsIgnoreCase(Registries.CRAFTING_RECIPE.getLocationKey())) {
             CraftingManager.getInstance().rebuild(); // re-derives from Registries.CRAFTING_RECIPE - must run after it's reloaded above
+        }
+        if (found && locationKey.equalsIgnoreCase(Registries.PLAYER_CLASS.getLocationKey())) {
+            PlayerManager.getInstance().syncClassRosters(); // grant/unequip against the reloaded class rosters
         }
         return found;
     }

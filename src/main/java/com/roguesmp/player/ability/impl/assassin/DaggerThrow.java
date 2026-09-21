@@ -143,6 +143,7 @@ public class DaggerThrow extends Ability {
             EntityUtils.addMetadata(mob, key, Bukkit.getCurrentTick());
 
             DamageEvent.Metadata metadata = new DamageEvent.Metadata(ID, DamageType.MELEE_ABILITY);
+            metadata.setIgnoreIframe(true);
             metadata.setDoKnockback(false);
             DamageUtils.damage(mob, attacker, damage * damageMultiplier, metadata);
             EffectManager.getInstance().addEffect(attacker, EmpoweredStrikeEffect.ID, new EmpoweredStrikeEffect(damageBoostDuration, damageBoost));

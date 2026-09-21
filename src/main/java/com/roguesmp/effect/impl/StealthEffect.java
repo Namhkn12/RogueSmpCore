@@ -21,6 +21,10 @@ public class StealthEffect extends SmpEffect {
             StealthEffect::new
     );
 
+    public StealthEffect(int duration) {
+        this(new BaseProperties(duration, DeathBehavior.REMOVE_ON_DEATH, DisplayMode.WITH_TIME));
+    }
+
     public StealthEffect(BaseProperties base) {
         super(KEY, base);
     }

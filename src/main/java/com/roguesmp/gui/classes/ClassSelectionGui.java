@@ -10,9 +10,11 @@ import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -61,9 +63,10 @@ public class ClassSelectionGui extends BaseGui {
     }
 
     private ItemStack createClassIcon(PlayerClass playerClass, boolean isCurrent) {
-        ItemStack item = ItemStack.of(playerClass.getIcon());
+        ItemStack item = ItemStack.of(Material.PAPER);
         item.setData(DataComponentTypes.ITEM_NAME, playerClass.getFormattedDisplayName()
                 .decoration(TextDecoration.BOLD, isCurrent));
+        item.setData(DataComponentTypes.ITEM_MODEL, Key.key(playerClass.getIcon()));
 
         List<Component> lore = new ArrayList<>();
         if (isCurrent) {

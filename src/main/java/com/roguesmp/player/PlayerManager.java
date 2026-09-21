@@ -56,6 +56,10 @@ public class PlayerManager {
         players.put(uuid, smpPlayer);
     }
 
+    public void syncClassRosters() {
+        players.values().forEach(SmpPlayer::syncClassRoster);
+    }
+
     public void untrackPlayer(UUID uuid) {
         players.remove(uuid);
     }

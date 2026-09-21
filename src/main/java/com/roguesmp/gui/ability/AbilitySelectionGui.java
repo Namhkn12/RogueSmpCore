@@ -4,7 +4,6 @@ import com.roguesmp.gui.BaseGui;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
-import com.roguesmp.player.ability.AbilityType;
 import com.roguesmp.player.classes.PlayerClass;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
@@ -24,7 +23,6 @@ import java.util.List;
 public class AbilitySelectionGui extends BaseGui {
 
     private final SmpPlayer smpPlayer;
-    private final AbilityType type;
     private final int targetIndex;
     private final List<AbilityInfo<?>> available;
 
@@ -32,10 +30,9 @@ public class AbilitySelectionGui extends BaseGui {
     private static final ItemStack FILLER_GRAY = createDecoration(Material.GRAY_STAINED_GLASS_PANE);
     private static final ItemStack BORDER_PURPLE = createDecoration(Material.PURPLE_STAINED_GLASS_PANE);
 
-    public AbilitySelectionGui(SmpPlayer smpPlayer, AbilityType type, int index) {
-        super(Component.text("Chọn: " + type.getDisplay() + " #" + (index + 1)), 5);
+    public AbilitySelectionGui(SmpPlayer smpPlayer, int index) {
+        super(Component.text("Chọn kĩ năng #" + (index + 1)), 5);
         this.smpPlayer = smpPlayer;
-        this.type = type;
         this.targetIndex = index;
 
         // Every ability in the current class's roster (unlocked or not) - not just unlocked ones -
@@ -46,7 +43,7 @@ public class AbilitySelectionGui extends BaseGui {
         if (playerClass != null) {
             for (String id : playerClass.getDefaultAbilities().keySet()) {
                 AbilityInfo<?> info = Registries.ABILITY.get(id);
-                if (info != null && info.getType() == type) {
+                if (info != null) {
                     list.add(info);
                 }
             }
@@ -57,8 +54,8 @@ public class AbilitySelectionGui extends BaseGui {
             boolean bUnlocked = isUnlocked(b.getId());
             if (aUnlocked != bUnlocked) return Boolean.compare(bUnlocked, aUnlocked);
 
-            boolean aEquipped = smpPlayer.getAbilityLoadout().isEquipped(a.getId(), type);
-            boolean bEquipped = smpPlayer.getAbilityLoadout().isEquipped(b.getId(), type);
+            boolean aEquipped = smpPlayer.getAbilityLoadout().isEquipped(a.getId());
+            boolean bEquipped = smpPlayer.getAbilityLoadout().isEquipped(b.getId());
             if (aEquipped != bEquipped) return Boolean.compare(bEquipped, aEquipped);
             return a.getId().compareTo(b.getId());
         });
@@ -90,7 +87,7 @@ public class AbilitySelectionGui extends BaseGui {
         // --- 2. Remove Button (Centered top) ---
         addButton(0, 4, createRemoveButton(), event -> {
             event.setCancelled(true);
-            smpPlayer.getAbilityLoadout().equip(type, null, targetIndex);
+            smpPlayer.getAbilityLoadout().equip(null, targetIndex);
             Utils.runLater(() -> new AbilityLoadoutGui(smpPlayer).showInventory(smpPlayer.getBukkitPlayer()));
         });
 
@@ -118,7 +115,7 @@ public class AbilitySelectionGui extends BaseGui {
                 }
 
                 Ability instance = info.createInstance(smpPlayer, level);
-                smpPlayer.getAbilityLoadout().equip(type, instance, targetIndex);
+                smpPlayer.getAbilityLoadout().equip(instance, targetIndex);
                 Utils.runLater(() -> new AbilityLoadoutGui(smpPlayer).showInventory(smpPlayer.getBukkitPlayer()));
             });
         }
@@ -128,7 +125,7 @@ public class AbilitySelectionGui extends BaseGui {
     }
 
     private boolean isEquippedElsewhere(String id) {
-        Ability[] equipped = smpPlayer.getAbilityLoadout().getAbilities(type);
+        Ability[] equipped = smpPlayer.getAbilityLoadout().getAbilities();
         for (int i = 0; i < equipped.length; i++) {
             if (i != targetIndex && equipped[i] != null && equipped[i].getId().equals(id)) return true;
         }
@@ -147,7 +144,7 @@ public class AbilitySelectionGui extends BaseGui {
 
         List<Component> lore = new ArrayList<>();
 
-        Ability currentInSlot = smpPlayer.getAbilityLoadout().getAbilities(type)[targetIndex];
+        Ability currentInSlot = smpPlayer.getAbilityLoadout().getAbilities()[targetIndex];
         boolean isHere = currentInSlot != null && currentInSlot.getId().equals(info.getId());
         boolean isElsewhere = isEquippedElsewhere(info.getId());
 
@@ -159,11 +156,12 @@ public class AbilitySelectionGui extends BaseGui {
             lore.add(Utils.text("○ Có thể trang bị", NamedTextColor.GRAY).decoration(TextDecoration.BOLD, true));
         }
 
-        lore.add(Utils.text("Phân loại: " + type.getDisplay(), NamedTextColor.DARK_GRAY));
         lore.add(Utils.text("Cấp độ: " + level, NamedTextColor.GOLD));
         lore.add(Component.empty());
 
         lore.addAll(info.getFormattedDescription(level));
+        lore.add(Component.empty());
+        lore.addAll(info.getFormattedActivation());
 
         lore.add(Component.empty());
         if (isElsewhere) {
@@ -182,7 +180,6 @@ public class AbilitySelectionGui extends BaseGui {
 
         List<Component> lore = new ArrayList<>();
         lore.add(Utils.text("🔒 Chưa mở khóa", NamedTextColor.GRAY).decoration(TextDecoration.BOLD, true));
-        lore.add(Utils.text("Phân loại: " + type.getDisplay(), NamedTextColor.DARK_GRAY));
         lore.add(Component.empty());
         lore.add(Utils.text("Hãy dùng /ability catalogue để mở khóa", NamedTextColor.YELLOW));
 

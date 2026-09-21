@@ -28,6 +28,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -114,6 +115,9 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.ITEM_MODEL),
                 tooltip("Để thay đổi model item.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildItemModelDialog(player))));
+        multi.addButton(componentLabel(ItemComponentKeys.EQUIPPABLE),
+                tooltip("Cho phép item được trang bị vào một slot (minecraft:equippable).", "Để trống các ô key để dùng giá trị mặc định của vanilla"),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(buildEquippableDialog(player))));
         multi.addButton(componentLabel(ItemComponentKeys.ENCHANT_GLINT),
                 tooltip("Buộc bật/tắt hiệu ứng lấp lánh phù phép.", "Ghi đè bất kể item có phù phép hay không"),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildEnchantGlintDialog(player))));
@@ -499,6 +503,80 @@ public class ItemCreatorGui {
                     components.remove(ItemComponentKeys.ITEM_MODEL.id());
                     Utils.runLater(() -> openMainDialog(player));
                 });
+    }
+
+    private Dialog buildEquippableDialog(Player player) {
+        EquippableComponent current = (EquippableComponent) components.get(ItemComponentKeys.EQUIPPABLE.id());
+        EquipmentSlot currentSlot = current == null ? EquipmentSlot.HEAD : current.slot();
+
+        List<SingleOptionDialogInput.OptionEntry> slotOptions = new ArrayList<>();
+        for (EquipmentSlot value : EquipmentSlot.values()) {
+            slotOptions.add(SingleOptionDialogInput.OptionEntry.create(value.name(), Component.text(value.name()), value == currentSlot));
+        }
+
+        DialogBuilder builder = DialogBuilder.create(Component.text("Trang bị được (equippable)"))
+                .canCloseWithEscape(false)
+                .addTextBody(Component.text("Các ô key để trống = dùng mặc định của vanilla."))
+                .addSingleOptionInput("slot", Component.text("Slot"), slotOptions, b -> {})
+                .addTextInput("equip_sound", Component.text("Âm thanh khi trang bị (vd: item.armor.equip_generic)"), b -> b.initial(keyText(current == null ? null : current.equipSound())).maxLength(256))
+                .addTextInput("asset_id", Component.text("Equipment model (asset_id, vd: mypack:crown)"), b -> b.initial(keyText(current == null ? null : current.assetId())).maxLength(256))
+                .addTextInput("allowed_entities", Component.text("Entity được trang bị (cách nhau bởi dấu phẩy, trống = tất cả)"), b -> b.initial(current == null ? "" : joinKeys(current.allowedEntities())).maxLength(512))
+                .addTextInput("camera_overlay", Component.text("Camera overlay"), b -> b.initial(keyText(current == null ? null : current.cameraOverlay())).maxLength(256))
+                .addTextInput("shearing_sound", Component.text("Âm thanh khi cắt bằng kéo"), b -> b.initial(keyText(current == null ? null : current.shearingSound())).maxLength(256))
+                .addCheckboxInput("dispensable", Component.text("Dispenser có thể trang bị"), b -> b.initial(current == null || current.dispensable()))
+                .addCheckboxInput("swappable", Component.text("Chuột phải để trang bị (swappable)"), b -> b.initial(current == null || current.swappable()))
+                .addCheckboxInput("damage_on_hurt", Component.text("Mất độ bền khi bị đánh"), b -> b.initial(current == null || current.damageOnHurt()))
+                .addCheckboxInput("equip_on_interact", Component.text("Trang bị lên mob khi tương tác"), b -> b.initial(current != null && current.equipOnInteract()))
+                .addCheckboxInput("can_be_sheared", Component.text("Có thể tháo bằng kéo"), b -> b.initial(current != null && current.canBeSheared()));
+
+        return wrapComponentDialog(player, ItemComponentKeys.EQUIPPABLE, builder,
+                (response, audience) -> {
+                    try {
+                        String slotName = response.getText("slot");
+                        EquipmentSlot slot = slotName == null ? EquipmentSlot.HEAD : EquipmentSlot.valueOf(slotName);
+
+                        List<Key> allowedEntities = new ArrayList<>();
+                        String entityText = response.getText("allowed_entities");
+                        if (entityText != null) {
+                            for (String part : entityText.split(",")) {
+                                if (!part.isBlank()) allowedEntities.add(Key.key(part.trim()));
+                            }
+                        }
+
+                        components.put(ItemComponentKeys.EQUIPPABLE.id(), new EquippableComponent(
+                                slot,
+                                optionalKey(response.getText("equip_sound")),
+                                optionalKey(response.getText("asset_id")),
+                                allowedEntities,
+                                Boolean.TRUE.equals(response.getBoolean("dispensable")),
+                                Boolean.TRUE.equals(response.getBoolean("swappable")),
+                                Boolean.TRUE.equals(response.getBoolean("damage_on_hurt")),
+                                Boolean.TRUE.equals(response.getBoolean("equip_on_interact")),
+                                optionalKey(response.getText("camera_overlay")),
+                                Boolean.TRUE.equals(response.getBoolean("can_be_sheared")),
+                                optionalKey(response.getText("shearing_sound"))));
+                    } catch (Exception e) {
+                        player.sendMessage(Utils.text("Có key không hợp lệ, không lưu được: " + e.getMessage(), NamedTextColor.RED));
+                    }
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.EQUIPPABLE.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
+    }
+
+    private static String keyText(@Nullable Key key) {
+        return key == null ? "" : key.asString();
+    }
+
+    private static String joinKeys(List<Key> keys) {
+        return String.join(", ", keys.stream().map(Key::asString).toList());
+    }
+
+    /** Blank text means "unset" (vanilla default); an invalid key throws. */
+    private static @Nullable Key optionalKey(@Nullable String text) {
+        return text == null || text.isBlank() ? null : Key.key(text.trim());
     }
 
     private Dialog buildEnchantGlintDialog(Player player) {

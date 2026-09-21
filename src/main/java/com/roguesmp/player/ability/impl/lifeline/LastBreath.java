@@ -8,7 +8,6 @@ import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityInfo;
-import com.roguesmp.player.ability.AbilityType;
 import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.utils.EntityUtils;
 import com.roguesmp.utils.Utils;
@@ -83,18 +82,8 @@ public class LastBreath extends Ability {
         Location loc = p.getLocation();
 
         // 1. Cooldown Reduction Logic for other abilities
-        for (Ability abil : smpPlayer.getAbilityLoadout().getAbilities(AbilityType.ACTIVE)) {
-            if (abil == null || abil.equals(this)) return;
-
-            int currentCD = abil.getCooldownTick();
-            if (currentCD > 0) {
-                int newCD = (int) (currentCD * (1.0 - cdrPercent));
-                abil.setCooldownTick(newCD);
-            }
-        }
-
-        for (Ability abil : smpPlayer.getAbilityLoadout().getAbilities(AbilityType.PASSIVE)) {
-            if (abil == null || abil.equals(this)) return;
+        for (Ability abil : smpPlayer.getAbilityLoadout().getAbilities()) {
+            if (abil == null || abil.equals(this)) continue;
 
             int currentCD = abil.getCooldownTick();
             if (currentCD > 0) {

@@ -2,10 +2,7 @@ package com.roguesmp.player.mechanic;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.EquipSlot;
-import com.roguesmp.event.AbilityCastEvent;
-import com.roguesmp.event.ArrowConsumeEvent;
-import com.roguesmp.event.DamageEvent;
-import com.roguesmp.event.DurabilityChangedEvent;
+import com.roguesmp.event.*;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
@@ -82,6 +79,8 @@ public interface PlayerMechanic {
     default void onShootArrow(EntityShootBowEvent event, SmpPlayer player) {}
 
     default void onConsumeArrow(ArrowConsumeEvent event, SmpPlayer player) {}
+
+    default void onStartBlocking(PlayerStartBlockAttackEvent event, SmpPlayer player) {}
 
     default void onTeleport(PlayerTeleportEvent event, SmpPlayer player) {}
 

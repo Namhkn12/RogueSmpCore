@@ -19,7 +19,6 @@ public record AbilityConfig(
         Map<String, List<Double>> scaling,
         String displayName,
         Material icon,
-        AbilityType type,
         Map<String, AbilityTrigger> triggers, // action key -> trigger, as authored in JSON (inverted by the loader)
         Map<Integer, List<UpgradeRequirement>> upgrades
 ) {
@@ -41,12 +40,11 @@ public record AbilityConfig(
             Codec.unboundedMap(Codec.listOf(Codec.DOUBLE)).optionalFieldOf("scaling", Map.of()).forGetter(AbilityConfig::scaling),
             Codec.STRING.optionalFieldOf("display_name", "").forGetter(AbilityConfig::displayName),
             Codec.MATERIAL.optionalFieldOf("icon", Material.BARRIER).forGetter(AbilityConfig::icon),
-            Codec.enumOf(AbilityType.class).optionalFieldOf("type", AbilityType.PASSIVE).forGetter(AbilityConfig::type),
             Codec.unboundedMap(AbilityTrigger.CODEC).optionalFieldOf("trigger", Map.of()).forGetter(AbilityConfig::triggers),
             Codec.unboundedMap(LEVEL_KEY_CODEC, Codec.lenientListOf(UpgradeRequirement.CODEC)).optionalFieldOf("upgrades", Map.of()).forGetter(AbilityConfig::upgrades),
             AbilityConfig::new
     );
 
     public static final AbilityConfig DEFAULT_CONFIG =
-            new AbilityConfig(List.of(), Map.of(), "", Material.BARRIER, AbilityType.PASSIVE, Map.of(), Map.of());
+            new AbilityConfig(List.of(), Map.of(), "", Material.BARRIER, Map.of(), Map.of());
 }

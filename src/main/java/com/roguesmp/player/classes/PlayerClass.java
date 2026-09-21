@@ -30,7 +30,7 @@ public class PlayerClass {
     public static final Codec<PlayerClass> CODEC = Codec.composite(
             Codec.STRING.fieldOf("id").forGetter(PlayerClass::getId),
             Codec.STRING.optionalFieldOf("display_name", "").forGetter(PlayerClass::getDisplayName),
-            Codec.MATERIAL.optionalFieldOf("icon", Material.BARRIER).forGetter(PlayerClass::getIcon),
+            Codec.STRING.optionalFieldOf("icon", "minecraft:barrier").forGetter(PlayerClass::getIcon),
             Codec.listOf(Codec.STRING).optionalFieldOf("description", List.of()).forGetter(PlayerClass::getDescription),
             Codec.lenientUnboundedMap(Codec.INT).optionalFieldOf("default_abilities", Map.of()).forGetter(PlayerClass::getDefaultAbilities),
             Codec.listOf(Codec.STRING).optionalFieldOf("allowedWeapons", List.of())
@@ -40,12 +40,12 @@ public class PlayerClass {
 
     private final String id;
     private final String displayName;
-    private final Material icon;
+    private final String icon;
     private final List<String> description;
     private final Map<String, Integer> defaultAbilities;
     private final Set<String> allowedWeapons;
 
-    public PlayerClass(String id, String displayName, Material icon, List<String> description, Map<String, Integer> defaultAbilities, List<String> allowedWeapons) {
+    public PlayerClass(String id, String displayName, String icon, List<String> description, Map<String, Integer> defaultAbilities, List<String> allowedWeapons) {
         this.id = id;
         this.displayName = displayName;
         this.icon = icon;
@@ -70,7 +70,7 @@ public class PlayerClass {
         return Utils.fromString(getDisplayName());
     }
 
-    public Material getIcon() {
+    public String getIcon() {
         return icon;
     }
 

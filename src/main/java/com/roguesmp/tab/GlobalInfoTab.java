@@ -5,7 +5,6 @@ import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
 import com.roguesmp.player.ability.AbilityLoadout;
-import com.roguesmp.player.ability.AbilityType;
 import com.roguesmp.player.ability.AbilityWithCharge;
 import com.roguesmp.tab.element.TabElement;
 import com.roguesmp.tab.scoreboard.TabScoreboardView;
@@ -64,13 +63,9 @@ public class GlobalInfoTab {
         view.slot(EFFECT_COLUMN_BASE + 2 + MAX_EFFECT_LINES, TabElement.ticking(20, c -> effectOverflow(player)));
 
         int row = 2;
-        for (int i = 0; i < AbilityType.ACTIVE.getMaxSlots(); i++) {
+        for (int i = 0; i < AbilityLoadout.SLOT_COUNT; i++) {
             int index = i;
-            view.slot(ABILITY_COLUMN_BASE + row++, TabElement.ticking(20, c -> abilityLine(loadout, AbilityType.ACTIVE, index)));
-        }
-        for (int i = 0; i < AbilityType.LIFELINE.getMaxSlots(); i++) {
-            int index = i;
-            view.slot(ABILITY_COLUMN_BASE + row++, TabElement.ticking(20, c -> abilityLine(loadout, AbilityType.LIFELINE, index)));
+            view.slot(ABILITY_COLUMN_BASE + row++, TabElement.ticking(20, c -> abilityLine(loadout, index)));
         }
 
         view.group(null, PLAYER_LIST_SLOTS);
@@ -145,9 +140,9 @@ public class GlobalInfoTab {
         return "";
     }
 
-    private static String abilityLine(AbilityLoadout loadout, AbilityType type, int index) {
+    private static String abilityLine(AbilityLoadout loadout, int index) {
         if (loadout == null) return "";
-        Ability[] abilities = loadout.getAbilities(type);
+        Ability[] abilities = loadout.getAbilities();
         if (index >= abilities.length || abilities[index] == null) {
             return "<gray>- Trống -</gray>";
         }

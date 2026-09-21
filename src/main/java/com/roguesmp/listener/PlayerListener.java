@@ -1,20 +1,20 @@
 package com.roguesmp.listener;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.EquipSlot;
-import com.roguesmp.event.AbilityCastEvent;
-import com.roguesmp.event.ArrowConsumeEvent;
-import com.roguesmp.event.DamageEvent;
-import com.roguesmp.event.DurabilityChangedEvent;
+import com.roguesmp.event.*;
 import com.roguesmp.gui.classes.ClassSelectionGui;
 import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.*;
+import com.roguesmp.server.ResourcePackManager;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.event.entity.EntityEquipmentChangedEvent;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import org.bukkit.Bukkit;
@@ -63,6 +63,7 @@ public class PlayerListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         playerManager.loadAndTrackPlayer(player.getUniqueId());
+        ResourcePackManager.sendResourcePack(player);
     }
 
     @EventHandler
@@ -148,6 +149,15 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
+        ItemStack itemStack = event.getItem();
+        if (itemStack != null) {
+            if (itemStack.hasData(DataComponentTypes.BLOCKS_ATTACKS)) {
+                PlayerStartBlockAttackEvent blockAttackEvent = new PlayerStartBlockAttackEvent(itemStack, event.getPlayer(), event.getHand());
+                Bukkit.getPluginManager().callEvent(blockAttackEvent);
+                if (blockAttackEvent.isCancelled()) event.setCancelled(true);
+            }
+        }
+
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
         if (smpPlayer == null) return;
         smpPlayer.onInteract(event);
@@ -384,5 +394,12 @@ public class PlayerListener implements Listener {
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(player.getUniqueId());
         if (smpPlayer == null) return;
         smpPlayer.onShootArrow(event);
+    }
+
+    @EventHandler
+    public void onStartBlocking(PlayerStartBlockAttackEvent event) {
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer().getUniqueId());
+        if (smpPlayer == null) return;
+        smpPlayer.onStartBlocking(event);
     }
 }
