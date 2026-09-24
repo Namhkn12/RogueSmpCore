@@ -3,6 +3,7 @@ package com.roguesmp.utils;
 import com.google.gson.*;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.annotation.GsonIgnore;
+import com.roguesmp.text.GlyphTagResolver;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -20,6 +21,7 @@ import java.util.*;
 public class Utils {
 
     public static final Random RANDOM = Random.from(new SplittableRandom());
+    public static final MiniMessage MINI_MESSAGE = MiniMessage.builder().editTags(builder -> builder.resolver(new GlyphTagResolver())).build();
 
     public static final Gson GSON = new GsonBuilder()
             .addSerializationExclusionStrategy(new ExclusionStrategy() {
@@ -76,13 +78,13 @@ public class Utils {
 
     public static Component fromString(String miniMessage) {
         if (miniMessage == null) return null;
-        return MiniMessage.miniMessage().deserialize(miniMessage);
+        return MINI_MESSAGE.deserialize(miniMessage);
     }
 
     public static List<Component> fromStrings(List<String> miniMessages) {
         List<Component> components = new ArrayList<>();
         for (String miniMessage : miniMessages) {
-            components.add(MiniMessage.miniMessage().deserialize(miniMessage));
+            components.add(MINI_MESSAGE.deserialize(miniMessage));
         }
         return components;
     }
@@ -90,7 +92,7 @@ public class Utils {
     public static List<Component> fromStrings(String... miniMessages) {
         List<Component> components = new ArrayList<>();
         for (String miniMessage : miniMessages) {
-            components.add(MiniMessage.miniMessage().deserialize(miniMessage));
+            components.add(MINI_MESSAGE.deserialize(miniMessage));
         }
         return components;
     }

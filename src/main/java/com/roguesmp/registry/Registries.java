@@ -42,6 +42,8 @@ import com.roguesmp.player.ability.upgrade.UpgradeRequirements;
 import com.roguesmp.entity.SpecialEntities;
 import com.roguesmp.entity.spell.EntitySpells;
 import com.roguesmp.npc.action.GuiOpenActions;
+import com.roguesmp.text.Glyph;
+import com.roguesmp.text.Glyphs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +72,7 @@ public class Registries {
     public static final Registry<Codec<? extends LootFunction>> LOOT_FUNCTION_CODEC = register(registry -> LootFunctions.loadClass());
     public static final Registry<Codec<? extends LootEntry>> LOOT_ENTRY_CODEC = register(registry -> LootEntries.loadClass());
 
+    public static final Registry<Glyph> GLYPH = register( registry -> Glyphs.bootstrap());
     // No bulk JSON entries of its own (Enchants is a hardcoded enum) - only exists so enchants
     // can have a "enchants/tags/*.json" folder like every other registry.
     public static final Registry<Enchants> ENCHANTS = register("enchants", registry -> Enchants.bootstrap());

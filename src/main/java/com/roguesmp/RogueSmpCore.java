@@ -45,6 +45,8 @@ import com.roguesmp.server.DailyResetScheduler;
 import com.roguesmp.server.PlayerDataAutoSaveScheduler;
 import com.roguesmp.tab.TabDemoCommand;
 import com.roguesmp.tab.TabEngine;
+import com.roguesmp.text.GlyphFontCommand;
+import com.roguesmp.text.Glyphs;
 import com.roguesmp.utils.GlowUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -220,6 +222,8 @@ public final class RogueSmpCore extends JavaPlugin {
         TabDemoCommand.register();
 
         ReloadCommand.register();
+        Glyphs.registerTestCommand();
+        GlyphFontCommand.register();
     }
 
     @Override

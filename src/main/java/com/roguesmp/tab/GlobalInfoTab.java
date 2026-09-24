@@ -9,6 +9,7 @@ import com.roguesmp.player.ability.AbilityWithCharge;
 import com.roguesmp.tab.element.TabElement;
 import com.roguesmp.tab.scoreboard.TabScoreboardView;
 import com.roguesmp.tab.tablist.TabListView;
+import com.roguesmp.text.Glyphs;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -82,7 +83,7 @@ public class GlobalInfoTab {
                 .line("<dark_gray>――――――――――――</dark_gray>")
                 .line("")
                 .line(TabElement.ticking(20, tabContext -> "<gold>Class: " + (smpPlayer.getPlayerClass() == null ? "<gray>Chưa có" : smpPlayer.getPlayerClass().getDisplayName())))
-                .line(TabElement.ticking(10, tabContext -> "<gold>Xu: " + Utils.formatMoney(smpPlayer.getPlayerData().getMoney())))
+                .line(TabElement.ticking(10, tabContext -> "<gold>Xu: " + Utils.formatMoney(smpPlayer.getPlayerData().getMoney()) + Utils.toString(Glyphs.COIN_ICON.create())))
                 .line("")
                 .build(context);
 
