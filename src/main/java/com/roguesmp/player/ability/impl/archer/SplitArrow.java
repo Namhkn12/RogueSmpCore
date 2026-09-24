@@ -43,7 +43,7 @@ public class SplitArrow extends Ability {
 
     @Override
     public void onDamageEntity(DamageEvent event) {
-        if (event.getDamageType() != DamageType.PROJECTILE || !(event.getDamager() instanceof Projectile) || !EntityUtils.isFriendly(event.getDamager())) return;
+        if (event.getDamageType() != DamageType.PROJECTILE || !(event.getDamager() instanceof Projectile) || EntityUtils.isFriendly(event.getDamager())) return;
         if (!(event.getVictim() instanceof LivingEntity living)) return;
         double damage = event.getFinalDamage() * multiplier;
         int count = 1 + bounce;
@@ -51,7 +51,7 @@ public class SplitArrow extends Ability {
         List<LivingEntity> chainedMobs = new ArrayList<>();
         for (int j = 0; j < count; j++) {
             chainedMobs.add(sourceEnemy);
-            List<LivingEntity> nearbyMobs = EntityUtils.getNearbyMobs(sourceEnemy.getLocation(), range, range, range, chainedMobs::contains);
+            List<LivingEntity> nearbyMobs = EntityUtils.getNearbyMobs(sourceEnemy.getLocation(), range, range, range, living1 -> !chainedMobs.contains(living1));
             LivingEntity nearestMob = EntityUtils.getNearestMob(sourceEnemy.getLocation(), nearbyMobs);
             if (nearestMob == null) {
                 break;

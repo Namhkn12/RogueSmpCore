@@ -78,31 +78,10 @@ public class DamageDisplayUtils {
     private static Component formatDamage(double damage, DamageType type, boolean isCritical) {
         String val = Utils.formatDecimal(damage);
 
-        TextColor color = switch (type) {
-            case MELEE, MELEE_ABILITY -> NamedTextColor.WHITE;
-            case PROJECTILE, PROJECTILE_ABILITY -> NamedTextColor.YELLOW;
-            case MAGIC -> NamedTextColor.LIGHT_PURPLE;
-            case FIRE -> NamedTextColor.GOLD;
-            case BLAST -> NamedTextColor.RED;
-            case AILMENT -> NamedTextColor.GREEN;
-            case TRUE -> NamedTextColor.AQUA;
-            case FALL, THORNS -> NamedTextColor.GRAY;
-            default -> NamedTextColor.DARK_GRAY;
-        };
+        TextColor color = NamedTextColor.WHITE;
 
-        String prefix = switch (type) {
-            case MELEE -> "⚔ ";
-            case PROJECTILE -> "🏹 ";
-            case MELEE_ABILITY, PROJECTILE_ABILITY -> "★ ";
-            case MAGIC -> "✦ ";
-            case AILMENT -> "☣ ";
-            case FIRE -> "🔥 ";
-            case TRUE -> "⚡ ";
-            default -> "";
-        };
+        String prefix = "";
 
-        // Crit is indicated by scale (see targetScale above) plus this marker, applied on top of
-        // whatever type icon/color is already showing — kept separate so it doesn't crowd out the type.
         String suffix = isCritical ? "‼" : "";
 
         return Component.text(prefix + val + suffix, color);
