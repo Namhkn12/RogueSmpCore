@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Code Style
+- Minimal comments: Do not add comments unless absolutely necessary. The codebase uses strong OOP, abstraction, and modular design - code should be self-explanatory through good naming and structure.
+- Only add comments for truly complex algorithms or non-obvious business logic.
+
 ## Project overview
 
 RogueSmpCore is a custom-content plugin for a Minecraft **Paper 1.21.11** server ("Rework plugin", package `com.roguesmp`). Java 21, built with Gradle. It layers a custom item/attribute/ability/dungeon framework on top of vanilla Bukkit, and depends on several other plugins being present at runtime (`depend` in `plugin.yml`): CommandAPI, FastAsyncWorldEdit, TAB, PlaceholderAPI, Multiverse-Core, WorldGuard.
