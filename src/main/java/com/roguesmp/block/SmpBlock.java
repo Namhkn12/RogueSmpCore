@@ -1,75 +1,175 @@
 package com.roguesmp.block;
 
-import com.roguesmp.block.manager.BlockManager;
-import com.roguesmp.item.BaseItem;
-import org.bukkit.Bukkit;
+import com.google.gson.JsonElement;
+import com.roguesmp.block.persistence.StateSection;
+import com.roguesmp.codec.DataResult;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.event.block.*;
+import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Runtime instance of a placed custom block. Created when its display entity loads and dropped when
+ * that entity unloads; the static tuning data lives in its {@link BlockType}.
+ */
 public class SmpBlock {
 
-    private final BaseItem item;
-    private boolean placeable = true;
-    private final BlockManager manager;
+    private static final List<StateSection<?>> NO_SECTIONS = List.of();
 
-    public SmpBlock(BaseItem item) {
-        this.item = item;
-        manager = BlockManager.getInstance();
+    private BlockType<?> type;
+    private BlockPos pos;
+    private Location location;
+    private UUID displayId;
+    private boolean hydrated;
+    private boolean dirty;
+    private List<StateSection<?>> sections;
+
+    public void bind(BlockPos pos, UUID displayId) {
+        this.pos = pos;
+        this.location = pos.toLocation();
+        this.displayId = displayId;
     }
 
-    public SmpBlock(BaseItem item, boolean placeable){
-        this(item);
-        this.placeable = placeable;
+    /**
+     * Called when this block is placed from an item, before this instance is registered to the manager.
+     */
+    public void onPlaced(Player player, ItemStack placedFrom) {
+
     }
 
-    private ItemStack getItemStack(int stackAmount){
-        return this.item.generateItemStack(stackAmount);
-    }
-
-    public void onBlockPlace(BlockPlaceEvent event, String id){
-        ItemStack item = event.getItemInHand();
-
-        if(!item.hasItemMeta()) return;
-        if(placeable){
-            Location loc = event.getBlock().getLocation();
-            manager.registerBlock(loc, id);
+    /**
+     * Items this block gives back when broken. Defaults to rolling the block's declared
+     * {@link BlockProperties#drops()}; override to build custom stacks (e.g. writing this block's
+     * own data onto the item) instead of, or alongside, the JSON list.
+     */
+    public List<ItemStack> getDrops() {
+        List<ItemStack> drops = new ArrayList<>();
+        for (BlockDrop drop : getType().drops()) {
+            ItemStack item = drop.roll();
+            if (item != null) drops.add(item);
         }
-        else{
-            event.setCancelled(true);
+        return drops;
+    }
+
+    /**
+     * Experience orb amount this block gives back when broken. Defaults to rolling the block's
+     * declared {@link BlockProperties#experience()}; override for custom amounts.
+     */
+    public int getExperience() {
+        return getType().experience().roll();
+    }
+
+    /**
+     * Called when this block is broken, after {@link #onUnload()} is called.
+     */
+    public void onBlockBreak(BlockBreakEvent event) {
+        if (!event.isDropItems() || event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
+
+        for (ItemStack drop : getDrops()) {
+            location.getWorld().dropItemNaturally(location.toCenterLocation(), drop);
         }
 
+        int experience = getExperience();
+        if (experience > 0) {
+            location.getWorld().spawn(location.toCenterLocation(), ExperienceOrb.class, orb -> orb.setExperience(experience));
+        }
     }
 
-    public void onBlockBreak(BlockBreakEvent event){
-        Location loc = event.getBlock().getLocation();
-
-        manager.removeBlock(loc);
-        loc.getWorld().dropItemNaturally(loc, getItemStack(1));
-    }
-
-    //Disabled piston push on default
-    public void onPistonPush(BlockPistonExtendEvent event){
-        event.setCancelled(true);
-    }
-
-    //Disabled sticky piston grab on default
-    public void onPistonGrab(BlockPistonRetractEvent event){
-        event.setCancelled(true);
-    }
-
-    //SmpBlock can't get destroyed by explosion
-    public void onBlockExploded(BlockExplodeEvent event){
+    public void onBlockInteract(PlayerInteractEvent event) {
 
     }
 
-    //SmpBlock on default when interact do nothing
-    public void onBlockInteract(PlayerInteractEvent event){
+    /**
+     * Called when this instance is unloaded, via being broken, or the entity for this block is unloaded.
+     */
+    public void onUnload() {
 
     }
 
-    public BaseItem getItem(){
-        return item;
+    /**
+     * Called when this block data is fully loaded.
+     */
+    public void onHydrated() {
+
+    }
+
+    /**
+     * Used to load persistent state data into this instance.
+     */
+    protected void collectSections(List<StateSection<?>> sections) {
+
+    }
+
+    public boolean isStateful() {
+        return !sections().isEmpty();
+    }
+
+    public DataResult<JsonElement> encodeState() {
+        return StateSection.encodeAll(sections());
+    }
+
+    public DataResult<Runnable> decodeState(JsonElement json) {
+        return StateSection.decodeAll(sections(), json);
+    }
+
+    private List<StateSection<?>> sections() {
+        if (sections == null) {
+            List<StateSection<?>> collected = new ArrayList<>();
+            collectSections(collected);
+            sections = collected.isEmpty() ? NO_SECTIONS : List.copyOf(collected);
+        }
+        return sections;
+    }
+
+    public BlockType<?> getType() {
+        return type;
+    }
+
+    void setType(BlockType<?> type) {
+        this.type = type;
+    }
+
+    public BlockPos getPos() {
+        return pos;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public UUID getDisplayId() {
+        return displayId;
+    }
+
+    public boolean isHydrated() {
+        return hydrated;
+    }
+
+    public void markHydrated() {
+        this.hydrated = true;
+    }
+
+    /**
+     * Flags this block's persisted state as changed, so the next periodic save (or unload) writes
+     * it. Call it whenever a field covered by a {@link StateSection} changes; a block that changes
+     * without calling it is not saved until it is marked or the server shuts down.
+     */
+    public void markDirty() {
+        this.dirty = true;
+    }
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void clearDirty() {
+        this.dirty = false;
     }
 }

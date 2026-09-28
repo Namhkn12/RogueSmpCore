@@ -8,6 +8,9 @@ public enum Attributes {
     ATTACK_SPEED_BASE(new AttackSpeedBase()),
     PROJECTILE_DAMAGE_BASE(new ProjectileDamageBase()),
     PROJECTILE_SPEED_BASE(new ProjectileSpeedBase()),
+    // Mining base, it looks better up here
+    BREAK_STRENGTH(new BreakStrength()),
+    // Mining base ^
     THROW_RATE_BASE(new ThrowRateBase()),
     MELEE_DAMAGE_PERCENT(new MeleeDamagePercent()),
     MAGIC_DAMAGE_PERCENT(new MagicDamagePercent()),
@@ -47,6 +50,10 @@ public enum Attributes {
     BLOCK_REACH(new BlockReach()),
     MINING_EFFICIENCY(new MiningEfficiency()),
     BURNING_TIME(new BurningTime()),
+
+    // --- MINING (custom blocks only) ---
+    MINING_SPEED(new MiningSpeed()),
+
     SCALE(new Scale()),
     LUCK(new Luck());
 

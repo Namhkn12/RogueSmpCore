@@ -1,10 +1,10 @@
 package com.roguesmp.player.mechanic;
 
 import com.roguesmp.constant.EquipSlot;
+import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.gui.crafting.CraftingGui;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.registry.BlockRegistry;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.Action;
@@ -18,7 +18,7 @@ public class BaseInteractionMechanic implements PlayerMechanic {
     public void onBlockPlace(BlockPlaceEvent event, SmpPlayer player) {
         EquipSlot equipSlot = EquipSlot.fromVanilla(event.getHand());
         SmpItem smpItem = player.getItemAtEquipSlot(equipSlot);
-        if (smpItem != null && smpItem.getBaseItem() != null && BlockRegistry.getBlock(smpItem.getBaseItem().getId()) == null) {
+        if (smpItem != null && smpItem.getBaseItem() != null && !smpItem.hasComponent(ItemComponentKeys.BLOCK_PLACE)) {
             event.setCancelled(true); // Prevent placing custom structural items
         }
     }

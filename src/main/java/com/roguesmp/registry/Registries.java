@@ -1,6 +1,10 @@
 package com.roguesmp.registry;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.block.BlockProperties;
+import com.roguesmp.block.BlockType;
+import com.roguesmp.block.SmpBlock;
+import com.roguesmp.block.BlockTypes;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.item.ItemType;
 import com.roguesmp.item.component.ItemComponentKeys;
@@ -91,6 +95,8 @@ public class Registries {
 
     public static final Registry<BaseItem> ITEM = new Registry<>("items", BaseItem.CODEC);
     public static final Registry<Quest> QUEST = new Registry<>("quests", Quest.CODEC);
+    public static final Registry<BlockType<? extends SmpBlock>> BLOCK_TYPE = register(registry -> BlockTypes.loadClass());
+    public static final Registry<BlockProperties> BLOCK_PROPERTIES = new Registry<>("blocks", BlockProperties.CODEC);
     public static final Registry<BaseNpc> NPC = new Registry<>("npcs", BaseNpc.CODEC);
     public static final Registry<BaseEntity> ENTITY = new Registry<>("entities", BaseEntity.CODEC);
 

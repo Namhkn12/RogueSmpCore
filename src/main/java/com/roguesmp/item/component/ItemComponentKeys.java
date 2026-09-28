@@ -25,6 +25,7 @@ public class ItemComponentKeys {
 
     public static final ComponentKey<DurabilityRepairComponent> DURABILITY_REPAIR = register("durability_repair", DurabilityRepairComponent.CODEC);
     public static final ComponentKey<WrenchComponent> WRENCH = register("wrench", WrenchComponent.CODEC);
+    public static final ComponentKey<BlockPlaceComponent> BLOCK_PLACE = register("block_place", BlockPlaceComponent.CODEC);
     public static final ComponentKey<PassiveAbilityComponent> PASSIVE_ABILITY = register("passive_ability", PassiveAbilityComponent.CODEC);
     public static final ComponentKey<EnchantGlintComponent> ENCHANT_GLINT = register("glint", EnchantGlintComponent.CODEC);
     public static final ComponentKey<MagicPowerComponent> MAGIC_POWER = register("magic_power", MagicPowerComponent.CODEC);
