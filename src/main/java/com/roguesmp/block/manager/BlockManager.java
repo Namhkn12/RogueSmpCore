@@ -8,6 +8,7 @@ import com.roguesmp.block.BlockType;
 import com.roguesmp.block.BlockVisual;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.BlockTypes;
+import com.roguesmp.block.Tickable;
 import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.event.SmpBlockPlaceEvent;
 import com.roguesmp.block.mining.MiningManager;
@@ -34,17 +35,13 @@ import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class BlockManager {
     private static BlockManager INSTANCE = null;
     private final Map<BlockPos, SmpBlock> blocks = new HashMap<>();
+    private final Set<Tickable> tickingBlocks = new HashSet<>();
     private final RogueSmpCore plugin;
     private final BlockDataRepository repository;
     private final MiningManager mining;
@@ -61,6 +58,17 @@ public class BlockManager {
         this.mining = new MiningManager(this, plugin);
 
         plugin.getServer().getScheduler().runTaskTimer(plugin, this::flushSlice, 1L, 1L);
+        plugin.getServer().getScheduler().runTaskTimer(plugin, this::tickBlocks, 1L, 1L);
+    }
+
+    private void tickBlocks(){
+        for(Tickable block : tickingBlocks){
+            block.tick();
+        }
+    }
+
+    private void registerIfTickable(SmpBlock block){
+        if(block instanceof Tickable tickable) tickingBlocks.add(tickable);
     }
 
     public boolean place(Player player, EquipmentSlot hand, Block clicked, BlockFace face, String blockId){
@@ -97,6 +105,7 @@ public class BlockManager {
         block.markDirty();
         block.markHydrated();
         blocks.put(pos, block);
+        registerIfTickable(block);
         Utils.runLater(() -> forcePhysicsUpdate(pos, block));
 
         if(player.getGameMode() != GameMode.CREATIVE){
@@ -149,6 +158,7 @@ public class BlockManager {
     private void remove(SmpBlock block, @Nullable Entity display){
         BlockPos pos = block.getPos();
         blocks.remove(pos);
+        if (block instanceof Tickable) tickingBlocks.remove(block);
         mining.cancelAt(pos);
         if(block.isStateful()) repository.delete(pos);
 
@@ -221,7 +231,10 @@ public class BlockManager {
         blocks.put(marker.pos(), block);
 
         if(block.isStateful()) hydrate(block);
-        else block.markHydrated();
+        else {
+            block.markHydrated();
+            registerIfTickable(block);
+        }
     }
 
     private void detach(BlockPos pos, Entity display, Map<BlockPos, String> changed){
@@ -233,6 +246,7 @@ public class BlockManager {
         block.onUnload();
         mining.cancelAt(pos);
         blocks.remove(pos);
+        if (block instanceof Tickable) tickingBlocks.remove(block);
     }
 
     private void hydrate(SmpBlock block){
@@ -267,6 +281,7 @@ public class BlockManager {
 
         block.clearDirty();
         block.markHydrated();
+        registerIfTickable(block);
         block.onHydrated();
     }
 
@@ -328,6 +343,7 @@ public class BlockManager {
 
         repository.closeWith(states);
         blocks.clear();
+        tickingBlocks.clear();
     }
 
     public static BlockManager getInstance() {
