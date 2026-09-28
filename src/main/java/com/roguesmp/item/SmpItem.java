@@ -193,6 +193,8 @@ public class SmpItem {
      * Applies all registered {@link ItemModifier}s to this item.
      */
     public void applyModifiers(@Nullable SmpPlayer player) {
+        if (baseItem == null) return;
+
         List<ItemModifier> modifierList = ModifierRegistry.getModifiers();
         for (ItemModifier itemModifier : modifierList) {
             itemModifier.collectAndApply(this, player);

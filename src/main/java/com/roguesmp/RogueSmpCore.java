@@ -1,7 +1,6 @@
 package com.roguesmp;
 
 import com.roguesmp.block.manager.BlockManager;
-import com.roguesmp.block.storage.BlockStorage;
 import com.roguesmp.command.ReloadCommand;
 import com.roguesmp.command.SmpBrowserCommand;
 import com.roguesmp.gui.crafting.FusionGui;
@@ -43,6 +42,7 @@ import com.roguesmp.quest.QuestManager;
 import com.roguesmp.registry.*;
 import com.roguesmp.server.DailyResetScheduler;
 import com.roguesmp.server.PlayerDataAutoSaveScheduler;
+import com.roguesmp.server.VanillaRecipeReplacer;
 import com.roguesmp.tab.TabDemoCommand;
 import com.roguesmp.tab.TabEngine;
 import com.roguesmp.text.GlyphFontCommand;
@@ -103,12 +103,9 @@ public final class RogueSmpCore extends JavaPlugin {
         NpcManager.init();
 
         ItemRegistry.init(this);
-        BlockRegistry.init(this);
 
         VanillaCraftingRecipeRegistry.init(this);
 
-        BlockStorage.init(this, BlockManager.getInstance());
-        BlockRegistry.getInstance().registerMachineRecipes();
         //dungeon register
         DungeonRegistry.onEnable(this);
 
@@ -124,9 +121,9 @@ public final class RogueSmpCore extends JavaPlugin {
     // Load data from files, databases, etc
     public void loadData() {
         Registries.loadAllData(this); // also loads/resolves every registry's tags/ folder
-        BlockStorage.getInstance().loadFromFile();
 
         CraftingManager.init(); // indexes Registries.CRAFTING_RECIPE - must run after it's loaded above
+        VanillaRecipeReplacer.replaceAll(); // swaps matching vanilla tool/armor recipes - must run after items load above
     }
 
     // Live-reload every data-driven registry (items, entities, quests, npcs, loot tables,
@@ -155,7 +152,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
     //Run on onDisable
     public void saveData() {
-        BlockStorage.getInstance().saveToFile(true);
+        BlockManager.getInstance().shutdown();
 
         PlayerManager.getInstance().onDisable();
         DungeonRegistry.onDisable();
@@ -236,6 +233,8 @@ public final class RogueSmpCore extends JavaPlugin {
         loadData();
         initListeners();
         initCommands();
+
+        BlockManager.getInstance().sweepLoadedChunks();
     }
 
     @Override

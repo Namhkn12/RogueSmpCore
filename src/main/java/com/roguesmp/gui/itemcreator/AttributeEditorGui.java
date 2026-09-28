@@ -110,11 +110,11 @@ public class AttributeEditorGui {
                 .canCloseWithEscape(false)
                 .externalTitle(Component.text(attribute.name(), valuePresent ? NamedTextColor.GREEN : NamedTextColor.GRAY))
                 .addTextBody(Component.text("Lưu ý: với hầu hết chỉ số dạng %, 1 = 100%", NamedTextColor.GRAY))
-                .addTextInput("value", Component.text("Giá trị (-1000 đến 1000)"), b -> b.initial(Utils.formatDecimal(current)).maxLength(16));
+                .addTextInput("value", Component.text("Giá trị"), b -> b.initial(Utils.formatDecimal(current)).maxLength(16));
 
         DialogTypeBuilder.MultiAction multi = builder.multiAction();
         multi.addButton(Component.text("Lưu"), null, (response, audience) -> {
-            Float value = DialogInputUtils.parseFloat(response.getText("value"), -1000f, 1000f);
+            Float value = DialogInputUtils.parseFloat(response.getText("value"), Float.MIN_VALUE, Float.MAX_VALUE);
             if (value != null) {
                 if (Utils.isEffectiveZero(value)) values.remove(attribute);
                 else values.put(attribute, (double) (float) value);

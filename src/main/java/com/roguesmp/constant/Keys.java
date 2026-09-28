@@ -30,6 +30,10 @@ public class Keys {
 
     public static final NamespacedKey NPC_ID = of("npc");
 
+    public static final NamespacedKey BLOCK_ID = of("block_id");
+
+    public static final NamespacedKey BLOCK_POS = of("block_pos");
+
     //Metadata key
     public static final String IN_STEALTH_META_KEY = "in_stealth";
 }

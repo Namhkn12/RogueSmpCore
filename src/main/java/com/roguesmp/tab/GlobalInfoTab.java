@@ -83,7 +83,7 @@ public class GlobalInfoTab {
                 .line("<dark_gray>――――――――――――</dark_gray>")
                 .line("")
                 .line(TabElement.ticking(20, tabContext -> "<gold>Class: " + (smpPlayer.getPlayerClass() == null ? "<gray>Chưa có" : smpPlayer.getPlayerClass().getDisplayName())))
-                .line(TabElement.ticking(10, tabContext -> "<gold>Xu: " + Utils.formatMoney(smpPlayer.getPlayerData().getMoney()) + Utils.toString(Glyphs.COIN_ICON.create())))
+                .line(TabElement.ticking(10, tabContext -> "<gold>Xu: " + Utils.formatMoney(smpPlayer.getPlayerData().getMoney()) + Utils.toString(Glyphs.COIN_ICON.create().color(NamedTextColor.WHITE))))
                 .line("")
                 .build(context);
 
