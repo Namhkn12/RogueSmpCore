@@ -27,13 +27,13 @@ public final class BlockVisual {
 
     private BlockVisual() {}
 
-    public static ItemDisplay spawn(BlockPos pos, BlockType<?> type, float yaw) {
+    public static ItemDisplay spawn(BlockPos pos, BlockType<?> type) {
         World world = pos.getWorld();
         if (world == null) throw new IllegalStateException("World " + pos.world() + " is not loaded");
 
         ItemStack stack = displayStack(type);
 
-        Location center = new Location(world, pos.x() + 0.5, pos.y() + 0.5, pos.z() + 0.5, yaw, 0f);
+        Location center = new Location(world, pos.x() + 0.5, pos.y() + 0.5, pos.z() + 0.5, 0f, 0f);
         return world.spawn(center, ItemDisplay.class, display -> {
             display.setItemStack(stack);
             display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.NONE);

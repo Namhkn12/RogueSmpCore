@@ -100,7 +100,7 @@ public class BlockManager {
         }
 
         BlockPos pos = BlockPos.of(target);
-        Entity display = BlockVisual.spawn(pos, type, facingYaw(player));
+        Entity display = BlockVisual.spawn(pos, type);
         block.bind(pos, display.getUniqueId());
         block.onPlaced(player, inHand);
         block.markDirty();
@@ -210,10 +210,6 @@ public class BlockManager {
         return !target.getWorld().getNearbyEntities(BoundingBox.of(target), entity ->
                 entity instanceof LivingEntity living && !(living instanceof Player p && p.getGameMode() == GameMode.SPECTATOR)
         ).isEmpty();
-    }
-
-    private float facingYaw(Player player){
-        return (Math.round(player.getLocation().getYaw() / 90f) * 90f + 180f) % 360f;
     }
 
     public void onEntitiesLoad(Collection<Entity> entities){

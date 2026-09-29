@@ -6,10 +6,10 @@ import com.roguesmp.block.persistence.StateSection;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.player.SmpPlayer;
 import org.bukkit.Location;
-import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +49,10 @@ public class SmpBlock {
      * {@link BlockProperties#drops()}; override to build custom stacks (e.g. writing this block's
      * own data onto the item) instead of, or alongside, the JSON list.
      */
-    public List<ItemStack> getDrops(SmpPlayer smpPlayer) {
+    public List<ItemStack> getDrops(@Nullable SmpPlayer smpPlayer) {
         List<ItemStack> drops = new ArrayList<>();
         for (BlockDrop drop : getType().drops()) {
-            ItemStack item = drop.roll();
+            ItemStack item = drop.roll(smpPlayer);
             if (item != null) drops.add(item);
         }
         return drops;
@@ -62,8 +62,8 @@ public class SmpBlock {
      * Experience orb amount this block gives back when broken. Defaults to rolling the block's
      * declared {@link BlockProperties#experience()}; override for custom amounts.
      */
-    public int getExperience(SmpPlayer smpPlayer) {
-        return getType().experience().roll();
+    public int getExperience(@Nullable SmpPlayer smpPlayer) {
+        return getType().experience().roll(smpPlayer);
     }
 
     /**

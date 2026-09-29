@@ -2,6 +2,7 @@ package com.roguesmp.block;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.item.BaseItem;
+import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Material;
@@ -27,7 +28,7 @@ public record BlockDrop(String item, int minAmount, int maxAmount, double chance
             BlockDrop::new
     );
 
-    public @Nullable ItemStack roll() {
+    public @Nullable ItemStack roll(@Nullable SmpPlayer player) {
         if (Utils.RANDOM.nextDouble() >= chance) return null;
 
         int amount = minAmount + (maxAmount > minAmount ? Utils.RANDOM.nextInt(maxAmount - minAmount + 1) : 0);
