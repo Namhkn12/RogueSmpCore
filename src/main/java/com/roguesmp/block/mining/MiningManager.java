@@ -8,11 +8,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.RayTraceResult;
 
 import java.util.Iterator;
 import java.util.HashMap;
@@ -25,6 +28,8 @@ import java.util.UUID;
  * matching abort event never fires.
  */
 public class MiningManager {
+
+    private static final double MINING_PARTICLE_REACH = 8.0;
 
     private final BlockManager manager;
     private final Map<UUID, BreakSession> sessions = new HashMap<>();
@@ -104,11 +109,21 @@ public class MiningManager {
                 continue;
             }
 
+            spawnMiningParticles(player, session.block());
+
             if (session.crackChanged(ticks)) {
-                player.sendBlockDamage(session.block().getLocation(), session.crackProgress(ticks));
                 updateCrackOverlay(session);
             }
         }
+    }
+
+    private void spawnMiningParticles(Player player, SmpBlock block) {
+        BlockFace face = miningFace(player, block);
+        if (face != null) manager.spawnMiningParticles(block, face);
+    }
+
+    private @Nullable BlockFace miningFace(Player player, SmpBlock block) {
+        return player.getTargetBlockFace((int) MINING_PARTICLE_REACH);
     }
 
     private void updateCrackOverlay(BreakSession session) {

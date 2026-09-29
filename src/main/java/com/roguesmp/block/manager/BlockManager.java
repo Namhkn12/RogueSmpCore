@@ -167,7 +167,7 @@ public class BlockManager {
         }
 
         Entity display = Bukkit.getEntity(block.getDisplayId());
-        playBreakEffects(block, display);
+        playBreakEffects(block);
         remove(block, display);
     }
 
@@ -181,11 +181,27 @@ public class BlockManager {
         if(display != null) display.remove();
     }
 
-    private void playBreakEffects(SmpBlock block, @Nullable Entity display){
+    /**
+     * Small burst of item particles hugging the face the player is looking at, mirroring vanilla's
+     * own per-tick dig particles.
+     */
+    public void spawnMiningParticles(SmpBlock block, BlockFace face){
+        Location center = block.getLocation().toCenterLocation();
+        World world = center.getWorld();
+
+        Location origin = center.clone().add(face.getModX() * 0.5, face.getModY() * 0.5, face.getModZ() * 0.5);
+        double spreadX = face.getModX() == 0 ? 0.2 : 0.03;
+        double spreadY = face.getModY() == 0 ? 0.2 : 0.03;
+        double spreadZ = face.getModZ() == 0 ? 0.2 : 0.03;
+
+        world.spawnParticle(Particle.ITEM, origin, 1, spreadX, spreadY, spreadZ, 0f, BlockVisual.displayStack(block));
+    }
+
+    private void playBreakEffects(SmpBlock block){
         BlockType<?> type = block.getType();
         Location center = block.getLocation().toCenterLocation();
         World world = center.getWorld();
-        ItemStack stack = display instanceof ItemDisplay itemDisplay ? itemDisplay.getItemStack() : BlockVisual.displayStack(type);
+        ItemStack stack = BlockVisual.displayStack(block);
         world.playSound(center, type.breakSound().asString(), SoundCategory.BLOCKS, 1f, 1f);
         world.spawnParticle(Particle.ITEM, center, 24, 0.25, 0.25, 0.25, 0.05, stack);
     }

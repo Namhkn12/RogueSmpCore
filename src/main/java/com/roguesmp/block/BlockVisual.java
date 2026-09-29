@@ -3,6 +3,7 @@ package com.roguesmp.block;
 import com.roguesmp.constant.Keys;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.key.Key;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -56,6 +57,15 @@ public final class BlockVisual {
         ItemStack stack = ItemStack.of(Material.STONE);
         stack.setData(DataComponentTypes.ITEM_MODEL, type.model());
         return stack;
+    }
+
+    public static ItemStack displayStack(SmpBlock block) {
+        Entity entity = Bukkit.getEntity(block.getDisplayId());
+        ItemStack itemStack;
+        if (entity instanceof ItemDisplay display) {
+            itemStack = display.getItemStack();
+        } else itemStack = displayStack(block.getType());
+        return itemStack;
     }
 
     /**
