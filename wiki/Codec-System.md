@@ -34,7 +34,21 @@ Codec.KEY       // net.kyori.adventure.key.Key (vd. "minecraft:stone")
 Codec<GameMode> GAMEMODE_CODEC = Codec.enumOf(GameMode.class);
 ```
 
+`Codec.enumOf`/`Codec.MATERIAL` (và nói chung, mọi codec khớp theo tên enum/hằng số) đều **không có `@SerializedName`** — chuỗi JSON được so khớp thẳng với tên hằng số, không phân biệt hoa/thường (`Enum.valueOf(clazz, s.toUpperCase())`). Nếu thấy `@SerializedName` trên 1 enum (vd. `Attributes`, `EntityAttribute`) mà enum đó được decode qua `Codec.enumOf`, annotation đó chỉ là tàn dư — Gson không tham gia vào quá trình decode này nên nó bị bỏ qua hoàn toàn.
+
 Mọi codec phức hợp khác trong dự án đều được xây từ những viên gạch primitive này thông qua các phép biến đổi bên dưới.
+
+### Vài combinator khác ít dùng hơn nhưng vẫn tồn tại
+
+```java
+Codec.unit(() -> new RandomStatComponent())      // MapCodec 0-field — object rỗng "{}" trong JSON
+Codec.lenientListOf(elementCodec)                // như listOf, nhưng bỏ qua phần tử lỗi thay vì fail cả list
+Codec.lenientListOf(elementCodec, (index, err) -> log(...)) // + callback báo lỗi từng phần tử
+Codec.withAlternative(primary, alternative)      // decode thử primary trước, lỗi thì thử alternative; encode luôn dùng primary
+Codec.lenientUnboundedMap(valueCodec)            // như unboundedMap, bỏ qua entry lỗi thay vì fail cả map
+```
+
+`Codec.dispatch` cũng có 2 overload tiện hơn bản 4-tham số đầy đủ đã thấy ở [mục xử lý đa hình](#polymorphic-dispatch-codecdispatch) bên dưới: `dispatch(getTypeId, lookupCodec)` (mặc định tên field `"type"`, key-codec `Codec.STRING`), và `dispatch("field_name", getTypeId, lookupCodec)` (tên field tùy chỉnh, vẫn `Codec.STRING`). Bản 4-tham số chỉ cần khi cả tên field *lẫn* codec của type-id đều muốn tùy chỉnh.
 
 ## Biến đổi kiểu dữ liệu (Transformations)
 
@@ -191,18 +205,26 @@ public static final Codec<SmpEffect> CODEC = Codec.dispatch(
 );
 ```
 
-### Đăng ký codec con — [`EffectCodecRegistry`](../src/main/java/com/roguesmp/registry/EffectCodecRegistry.java)
+### Đăng ký codec con — [`EffectCodecs`](../src/main/java/com/roguesmp/effect/EffectCodecs.java)
+
+> ⚠️ Class đăng ký này từng tên là `registry/EffectCodecRegistry.java` với 1 `bootstrap()` gọi `register(id, codec)` riêng — class đó **đã bị xóa**. Registration giờ nằm ngay trong `effect/EffectCodecs.java`, gọi thẳng `Registries.EFFECT_CODEC.register(...)`, không qua lớp trung gian nào nữa:
 
 ```java
-public static void bootstrap() {
-    register(SpeedEffect.EFFECT_ID, SpeedEffect.CODEC);
-    register(DamageIncreaseEffect.ID, DamageIncreaseEffect.CODEC);
-    register(ResistanceEffect.ID, ResistanceEffect.CODEC);
+public static final Codec<SpeedEffect> SPEED = register(SpeedEffect.EFFECT_ID, SpeedEffect.CODEC);
+public static final Codec<DamageIncreaseEffect> DAMAGE_INCREASE = register(DamageIncreaseEffect.ID, DamageIncreaseEffect.CODEC);
+// ...
+
+public static void loadClass() { } // ép static initializer chạy — cùng pattern loadClass() ở mọi nơi khác
+
+private static <T extends SmpEffect> Codec<T> register(String id, Codec<T> codec) {
+    Registries.EFFECT_CODEC.register(id, codec);
+    return codec;
 }
 ```
 
-`bootstrap()` chạy 1 lần từ `Registries.boostrap(plugin)`, đổ dữ liệu vào `Registries.EFFECT_CODEC` (1 `Registry<Codec<? extends SmpEffect>>` in-memory).
+`Registries.EFFECT_CODEC` giờ tự bootstrap qua cơ chế `register(Bootstrapper<T>)` chung của `Registries` (xem [Registry System](Registry-System.md#cơ-chế-bootstrap)), không còn gọi tay `EffectCodecRegistry.bootstrap()` từ `Registries.boostrap()` nữa.
 
+<a id="giả-lập-kế-thừa-bằng-1-mapcodec-field-chung"></a>
 ### Giả lập kế thừa bằng 1 `MapCodec` field chung
 
 `SmpEffect` cung cấp sẵn 1 `MapCodec<BaseProperties>` cho các field dùng chung (`duration`, `death_behavior`, `display`, `display_time`):
@@ -262,7 +284,7 @@ public static final Codec<BaseItem> CODEC = Codec.composite(
 );
 ```
 
-- Mỗi component đăng ký `Codec` của nó vào `Registries.ITEM_COMPONENT_CODEC` qua [`ItemComponentCodecRegistry.register(id, codec)`](../src/main/java/com/roguesmp/registry/ItemComponentCodecRegistry.java), được gọi từ static initializer của [`ComponentKeys`](../src/main/java/com/roguesmp/constant/ComponentKeys.java) (vd. `ITEM_NAME = ItemComponentCodecRegistry.register("name", NameComponent.CODEC);`). Xem [Item System](Item-System.md) để có bức tranh đầy đủ.
+- Mỗi component đăng ký `Codec` của nó vào `Registries.ITEM_COMPONENT_CODEC` qua helper `register(id, codec)` khai ngay trong [`ItemComponentKeys`](../src/main/java/com/roguesmp/item/component/ItemComponentKeys.java) (⚠️ **không** còn nằm ở `constant/ComponentKeys.java`/`registry/ItemComponentCodecRegistry.java` như tên cũ — 2 class đó đã bị xóa, việc đăng ký giờ gọi thẳng `Registries.ITEM_COMPONENT_CODEC.register(id, codec)` ngay trong static block của `ItemComponentKeys`, vd. `NAME = register("name", NameComponent.CODEC);`). Xem [Item System](Item-System.md) để có bức tranh đầy đủ. Entity cũng có 1 hệ mirror y hệt: [`EntityComponentKeys`](../src/main/java/com/roguesmp/entity/component/EntityComponentKeys.java) đăng ký vào `Registries.ENTITY_COMPONENT_CODEC` cho `Map<String, EntityComponent>` của `BaseEntity` — xem [Entity, Boss & Spell System](Entity-Boss-Spell-System.md).
 - Khác với `dispatch()` (đọc type-id từ 1 field cố định *bên trong* value, vd. `"id"`), `dispatchedMap` dùng **chính key của map** (`"name"`, `"durability"`, ...) làm type-id.
 - `"unique"` không còn là field JSON riêng: `BaseItem` tự tính `isUnique()` từ việc có component nào implement `UniqueTrackingComponent` hay không (vd. `durability` bên dưới → `DurabilityComponent implements UniqueTrackingComponent` → item này tự động unique).
 
@@ -293,6 +315,20 @@ if (result.isSuccess()) {
 ```
 
 Một file JSON bị lỗi chỉ log lỗi cho đúng entry đó — không bao giờ làm sập cả quá trình load. Xem [Registry System](Registry-System.md) để biết toàn bộ câu chuyện load registry.
+
+## Tham chiếu sang entry của 1 registry khác — `Registry.referenceCodec`
+
+Khi 1 field JSON cần trỏ tới id của 1 entry nằm ở **registry khác** (vd. 1 yêu cầu nâng cấp ability cần "5 cục `ruby_shard`" — `ruby_shard` là id trong `Registries.ITEM`), đừng decode bằng `Codec.STRING` trần rồi tự `Registries.ITEM.get(id)` ở nơi dùng. Dùng `Registry.referenceCodec(...)`, trả về `Codec<Holder<T>>`:
+
+```java
+public static final Codec<ItemRequirement> CODEC = Codec.composite(
+        Registry.referenceCodec(() -> Registries.ITEM).fieldOf("item_id").forGetter(ItemRequirement::getRequiredItemHolder),
+        Codec.INT.fieldOf("amount").forGetter(ItemRequirement::getAmount),
+        ItemRequirement::new
+);
+```
+
+Tham số là 1 `Supplier<Registry<T>>` (không phải `Registry<T>` trực tiếp) để tránh vấn đề thứ tự khởi tạo static field trong `Registries` — việc tra registry chỉ thực sự xảy ra lúc decode, không phải lúc class `Registries` được load. Giá trị decode ra là 1 [`Holder<T>`](Registry-System.md#holdert--tham-chiếu-ổn-định-qua-id) — 1 tham chiếu bền theo id, có thể "chưa bind" (id chưa tồn tại lúc decode, chỉ cần tồn tại trước khi dùng thật). Xem [Registry System](Registry-System.md#holdert--tham-chiếu-ổn-định-qua-id) để biết cơ chế bind/validate đầy đủ.
 
 ## Quick start tối giản
 

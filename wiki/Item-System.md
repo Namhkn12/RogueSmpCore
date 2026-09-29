@@ -123,22 +123,29 @@ public interface ItemComponent {
 
 `ComponentKey<T extends ItemComponent>` ([`ComponentKey.java`](../src/main/java/com/roguesmp/item/component/ComponentKey.java)) chỉ đơn giản là `record ComponentKey<T>(String id)` — 1 handle đã gõ kiểu, dùng làm key trong map component của `BaseItem`/`SmpItem` (qua `.id()`), và làm tham số cho `baseItem.getComponent(key)` / `smpItem.getComponent(key)`.
 
-[`ComponentKeys.java`](../src/main/java/com/roguesmp/constant/ComponentKeys.java) khai báo mọi hằng số `ComponentKey<T>`, và trong static initializer, đăng ký `Codec` của từng component cùng lúc:
+> ⚠️ Class đăng ký này **không còn nằm ở `constant/ComponentKeys.java`** — nó đã dọn sang [`item/component/ItemComponentKeys.java`](../src/main/java/com/roguesmp/item/component/ItemComponentKeys.java), cùng lúc đó `registry/ItemComponentCodecRegistry.java` (lớp trung gian cũ) cũng bị xóa. Nếu thấy tài liệu/code cũ nhắc `constant.ComponentKeys` hay `ItemComponentCodecRegistry`, đó là tên đã lỗi thời.
+
+[`ItemComponentKeys.java`](../src/main/java/com/roguesmp/item/component/ItemComponentKeys.java) khai báo mọi hằng số `ComponentKey<T>`, và trong static initializer, đăng ký `Codec` của từng component cùng lúc, gọi thẳng `Registries.ITEM_COMPONENT_CODEC.register(...)` — không qua lớp trung gian nào nữa:
 
 ```java
 public static final ComponentKey<DurabilityComponent> DURABILITY;
 static {
-    DURABILITY = ItemComponentCodecRegistry.register("durability", DurabilityComponent.CODEC);
+    DURABILITY = register("durability", DurabilityComponent.CODEC);
     ...
     BROKEN = new ComponentKey<>("broken"); // Transient so it has no CODEC.
 }
 
 public static void loadClass() { }
+
+public static <T extends ItemComponent> ComponentKey<T> register(String id, Codec<T> codec) {
+    Registries.ITEM_COMPONENT_CODEC.register(id, codec);
+    return new ComponentKey<>(id);
+}
 ```
 
-`ItemComponentCodecRegistry.register(id, codec)` vừa tạo key vừa lưu codec vào [`Registries.ITEM_COMPONENT_CODEC`](Registry-System.md) — bảng tra mà `dispatchedMap` của `BaseItem.CODEC` dùng khi decode 1 object `"components"`. `BROKEN` là ngoại lệ duy nhất: transient/chỉ tồn tại runtime, nên được tạo trực tiếp mà không có codec nào cả.
+`register(id, codec)` vừa tạo key vừa lưu codec vào [`Registries.ITEM_COMPONENT_CODEC`](Registry-System.md) — bảng tra mà `dispatchedMap` của `BaseItem.CODEC` dùng khi decode 1 object `"components"`. Component không có `CODEC` (transient/chỉ tồn tại runtime — hiện tại là `BROKEN` và `ItemTypeComponent`) được tạo trực tiếp `new ComponentKey<>("id")` mà không gọi `register(...)`.
 
-`loadClass()` là 1 no-op cố tình để trống — công việc duy nhất của nó là *được gọi* (`RogueSmpCore.init()`, trước khi bất kỳ thứ gì decode JSON của item) để ép static initializer của class này chạy. Java load class theo kiểu lazy, nên nếu không có lệnh gọi này, việc đăng ký codec component có thể bị trễ đến lần dùng đầu tiên — **gọi nó, đừng xóa nó.**
+`loadClass()` là 1 no-op cố tình để trống — công việc duy nhất của nó là *được gọi* (`RogueSmpCore.init()`, trước khi bất kỳ thứ gì decode JSON của item) để ép static initializer của class này chạy. Java load class theo kiểu lazy, nên nếu không có lệnh gọi này, việc đăng ký codec component có thể bị trễ đến lần dùng đầu tiên — **gọi nó, đừng xóa nó.** Entity có 1 hệ mirror y hệt ([`EntityComponentKeys`](../src/main/java/com/roguesmp/entity/component/EntityComponentKeys.java) đăng ký vào `Registries.ENTITY_COMPONENT_CODEC`) — xem [Entity, Boss & Spell System](Entity-Boss-Spell-System.md).
 
 ## Hai ví dụ minh họa
 
@@ -192,11 +199,143 @@ public final class DurabilityComponent implements ItemComponent {
 
 `@GsonIgnore` đánh dấu `currentDurability` bị loại khỏi quá trình round-trip JSON của `BaseItem` — đây là state riêng cho từng instance, chỉ sống trong PDC của 1 `ItemStack`, được hydrate qua `load`/`save`.
 
+<a id="tham-khảo-đầy-đủ--mọi-component-đã-đăng-ký-dành-cho-designer-viết-json"></a>
+## Tham khảo đầy đủ — mọi component đã đăng ký (dành cho designer viết JSON)
+
+Bảng dưới liệt kê **mọi** key hợp lệ trong object `"components"` của 1 file `items/*.json`, tính đến thời điểm viết trang này. Component không có cột "CODEC" (`broken`, `item_type`) là state runtime thuần — không thể khai trong JSON, bỏ qua khi viết item mới.
+
+| Key JSON | Class | Shape | Bắt buộc/mặc định |
+| :--- | :--- | :--- | :--- |
+| `name` | `NameComponent` | chuỗi MiniMessage trần | — |
+| `stack_size` | `StackSizeComponent` | số nguyên trần | — |
+| `description` | `DescriptionComponent` | mảng chuỗi MiniMessage | — |
+| `durability` | `DurabilityComponent` | số nguyên trần (độ bền tối đa) | — |
+| `durability_repair` | `DurabilityRepairComponent` | số nguyên trần (lượng hồi mỗi lần sửa) | — |
+| `enchant` | `EnchantComponent` | `{ "enchants": {"<ENCHANT>": <level>, ...} }` | `enchants` bắt buộc |
+| `attribute` | `EquipAttributeComponent` | `{ "attributes": {"<ATTR>": <double>, ...}, "slot": "<EquipSlot>" }` | cả 2 bắt buộc |
+| `socket` | `GemSocketComponent` | số nguyên trần (số socket) | — |
+| `gem_data` | `GemDataComponent` | `{ "attributes": {"<EquipSlot>": {"<ATTR>": <double>}}, "success_chance": <double, mặc định 1.0> }` | `attributes` bắt buộc |
+| `consumable` | `ConsumableComponent` | xem ví dụ bên dưới | tất cả field bắt buộc |
+| `potion_content` | `PotionContentComponent` | `{ "color": "A,R,G,B", "effects": [{"type","duration","amplifier"}] }` | cả 2 bắt buộc |
+| `head_skin` | `PlayerHeadSkinComponent` | chuỗi trần (id trong `SkinRegistry`) | — |
+| `item_model` | `ItemModelComponent` | chuỗi trần (namespaced key, vd. `"roguesmp:fire_sword"`) | — |
+| `equippable` | `EquippableComponent` | xem ví dụ bên dưới | `slot` bắt buộc, còn lại optional |
+| `wrench` | `WrenchComponent` | `{}` (object rỗng, đánh dấu "item này là cờ lê") | — |
+| `block_place` | `BlockPlaceComponent` | `{ "block": "<id trong Registries.BLOCK_PROPERTIES>" }` | bắt buộc |
+| `passive_ability` | `PassiveAbilityComponent` | mảng `ItemAbility` đa hình (`"type"`) — xem [mục riêng](#itemability--năng-lực-thụ-động-gắn-trên-item) | — |
+| `glint` | `EnchantGlintComponent` | boolean trần (cưỡng chế hiệu ứng lấp lánh) | — |
+| `magic_power` | `MagicPowerComponent` | số nguyên trần (mana tối đa) | — |
+| `random_stat` | `RandomStatComponent` | `{}` (object rỗng — roll random quality lúc PDC load lần đầu) | — |
+| `usage_timer` | `UsageTimerComponent` | số nguyên trần (số tick còn lại trước khi item tự xóa lúc đang mặc) | — |
+| `command_executor` | `CommandExecutorComponent` | chuỗi trần (lệnh gốc; click trái mở dialog đổi, click phải chạy) | — |
+
+Enum dùng trong bảng trên: `EquipSlot` — `MAINHAND, OFFHAND, HEAD, CHEST, LEGS, FEET, PROJECTILE`. `Attributes` (viết `"attribute"`/`"gem_data"` bằng đúng tên hằng số, không phân biệt hoa/thường) — **Combat & Offense**: `MELEE_DAMAGE_BASE, ATTACK_SPEED_BASE, PROJECTILE_DAMAGE_BASE, PROJECTILE_SPEED_BASE, BREAK_STRENGTH, THROW_RATE_BASE, MELEE_DAMAGE_PERCENT, MAGIC_DAMAGE_PERCENT, THROW_RATE_PERCENT, PROJECTILE_DAMAGE_PERCENT, PROJECTILE_SPEED_PERCENT, CRIT_DAMAGE_FLAT, ATTACK_KNOCKBACK, SWEEPING_DAMAGE_RATIO`; **Defense & Vitals**: `DEFENSE_FLAT, MAX_HEALTH_FLAT, MAX_HEALTH_PERCENT, KNOCKBACK_RESISTANCE`; **Land Movement**: `SPEED_FLAT, SPEED_PERCENT, SNEAKING_SPEED, MOVEMENT_EFFICIENCY`; **Vertical & Physics**: `JUMP_STRENGTH, GRAVITY, STEP_HEIGHT, FALL_DAMAGE, SAFE_FALL_DISTANCE`; **Aquatic**: `WATER_MOVEMENT_EFFICIENCY, SUBMERGED_MINING_SPEED, OXYGEN_BONUS`; **Utility & World**: `ENTITY_REACH, BLOCK_REACH, MINING_EFFICIENCY, BURNING_TIME`; **Mining** (chỉ block tùy chỉnh): `MINING_SPEED`; và `SCALE`, `LUCK`. `Enchants` (dùng trong `"enchant"`) theo nhóm: bảo vệ (`FIRE_PROTECTION, BLAST_PROTECTION, PROJECTILE_PROTECTION`), tiện ích giáp (`REGENERATION, RESPIRATION, AQUA_AFFINITY, THORNS, FEATHER_FALLING, DEPTH_STRIDER, FROST_WALKER, SOUL_SPEED, SWIFT_SNEAK`), sát thương trực tiếp (`SMITE, BANE_OF_ARTHROPODS, FIRE_SLAYER, IMPALING, REGICIDE`), hiệu ứng vũ khí (`SMASH, BLEEDING, POISONING`), di chuyển (`RIPTIDE, LUNGE`), tiện ích công cụ (`LOOTING, EFFICIENCY, SILK_TOUCH, FORTUNE, LUCK_OF_THE_SEA, LURE, MENDING`), infusion (`VIGOR, FOCUS, FORTITUDE, PERSPICACITY, CELERITY`), lời nguyền (`EXHAUSTION, IRREPARABLE, UNCRITABLE`), thẩm mỹ (`GLOWING`), cùng vài cái khác (`CHANNELING, MULTISHOT, QUICK_CHARGE, PIERCING, DENSITY, WIND_BURST, EPOCH, RETRIEVAL, LIFESTEAL, KNOCKBACK, SWEEPING_EDGE, PUNCH, FLAME, FIRE_ASPECT, ICE_ASPECT`).
+
+### Ví dụ đầy đủ — vũ khí cận chiến với gem socket
+
+```json
+{
+  "id": "fire_sword",
+  "base": "NETHERITE_SWORD",
+  "components": {
+    "name": "<gold>Fire Sword",
+    "description": ["<gray>A blade forged in dragonfire.", "<gray>Handle with care."],
+    "durability": 500,
+    "attribute": {
+      "attributes": { "MELEE_DAMAGE_BASE": 7.0, "ATTACK_SPEED_BASE": -2.4 },
+      "slot": "MAINHAND"
+    },
+    "enchant": { "enchants": { "SHARPNESS": 3, "FIRE_ASPECT": 2 } },
+    "socket": 2,
+    "gem_data": {
+      "attributes": { "MAINHAND": { "MELEE_DAMAGE_PERCENT": 5.0 } },
+      "success_chance": 0.8
+    },
+    "glint": true
+  }
+}
+```
+
+`durability` khiến item này tự động `isUnique() == true` (implement `UniqueTrackingComponent`) — mỗi item đúc ra có UUID riêng, được cache trong `ItemManager`.
+
+### Ví dụ đầy đủ — vật phẩm ăn được (potion + hiệu ứng)
+
+```json
+{
+  "id": "phoenix_elixir",
+  "base": "POTION",
+  "components": {
+    "name": "<light_purple>Phoenix Elixir",
+    "item_model": "roguesmp:phoenix_elixir",
+    "consumable": {
+      "effects": [ { "id": "speed", "duration": 200 } ],
+      "hunger": 0,
+      "saturation": 0,
+      "canAlwaysEat": true,
+      "consumeSeconds": 1.2,
+      "animation": "DRINK",
+      "sound": "minecraft:entity.generic.drink",
+      "hasParticles": true
+    },
+    "potion_content": {
+      "color": "255,0,120,255",
+      "effects": [ { "type": "speed", "duration": 1200, "amplifier": 1 } ]
+    }
+  }
+}
+```
+
+`consumable.effects` là danh sách `SmpEffect` đa hình (dispatch trên field `"id"` riêng của effect, xem [Codec System](Codec-System.md#polymorphic-dispatch-codecdispatch)) — không nên nhầm với `potion_content.effects` (chỉ là hiệu ứng potion vanilla, `StoredEffect` đơn giản `{type, duration, amplifier}`).
+
+### Ví dụ đầy đủ — trang bị (equippable) + đầu người
+
+```json
+{
+  "id": "dragon_helm",
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<red>Dragon Helm",
+    "head_skin": "dragon_helm_skin",
+    "equippable": {
+      "slot": "HEAD",
+      "asset_id": "roguesmp:dragon_helm",
+      "damage_on_hurt": false
+    },
+    "attribute": {
+      "attributes": { "MAX_HEALTH_FLAT": 20.0, "DEFENSE_FLAT": 8.0 },
+      "slot": "HEAD"
+    }
+  }
+}
+```
+
+`equippable.slot` dùng enum `EquipmentSlot` vanilla của Bukkit (`HAND, OFF_HAND, FEET, LEGS, CHEST, HEAD, BODY`) — **khác** với `EquipSlot` tùy chỉnh của `attribute`/`gem_data` (chú ý 2 enum khác nhau, dễ nhầm khi cùng nằm trong 1 item).
+
+<a id="itemability--năng-lực-thụ-động-gắn-trên-item"></a>
+## `ItemAbility` — năng lực thụ động gắn trên item
+
+[`ItemAbility.java`](../src/main/java/com/roguesmp/item/ability/ItemAbility.java) là interface theo đúng khuôn mẫu hook mặc định no-op như `ItemComponent`/`SmpAttribute`/`Ability`: `getTypeId()` (bắt buộc), cộng các hook tùy chọn `provideAttribute(SmpPlayer, SmpItem)` (đóng góp thêm `Map<Attributes, Double>` ngoài `attribute`/`gem_data`), `onTick(SmpPlayer, SmpItem, interval)` (thụ động, định kỳ), `onDamageEntity`/`onHurt`, `onDurabilityChange`, `onInteractEntity` (right-click 1 entity khi đang cầm/mặc item). Không có 1 trigger cố định duy nhất — mỗi impl override đúng hook nó cần. Gắn vào item qua component `passive_ability` (`List<ItemAbility>`, dispatch đa hình trên `"type"`, xem [`Registries.ITEM_ABILITY_CODEC`](Registry-System.md)).
+
+3 kiểu đã đăng ký trong [`ItemAbilities.java`](../src/main/java/com/roguesmp/item/ability/ItemAbilities.java):
+
+| `type` | Ý nghĩa | JSON |
+| :--- | :--- | :--- |
+| `unyielding_edge` | Sát thương cận chiến tăng dần khi độ bền giảm | `{ "type": "unyielding_edge", "dmgPerUnitLoss": 5.0, "amountLossPerUnit": 200 }` (2 field optional, default như trên) |
+| `barking` | Định kỳ phát 1 âm thanh ngẫu nhiên, chỉ người cầm nghe | `{ "type": "barking", "interval": 200, "sounds": [{"key": "entity.wolf.growl", "volume": 1.0, "pitch": 1.0}] }` |
+| `entity_zapper` | Click phải xóa entity đang nhắm (từ chối trên player) | `{ "type": "entity_zapper" }` (không field) |
+
+```json
+"passive_ability": [
+  { "type": "unyielding_edge", "dmgPerUnitLoss": 8.0, "amountLossPerUnit": 150 },
+  { "type": "barking", "interval": 400, "sounds": [ { "key": "entity.wolf.growl" } ] }
+]
+```
+
 ## Cách thêm 1 `ItemComponent` mới
 
 1. Tạo 1 class trong `item/component/impl/` implement `ItemComponent`. Khai `public static final Codec<YourComponent> CODEC` — `Codec.INT.xmap(...)`/tương tự cho 1 giá trị đơn, `Codec.composite(...)` cho nhiều field có tên (xem [Codec System](Codec-System.md)).
 2. Implement `copy()` (bắt buộc). Chỉ thêm `load`/`save` nếu có state runtime mutable cần lưu vào PDC (định nghĩa 1 `NamespacedKey` dưới `Keys.GLOBAL_NAMESPACE`, theo mẫu `DurabilityComponent.DURABILITY_KEY`). Thêm `modifyStack` để đụng vào `DataComponentTypes` vanilla. Thêm `contributeLore` để đóng góp dòng lore.
-3. Đăng ký nó trong [`ComponentKeys.java`](../src/main/java/com/roguesmp/constant/ComponentKeys.java): khai `public static final ComponentKey<YourComponent> YOUR_KEY;` và trong static block, `YOUR_KEY = ItemComponentCodecRegistry.register("your_id", YourComponent.CODEC);`.
+3. Đăng ký nó trong [`ItemComponentKeys.java`](../src/main/java/com/roguesmp/item/component/ItemComponentKeys.java): khai `public static final ComponentKey<YourComponent> YOUR_KEY;` và trong static block, `YOUR_KEY = register("your_id", YourComponent.CODEC);`.
 4. Không cần nối gì thêm — `ComponentKeys.loadClass()` đã chạy sẵn lúc plugin `init()`.
 5. Tham chiếu `"your_id"` trong object `"components"` của 1 item ở `plugins/.../items/*.json`; `BaseItem.CODEC` sẽ tự động decode nó.
 6. Truy cập nó ở nơi khác qua `baseItem.getComponent(ComponentKeys.YOUR_KEY)` / `smpItem.getComponent(ComponentKeys.YOUR_KEY)`.

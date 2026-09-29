@@ -63,29 +63,13 @@ if (!(event.getView().getTopInventory().getHolder(false) instanceof BaseGui base
 
 Handler click còn rẽ nhánh tiếp theo vị trí click: không có inventory bị click → `onClickOutsideInventory`; inventory bị click là của chính player (`InventoryType.PLAYER`) → `onClickBottomInventory`; còn lại → `onClickTopInventory`. Event drag/open/close chuyển thẳng tới hook `BaseGui` tương ứng.
 
-## Mixin — `gui/interfaces/`
-
-2 interface tùy chọn cho GUI dạng công thức/máy chế tạo:
-
-```java
-public interface IHaveBlueprint {
-    void setBlueprintItem(BaseRecipe lockedRecipe);
-    void setupBlueprintSlot();
-}
-
-public interface IHaveInputOutput {
-    int[] getInputSlots();
-    int[] getOutputSlots();
-}
-```
-
 ## Ví dụ 1 — đơn giản: `IslandLeaveConfirmGui`
 
 [`gui/island/IslandLeaveConfirmGui.java`](../src/main/java/com/roguesmp/gui/island/IslandLeaveConfirmGui.java) — 1 hộp thoại xác nhận 3 hàng:
 
 ```java
 public class IslandLeaveConfirmGui extends BaseGui {
-    public IslandLeaveConfirmGui(Player player) {
+    public IslandLeaveConfirmGui(UUID islandId, Player player) {
         super(Component.text("Xác nhận rời đảo"), 3);
     }
 
@@ -104,21 +88,21 @@ public class IslandLeaveConfirmGui extends BaseGui {
 }
 ```
 
-## Ví dụ 2 — phức tạp: `MachineGui`
+## Ví dụ 2 — phức tạp, tự vẽ lại theo state: `ReactiveGui<S>`
 
-[`gui/MachineGui.java`](../src/main/java/com/roguesmp/gui/MachineGui.java) (abstract) — `extends BaseGui implements IHaveInputOutput, IHaveBlueprint`. Các GUI máy cụ thể implement `getInputSlots()`, `getOutputSlots()`, `getProcessingSlot()`. `setup()` lấp decoration của máy, kiểm tra slot input/output nằm đúng phạm vi hàng, thêm nút cài đặt/duyệt công thức, rồi gọi `setupBlueprintSlot()` của chính nó:
+> ⚠️ `gui/MachineGui.java` (abstract, cùng cặp mixin `IHaveBlueprint`/`IHaveInputOutput` ở `gui/interfaces/`) **đã bị xóa hoàn toàn** — không còn tồn tại trong codebase. GUI dạng máy/công thức giờ extend [`gui/ReactiveGui.java`](../src/main/java/com/roguesmp/gui/ReactiveGui.java) thay vào đó.
+
+`ReactiveGui<S>` (abstract, `extends BaseGui`) giải quyết đúng vấn đề mà `MachineGui` từng giải quyết (1 GUI đang mở cần tự cập nhật khi state nghiệp vụ phía sau đổi — máy đang chế tạo, thanh năng lượng, ...) nhưng theo hướng khai báo thay vì "tự tay gọi `setItem` khi cần":
 
 ```java
-@Override
-public void setupBlueprintSlot() {
-    if (!(machine instanceof IHaveLockedRecipe)) return;
-    // click phải: đọc PDC Keys.ITEM_ID của item trên con trỏ chuột, tra công thức qua
-    // RecipeManager.findRecipeBasedOnMainOutput(...), khóa nó lại qua machine.setLockedRecipe(recipe)
-    // click trái: mở khóa
+public abstract class ReactiveGui<S> extends BaseGui {
+    protected abstract S computeState();           // đọc state nghiệp vụ hiện tại (input slot, recipe, ...)
+    protected abstract void render(S state);        // vẽ lại toàn bộ inventory dựa trên state đó
+    protected boolean isStateEqual(S oldState, S newState) { return Objects.equals(oldState, newState); }
 }
 ```
 
-Nó còn có `setEnergy(int, int)` / `setProcessing(ItemStack)`, cả 2 gọi `this.getInventory().setItem(...)` **trực tiếp** (không phải `addButton`) — đây là pattern để cập nhật trực tiếp 1 GUI đang mở, bỏ qua map handler vì hành vi click của slot không cần đổi, chỉ có item hiển thị cần đổi.
+Sau mỗi click/drag vào GUI, `ReactiveGui` tự lên lịch (`Utils.runLater`, trễ 1 tick — đợi Bukkit áp dụng xong thay đổi inventory do click gây ra) 1 lần `syncStateInventory()`: gọi lại `computeState()`, so với state đã vẽ lần trước qua `isStateEqual`, và chỉ gọi `render(newState)` nếu thực sự đổi — tránh vẽ lại (và gây nháy màn hình) khi state không đổi. 2 GUI đang dùng pattern này: [`gui/crafting/CraftingGui.java`](../src/main/java/com/roguesmp/gui/crafting/CraftingGui.java) và [`gui/crafting/FusionGui.java`](../src/main/java/com/roguesmp/gui/crafting/FusionGui.java) — xem [Crafting System](Crafting-System.md) để biết `CraftingManager`/`RecipeKey` mà state của chúng đọc từ đó.
 
 ## Mở 1 GUI — call site thật
 
@@ -136,7 +120,7 @@ event.getPlayer().openInventory(gui.getInventory());
 2. Override `setup()`: đổ slot bằng `addButton`/`addAction`/`addItem`, kết thúc bằng `fillEmpty(...)`.
 3. Chỉ override `onClickBottomInventory`/`onDragInventory`/v.v. nếu cần hành vi khác mặc định (đa số GUI chỉ cần cancel click ở inventory dưới để tránh xáo trộn item).
 4. Khởi tạo và gọi `gui.showInventory(player)`.
-5. Với GUI dạng máy/công thức có slot input/output và công thức có thể khóa, extend `MachineGui` thay vào đó và implement `getInputSlots()`, `getOutputSlots()`, `getProcessingSlot()`.
+5. Với GUI cần tự vẽ lại theo 1 state nghiệp vụ đổi liên tục (máy chế tạo, slot input/output, ...), extend `ReactiveGui<S>` thay vào đó và implement `computeState()`/`render(S)`.
 
 ## Lưu ý & lỗi thường gặp
 
