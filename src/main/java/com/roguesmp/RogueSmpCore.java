@@ -128,15 +128,6 @@ public final class RogueSmpCore extends JavaPlugin {
         VanillaRecipeReplacer.replaceAll(); // swaps matching vanilla tool/armor recipes - must run after items load above
     }
 
-    // Live-reload every data-driven registry (items, entities, quests, npcs, loot tables,
-    // crafting recipes, ability configs, ...) from disk without restarting the server
-    public void reloadData() {
-        Registries.reloadAllData(this);
-
-        CraftingManager.getInstance().rebuild(); // re-derives from Registries.CRAFTING_RECIPE - must run after it's reloaded above
-        PlayerManager.getInstance().syncClassRosters(); // grant/unequip against the reloaded class rosters
-    }
-
     /**
      * Live-reloads a single data-driven registry by its location key (e.g. "items", "entities"),
      * see {@link Registry#getReloadableKeys()}. Returns false if unknown.
@@ -148,6 +139,12 @@ public final class RogueSmpCore extends JavaPlugin {
         }
         if (found && locationKey.equalsIgnoreCase(Registries.PLAYER_CLASS.getLocationKey())) {
             PlayerManager.getInstance().syncClassRosters(); // grant/unequip against the reloaded class rosters
+        }
+        if (found && locationKey.equalsIgnoreCase(Registries.BLOCK_PROPERTIES.getLocationKey())) {
+            for (String id : Registries.BLOCK_PROPERTIES.getAll().keySet()) {
+                Registries.BLOCK_TYPE.unregister(id);
+            }
+            BlockTypes.registerDefaults();
         }
         return found;
     }
