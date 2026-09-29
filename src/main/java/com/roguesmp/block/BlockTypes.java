@@ -23,6 +23,13 @@ public class BlockTypes {
 
     }
 
+    public static void registerDefaults() {
+        for (String s : Registries.BLOCK_PROPERTIES.getAll().keySet()) {
+            if (Registries.BLOCK_TYPE.get(s) != null) continue;
+            Registries.BLOCK_TYPE.register(s, new BlockType<>(s, SmpBlock::new));
+        }
+    }
+
     public static @Nullable SmpBlock create(String id) {
         BlockType<? extends SmpBlock> type = Registries.BLOCK_TYPE.get(id);
         return type == null ? null : type.create();

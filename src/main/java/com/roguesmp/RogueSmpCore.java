@@ -1,5 +1,6 @@
 package com.roguesmp;
 
+import com.roguesmp.block.BlockTypes;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.command.ReloadCommand;
 import com.roguesmp.command.SmpBrowserCommand;
@@ -120,8 +121,9 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Load data from files, databases, etc
     public void loadData() {
-        Registries.loadAllData(this); // also loads/resolves every registry's tags/ folder
+        Registries.loadAllData(this);
 
+        BlockTypes.registerDefaults();
         CraftingManager.init(); // indexes Registries.CRAFTING_RECIPE - must run after it's loaded above
         VanillaRecipeReplacer.replaceAll(); // swaps matching vanilla tool/armor recipes - must run after items load above
     }
@@ -129,7 +131,7 @@ public final class RogueSmpCore extends JavaPlugin {
     // Live-reload every data-driven registry (items, entities, quests, npcs, loot tables,
     // crafting recipes, ability configs, ...) from disk without restarting the server
     public void reloadData() {
-        Registries.reloadAllData(this); // also loads/resolves every registry's tags/ folder
+        Registries.reloadAllData(this);
 
         CraftingManager.getInstance().rebuild(); // re-derives from Registries.CRAFTING_RECIPE - must run after it's reloaded above
         PlayerManager.getInstance().syncClassRosters(); // grant/unequip against the reloaded class rosters
