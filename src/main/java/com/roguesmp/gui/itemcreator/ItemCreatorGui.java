@@ -157,6 +157,9 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.COMMAND_EXECUTOR),
                 tooltip("Vật phẩm này có thể dùng lưu lệnh cho tiện lợi", null),
                 (response, audience) -> player.showDialog(buildCommandExecutorDialog(player)));
+        multi.addButton(componentLabel(ItemComponentKeys.BLOCK_PLACE),
+                tooltip("Vật phẩm này có thể dùng để đặt block custom", null),
+                (response, audience) -> player.showDialog(buildBlockPlaceDialog(player)));
 
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
@@ -769,6 +772,25 @@ public class ItemCreatorGui {
                     openMainDialog(player);
                 });
     }
+
+    private Dialog buildBlockPlaceDialog(Player player) {
+        BlockPlaceComponent current = (BlockPlaceComponent) components.get(ItemComponentKeys.BLOCK_PLACE.id());
+        DialogBuilder builder = DialogBuilder.create(Component.text("Custom Block id"))
+                .canCloseWithEscape(false)
+                .addTextInput("value", Component.text("Id của khối custom"));
+
+        return wrapComponentDialog(player, ItemComponentKeys.BLOCK_PLACE, builder,
+                (response, audience) -> {
+                    String value = response.getText("value");
+                    components.put(ItemComponentKeys.BLOCK_PLACE.id(), new BlockPlaceComponent(value));
+                    openMainDialog(player);
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.BLOCK_PLACE.id());
+                    openMainDialog(player);
+                });
+    }
+
     // ==========================================
     // COMMAND
     // ==========================================
