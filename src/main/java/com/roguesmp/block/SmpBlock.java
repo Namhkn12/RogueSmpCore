@@ -1,13 +1,13 @@
 package com.roguesmp.block;
 
 import com.google.gson.JsonElement;
+import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.persistence.StateSection;
 import com.roguesmp.codec.DataResult;
-import org.bukkit.GameMode;
+import com.roguesmp.player.SmpPlayer;
 import org.bukkit.Location;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -49,7 +49,7 @@ public class SmpBlock {
      * {@link BlockProperties#drops()}; override to build custom stacks (e.g. writing this block's
      * own data onto the item) instead of, or alongside, the JSON list.
      */
-    public List<ItemStack> getDrops() {
+    public List<ItemStack> getDrops(SmpPlayer smpPlayer) {
         List<ItemStack> drops = new ArrayList<>();
         for (BlockDrop drop : getType().drops()) {
             ItemStack item = drop.roll();
@@ -62,24 +62,15 @@ public class SmpBlock {
      * Experience orb amount this block gives back when broken. Defaults to rolling the block's
      * declared {@link BlockProperties#experience()}; override for custom amounts.
      */
-    public int getExperience() {
+    public int getExperience(SmpPlayer smpPlayer) {
         return getType().experience().roll();
     }
 
     /**
-     * Called when this block is broken, after {@link #onUnload()} is called.
+     * Called when this block is broken, before {@link #onUnload()} is called.
      */
-    public void onBlockBreak(BlockBreakEvent event) {
-        if (!event.isDropItems() || event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
+    public void onBlockBreak(SmpBlockBreakEvent event) {
 
-        for (ItemStack drop : getDrops()) {
-            location.getWorld().dropItemNaturally(location.toCenterLocation(), drop);
-        }
-
-        int experience = getExperience();
-        if (experience > 0) {
-            location.getWorld().spawn(location.toCenterLocation(), ExperienceOrb.class, orb -> orb.setExperience(experience));
-        }
     }
 
     public void onBlockInteract(PlayerInteractEvent event) {

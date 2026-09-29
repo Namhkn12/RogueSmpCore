@@ -14,6 +14,8 @@ import com.roguesmp.block.event.SmpBlockPlaceEvent;
 import com.roguesmp.block.mining.MiningManager;
 import com.roguesmp.block.persistence.BlockDataRepository;
 import com.roguesmp.codec.DataResult;
+import com.roguesmp.player.PlayerManager;
+import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -36,7 +38,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 public class BlockManager {
     private static BlockManager INSTANCE = null;
@@ -139,16 +140,31 @@ public class BlockManager {
     public void destroy(BlockBreakEvent event){
         SmpBlock block = blocks.get(BlockPos.of(event.getBlock()));
         if(block == null) return;
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(event.getPlayer());
+        if (smpPlayer == null) return;
+        boolean shouldDrop = event.isDropItems() && event.getPlayer().getGameMode() != GameMode.CREATIVE;
+        List<ItemStack> drops = shouldDrop ? new ArrayList<>(block.getDrops(smpPlayer)) : new ArrayList<>();
+        int experience = shouldDrop ? block.getExperience(smpPlayer) : 0;
 
-        SmpBlockBreakEvent smpEvent = new SmpBlockBreakEvent(block, event.getPlayer(), event);
+        SmpBlockBreakEvent smpEvent = new SmpBlockBreakEvent(block, smpPlayer, event, drops, experience);
         Bukkit.getPluginManager().callEvent(smpEvent);
         if(smpEvent.isCancelled()){
             event.setCancelled(true);
             return;
         }
 
+        block.onBlockBreak(smpEvent);
         block.onUnload();
-        block.onBlockBreak(event);
+
+        Location location = event.getBlock().getLocation();
+        for (ItemStack drop : smpEvent.getDrops()) {
+            location.getWorld().dropItemNaturally(location.toCenterLocation(), drop);
+        }
+
+        int experienceDropped = smpEvent.getExperience();
+        if (experienceDropped > 0) {
+            location.getWorld().spawn(location.toCenterLocation(), ExperienceOrb.class, orb -> orb.setExperience(experience));
+        }
 
         Entity display = Bukkit.getEntity(block.getDisplayId());
         playBreakEffects(block, display);

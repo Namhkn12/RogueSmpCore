@@ -64,7 +64,6 @@ public class MiningManager {
 
     private void finishSession(BreakSession session) {
         minerAt.remove(session.block().getPos(), session.playerId());
-        clearCrack(session);
         removeCrackOverlay(session);
     }
 
@@ -74,10 +73,7 @@ public class MiningManager {
     }
 
     public void stopAll() {
-        sessions.values().forEach(session -> {
-            clearCrack(session);
-            removeCrackOverlay(session);
-        });
+        sessions.values().forEach(this::removeCrackOverlay);
         sessions.clear();
         minerAt.clear();
     }
@@ -139,10 +135,5 @@ public class MiningManager {
         if (!center.getWorld().equals(player.getWorld())) return false;
         double reach = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).getValue();
         return player.getEyeLocation().distanceSquared(center) <= reach * reach;
-    }
-
-    private void clearCrack(BreakSession session) {
-        Player player = Bukkit.getPlayer(session.playerId());
-        if (player != null) player.sendBlockDamage(session.block().getLocation(), 0f);
     }
 }
