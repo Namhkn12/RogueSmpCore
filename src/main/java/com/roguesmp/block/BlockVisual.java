@@ -1,5 +1,6 @@
 package com.roguesmp.block;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.Keys;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.key.Key;
@@ -9,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -72,12 +74,12 @@ public final class BlockVisual {
      * A purely cosmetic entity co-located with the block's own display, showing one of the shared
      * {@code smp:destroy_stage_<0-9>} models. Never persisted - it must not survive a restart mid-mine.
      */
-    public static Entity spawnCrackOverlay(BlockPos pos, int stage) {
+    public static Entity spawnCrackOverlay(BlockPos pos, int stage, Player player) {
         World world = pos.getWorld();
         if (world == null) throw new IllegalStateException("World " + pos.world() + " is not loaded");
 
         Location center = new Location(world, pos.x() + 0.5, pos.y() + 0.5, pos.z() + 0.5);
-        return world.spawn(center, ItemDisplay.class, display -> {
+        Entity entity = world.spawn(center, ItemDisplay.class, display -> {
             display.setItemStack(crackStageStack(stage));
             display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.NONE);
             display.setTransformation(new Transformation(
@@ -89,6 +91,9 @@ public final class BlockVisual {
             display.setPersistent(false);
             display.setInvulnerable(true);
         });
+        entity.setVisibleByDefault(false);
+        player.showEntity(RogueSmpCore.getInstance(), entity);
+        return entity;
     }
 
     public static void updateCrackOverlay(Entity overlay, int stage) {
@@ -106,7 +111,7 @@ public final class BlockVisual {
     }
 
     private static Key crackStageKey(int stage) {
-        return Key.key("smp", "destroy_stage_" + stage);
+        return Keys.of("destroy_stage_" + stage);
     }
 
     public static @Nullable Marker read(Entity entity) {

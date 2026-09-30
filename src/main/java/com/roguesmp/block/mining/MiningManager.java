@@ -56,7 +56,7 @@ public class MiningManager {
             return;
         }
 
-        UUID crackOverlayId = BlockVisual.spawnCrackOverlay(block.getPos(), 0).getUniqueId();
+        UUID crackOverlayId = BlockVisual.spawnCrackOverlay(block.getPos(), 0, event.getPlayer()).getUniqueId();
         BreakSession session = new BreakSession(player.getUniqueId(), block, player.getInventory().getHeldItemSlot(), crackOverlayId);
         sessions.put(player.getUniqueId(), session);
         minerAt.put(block.getPos(), player.getUniqueId());
