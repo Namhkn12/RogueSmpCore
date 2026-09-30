@@ -141,9 +141,9 @@ public final class RogueSmpCore extends JavaPlugin {
             PlayerManager.getInstance().syncClassRosters(); // grant/unequip against the reloaded class rosters
         }
         if (found && locationKey.equalsIgnoreCase(Registries.BLOCK_PROPERTIES.getLocationKey())) {
-            for (String id : Registries.BLOCK_PROPERTIES.getAll().keySet()) {
-                Registries.BLOCK_TYPE.unregister(id);
-            }
+            // Create BlockType instances from Properties Registry.
+            // After reload there would still be old BlockType instances (from deleted Properties entries)
+            // but it shouldn't matter since we only reload during dev.
             BlockTypes.registerDefaults();
         }
         return found;
