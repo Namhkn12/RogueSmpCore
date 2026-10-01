@@ -52,7 +52,7 @@ public class MiningManager {
         int ticks = MiningSpeedCalculator.ticksToBreak(player, block.getType());
         if (ticks == MiningSpeedCalculator.CANNOT_BREAK) return;
         if (ticks == 0) {
-            manager.breakBlock(event.getBlock(), player);
+            manager.breakBlock(event.getBlock(), player, true);
             return;
         }
 
@@ -105,7 +105,7 @@ public class MiningManager {
             if (ticks == 0 || session.advance(ticks)) {
                 iterator.remove();
                 finishSession(session);
-                manager.breakBlock(session.block().getLocation().getBlock(), player);
+                manager.breakBlock(session.block().getLocation().getBlock(), player, true);
                 continue;
             }
 

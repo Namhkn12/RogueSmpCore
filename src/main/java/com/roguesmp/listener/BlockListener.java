@@ -62,7 +62,7 @@ public class BlockListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event){
-        manager.destroy(event);
+        manager.handlePlayerBreak(event);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -96,6 +96,7 @@ public class BlockListener implements Listener {
         if(target == null && clicked.getType().isInteractable() && !player.isSneaking()) return;
 
         event.setUseItemInHand(Event.Result.DENY);
-        manager.place(player, event.getHand(), clicked, event.getBlockFace(), placement.getBlockId());
+        Block placeTarget = clicked.isReplaceable() ? clicked : clicked.getRelative(event.getBlockFace());
+        manager.place(placeTarget, placement.getBlockId(), player, event.getHand(), clicked);
     }
 }

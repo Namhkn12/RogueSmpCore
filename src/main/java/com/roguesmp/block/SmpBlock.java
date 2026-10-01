@@ -5,6 +5,7 @@ import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.persistence.StateSection;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.player.SmpPlayer;
+import net.kyori.adventure.key.Key;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -38,7 +39,7 @@ public class SmpBlock {
     }
 
     /**
-     * Called when this block is placed from an item, before this instance is registered to the manager.
+     * Called when this block is placed from an item by players, before this instance is registered to the manager.
      */
     public void onPlaced(Player player, ItemStack placedFrom) {
 
@@ -125,6 +126,10 @@ public class SmpBlock {
 
     void setType(BlockType<?> type) {
         this.type = type;
+    }
+
+    public Key getDisplayModel() {
+        return getType().model();
     }
 
     public BlockPos getPos() {

@@ -18,8 +18,6 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public record BlockDrop(String item, int minAmount, int maxAmount, double chance) {
 
-    private static final String VANILLA_PREFIX = "minecraft:";
-
     public static final Codec<BlockDrop> CODEC = Codec.composite(
             Codec.STRING.fieldOf("item").forGetter(BlockDrop::item),
             Codec.INT.optionalFieldOf("min_amount", 1).forGetter(BlockDrop::minAmount),
@@ -29,9 +27,7 @@ public record BlockDrop(String item, int minAmount, int maxAmount, double chance
     );
 
     public @Nullable ItemStack roll(@Nullable SmpPlayer player) {
-        if (Utils.RANDOM.nextDouble() >= chance) return null;
-
-        int amount = minAmount + (maxAmount > minAmount ? Utils.RANDOM.nextInt(maxAmount - minAmount + 1) : 0);
+        int amount = rollAmount();
         if (amount <= 0) return null;
 
         ItemStack stack = resolve();
@@ -41,10 +37,21 @@ public record BlockDrop(String item, int minAmount, int maxAmount, double chance
         return stack;
     }
 
+    /** Same roll as {@link #roll}, without resolving a live {@link ItemStack} - for id-based storage (see {@link StoredItem}). */
+    public @Nullable StoredItem rollStored() {
+        int amount = rollAmount();
+        return amount <= 0 ? null : new StoredItem(item, amount);
+    }
+
+    private int rollAmount() {
+        if (Utils.RANDOM.nextDouble() >= chance) return 0;
+        return minAmount + (maxAmount > minAmount ? Utils.RANDOM.nextInt(maxAmount - minAmount + 1) : 0);
+    }
+
     private @Nullable ItemStack resolve() {
-        if (item.startsWith(VANILLA_PREFIX)) {
-            Material material = Material.matchMaterial(item.substring(VANILLA_PREFIX.length()));
-            return material == null ? null : new ItemStack(material);
+        if (BlockRef.isVanilla(item)) {
+            Material material = BlockRef.vanillaMaterial(item);
+            return material == null ? null : ItemStack.of(material);
         }
 
         BaseItem baseItem = Registries.ITEM.get(item);

@@ -1,6 +1,9 @@
 package com.roguesmp.block;
 
-import com.roguesmp.constant.Keys;
+import com.roguesmp.RogueSmpCore;
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.DataResult;
+import com.roguesmp.codec.JsonOps;
 import com.roguesmp.item.ItemType;
 import com.roguesmp.registry.Holder;
 import com.roguesmp.registry.Registries;
@@ -12,7 +15,7 @@ import java.util.function.Supplier;
 
 /**
  * A custom block's compile-time identity: its id and the factory for its {@link SmpBlock} subclass.
- * The id is independent of any item; items place a block through {@code BlockPlaceComponent}. Its tunable data is not stored here - it is loaded
+ * The id is independent of any item; items place a block through {@code BlockPlaceComponent}. A block tunable data is loaded
  * into {@link Registries#BLOCK_PROPERTIES} and read through a {@link Holder}, so a data reload takes
  * effect immediately. A declared type with no {@code blocks/<id>.json} uses {@link BlockProperties#DEFAULT}
  * and is reported by {@code Registry.validateAllHolders()}. Declare instances as constants in {@link BlockTypes}.
@@ -22,6 +25,8 @@ public final class BlockType<T extends SmpBlock> {
     private final String id;
     private final Supplier<T> factory;
     private final Holder<BlockProperties> properties;
+    private int decodedVersion = -1;
+    private Object cachedData;
 
     BlockType(String id, Supplier<T> factory) {
         this.id = id;
@@ -43,6 +48,25 @@ public final class BlockType<T extends SmpBlock> {
         return properties.isBound() ? properties.value() : BlockProperties.DEFAULT;
     }
 
+    /**
+     * Subtype-specific data decoded from {@link BlockProperties#data()} via {@code codec}, shared by
+     * every instance of this block type.
+     */
+    @SuppressWarnings("unchecked")
+    public <D> D data(Codec<D> codec, D defaultValue) {
+        if (properties.version() != decodedVersion) { //Holder got reloaded, read data again
+            DataResult<D> decoded = codec.decode(properties().data(), JsonOps.INSTANCE);
+            if (decoded.isSuccess()) {
+                cachedData = decoded.result();
+            } else {
+                RogueSmpCore.LOGGER.error("Could not decode extra data for block '{}': {}", id, decoded.error());
+                cachedData = defaultValue;
+            }
+            decodedVersion = properties.version();
+        }
+        return (D) cachedData;
+    }
+
     public int hardness() {
         return properties().hardness();
     }
@@ -57,6 +81,10 @@ public final class BlockType<T extends SmpBlock> {
 
     public Key model() {
         return properties().model();
+    }
+
+    public String displayName() {
+        return properties().displayName();
     }
 
     public List<BlockDrop> drops() {

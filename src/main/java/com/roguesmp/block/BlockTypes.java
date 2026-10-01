@@ -1,9 +1,12 @@
 package com.roguesmp.block;
 
+import com.roguesmp.block.impl.BlockGenerator;
 import com.roguesmp.block.impl.TallyBlock;
 import com.roguesmp.registry.Registries;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -18,6 +21,8 @@ public class BlockTypes {
 
     public static final BlockType<SmpBlock> STEEL_BLOCK = register("steel_block", SmpBlock::new);
     public static final BlockType<TallyBlock> TALLY_BLOCK = register("tally_block", TallyBlock::new);
+    public static final BlockType<BlockGenerator> GENERATOR_BLOCK = register("generator_block", BlockGenerator::new);
+    public static final BlockType<BlockGenerator> STEEL_GENERATOR = register("steel_generator", BlockGenerator::new);
 
     public static void loadClass() {
 
