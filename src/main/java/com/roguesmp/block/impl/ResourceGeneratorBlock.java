@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class BlockGenerator extends SmpBlock implements Tickable, Directional, EnergyStorage {
+public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Directional, EnergyStorage {
 
     public record Data(String place, int placeDelayTicks, int breakDelayTicks, List<BlockDrop> drops, int maxEnergy, int energyPerTick, int energyPerFuel, int lootCapacity) {
 
@@ -74,10 +74,8 @@ public class BlockGenerator extends SmpBlock implements Tickable, Directional, E
     @Override
     public void tick() {
         tryConsumeFuel();
-        if (getEnergy() > 0) {
-            if (mining) tickMining();
-            else tickWaiting();
-        }
+        if (mining) tickMining();
+        else if (getEnergy() > 0) tickWaiting();
         tickGuiRefresh();
     }
 
@@ -120,6 +118,8 @@ public class BlockGenerator extends SmpBlock implements Tickable, Directional, E
             resetToWaiting();
             return;
         }
+
+        if (getEnergy() <= 0) return;
 
         removeEnergy(data().energyPerTick());
         if (--breakTicksLeft <= 0) {

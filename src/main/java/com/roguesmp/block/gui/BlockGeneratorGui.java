@@ -1,6 +1,6 @@
 package com.roguesmp.block.gui;
 
-import com.roguesmp.block.impl.BlockGenerator;
+import com.roguesmp.block.impl.ResourceGeneratorBlock;
 import com.roguesmp.block.StoredItem;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.ItemStackUtils;
@@ -29,9 +29,9 @@ public class BlockGeneratorGui extends BaseGui {
     private static final int FUEL_SLOT = 10;
     private static final int[] LOOT_SLOTS = {12, 13, 14, 15, 16, 21, 22, 23, 24, 25};
 
-    private final BlockGenerator generator;
+    private final ResourceGeneratorBlock generator;
 
-    public BlockGeneratorGui(BlockGenerator generator) {
+    public BlockGeneratorGui(ResourceGeneratorBlock generator) {
         super(Utils.text("Generator", NamedTextColor.DARK_GRAY), 4);
         this.generator = generator;
     }
