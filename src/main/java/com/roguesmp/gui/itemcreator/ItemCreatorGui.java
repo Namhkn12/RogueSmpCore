@@ -157,6 +157,9 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.COMMAND_EXECUTOR),
                 tooltip("Vật phẩm này có thể dùng lưu lệnh cho tiện lợi", null),
                 (response, audience) -> player.showDialog(buildCommandExecutorDialog(player)));
+        multi.addButton(componentLabel(ItemComponentKeys.BLOCK_PLACE),
+                tooltip("Vật phẩm này có thể dùng để đặt block custom", null),
+                (response, audience) -> player.showDialog(buildBlockPlaceDialog(player)));
 
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
@@ -754,9 +757,10 @@ public class ItemCreatorGui {
 
     private Dialog buildCommandExecutorDialog(Player player) {
         CommandExecutorComponent current = (CommandExecutorComponent) components.get(ItemComponentKeys.COMMAND_EXECUTOR.id());
+        String initial = current == null ? "" : current.getLoadedCommand();
         DialogBuilder builder = DialogBuilder.create(Component.text("Đặt Command"))
                 .canCloseWithEscape(false)
-                .addTextInput("value", Component.text("Lệnh ban đầu, có thể đổi sau."));
+                .addTextInput("value", Component.text("Lệnh ban đầu, có thể đổi sau."), b -> b.initial(initial).maxLength(1000));
 
         return wrapComponentDialog(player, ItemComponentKeys.COMMAND_EXECUTOR, builder,
                 (response, audience) -> {
@@ -769,6 +773,26 @@ public class ItemCreatorGui {
                     openMainDialog(player);
                 });
     }
+
+    private Dialog buildBlockPlaceDialog(Player player) {
+        BlockPlaceComponent current = (BlockPlaceComponent) components.get(ItemComponentKeys.BLOCK_PLACE.id());
+        String initial = current == null ? "" : current.getBlockId();
+        DialogBuilder builder = DialogBuilder.create(Component.text("Custom Block id"))
+                .canCloseWithEscape(false)
+                .addTextInput("value", Component.text("Id của khối custom"), builder1 -> builder1.initial(initial).maxLength(1000));
+
+        return wrapComponentDialog(player, ItemComponentKeys.BLOCK_PLACE, builder,
+                (response, audience) -> {
+                    String value = response.getText("value");
+                    components.put(ItemComponentKeys.BLOCK_PLACE.id(), new BlockPlaceComponent(value));
+                    openMainDialog(player);
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.BLOCK_PLACE.id());
+                    openMainDialog(player);
+                });
+    }
+
     // ==========================================
     // COMMAND
     // ==========================================

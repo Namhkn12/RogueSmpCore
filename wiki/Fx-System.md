@@ -25,7 +25,7 @@ public interface FxShape {
 }
 ```
 
-Tham số `tick` tồn tại để hỗ trợ shape đổi hình dạng theo thời gian (vd. mật độ điểm tăng dần), nhưng phần lớn implement có sẵn **bỏ qua nó** — shape chỉ nên là hình học, việc di chuyển/biến đổi qua thời gian nên để `FxMotion` lo. Có sẵn: `PointShape`, `LineShape`, `CircleShape`, `SphereShape` (Fibonacci lattice), `HelixShape`.
+Tham số `tick` tồn tại để hỗ trợ shape đổi hình dạng theo thời gian (vd. mật độ điểm tăng dần), nhưng phần lớn implement có sẵn **bỏ qua nó** — shape chỉ nên là hình học, việc di chuyển/biến đổi qua thời gian nên để `FxMotion` lo. Có sẵn: `PointShape`, `LineShape`, `CircleShape`, `SphereShape` (Fibonacci lattice), `HelixShape`, `PillarShape` (cột điểm rải ngẫu nhiên theo chiều dọc, tự roll lại mỗi lần gọi `points(tick)`).
 
 ## `FxTransform` — vị trí + xoay + scale bất biến
 
@@ -68,14 +68,16 @@ Motion cũng có thể là lambda tại chỗ (xem `shockwave()` trong `Explosio
 [`fx/render/FxRenderer.java`](../src/main/java/com/roguesmp/fx/render/FxRenderer.java):
 
 ```java
-void render(World world, FxTransform transform, List<Vector> localPoints, int tick);
+void render(World world, FxTransform transform, List<Vector> localPoints, int tick, Collection<Player> viewers);
 void remove(); // dọn dẹp entity/state do renderer này sở hữu
 ```
 
-- **`ParticleRenderer`** — không có state, spawn `ParticleBuilder` tại từng điểm mỗi tick.
-- **`BlockDisplayRenderer`** / **`ItemDisplayRenderer`** — extend `AbstractDisplayRenderer`, giữ **1 entity `Display` thật cho mỗi điểm**, teleport/reorient nó mỗi tick thay vì respawn. Số entity tự tăng/giảm theo số điểm shape trả về mỗi tick (`ensureCapacity`); `setPersistent(false)` + `setInterpolationDuration(...)` để entity không lưu vào chunk và di chuyển mượt giữa 2 lần cập nhật.
+- **`ParticleRenderer`** — không có state, spawn `ParticleBuilder` tại từng điểm mỗi tick. Có thêm 1 constructor nhận `Function<FxPoint, List<ParticleBuilder>>` cho phép trả về **nhiều** `ParticleBuilder` mỗi điểm (vd. lẫn 2 loại particle tại cùng 1 vị trí), thay vì chỉ 1 builder cố định.
+- **`BlockDisplayRenderer`** / **`ItemDisplayRenderer`** — extend `AbstractDisplayRenderer`, giữ **1 entity `Display` thật cho mỗi điểm**, teleport/reorient nó mỗi tick thay vì respawn. Số entity tự tăng/giảm theo số điểm shape trả về mỗi tick (`ensureCapacity`); `setPersistent(false)` + `setInterpolationDuration(...)` để entity không lưu vào chunk và di chuyển mượt giữa 2 lần cập nhật. Có thêm 1 constructor nhận `BiConsumer<T, FxPoint> onRender` — chạy mỗi tick cho mỗi entity display, có thể chỉnh lại vị trí thế giới (bob/jitter) và/hoặc cấu hình lại chính entity display đó.
 
-Cả 2 loại renderer đều nhận tham số `Collection<Player> viewers` (`null` = mọi người xung quanh đều thấy, mặc định) — xem [scope người xem](#giới-hạn-người-xem--fxeffectviewers) bên dưới. `ParticleRenderer` gọi `builder.receivers(viewers)`/`builder.allPlayers()` mỗi tick; `AbstractDisplayRenderer` chỉ set `setVisibleByDefault(false)` + `viewer.showEntity(...)` **1 lần lúc spawn** entity (không lặp lại mỗi tick), nên giả định `viewers` không đổi trong suốt vòng đời effect.
+`FxPoint` (`fx/render/FxPoint.java`) — record `(World world, Vector3f position, int index, int tick)` truyền vào 2 callback tùy chỉnh trên.
+
+Cả 2 loại renderer đều nhận tham số `Collection<Player> viewers` (`null` = mọi người xung quanh đều thấy, mặc định) — xem [scope người xem](#giới-hạn-người-xem--fxeffectviewers) bên dưới. `ParticleRenderer` chỉ gọi `builder.receivers(viewers)` khi `viewers != null` — khi `null` nó không gọi gì thêm, để `ParticleBuilder` tự dùng mặc định của nó (mọi người xung quanh); `AbstractDisplayRenderer` chỉ set `setVisibleByDefault(false)` + `viewer.showEntity(...)` **1 lần lúc spawn** entity (không lặp lại mỗi tick), nên giả định `viewers` không đổi trong suốt vòng đời effect.
 
 ## `FxPart` — 1 phần tử hình ảnh
 
@@ -173,4 +175,4 @@ Runnable này tự `cancel()` khi `handle.isActive()` trả `false` — vòng đ
 - **World/chunk unload đã được xử lý an toàn, không cần tự check ở tầng gọi**: nếu `origin.getWorld()` trả `null` (world đã unload, vd. qua Multiverse), `FxEffect.tick()` tự `stop()` thay vì ném NPE giữa vòng lặp dùng chung của `FxEngine`. Mỗi `ParticleRenderer`/`AbstractDisplayRenderer` tự kiểm tra `world.isChunkLoaded(...)` **1 lần mỗi part mỗi tick** (tại vị trí root của part, không phải từng điểm — đánh đổi để tránh chi phí check theo từng điểm) trước khi spawn/teleport, bỏ qua tick đó thay vì force-load chunk. `AbstractDisplayRenderer` cũng tự lọc bỏ entity đã bị server dọn (`!isValid()`) trước khi đếm capacity, để không gọi `teleport`/`setTransformation` lên 1 entity đã chết.
 
 ---
-◀ [Dungeon System](Dungeon-System.md) · Về [Trang chủ](Home.md)
+◀ [Block System](Block-System.md) · Về [Trang chủ](Home.md)

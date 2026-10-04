@@ -65,8 +65,7 @@ public class Registry<T> {
      * subfolders. The registry id for each file is its path relative to that folder with the
      * extension stripped, so nesting is reflected directly in the id and the id always points
      * straight back at its own file - e.g. {@code items/weapons/fire_sword.json} -> id
-     * {@code "weapons/fire_sword"}. A flat folder (no subfolders) behaves exactly as before:
-     * relative path of a top-level file is just its own filename.
+     * {@code "weapons/fire_sword"}.
      */
     public @Blocking void loadFrom(RogueSmpCore plugin) {
         if (locationKey == null || codec == null) return;
@@ -143,9 +142,7 @@ public class Registry<T> {
 
     /**
      * Declares a tag that must always exist on this registry (see {@link com.roguesmp.tag.Tags}).
-     * {@link #loadTagsFrom} keeps this exact instance across reloads - resetting it to the entries
-     * of {@code tags/<id>.json}, or to empty when there's no such file - instead of creating a new
-     * {@link SmpTag}, so code can hold it directly.
+     * {@link #loadTagsFrom} keeps this exact instance across reloads.
      */
     public void registerBuiltInTag(SmpTag<T> tag) {
         if (locationKey == null) {
@@ -158,8 +155,7 @@ public class Registry<T> {
     /**
      * Loads every {@code *.json} file under {@code <dataFolder>/<locationKey>/tags/} as an
      * {@link SmpTag} of this registry's type, auto-registered by filename and resolved against
-     * this registry's own {@link #get(String)}. Drop a new file in that folder and it's
-     * automatically picked up next load — no manual registration needed.
+     * this registry's own {@link #get(String)}.
      * <p>
      * Must run after this registry's own entries are loaded/registered, since tag resolution
      * looks entries up by id via {@link #get(String)}.
@@ -196,8 +192,7 @@ public class Registry<T> {
             }
         }
 
-        // Built-in tags always exist and keep their identity across reloads (see registerBuiltInTag):
-        // reset each to its file's entries (or empty) and swap it in for the throwaway loaded above.
+        // Built-in tags always exist and keep their identity across reloads (see registerBuiltInTag).
         // Must happen before the resolve loop below, so a "#builtin" reference resolves fresh contents.
         for (SmpTag<T> builtIn : builtInTags.values()) {
             SmpTag<T> loaded = tags.get(builtIn.getId());
@@ -211,8 +206,7 @@ public class Registry<T> {
         }
 
         // Rebuild the reverse index on every already-requested entry Holder (see getHolder) - which
-        // tags does this entry now belong to. Only a handful of holders ever get requested, and this
-        // runs at (re)load time only, so an O(holders * tags) scan here is fine.
+        // tags does this entry now belong to.
         for (Holder<T> holder : holders.values()) {
             if (holder.isBound()) linkHolderTags(holder);
         }
@@ -240,9 +234,7 @@ public class Registry<T> {
     /**
      * Writes {@code rawEntries} to {@code <locationKey>/tags/<tagId>.json} and reloads this
      * registry's tags so {@link #getTag} / {@link #getTags} immediately reflect the change
-     * (including re-resolving any {@code #tagId} reference to/from it). Works for any tag-capable
-     * registry, not just file-backed ones (see the {@link #Registry(String)} constructor) - only
-     * {@code locationKey} matters here, same as {@link #loadTagsFrom}.
+     * (including re-resolving any {@code #tagId} reference to/from it).
      *
      * @return true if the file was written successfully
      */
@@ -278,8 +270,7 @@ public class Registry<T> {
 
     /**
      * Deletes {@code <locationKey>/tags/<tagId>.json} and reloads this registry's tags. Returns
-     * true if the file didn't exist to begin with, same "already gone counts as done" shape as
-     * {@link #removeAndDeleteFiles}.
+     * true if the file didn't exist to begin with.
      */
     public @Blocking boolean deleteTag(RogueSmpCore plugin, String tagId) {
         if (locationKey == null) return false;
@@ -449,9 +440,7 @@ public class Registry<T> {
     }
 
     /**
-     * A ready-made codec for referencing an entry of some registry by id as a {@link Holder} - so
-     * you don't need to hand-write {@code Codec.STRING.xmap(registry::getHolder, Holder::getId)}
-     * for every registry that needs one.
+     * A ready-made codec for referencing an entry of some registry by id as a {@link Holder}.
      * <p>
      * Takes a <b>supplier</b> (e.g. {@code () -> Registries.QUEST}) rather than a {@code Registry<T>}
      * directly, and never calls it until this codec is actually decoded/encoded. That's not
@@ -484,9 +473,7 @@ public class Registry<T> {
 
     /**
      * Checks every registry (data-driven or in-memory) for holders nobody ever registered a value
-     * for, and logs a warning for each. Call once, after all loading/bootstrapping finishes, to
-     * catch a bad/typo'd reference id at startup instead of a {@link Holder#value()} exception
-     * deep in gameplay code.
+     * for, and logs a warning for each.
      */
     public static void validateAllHolders() {
         for (Registry<?> registry : ALL_REGISTRIES) {
@@ -545,8 +532,7 @@ public class Registry<T> {
     /**
      * Location key of every registry that's actually file-backed (has a codec) - e.g. "items",
      * "entities". Excludes code-populated registries (e.g. {@code enchants}) whose entries come
-     * from a bootstrapper, not a {@code *.json} folder, and so would just be wiped by a reload
-     * rather than repopulated.
+     * from a bootstrapper, not a {@code *.json} folder.
      */
     public static @Unmodifiable List<String> getReloadableKeys() {
         List<String> keys = new ArrayList<>();
@@ -557,7 +543,7 @@ public class Registry<T> {
     }
 
     /**
-     * Clears and reloads (entries + tags) the single data-driven registry matching
+     * Clears and reloads (entries + tags) the data-driven registry matching
      * {@code locationKey} (case-insensitive). Returns {@code false} if no reloadable registry has
      * that key.
      */

@@ -120,19 +120,10 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Load data from files, databases, etc
     public void loadData() {
-        Registries.loadAllData(this); // also loads/resolves every registry's tags/ folder
+        Registries.loadAllData(this);
 
         CraftingManager.init(); // indexes Registries.CRAFTING_RECIPE - must run after it's loaded above
         VanillaRecipeReplacer.replaceAll(); // swaps matching vanilla tool/armor recipes - must run after items load above
-    }
-
-    // Live-reload every data-driven registry (items, entities, quests, npcs, loot tables,
-    // crafting recipes, ability configs, ...) from disk without restarting the server
-    public void reloadData() {
-        Registries.reloadAllData(this); // also loads/resolves every registry's tags/ folder
-
-        CraftingManager.getInstance().rebuild(); // re-derives from Registries.CRAFTING_RECIPE - must run after it's reloaded above
-        PlayerManager.getInstance().syncClassRosters(); // grant/unequip against the reloaded class rosters
     }
 
     /**

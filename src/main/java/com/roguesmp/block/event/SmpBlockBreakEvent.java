@@ -1,12 +1,16 @@
 package com.roguesmp.block.event;
 
 import com.roguesmp.block.SmpBlock;
-import org.bukkit.entity.Player;
+import com.roguesmp.player.SmpPlayer;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * Fired by {@code BlockManager#destroy}, right before any teardown (drops, state removal, display
@@ -17,27 +21,44 @@ public class SmpBlockBreakEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
 
     private final @NotNull SmpBlock block;
-    private final @NotNull Player player;
+    private final @Nullable SmpPlayer player;
     private final @NotNull BlockBreakEvent breakEvent;
+    private final @NotNull List<ItemStack> drops;
+    private int experience;
     private boolean cancelled;
 
-    public SmpBlockBreakEvent(@NotNull SmpBlock block, @NotNull Player player, @NotNull BlockBreakEvent breakEvent) {
+    public SmpBlockBreakEvent(@NotNull SmpBlock block, @Nullable SmpPlayer player, @NotNull BlockBreakEvent breakEvent,
+                               @NotNull List<ItemStack> drops, int experience) {
         this.block = block;
         this.player = player;
         this.breakEvent = breakEvent;
+        this.drops = drops;
+        this.experience = experience;
     }
 
     public @NotNull SmpBlock getBlock() {
         return block;
     }
 
-    public @NotNull Player getPlayer() {
+    public @Nullable SmpPlayer getPlayer() {
         return player;
     }
 
-    /** The vanilla event this fired from - inspect it for drop/exp settings, but don't cancel it directly, cancel this instead. */
     public @NotNull BlockBreakEvent getBreakEvent() {
         return breakEvent;
+    }
+
+    /** Return a mutable list that this event will drops */
+    public @NotNull List<ItemStack> getDrops() {
+        return drops;
+    }
+
+    public int getExperience() {
+        return experience;
+    }
+
+    public void setExperience(int experience) {
+        this.experience = experience;
     }
 
     @Override

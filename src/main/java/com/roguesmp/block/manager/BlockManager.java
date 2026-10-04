@@ -4,15 +4,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.BlockPos;
-import com.roguesmp.block.BlockType;
 import com.roguesmp.block.BlockVisual;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.BlockTypes;
+import com.roguesmp.block.Tickable;
 import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.event.SmpBlockPlaceEvent;
 import com.roguesmp.block.mining.MiningManager;
 import com.roguesmp.block.persistence.BlockDataRepository;
 import com.roguesmp.codec.DataResult;
+import com.roguesmp.player.PlayerManager;
+import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -34,17 +36,12 @@ import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class BlockManager {
     private static BlockManager INSTANCE = null;
     private final Map<BlockPos, SmpBlock> blocks = new HashMap<>();
+    private final Set<Tickable> tickingBlocks = new HashSet<>();
     private final RogueSmpCore plugin;
     private final BlockDataRepository repository;
     private final MiningManager mining;
@@ -61,51 +58,73 @@ public class BlockManager {
         this.mining = new MiningManager(this, plugin);
 
         plugin.getServer().getScheduler().runTaskTimer(plugin, this::flushSlice, 1L, 1L);
+        plugin.getServer().getScheduler().runTaskTimer(plugin, this::tickBlocks, 1L, 1L);
     }
 
-    public boolean place(Player player, EquipmentSlot hand, Block clicked, BlockFace face, String blockId){
-        Block target = clicked.isReplaceable() ? clicked : clicked.getRelative(face);
-        if(!target.isReplaceable() || blocks.containsKey(BlockPos.of(target)) || isOccupied(target)) return false;
+    private void tickBlocks(){
+        for(Tickable block : tickingBlocks){
+            block.tick();
+        }
+    }
+
+    private void registerIfTickable(SmpBlock block){
+        if(block instanceof Tickable tickable) tickingBlocks.add(tickable);
+    }
+
+    /**
+     * Places {@code blockId} at {@code target}. With a {@code player}, this will
+     * fire {@link BlockPlaceEvent}/{@link SmpBlockPlaceEvent}, checks for nearby entities, consumes
+     * the item in {@code hand}, plays effects, and calls {@link SmpBlock#onPlaced}. With no player,
+     * the above methods will not be called.
+     * The target must be replaceable and not already tracked (custom block).
+     */
+    public boolean place(Block target, String blockId, @Nullable Player player, @Nullable EquipmentSlot hand, @Nullable Block clicked){
+        if(!target.isReplaceable() || blocks.containsKey(BlockPos.of(target)) || (player != null && isOccupied(target))) return false;
 
         SmpBlock block = BlockTypes.create(blockId);
         if(block == null) return false;
 
-        ItemStack inHand = player.getInventory().getItem(hand);
+        ItemStack inHand = player != null ? player.getInventory().getItem(hand) : null;
         BlockState replaced = target.getState(false);
         target.setType(Material.BARRIER, false);
 
-        BlockPlaceEvent event = new BlockPlaceEvent(target, replaced, clicked, inHand, player, true, hand);
-        Bukkit.getPluginManager().callEvent(event);
-        if(event.isCancelled() || !event.canBuild()){
-            replaced.update(true, false);
-            return false;
+        if(player != null){
+            BlockPlaceEvent event = new BlockPlaceEvent(target, replaced, clicked != null ? clicked : target, inHand, player, true, hand);
+            Bukkit.getPluginManager().callEvent(event);
+            if(event.isCancelled() || !event.canBuild()){
+                replaced.update(true, false);
+                return false;
+            }
         }
 
-        BlockType<?> type = block.getType();
-
-        SmpBlockPlaceEvent smpEvent = new SmpBlockPlaceEvent(player, type, target);
-        Bukkit.getPluginManager().callEvent(smpEvent);
-        if(smpEvent.isCancelled()){
-            replaced.update(true, false);
-            return false;
+        if(player != null){
+            SmpBlockPlaceEvent smpEvent = new SmpBlockPlaceEvent(player, block, target);
+            Bukkit.getPluginManager().callEvent(smpEvent);
+            if(smpEvent.isCancelled()){
+                replaced.update(true, false);
+                return false;
+            }
         }
 
         BlockPos pos = BlockPos.of(target);
-        Entity display = BlockVisual.spawn(pos, type, facingYaw(player));
+        Entity display = BlockVisual.spawn(pos, block);
         block.bind(pos, display.getUniqueId());
-        block.onPlaced(player, inHand);
+        if(player != null) block.onPlaced(player, inHand);
         block.markDirty();
         block.markHydrated();
         blocks.put(pos, block);
+        registerIfTickable(block);
         Utils.runLater(() -> forcePhysicsUpdate(pos, block));
 
-        if(player.getGameMode() != GameMode.CREATIVE){
-            inHand.setAmount(inHand.getAmount() - 1);
-            player.getInventory().setItem(hand, inHand);
+        if(player != null){
+            if(player.getGameMode() != GameMode.CREATIVE){
+                inHand.setAmount(inHand.getAmount() - 1);
+                player.getInventory().setItem(hand, inHand);
+            }
+//            Sound is also played client-side, so it's best to use a vanilla item that is not a placeable block to prevent double sound.
+            target.getWorld().playSound(target.getLocation().toCenterLocation(), block.getProperties().placeSound().asString(), SoundCategory.BLOCKS, 1f, 0.8f);
+            player.swingHand(hand);
         }
-//        Sound is also played client-side, so it's best to use a vanilla item that is not a placeable block to prevent double sound.
-        target.getWorld().playSound(target.getLocation().toCenterLocation(), type.placeSound().asString(), SoundCategory.BLOCKS, 1f, 0.8f);
-        player.swingHand(hand);
         return true;
     }
 
@@ -118,49 +137,110 @@ public class BlockManager {
         bukkitBlock.setType(Material.BARRIER, true);
     }
 
-    public boolean breakBlock(Block block, Player player){
-        BlockBreakEvent event = new BlockBreakEvent(block, player);
-        Bukkit.getPluginManager().callEvent(event);
-        if(event.isCancelled()) return false;
+    /**
+     * Breaks whatever's at {@code target}. With a {@code player}, it will call {@link BlockBreakEvent}
+     * and {@link #handlePlayerBreak} reacts to it (drops, xp, effects, {@code onBlockBreak}). With
+     * no player, this will be a plain removal - the
+     * tracked block (if any) is just unloaded and untracked, no drops/events is called; the
+     * caller is responsible for those. Either way the underlying block is always cleared to air.
+     *
+     * @param playEffect Whether the particle and sound effect is played (only in-effect when player = null).
+     */
+    public boolean breakBlock(Block target, @Nullable Player player, boolean playEffect){
+        if(player != null){
+            BlockBreakEvent event = new BlockBreakEvent(target, player);
+            Bukkit.getPluginManager().callEvent(event);
+            if(event.isCancelled()) return false;
+        } else {
+            SmpBlock block = blocks.get(BlockPos.of(target));
+            if(block != null){
+                if (playEffect) playBreakEffects(block);
+                block.onUnload();
+                remove(block, Bukkit.getEntity(block.getDisplayId()));
+            } else { //Probably vanilla?
+                if (playEffect) {
+                    World world = target.getWorld();
+                    ItemStack tar = ItemStack.of(target.getType());
+                    Location center = target.getLocation().toCenterLocation();
+                    world.playSound(center, target.getBlockSoundGroup().getBreakSound(), SoundCategory.BLOCKS, 1f, 1f);
+                    world.spawnParticle(Particle.ITEM, center, 24, 0.25, 0.25, 0.25, 0.05, tar);
+                }
+            }
+        }
 
-        block.setType(Material.AIR, true);
+        target.setType(Material.AIR, true);
         return true;
     }
 
-    public void destroy(BlockBreakEvent event){
+    public boolean breakBlock(Block target, @Nullable Player player) {
+        return breakBlock(target, player, true);
+    }
+
+    public void handlePlayerBreak(BlockBreakEvent event){
         SmpBlock block = blocks.get(BlockPos.of(event.getBlock()));
         if(block == null) return;
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(event.getPlayer());
+        if (smpPlayer == null) return;
+        boolean shouldDrop = event.isDropItems() && event.getPlayer().getGameMode() != GameMode.CREATIVE;
+        List<ItemStack> drops = shouldDrop ? new ArrayList<>(block.getDrops(smpPlayer)) : new ArrayList<>();
+        int experience = shouldDrop ? block.getExperience(smpPlayer) : 0;
 
-        SmpBlockBreakEvent smpEvent = new SmpBlockBreakEvent(block, event.getPlayer(), event);
+        SmpBlockBreakEvent smpEvent = new SmpBlockBreakEvent(block, smpPlayer, event, drops, experience);
         Bukkit.getPluginManager().callEvent(smpEvent);
         if(smpEvent.isCancelled()){
             event.setCancelled(true);
             return;
         }
 
+        block.onBlockBreak(smpEvent);
         block.onUnload();
-        block.onBlockBreak(event);
+
+        Location location = event.getBlock().getLocation();
+        for (ItemStack drop : smpEvent.getDrops()) {
+            location.getWorld().dropItemNaturally(location.toCenterLocation(), drop);
+        }
+
+        int experienceDropped = smpEvent.getExperience();
+        if (experienceDropped > 0) {
+            location.getWorld().spawn(location.toCenterLocation(), ExperienceOrb.class, orb -> orb.setExperience(experience));
+        }
 
         Entity display = Bukkit.getEntity(block.getDisplayId());
-        playBreakEffects(block, display);
+        playBreakEffects(block);
         remove(block, display);
     }
 
     private void remove(SmpBlock block, @Nullable Entity display){
         BlockPos pos = block.getPos();
         blocks.remove(pos);
+        if (block instanceof Tickable) tickingBlocks.remove(block);
         mining.cancelAt(pos);
         if(block.isStateful()) repository.delete(pos);
 
         if(display != null) display.remove();
     }
 
-    private void playBreakEffects(SmpBlock block, @Nullable Entity display){
-        BlockType<?> type = block.getType();
+    /**
+     * Small burst of item particles hugging the face the player is looking at, mirroring vanilla's
+     * own per-tick dig particles.
+     */
+    public void spawnMiningParticles(SmpBlock block, BlockFace face){
         Location center = block.getLocation().toCenterLocation();
         World world = center.getWorld();
-        ItemStack stack = display instanceof ItemDisplay itemDisplay ? itemDisplay.getItemStack() : BlockVisual.displayStack(type);
-        world.playSound(center, type.breakSound().asString(), SoundCategory.BLOCKS, 1f, 1f);
+
+        Location origin = center.clone().add(face.getModX() * 0.5, face.getModY() * 0.5, face.getModZ() * 0.5);
+        double spreadX = face.getModX() == 0 ? 0.2 : 0.03;
+        double spreadY = face.getModY() == 0 ? 0.2 : 0.03;
+        double spreadZ = face.getModZ() == 0 ? 0.2 : 0.03;
+
+        world.spawnParticle(Particle.ITEM, origin, 1, spreadX, spreadY, spreadZ, 0f, BlockVisual.displayStack(block));
+    }
+
+    private void playBreakEffects(SmpBlock block){
+        Location center = block.getLocation().toCenterLocation();
+        World world = center.getWorld();
+        ItemStack stack = BlockVisual.displayStack(block);
+        world.playSound(center, block.getProperties().breakSound().asString(), SoundCategory.BLOCKS, 1f, 1f);
         world.spawnParticle(Particle.ITEM, center, 24, 0.25, 0.25, 0.25, 0.05, stack);
     }
 
@@ -168,10 +248,6 @@ public class BlockManager {
         return !target.getWorld().getNearbyEntities(BoundingBox.of(target), entity ->
                 entity instanceof LivingEntity living && !(living instanceof Player p && p.getGameMode() == GameMode.SPECTATOR)
         ).isEmpty();
-    }
-
-    private float facingYaw(Player player){
-        return (Math.round(player.getLocation().getYaw() / 90f) * 90f + 180f) % 360f;
     }
 
     public void onEntitiesLoad(Collection<Entity> entities){
@@ -218,10 +294,14 @@ public class BlockManager {
         }
 
         block.bind(marker.pos(), display.getUniqueId());
+        BlockVisual.refreshModel(block);
         blocks.put(marker.pos(), block);
 
         if(block.isStateful()) hydrate(block);
-        else block.markHydrated();
+        else {
+            block.markHydrated();
+            registerIfTickable(block);
+        }
     }
 
     private void detach(BlockPos pos, Entity display, Map<BlockPos, String> changed){
@@ -233,6 +313,7 @@ public class BlockManager {
         block.onUnload();
         mining.cancelAt(pos);
         blocks.remove(pos);
+        if (block instanceof Tickable) tickingBlocks.remove(block);
     }
 
     private void hydrate(SmpBlock block){
@@ -267,6 +348,7 @@ public class BlockManager {
 
         block.clearDirty();
         block.markHydrated();
+        registerIfTickable(block);
         block.onHydrated();
     }
 
@@ -328,6 +410,7 @@ public class BlockManager {
 
         repository.closeWith(states);
         blocks.clear();
+        tickingBlocks.clear();
     }
 
     public static BlockManager getInstance() {

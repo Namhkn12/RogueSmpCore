@@ -2,7 +2,7 @@
 
 Package: [`com.roguesmp.attribute`](../src/main/java/com/roguesmp/attribute)
 
-`SmpAttribute` là 1 interface đảm nhận 2 nhiệm vụ rất khác nhau qua cùng 1 API: bọc 1 `Attribute` vanilla của Bukkit (tốc độ di chuyển, kháng knockback, ...), và hook vào 1 bề mặt gameplay-event tùy chỉnh rộng cho các stat không có tương đương trong vanilla (% sát thương phép, hiệu ứng on-hit, ...). **Không có `AttributeRegistry`** — mỗi attribute chỉ đơn giản là 1 hằng số cứng trong enum [`Attributes`](../src/main/java/com/roguesmp/constant/Attributes.java).
+`SmpAttribute` là 1 interface đảm nhận 2 nhiệm vụ rất khác nhau qua cùng 1 API: bọc 1 `Attribute` vanilla của Bukkit (tốc độ di chuyển, kháng knockback, ...), và hook vào 1 bề mặt gameplay-event tùy chỉnh rộng cho các stat không có tương đương trong vanilla (% sát thương phép, hiệu ứng on-hit, ...). **Không có `AttributeRegistry`** — mỗi attribute chỉ đơn giản là 1 hằng số cứng trong enum [`Attributes`](../src/main/java/com/roguesmp/attribute/Attributes.java).
 
 ## Interface `SmpAttribute`
 
@@ -47,13 +47,14 @@ Ngoài ra còn có các helper lore (`defaultFlatLoreProvider`, `defaultPercentL
 
 ## Enum `Attributes` — cái "registry" không phải registry
 
-[`Attributes.java`](../src/main/java/com/roguesmp/constant/Attributes.java) có ~30 hằng số, chia nhóm theo category (combat/offense, defense/vitals, land movement, vertical/physics, aquatic, utility/world). Mỗi hằng số được tạo bằng cách truyền thẳng 1 instance `SmpAttribute` mới:
+> ⚠️ Class này nằm ở [`attribute/Attributes.java`](../src/main/java/com/roguesmp/attribute/Attributes.java) — **không** phải `constant/Attributes.java` như tên gói có thể gợi ý ở nơi khác.
+
+Có 34 hằng số, chia nhóm theo category bằng comment trong source (combat/offense, defense/vitals, land movement, vertical/physics, aquatic, utility/world, mining). Mỗi hằng số được tạo bằng cách truyền thẳng 1 instance `SmpAttribute` mới:
 
 ```java
 public enum Attributes {
-    @SerializedName("melee_damage_base")
+    // --- COMBAT & OFFENSE ---
     MELEE_DAMAGE_BASE(new MeleeDamageBase()),
-    @SerializedName("magic_damage_percent")
     MAGIC_DAMAGE_PERCENT(new MagicDamagePercent()),
     ...
     ;
@@ -64,7 +65,7 @@ public enum Attributes {
 }
 ```
 
-Enum này cũng chính là thứ mà Codec/Gson dùng để serialize map attribute của item (`Codec.enumOf(Attributes.class)` — xem `EquipAttributeComponent` trong [Item System](Item-System.md)). **Thêm 1 attribute mới chỉ đơn giản là thêm 1 hằng số enum** — không có bước đăng ký riêng nào khác.
+**Không có `@SerializedName` trên bất kỳ hằng số nào** — enum này được decode qua `Codec.enumOf(Attributes.class)` (xem [Codec System](Codec-System.md)), không qua Gson, nên chuỗi JSON phải khớp (không phân biệt hoa/thường) với **tên hằng số Java**, vd. `"melee_damage_base"` hoặc `"MELEE_DAMAGE_BASE"` đều decode ra `MELEE_DAMAGE_BASE`. Đây cũng chính là codec dùng để serialize map attribute của item (`EquipAttributeComponent`/`GemDataComponent` — xem [Item System](Item-System.md#tham-khảo-đầy-đủ--mọi-component-đã-đăng-ký-dành-cho-designer-viết-json) để có danh sách đầy đủ 34 hằng số theo nhóm). **Thêm 1 attribute mới chỉ đơn giản là thêm 1 hằng số enum** — không có bước đăng ký registry nào khác.
 
 ## Ví dụ 1 — bọc vanilla đơn giản: `KnockbackResistance`
 
@@ -106,6 +107,7 @@ public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer p
 
 Không override cặp bọc vanilla nào cả — thuần túy là hook tùy chỉnh. `DamageType` ([`constant/DamageType.java`](../src/main/java/com/roguesmp/constant/DamageType.java)) là 1 enum tùy chỉnh (`MELEE`, `MELEE_ABILITY`, `PROJECTILE`, `PROJECTILE_ABILITY`, `MAGIC`, `THORNS`, `BLAST`, `FIRE`, `FALL`, `AILMENT`, `TRUE`, `OTHER`) được map từ `EntityDamageEvent.DamageCause` của Bukkit. `DamageEvent` ([`event/DamageEvent.java`](../src/main/java/com/roguesmp/event/DamageEvent.java)) là 1 `Event` tùy chỉnh của Bukkit, với các lệnh gọi `addDamageModifier(double value, DamageOperation operation)` theo từng giai đoạn để dựng lên sát thương cuối cùng. `MeleeDamageBase` theo đúng khuôn mẫu này, kiểm tra `DamageType.MELEE` với `DamageOperation.BASE`.
 
+<a id="attribute-thực-sự-được-áp-dụng-như-thế-nào--không-có-attributemanager"></a>
 ## Attribute thực sự được áp dụng như thế nào — không có `AttributeManager`
 
 Trách nhiệm được chia làm 2 nơi, cả 2 đều duyệt qua 1 `EnumMap<Attributes, Double> activeAttributes` sống trên player:
@@ -125,7 +127,7 @@ player.getActiveAttributes().forEach((attributes, value) ->
 
 1. Tạo 1 class trong `attribute/impl/` implement `SmpAttribute`. Implement `getId`, `getEnumConstant`, `getSimpleName`, `getDisplayText`.
 2. Nếu nó bọc 1 `Attribute` vanilla: override `addVanillaAttribute`/`removeVanillaAttribute`, dùng 1 `NamespacedKey` modifier ổn định (xem `KnockbackResistance`). Nếu là custom: override (các) hook `on*` liên quan (xem `MagicDamagePercent`).
-3. Thêm 1 hằng số vào `constant/Attributes.java`: `@SerializedName("snake_case_id") YOUR_ATTR(new YourImpl()),`.
+3. Thêm 1 hằng số vào [`attribute/Attributes.java`](../src/main/java/com/roguesmp/attribute/Attributes.java): `YOUR_ATTR(new YourImpl()),` — tên hằng số chính là chuỗi dùng trong JSON (không phân biệt hoa/thường), không cần `@SerializedName`.
 4. Xong — `EquipAttributeComponent`/`SmpPlayer.updateSlotStat` và `AttributeMechanic` đã duyệt tổng quát qua mọi giá trị `Attributes`, nên hằng số mới sẽ tự động được xử lý lúc equip/unequip và trong các hook event liên quan. Không có bước đăng ký registry nào cần thiết.
 
 ## Lưu ý & lỗi thường gặp

@@ -8,11 +8,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.RayTraceResult;
 
 import java.util.Iterator;
 import java.util.HashMap;
@@ -25,6 +28,8 @@ import java.util.UUID;
  * matching abort event never fires.
  */
 public class MiningManager {
+
+    private static final double MINING_PARTICLE_REACH = 8.0;
 
     private final BlockManager manager;
     private final Map<UUID, BreakSession> sessions = new HashMap<>();
@@ -40,18 +45,18 @@ public class MiningManager {
         if (player.getGameMode() != GameMode.SURVIVAL) return;
 
         SmpBlock block = manager.get(BlockPos.of(event.getBlock()));
-        if (block == null || !block.isHydrated() || block.getType().hardness() < 0) return;
+        if (block == null || !block.isHydrated() || block.getProperties().hardness() < 0) return;
 
         stop(player.getUniqueId());
 
-        int ticks = MiningSpeedCalculator.ticksToBreak(player, block.getType());
+        int ticks = MiningSpeedCalculator.ticksToBreak(player, block.getProperties());
         if (ticks == MiningSpeedCalculator.CANNOT_BREAK) return;
         if (ticks == 0) {
-            manager.breakBlock(event.getBlock(), player);
+            manager.breakBlock(event.getBlock(), player, true);
             return;
         }
 
-        UUID crackOverlayId = BlockVisual.spawnCrackOverlay(block.getPos(), 0).getUniqueId();
+        UUID crackOverlayId = BlockVisual.spawnCrackOverlay(block.getPos(), 0, event.getPlayer()).getUniqueId();
         BreakSession session = new BreakSession(player.getUniqueId(), block, player.getInventory().getHeldItemSlot(), crackOverlayId);
         sessions.put(player.getUniqueId(), session);
         minerAt.put(block.getPos(), player.getUniqueId());
@@ -64,7 +69,6 @@ public class MiningManager {
 
     private void finishSession(BreakSession session) {
         minerAt.remove(session.block().getPos(), session.playerId());
-        clearCrack(session);
         removeCrackOverlay(session);
     }
 
@@ -74,10 +78,7 @@ public class MiningManager {
     }
 
     public void stopAll() {
-        sessions.values().forEach(session -> {
-            clearCrack(session);
-            removeCrackOverlay(session);
-        });
+        sessions.values().forEach(this::removeCrackOverlay);
         sessions.clear();
         minerAt.clear();
     }
@@ -94,7 +95,7 @@ public class MiningManager {
                 continue;
             }
 
-            int ticks = MiningSpeedCalculator.ticksToBreak(player, session.block().getType());
+            int ticks = MiningSpeedCalculator.ticksToBreak(player, session.block().getProperties());
             if (ticks == MiningSpeedCalculator.CANNOT_BREAK) {
                 iterator.remove();
                 finishSession(session);
@@ -104,15 +105,25 @@ public class MiningManager {
             if (ticks == 0 || session.advance(ticks)) {
                 iterator.remove();
                 finishSession(session);
-                manager.breakBlock(session.block().getLocation().getBlock(), player);
+                manager.breakBlock(session.block().getLocation().getBlock(), player, true);
                 continue;
             }
 
+            spawnMiningParticles(player, session.block());
+
             if (session.crackChanged(ticks)) {
-                player.sendBlockDamage(session.block().getLocation(), session.crackProgress(ticks));
                 updateCrackOverlay(session);
             }
         }
+    }
+
+    private void spawnMiningParticles(Player player, SmpBlock block) {
+        BlockFace face = miningFace(player, block);
+        if (face != null) manager.spawnMiningParticles(block, face);
+    }
+
+    private @Nullable BlockFace miningFace(Player player, SmpBlock block) {
+        return player.getTargetBlockFace((int) MINING_PARTICLE_REACH);
     }
 
     private void updateCrackOverlay(BreakSession session) {
@@ -139,10 +150,5 @@ public class MiningManager {
         if (!center.getWorld().equals(player.getWorld())) return false;
         double reach = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).getValue();
         return player.getEyeLocation().distanceSquared(center) <= reach * reach;
-    }
-
-    private void clearCrack(BreakSession session) {
-        Player player = Bukkit.getPlayer(session.playerId());
-        if (player != null) player.sendBlockDamage(session.block().getLocation(), 0f);
     }
 }

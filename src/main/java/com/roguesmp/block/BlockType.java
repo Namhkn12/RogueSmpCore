@@ -1,77 +1,45 @@
 package com.roguesmp.block;
 
-import com.roguesmp.constant.Keys;
-import com.roguesmp.item.ItemType;
-import com.roguesmp.registry.Holder;
-import com.roguesmp.registry.Registries;
-import net.kyori.adventure.key.Key;
+import com.roguesmp.codec.Codec;
 
-import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.BiFunction;
 
 /**
- * A custom block's compile-time identity: its id and the factory for its {@link SmpBlock} subclass.
- * The id is independent of any item; items place a block through {@code BlockPlaceComponent}. Its tunable data is not stored here - it is loaded
- * into {@link Registries#BLOCK_PROPERTIES} and read through a {@link Holder}, so a data reload takes
- * effect immediately. A declared type with no {@code blocks/<id>.json} uses {@link BlockProperties#DEFAULT}
- * and is reported by {@code Registry.validateAllHolders()}. Declare instances as constants in {@link BlockTypes}.
+ * A type of custom block. Declare instances as constants in {@link BlockTypes}.
+ * Many block ids can share one type.
  */
-public final class BlockType<T extends SmpBlock> {
+public final class BlockType<D, B extends SmpBlock> {
 
-    private final String id;
-    private final Supplier<T> factory;
-    private final Holder<BlockProperties> properties;
+    private final String key;
+    private final BiFunction<BlockProperties, D, B> factory;
+    private final Codec<BlockData> dataCodec;
 
-    BlockType(String id, Supplier<T> factory) {
-        this.id = id;
+    @SuppressWarnings("unchecked")
+    BlockType(String key, Codec<D> dataCodec, D defaults, BiFunction<BlockProperties, D, B> factory) {
+        this.key = key;
         this.factory = factory;
-        this.properties = Registries.BLOCK_PROPERTIES.getHolder(id);
+        this.dataCodec = Codec.composite(
+                BlockProperties.CODEC.forGetter(BlockData::properties),
+                dataCodec.optionalFieldOf("data", defaults).forGetter((BlockData file) -> (D) file.data()),
+                (properties, data) -> new BlockData(this, properties, data)
+        );
     }
 
-    public T create() {
-        T block = factory.get();
-        block.setType(this);
-        return block;
+    /** The value of {@code "type"} in a block's JSON that selects this type. */
+    public String key() {
+        return key;
     }
 
-    public String id() {
-        return id;
+    Codec<BlockData> dataCodec() {
+        return dataCodec;
     }
 
-    public BlockProperties properties() {
-        return properties.isBound() ? properties.value() : BlockProperties.DEFAULT;
+    public B create(BlockProperties properties, D data) {
+        return factory.apply(properties, data);
     }
 
-    public int hardness() {
-        return properties().hardness();
-    }
-
-    public Set<Holder<ItemType>> tools() {
-        return properties().tools();
-    }
-
-    public int breakStrength() {
-        return properties().breakStrength();
-    }
-
-    public Key model() {
-        return properties().model();
-    }
-
-    public List<BlockDrop> drops() {
-        return properties().drops();
-    }
-
-    public BlockExperience experience() {
-        return properties().experience();
-    }
-
-    public Key placeSound() {
-        return properties().placeSound();
-    }
-
-    public Key breakSound() {
-        return properties().breakSound();
+    @SuppressWarnings("unchecked")
+    SmpBlock create(BlockData data) {
+        return factory.apply(data.properties(), (D) data.data());
     }
 }

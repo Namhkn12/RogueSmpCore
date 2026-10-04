@@ -2,7 +2,7 @@
 
 Package: [`com.roguesmp.player.ability`](../src/main/java/com/roguesmp/player/ability)
 
-`Ability` là class hành vi cho mỗi lần cast (cùng khuôn mẫu hook mặc định no-op với [`SmpAttribute`](Attribute-System.md)/`Spell`). Mỗi impl đi kèm 1 `AbilityInfo<T>` static chứa factory, scaling theo level, các action có tên, và các trigger được load từ JSON. `AbilityLoadout` là container runtime cho từng player, điều phối phím bấm vào chuỗi ability đang trang bị, bao gồm cả 1 cơ chế interceptor cho các ability cần bắt (capture) vài input tiếp theo của player (chế độ ngắm/tích lực).
+`Ability` là class hành vi cho mỗi lần cast (cùng khuôn mẫu hook mặc định no-op với [`SmpAttribute`](Attribute-System.md)/`Spell`). Mỗi impl đi kèm 1 `AbilityInfo<T>` static (factory + action, thuần code) và 1 `AbilityConfig` JSON-loadable riêng (scaling theo level, trigger, mô tả, chi phí nâng cấp), liên kết với nhau qua id. `AbilityLoadout` là container runtime cho từng player, điều phối phím bấm vào chuỗi ability đang trang bị, bao gồm cả 1 cơ chế interceptor cho các ability cần bắt (capture) vài input tiếp theo của player (chế độ ngắm/tích lực). Ability nào 1 player được phép trang bị còn phụ thuộc vào [Player Class System](Player-Class-System.md) đang active.
 
 ## `Ability`
 
@@ -32,47 +32,79 @@ public void onProjectileHit(ProjectileHitEvent event);
 public void onProjectileLaunch(PlayerLaunchProjectileEvent event);
 public void onShootArrow(EntityShootBowEvent event);
 public void onConsumeArrow(ArrowConsumeEvent event);
+public void onStartBlocking(PlayerStartBlockAttackEvent event); // player bắt đầu đỡ đòn bằng khiên
+public void onTeleport(PlayerTeleportEvent event);
+public void onDeath(PlayerDeathEvent event);
+public void onEquip();   // lúc ability được equip vào loadout
+public void onUnequip(); // lúc ability bị gỡ khỏi loadout
 ```
 
-## `AbilityInfo<T>`
+## `AbilityInfo<T>` / `AbilityConfig` — nửa code, nửa JSON
 
-[`player/ability/AbilityInfo.java`](../src/main/java/com/roguesmp/player/ability/AbilityInfo.java) — khai báo như 1 field `INFO` static trên từng impl:
+> ⚠️ **`AbilityInfo` đã được tách làm 2 nửa.** Trước đây 1 `AbilityInfo` duy nhất vừa giữ code (factory, action) vừa tự `populate(...)` dữ liệu JSON (scaling, trigger) vào chính nó. Giờ **`AbilityInfo`** ([`player/ability/AbilityInfo.java`](../src/main/java/com/roguesmp/player/ability/AbilityInfo.java)) chỉ còn giữ phần **không thể là JSON** (id, class, factory, action registry), còn mọi dữ liệu tunable nằm ở 1 record JSON-loadable riêng, **`AbilityConfig`** ([`player/ability/AbilityConfig.java`](../src/main/java/com/roguesmp/player/ability/AbilityConfig.java)), tra theo `id` từ `Registries.ABILITY_CONFIG` **mỗi lần cần** — không cache vào field của `AbilityInfo`, nên 1 lần reload registry lập tức có hiệu lực.
 
 ```java
+// AbilityInfo — khai báo như 1 field INFO static trên từng impl, phần Java thuần
 public static final AbilityInfo<Fireball> INFO = new AbilityInfo<>(ID, Fireball.class, Fireball::new)
         .registerAction("execute", Fireball::handleExecute);
 ```
 
-Cấu trúc:
-- `AbilityAction<T> { AbilityResponse execute(T ability); }` — 1 hành vi có tên.
-- `factory`: `BiFunction<SmpPlayer, Integer, T>` — dựng 1 instance mới (`Fireball::new`).
-- `actionRegistry`: `Map<String, AbilityAction<T>>` — populate trong code qua các lệnh gọi nối chuỗi `.registerAction("key", Class::method)`.
-- `triggerMap`: `Map<AbilityTrigger, String>` (trigger → action key) — populate **từ JSON lúc load** qua `populate(...)`, không hardcode.
-- `scaling`: `Map<String, List<Double>>` — giá trị theo từng level; `getAttributeForLevel(attr, level)` clamp index thành `level - 1`.
-- `findMatchingActionKey(Player, AbilityTrigger.Key)` — tìm trigger đầu tiên khớp cả phím vật lý lẫn predicate tùy chọn.
-- `executeSpecificAction(T, actionKey)` — chạy action đã khớp, fallback về `AbilityResponse.continueChain()` nếu key không tồn tại.
+`AbilityInfo` giữ: `id`, `abilityClass`, `factory` (`BiFunction<SmpPlayer, Integer, T>`, dựng 1 instance mới), `actionRegistry` (`Map<String, AbilityAction<T>>`, populate bằng `.registerAction("key", Class::method)` nối chuỗi trong code). Mọi getter tunable (`getDisplayName()`, `getIcon()`, `getScaling()`, `getDescription()`, `getUpgradeRequirement()`, `findMatchingActionKey(...)`) đều **ủy quyền sang `AbilityConfig`** đọc từ `Registries.ABILITY_CONFIG.getOrDefault(id, AbilityConfig.DEFAULT_CONFIG)` bên trong.
+
+```java
+// AbilityConfig — record JSON-loadable, load từ ability_info/<id>.json vào Registries.ABILITY_CONFIG
+public record AbilityConfig(
+        List<String> description,               // "description": mảng chuỗi MiniMessage, hỗ trợ tag <key>/<key:format> tra theo scaling
+        Map<String, List<Double>> scaling,       // "scaling": key tùy ý -> giá trị theo từng level (index 0 = level 1)
+        String displayName,                      // "display_name"
+        Material icon,                           // "icon" — tên Material, mặc định BARRIER
+        Map<String, AbilityTrigger> triggers,     // "trigger": action-key -> {key, options, displayName}
+        Map<Integer, List<UpgradeRequirement>> upgrades // "upgrades": level (chuỗi "2","3",...) -> list yêu cầu nâng cấp
+) { }
+```
+
+Cả 2 nửa liên kết với nhau **chỉ qua chuỗi id** — file `ability_info/<id>.json` không có field `"id"`/`"type"` nào cả, chính **id registry** (đường dẫn file, bỏ `.json`) phải khớp tuyệt đối với `AbilityInfo.ID` trong code. Lệch tên → ability chạy với `AbilityConfig.DEFAULT_CONFIG` (rỗng, icon `BARRIER`) mà không có lỗi nào được báo.
+
+`getAttributeForLevel(attr, level)` clamp index thành `level - 1` (level bắt đầu từ 1); `findMatchingActionKey(Player, AbilityTrigger.Key)` duyệt `config().triggers()` tìm entry đầu tiên khớp; `executeSpecificAction(T, actionKey)` chạy action đã đăng ký trong `AbilityInfo`, fallback `AbilityResponse.continueChain()` nếu key không tồn tại.
 
 ## `AbilityTrigger` — phím vật lý + predicate tùy chọn
 
 [`player/ability/trigger/AbilityTrigger.java`](../src/main/java/com/roguesmp/player/ability/trigger/AbilityTrigger.java):
 
 ```java
-public enum Key { LEFT_CLICK, RIGHT_CLICK, SWAP, SNEAK, JUMP }
+public enum Key { LEFT_CLICK, RIGHT_CLICK, SWAP, SNEAK, JUMP } // đúng 5 giá trị, không có thêm
 
-private final Key key;
-private final List<String> options = new ArrayList<>();
+public static final Codec<AbilityTrigger> CODEC = Codec.composite(
+        Codec.enumOf(Key.class).fieldOf("key").forGetter(AbilityTrigger::getKey),
+        Codec.listOf(Codec.STRING).optionalFieldOf("options", new ArrayList<>()).forGetter(AbilityTrigger::getOptions),
+        Codec.STRING.optionalFieldOf("displayName", "").forGetter(AbilityTrigger::getDisplayName),
+        AbilityTrigger::new
+);
 
 public boolean matches(Player player, Key pressedKey) {
     if (this.key != pressedKey) return false;
     for (String optionKey : options) {
-        Predicate<Player> condition = TriggerOptionRegistry.get(optionKey);
-        if (condition != null && !condition.test(player)) return false;
+        TriggerOption option = Registries.TRIGGER_OPTION.get(optionKey);
+        if (option != null && !option.test(player)) return false;
     }
     return true;
 }
 ```
 
-1 trigger đọc là "phím vật lý X, **và** mọi predicate có tên đều đúng." Predicate được tra theo tên key qua [`TriggerOptionRegistry`](../src/main/java/com/roguesmp/registry/ability/TriggerOptionRegistry.java), vd. `"sneaking" → Player::isSneaking`, `"holding_projectile" → ...`, `"not_holding_consumable" → ...`.
+1 trigger đọc là "phím vật lý X, **và** mọi predicate có tên đều đúng." `displayName` (optional) chỉ dùng để hiển thị — hữu ích khi 1 ability có nhiều trigger và cần phân biệt chúng trong GUI (vd. `"Kích hoạt (Ngắm): Chuột phải"`).
+
+### `TriggerOption` — bảng predicate, [`Registries.TRIGGER_OPTION`](Registry-System.md)
+
+Đăng ký code-driven qua [`TriggerOptions.java`](../src/main/java/com/roguesmp/player/ability/trigger/TriggerOptions.java). **Hiện chỉ có đúng 4 option đã đăng ký** — đừng giả định có nhiều hơn khi viết trigger JSON:
+
+| id | Predicate |
+| :--- | :--- |
+| `sneaking` | `Player::isSneaking` |
+| `not_sneaking` | `p -> !p.isSneaking()` |
+| `sprinting` | `Player::isSprinting` |
+| `not_sprinting` | `p -> !p.isSprinting()` |
+
+Thêm 1 option mới: khai `public static final TriggerOption YOUR_OPTION = register("your_id", "Tên hiển thị", predicate);` trong `TriggerOptions.java`.
 
 ## `AbilityLoadout` — container runtime cho từng player
 
@@ -85,7 +117,7 @@ private Ability contextOwner = null;   // interceptor: bắt input tiếp theo
 private int contextTicksLeft = 0;
 ```
 
-`equip()` ghi vào cả mảng runtime lẫn persistence `PlayerData`. `loadData(PlayerData)` dựng lại instance qua `AbilityRegistry.getInstance().createInstance(id, smpPlayer, level)`. `tick()` giảm dần `contextTicksLeft` và tự động xóa `contextOwner` khi về 0 (nên 1 chế độ capture sẽ tự hết hạn nếu không bao giờ được release rõ ràng).
+`equip()` ghi vào cả mảng runtime lẫn persistence `PlayerData`. `loadData(PlayerData)` dựng lại instance qua `Registries.ABILITY.get(id).createInstance(smpPlayer, level)` (⚠️ không còn qua 1 singleton `AbilityRegistry.getInstance()` — `Registries.ABILITY` là `Registry<AbilityInfo<? extends Ability>>`, code-driven, populate qua [`AbilityInfos.loadClass()`](../src/main/java/com/roguesmp/player/ability/AbilityInfos.java)). `tick()` giảm dần `contextTicksLeft` và tự động xóa `contextOwner` khi về 0 (nên 1 chế độ capture sẽ tự hết hạn nếu không bao giờ được release rõ ràng).
 
 ### Điều phối `cast(key)` → `execute(...)`
 
@@ -173,43 +205,74 @@ public AbilityResponse handleDash() {
 
 Trong lúc đang capture, mọi lệnh `cast()` đều route vào `AetherStance` trước (bất kể phím nào được bấm, miễn là 1 trong các trigger của nó khớp), cho đến khi nó tự release hoặc `contextTicksLeft` hết hạn qua `AbilityLoadout.tick()`.
 
-## Load trigger/scaling từ JSON
+## `ability_info/<id>.json` — ví dụ đầy đủ, đã xác minh với code thật
 
-[`registry/ability/AbilityRegistry.java`](../src/main/java/com/roguesmp/registry/ability/AbilityRegistry.java) — `loadAll()` đọc mọi file `*.json` dưới `<dataFolder>/ability_info/`, khớp với 1 `AbilityInfo` đã đăng ký sẵn theo id, rồi gọi `info.populate(...)`. Parse trigger:
-
-```java
-JsonObject obj = json.getAsJsonObject("trigger");
-for (String actionKey : obj.keySet()) {
-    JsonObject data = obj.getAsJsonObject(actionKey);
-    AbilityTrigger.Key key = AbilityTrigger.Key.valueOf(data.get("key").getAsString().toUpperCase());
-    List<String> options = new ArrayList<>();
-    if (data.has("options")) data.getAsJsonArray("options").forEach(opt -> options.add(opt.getAsString()));
-    map.put(new AbilityTrigger(key, options), actionKey);
-}
-```
-
-Cấu trúc suy ra được (chưa có file JSON mẫu nào được commit):
+Không còn 1 `AbilityRegistry` singleton nào cả — `Registries.ABILITY_CONFIG = new Registry<>("ability_info", AbilityConfig.CODEC)` tự load đệ quy mọi file dưới `ability_info/`, id = đường dẫn file bỏ `.json` (xem [Registry System](Registry-System.md)). Ví dụ dưới khớp đúng các key `scaling` mà [`Fireball`](../src/main/java/com/roguesmp/player/ability/impl/mage/Fireball.java) (`ID = "fireball"`) thật sự đọc qua `getAttributeForLevel(...)`:
 
 ```json
 {
-  "id": "aether_stance", "display_name": "...", "icon": "END_ROD", "type": "ACTIVE",
-  "scaling": { "damage": [4, 6, 8], "cooldown": [200, 180, 160] },
+  "display_name": "<red>Fireball",
+  "icon": "FIRE_CHARGE",
+  "description": [
+    "Phóng 1 quả cầu lửa gây <damage> sát thương trong bán kính <radius> ô.",
+    "Hồi chiêu: <cooldown:second>s"
+  ],
+  "scaling": {
+    "damage": [10.0, 14.0, 18.0, 22.0, 26.0],
+    "radius": [2.5, 2.5, 3.0, 3.0, 3.5],
+    "velocity": [1.4, 1.5, 1.6, 1.7, 1.8],
+    "cooldown": [100.0, 90.0, 80.0, 70.0, 60.0]
+  },
+  "trigger": {
+    "execute": { "key": "RIGHT_CLICK", "options": ["sneaking"] }
+  },
+  "upgrades": {
+    "2": [ { "type": "exp", "level": 10 } ],
+    "3": [ { "type": "item", "item_id": "fire_essence", "amount": 5 }, { "type": "exp", "level": 20 } ]
+  }
+}
+```
+
+Vài điểm quan trọng khi viết file này:
+- **Không có field `"id"`/`"type"` nào trong file** — id chính là đường dẫn file (`ability_info/fireball.json` → id `"fireball"`), phải khớp tuyệt đối `Fireball.ID` trong code.
+- **`trigger` là 1 map, không phải mảng** — key của map chính là **tên action** đã `registerAction(...)` trong code (vd. `"execute"`), không phải tên tự do.
+- 1 ability nhiều action (kiểu `AetherStance`: `activate`/`fire`/`dash`) cần 1 entry `trigger` cho **mỗi** action muốn có phím bấm riêng:
+  ```json
   "trigger": {
     "activate": { "key": "RIGHT_CLICK", "options": ["sneaking"] },
     "fire":     { "key": "LEFT_CLICK" },
     "dash":     { "key": "SNEAK" }
   }
+  ```
+- **`options` chỉ chấp nhận 4 id đã đăng ký** (xem bảng `TriggerOption` ở trên) — 1 id không tồn tại bị bỏ qua âm thầm khi kiểm tra (`Registries.TRIGGER_OPTION.get(optionKey)` trả `null` → coi như predicate đó "đúng").
+- Ability thuần passive (vd. `Dodging`, chỉ phản ứng theo hook `on*`) có thể bỏ hẳn `"trigger"` — sẽ hiện là "Kích hoạt: Bị động" trong GUI.
+
+<a id="upgraderequirement--chi-phí-nâng-cấp-level"></a>
+## `UpgradeRequirement` — chi phí nâng cấp level
+
+`"upgrades"` map level đích (viết dưới dạng chuỗi số, `"2"`, `"3"`, ...) sang 1 danh sách yêu cầu đa hình (dispatch trên `"type"`, qua [`Registries.ABILITY_UPGRADE_REQUIREMENT_CODEC`](../src/main/java/com/roguesmp/player/ability/upgrade/UpgradeRequirements.java)) — tất cả yêu cầu trong list phải thỏa để nâng ability từ level hiện tại lên level đó. 2 kiểu đã đăng ký:
+
+| `type` | Field | Ý nghĩa |
+| :--- | :--- | :--- |
+| `item` | `item_id` (tham chiếu [`Holder<BaseItem>`](Registry-System.md#holdert--tham-chiếu-ổn-định-qua-id) vào `Registries.ITEM`), `amount` (int) | Cần nộp N item `item_id` |
+| `exp` | `level` (int) | Cần đủ kinh nghiệm tương đương N level vanilla (`PlayerUtils.getExpFromLevel`) |
+
+```json
+"upgrades": {
+  "2": [ { "type": "exp", "level": 10 } ],
+  "3": [ { "type": "item", "item_id": "fire_essence", "amount": 5 }, { "type": "exp", "level": 20 } ]
 }
 ```
 
 ## Cách thêm 1 ability mới
 
-1. Tạo 1 class trong `player/ability/impl/{active|passive|lifeline}` extend `Ability`, với `public static final String ID = "..."`.
+1. Tạo 1 class trong `player/ability/impl/<lớp nhân vật>` (vd. `warrior/`, `mage/`, `archer/`, `assassin/`) extend `Ability`, với `public static final String ID = "..."`.
 2. Khai `public static final AbilityInfo<YourClass> INFO = new AbilityInfo<>(ID, YourClass.class, YourClass::new)`, nối chuỗi `.registerAction("key", YourClass::method)` cho từng hành vi riêng biệt — 1 `"execute"` duy nhất cho ability đơn giản (`Fireball`), hoặc nhiều action có tên cho ability dạng state/capture (`AetherStance` với `activate`/`fire`/`dash`). Ability passive chỉ phản ứng theo event (vd. `Dodging`) có thể không đăng ký action nào cả.
-3. Lấy giá trị scaling trong constructor qua `getAbilityInfo().getAttributeForLevel("key", level)`.
+3. Lấy giá trị scaling trong constructor/method qua `getAbilityInfo().getAttributeForLevel("key", level)` (hoặc helper `getBaseAttributeValue("key")` trên chính `Ability`, tự dùng `getLevel()` hiện tại).
 4. Override `getAbilityInfo()` trả về `INFO`, cộng với các hook `on*` liên quan cho hành vi phản ứng.
-5. Đăng ký `YourClass.INFO` trong constructor của `AbilityRegistry`.
-6. Viết `<dataFolder>/ability_info/<id>.json` với `scaling`, `trigger` (action key → `AbilityTrigger.Key` + `options` tùy chọn), `display_name`, `icon`, `type`, `description`.
+5. Đăng ký `YourClass.INFO` trong [`AbilityInfos.java`](../src/main/java/com/roguesmp/player/ability/AbilityInfos.java): `public static final AbilityInfo<YourClass> YOUR_ABILITY = register(YourClass.INFO);`.
+6. Viết `<dataFolder>/ability_info/<id>.json` (id file **phải khớp** `ID` ở bước 1) với `scaling`, `trigger`, `display_name`, `icon`, `description`, `upgrades` — xem ví dụ đầy đủ ở trên.
+7. Nếu ability này thuộc về 1 lớp nhân vật (class), thêm id của nó vào `default_abilities` của file `classes/<class>.json` tương ứng — xem [Player Class System](Player-Class-System.md); nếu không, ability sẽ tồn tại trong registry nhưng không class nào cho phép trang bị nó.
 
 ## Lưu ý & lỗi thường gặp
 
@@ -218,4 +281,4 @@ Cấu trúc suy ra được (chưa có file JSON mẫu nào được commit):
 - **`CAPTURE` phải được gia hạn ở mỗi lần gọi action trong lúc stance còn active**, nếu không `contextTicksLeft` sẽ tự về 0 qua `AbilityLoadout.tick()` và âm thầm release interceptor — xem cách `AetherStance.handleFire`/`handleDash` trả `AbilityResponse.capture(ticksLeft)` lại mỗi lần.
 
 ---
-◀ [Entity, Boss & Spell System](Entity-Boss-Spell-System.md) · Về [Trang chủ](Home.md) · Tiếp theo: [Dungeon System](Dungeon-System.md)
+◀ [Entity, Boss & Spell System](Entity-Boss-Spell-System.md) · Về [Trang chủ](Home.md) · Tiếp theo: [Player Class System](Player-Class-System.md)

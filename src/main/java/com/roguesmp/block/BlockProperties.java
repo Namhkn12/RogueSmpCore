@@ -1,6 +1,7 @@
 package com.roguesmp.block;
 
 import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.MapCodec;
 import com.roguesmp.item.ItemType;
 import com.roguesmp.registry.Holder;
 import com.roguesmp.registry.Registries;
@@ -13,9 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Tunable data of a custom block, loaded from {@code blocks/<id>.json} into
- * {@code Registries.BLOCK_PROPERTIES}. Read it through {@link BlockType}, which falls back to
- * {@link #DEFAULT} for an id with no file.
+ * Data that every SmpBlock will have.
  * <p>
  *     Sound is also played client-side, so it's best to use a vanilla item that is not a placeable block to prevent double sound.
  * </p>
@@ -25,6 +24,7 @@ public record BlockProperties(
         Set<Holder<ItemType>> tools,
         int breakStrength,
         Key model,
+        String displayName,
         List<BlockDrop> drops,
         BlockExperience experience,
         Key placeSound,
@@ -36,6 +36,7 @@ public record BlockProperties(
             Set.of(),
             0,
             Key.key("stone"),
+            "",
             List.of(),
             BlockExperience.NONE,
             Key.key("block.stone.place"),
@@ -45,11 +46,12 @@ public record BlockProperties(
     private static final Codec<Set<Holder<ItemType>>> TOOLS_CODEC = Codec.listOf(Registry.referenceCodec(() -> Registries.ITEM_TYPE))
             .xmap(HashSet::new, ArrayList::new);
 
-    public static final Codec<BlockProperties> CODEC = Codec.composite(
+    public static final MapCodec<BlockProperties> CODEC = Codec.composite(
             Codec.INT.optionalFieldOf("hardness", DEFAULT.hardness()).forGetter(BlockProperties::hardness),
             TOOLS_CODEC.optionalFieldOf("tools", DEFAULT.tools()).forGetter(BlockProperties::tools),
             Codec.INT.optionalFieldOf("break_strength", DEFAULT.breakStrength()).forGetter(BlockProperties::breakStrength),
             Codec.KEY.optionalFieldOf("model", DEFAULT.model()).forGetter(BlockProperties::model),
+            Codec.STRING.optionalFieldOf("display_name", DEFAULT.displayName()).forGetter(BlockProperties::displayName),
             Codec.listOf(BlockDrop.CODEC).optionalFieldOf("drops", DEFAULT.drops()).forGetter(BlockProperties::drops),
             BlockExperience.CODEC.optionalFieldOf("experience", DEFAULT.experience()).forGetter(BlockProperties::experience),
             Codec.KEY.optionalFieldOf("place_sound", DEFAULT.placeSound()).forGetter(BlockProperties::placeSound),

@@ -2,149 +2,234 @@
 
 Package: [`com.roguesmp.entity`](../src/main/java/com/roguesmp/entity)
 
-Theo cùng mô hình định nghĩa/runtime với [Item System](Item-System.md): `BaseEntity` là định nghĩa JSON tĩnh, `SmpEntity` là wrapper runtime quanh 1 `LivingEntity` sống. Boss extend `SmpEntity` trực tiếp và tự điều khiển logic phase/spell riêng; mob thường thì hoàn toàn do JSON điều khiển thông qua 1 bảng tra `Spell` tổng quát.
+> ⚠️ **Kiến trúc đã đổi hoàn toàn kể từ lần viết đầu của trang này.** Trước đây `BaseEntity` là 1 POJO Gson phẳng (field `baseStat`, `equipments`, `activeSpell`/`passiveSpell` trực tiếp) và boss được đăng ký qua 1 singleton `EntityRegistry.registerSpecial(id, factory)`. **Cả 2 điều đó không còn đúng.** `BaseEntity` giờ dùng [Codec System](Codec-System.md) và mô hình **component** y hệt [Item System](Item-System.md) — mọi dữ liệu/hành vi của 1 entity (tên hiển thị, cờ AI, stat, trang bị, spell, boss bar, nameplate, loot table, phase) đều là 1 `EntityComponent` cắm vào `Map<String, EntityComponent>`, không còn field cứng nào khác ngoài `id`/`entityType`.
 
-> **Lưu ý:** không giống `BaseItem`/`BaseEffect`, `BaseEntity` **không** được decode qua [Codec System](Codec-System.md) — nó là 1 POJO Gson thuần túy (`Utils.GSON.fromJson(reader, BaseEntity.class)`), được load bởi `EntityRegistry.loadFromFile()`. Đừng mặc định rằng mọi class được định nghĩa bằng JSON trong dự án đều dùng `Codec` — hãy kiểm tra trước khi copy 1 pattern.
+## `BaseEntity` — định nghĩa tĩnh, dùng Codec + component
 
-## `BaseEntity` — định nghĩa tĩnh
-
-[`entity/BaseEntity.java`](../src/main/java/com/roguesmp/entity/BaseEntity.java) — field: `id`, `entityType`, `displayName`, `noAi`, `invulnerable`, `persistent`, `isBoss`, `isElite`, `detectionRange`, `baseStat` (`Map<EntityAttribute, Double>`), `equipments` (`Map<EquipmentSlot, EntityEquipment>`), `activeSpell`/`passiveSpell` (`List<String>` chứa id spell), `passiveInterval`, `canCastSameSpellTwice`, `spellParams` (`Map<String, Map<String, Object>>`, tham số riêng cho từng spell id). Được dựng bằng constructor all-args private cộng với setter kiểu fluent.
-
-Method chính:
-- `spawn(Location)` — spawn entity Bukkit, gọi `EntityRegistry.getInstance().wrap(this, living)` để lấy 1 `SmpEntity`, rồi `initialize()` và đăng ký với `EntityManager`.
-- `processSpell(SmpEntity)` — biến các list id `activeSpell`/`passiveSpell` cộng `spellParams` thành instance `Spell` qua `EntitySpellRegistry.createSpell(...)`, rồi gọi `smpEntity.startSpell(...)`.
-- `processEntity(Entity)` — áp dụng cờ AI/bất tử/persistent, attribute từ `baseStat`, và `equipments` lên entity Bukkit đã spawn. Việc này vẫn chạy ngay cả với các boss subclass hardcode (xem bên dưới), vì nó cung cấp base stat/trang bị cho chúng.
-
-## `SmpEntity` — wrapper runtime, lịch chạy an toàn với Folia
-
-[`entity/SmpEntity.java`](../src/main/java/com/roguesmp/entity/SmpEntity.java) chạy các tick spell định kỳ thông qua **entity scheduler** của Paper (`entity.getScheduler().runAtFixedRate(...)`), giúp việc tick được gắn đúng vào region đang sở hữu entity đó — bắt buộc để tương thích Folia.
+[`entity/BaseEntity.java`](../src/main/java/com/roguesmp/entity/BaseEntity.java):
 
 ```java
-// startSpell(...)
-if (passiveSpells != null && !passiveSpells.isEmpty()) {
-    taskPassive = entity.getScheduler().runAtFixedRate(
-            plugin,
-            task -> runPassiveSpellTask(passiveIntervalTicks),
-            this::unload,   // callback retired — tự cancel gọn gàng nếu region của entity unload/entity chết
-            1L,
-            passiveIntervalTicks
-    );
-}
+public static final Codec<BaseEntity> CODEC = Codec.composite(
+        Codec.STRING.fieldOf("id").forGetter(BaseEntity::getId),
+        Codec.enumOf(EntityType.class).fieldOf("entityType").forGetter(BaseEntity::getEntityType),
+        Codec.<EntityComponent>dispatchedMap(Registries.ENTITY_COMPONENT_CODEC::getOrThrow)
+                .optionalFieldOf("components", Map.of())
+                .forGetter(BaseEntity::getComponents),
+        BaseEntity::new
+);
+```
 
-if (activeSpells != null && !activeSpells.isEmpty()) {
-    taskActive = entity.getScheduler().runAtFixedRate(
-            plugin,
-            task -> runActiveSpellTask(ACTIVE_RUN_INTERVAL_DEFAULT),
-            this::unload,
-            spellDelay,
-            ACTIVE_RUN_INTERVAL_DEFAULT
-    );
+Chỉ 3 field: `id` (String, bắt buộc), `entityType` (enum `org.bukkit.entity.EntityType`, bắt buộc, khớp theo tên không phân biệt hoa/thường — không qua Gson nên `@SerializedName` trên `EntityType` không có tác dụng gì ở đây), `components` (`Map<String, EntityComponent>`, optional, mặc định rỗng — key của map chính là type-id, giống hệt `dispatchedMap` của `BaseItem`, xem [Codec System](Codec-System.md#polymorphic-dispatch-codecdispatch)). Registry: `Registries.ENTITY = new Registry<>("entities", BaseEntity.CODEC)`, thư mục `entities/`.
+
+`processEntity(Entity)` gọi `component.apply(living)` cho mọi component — đây là bước gắn attribute/trang bị/cờ AI lên 1 `LivingEntity` Bukkit thật, chạy trước khi `SmpEntity` wrapper tồn tại.
+
+## `EntityComponent` — điểm mở rộng, mirror `ItemComponent`
+
+[`entity/component/EntityComponent.java`](../src/main/java/com/roguesmp/entity/component/EntityComponent.java), toàn bộ interface (mọi hook trừ `copy()` đều default no-op):
+
+```java
+public interface EntityComponent {
+    @NotNull EntityComponent copy();                      // bắt buộc — tách state runtime khỏi template dùng chung
+    default void apply(LivingEntity entity) { }             // 1 lần, lúc BaseEntity.processEntity — CHƯA có SmpEntity
+    default void onSpawn(SmpEntity entity) { }               // 1 lần, lúc SmpEntity.initialize(), sau apply — ĐÃ có SmpEntity
+    default void onUnload(SmpEntity entity) { }
+    default void onDamage(DamageEvent event, SmpEntity entity) { }
+    default void onHurt(DamageEvent event, SmpEntity entity) { }
+    default void onDeath(EntityDeathEvent event, SmpEntity entity) { }
+    default void onProjectileLaunch(ProjectileLaunchEvent event, SmpEntity entity) { }
+    default void onProjectileHit(ProjectileHitEvent event, SmpEntity entity) { }
+    default void onCastSpell(SpellCastEvent event, SmpEntity entity) { }
+    default void onTargetEntity(EntityTargetLivingEntityEvent event, SmpEntity entity) { }
 }
 ```
 
-`runActiveSpellTask` đếm ngược `nextActiveTimer`; về 0 thì gọi `activeSpells.runNextSpell(...)` (ủy quyền cho `SpellManager`, xem bên dưới), giá trị trả về là `cooldownTicks()` của spell vừa cast, dùng làm timer mới. `runPassiveSpellTask` tick `run(interval)` cho mọi spell passive mỗi chu kỳ, refresh boss bar, và bỏ qua hoàn toàn nếu không có player nào trong `detectionRange`.
+`SmpEntity` không có "mechanic layer" riêng nữa (khác với player, xem [Attribute System](Attribute-System.md#attribute-thực-sự-được-áp-dụng-như-thế-nào--không-có-attributemanager)) — mỗi hook Bukkit/tùy chỉnh nhận được chỉ đơn giản duyệt `componentMap.values()` và forward, y hệt `SmpEntity.onDamage`/`onHurt`/`onDeath`/... Component **là** hành vi, không có tầng trung gian nào khác.
 
-`changePhase(SpellManager newActive, List<Spell> newPassive, @Nullable Consumer<LivingEntity> phaseAction)` — cancel `SpellManager` hiện tại (tôn trọng `persistOnPhaseChange()` của từng spell), chạy `phaseAction` tùy chọn, rồi thay vào list spell mới (khởi động lại task đã lên lịch nếu cần). Đây là primitive cốt lõi mà boss dùng để chuyển pha.
-
-## `EntityRegistry` — đăng ký entity đặc biệt/boss
-
-[`registry/entity/EntityRegistry.java`](../src/main/java/com/roguesmp/registry/entity/EntityRegistry.java):
+Ticking định kỳ là 1 mixin riêng, [`TickingComponent`](../src/main/java/com/roguesmp/entity/component/TickingComponent.java):
 
 ```java
-private final Map<String, BiFunction<BaseEntity, LivingEntity, SmpEntity>> factories = new HashMap<>();
-
-private EntityRegistry(RogueSmpCore plugin) {
-    registerSpecial("primordial_slime", PrimordialSlime::new);
-    registerSpecial("hell_knight", HellKnight::new);
-    registerSpecial(HellKnightCompanion.ID, HellKnightCompanion::new);
-    // ...
-}
-
-public SmpEntity wrap(BaseEntity base, LivingEntity living) {
-    return factories.getOrDefault(base.getId(), SmpEntity::new).apply(base, living); // fallback: SmpEntity thường
-}
-
-private void registerSpecial(String id, BiFunction<BaseEntity, LivingEntity, SmpEntity> factory) {
-    factories.put(id, factory);
+public interface TickingComponent extends EntityComponent {
+    void tick(SmpEntity entity, int interval);
 }
 ```
 
-Bất kỳ id entity nào **chưa** đăng ký qua `registerSpecial` sẽ wrap thành 1 `SmpEntity` thường, hoàn toàn do list `activeSpell`/`passiveSpell` trong JSON điều khiển (tra qua `EntitySpellRegistry`). Id đã đăng ký sẽ được dựng bằng subclass riêng của nó — đây là cách boss có thể dùng logic phase/spell tự viết tay mà vẫn dùng chung pipeline base stat/trang bị từ JSON.
+`SmpEntity` chỉ khởi động **1** task lịch chung (entity scheduler của Paper, Folia-safe) nếu có **ít nhất 1** component implement `TickingComponent` — không phải 1 task/component. Task này chạy mỗi `SmpEntity.PASSIVE_RUN_INTERVAL_DEFAULT` (2 tick) và gọi `tick(this, interval)` trên mọi component ticking. Component cần chu kỳ chậm hơn tự đếm ngược nội bộ và trừ `interval` mỗi lần gọi, không có tham số interval-riêng-per-component.
 
-## Ví dụ boss — `HellKnight`
+## `EntityComponentKeys` — đăng ký, mirror `ItemComponentKeys`
 
-[`entity/boss/hellknight/HellKnight.java`](../src/main/java/com/roguesmp/entity/boss/hellknight/HellKnight.java) extend `SmpEntity`. Constructor của nó dựng `phase1Actives/Passives` cho tới `phase4Active/Passive` như các field `List<Spell>` thuần (instance `new XSpell(...)`, hardcode — không do JSON điều khiển). Nó override `initialize()` để chạy 1 đoạn cinematic mở màn thay vì bắt đầu spell ngay, kết thúc bằng `startCombat()` dựng 1 `BossBarManager` khóa theo ngưỡng % máu.
-
-Chuyển pha (`setupPhaseTrigger()`):
+[`entity/component/EntityComponentKeys.java`](../src/main/java/com/roguesmp/entity/component/EntityComponentKeys.java):
 
 ```java
-phaseEvents.put(80, boss -> {
-    this.changePhase(SpellManager.EMPTY, Collections.emptyList(), null); // đóng băng spell trong lúc cutscene
-    setAi(false);
-    Utils.runLater(() -> {
-        setAi(true);
-        this.changePhase(new SpellManager(phase2Active), phase2Passive,
-                living -> dialogue("<red><b>Để xem các ngươi xử lí thế nào..."));
-        this.forceCastSpell(ShadowCloneSpell.class);
-    }, 20);
-});
-
-phaseEvents.put(70, boss -> this.changePhase(new SpellManager(phase3Active), phase3Passive, null));
+public static final EntityComponentKey<DisplayNameComponent> DISPLAY_NAME;
+static {
+    DISPLAY_NAME = register("display_name", DisplayNameComponent.CODEC);
+    BEHAVIOR = register("behavior", BehaviorComponent.CODEC);
+    ATTRIBUTES = register("attributes", AttributeComponent.CODEC);
+    EQUIPMENT = register("equipment", EquipmentComponent.CODEC);
+    SPELLS = register("spells", SpellComponent.CODEC);
+    BOSS_BAR = register("boss_bar", BossBarComponent.CODEC);
+    NAMEPLATE = register("nameplate", NameplateComponent.CODEC);
+    PHASE = new EntityComponentKey<>("phase"); // code-driven only, không có CODEC (BossHealthAction là lambda, không serialize được)
+    LOOT_TABLE = register("loot_table", LootTableComponent.CODEC);
+}
+public static void loadClass() { } // gọi từ RogueSmpCore.init() để ép static initializer chạy — cùng pattern ItemComponentKeys
 ```
 
-Pha ở ngưỡng 30% còn triệu hồi và cưỡi 1 companion trước khi vào pha cuối. Ngưỡng boss bar đến từ `BossBarManager` và được `SmpEntity.onHurt` tham chiếu để giới hạn sát thương đúng bằng ngưỡng trước khi kích hoạt phase action — nên boss không bao giờ bị "vượt qua" 1 phase trigger chỉ vì ăn 1 đòn quá to.
+<a id="tham-khảo-đầy-đủ--mọi-component-entity-đã-đăng-ký"></a>
+## Tham khảo đầy đủ — mọi component entity đã đăng ký
 
-`entity/boss/primordialslime/PrimordialSlime.java` theo đúng pattern này (list spell theo pha, map `phaseEvents` ở 70%/40%, gọi `changePhase(...)` kiểu cinematic) — khác biệt duy nhất: nó trì hoãn `startSpell` đến khi đoạn mở màn riêng của nó kết thúc, và hủy toàn bộ sát thương trong lúc mở màn.
+| Key JSON | Class | Shape |
+| :--- | :--- | :--- |
+| `display_name` | `DisplayNameComponent` | chuỗi MiniMessage trần |
+| `behavior` | `BehaviorComponent` | `{ "noAi": false, "invulnerable": false, "persistent": false, "detectionRange": 20 }` (tất cả optional) |
+| `attributes` | `AttributeComponent` | map phẳng `EntityAttribute -> double`, vd. `{"max_health": 200.0, "movement_speed": 0.3}` |
+| `equipment` | `EquipmentComponent` | map phẳng `EquipmentSlot (vanilla) -> EntityEquipment` |
+| `spells` | `SpellComponent` | xem [mục Spell](#spellcomponent--casting-chủ-động--bị-động) bên dưới |
+| `boss_bar` | `BossBarComponent` | `{ "range": 30, "color": "WHITE", "style": "PROGRESS", "bossFog": true }` (tất cả optional) |
+| `nameplate` | `NameplateComponent` | `{ "showHealth": true, "showName": true, "heightOffset": 0.3 }` (tất cả optional — mọi entity tự có 1 bản mặc định nếu không khai) |
+| `loot_table` | `LootTableComponent` | mảng chuỗi trần — id trỏ vào [`Registries.LOOT_TABLE`](Loot-System.md) |
+| `phase` | `PhaseComponent` | **không JSON-hóa được** — chỉ gắn từ code, xem [mục Phase](#phasecomponent--ngưỡng-máu-chuyển-pha) bên dưới |
 
-## Spell
+`EntityAttribute` (enum, `entity/EntityAttribute.java`, wrap `org.bukkit.attribute.Attribute`): `MAX_HEALTH, FOLLOW_RANGE, KNOCKBACK_RESISTANCE, MOVEMENT_SPEED, FLYING_SPEED, ATTACK_DAMAGE, ATTACK_KNOCKBACK, ATTACK_SPEED, ARMOR, FALL_DAMAGE_MULTIPLIER, SAFE_FALL_DISTANCE, SCALE, STEP_HEIGHT, GRAVITY, JUMP_STRENGTH, BURNING_TIME, EXPLOSION_KNOCKBACK_RESISTANCE, MOVEMENT_EFFICIENCY, WATER_MOVEMENT_EFFICIENCY`.
 
-### `Spell` — lớp cơ sở abstract
+`EntityEquipment` (`entity/EntityEquipment.java`) fields: `material` (bắt buộc), `displayName`/`lore` (optional), `enchantGlint` (optional, mặc định `false`), `trimMaterial`/`trimPattern` (optional, key vanilla trim, vd. `"redstone"`/`"silence"`), `dyeColor` (optional, `"A,R,G,B"`), `headSkin` (optional, id trong `SkinRegistry`).
 
-[`entity/spell/Spell.java`](../src/main/java/com/roguesmp/entity/spell/Spell.java) — `abstract class Spell implements Cloneable` (không phải interface trần):
+### Ví dụ đầy đủ — `entities/hell_knight.json`
+
+```json
+{
+  "id": "hell_knight",
+  "entityType": "ZOMBIE",
+  "components": {
+    "display_name": "<red>Hell Knight",
+    "behavior": { "invulnerable": false, "persistent": true, "detectionRange": 25 },
+    "attributes": { "max_health": 200.0, "movement_speed": 0.3, "attack_damage": 15.0 },
+    "equipment": {
+      "hand": { "material": "NETHERITE_SWORD", "displayName": "<red>Hellfire Blade", "enchantGlint": true },
+      "head": { "material": "NETHERITE_HELMET", "trimMaterial": "redstone", "trimPattern": "silence" }
+    },
+    "spells": {
+      "activeSpell": [ { "type": "self_destruct_spell", "particleCount": 20 } ],
+      "passiveSpell": [ { "type": "slow_aura_spell" } ],
+      "passiveInterval": 40
+    },
+    "boss_bar": { "range": 40, "color": "RED", "style": "NOTCHED_10" },
+    "nameplate": { "heightOffset": 0.35 },
+    "loot_table": ["hell_knight_common", "hell_knight_rare"]
+  }
+}
+```
+
+## `SpellComponent` — casting chủ động & bị động
+
+[`entity/component/impl/SpellComponent.java`](../src/main/java/com/roguesmp/entity/component/impl/SpellComponent.java) gộp cả phần **JSON-khai báo** lẫn phần **runtime sống** (lịch chạy Folia-safe, detection range, dispatch event) vào cùng 1 component:
 
 ```java
-public boolean canRun();                 // mặc định true — gate trước khi SpellManager chọn nó
-public abstract void run(int interval);  // hiệu ứng thật sự
-public void cancel();                    // cancel các BukkitRunnable đang theo dõi
-public abstract int cooldownTicks();     // độ trễ trước lần chọn active-spell tiếp theo
-public int castTicks();                  // mặc định 0
-public boolean onlyForceCasted();        // mặc định false — bị loại khỏi vòng xoay active-spell ngẫu nhiên
-public boolean persistOnPhaseChange();   // mặc định false — sống sót qua changePhase() nếu true
-public void onDamage(DamageEvent event);
-public void onHurt(DamageEvent event);
-public void onDeath(EntityDeathEvent event);
-public void onProjectileLaunch(ProjectileLaunchEvent event);
-public void onProjectileHit(ProjectileHitEvent event);
-public void onCastSpell(SpellCastEvent event);
-public void onTargetEntity(EntityTargetLivingEntityEvent event);
-public void onNearbyPlayerDeath(PlayerDeathEvent event); // gate bởi hasNearbyPlayerDeathTrigger()
+public static final Codec<SpellComponent> CODEC = Codec.composite(
+        Codec.listOf(SpellParams.CODEC).optionalFieldOf("activeSpell", List.of()).forGetter(SpellComponent::getActiveSpellParams),
+        Codec.listOf(SpellParams.CODEC).optionalFieldOf("passiveSpell", List.of()).forGetter(SpellComponent::getPassiveSpellParams),
+        Codec.INT.optionalFieldOf("passiveInterval", 0).forGetter(SpellComponent::getPassiveIntervalConfig),
+        Codec.BOOLEAN.optionalFieldOf("canCastSameSpellTwice", false).forGetter(SpellComponent::isCanCastSameSpellTwiceConfig),
+        SpellComponent::new
+);
 ```
 
-`SpellParamReader { Spell fromParams(Map<String,Object> params, LivingEntity owner) }` là cách các spell **do JSON điều khiển** (`entity/spell/impl/*`) đăng ký 1 factory vào [`EntitySpellRegistry`](../src/main/java/com/roguesmp/registry/entity/EntitySpellRegistry.java), vd. `register("self_destruct_spell", SelfDestructSpell::readParam)`. Spell hardcode riêng cho boss (trong các package `entity/boss/*`) bỏ qua registry này hoàn toàn — chúng được `new` trực tiếp ngay trong constructor của boss.
+Mỗi phần tử của `activeSpell`/`passiveSpell` là 1 `SpellParams` đa hình, dispatch trên field `"type"` qua [`Registries.ENTITY_SPELL`](../src/main/java/com/roguesmp/entity/spell/EntitySpells.java) (mỗi `SpellType` đăng ký cả id lẫn `Codec` params riêng của nó). `passiveInterval` ≤ 0 → dùng mặc định `SmpEntity.PASSIVE_RUN_INTERVAL_DEFAULT` (2 tick).
 
-### `SpellManager` — vòng xoay active-spell
+```json
+"spells": {
+  "activeSpell": [ { "type": "self_destruct_spell", "particleCount": 20 } ],
+  "passiveSpell": [ { "type": "slow_aura_spell" } ],
+  "passiveInterval": 40,
+  "canCastSameSpellTwice": false
+}
+```
 
-[`entity/spell/SpellManager.java`](../src/main/java/com/roguesmp/entity/spell/SpellManager.java) bọc 1 `List<Spell>`, tính độ sâu cooldown là `floor((số-spell-1)/2)` để 1 spell không bị chọn lại ngay lập tức, và expose `runNextSpell(boolean preventSameSpellTwiceInARow)` cùng `forceCastSpell(Class<? extends Spell>)`.
+Ví dụ `SelfDestructSpell.Params`, cho thấy shape 1 `SpellParams` cụ thể:
 
-### Ví dụ spell — `TeleportBehindSpell`
+```java
+public record Params(int particleCount) implements SpellParams {
+    public static final Codec<Params> CODEC = Codec.INT.optionalFieldOf("particleCount", 10)
+            .xmap(Params::new, Params::particleCount).codec();
+    @Override public String getTypeId() { return "self_destruct_spell"; }
+}
+```
 
-[`entity/boss/hellknight/TeleportBehindSpell.java`](../src/main/java/com/roguesmp/entity/boss/hellknight/TeleportBehindSpell.java): extend `Spell`, override `cooldownTicks()` (trả về 300) và `run(int interval)`. Vì spell passive tick mỗi chu kỳ thay vì được `SpellManager` lên lịch theo cooldown, nó tự theo dõi 1 biến đếm `currentCooldown` nội bộ. Bọc hiệu ứng trong 1 `BukkitRunnable`, thêm vào tập `activeRunnables` kế thừa từ `Spell` để việc đổi pha / `cancel()` dọn dẹp đúng cách.
+`lucSpell` lịch chạy: `activeSpell` chọn 1 spell qua `SpellManager` (`floor((số-spell-1)/2)` cooldown chống chọn lại ngay), timer tiếp theo lấy từ `cooldownTicks()` của spell vừa cast; `passiveSpell` tick **mọi** spell mỗi chu kỳ, tự tắt (`activeSpells.cancelAll()`) khi không còn player nào trong `detectionRange`.
 
-## Cách thêm 1 boss mới với phase và spell
+### Boss code-driven không khai spell trong JSON
 
-1. Viết 1 định nghĩa entity JSON (`entities/<id>.json`) khớp với các field Gson của `BaseEntity` — vẫn cần thiết ngay cả với boss hardcode, vì `base.processEntity()` cung cấp attribute/trang bị cơ bản lúc `initialize()`.
-2. Tạo `MyBoss extends SmpEntity` với constructor `(BaseEntity base, LivingEntity entity)`. Dựng `phaseNActive`/`phaseNPassive` như các `List<Spell>` chứa instance `new XSpell(...)`.
-3. Dựng 1 `Map<Integer, BossBarManager.BossHealthAction> phaseEvents` khóa theo % máu, mỗi entry gọi `this.changePhase(new SpellManager(phaseNActive), phaseNPassive, optionalConsumer)`.
-4. Override `initialize()` nếu cần 1 cinematic spawn tùy chỉnh; dựng 1 `BossBarManager` rồi gọi `startSpell(...)` để khởi động các vòng lặp đã lên lịch Folia-safe.
-5. Viết class spell extend `Spell` trực tiếp trong package của boss — không cần entry `EntitySpellRegistry` cho spell riêng của boss.
-6. Đăng ký boss trong constructor của `EntityRegistry`: `registerSpecial("my_boss_id", MyBoss::new);` — id phải khớp chính xác với `id` trong file JSON. Bỏ qua bước này thì boss chỉ wrap thành 1 `SmpEntity` thường, không có logic phase nào.
+Boss viết tay không cần `spells` trong JSON — dùng constructor `new SpellComponent(SmpEntity owner)`, bind ngay lập tức để có thể gọi `startSpell(...)`/`changePhase(...)` từ chính constructor của boss:
+
+```java
+public class MyBoss extends SmpEntity {
+    private final SpellComponent spellComponent;
+
+    public MyBoss(BaseEntity base, LivingEntity entity) {
+        super(base, entity);
+        this.spellComponent = new SpellComponent(this);
+        setComponent(EntityComponentKeys.SPELLS, spellComponent);
+    }
+
+    @Override
+    protected void onInitialized() {
+        spellComponent.startSpell(new SpellManager(phase1Actives), phase1Passives, detectionRange);
+    }
+}
+```
+
+`changePhase(SpellManager newActive, List<Spell> newPassive, @Nullable Consumer<LivingEntity> phaseAction)` (+ overload có `spellDelay`) cancel spell hiện tại rồi thay bằng list mới — primitive cốt lõi để chuyển pha kiểu boss.
+
+<a id="phasecomponent--ngưỡng-máu-chuyển-pha"></a>
+## `PhaseComponent` — ngưỡng máu chuyển pha
+
+[`entity/component/impl/PhaseComponent.java`](../src/main/java/com/roguesmp/entity/component/impl/PhaseComponent.java) — 1 `TickingComponent` độc lập, tách hẳn khỏi `SpellComponent` (trước đây là 1 `PhaseManager` lồng bên trong spell casting; giờ phase trigger không cần spell nào tồn tại để hoạt động). Nhận 1 `Map<Integer, BossHealthAction>` (% máu → hành động, `BossHealthAction` là `void run(LivingEntity boss)` — 1 lambda Java, **không thể khai trong JSON**) cộng cờ `capDamage` (chặn 1 đòn quá to "nhảy vọt" qua 1 ngưỡng mà không kích hoạt nó):
+
+```java
+Map<Integer, PhaseComponent.BossHealthAction> phaseEvents = new HashMap<>();
+phaseEvents.put(70, boss -> this.changePhase(new SpellManager(phase2Active), phase2Passive, null));
+phaseEvents.put(30, boss -> { /* triệu hồi minion, đổi pha cuối */ });
+
+setComponent(EntityComponentKeys.PHASE, new PhaseComponent(phaseEvents, true));
+```
+
+Ngưỡng được kiểm tra theo thứ tự giảm dần, "tiêu thụ" từng cái khi máu đi qua; nếu `capDamage == true`, HP thật của entity bị ép khớp đúng ngưỡng đó (không đi qua `DamageEvent`, nên nếu có `NameplateComponent` gắn kèm, `PhaseComponent` tự refresh nameplate luôn).
+
+## ⚠️ Trạng thái hiện tại của boss/entity đặc biệt — đang dở dang
+
+[`registry/entity` cũ / `EntityFactory`](../src/main/java/com/roguesmp/entity/EntityFactory.java) là cơ chế **thiết kế để thay thế** `EntityRegistry.registerSpecial(id, factory)` cũ:
+
+```java
+@FunctionalInterface
+public interface EntityFactory<T extends SmpEntity> {
+   T create(BaseEntity base, LivingEntity living);
+}
+```
+
+`EntityManager.wrap(base, living)` tra `Registries.ENTITY_FACTORY.get(base.getId())`, fallback về `SmpEntity` thường nếu không tìm thấy — đúng khuôn mẫu cũ. **Nhưng tại thời điểm viết trang này, [`SpecialEntities.java`](../src/main/java/com/roguesmp/entity/SpecialEntities.java) — nơi lẽ ra khai báo mọi `EntityFactory` — có toàn bộ khai báo bị comment lại, và `entity/boss/` chỉ còn đúng 1 file `KeasaTheLich.java`, hiện là 1 class rỗng chưa implement gì.** Nghĩa là **không có id entity nào hiện được coi là "đặc biệt"** — mọi entity, kể cả tương lai sẽ là boss, hiện wrap thành `SmpEntity` thường. Các boss cũ (`HellKnight`, `PrimordialSlime`, `HellKnightCompanion`, ...) được nhắc trong doc comment của `SpellComponent`/`EntityRegistry` cũ **không còn tồn tại như file code** — đừng tìm chúng, và đừng lấy các tên đó làm ví dụ thật khi viết code mới.
+
+**Khi hồi sinh 1 boss** (hoặc viết boss đầu tiên trong kiến trúc mới): viết class boss `extends SmpEntity`, gắn `SpellComponent`/`PhaseComponent` của riêng nó (xem 2 mục trên), rồi đăng ký bằng cách bỏ comment (hoặc thêm dòng tương tự) trong `SpecialEntities.java`:
+
+```java
+public static final EntityFactory<MyBoss> MY_BOSS = register("my_boss_id", MyBoss::new);
+```
+
+Id truyền vào `register` phải khớp chính xác `id` trong file JSON của entity đó — lệch thì boss âm thầm rơi về `SmpEntity` thường, không báo lỗi gì.
+
+## Cách thêm 1 loại spell mới (do JSON điều khiển)
+
+1. Tạo `record`/class implement `SpellParams` (`getTypeId()` trả type-id, cộng `public static final Codec<...> CODEC`).
+2. Viết class `Spell` thật (extend `entity/spell/Spell.java` — `run(int interval)`, `cooldownTicks()` là 2 method abstract) đọc dữ liệu từ `Params`.
+3. Đăng ký cả type-id lẫn params-codec vào [`EntitySpells.java`](../src/main/java/com/roguesmp/entity/spell/EntitySpells.java) (tương tự `ItemComponentKeys`/`ComponentKeys` — 1 `SpellType<Params>` gói cả factory dựng `Spell` thật lẫn `CODEC` của `Params`).
+4. Dùng `"type": "your_id"` trong `activeSpell`/`passiveSpell` của bất kỳ entity JSON nào.
 
 ## Lưu ý & lỗi thường gặp
 
-- **`BaseEntity` dùng Gson thô, không dùng `Codec`** — đừng dùng `Codec.composite`/`dispatch` ở đây; pattern đó thuộc về `BaseItem`/`SmpEffect`.
-- **Id truyền vào `registerSpecial` phải khớp chính xác với field `id` trong JSON**, nếu không entity sẽ âm thầm rơi về `SmpEntity` thường, không có logic phase nào — không hề có lỗi nào được báo.
-- **`persistOnPhaseChange()` mặc định là `false`** — 1 spell mà bạn muốn sống sót qua `changePhase()` (vd. 1 DoT kéo dài) cần được override rõ ràng thành `true`, nếu không nó sẽ bị hủy cùng với mọi thứ khác trong pha cũ.
-- **Dùng `this::unload` làm callback retired**, đừng tự cancel bằng tay — callback retired của `runAtFixedRate` chính là thứ giữ cho việc dọn dẹp lúc region unload/entity chết trên Folia hoạt động đúng; bỏ qua nó có nguy cơ để lại 1 task đã lên lịch bị treo.
+- **`BaseEntity` giờ dùng Codec + component, không còn là Gson POJO phẳng** — copy pattern từ `BaseItem`/`ItemComponent` khi thêm component mới, không tự chế 1 field trực tiếp trên `BaseEntity`.
+- **`EntityComponentKeys.loadClass()` phải được gọi trong `RogueSmpCore.init()`** (cùng lúc với `ItemComponentKeys.loadClass()`) — bỏ sót thì codec của mọi entity component không được đăng ký, mọi file `entities/*.json` fail decode.
+- **`phase` không thể khai trong JSON** — `BossHealthAction` là 1 lambda Java thuần, chỉ gắn được từ code (`setComponent(EntityComponentKeys.PHASE, ...)`), khác với mọi component khác trong bảng.
+- **Đăng ký sai/thiếu id trong `SpecialEntities.java`** khiến 1 boss âm thầm chạy như `SmpEntity` thường — không có exception nào báo, chỉ đơn giản là không có phase/spell riêng nào chạy.
+- **`TickingComponent.tick(entity, interval)` không tick nhanh hơn `SmpEntity.PASSIVE_RUN_INTERVAL_DEFAULT` (2 tick)** dù bạn có gọi `startSpell`/cấu hình gì khác — 1 component cần chu kỳ chậm hơn (chậm hơn 2 tick) nên tự đếm ngược nội bộ và trừ `interval` mỗi lần `tick` được gọi.
 
 ---
 ◀ [GUI Framework](GUI-Framework.md) · Về [Trang chủ](Home.md) · Tiếp theo: [Player Ability System](Player-Ability-System.md)

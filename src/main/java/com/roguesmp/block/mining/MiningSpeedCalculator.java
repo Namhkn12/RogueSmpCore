@@ -1,7 +1,7 @@
 package com.roguesmp.block.mining;
 
 import com.roguesmp.attribute.Attributes;
-import com.roguesmp.block.BlockType;
+import com.roguesmp.block.BlockProperties;
 import com.roguesmp.item.ItemType;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
@@ -21,7 +21,6 @@ import java.util.Set;
  */
 public final class MiningSpeedCalculator {
 
-    /** {@link #ticksToBreak(Player, BlockType)} result meaning the player cannot break it at all. */
     public static final int CANNOT_BREAK = -1;
 
     private static final float BASE_MINING_SPEED = 1f;
@@ -66,7 +65,7 @@ public final class MiningSpeedCalculator {
      * Ticks to break {@code block} right now, {@code 0} for instant, or {@link #CANNOT_BREAK} if the
      * player is missing a required tool or doesn't meet the block's break strength.
      */
-    public static int ticksToBreak(Player player, BlockType<?> block) {
+    public static int ticksToBreak(Player player, BlockProperties block) {
         if (!hasRequiredTool(player, block)) return CANNOT_BREAK;
 
         SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
@@ -77,7 +76,7 @@ public final class MiningSpeedCalculator {
         return ticksToBreak(totalMiningSpeed(smpPlayer, player), block.hardness());
     }
 
-    private static boolean hasRequiredTool(Player player, BlockType<?> block) {
+    private static boolean hasRequiredTool(Player player, BlockProperties block) {
         Set<Holder<ItemType>> required = block.tools();
         if (required.isEmpty()) return true;
 

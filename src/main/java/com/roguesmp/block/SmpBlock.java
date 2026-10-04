@@ -1,15 +1,16 @@
 package com.roguesmp.block;
 
 import com.google.gson.JsonElement;
+import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.persistence.StateSection;
 import com.roguesmp.codec.DataResult;
-import org.bukkit.GameMode;
+import com.roguesmp.player.SmpPlayer;
+import net.kyori.adventure.key.Key;
 import org.bukkit.Location;
-import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,19 +18,24 @@ import java.util.UUID;
 
 /**
  * Runtime instance of a placed custom block. Created when its display entity loads and dropped when
- * that entity unloads; the static tuning data lives in its {@link BlockType}.
+ * that entity unloads.
  */
 public class SmpBlock {
 
     private static final List<StateSection<?>> NO_SECTIONS = List.of();
 
-    private BlockType<?> type;
+    private final BlockProperties properties;
+    private String id;
     private BlockPos pos;
     private Location location;
     private UUID displayId;
     private boolean hydrated;
     private boolean dirty;
     private List<StateSection<?>> sections;
+
+    protected SmpBlock(BlockProperties properties) {
+        this.properties = properties;
+    }
 
     public void bind(BlockPos pos, UUID displayId) {
         this.pos = pos;
@@ -38,7 +44,7 @@ public class SmpBlock {
     }
 
     /**
-     * Called when this block is placed from an item, before this instance is registered to the manager.
+     * Called when this block is placed from an item by players, before this instance is registered to the manager.
      */
     public void onPlaced(Player player, ItemStack placedFrom) {
 
@@ -46,13 +52,12 @@ public class SmpBlock {
 
     /**
      * Items this block gives back when broken. Defaults to rolling the block's declared
-     * {@link BlockProperties#drops()}; override to build custom stacks (e.g. writing this block's
-     * own data onto the item) instead of, or alongside, the JSON list.
+     * {@link BlockProperties#drops()}.
      */
-    public List<ItemStack> getDrops() {
+    public List<ItemStack> getDrops(@Nullable SmpPlayer smpPlayer) {
         List<ItemStack> drops = new ArrayList<>();
-        for (BlockDrop drop : getType().drops()) {
-            ItemStack item = drop.roll();
+        for (BlockDrop drop : properties.drops()) {
+            ItemStack item = drop.roll(smpPlayer);
             if (item != null) drops.add(item);
         }
         return drops;
@@ -62,24 +67,15 @@ public class SmpBlock {
      * Experience orb amount this block gives back when broken. Defaults to rolling the block's
      * declared {@link BlockProperties#experience()}; override for custom amounts.
      */
-    public int getExperience() {
-        return getType().experience().roll();
+    public int getExperience(@Nullable SmpPlayer smpPlayer) {
+        return properties.experience().roll(smpPlayer);
     }
 
     /**
-     * Called when this block is broken, after {@link #onUnload()} is called.
+     * Called when this block is broken, before {@link #onUnload()} is called.
      */
-    public void onBlockBreak(BlockBreakEvent event) {
-        if (!event.isDropItems() || event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
+    public void onBlockBreak(SmpBlockBreakEvent event) {
 
-        for (ItemStack drop : getDrops()) {
-            location.getWorld().dropItemNaturally(location.toCenterLocation(), drop);
-        }
-
-        int experience = getExperience();
-        if (experience > 0) {
-            location.getWorld().spawn(location.toCenterLocation(), ExperienceOrb.class, orb -> orb.setExperience(experience));
-        }
     }
 
     public void onBlockInteract(PlayerInteractEvent event) {
@@ -128,12 +124,26 @@ public class SmpBlock {
         return sections;
     }
 
-    public BlockType<?> getType() {
-        return type;
+    public BlockProperties getProperties() {
+        return properties;
     }
 
-    void setType(BlockType<?> type) {
-        this.type = type;
+    /** The id of this block's JSON file, e.g. {@code "steel_generator"}. */
+    public String getId() {
+        return id;
+    }
+
+    void setId(String id) {
+        this.id = id;
+    }
+
+    /**
+     * The model key this block's display should currently show, override for a block whose appearance depends on its own state
+     * (e.g. an active/idle variant) and call {@link BlockVisual#refreshModel} whenever that state
+     * changes to update to the new model.
+     */
+    public Key getDisplayModel() {
+        return properties.model();
     }
 
     public BlockPos getPos() {
@@ -158,8 +168,7 @@ public class SmpBlock {
 
     /**
      * Flags this block's persisted state as changed, so the next periodic save (or unload) writes
-     * it. Call it whenever a field covered by a {@link StateSection} changes; a block that changes
-     * without calling it is not saved until it is marked or the server shuts down.
+     * it. Call it whenever a field covered by a {@link StateSection} changes.
      */
     public void markDirty() {
         this.dirty = true;
