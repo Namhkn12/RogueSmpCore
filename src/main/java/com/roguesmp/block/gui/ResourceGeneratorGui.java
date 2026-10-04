@@ -9,6 +9,7 @@ import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class BlockGeneratorGui extends BaseGui {
+public class ResourceGeneratorGui extends BaseGui {
 
     private static final int MAIN_INFO_SLOT = 4;
     private static final int STATUS_SLOT = 5;
@@ -31,8 +32,8 @@ public class BlockGeneratorGui extends BaseGui {
 
     private final ResourceGeneratorBlock generator;
 
-    public BlockGeneratorGui(ResourceGeneratorBlock generator) {
-        super(Utils.text("Generator", NamedTextColor.DARK_GRAY), 4);
+    public ResourceGeneratorGui(ResourceGeneratorBlock generator) {
+        super(Component.text("Resource Generator"), 4);
         this.generator = generator;
     }
 
@@ -48,8 +49,8 @@ public class BlockGeneratorGui extends BaseGui {
 
     private void renderMainInfo() {
         ItemStack item = ItemStack.of(Material.STONE);
-        item.setData(DataComponentTypes.ITEM_MODEL, generator.getType().model());
-        ItemStackUtils.setItemName(item, Utils.fromString(generator.getType().displayName()));
+        item.setData(DataComponentTypes.ITEM_MODEL, generator.getProperties().model());
+        ItemStackUtils.setItemName(item, Utils.fromString(generator.getProperties().displayName()));
         List<Component> infoLore = new ArrayList<>();
         infoLore.add(Utils.text("Năng lượng: ", NamedTextColor.YELLOW).append(Component.text(generator.getEnergy() + " / " + generator.getMaxEnergy(), NamedTextColor.GRAY)));
         infoLore.add(Utils.text("Sức chứa: ", NamedTextColor.YELLOW).append(Component.text(generator.getOccupiedCapacity() + " / " + generator.getLootCapacity(), NamedTextColor.GRAY)));
@@ -113,7 +114,13 @@ public class BlockGeneratorGui extends BaseGui {
         Component name = display.getData(DataComponentTypes.CUSTOM_NAME);
         if (name != null) {
             Component newName = name.append(Component.text(" (x" + Utils.formatMoney(stored.amount()) + ")", NamedTextColor.GRAY));
-            display.setData(DataComponentTypes.ITEM_NAME, newName);
+            display.setData(DataComponentTypes.CUSTOM_NAME, newName.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        } else {
+            Component oldName = display.getData(DataComponentTypes.ITEM_NAME);
+            if (oldName != null) {
+                Component newName = oldName.append(Component.text(" (x" + Utils.formatMoney(stored.amount()) + ")", NamedTextColor.GRAY));
+                display.setData(DataComponentTypes.CUSTOM_NAME, newName.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+            }
         }
         List<Component> displayLore = new ArrayList<>();
         displayLore.add(Utils.text("-------"));

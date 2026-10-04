@@ -1,5 +1,6 @@
 package com.roguesmp.block.impl;
 
+import com.roguesmp.block.BlockProperties;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.persistence.StateSection;
 import com.roguesmp.codec.Codec;
@@ -15,6 +16,10 @@ import java.util.List;
 public class TallyBlock extends SmpBlock {
 
     private int count = 0;
+
+    public TallyBlock(BlockProperties properties) {
+        super(properties);
+    }
 
     @Override
     protected void collectSections(List<StateSection<?>> sections) {

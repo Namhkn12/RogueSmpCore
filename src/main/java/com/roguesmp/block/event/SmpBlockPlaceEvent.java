@@ -1,6 +1,6 @@
 package com.roguesmp.block.event;
 
-import com.roguesmp.block.BlockType;
+import com.roguesmp.block.SmpBlock;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -18,13 +18,13 @@ public class SmpBlockPlaceEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
 
     private final @NotNull Player player;
-    private final @NotNull BlockType<?> type;
+    private final @NotNull SmpBlock block;
     private final @NotNull Block target;
     private boolean cancelled;
 
-    public SmpBlockPlaceEvent(@NotNull Player player, @NotNull BlockType<?> type, @NotNull Block target) {
+    public SmpBlockPlaceEvent(@NotNull Player player, @NotNull SmpBlock block, @NotNull Block target) {
         this.player = player;
-        this.type = type;
+        this.block = block;
         this.target = target;
     }
 
@@ -32,8 +32,9 @@ public class SmpBlockPlaceEvent extends Event implements Cancellable {
         return player;
     }
 
-    public @NotNull BlockType<?> getBlockType() {
-        return type;
+    /** The block about to be placed - created, but not yet bound to a position or registered. */
+    public @NotNull SmpBlock getBlock() {
+        return block;
     }
 
     /** The vanilla block being replaced - already a barrier by the time this fires. */

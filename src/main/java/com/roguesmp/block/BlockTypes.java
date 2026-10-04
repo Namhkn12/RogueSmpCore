@@ -1,44 +1,45 @@
 package com.roguesmp.block;
 
+import com.roguesmp.block.data.NoData;
+import com.roguesmp.block.data.GeneratorData;
 import com.roguesmp.block.impl.ResourceGeneratorBlock;
 import com.roguesmp.block.impl.TallyBlock;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.registry.Registries;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Supplier;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
-/**
- * Every custom block's {@link BlockType}. Each constant registers itself into
- * {@link Registries#BLOCK_TYPE} as it's initialized - call {@link #loadClass()} to force that to
- * happen. Use a constant directly for the concrete type, or look an id up in the registry and cast.
- * The block's tunable data lives in {@code blocks/<id>.json}, see {@link BlockProperties}.
- * <p>
- * Declare a block as {@code register("steel_block", SmpBlock::new)}.
- */
 public class BlockTypes {
 
-    public static final BlockType<SmpBlock> STEEL_BLOCK = register("steel_block", SmpBlock::new);
-    public static final BlockType<TallyBlock> TALLY_BLOCK = register("tally_block", TallyBlock::new);
-    public static final BlockType<ResourceGeneratorBlock> GENERATOR_BLOCK = register("generator_block", ResourceGeneratorBlock::new);
-    public static final BlockType<ResourceGeneratorBlock> STEEL_GENERATOR = register("steel_generator", ResourceGeneratorBlock::new);
+    public static final String DEFAULT_TYPE = "block";
 
-    public static void loadClass() {
+    public static final BlockType<NoData, SmpBlock> BASIC = plain(DEFAULT_TYPE, SmpBlock::new);
+    public static final BlockType<NoData, TallyBlock> TALLY = plain("tally", TallyBlock::new);
+    public static final BlockType<GeneratorData, ResourceGeneratorBlock> GENERATOR =
+            register("generator", GeneratorData.CODEC, GeneratorData.DEFAULT, ResourceGeneratorBlock::new);
 
-    }
-
-    public static void registerDefaults() {
-        for (String s : Registries.BLOCK_PROPERTIES.getAll().keySet()) {
-            if (Registries.BLOCK_TYPE.get(s) != null) continue;
-            Registries.BLOCK_TYPE.register(s, new BlockType<>(s, SmpBlock::new));
-        }
-    }
-
+    /** Create a new SmpBlock instance of {@code id} from its corresponding registered data, or null if there's no such block. */
     public static @Nullable SmpBlock create(String id) {
-        BlockType<? extends SmpBlock> type = Registries.BLOCK_TYPE.get(id);
-        return type == null ? null : type.create();
+        BlockData data = Registries.BLOCK.get(id);
+        if (data == null) return null;
+
+        SmpBlock block = data.type().create(data);
+        block.setId(id);
+        return block;
     }
 
-    private static <T extends SmpBlock> BlockType<T> register(String id, Supplier<T> factory) {
-        return Registries.BLOCK_TYPE.register(id, new BlockType<>(id, factory));
+    private static <B extends SmpBlock> BlockType<NoData, B> plain(String key, Function<BlockProperties, B> factory) {
+        return register(key, NoData.CODEC, NoData.INSTANCE, (properties, none) -> factory.apply(properties));
     }
+
+    private static <D, B extends SmpBlock> BlockType<D, B> register(String key, Codec<D> dataCodec, D defaults, BiFunction<BlockProperties, D, B> factory) {
+        BlockType<D, B> type = new BlockType<>(key, dataCodec, defaults, factory);
+        if (Registries.BLOCK_TYPE.get(key) != null) throw new IllegalStateException("Duplicate block type '" + key + "'");
+        Registries.BLOCK_TYPE.register(key, type);
+        return type;
+    }
+
+    public static void loadClass() {}
 }

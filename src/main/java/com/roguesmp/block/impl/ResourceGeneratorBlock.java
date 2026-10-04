@@ -1,11 +1,12 @@
 package com.roguesmp.block.impl;
 
 import com.roguesmp.block.*;
+import com.roguesmp.block.data.GeneratorData;
 import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.persistence.StateSection;
 import com.roguesmp.codec.Codec;
-import com.roguesmp.block.gui.BlockGeneratorGui;
+import com.roguesmp.block.gui.ResourceGeneratorGui;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,33 +27,9 @@ import java.util.UUID;
 
 public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Directional, EnergyStorage {
 
-    public record Data(String place, int placeDelayTicks, int breakDelayTicks, List<BlockDrop> drops, int maxEnergy, int energyPerTick, int energyPerFuel, int lootCapacity) {
-
-        public static final Data DEFAULT = new Data(
-                "minecraft:stone",
-                100,
-                100,
-                List.of(),
-                5000,
-                1,
-                200,
-                1000
-        );
-
-        public static final Codec<Data> CODEC = Codec.composite(
-                Codec.STRING.optionalFieldOf("place", DEFAULT.place()).forGetter(Data::place),
-                Codec.INT.optionalFieldOf("place_delay", DEFAULT.placeDelayTicks()).forGetter(Data::placeDelayTicks),
-                Codec.INT.optionalFieldOf("break_delay", DEFAULT.breakDelayTicks()).forGetter(Data::breakDelayTicks),
-                Codec.listOf(BlockDrop.CODEC).optionalFieldOf("drops", DEFAULT.drops()).forGetter(Data::drops),
-                Codec.INT.optionalFieldOf("max_energy", DEFAULT.maxEnergy()).forGetter(Data::maxEnergy),
-                Codec.INT.optionalFieldOf("energy_per_tick", DEFAULT.energyPerTick()).forGetter(Data::energyPerTick),
-                Codec.INT.optionalFieldOf("energy_per_fuel", DEFAULT.energyPerFuel()).forGetter(Data::energyPerFuel),
-                Codec.INT.optionalFieldOf("capacity", DEFAULT.lootCapacity()).forGetter(Data::lootCapacity),
-                Data::new
-        );
-    }
-
     private static final int GUI_REFRESH_INTERVAL = 10;
+
+    private final GeneratorData data;
 
     private BlockFace faceDirection;
     private int placeDelay;
@@ -61,14 +38,15 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     private int energy;
     private final List<StoredItem> loot = new ArrayList<>();
     private @Nullable StoredItem fuel;
-    private @Nullable BlockGeneratorGui gui;
+    private @Nullable ResourceGeneratorGui gui;
     private int guiRefreshTicks;
 
     private UUID crackOverlayId;
     private int shownStage = -1;
 
-    private Data data() {
-        return getType().data(Data.CODEC, Data.DEFAULT);
+    public ResourceGeneratorBlock(BlockProperties properties, GeneratorData data) {
+        super(properties);
+        this.data = data;
     }
 
     @Override
@@ -97,7 +75,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         if (--placeDelay > 0) return;
 
         if (!target.getType().isAir()) {
-            placeDelay = data().placeDelayTicks();
+            placeDelay = data.placeDelayTicks();
             return;
         }
 
@@ -107,7 +85,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
 
     private void beginMining(Block target) {
         mining = true;
-        breakTicksLeft = data().breakDelayTicks();
+        breakTicksLeft = data.breakDelayTicks();
         markDirty();
         spawnCrack(target);
     }
@@ -121,7 +99,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
 
         if (getEnergy() <= 0) return;
 
-        removeEnergy(data().energyPerTick());
+        removeEnergy(data.energyPerTick());
         if (--breakTicksLeft <= 0) {
             harvest(target);
             resetToWaiting();
@@ -133,7 +111,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
 
     private void resetToWaiting() {
         mining = false;
-        placeDelay = data().placeDelayTicks();
+        placeDelay = data.placeDelayTicks();
         removeCrack();
         markDirty();
     }
@@ -143,7 +121,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     }
 
     private void placeGenerated(Block target) {
-        String place = data().place();
+        String place = data.place();
         Material vanilla = BlockRef.vanillaMaterial(place);
         if (vanilla != null) {
             target.setType(vanilla, false);
@@ -155,14 +133,14 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     private boolean isCorrectBlock(Block target) {
         if (BlockManager.getInstance().get(BlockPos.of(target)) != null) return true;
 
-        Material vanilla = BlockRef.vanillaMaterial(data().place());
+        Material vanilla = BlockRef.vanillaMaterial(data.place());
         return vanilla != null && target.getType() == vanilla;
     }
 
     private void harvest(Block target) {
         BlockManager.getInstance().breakBlock(target, null);
 
-        for (BlockDrop drop : data().drops()) {
+        for (BlockDrop drop : data.drops()) {
             StoredItem item = drop.rollStored();
             if (item != null) storeLoot(item);
         }
@@ -170,7 +148,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     }
 
     private void storeLoot(StoredItem rolled) {
-        int spaceLeft = data().lootCapacity() - getOccupiedCapacity();
+        int spaceLeft = data.lootCapacity() - getOccupiedCapacity();
         int toStore = Math.max(0, Math.min(rolled.amount(), spaceLeft));
 
         if (toStore > 0) {
@@ -204,7 +182,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     }
 
     public int getLootCapacity() {
-        return data().lootCapacity();
+        return data.lootCapacity();
     }
 
     public boolean isMining() {
@@ -218,23 +196,23 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
 
     /** The block id this generator places and mines - vanilla as {@code "minecraft:<material>"}, else a custom block id. */
     public String getPlaceTarget() {
-        return data().place();
+        return data.place();
     }
 
     public int getPlaceDelayTicks() {
-        return data().placeDelayTicks();
+        return data.placeDelayTicks();
     }
 
     public int getBreakDelayTicks() {
-        return data().breakDelayTicks();
+        return data.breakDelayTicks();
     }
 
     public int getEnergyPerTick() {
-        return data().energyPerTick();
+        return data.energyPerTick();
     }
 
     public int getEnergyPerFuel() {
-        return data().energyPerFuel();
+        return data.energyPerFuel();
     }
 
     private void spawnCrack(Block target) {
@@ -247,7 +225,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     }
 
     private void updateCrack() {
-        int total = data().breakDelayTicks();
+        int total = data.breakDelayTicks();
         int elapsed = total - breakTicksLeft;
         int stage = Math.min((elapsed * BlockVisual.CRACK_STAGES) / total, BlockVisual.CRACK_STAGES - 1);
         if (stage == shownStage) return;
@@ -285,12 +263,12 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
 
     @Override
     public int getMaxEnergy() {
-        return data().maxEnergy();
+        return data.maxEnergy();
     }
 
     @Override
     public int addEnergy(int amount) {
-        energy = Math.min(energy + amount, data().maxEnergy());
+        energy = Math.min(energy + amount, data.maxEnergy());
         return energy;
     }
 
@@ -350,7 +328,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     private void tryConsumeFuel() {
         if (fuel == null) return;
 
-        int energyPerItem = data().energyPerFuel();
+        int energyPerItem = data.energyPerFuel();
         int capacity = getMaxEnergy() - energy;
         int consumed = energyPerItem > 0 ? Math.min(fuel.amount(), capacity / energyPerItem) : 0;
         if (consumed <= 0) return;
@@ -364,7 +342,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     @Override
     public void onPlaced(Player player, ItemStack placedFrom) {
         faceDirection = getPlacementFacing(player);
-        placeDelay = data().placeDelayTicks();
+        placeDelay = data.placeDelayTicks();
         markDirty();
         rotateDisplay(Bukkit.getEntity(getDisplayId()), faceDirection);
     }
@@ -374,11 +352,11 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         event.setCancelled(true);
-        if (gui == null) gui = new BlockGeneratorGui(this);
+        if (gui == null) gui = new ResourceGeneratorGui(this);
         gui.showInventory(event.getPlayer());
     }
 
-    public void releaseGui(BlockGeneratorGui closed) {
+    public void releaseGui(ResourceGeneratorGui closed) {
         if (gui == closed) gui = null;
     }
 
@@ -408,7 +386,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     protected void collectSections(List<StateSection<?>> sections) {
         super.collectSections(sections);
         sections.add(StateSection.of(Directional.CODEC.optionalFieldOf("direction", BlockFace.EAST), () -> faceDirection, direction -> this.faceDirection = direction));
-        sections.add(StateSection.of(Codec.INT.optionalFieldOf("energy", Data.DEFAULT.maxEnergy()), () -> energy, integer -> energy = integer));
+        sections.add(StateSection.of(Codec.INT.optionalFieldOf("energy", data::maxEnergy), () -> energy, integer -> energy = integer));
         sections.add(StateSection.of(Codec.listOf(StoredItem.CODEC).optionalFieldOf("loot", List.of()), () -> loot, value -> { loot.clear(); loot.addAll(value); }));
         sections.add(StateSection.of(StoredItem.CODEC.optionalFieldOf("fuel"), () -> Optional.ofNullable(fuel), value -> fuel = value.orElse(null)));
     }

@@ -21,7 +21,6 @@ import org.joml.Vector3f;
 
 public final class BlockVisual {
 
-    /** Vanilla's crack overlay is 10 shared textures laid over every block - same idea here. */
     public static final int CRACK_STAGES = 10;
     private static final float CRACK_OVERLAY_SCALE = 1.001f;
 
@@ -34,7 +33,7 @@ public final class BlockVisual {
         if (world == null) throw new IllegalStateException("World " + pos.world() + " is not loaded");
 
         ItemStack stack = displayStack(block.getDisplayModel());
-        String typeId = block.getType().id();
+        String blockId = block.getId();
 
         Location center = new Location(world, pos.x() + 0.5, pos.y() + 0.5, pos.z() + 0.5, 0f, 0f);
         return world.spawn(center, ItemDisplay.class, display -> {
@@ -51,13 +50,9 @@ public final class BlockVisual {
             display.setInvulnerable(true);
 
             PersistentDataContainer data = display.getPersistentDataContainer();
-            data.set(Keys.BLOCK_ID, PersistentDataType.STRING, typeId);
+            data.set(Keys.BLOCK_ID, PersistentDataType.STRING, blockId);
             data.set(Keys.BLOCK_POS, PersistentDataType.STRING, pos.serialize());
         });
-    }
-
-    public static ItemStack displayStack(BlockType<?> type) {
-        return displayStack(type.model());
     }
 
     public static ItemStack displayStack(Key model) {

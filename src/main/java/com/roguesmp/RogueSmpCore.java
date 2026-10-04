@@ -1,6 +1,5 @@
 package com.roguesmp;
 
-import com.roguesmp.block.BlockTypes;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.command.ReloadCommand;
 import com.roguesmp.command.SmpBrowserCommand;
@@ -123,7 +122,6 @@ public final class RogueSmpCore extends JavaPlugin {
     public void loadData() {
         Registries.loadAllData(this);
 
-        BlockTypes.registerDefaults();
         CraftingManager.init(); // indexes Registries.CRAFTING_RECIPE - must run after it's loaded above
         VanillaRecipeReplacer.replaceAll(); // swaps matching vanilla tool/armor recipes - must run after items load above
     }
@@ -139,12 +137,6 @@ public final class RogueSmpCore extends JavaPlugin {
         }
         if (found && locationKey.equalsIgnoreCase(Registries.PLAYER_CLASS.getLocationKey())) {
             PlayerManager.getInstance().syncClassRosters(); // grant/unequip against the reloaded class rosters
-        }
-        if (found && locationKey.equalsIgnoreCase(Registries.BLOCK_PROPERTIES.getLocationKey())) {
-            // Create BlockType instances from Properties Registry.
-            // After reload there would still be old BlockType instances (from deleted Properties entries)
-            // but it shouldn't matter since we only reload during dev.
-            BlockTypes.registerDefaults();
         }
         return found;
     }

@@ -32,7 +32,6 @@ public class Holder<T> {
     private final String id;
     private @Nullable T value;
     private final Set<String> tagIds = new HashSet<>();
-    private int version;
 
     Holder(String id) {
         this.id = id;
@@ -45,13 +44,11 @@ public class Holder<T> {
 
     void bind(T value) {
         this.value = value;
-        version++;
     }
 
     void unbind() {
         this.value = null;
         tagIds.clear();
-        version++;
     }
 
     void addTag(String tagId) {
@@ -84,13 +81,5 @@ public class Holder<T> {
 
     public String getId() {
         return id;
-    }
-
-    /**
-     * Bumped every time this holder is bound or unbound - compare against a cached value to detect
-     * a reload without holding onto the old bound value just to check its identity.
-     */
-    public int version() {
-        return version;
     }
 }

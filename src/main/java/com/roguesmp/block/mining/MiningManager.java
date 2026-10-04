@@ -45,11 +45,11 @@ public class MiningManager {
         if (player.getGameMode() != GameMode.SURVIVAL) return;
 
         SmpBlock block = manager.get(BlockPos.of(event.getBlock()));
-        if (block == null || !block.isHydrated() || block.getType().hardness() < 0) return;
+        if (block == null || !block.isHydrated() || block.getProperties().hardness() < 0) return;
 
         stop(player.getUniqueId());
 
-        int ticks = MiningSpeedCalculator.ticksToBreak(player, block.getType());
+        int ticks = MiningSpeedCalculator.ticksToBreak(player, block.getProperties());
         if (ticks == MiningSpeedCalculator.CANNOT_BREAK) return;
         if (ticks == 0) {
             manager.breakBlock(event.getBlock(), player, true);
@@ -95,7 +95,7 @@ public class MiningManager {
                 continue;
             }
 
-            int ticks = MiningSpeedCalculator.ticksToBreak(player, session.block().getType());
+            int ticks = MiningSpeedCalculator.ticksToBreak(player, session.block().getProperties());
             if (ticks == MiningSpeedCalculator.CANNOT_BREAK) {
                 iterator.remove();
                 finishSession(session);

@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.BlockPos;
-import com.roguesmp.block.BlockType;
 import com.roguesmp.block.BlockVisual;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.BlockTypes;
@@ -98,10 +97,8 @@ public class BlockManager {
             }
         }
 
-        BlockType<?> type = block.getType();
-
         if(player != null){
-            SmpBlockPlaceEvent smpEvent = new SmpBlockPlaceEvent(player, type, target);
+            SmpBlockPlaceEvent smpEvent = new SmpBlockPlaceEvent(player, block, target);
             Bukkit.getPluginManager().callEvent(smpEvent);
             if(smpEvent.isCancelled()){
                 replaced.update(true, false);
@@ -125,7 +122,7 @@ public class BlockManager {
                 player.getInventory().setItem(hand, inHand);
             }
 //            Sound is also played client-side, so it's best to use a vanilla item that is not a placeable block to prevent double sound.
-            target.getWorld().playSound(target.getLocation().toCenterLocation(), type.placeSound().asString(), SoundCategory.BLOCKS, 1f, 0.8f);
+            target.getWorld().playSound(target.getLocation().toCenterLocation(), block.getProperties().placeSound().asString(), SoundCategory.BLOCKS, 1f, 0.8f);
             player.swingHand(hand);
         }
         return true;
@@ -240,11 +237,10 @@ public class BlockManager {
     }
 
     private void playBreakEffects(SmpBlock block){
-        BlockType<?> type = block.getType();
         Location center = block.getLocation().toCenterLocation();
         World world = center.getWorld();
         ItemStack stack = BlockVisual.displayStack(block);
-        world.playSound(center, type.breakSound().asString(), SoundCategory.BLOCKS, 1f, 1f);
+        world.playSound(center, block.getProperties().breakSound().asString(), SoundCategory.BLOCKS, 1f, 1f);
         world.spawnParticle(Particle.ITEM, center, 24, 0.25, 0.25, 0.25, 0.05, stack);
     }
 
