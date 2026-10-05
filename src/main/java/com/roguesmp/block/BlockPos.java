@@ -56,6 +56,10 @@ public record BlockPos(UUID world, int x, int y, int z) {
         return bukkitWorld == null ? null : bukkitWorld.getBlockAt(x, y, z);
     }
 
+    public BlockPos offset(int dx, int dy, int dz) {
+        return new BlockPos(world, x + dx, y + dy, z + dz);
+    }
+
     public BlockPos relative(BlockFace face) {
         return new BlockPos(world, x + face.getModX(), y + face.getModY(), z + face.getModZ());
     }
