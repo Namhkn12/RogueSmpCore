@@ -75,50 +75,9 @@ static {
 public static void loadClass() { } // gọi từ RogueSmpCore.init() để ép static initializer chạy — cùng pattern ItemComponentKeys
 ```
 
-<a id="tham-khảo-đầy-đủ--mọi-component-entity-đã-đăng-ký"></a>
-## Tham khảo đầy đủ — mọi component entity đã đăng ký
+## Viết entity bằng JSON
 
-| Key JSON | Class | Shape |
-| :--- | :--- | :--- |
-| `display_name` | `DisplayNameComponent` | chuỗi MiniMessage trần |
-| `behavior` | `BehaviorComponent` | `{ "noAi": false, "invulnerable": false, "persistent": false, "detectionRange": 20 }` (tất cả optional) |
-| `attributes` | `AttributeComponent` | map phẳng `EntityAttribute -> double`, vd. `{"max_health": 200.0, "movement_speed": 0.3}` |
-| `equipment` | `EquipmentComponent` | map phẳng `EquipmentSlot (vanilla) -> EntityEquipment` |
-| `spells` | `SpellComponent` | xem [mục Spell](#spellcomponent--casting-chủ-động--bị-động) bên dưới |
-| `boss_bar` | `BossBarComponent` | `{ "range": 30, "color": "WHITE", "style": "PROGRESS", "bossFog": true }` (tất cả optional) |
-| `nameplate` | `NameplateComponent` | `{ "showHealth": true, "showName": true, "heightOffset": 0.3 }` (tất cả optional — mọi entity tự có 1 bản mặc định nếu không khai) |
-| `loot_table` | `LootTableComponent` | mảng chuỗi trần — id trỏ vào [`Registries.LOOT_TABLE`](Loot-System.md) |
-| `phase` | `PhaseComponent` | **không JSON-hóa được** — chỉ gắn từ code, xem [mục Phase](#phasecomponent--ngưỡng-máu-chuyển-pha) bên dưới |
-
-`EntityAttribute` (enum, `entity/EntityAttribute.java`, wrap `org.bukkit.attribute.Attribute`): `MAX_HEALTH, FOLLOW_RANGE, KNOCKBACK_RESISTANCE, MOVEMENT_SPEED, FLYING_SPEED, ATTACK_DAMAGE, ATTACK_KNOCKBACK, ATTACK_SPEED, ARMOR, FALL_DAMAGE_MULTIPLIER, SAFE_FALL_DISTANCE, SCALE, STEP_HEIGHT, GRAVITY, JUMP_STRENGTH, BURNING_TIME, EXPLOSION_KNOCKBACK_RESISTANCE, MOVEMENT_EFFICIENCY, WATER_MOVEMENT_EFFICIENCY`.
-
-`EntityEquipment` (`entity/EntityEquipment.java`) fields: `material` (bắt buộc), `displayName`/`lore` (optional), `enchantGlint` (optional, mặc định `false`), `trimMaterial`/`trimPattern` (optional, key vanilla trim, vd. `"redstone"`/`"silence"`), `dyeColor` (optional, `"A,R,G,B"`), `headSkin` (optional, id trong `SkinRegistry`).
-
-### Ví dụ đầy đủ — `entities/hell_knight.json`
-
-```json
-{
-  "id": "hell_knight",
-  "entityType": "ZOMBIE",
-  "components": {
-    "display_name": "<red>Hell Knight",
-    "behavior": { "invulnerable": false, "persistent": true, "detectionRange": 25 },
-    "attributes": { "max_health": 200.0, "movement_speed": 0.3, "attack_damage": 15.0 },
-    "equipment": {
-      "hand": { "material": "NETHERITE_SWORD", "displayName": "<red>Hellfire Blade", "enchantGlint": true },
-      "head": { "material": "NETHERITE_HELMET", "trimMaterial": "redstone", "trimPattern": "silence" }
-    },
-    "spells": {
-      "activeSpell": [ { "type": "self_destruct_spell", "particleCount": 20 } ],
-      "passiveSpell": [ { "type": "slow_aura_spell" } ],
-      "passiveInterval": 40
-    },
-    "boss_bar": { "range": 40, "color": "RED", "style": "NOTCHED_10" },
-    "nameplate": { "heightOffset": 0.35 },
-    "loot_table": ["hell_knight_common", "hell_knight_rare"]
-  }
-}
-```
+Bảng đầy đủ mọi component (`display_name`, `behavior`, `attributes`, `equipment`, `spells`, `boss_bar`, `nameplate`, `loot_table`) — từng key, kiểu, mặc định, tác dụng — cùng danh sách spell JSON và ví dụ entity hoàn chỉnh nằm ở [JSON-Entities](JSON-Entities.md). Trang này chỉ giải thích cơ chế bên trong.
 
 ## `SpellComponent` — casting chủ động & bị động
 
@@ -155,7 +114,7 @@ public record Params(int particleCount) implements SpellParams {
 }
 ```
 
-`lucSpell` lịch chạy: `activeSpell` chọn 1 spell qua `SpellManager` (`floor((số-spell-1)/2)` cooldown chống chọn lại ngay), timer tiếp theo lấy từ `cooldownTicks()` của spell vừa cast; `passiveSpell` tick **mọi** spell mỗi chu kỳ, tự tắt (`activeSpells.cancelAll()`) khi không còn player nào trong `detectionRange`.
+Lịch chạy: `activeSpell` chọn 1 spell qua `SpellManager` (`floor((số-spell-1)/2)` cooldown chống chọn lại ngay), timer tiếp theo lấy từ `cooldownTicks()` của spell vừa cast; `passiveSpell` tick **mọi** spell mỗi chu kỳ, tự tắt (`activeSpells.cancelAll()`) khi không còn player nào trong `detectionRange`.
 
 ### Boss code-driven không khai spell trong JSON
 

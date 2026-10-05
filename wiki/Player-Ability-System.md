@@ -2,7 +2,7 @@
 
 Package: [`com.roguesmp.player.ability`](../src/main/java/com/roguesmp/player/ability)
 
-`Ability` là class hành vi cho mỗi lần cast (cùng khuôn mẫu hook mặc định no-op với [`SmpAttribute`](Attribute-System.md)/`Spell`). Mỗi impl đi kèm 1 `AbilityInfo<T>` static (factory + action, thuần code) và 1 `AbilityConfig` JSON-loadable riêng (scaling theo level, trigger, mô tả, chi phí nâng cấp), liên kết với nhau qua id. `AbilityLoadout` là container runtime cho từng player, điều phối phím bấm vào chuỗi ability đang trang bị, bao gồm cả 1 cơ chế interceptor cho các ability cần bắt (capture) vài input tiếp theo của player (chế độ ngắm/tích lực). Ability nào 1 player được phép trang bị còn phụ thuộc vào [Player Class System](Player-Class-System.md) đang active.
+`Ability` là class hành vi cho mỗi lần cast (cùng khuôn mẫu hook mặc định no-op với [`SmpAttribute`](Attribute-System.md)/`Spell`). Mỗi impl đi kèm 1 `AbilityInfo<T>` static (factory + action, thuần code) và 1 `AbilityConfig` JSON-loadable riêng (scaling theo level, trigger, mô tả, chi phí nâng cấp), liên kết với nhau qua id. `AbilityLoadout` là container runtime cho từng player, điều phối phím bấm vào chuỗi ability đang trang bị, bao gồm cả 1 cơ chế interceptor cho các ability cần bắt (capture) vài input tiếp theo của player (chế độ ngắm/tích lực). Ability nào 1 player được phép trang bị còn phụ thuộc vào [class nhân vật](JSON-Classes.md) đang active.
 
 ## `Ability`
 
@@ -176,6 +176,8 @@ public AbilityResponse handleExecute() {
 
 ## Ví dụ 2 — phức tạp, capture/chế độ ngắm: `AetherStance`
 
+> ⚠️ `AetherStance` hiện **không được đăng ký** trong `AbilityInfos` (cùng `firework_blast`, `flame_spirit`, `infernal_overdrive`, `raygun`, `last_breath`) — vẫn là ví dụ tốt về mẫu capture, nhưng không chạy được trong game cho tới khi đăng ký.
+
 [`player/ability/impl/active/AetherStance.java`](../src/main/java/com/roguesmp/player/ability/impl/active/AetherStance.java) — 3 action đăng ký tạo thành 1 state machine nhỏ:
 
 ```java
@@ -205,64 +207,9 @@ public AbilityResponse handleDash() {
 
 Trong lúc đang capture, mọi lệnh `cast()` đều route vào `AetherStance` trước (bất kể phím nào được bấm, miễn là 1 trong các trigger của nó khớp), cho đến khi nó tự release hoặc `contextTicksLeft` hết hạn qua `AbilityLoadout.tick()`.
 
-## `ability_info/<id>.json` — ví dụ đầy đủ, đã xác minh với code thật
+## Viết `ability_info/<id>.json`
 
-Không còn 1 `AbilityRegistry` singleton nào cả — `Registries.ABILITY_CONFIG = new Registry<>("ability_info", AbilityConfig.CODEC)` tự load đệ quy mọi file dưới `ability_info/`, id = đường dẫn file bỏ `.json` (xem [Registry System](Registry-System.md)). Ví dụ dưới khớp đúng các key `scaling` mà [`Fireball`](../src/main/java/com/roguesmp/player/ability/impl/mage/Fireball.java) (`ID = "fireball"`) thật sự đọc qua `getAttributeForLevel(...)`:
-
-```json
-{
-  "display_name": "<red>Fireball",
-  "icon": "FIRE_CHARGE",
-  "description": [
-    "Phóng 1 quả cầu lửa gây <damage> sát thương trong bán kính <radius> ô.",
-    "Hồi chiêu: <cooldown:second>s"
-  ],
-  "scaling": {
-    "damage": [10.0, 14.0, 18.0, 22.0, 26.0],
-    "radius": [2.5, 2.5, 3.0, 3.0, 3.5],
-    "velocity": [1.4, 1.5, 1.6, 1.7, 1.8],
-    "cooldown": [100.0, 90.0, 80.0, 70.0, 60.0]
-  },
-  "trigger": {
-    "execute": { "key": "RIGHT_CLICK", "options": ["sneaking"] }
-  },
-  "upgrades": {
-    "2": [ { "type": "exp", "level": 10 } ],
-    "3": [ { "type": "item", "item_id": "fire_essence", "amount": 5 }, { "type": "exp", "level": 20 } ]
-  }
-}
-```
-
-Vài điểm quan trọng khi viết file này:
-- **Không có field `"id"`/`"type"` nào trong file** — id chính là đường dẫn file (`ability_info/fireball.json` → id `"fireball"`), phải khớp tuyệt đối `Fireball.ID` trong code.
-- **`trigger` là 1 map, không phải mảng** — key của map chính là **tên action** đã `registerAction(...)` trong code (vd. `"execute"`), không phải tên tự do.
-- 1 ability nhiều action (kiểu `AetherStance`: `activate`/`fire`/`dash`) cần 1 entry `trigger` cho **mỗi** action muốn có phím bấm riêng:
-  ```json
-  "trigger": {
-    "activate": { "key": "RIGHT_CLICK", "options": ["sneaking"] },
-    "fire":     { "key": "LEFT_CLICK" },
-    "dash":     { "key": "SNEAK" }
-  }
-  ```
-- **`options` chỉ chấp nhận 4 id đã đăng ký** (xem bảng `TriggerOption` ở trên) — 1 id không tồn tại bị bỏ qua âm thầm khi kiểm tra (`Registries.TRIGGER_OPTION.get(optionKey)` trả `null` → coi như predicate đó "đúng").
-- Ability thuần passive (vd. `Dodging`, chỉ phản ứng theo hook `on*`) có thể bỏ hẳn `"trigger"` — sẽ hiện là "Kích hoạt: Bị động" trong GUI.
-
-<a id="upgraderequirement--chi-phí-nâng-cấp-level"></a>
-## `UpgradeRequirement` — chi phí nâng cấp level
-
-`"upgrades"` map level đích (viết dưới dạng chuỗi số, `"2"`, `"3"`, ...) sang 1 danh sách yêu cầu đa hình (dispatch trên `"type"`, qua [`Registries.ABILITY_UPGRADE_REQUIREMENT_CODEC`](../src/main/java/com/roguesmp/player/ability/upgrade/UpgradeRequirements.java)) — tất cả yêu cầu trong list phải thỏa để nâng ability từ level hiện tại lên level đó. 2 kiểu đã đăng ký:
-
-| `type` | Field | Ý nghĩa |
-| :--- | :--- | :--- |
-| `item` | `item_id` (tham chiếu [`Holder<BaseItem>`](Registry-System.md#holdert--tham-chiếu-ổn-định-qua-id) vào `Registries.ITEM`), `amount` (int) | Cần nộp N item `item_id` |
-| `exp` | `level` (int) | Cần đủ kinh nghiệm tương đương N level vanilla (`PlayerUtils.getExpFromLevel`) |
-
-```json
-"upgrades": {
-  "2": [ { "type": "exp", "level": 10 } ],
-  "3": [ { "type": "item", "item_id": "fire_essence", "amount": 5 }, { "type": "exp", "level": 20 } ]
-}
-```
+Cấu trúc file, cách `scaling`/`trigger`/`upgrades` hoạt động, danh sách 4 `TriggerOption`, 2 loại `UpgradeRequirement` (`item`, `exp`), và bảng "ability nào đọc chỉ số `scaling` nào / có action nào" nằm ở [JSON-Abilities](JSON-Abilities.md). Lớp nhân vật quyết định ability nào trang bị được: [JSON-Classes](JSON-Classes.md). Điểm cần nhớ khi viết code: `AbilityInfo` chỉ giữ phần Java (id, factory, action registry); mọi giá trị tunable đọc từ `AbilityConfig` tại thời điểm gọi nên reload có hiệu lực ngay.
 
 ## Cách thêm 1 ability mới
 
@@ -271,8 +218,8 @@ Vài điểm quan trọng khi viết file này:
 3. Lấy giá trị scaling trong constructor/method qua `getAbilityInfo().getAttributeForLevel("key", level)` (hoặc helper `getBaseAttributeValue("key")` trên chính `Ability`, tự dùng `getLevel()` hiện tại).
 4. Override `getAbilityInfo()` trả về `INFO`, cộng với các hook `on*` liên quan cho hành vi phản ứng.
 5. Đăng ký `YourClass.INFO` trong [`AbilityInfos.java`](../src/main/java/com/roguesmp/player/ability/AbilityInfos.java): `public static final AbilityInfo<YourClass> YOUR_ABILITY = register(YourClass.INFO);`.
-6. Viết `<dataFolder>/ability_info/<id>.json` (id file **phải khớp** `ID` ở bước 1) với `scaling`, `trigger`, `display_name`, `icon`, `description`, `upgrades` — xem ví dụ đầy đủ ở trên.
-7. Nếu ability này thuộc về 1 lớp nhân vật (class), thêm id của nó vào `default_abilities` của file `classes/<class>.json` tương ứng — xem [Player Class System](Player-Class-System.md); nếu không, ability sẽ tồn tại trong registry nhưng không class nào cho phép trang bị nó.
+6. Viết `<dataFolder>/ability_info/<id>.json` (id file **phải khớp** `ID` ở bước 1) — xem [JSON-Abilities](JSON-Abilities.md).
+7. Nếu ability này thuộc về 1 lớp nhân vật (class), thêm id của nó vào `default_abilities` của file `classes/<class>.json` tương ứng — xem [JSON-Classes](JSON-Classes.md); nếu không, ability sẽ tồn tại trong registry nhưng không class nào cho phép trang bị nó.
 
 ## Lưu ý & lỗi thường gặp
 
@@ -281,4 +228,4 @@ Vài điểm quan trọng khi viết file này:
 - **`CAPTURE` phải được gia hạn ở mỗi lần gọi action trong lúc stance còn active**, nếu không `contextTicksLeft` sẽ tự về 0 qua `AbilityLoadout.tick()` và âm thầm release interceptor — xem cách `AetherStance.handleFire`/`handleDash` trả `AbilityResponse.capture(ticksLeft)` lại mỗi lần.
 
 ---
-◀ [Entity, Boss & Spell System](Entity-Boss-Spell-System.md) · Về [Trang chủ](Home.md) · Tiếp theo: [Player Class System](Player-Class-System.md)
+◀ [Entity, Boss & Spell System](Entity-Boss-Spell-System.md) · Về [Trang chủ](Home.md) · Tiếp theo: [Dungeon System](Dungeon-System.md)

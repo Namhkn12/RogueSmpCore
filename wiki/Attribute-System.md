@@ -65,7 +65,7 @@ public enum Attributes {
 }
 ```
 
-**Không có `@SerializedName` trên bất kỳ hằng số nào** — enum này được decode qua `Codec.enumOf(Attributes.class)` (xem [Codec System](Codec-System.md)), không qua Gson, nên chuỗi JSON phải khớp (không phân biệt hoa/thường) với **tên hằng số Java**, vd. `"melee_damage_base"` hoặc `"MELEE_DAMAGE_BASE"` đều decode ra `MELEE_DAMAGE_BASE`. Đây cũng chính là codec dùng để serialize map attribute của item (`EquipAttributeComponent`/`GemDataComponent` — xem [Item System](Item-System.md#tham-khảo-đầy-đủ--mọi-component-đã-đăng-ký-dành-cho-designer-viết-json) để có danh sách đầy đủ 34 hằng số theo nhóm). **Thêm 1 attribute mới chỉ đơn giản là thêm 1 hằng số enum** — không có bước đăng ký registry nào khác.
+**Không có `@SerializedName` trên bất kỳ hằng số nào** — enum này được decode qua `Codec.enumOf(Attributes.class)` (xem [Codec System](Codec-System.md)), không qua Gson, nên chuỗi JSON phải khớp (không phân biệt hoa/thường) với **tên hằng số Java**, vd. `"melee_damage_base"` hoặc `"MELEE_DAMAGE_BASE"` đều decode ra `MELEE_DAMAGE_BASE`. Đây cũng chính là codec dùng để serialize map attribute của item (`EquipAttributeComponent`/`GemDataComponent` — xem [JSON-Items](JSON-Items.md#danh-sách-attribute) để có danh sách đầy đủ theo nhóm). **Thêm 1 attribute mới chỉ đơn giản là thêm 1 hằng số enum** — không có bước đăng ký registry nào khác.
 
 ## Ví dụ 1 — bọc vanilla đơn giản: `KnockbackResistance`
 
