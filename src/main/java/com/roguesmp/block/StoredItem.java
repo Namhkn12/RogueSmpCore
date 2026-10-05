@@ -3,13 +3,18 @@ package com.roguesmp.block;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.ItemComponentKeys;
+import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.item.component.impl.StackSizeComponent;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.ItemStackUtils;
+import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Locale;
 
 public record StoredItem(String item, int amount) {
 
@@ -34,7 +39,7 @@ public record StoredItem(String item, int amount) {
     }
 
     public static @Nullable Material vanillaMaterial(String id) {
-        return isVanilla(id) ? Material.matchMaterial(id.substring(VANILLA_PREFIX.length())) : null;
+        return isVanilla(id) ? Material.getMaterial(id.substring(VANILLA_PREFIX.length()).toUpperCase(Locale.ROOT)) : null;
     }
 
     public static String vanillaId(Material material) {
@@ -55,6 +60,17 @@ public record StoredItem(String item, int amount) {
 
         stack.setAmount(amount);
         return stack;
+    }
+
+    public Component displayName() {
+        if (isVanilla(item)) {
+            Material material = vanillaMaterial(item);
+            return material == null ? Component.text(item) : Component.translatable(material.translationKey());
+        }
+
+        BaseItem baseItem = Registries.ITEM.get(item);
+        NameComponent name = baseItem == null ? null : baseItem.getComponent(ItemComponentKeys.ITEM_NAME);
+        return name == null ? Component.text(item) : Utils.fromString(name.value());
     }
 
     public int maxStackSize() {

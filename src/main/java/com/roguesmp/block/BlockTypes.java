@@ -1,9 +1,9 @@
 package com.roguesmp.block;
 
-import com.roguesmp.block.data.NoData;
 import com.roguesmp.block.data.GeneratorData;
-import com.roguesmp.block.impl.ResourceGeneratorBlock;
+import com.roguesmp.block.data.NoData;
 import com.roguesmp.block.impl.TallyBlock;
+import com.roguesmp.block.impl.generator.ResourceGeneratorBlock;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.registry.Registries;
 import org.jetbrains.annotations.Nullable;

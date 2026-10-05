@@ -18,7 +18,7 @@ public final class BlockRef {
     }
 
     public static @Nullable Material vanillaMaterial(String id) {
-        return isVanilla(id) ? Material.matchMaterial(id.substring(VANILLA_PREFIX.length())) : null;
+        return isVanilla(id) ? Material.getMaterial(id.substring(VANILLA_PREFIX.length()).toUpperCase()) : null;
     }
 
     /** The id a vanilla {@code material} would have in this convention - the inverse of {@link #vanillaMaterial}. */
