@@ -122,8 +122,9 @@ public class ResourceGeneratorGui extends BaseGui {
     private void renderLootSlots() {
         List<StoredItem> items = generator.getLoot();
         for (int i = 0; i < LOOT_SLOTS.length; i++) {
+            ItemStack filler = ItemStackUtils.hideTooltip(ItemStack.of(Material.WHITE_STAINED_GLASS_PANE));
             if (i < items.size()) addButton(LOOT_SLOTS[i], lootDisplayItem(items.get(i)), this::onLootClick);
-            else addButton(LOOT_SLOTS[i], FILLER, ClickHandler.noAction());
+            else addButton(LOOT_SLOTS[i], filler, ClickHandler.noAction());
         }
     }
 

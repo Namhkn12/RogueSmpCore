@@ -11,7 +11,7 @@ public enum ModifierOperation {
         return switch (this) {
             case MULTIPLY_BASE -> sign(amount) + Utils.formatDecimal(amount * 100) + "%";
             case MULTIPLY_TOTAL -> "×" + Utils.formatDecimal(1 + amount);
-            case ADD -> sign(amount) + Utils.formatDecimal(amount * stat.flatDisplayScale()) + stat.flatSuffix();
+            case ADD -> sign(amount) + Utils.formatDecimal(amount);
         };
     }
 
