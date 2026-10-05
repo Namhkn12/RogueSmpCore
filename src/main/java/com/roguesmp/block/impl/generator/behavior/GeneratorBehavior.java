@@ -1,9 +1,9 @@
-package com.roguesmp.block.impl.generator.module.behavior;
+package com.roguesmp.block.impl.generator.behavior;
 
 import com.roguesmp.block.StoredItem;
-import com.roguesmp.block.impl.generator.ResourceGeneratorBlock;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.registry.Registries;
+import com.roguesmp.block.impl.generator.ResourceGeneratorBlock;
 import net.kyori.adventure.text.Component;
 
 import java.util.List;

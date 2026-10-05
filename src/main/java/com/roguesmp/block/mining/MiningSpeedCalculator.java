@@ -80,7 +80,7 @@ public final class MiningSpeedCalculator {
         Set<Holder<ItemType>> required = block.tools();
         if (required.isEmpty()) return true;
 
-        ItemStack tool = heldItem(player);
+        ItemStack tool = player.getInventory().getItemInMainHand();
         for (Holder<ItemType> type : required) {
             if (type.isBound() && type.value().matches(tool)) return true;
         }
@@ -89,10 +89,6 @@ public final class MiningSpeedCalculator {
 
     private static double breakStrength(SmpPlayer smpPlayer) {
         return smpPlayer.getActiveAttributes().getOrDefault(Attributes.BREAK_STRENGTH, 0d);
-    }
-
-    private static ItemStack heldItem(Player player) {
-        return player.getInventory().getItemInMainHand();
     }
 
     private static int effectLevel(Player player, PotionEffectType type) {

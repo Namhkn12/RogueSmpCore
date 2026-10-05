@@ -16,7 +16,7 @@ public final class CrackDisplay {
     private int shownStage = -1;
 
     public void show(Block target) {
-        if (isCustom(target)) {
+        if (BlockManager.getInstance().isSmpBlock(target.getLocation())) {
             overlayId = BlockVisual.spawnCrackOverlay(BlockPos.of(target), 0).getUniqueId();
         } else {
             BlockVisual.sendBlockDamage(BlockPos.of(target), 0);
@@ -47,9 +47,5 @@ public final class CrackDisplay {
             BlockVisual.sendBlockDamage(BlockPos.of(target), -1);
         }
         shownStage = -1;
-    }
-
-    private boolean isCustom(Block target) {
-        return BlockManager.getInstance().isSmpBlock(target.getLocation());
     }
 }

@@ -429,8 +429,6 @@ public class BlockManager {
         return block != null && block.isHydrated() ? block : null;
     }
 
-    public Collection<SmpBlock> getAllBlocks() {return Collections.unmodifiableCollection(blocks.values());}
-
     public MiningManager getMining() {return mining;}
 
     public static void init(RogueSmpCore core) {INSTANCE = new BlockManager(core);}

@@ -1,9 +1,5 @@
 package com.roguesmp.item.component.impl;
 
-import com.roguesmp.block.impl.generator.module.BurnUnit;
-import com.roguesmp.block.impl.generator.module.FuelType;
-import com.roguesmp.block.impl.generator.module.GeneratorEffect;
-import com.roguesmp.block.impl.generator.module.ModifierLore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.BaseItem;
@@ -11,6 +7,9 @@ import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.block.impl.generator.part.BurnUnit;
+import com.roguesmp.block.impl.generator.fuel.FuelType;
+import com.roguesmp.block.impl.generator.stat.GeneratorEffect;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
@@ -45,13 +44,6 @@ public record GeneratorFuelComponent(
         return duration > 0;
     }
 
-    private static List<String> fuelTypeNames(String itemId) {
-        return Registries.FUEL_TYPE.getAll().values().stream()
-                .filter(type -> type.matches(itemId))
-                .map(FuelType::displayText)
-                .toList();
-    }
-
     @Override
     public @NotNull ItemComponent copy() {
         return this;
@@ -60,14 +52,18 @@ public record GeneratorFuelComponent(
     @Override
     public void contributeLore(ItemLoreContext context) {
         List<Component> lines = new ArrayList<>();
-        if (energy > 0) lines.add(ModifierLore.line("Năng lượng: +" + energy, NamedTextColor.YELLOW));
+        if (energy > 0) lines.add(Utils.text("Năng lượng: +" + energy, NamedTextColor.YELLOW));
         if (hasEffect()) {
             lines.addAll(effect.describe());
-            lines.add(ModifierLore.line("Kéo dài: " + unit.format(duration), NamedTextColor.GRAY));
+            lines.add(Utils.text("Kéo dài: " + unit.format(duration), NamedTextColor.GRAY));
         }
-        List<String> typeNames = fuelTypeNames(context.smpItem().getBaseItem().getId());
+        String itemId = context.smpItem().getBaseItem().getId();
+        List<String> typeNames = Registries.FUEL_TYPE.getAll().values().stream()
+                .filter(type -> type.matches(itemId))
+                .map(FuelType::displayText)
+                .toList();
         if (!typeNames.isEmpty()) {
-            lines.add(ModifierLore.line("Loại nhiên liệu: ", NamedTextColor.GRAY).append(Utils.fromString(String.join(", ", typeNames))));
+            lines.add(Utils.text("Loại nhiên liệu: ", NamedTextColor.GRAY).append(Utils.fromString(String.join(", ", typeNames))));
         }
         context.builder().putLines(LORE_PRIORITY, lines);
     }

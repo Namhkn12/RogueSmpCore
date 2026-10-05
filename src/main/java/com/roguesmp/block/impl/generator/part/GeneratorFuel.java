@@ -1,13 +1,11 @@
-package com.roguesmp.block.impl.generator;
+package com.roguesmp.block.impl.generator.part;
 
 import com.roguesmp.block.EnergyStorage;
 import com.roguesmp.block.StoredItem;
-import com.roguesmp.block.impl.generator.module.ActiveBurn;
-import com.roguesmp.block.impl.generator.module.BurnUnit;
-import com.roguesmp.block.impl.generator.module.GeneratorEffect;
 import com.roguesmp.block.persistence.StateSection;
 import com.roguesmp.codec.MapCodec;
 import com.roguesmp.item.component.impl.GeneratorFuelComponent;
+import com.roguesmp.block.impl.generator.stat.GeneratorEffect;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;

@@ -29,13 +29,16 @@ public class AltarMainBlock extends AltarBlock {
         ItemStack input = getItem();
         if (input == null) return FusionAssessment.failed(FusionIssue.NO_INPUT);
 
-        List<AltarSideBlock> sides = findSides();
-        if (sides == null) return FusionAssessment.failed(FusionIssue.STRUCTURE_INCOMPLETE);
-
-        ItemStack[] items = new ItemStack[sides.size() + 1];
+        AltarSideSlot[] slots = AltarSideSlot.values();
+        List<AltarSideBlock> sides = new ArrayList<>(slots.length);
+        ItemStack[] items = new ItemStack[slots.length + 1];
         items[0] = input.clone();
-        for (int i = 0; i < sides.size(); i++) {
-            ItemStack sideItem = sides.get(i).getItem();
+        for (int i = 0; i < slots.length; i++) {
+            AltarSideBlock side = getSide(slots[i]);
+            if (side == null) return FusionAssessment.failed(FusionIssue.STRUCTURE_INCOMPLETE);
+
+            sides.add(side);
+            ItemStack sideItem = side.getItem();
             items[i + 1] = sideItem == null ? null : sideItem.clone();
         }
 
@@ -65,14 +68,10 @@ public class AltarMainBlock extends AltarBlock {
     public void tick() {
         if (ritual == null) {
             super.tick();
-            tickName();
+            if (nameDisplay != null && nameDisplay.tick()) nameDisplay = null;
         } else if (ritual.tick()) {
             ritual = null;
         }
-    }
-
-    private void tickName() {
-        if (nameDisplay != null && nameDisplay.tick()) nameDisplay = null;
     }
 
     private void clearName() {
@@ -101,15 +100,5 @@ public class AltarMainBlock extends AltarBlock {
     public @Nullable AltarSideBlock getSide(AltarSideSlot slot) {
         SmpBlock block = BlockManager.getInstance().get(AltarLayout.positionOf(getPos(), slot));
         return block instanceof AltarSideBlock side && side.isHydrated() ? side : null;
-    }
-
-    private @Nullable List<AltarSideBlock> findSides() {
-        List<AltarSideBlock> sides = new ArrayList<>();
-        for (AltarSideSlot slot : AltarSideSlot.values()) {
-            AltarSideBlock side = getSide(slot);
-            if (side == null) return null;
-            sides.add(side);
-        }
-        return sides;
     }
 }

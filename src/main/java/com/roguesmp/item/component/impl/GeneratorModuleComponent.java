@@ -1,9 +1,6 @@
 package com.roguesmp.item.component.impl;
 
 import com.roguesmp.block.StoredItem;
-import com.roguesmp.block.impl.generator.module.FuelSynergy;
-import com.roguesmp.block.impl.generator.module.GeneratorEffect;
-import com.roguesmp.block.impl.generator.module.ModifierLore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.BaseItem;
@@ -11,6 +8,8 @@ import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.block.impl.generator.fuel.FuelSynergy;
+import com.roguesmp.block.impl.generator.stat.GeneratorEffect;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +41,7 @@ public record GeneratorModuleComponent(
     }
 
     private Component incompatibleLine() {
-        Component line = ModifierLore.line("Xung đột: ", NamedTextColor.DARK_RED);
+        Component line = Utils.text("Xung đột: ", NamedTextColor.DARK_RED);
         for (int i = 0; i < incompatible.size(); i++) {
             if (i > 0) line = line.append(Component.text(", ", NamedTextColor.DARK_RED));
             line = line.append(new StoredItem(incompatible.get(i), 1).displayName());
@@ -59,10 +58,10 @@ public record GeneratorModuleComponent(
     public void contributeLore(ItemLoreContext context) {
         List<Component> lines = new ArrayList<>(effect.describe());
         for (FuelSynergy synergy : synergies) {
-            lines.add(ModifierLore.line("Với nhiên liệu ", NamedTextColor.GOLD).append(Utils.fromString(synergy.type().isBound() ? synergy.type().value().displayText() : synergy.type().getId())).append(Component.text(":", NamedTextColor.GOLD)));
+            lines.add(Utils.text("Với nhiên liệu ", NamedTextColor.GOLD).append(Utils.fromString(synergy.type().isBound() ? synergy.type().value().displayText() : synergy.type().getId())).append(Component.text(":", NamedTextColor.GOLD)));
             lines.addAll(synergy.effect().describe());
         }
-        if (maxPerMachine > 0) lines.add(ModifierLore.line("Tối đa mỗi máy: " + maxPerMachine, NamedTextColor.GRAY));
+        if (maxPerMachine > 0) lines.add(Utils.text("Tối đa mỗi máy: " + maxPerMachine, NamedTextColor.GRAY));
         if (!incompatible.isEmpty()) lines.add(incompatibleLine());
         context.builder().putLines(LORE_PRIORITY, lines);
     }

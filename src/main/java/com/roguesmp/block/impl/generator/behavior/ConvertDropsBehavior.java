@@ -1,9 +1,9 @@
-package com.roguesmp.block.impl.generator.module.behavior;
+package com.roguesmp.block.impl.generator.behavior;
 
 import com.roguesmp.block.StoredItem;
-import com.roguesmp.block.impl.generator.ResourceGeneratorBlock;
-import com.roguesmp.block.impl.generator.module.ModifierLore;
 import com.roguesmp.codec.Codec;
+import com.roguesmp.utils.Utils;
+import com.roguesmp.block.impl.generator.ResourceGeneratorBlock;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -28,7 +28,7 @@ public record ConvertDropsBehavior(Map<String, String> conversions) implements G
     @Override
     public List<Component> getDisplay() {
         List<Component> lines = new ArrayList<>();
-        conversions.forEach((from, to) -> lines.add(ModifierLore.line("Chuyển ", NamedTextColor.GOLD)
+        conversions.forEach((from, to) -> lines.add(Utils.text("Chuyển ", NamedTextColor.GOLD)
                 .append(new StoredItem(from, 1).displayName())
                 .append(Component.text(" → ", NamedTextColor.GOLD))
                 .append(new StoredItem(to, 1).displayName())));

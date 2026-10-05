@@ -116,12 +116,8 @@ public class MiningManager {
     }
 
     private void spawnMiningParticles(Player player, SmpBlock block) {
-        BlockFace face = miningFace(player, block);
+        BlockFace face = player.getTargetBlockFace((int) MINING_PARTICLE_REACH);
         if (face != null) manager.spawnMiningParticles(block, face);
-    }
-
-    private @Nullable BlockFace miningFace(Player player, SmpBlock block) {
-        return player.getTargetBlockFace((int) MINING_PARTICLE_REACH);
     }
 
     private void updateCrackOverlay(BreakSession session) {

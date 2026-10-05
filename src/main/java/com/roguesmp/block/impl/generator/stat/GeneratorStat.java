@@ -1,4 +1,4 @@
-package com.roguesmp.block.impl.generator.module;
+package com.roguesmp.block.impl.generator.stat;
 
 public enum GeneratorStat {
     PLACE_DELAY("Thời gian đặt", false),

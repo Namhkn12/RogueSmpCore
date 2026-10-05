@@ -1,9 +1,9 @@
-package com.roguesmp.block.impl.generator.module;
+package com.roguesmp.block.impl.generator.stat;
 
 import com.roguesmp.block.BlockDrop;
 import com.roguesmp.block.StoredItem;
 import com.roguesmp.block.data.GeneratorData;
-import com.roguesmp.block.impl.generator.module.behavior.GeneratorBehavior;
+import com.roguesmp.block.impl.generator.behavior.GeneratorBehavior;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -29,7 +29,13 @@ public final class GeneratorStats {
 
     public GeneratorStats(GeneratorData data, List<GeneratorEffect> effects) {
         for (GeneratorEffect effect : effects) {
-            addModifiers(effect.modifiers());
+            for (StatModifier modifier : effect.modifiers()) {
+                switch (modifier.operation()) {
+                    case MULTIPLY_BASE -> baseMultiplierSums.merge(modifier.stat(), modifier.amount(), Double::sum);
+                    case MULTIPLY_TOTAL -> totalMultipliers.merge(modifier.stat(), 1 + modifier.amount(), (a, b) -> a * b);
+                    case ADD -> flatSums.merge(modifier.stat(), modifier.amount(), Double::sum);
+                }
+            }
             behaviors.addAll(effect.behaviors());
         }
 
@@ -42,7 +48,7 @@ public final class GeneratorStats {
 
     public @Nullable StoredItem rollDrop(BlockDrop drop) {
         boolean rare = drop.chance() < GUARANTEED_CHANCE;
-        double chance = rare ? clampChance(drop.chance() * multiplier(GeneratorStat.RARE_DROP_CHANCE) + flat(GeneratorStat.RARE_DROP_CHANCE)) : drop.chance();
+        double chance = rare ? Math.clamp(drop.chance() * multiplier(GeneratorStat.RARE_DROP_CHANCE) + flat(GeneratorStat.RARE_DROP_CHANCE), 0.0, GUARANTEED_CHANCE) : drop.chance();
         double amountMultiplier = multiplier(GeneratorStat.DROP_AMOUNT) * (rare ? 1.0 : multiplier(GeneratorStat.COMMON_DROP_AMOUNT));
         double flatAmount = flat(GeneratorStat.DROP_AMOUNT) + (rare ? 0.0 : flat(GeneratorStat.COMMON_DROP_AMOUNT));
         return drop.rollStored(chance, amountMultiplier, flatAmount);
@@ -84,26 +90,12 @@ public final class GeneratorStats {
         return energyPerTick;
     }
 
-    private void addModifiers(List<StatModifier> modifiers) {
-        for (StatModifier modifier : modifiers) {
-            switch (modifier.operation()) {
-                case MULTIPLY_BASE -> baseMultiplierSums.merge(modifier.stat(), modifier.amount(), Double::sum);
-                case MULTIPLY_TOTAL -> totalMultipliers.merge(modifier.stat(), 1 + modifier.amount(), (a, b) -> a * b);
-                case ADD -> flatSums.merge(modifier.stat(), modifier.amount(), Double::sum);
-            }
-        }
-    }
-
     private double multiplier(GeneratorStat stat) {
         return Math.max(MIN_MULTIPLIER, (1 + baseMultiplierSums.getOrDefault(stat, 0.0)) * totalMultipliers.getOrDefault(stat, 1.0));
     }
 
     private double flat(GeneratorStat stat) {
         return flatSums.getOrDefault(stat, 0.0);
-    }
-
-    private double clampChance(double chance) {
-        return Math.max(0, Math.min(GUARANTEED_CHANCE, chance));
     }
 
     private int applyModifiers(int base, GeneratorStat stat) {

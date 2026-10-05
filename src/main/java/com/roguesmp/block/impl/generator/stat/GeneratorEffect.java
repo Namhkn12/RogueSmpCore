@@ -1,10 +1,11 @@
-package com.roguesmp.block.impl.generator.module;
+package com.roguesmp.block.impl.generator.stat;
 
-import com.roguesmp.block.impl.generator.module.behavior.GeneratorBehavior;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.MapCodec;
+import com.roguesmp.block.impl.generator.behavior.GeneratorBehavior;
 import net.kyori.adventure.text.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public record GeneratorEffect(List<StatModifier> modifiers, List<GeneratorBehavior> behaviors) {
@@ -16,7 +17,8 @@ public record GeneratorEffect(List<StatModifier> modifiers, List<GeneratorBehavi
     );
 
     public List<Component> describe() {
-        List<Component> lines = ModifierLore.describe(modifiers);
+        List<Component> lines = new ArrayList<>();
+        modifiers.forEach(modifier -> lines.add(modifier.describe()));
         behaviors.forEach(behavior -> lines.addAll(behavior.getDisplay()));
         return lines;
     }

@@ -1,4 +1,4 @@
-package com.roguesmp.block.impl.generator.module;
+package com.roguesmp.block.impl.generator.fuel;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.registry.Registries;

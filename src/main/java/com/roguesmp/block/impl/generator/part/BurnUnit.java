@@ -1,4 +1,4 @@
-package com.roguesmp.block.impl.generator.module;
+package com.roguesmp.block.impl.generator.part;
 
 import com.roguesmp.utils.Utils;
 

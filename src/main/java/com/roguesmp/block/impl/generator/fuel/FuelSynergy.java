@@ -1,9 +1,10 @@
-package com.roguesmp.block.impl.generator.module;
+package com.roguesmp.block.impl.generator.fuel;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.registry.Holder;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.registry.Registry;
+import com.roguesmp.block.impl.generator.stat.GeneratorEffect;
 
 public record FuelSynergy(Holder<FuelType> type, GeneratorEffect effect) {
 

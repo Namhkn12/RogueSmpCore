@@ -1,11 +1,10 @@
-package com.roguesmp.block.impl.generator;
+package com.roguesmp.block.impl.generator.part;
 
-import com.roguesmp.block.impl.generator.module.GeneratorEffect;
-import com.roguesmp.block.impl.generator.module.ModuleInstallResult;
 import com.roguesmp.block.persistence.StateSection;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.MapCodec;
 import com.roguesmp.item.component.impl.GeneratorModuleComponent;
+import com.roguesmp.block.impl.generator.stat.GeneratorEffect;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

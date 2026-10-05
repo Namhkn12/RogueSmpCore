@@ -14,11 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Locale;
-
 public record StoredItem(String item, int amount) {
-
-    private static final String VANILLA_PREFIX = "minecraft:";
 
     public static final Codec<StoredItem> CODEC = Codec.composite(
             Codec.STRING.fieldOf("item").forGetter(StoredItem::item),
@@ -30,20 +26,8 @@ public record StoredItem(String item, int amount) {
         if (stack == null || stack.getType().isAir()) return null;
 
         String customId = ItemStackUtils.getBaseId(stack);
-        String id = customId != null ? customId : vanillaId(stack.getType());
+        String id = customId != null ? customId : BlockRef.vanillaId(stack.getType());
         return new StoredItem(id, stack.getAmount());
-    }
-
-    public static boolean isVanilla(String id) {
-        return id.startsWith(VANILLA_PREFIX);
-    }
-
-    public static @Nullable Material vanillaMaterial(String id) {
-        return isVanilla(id) ? Material.getMaterial(id.substring(VANILLA_PREFIX.length()).toUpperCase(Locale.ROOT)) : null;
-    }
-
-    public static String vanillaId(Material material) {
-        return VANILLA_PREFIX + material.getKey().getKey();
     }
 
     public StoredItem withAmount(int newAmount) {
@@ -63,8 +47,8 @@ public record StoredItem(String item, int amount) {
     }
 
     public Component displayName() {
-        if (isVanilla(item)) {
-            Material material = vanillaMaterial(item);
+        if (BlockRef.isVanilla(item)) {
+            Material material = BlockRef.vanillaMaterial(item);
             return material == null ? Component.text(item) : Component.translatable(material.translationKey());
         }
 
@@ -74,8 +58,8 @@ public record StoredItem(String item, int amount) {
     }
 
     public int maxStackSize() {
-        if (isVanilla(item)) {
-            Material material = vanillaMaterial(item);
+        if (BlockRef.isVanilla(item)) {
+            Material material = BlockRef.vanillaMaterial(item);
             if (material == null) return 1;
             Integer stackSize = material.getDefaultData(DataComponentTypes.MAX_STACK_SIZE);
             return stackSize == null ? 1 : stackSize;
@@ -91,8 +75,8 @@ public record StoredItem(String item, int amount) {
     }
 
     private @Nullable ItemStack resolve() {
-        if (isVanilla(item)) {
-            Material material = vanillaMaterial(item);
+        if (BlockRef.isVanilla(item)) {
+            Material material = BlockRef.vanillaMaterial(item);
             return material == null ? null : ItemStack.of(material);
         }
 

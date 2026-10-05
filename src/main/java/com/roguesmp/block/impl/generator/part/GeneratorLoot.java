@@ -1,4 +1,4 @@
-package com.roguesmp.block.impl.generator;
+package com.roguesmp.block.impl.generator.part;
 
 import com.roguesmp.block.StoredItem;
 import com.roguesmp.block.persistence.StateSection;

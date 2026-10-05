@@ -5,12 +5,15 @@ import com.roguesmp.block.data.GeneratorData;
 import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.gui.ResourceGeneratorGui;
 import com.roguesmp.block.manager.BlockManager;
-import com.roguesmp.block.impl.generator.module.*;
-import com.roguesmp.block.impl.generator.module.behavior.GeneratorBehavior;
 import com.roguesmp.block.persistence.StateSection;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.MapCodec;
-import com.roguesmp.item.component.impl.GeneratorFuelComponent;
+import com.roguesmp.block.impl.generator.stat.GeneratorEffect;
+import com.roguesmp.block.impl.generator.part.GeneratorFuel;
+import com.roguesmp.block.impl.generator.part.GeneratorLoot;
+import com.roguesmp.block.impl.generator.stat.GeneratorStats;
+import com.roguesmp.block.impl.generator.part.ModuleInstallResult;
+import com.roguesmp.block.impl.generator.part.ModuleSlots;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -172,14 +175,12 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
             if (item != null) drops.add(item);
         }
         stats.behaviors().forEach(behavior -> behavior.onHarvest(this, drops));
-        drops.forEach(this::storeLoot);
+        for (StoredItem drop : drops) {
+            StoredItem overflow = loot.store(drop, stats.lootCapacity());
+            if (overflow != null) dropAtCenter(overflow);
+        }
         fuel.onHarvest();
         markDirty();
-    }
-
-    private void storeLoot(StoredItem rolled) {
-        StoredItem overflow = loot.store(rolled, stats.lootCapacity());
-        if (overflow != null) dropAtCenter(overflow);
     }
 
     private void dropAtCenter(StoredItem stored) {
@@ -202,13 +203,20 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         breakTicksLeft = Math.min(breakTicksLeft, stats.breakDelayTicks());
     }
 
-    /** The generator's total stored item count, across every distinct id. */
-    public int getOccupiedCapacity() {
-        return loot.occupied();
+    public GeneratorStats stats() {
+        return stats;
     }
 
-    public int getLootCapacity() {
-        return stats.lootCapacity();
+    public ModuleSlots modules() {
+        return modules;
+    }
+
+    public GeneratorLoot loot() {
+        return loot;
+    }
+
+    public GeneratorFuel fuel() {
+        return fuel;
     }
 
     public boolean isMining() {
@@ -218,31 +226,6 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     /** Ticks left until the current mine finishes, only meaningful while {@link #isMining}. */
     public int getBreakTicksLeft() {
         return breakTicksLeft;
-    }
-
-    /** The block id this generator places and mines - vanilla as {@code "minecraft:<material>"}, else a custom block id. */
-    public String getPlaceTarget() {
-        return data.place();
-    }
-
-    public int getPlaceDelayTicks() {
-        return stats.placeDelayTicks();
-    }
-
-    public int getBreakDelayTicks() {
-        return stats.breakDelayTicks();
-    }
-
-    public double getEnergyPerTick() {
-        return stats.energyPerTick();
-    }
-
-    public int getModuleSlots() {
-        return modules.capacity();
-    }
-
-    public List<String> getModules() {
-        return modules.items();
     }
 
     public ModuleInstallResult installModule(String itemId) {
@@ -261,22 +244,6 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
             markDirty();
         }
         return removed;
-    }
-
-    public @Nullable ActiveBurn getBurn() {
-        return fuel.burn();
-    }
-
-    public @Nullable GeneratorFuelComponent getBurningFuel() {
-        return fuel.burningComponent();
-    }
-
-    public List<GeneratorBehavior> getActiveBehaviors() {
-        return stats.behaviors();
-    }
-
-    public List<StatModifier> getActiveModifiers() {
-        return stats.summary();
     }
 
     @Override
@@ -302,18 +269,6 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     }
 
     /**
-     * Every currently-held loot entry, by id and raw (possibly larger-than-one-real-stack) amount -
-     * its size is how many distinct item ids are stored; their amounts sum to at most
-     * {@link #getOccupiedCapacity}. Returned as {@link StoredItem}, not resolved to {@link ItemStack}:
-     * an entry's amount can exceed its real max stack size, which isn't safe to hand to the client as
-     * one stack - the caller (the gui) has to clamp via {@link StoredItem#maxStackSize()} before ever
-     * resolving one.
-     */
-    public List<StoredItem> getLoot() {
-        return loot.entries();
-    }
-
-    /**
      * Removes up to {@code amount} of {@code item} from loot, or null if that id isn't currently
      * stored. The loot entry shrinks or disappears accordingly.
      */
@@ -321,14 +276,6 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         StoredItem taken = loot.take(item, amount);
         if (taken != null) markDirty();
         return taken;
-    }
-
-    public @Nullable StoredItem getFuel() {
-        return fuel.slot();
-    }
-
-    public void setFuel(@Nullable StoredItem item) {
-        fuel.setSlot(item);
     }
 
     @Override

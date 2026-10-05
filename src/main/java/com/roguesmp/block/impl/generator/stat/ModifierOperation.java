@@ -1,4 +1,4 @@
-package com.roguesmp.block.impl.generator.module;
+package com.roguesmp.block.impl.generator.stat;
 
 import com.roguesmp.utils.Utils;
 
@@ -7,7 +7,7 @@ public enum ModifierOperation {
     MULTIPLY_TOTAL,
     ADD;
 
-    public String format(double amount, GeneratorStat stat) {
+    public String format(double amount) {
         return switch (this) {
             case MULTIPLY_BASE -> sign(amount) + Utils.formatDecimal(amount * 100) + "%";
             case MULTIPLY_TOTAL -> "×" + Utils.formatDecimal(1 + amount);

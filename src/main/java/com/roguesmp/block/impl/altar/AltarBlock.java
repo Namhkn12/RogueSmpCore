@@ -43,10 +43,6 @@ public abstract class AltarBlock extends SmpBlock implements Tickable {
         display.refresh(this);
     }
 
-    public boolean isLocked() {
-        return locked;
-    }
-
     public void setLocked(boolean locked) {
         this.locked = locked;
         if (!locked) display.settle();

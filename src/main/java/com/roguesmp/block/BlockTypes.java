@@ -5,9 +5,9 @@ import com.roguesmp.block.data.NoData;
 import com.roguesmp.block.impl.TallyBlock;
 import com.roguesmp.block.impl.altar.AltarMainBlock;
 import com.roguesmp.block.impl.altar.AltarSideBlock;
-import com.roguesmp.block.impl.generator.ResourceGeneratorBlock;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.registry.Registries;
+import com.roguesmp.block.impl.generator.ResourceGeneratorBlock;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;
