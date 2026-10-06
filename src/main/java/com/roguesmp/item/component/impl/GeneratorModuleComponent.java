@@ -59,7 +59,7 @@ public record GeneratorModuleComponent(
         List<Component> lines = new ArrayList<>(effect.describe());
         for (FuelSynergy synergy : synergies) {
             lines.add(Utils.text("Với nhiên liệu ", NamedTextColor.GOLD).append(Utils.fromString(synergy.type().isBound() ? synergy.type().value().displayText() : synergy.type().getId())).append(Component.text(":", NamedTextColor.GOLD)));
-            lines.addAll(synergy.effect().describe());
+            for (Component line : synergy.effect().describe()) lines.add(Utils.text(" ").append(line));
         }
         if (maxPerMachine > 0) lines.add(Utils.text("Tối đa mỗi máy: " + maxPerMachine, NamedTextColor.GRAY));
         if (!incompatible.isEmpty()) lines.add(incompatibleLine());

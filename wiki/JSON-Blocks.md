@@ -163,15 +163,19 @@ Công thức: `giá trị = gốc × max(0.1, (1 + Σ MULTIPLY_BASE) × Π(1 + M
 
 ### Behavior
 
-Field chọn loại: `"type"`. Hiện có 1 loại:
+Field chọn loại: `"type"`. Dùng được ở module, synergy và nhiên liệu (`behaviors`). Hiện có 2 loại:
 
 | `type` | Key | Ý nghĩa |
 | :--- | :--- | :--- |
 | `convert_drops` | `conversions` (object: **id item → id item**, bắt buộc) | Sau khi roll drop, thay id item theo bảng (giữ số lượng), trước khi vào kho. Key dạng `item` giống `drops`. |
+| `add_drops` | `drops` (mảng drop, bắt buộc) | Mỗi lần thu hoạch roll thêm các drop này (cùng định dạng `drops` của block: `item`, `min_amount`, `max_amount`, `chance`). Drop `chance < 1` tính là hiếm nên chịu `RARE_DROP_CHANCE`; mọi drop chịu `DROP_AMOUNT`. |
 
 ```json
 { "type": "convert_drops", "conversions": { "minecraft:cobblestone": "minecraft:iron_ore" } }
+{ "type": "add_drops", "drops": [ { "item": "minecraft:diamond", "chance": 0.05 } ] }
 ```
+
+Behavior chạy lần lượt: các module (kèm synergy của từng module) trước, nhiên liệu sau. `convert_drops` chỉ đổi những drop đã có tại thời điểm nó chạy, nên `convert_drops` của module **không** đổi drop do `add_drops` của nhiên liệu thêm vào; ngược lại `convert_drops` của nhiên liệu đổi được cả drop do module thêm.
 
 <a id="generator_module--item-module"></a>
 ## `generator_module` — item module
@@ -225,7 +229,8 @@ Ba kiểu dùng: **chỉ năng lượng** (`energy > 0`, `duration 0`); **chỉ 
   "components": {
     "name": "<gray>Coal Briquette",
     "generator_fuel": { "energy": 400, "duration": 1200, "unit": "TICKS",
-      "modifiers": [ { "stat": "PLACE_DELAY", "amount": -0.2 } ] }
+      "modifiers": [ { "stat": "PLACE_DELAY", "amount": -0.2 } ],
+      "behaviors": [ { "type": "add_drops", "drops": [ { "item": "minecraft:flint", "chance": 0.1 } ] } ] }
   }
 }
 ```

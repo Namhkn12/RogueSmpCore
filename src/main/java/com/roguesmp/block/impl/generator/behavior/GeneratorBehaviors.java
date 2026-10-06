@@ -6,6 +6,7 @@ import com.roguesmp.registry.Registries;
 public class GeneratorBehaviors {
 
     public static final Codec<ConvertDropsBehavior> CONVERT_DROPS = register(ConvertDropsBehavior.TYPE_KEY, ConvertDropsBehavior.CODEC);
+    public static final Codec<AddDropsBehavior> ADD_DROPS = register(AddDropsBehavior.TYPE_KEY, AddDropsBehavior.CODEC);
 
     public static void loadClass() {
 

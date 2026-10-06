@@ -28,7 +28,7 @@ public record ConvertDropsBehavior(Map<String, String> conversions) implements G
     @Override
     public List<Component> getDisplay() {
         List<Component> lines = new ArrayList<>();
-        conversions.forEach((from, to) -> lines.add(Utils.text("Chuyển ", NamedTextColor.GOLD)
+        conversions.forEach((from, to) -> lines.add(Utils.text("Chuyển đổi: ", NamedTextColor.GOLD)
                 .append(new StoredItem(from, 1).displayName())
                 .append(Component.text(" → ", NamedTextColor.GOLD))
                 .append(new StoredItem(to, 1).displayName())));
