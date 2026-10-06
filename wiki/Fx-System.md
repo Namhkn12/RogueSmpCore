@@ -175,4 +175,4 @@ Runnable này tự `cancel()` khi `handle.isActive()` trả `false` — vòng đ
 - **World/chunk unload đã được xử lý an toàn, không cần tự check ở tầng gọi**: nếu `origin.getWorld()` trả `null` (world đã unload, vd. qua Multiverse), `FxEffect.tick()` tự `stop()` thay vì ném NPE giữa vòng lặp dùng chung của `FxEngine`. Mỗi `ParticleRenderer`/`AbstractDisplayRenderer` tự kiểm tra `world.isChunkLoaded(...)` **1 lần mỗi part mỗi tick** (tại vị trí root của part, không phải từng điểm — đánh đổi để tránh chi phí check theo từng điểm) trước khi spawn/teleport, bỏ qua tick đó thay vì force-load chunk. `AbstractDisplayRenderer` cũng tự lọc bỏ entity đã bị server dọn (`!isValid()`) trước khi đếm capacity, để không gọi `teleport`/`setTransformation` lên 1 entity đã chết.
 
 ---
-◀ [Block System](Block-System.md) · Về [Trang chủ](Home.md)
+◀ [Dungeon System](Dungeon-System.md) · Về [Trang chủ](Home.md)

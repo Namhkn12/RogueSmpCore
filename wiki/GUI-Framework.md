@@ -102,7 +102,7 @@ public abstract class ReactiveGui<S> extends BaseGui {
 }
 ```
 
-Sau mỗi click/drag vào GUI, `ReactiveGui` tự lên lịch (`Utils.runLater`, trễ 1 tick — đợi Bukkit áp dụng xong thay đổi inventory do click gây ra) 1 lần `syncStateInventory()`: gọi lại `computeState()`, so với state đã vẽ lần trước qua `isStateEqual`, và chỉ gọi `render(newState)` nếu thực sự đổi — tránh vẽ lại (và gây nháy màn hình) khi state không đổi. 2 GUI đang dùng pattern này: [`gui/crafting/CraftingGui.java`](../src/main/java/com/roguesmp/gui/crafting/CraftingGui.java) và [`gui/crafting/FusionGui.java`](../src/main/java/com/roguesmp/gui/crafting/FusionGui.java) — xem [Crafting System](Crafting-System.md) để biết `CraftingManager`/`RecipeKey` mà state của chúng đọc từ đó.
+Sau mỗi click/drag vào GUI, `ReactiveGui` tự lên lịch (`Utils.runLater`, trễ 1 tick — đợi Bukkit áp dụng xong thay đổi inventory do click gây ra) 1 lần `syncStateInventory()`: gọi lại `computeState()`, so với state đã vẽ lần trước qua `isStateEqual`, và chỉ gọi `render(newState)` nếu thực sự đổi — tránh vẽ lại (và gây nháy màn hình) khi state không đổi. 2 GUI đang dùng pattern này: [`gui/crafting/CraftingGui.java`](../src/main/java/com/roguesmp/gui/crafting/CraftingGui.java) và [`gui/crafting/FusionGui.java`](../src/main/java/com/roguesmp/gui/crafting/FusionGui.java) — xem [JSON-Crafting](JSON-Crafting.md) để biết `CraftingManager`/`RecipeKey` mà state của chúng đọc từ đó.
 
 ## Mở 1 GUI — call site thật
 

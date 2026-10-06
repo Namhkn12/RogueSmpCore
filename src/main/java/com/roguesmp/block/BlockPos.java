@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -56,8 +55,8 @@ public record BlockPos(UUID world, int x, int y, int z) {
         return bukkitWorld == null ? null : bukkitWorld.getBlockAt(x, y, z);
     }
 
-    public BlockPos relative(BlockFace face) {
-        return new BlockPos(world, x + face.getModX(), y + face.getModY(), z + face.getModZ());
+    public BlockPos offset(int dx, int dy, int dz) {
+        return new BlockPos(world, x + dx, y + dy, z + dz);
     }
 
     public boolean matches(Location location) {

@@ -32,6 +32,8 @@ public class ItemComponentKeys {
     public static final ComponentKey<RandomStatComponent> RANDOM_STAT = register("random_stat", RandomStatComponent.CODEC);
     public static final ComponentKey<UsageTimerComponent> USAGE_TIMER = register("usage_timer", UsageTimerComponent.CODEC);
     public static final ComponentKey<CommandExecutorComponent> COMMAND_EXECUTOR = register("command_executor", CommandExecutorComponent.CODEC);
+    public static final ComponentKey<GeneratorModuleComponent> GENERATOR_MODULE = register("generator_module", GeneratorModuleComponent.CODEC);
+    public static final ComponentKey<GeneratorFuelComponent> GENERATOR_FUEL = register("generator_fuel", GeneratorFuelComponent.CODEC);
 
     public static void loadClass() {
 

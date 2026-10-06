@@ -87,7 +87,7 @@ public final class BlockVisual {
 
         Location center = new Location(world, pos.x() + 0.5, pos.y() + 0.5, pos.z() + 0.5);
         return world.spawn(center, ItemDisplay.class, display -> {
-            display.setItemStack(crackStageStack(stage));
+            display.setItemStack(displayStack(crackStageKey(stage)));
             display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.NONE);
             display.setTransformation(new Transformation(
                     new Vector3f(),
@@ -133,12 +133,6 @@ public final class BlockVisual {
                 player.sendBlockDamage(loc, progress, pos.hashCode());
             }
         }
-    }
-
-    private static ItemStack crackStageStack(int stage) {
-        ItemStack stack = ItemStack.of(Material.STONE);
-        stack.setData(DataComponentTypes.ITEM_MODEL, crackStageKey(stage));
-        return stack;
     }
 
     private static Key crackStageKey(int stage) {

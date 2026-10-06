@@ -50,10 +50,6 @@ final class BreakSession {
         return shownStage;
     }
 
-    float crackProgress(int requiredTicks) {
-        return Math.min(elapsedTicks / (float) requiredTicks, 1f);
-    }
-
     UUID crackOverlayId() {
         return crackOverlayId;
     }

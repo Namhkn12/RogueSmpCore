@@ -3,17 +3,18 @@ package com.roguesmp.block;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.ItemComponentKeys;
+import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.item.component.impl.StackSizeComponent;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.ItemStackUtils;
+import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 public record StoredItem(String item, int amount) {
-
-    private static final String VANILLA_PREFIX = "minecraft:";
 
     public static final Codec<StoredItem> CODEC = Codec.composite(
             Codec.STRING.fieldOf("item").forGetter(StoredItem::item),
@@ -25,20 +26,8 @@ public record StoredItem(String item, int amount) {
         if (stack == null || stack.getType().isAir()) return null;
 
         String customId = ItemStackUtils.getBaseId(stack);
-        String id = customId != null ? customId : vanillaId(stack.getType());
+        String id = customId != null ? customId : BlockRef.vanillaId(stack.getType());
         return new StoredItem(id, stack.getAmount());
-    }
-
-    public static boolean isVanilla(String id) {
-        return id.startsWith(VANILLA_PREFIX);
-    }
-
-    public static @Nullable Material vanillaMaterial(String id) {
-        return isVanilla(id) ? Material.matchMaterial(id.substring(VANILLA_PREFIX.length())) : null;
-    }
-
-    public static String vanillaId(Material material) {
-        return VANILLA_PREFIX + material.getKey().getKey();
     }
 
     public StoredItem withAmount(int newAmount) {
@@ -57,9 +46,20 @@ public record StoredItem(String item, int amount) {
         return stack;
     }
 
+    public Component displayName() {
+        if (BlockRef.isVanilla(item)) {
+            Material material = BlockRef.vanillaMaterial(item);
+            return material == null ? Component.text(item) : Component.translatable(material.translationKey());
+        }
+
+        BaseItem baseItem = Registries.ITEM.get(item);
+        NameComponent name = baseItem == null ? null : baseItem.getComponent(ItemComponentKeys.ITEM_NAME);
+        return name == null ? Component.text(item) : Utils.fromString(name.value());
+    }
+
     public int maxStackSize() {
-        if (isVanilla(item)) {
-            Material material = vanillaMaterial(item);
+        if (BlockRef.isVanilla(item)) {
+            Material material = BlockRef.vanillaMaterial(item);
             if (material == null) return 1;
             Integer stackSize = material.getDefaultData(DataComponentTypes.MAX_STACK_SIZE);
             return stackSize == null ? 1 : stackSize;
@@ -75,8 +75,8 @@ public record StoredItem(String item, int amount) {
     }
 
     private @Nullable ItemStack resolve() {
-        if (isVanilla(item)) {
-            Material material = vanillaMaterial(item);
+        if (BlockRef.isVanilla(item)) {
+            Material material = BlockRef.vanillaMaterial(item);
             return material == null ? null : ItemStack.of(material);
         }
 

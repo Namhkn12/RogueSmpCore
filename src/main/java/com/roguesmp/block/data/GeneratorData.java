@@ -6,7 +6,7 @@ import com.roguesmp.codec.Codec;
 import java.util.List;
 
 public record GeneratorData(String place, int placeDelayTicks, int breakDelayTicks, List<BlockDrop> drops,
-                            int maxEnergy, int energyPerTick, int energyPerFuel, int lootCapacity) {
+                            int maxEnergy, int energyPerTick, int lootCapacity, int moduleSlots) {
 
     public static final GeneratorData DEFAULT = new GeneratorData(
             "minecraft:stone",
@@ -15,8 +15,8 @@ public record GeneratorData(String place, int placeDelayTicks, int breakDelayTic
             List.of(),
             5000,
             1,
-            200,
-            1000
+            1000,
+            0
     );
 
     public static final Codec<GeneratorData> CODEC = Codec.composite(
@@ -26,8 +26,8 @@ public record GeneratorData(String place, int placeDelayTicks, int breakDelayTic
             Codec.listOf(BlockDrop.CODEC).optionalFieldOf("drops", DEFAULT.drops()).forGetter(GeneratorData::drops),
             Codec.INT.optionalFieldOf("max_energy", DEFAULT.maxEnergy()).forGetter(GeneratorData::maxEnergy),
             Codec.INT.optionalFieldOf("energy_per_tick", DEFAULT.energyPerTick()).forGetter(GeneratorData::energyPerTick),
-            Codec.INT.optionalFieldOf("energy_per_fuel", DEFAULT.energyPerFuel()).forGetter(GeneratorData::energyPerFuel),
             Codec.INT.optionalFieldOf("capacity", DEFAULT.lootCapacity()).forGetter(GeneratorData::lootCapacity),
+            Codec.INT.optionalFieldOf("module_slots", DEFAULT.moduleSlots()).forGetter(GeneratorData::moduleSlots),
             GeneratorData::new
     );
 }

@@ -10,15 +10,13 @@ import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.util.BoundingBox;
-import org.bukkit.util.RayTraceResult;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -118,12 +116,8 @@ public class MiningManager {
     }
 
     private void spawnMiningParticles(Player player, SmpBlock block) {
-        BlockFace face = miningFace(player, block);
+        BlockFace face = player.getTargetBlockFace((int) MINING_PARTICLE_REACH);
         if (face != null) manager.spawnMiningParticles(block, face);
-    }
-
-    private @Nullable BlockFace miningFace(Player player, SmpBlock block) {
-        return player.getTargetBlockFace((int) MINING_PARTICLE_REACH);
     }
 
     private void updateCrackOverlay(BreakSession session) {

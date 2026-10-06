@@ -47,6 +47,9 @@ import com.roguesmp.entity.spell.EntitySpells;
 import com.roguesmp.npc.action.GuiOpenActions;
 import com.roguesmp.text.Glyph;
 import com.roguesmp.text.Glyphs;
+import com.roguesmp.block.impl.generator.fuel.FuelType;
+import com.roguesmp.block.impl.generator.behavior.GeneratorBehavior;
+import com.roguesmp.block.impl.generator.behavior.GeneratorBehaviors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +62,7 @@ public class Registries {
     public static final Registry<Codec<? extends EntityComponent>> ENTITY_COMPONENT_CODEC = register(registry -> EntityComponentKeys.loadClass());
     public static final Registry<Codec<? extends SmpEffect>> EFFECT_CODEC = register(registry -> EffectCodecs.loadClass());
     public static final Registry<Codec<? extends ItemAbility>> ITEM_ABILITY_CODEC = register(registry -> ItemAbilities.loadClass());
+    public static final Registry<Codec<? extends GeneratorBehavior>> GENERATOR_BEHAVIOR_CODEC = register(registry -> GeneratorBehaviors.loadClass());
 
     public static final Registry<Codec<? extends QuestObjective>> QUEST_OBJECTIVE_CODEC = register(registry -> QuestObjectives.loadClass());
     public static final Registry<Codec<? extends QuestRequirement>> QUEST_REQUIREMENT_CODEC = register(registry -> QuestRequirements.loadClass());
@@ -101,6 +105,7 @@ public class Registries {
 
     public static final Registry<LootTable> LOOT_TABLE = new Registry<>(LootConfig.LOOT_TABLE_FOLDER, LootTable.CODEC);
     public static final Registry<ItemType> ITEM_TYPE = new Registry<>("item_types", ItemType.CODEC);
+    public static final Registry<FuelType> FUEL_TYPE = new Registry<>("fuel_types", FuelType.CODEC);
 
     public static final Registry<Codec<? extends CraftingRecipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());
     public static final Registry<CraftingRecipe> CRAFTING_RECIPE = new Registry<>("crafting_recipes", CraftingRecipe.CODEC);

@@ -3,6 +3,7 @@ package com.roguesmp.codec;
 import com.roguesmp.RogueSmpCore;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -177,6 +178,23 @@ public interface Codec<A> {
                 }
             },
             java.util.UUID::toString);
+
+    /**
+     * Codec for an {@link ItemStack}, stored as the raw bytes using {@link ItemStack#serializeAsBytes()}
+     */
+    Codec<ItemStack> ITEM_STACK = Codec.listOf(Codec.BYTE).xmap(
+            bytes -> {
+                byte[] raw = new byte[bytes.size()];
+                for (int i = 0; i < raw.length; i++) raw[i] = bytes.get(i);
+                return ItemStack.deserializeBytes(raw);
+            },
+            itemStack -> {
+                byte[] raw = itemStack.serializeAsBytes();
+                List<Byte> bytes = new ArrayList<>(raw.length);
+                for (byte b : raw) bytes.add(b);
+                return bytes;
+            }
+    );
 
     /**
      * Creates a codec for any Java Enum type.

@@ -2,7 +2,7 @@
 
 Package: [`com.roguesmp.registry`](../src/main/java/com/roguesmp/registry)
 
-> ⚠️ **Migration đã hoàn tất phần lớn.** Trước đây mỗi tập dữ liệu (item, entity, npc, quest, skin, block, ...) có 1 class singleton tự viết tay riêng (`ItemRegistry`, `BlockRegistry`, `EntityRegistry`, `NpcRegistry`, `QuestRegistry`, ...), lặp lại logic load/save cho từng subsystem. **Chỉ còn 2 class kiểu này sống sót**: [`ItemRegistry`](../src/main/java/com/roguesmp/registry/ItemRegistry.java) (đã `@Deprecated`, chỉ còn để tương thích ngược) và [`SkinRegistry`](../src/main/java/com/roguesmp/registry/SkinRegistry.java) (vẫn còn hành vi runtime thật — fetch skin từ Mojang). `BlockRegistry`, `EntityRegistry`, `NpcRegistry`, `QuestRegistry` **không còn tồn tại** — dữ liệu của chúng giờ là các field `Registry<T>` phẳng, khai báo thẳng trong [`Registries`](../src/main/java/com/roguesmp/registry/Registries.java) (`Registries.ENTITY`, `Registries.NPC`, `Registries.QUEST`, `Registries.BLOCK_PROPERTIES`). Code mới **luôn** dùng thẳng `Registries.<TÊN>` — không bao giờ tự viết 1 singleton `getInstance()` mới cho dữ liệu JSON thuần túy.
+> ⚠️ **Migration đã hoàn tất phần lớn.** Trước đây mỗi tập dữ liệu (item, entity, npc, quest, skin, block, ...) có 1 class singleton tự viết tay riêng (`ItemRegistry`, `BlockRegistry`, `EntityRegistry`, `NpcRegistry`, `QuestRegistry`, ...), lặp lại logic load/save cho từng subsystem. **Chỉ còn 2 class kiểu này sống sót**: [`ItemRegistry`](../src/main/java/com/roguesmp/registry/ItemRegistry.java) (đã `@Deprecated`, chỉ còn để tương thích ngược) và [`SkinRegistry`](../src/main/java/com/roguesmp/registry/SkinRegistry.java) (vẫn còn hành vi runtime thật — fetch skin từ Mojang). `BlockRegistry`, `EntityRegistry`, `NpcRegistry`, `QuestRegistry` **không còn tồn tại** — dữ liệu của chúng giờ là các field `Registry<T>` phẳng, khai báo thẳng trong [`Registries`](../src/main/java/com/roguesmp/registry/Registries.java) (`Registries.ENTITY`, `Registries.NPC`, `Registries.QUEST`, `Registries.BLOCK`). Code mới **luôn** dùng thẳng `Registries.<TÊN>` — không bao giờ tự viết 1 singleton `getInstance()` mới cho dữ liệu JSON thuần túy.
 
 ## Hai thứ cùng tên "Registry" — đừng nhầm lẫn
 
@@ -111,7 +111,7 @@ public static final SmpTag<Quest> DAILY_MEDIUM_QUEST = builtIn("daily_medium_que
 public static final SmpTag<Quest> DAILY_HARD_QUEST = builtIn("daily_hard_quest", () -> Registries.QUEST);
 ```
 
-`Tags.bootstrap()` phải chạy **trước** bất kỳ tag nào được load từ đĩa (xem thứ tự trong `Registries.boostrap` bên dưới), nếu không những entry built-in trên sẽ không tồn tại để nhận dữ liệu JSON đè lên. Ứng dụng thực tế đã thấy: [`PlayerClass.allowedWeapons`](Player-Class-System.md) là 1 `Set<String>` id-của-tag-trên-`Registries.ITEM` (vd. `"weapons"`), không phải id item trực tiếp — 1 class được phép dùng "mọi thứ nằm trong tag này."
+`Tags.bootstrap()` phải chạy **trước** bất kỳ tag nào được load từ đĩa (xem thứ tự trong `Registries.boostrap` bên dưới), nếu không những entry built-in trên sẽ không tồn tại để nhận dữ liệu JSON đè lên. Ứng dụng thực tế đã thấy: [`PlayerClass.allowedWeapons`](JSON-Classes.md) là 1 `Set<String>` id-của-tag-trên-`Registries.ITEM` (vd. `"weapons"`), không phải id item trực tiếp — 1 class được phép dùng "mọi thứ nằm trong tag này."
 
 API sửa tag từ code: `Registry.saveTag(plugin, tagId, List<String> rawEntries)` (ghi file + reload ngay), `deleteTag(plugin, tagId)`.
 
@@ -119,23 +119,26 @@ API sửa tag từ code: `Registry.saveTag(plugin, tagId, List<String> rawEntrie
 
 [`Registries.java`](../src/main/java/com/roguesmp/registry/Registries.java) hiện có **hơn 30** field `Registry<T>`, chia làm 2 nhóm:
 
-**Bảng tra codec in-memory** (dùng cho [xử lý đa hình](Codec-System.md#polymorphic-dispatch-codecdispatch), không bao giờ load từ đĩa): `ITEM_COMPONENT_CODEC`, `ENTITY_COMPONENT_CODEC`, `EFFECT_CODEC`, `ITEM_ABILITY_CODEC`, `QUEST_OBJECTIVE_CODEC`, `QUEST_REQUIREMENT_CODEC`, `QUEST_REWARD_CODEC`, `OBJECTIVE_PROGRESS_CODEC`, `ABILITY_UPGRADE_REQUIREMENT_CODEC`, `NPC_ACTION_CODEC`, `LOOT_CONDITION_CODEC`, `LOOT_FUNCTION_CODEC`, `LOOT_ENTRY_CODEC`, `CRAFTING_RECIPE_CODEC`.
+**Bảng tra codec in-memory** (dùng cho [xử lý đa hình](Codec-System.md#polymorphic-dispatch-codecdispatch), không bao giờ load từ đĩa): `ITEM_COMPONENT_CODEC`, `ENTITY_COMPONENT_CODEC`, `EFFECT_CODEC`, `ITEM_ABILITY_CODEC`, `QUEST_OBJECTIVE_CODEC`, `QUEST_REQUIREMENT_CODEC`, `QUEST_REWARD_CODEC`, `OBJECTIVE_PROGRESS_CODEC`, `ABILITY_UPGRADE_REQUIREMENT_CODEC`, `NPC_ACTION_CODEC`, `LOOT_CONDITION_CODEC`, `LOOT_FUNCTION_CODEC`, `LOOT_ENTRY_CODEC`, `CRAFTING_RECIPE_CODEC`, `GENERATOR_BEHAVIOR_CODEC`.
 
 **Registry data-driven** (backing bởi 1 `Codec<T>`, tự load từ `<dataFolder>/<locationKey>/`):
 
-| Field | Kiểu | Thư mục | Trang wiki |
+| Field | Kiểu | Thư mục | JSON reference |
 | :--- | :--- | :--- | :--- |
-| `ITEM` | `Registry<BaseItem>` | `items/` | [Item System](Item-System.md) |
-| `ENTITY` | `Registry<BaseEntity>` | `entities/` | [Entity, Boss & Spell System](Entity-Boss-Spell-System.md) |
-| `NPC` | `Registry<BaseNpc>` | `npcs/` | [NPC System](Npc-System.md) |
-| `QUEST` | `Registry<Quest>` | `quests/` | [Quest System](Quest-System.md) |
-| `LOOT_TABLE` | `Registry<LootTable>` | `loottable/` | [Loot System](Loot-System.md) |
-| `CRAFTING_RECIPE` | `Registry<CraftingRecipe>` | `crafting_recipes/` | [Crafting System](Crafting-System.md) |
-| `BLOCK_PROPERTIES` | `Registry<BlockProperties>` | `blocks/` | [Block System](Block-System.md) |
-| `ITEM_TYPE` | `Registry<ItemType>` | `item_types/` | [Item System](Item-System.md) |
-| `PLAYER_CLASS` | `Registry<PlayerClass>` | `classes/` | [Player Class System](Player-Class-System.md) |
-| `ABILITY_CONFIG` | `Registry<AbilityConfig>` | `ability_info/` | [Player Ability System](Player-Ability-System.md) |
-| `SKIN_DATA` | `Registry<SkinRegistry.SkinData>` | `skins/` | — |
+| `ITEM` | `Registry<BaseItem>` | `items/` | [JSON-Items](JSON-Items.md) |
+| `ITEM_TYPE` | `Registry<ItemType>` | `item_types/` | [JSON-Items](JSON-Items.md#item_types--loại-item) |
+| `SKIN_DATA` | `Registry<SkinRegistry.SkinData>` | `skins/` | [JSON-Items](JSON-Items.md#skins--dữ-liệu-skin) |
+| `ENTITY` | `Registry<BaseEntity>` | `entities/` | [JSON-Entities](JSON-Entities.md) |
+| `ABILITY_CONFIG` | `Registry<AbilityConfig>` | `ability_info/` | [JSON-Abilities](JSON-Abilities.md) |
+| `PLAYER_CLASS` | `Registry<PlayerClass>` | `classes/` | [JSON-Classes](JSON-Classes.md) |
+| `QUEST` | `Registry<Quest>` | `quests/` | [JSON-Quests](JSON-Quests.md) |
+| `NPC` | `Registry<BaseNpc>` | `npcs/` | [JSON-Npcs](JSON-Npcs.md) |
+| `LOOT_TABLE` | `Registry<LootTable>` | `loottable/` | [JSON-Loot](JSON-Loot.md) |
+| `CRAFTING_RECIPE` | `Registry<CraftingRecipe>` | `crafting_recipes/` | [JSON-Crafting](JSON-Crafting.md) |
+| `BLOCK` | `Registry<BlockData>` | `blocks/` | [JSON-Blocks](JSON-Blocks.md) |
+| `FUEL_TYPE` | `Registry<FuelType>` | `fuel_types/` | [JSON-Blocks](JSON-Blocks.md#fuel_types--loại-nhiên-liệu) |
+
+Ý nghĩa từng key của các thư mục này: xem [JSON-Overview](JSON-Overview.md).
 
 Vài registry còn lại là bảng tra **in-memory nhưng code-populated qua cùng cơ chế bootstrap** (`ENCHANTS`, `GLYPH`, `ENTITY_SPELL`, `ENTITY_FACTORY`, `ABILITY`, `BLOCK_TYPE`, `TRIGGER_OPTION`, `NPC_GUI_OPEN_ACTION`) — không có file JSON tương ứng (trừ `ENCHANTS`, chỉ có `enchants/tags/*.json` vì nó vẫn muốn hỗ trợ tag dù bản thân là enum cứng).
 
