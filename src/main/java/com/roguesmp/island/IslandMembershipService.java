@@ -5,6 +5,7 @@ import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -78,10 +79,14 @@ public class IslandMembershipService {
         Player onlineTarget = Bukkit.getPlayer(targetId);
         if (onlineTarget != null && worldManager.isIslandWorld(onlineTarget.getWorld())) {
             onlineTarget.sendMessage(Utils.fromString("<yellow>Bạn đã trở thành người vô gia cư nên sẽ được hộ tống về hub."));
-            teleportService.sendToHub(onlineTarget);
+            if (!abandoned) teleportService.sendToHub(onlineTarget);
         }
 
-        if (abandoned) worldManager.unloadIslandWorld(islandId);
+        if (abandoned) {
+            World world = worldManager.getLoadedWorld(islandId);
+            if (world != null) teleportService.evacuate(world);
+            worldManager.unloadIslandWorld(islandId);
+        }
 
         dataManager.saveAsync(islandData);
         return true;

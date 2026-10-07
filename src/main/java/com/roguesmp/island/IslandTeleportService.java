@@ -1,10 +1,13 @@
 package com.roguesmp.island;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.mvplugins.multiverse.core.MultiverseCoreApi;
 import org.mvplugins.multiverse.core.teleportation.PassengerModes;
 
 public class IslandTeleportService {
@@ -12,6 +15,7 @@ public class IslandTeleportService {
     private final PlayerManager playerManager;
     private final IslandDataManager dataManager;
     private final IslandWorldManager worldManager;
+    private final MultiverseCoreApi multiverseApi = MultiverseCoreApi.get();
 
     public IslandTeleportService(PlayerManager playerManager, IslandDataManager dataManager, IslandWorldManager worldManager) {
         this.playerManager = playerManager;
@@ -51,14 +55,39 @@ public class IslandTeleportService {
     }
 
     public void sendToHub(Player player) {
-        worldManager.getMultiverseApi().getWorldManager().getDefaultWorld()
-                .peek(hub -> teleport(player, hub.getSpawnLocation()));
+        multiverseApi.getWorldManager().getDefaultWorld().peek(hub -> teleport(player, hub.getSpawnLocation()));
     }
 
+    /**
+     * Sends everyone in the world to the hub, so the world can be unloaded.
+     */
+    public void evacuate(World world) {
+        multiverseApi.getWorldManager().getDefaultWorld().peek(hub -> {
+            for (Player player : world.getPlayers()) {
+                player.sendMessage(Utils.fromString("<yellow>Đảo đã đóng cửa nên bạn được đưa về hub."));
+                teleport(player, hub.getSpawnLocation());
+            }
+        });
+    }
+
+    /**
+     * Teleports through Multiverse's safety teleporter, and falls back to a plain teleport if Multiverse refuses.
+     */
     public void teleport(Player player, Location location) {
-        worldManager.getMultiverseApi().getSafetyTeleporter()
+        multiverseApi.getSafetyTeleporter()
                 .to(location)
                 .passengerMode(PassengerModes.RETAIN_ALL)
-                .teleportSingle(player);
+                .teleportSingle(player)
+                .onFailure(attempts -> {
+                    attempts.forEach(attempt -> {
+                        RogueSmpCore.LOGGER.warn("Multiverse could not teleport {} ({}), falling back to a plain teleport", player.getName(), attempt.getFailureMessage());
+                    });
+
+                    Utils.runLater(() -> player.teleportAsync(location));
+                });
+    }
+
+    public MultiverseCoreApi getMultiverseApi() {
+        return multiverseApi;
     }
 }

@@ -59,7 +59,7 @@ public class IslandListener implements Listener {
             }
         }
 
-        islandManager.getIslandWorldManager().getMultiverseApi().getWorldManager().getDefaultWorld()
+        islandManager.getTeleportService().getMultiverseApi().getWorldManager().getDefaultWorld()
                 .peek(hub -> event.setSpawnLocation(hub.getSpawnLocation()));
     }
 

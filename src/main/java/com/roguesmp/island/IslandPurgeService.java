@@ -13,11 +13,13 @@ public class IslandPurgeService {
     private final IslandDataManager dataManager;
     private final IslandWorldManager worldManager;
     private final IslandRegionManager regionManager;
+    private final IslandTeleportService teleportService;
 
-    public IslandPurgeService(IslandDataManager dataManager, IslandWorldManager worldManager, IslandRegionManager regionManager) {
+    public IslandPurgeService(IslandDataManager dataManager, IslandWorldManager worldManager, IslandRegionManager regionManager, IslandTeleportService teleportService) {
         this.dataManager = dataManager;
         this.worldManager = worldManager;
         this.regionManager = regionManager;
+        this.teleportService = teleportService;
     }
 
     public void purgeArchived(CommandSender requester) {
@@ -40,6 +42,7 @@ public class IslandPurgeService {
         }
 
         regionManager.removeIslandRegion(world);
+        teleportService.evacuate(world);
         worldManager.discardWorld(world).thenRun(() -> Utils.runLater(() -> finishPurge(islandId, worldName)));
     }
 

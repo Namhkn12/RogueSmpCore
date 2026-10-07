@@ -15,11 +15,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
-import org.mvplugins.multiverse.core.MultiverseCoreApi;
-import org.mvplugins.multiverse.core.teleportation.PassengerModes;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +40,6 @@ public class IslandWorldManager {
     private static final int EVACUATION_DELAY_TICKS = 20;
 
     private final RogueSmpCore plugin;
-    private final MultiverseCoreApi multiverseApi;
     private final File worldFolder;
     private final PolarWorld template;
     private final Map<UUID, CompletableFuture<World>> loading = new ConcurrentHashMap<>();
@@ -51,7 +47,6 @@ public class IslandWorldManager {
 
     public IslandWorldManager(RogueSmpCore plugin) {
         this.plugin = plugin;
-        this.multiverseApi = MultiverseCoreApi.get();
         this.worldFolder = new File(plugin.getDataFolder(), WORLD_FOLDER_NAME);
         this.worldFolder.mkdirs();
         this.template = readTemplate();
@@ -176,7 +171,6 @@ public class IslandWorldManager {
 
         CompletableFuture<Void> pendingUnload = new CompletableFuture<>();
         unloading.put(islandId, pendingUnload);
-        evacuate(world);
         Polar.saveWorld(world, getWorldSource(getWorldId(world)))
                 .thenRun(() -> Utils.runLater(() -> {
                     Bukkit.unloadWorld(world, false);
@@ -198,7 +192,6 @@ public class IslandWorldManager {
         CompletableFuture<Void> pendingUnload = islandId == null ? null : unloading.get(islandId);
         if (pendingUnload != null) return pendingUnload;
 
-        evacuate(world);
         Polar.stopAutoSaveTask(world.getKey());
 
         CompletableFuture<Void> discarded = new CompletableFuture<>();
@@ -215,18 +208,6 @@ public class IslandWorldManager {
         } catch (Exception e) {
             RogueSmpCore.LOGGER.error("Failed to delete island world file for {}", islandId, e);
         }
-    }
-
-    public void evacuate(World world) {
-        multiverseApi.getWorldManager().getDefaultWorld().peek(hub -> {
-            for (Player player : world.getPlayers()) {
-                player.sendMessage(Utils.fromString("<yellow>Đảo đã đóng cửa nên bạn được đưa về hub."));
-                multiverseApi.getSafetyTeleporter()
-                        .to(hub.getSpawnLocation())
-                        .passengerMode(PassengerModes.RETAIN_ALL)
-                        .teleportSingle(player);
-            }
-        });
     }
 
     private Config buildConfig() {
@@ -255,9 +236,5 @@ public class IslandWorldManager {
                 center.clone().add(x, 1, z).getBlock().setType(Material.GRASS_BLOCK);
             }
         }
-    }
-
-    public MultiverseCoreApi getMultiverseApi() {
-        return multiverseApi;
     }
 }

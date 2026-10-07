@@ -38,7 +38,7 @@ public class IslandManager {
         this.teleportService = new IslandTeleportService(playerManager, islandDataManager, islandWorldManager);
         this.membershipService = new IslandMembershipService(playerManager, islandDataManager, islandWorldManager, islandRegionManager, teleportService);
         this.inviteManager = new IslandInviteManager(playerManager, islandDataManager, membershipService);
-        this.purgeService = new IslandPurgeService(islandDataManager, islandWorldManager, islandRegionManager);
+        this.purgeService = new IslandPurgeService(islandDataManager, islandWorldManager, islandRegionManager, teleportService);
         this.visitService = new IslandVisitService(playerManager, islandDataManager, islandWorldManager, teleportService);
     }
 
@@ -77,7 +77,7 @@ public class IslandManager {
         islandDataManager.cache(islandData);
         islandDataManager.saveAsync(islandData);
 
-        islandWorldManager.getMultiverseApi().getSafetyTeleporter()
+        teleportService.getMultiverseApi().getSafetyTeleporter()
                 .to(spawnPoint)
                 .passengerMode(PassengerModes.RETAIN_ALL)
                 .teleportSingle(creator)
@@ -122,7 +122,11 @@ public class IslandManager {
 
         islandDataManager.removeCache(islandData.getIslandId());
         if (islandData.isDirty()) islandDataManager.saveAsync(islandData);
-        Utils.runLater(() -> islandWorldManager.unloadIslandWorld(islandData.getIslandId()));
+        Utils.runLater(() -> {
+            World world = islandWorldManager.getLoadedWorld(islandData.getIslandId());
+            if (world != null) teleportService.evacuate(world);
+            islandWorldManager.unloadIslandWorld(islandData.getIslandId());
+        });
     }
 
     public void onDisable() {
