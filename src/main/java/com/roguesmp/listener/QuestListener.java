@@ -43,10 +43,7 @@ public class QuestListener implements Listener {
             RogueSmpCore.LOGGER.error("No quest data found");
             return;
         }
-        Utils.runAsync(() -> {
-            questManager.getQuestDataManager().saveData(playerQuestData);
-        });
-
+        questManager.getQuestDataManager().saveAsync(playerQuestData);
     }
 
     @EventHandler

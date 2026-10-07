@@ -1,6 +1,7 @@
 package com.roguesmp.codec;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.utils.WorldPos;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -167,6 +168,17 @@ public interface Codec<A> {
 
     /** Codec for Kyori Key identifiers (e.g. "minecraft:stone"). */
     Codec<Key> KEY = Codec.STRING.xmap(Key::key, Key::asString);
+
+    /** Codec for {@link WorldPos}, storing the world as a namespaced key. */
+    Codec<WorldPos> WORLD_POS = Codec.composite(
+            Codec.KEY.fieldOf("world").forGetter(WorldPos::world),
+            Codec.DOUBLE.fieldOf("x").forGetter(WorldPos::x),
+            Codec.DOUBLE.fieldOf("y").forGetter(WorldPos::y),
+            Codec.DOUBLE.fieldOf("z").forGetter(WorldPos::z),
+            Codec.FLOAT.optionalFieldOf("yaw", 0f).forGetter(WorldPos::yaw),
+            Codec.FLOAT.optionalFieldOf("pitch", 0f).forGetter(WorldPos::pitch),
+            WorldPos::new
+    );
 
     Codec<UUID> UUID = Codec.STRING.comapFlatMap(
             s -> {

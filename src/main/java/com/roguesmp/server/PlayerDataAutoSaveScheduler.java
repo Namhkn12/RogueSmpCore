@@ -13,6 +13,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Periodically flushes dirty (unsaved) player/island/quest data that's currently cached in
@@ -41,8 +42,8 @@ public class PlayerDataAutoSaveScheduler {
         }
     }
 
-    // Runs on the main thread: only reads/snapshots the caches (safe - matches how they're
-    // mutated elsewhere) and defers the actual blocking DB writes to an async task.
+    // Runs on the main thread: encodes each dirty value immediately (safe - matches how they're
+    // mutated elsewhere) and hands one batched transaction per store to the async writers.
     private void runAutoSave() {
         List<PlayerData> dirtyPlayers = new ArrayList<>();
         for (PlayerData data : PlayerManager.getInstance().getDataManager().getCachedPlayerData()) {
@@ -71,17 +72,10 @@ public class PlayerDataAutoSaveScheduler {
             player.sendMessage(Utils.fromString("<yellow><bold>[!]</bold> <gray>Đang lưu dữ liệu server..."));
         }
 
-        Utils.runAsync(() -> {
-            for (PlayerData data : dirtyPlayers) {
-                PlayerManager.getInstance().getDataManager().savePlayerData(data);
-            }
-            for (IslandData data : dirtyIslands) {
-                IslandManager.getInstance().getIslandDataManager().saveIslandData(data);
-            }
-            for (PlayerQuestData data : dirtyQuests) {
-                QuestManager.getInstance().getQuestDataManager().saveData(data);
-            }
-            RogueSmpCore.LOGGER.info("[AutoSave] Done.");
-        });
+        CompletableFuture.allOf(
+                PlayerManager.getInstance().getDataManager().saveAllAsync(dirtyPlayers),
+                IslandManager.getInstance().getIslandDataManager().saveAllAsync(dirtyIslands),
+                QuestManager.getInstance().getQuestDataManager().saveAllAsync(dirtyQuests)
+        ).thenRun(() -> RogueSmpCore.LOGGER.info("[AutoSave] Done."));
     }
 }

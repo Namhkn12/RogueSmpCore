@@ -120,7 +120,7 @@ public class DailyQuestManager {
             progress.setRewardClaimed(true);
         }
 
-        Utils.runAsync(() -> questManager.getQuestDataManager().saveData(data));
+        questManager.getQuestDataManager().saveAsync(data);
         return true;
     }
 

@@ -1,6 +1,7 @@
 package com.roguesmp.player;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.utils.WorldPos;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -69,6 +70,7 @@ public class PlayerManager {
             SmpPlayer smpPlayer = players.get(player.getUniqueId());
             if (smpPlayer == null) return;
             PlayerData playerData = dataManager.removeCachedData(smpPlayer.getUuid());
+            playerData.setLastLocation(WorldPos.of(player.getLocation()));
             dataManager.savePlayerData(playerData);
         });
         dataManager.close();

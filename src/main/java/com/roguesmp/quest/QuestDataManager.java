@@ -1,127 +1,72 @@
 package com.roguesmp.quest;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.codec.DataResult;
-import com.roguesmp.codec.JsonOps;
-import com.roguesmp.utils.Utils;
+import com.roguesmp.storage.JsonSqliteStore;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
-/**
- * Handle saving/loading player quest data to/from a global SQLite database
- * (replaces the old one-json-file-per-player storage, which raced between
- * the async save on quit and the synchronous save from claimAndReplenish).
- */
 public class QuestDataManager {
 
-    private static final String DB_FILE_NAME = "player_quest_data.db";
-
     private final Map<UUID, PlayerQuestData> dataMap = new HashMap<>();
-    private final Connection connection;
+    private final JsonSqliteStore<PlayerQuestData> store;
 
     public QuestDataManager(RogueSmpCore plugin) {
-        this.connection = openConnection(plugin);
-        createTable();
+        this.store = new JsonSqliteStore<>(plugin, "player_quest_data.db", "player_quest_data", "uuid", PlayerQuestData.CODEC);
     }
 
-    private Connection openConnection(RogueSmpCore plugin) {
-        File dbFile = new File(plugin.getDataFolder(), DB_FILE_NAME);
-        File parent = dbFile.getParentFile();
-        if (!parent.exists()) {
-            parent.mkdirs();
-        }
-
-        try {
-            return DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to open quest data database", e);
-        }
+    public @Blocking PlayerQuestData loadData(UUID uuid) {
+        PlayerQuestData loaded = store.load(uuid);
+        return loaded != null ? loaded : new PlayerQuestData(uuid);
     }
 
-    private void createTable() {
-        String sql = """
-                CREATE TABLE IF NOT EXISTS player_quest_data (
-                    uuid TEXT PRIMARY KEY NOT NULL,
-                    data BLOB NOT NULL
-                )
-                """;
+    /**
+     * Main thread only: the data is encoded immediately, then queued on the store in call order.
+     */
+    public void saveAsync(PlayerQuestData playerQuestData) {
+        String json = store.encode(new PlayerQuestData(playerQuestData));
+        if (json == null) return;
 
-        try (Statement statement = connection.createStatement()) {
-            statement.execute(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to create player_quest_data table", e);
-        }
+        playerQuestData.setDirty(false);
+        store.writeAsync(playerQuestData.getUuid(), json).thenAccept(written -> {
+            if (!written) playerQuestData.setDirty(true);
+        });
     }
 
-    public @Blocking synchronized PlayerQuestData loadData(UUID uuid) {
-        RogueSmpCore.LOGGER.info("Loading quest data for uuid {}", uuid);
+    public @Blocking void saveData(PlayerQuestData playerQuestData) {
+        String json = store.encode(new PlayerQuestData(playerQuestData));
+        if (json == null) return;
 
-        String sql = "SELECT json(data) AS data FROM player_quest_data WHERE uuid = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, uuid.toString());
-
-            try (ResultSet result = statement.executeQuery()) {
-                if (!result.next()) {
-                    return createDefault(uuid);
-                }
-
-                JsonObject json = Utils.GSON.fromJson(result.getString("data"), JsonObject.class);
-                if (json == null) return createDefault(uuid);
-
-                DataResult<PlayerQuestData> decoded = PlayerQuestData.CODEC.decode(json, JsonOps.INSTANCE);
-                if (!decoded.isSuccess()) {
-                    RogueSmpCore.LOGGER.warn("Failed to decode quest data for {}: {}", uuid, decoded.error());
-                    return createDefault(uuid);
-                }
-                return decoded.result();
-            }
-        } catch (SQLException e) {
-            RogueSmpCore.LOGGER.error("Failed to load quest data for uuid {}", uuid, e);
-            return createDefault(uuid);
-        }
+        if (store.write(playerQuestData.getUuid(), json)) playerQuestData.setDirty(false);
     }
 
-    public @Blocking synchronized void saveData(PlayerQuestData playerQuestData) {
-        PlayerQuestData data = new PlayerQuestData(playerQuestData);
-        RogueSmpCore.LOGGER.info("Saving player quest data (uuid: {})", playerQuestData.getUuid());
+    /**
+     * Main thread only: the data is encoded immediately and all profiles are written in one transaction.
+     */
+    public CompletableFuture<Void> saveAllAsync(Collection<PlayerQuestData> profiles) {
+        Map<UUID, String> rows = new HashMap<>();
+        List<PlayerQuestData> encoded = new ArrayList<>();
+        for (PlayerQuestData profile : profiles) {
+            String json = store.encode(new PlayerQuestData(profile));
+            if (json == null) continue;
 
-        DataResult<JsonElement> encoded = PlayerQuestData.CODEC.encode(data, JsonOps.INSTANCE);
-        if (!encoded.isSuccess()) {
-            RogueSmpCore.LOGGER.error(encoded.error());
-            return;
+            profile.setDirty(false);
+            rows.put(profile.getUuid(), json);
+            encoded.add(profile);
         }
 
-        String sql = """
-                INSERT INTO player_quest_data (uuid, data)
-                VALUES (?, jsonb(?))
-                ON CONFLICT(uuid) DO UPDATE SET data = excluded.data
-                """;
-
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, data.getUuid().toString());
-            statement.setString(2, Utils.GSON.toJson(encoded.result()));
-            statement.executeUpdate();
-            playerQuestData.setDirty(false);
-        } catch (SQLException e) {
-            RogueSmpCore.LOGGER.warn("Failed to save player quest data (uuid: {})", playerQuestData.getUuid());
-        }
+        return store.writeAllAsync(rows).thenAccept(written -> {
+            if (!written) encoded.forEach(profile -> profile.setDirty(true));
+        });
     }
 
     public @Blocking void saveAllData() {
@@ -141,14 +86,6 @@ public class QuestDataManager {
     }
 
     public void close() {
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            RogueSmpCore.LOGGER.error("Failed to close quest data database", e);
-        }
-    }
-
-    private PlayerQuestData createDefault(UUID uuid) {
-        return new PlayerQuestData(uuid);
+        store.close();
     }
 }

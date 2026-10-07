@@ -1,8 +1,10 @@
 package com.roguesmp.island;
 
-import com.roguesmp.annotation.GsonIgnore;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.island.setting.IslandSettings;
 import com.roguesmp.island.setting.Setting;
+import com.roguesmp.utils.WorldPos;
+import net.kyori.adventure.key.Key;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
@@ -12,45 +14,43 @@ import java.util.*;
 
 public class IslandData {
 
-    @GsonIgnore
+    public static final Codec<IslandData> CODEC = Codec.composite(
+            Codec.UUID.fieldOf("islandId").forGetter(IslandData::getIslandId),
+            Codec.listOf(Codec.UUID).<Set<UUID>>xmap(HashSet::new, ArrayList::new).optionalFieldOf("members", new HashSet<UUID>()).forGetter(data -> data.members),
+            Codec.WORLD_POS.lenientOptionalFieldOf("spawnLocation", null).forGetter(data -> data.spawnLocation),
+            Codec.BOOLEAN.optionalFieldOf("archived", false).forGetter(IslandData::isArchived),
+            IslandSettings.VALUES_CODEC.optionalFieldOf("settings", new LinkedHashMap<String, Object>()).forGetter(data -> data.settings),
+            IslandData::new
+    );
+
     private boolean dirty = true;
 
     private boolean archived;
     private final UUID islandId;
     private final Set<UUID> members;
-    private final int gridIndex;
-    private String spawnLocation; //x,y,z,yaw,pitch (int)
+    private WorldPos spawnLocation;
     private final Map<String, Object> settings;
 
-    public IslandData(UUID creatorId, int gridIndex) {
-        this.gridIndex = gridIndex;
+    private IslandData(UUID islandId, Set<UUID> members, @Nullable WorldPos spawnLocation, boolean archived, Map<String, Object> settings) {
+        this.islandId = islandId;
+        this.members = new HashSet<>(members);
+        this.spawnLocation = spawnLocation != null ? spawnLocation : defaultSpawn(islandId);
+        this.archived = archived;
+        this.settings = new LinkedHashMap<>(settings);
+        this.dirty = false;
+    }
+
+    public IslandData(UUID creatorId) {
         this.islandId = UUID.randomUUID();
         this.members = new HashSet<>();
         this.members.add(creatorId);
+        this.spawnLocation = defaultSpawn(islandId);
         this.archived = false;
-        this.settings = getDefaultSettings();
-    }
-
-    public IslandData(UUID islandId, Set<UUID> members, int gridIndex) {
-        this.islandId = islandId;
-        this.members = new HashSet<>(members);
-        this.gridIndex = gridIndex;
-        this.archived = false;
-        this.settings = getDefaultSettings();
-    }
-
-    //no-args constructor because gson love it
-    public IslandData() {
-        this.archived = false;
-        this.islandId = UUID.randomUUID();
-        this.members = new HashSet<>();
-        this.gridIndex = -1;
-        this.settings = getDefaultSettings();
+        this.settings = new LinkedHashMap<>();
     }
 
     public IslandData(IslandData source) {
         this.islandId = source.islandId;
-        this.gridIndex = source.gridIndex;
         this.members = new HashSet<>(source.members);
         this.spawnLocation = source.spawnLocation;
         this.archived = source.archived;
@@ -58,15 +58,14 @@ public class IslandData {
         this.settings = new LinkedHashMap<>(source.settings);
     }
 
-    private Map<String, Object> getDefaultSettings() {
-        Map<String, Object> defaultMap = new LinkedHashMap<>();
-        defaultMap.put(IslandSettings.ALLOW_GUEST.id(), IslandSettings.ALLOW_GUEST.defaultValue());
-        return defaultMap;
+    private static WorldPos defaultSpawn(UUID islandId) {
+        return new WorldPos(Key.key("polarpaper", IslandWorldManager.WORLD_PREFIX + islandId), 0.5, IslandWorldManager.CENTER_Y + 2, 0.5, 0, 0);
     }
 
     @SuppressWarnings("unchecked")
-    public @Nullable <T> T getSettingValue(Setting<T> setting) {
-        return (T) this.settings.get(setting.id());
+    public <T> T getSettingValue(Setting<T> setting) {
+        Object value = this.settings.get(setting.id());
+        return value != null ? (T) value : setting.defaultValue();
     }
 
     public <T> void setSettingValue(Setting<T> setting, T value) {
@@ -92,38 +91,13 @@ public class IslandData {
         this.dirty = true;
     }
 
-    public int getGridIndex() {
-        return gridIndex;
-    }
-
     public void setSpawnLocation(Location location) {
-        float x = location.getBlockX() + 0.5f;
-        float y = location.getBlockY();
-        float z = location.getBlockZ() + 0.5f;
-        int yaw = (int) location.getYaw();
-        int pitch = (int) location.getPitch();
-        this.spawnLocation = x + "," + y + "," + z + "," + yaw + "," + pitch;
+        this.spawnLocation = new WorldPos(WorldPos.of(location).world(), location.getBlockX() + 0.5, location.getBlockY(), location.getBlockZ() + 0.5, (int) location.getYaw(), (int) location.getPitch());
         this.dirty = true;
     }
 
-    public String getSpawnLocation() {
-        return spawnLocation;
-    }
-
     public Location getSpawnLocationWorld(World world) {
-        if (this.spawnLocation == null || this.spawnLocation.isEmpty()) {
-            return null;
-        }
-
-        String[] parts = this.spawnLocation.split(",");
-
-        double x = Double.parseDouble(parts[0]);
-        double y = Double.parseDouble(parts[1]);
-        double z = Double.parseDouble(parts[2]);
-        float yaw = Float.parseFloat(parts[3]);
-        float pitch = Float.parseFloat(parts[4]);
-
-        return new Location(world, x, y, z, yaw, pitch);
+        return spawnLocation.toLocation(world);
     }
 
     public boolean isMember(UUID playerUuid) {
@@ -145,13 +119,5 @@ public class IslandData {
 
     public boolean isDirty() {
         return dirty;
-    }
-
-    /**
-     * Checks if the island is completely abandoned.
-     * Use this to determine if the Slime files can be safely deleted or archived.
-     */
-    public boolean isEmpty() {
-        return members.isEmpty();
     }
 }

@@ -2,141 +2,262 @@ package com.roguesmp.island;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.utils.Utils;
-import org.bukkit.*;
-import org.jetbrains.annotations.Blocking;
+import live.minehub.polarpaper.Polar;
+import live.minehub.polarpaper.core.config.Config;
+import live.minehub.polarpaper.core.generator.PolarGenerator;
+import live.minehub.polarpaper.core.source.FilePolarSource;
+import live.minehub.polarpaper.core.source.PolarSource;
+import live.minehub.polarpaper.core.world.PolarReader;
+import live.minehub.polarpaper.core.world.PolarWorld;
+import net.kyori.adventure.key.Key;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
-import org.mvplugins.multiverse.core.world.AllowedPortalType;
-import org.mvplugins.multiverse.core.world.options.CreateWorldOptions;
-import org.mvplugins.multiverse.core.world.options.LoadWorldOptions;
+import org.mvplugins.multiverse.core.teleportation.PassengerModes;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class IslandWorldManager {
 
-    public static final String WORLD_NAME = "sb_island_world";
+    public static final String WORLD_PREFIX = "island_";
+    public static final int BORDER_DIAMETER = 160;
 
-    private static final int ISLAND_GAP = 400; // Distance between islands
-    private static final int GRID_WIDTH = 50; // How many islands per row before dropping down
-    private static final String INDEX_FILE_NAME = "island_grid_index.json";
-
-    private int nextAvailableIndex = 0;
+    private static final String WORLD_FOLDER_NAME = "island_worlds";
+    private static final String TEMPLATE_FILE_NAME = "island_template.polar";
+    private static final byte MIN_SECTION = -4;
+    private static final byte MAX_SECTION = 19;
+    private static final int AUTO_SAVE_TICKS = 6000;
+    public static final int CENTER_Y = 65;
+    private static final int EVACUATION_DELAY_TICKS = 20;
 
     private final RogueSmpCore plugin;
     private final MultiverseCoreApi multiverseApi;
+    private final File worldFolder;
+    private final PolarWorld template;
+    private final Map<UUID, CompletableFuture<World>> loading = new ConcurrentHashMap<>();
+    private final Map<UUID, CompletableFuture<Void>> unloading = new ConcurrentHashMap<>();
 
     public IslandWorldManager(RogueSmpCore plugin) {
         this.plugin = plugin;
         this.multiverseApi = MultiverseCoreApi.get();
-        loadGlobalIndexCounter();
+        this.worldFolder = new File(plugin.getDataFolder(), WORLD_FOLDER_NAME);
+        this.worldFolder.mkdirs();
+        this.template = readTemplate();
     }
 
-    public void loadSkyblockWorld() {
-        if (multiverseApi.getWorldManager().isLoadedWorld(WORLD_NAME)) return;
-        if (!multiverseApi.getWorldManager().isWorld(WORLD_NAME)) {
-            multiverseApi.getWorldManager().createWorld(CreateWorldOptions.worldName(WORLD_NAME)
-                            .generatorSettings("{\"layers\":[{\"block\":\"air\",\"height\":1}],\"biome\":\"the_void\"}")
-                            .environment(World.Environment.NORMAL)
-                            .worldType(WorldType.FLAT)
-                            .generateStructures(false))
-                    .peek(loadedMultiverseWorld -> {
-                        loadedMultiverseWorld.setAllowAdvancementGrant(false);
-                        loadedMultiverseWorld.setBedRespawn(false);
-                        loadedMultiverseWorld.setAdjustSpawn(false);
-                        loadedMultiverseWorld.setAnchorSpawn(false);
-                        loadedMultiverseWorld.setDifficulty(Difficulty.NORMAL);
-                        loadedMultiverseWorld.setGameMode(GameMode.SURVIVAL);
-                        loadedMultiverseWorld.setKeepSpawnInMemory(false);
-                        loadedMultiverseWorld.setPortalForm(AllowedPortalType.NONE);
-                        loadedMultiverseWorld.setAutoLoad(true);
+    private @Nullable PolarWorld readTemplate() {
+        File file = new File(plugin.getDataFolder(), TEMPLATE_FILE_NAME);
+        if (!file.exists()) return null;
+
+        try {
+            return new PolarReader().read(new FilePolarSource(file.toPath()));
+        } catch (IOException e) {
+            RogueSmpCore.LOGGER.error("Failed to read island template {}", file.getPath(), e);
+            return null;
+        }
+    }
+
+    public FilePolarSource getWorldSource(String worldName) {
+        return new FilePolarSource(worldFolder.toPath().resolve(worldName + ".polar"));
+    }
+
+    public String getWorldName(UUID islandId) {
+        return WORLD_PREFIX + islandId;
+    }
+
+    private String getWorldId(World world) {
+        return world.getKey().getKey();
+    }
+
+    public boolean isIslandWorld(World world) {
+        return getWorldId(world).startsWith(WORLD_PREFIX);
+    }
+
+    public @Nullable UUID getIslandId(World world) {
+        return getIslandId(world.getKey().asString());
+    }
+
+    public @Nullable UUID getIslandId(String worldKey) {
+        String worldId = Key.key(worldKey).value();
+        if (!worldId.startsWith(WORLD_PREFIX)) return null;
+        try {
+            return UUID.fromString(worldId.substring(WORLD_PREFIX.length()));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public @Nullable World getLoadedWorld(UUID islandId) {
+        Plugin polarPlugin = Bukkit.getPluginManager().getPlugin("polarpaper");
+        if (polarPlugin == null) return null;
+        return Bukkit.getWorld(new NamespacedKey(polarPlugin, getWorldName(islandId)));
+    }
+
+    public Location getDefaultSpawn(World world) {
+        return new Location(world, 0.5, CENTER_Y + 2, 0.5);
+    }
+
+    public boolean isWorldAvailable(UUID islandId) {
+        return getLoadedWorld(islandId) != null || Files.exists(getWorldSource(getWorldName(islandId)).path());
+    }
+
+    public CompletableFuture<World> createIslandWorld(UUID islandId) {
+        String worldName = getWorldName(islandId);
+        PolarWorld polarWorld = template != null ? template : new PolarWorld(MIN_SECTION, MAX_SECTION);
+
+        return Polar.createWorld(polarWorld, worldName, buildConfig())
+                .thenCompose(world -> {
+                    CompletableFuture<Void> prepared = new CompletableFuture<>();
+                    Utils.runLater(() -> {
+                        PolarGenerator.fromWorld(world).setSource(getWorldSource(worldName));
+                        if (template == null) generateBaselineIslandStructure(new Location(world, 0, CENTER_Y, 0));
+                        world.getWorldBorder().setCenter(0, 0);
+                        world.getWorldBorder().setSize(BORDER_DIAMETER);
+                        prepared.complete(null);
                     });
-        } else {
-            multiverseApi.getWorldManager().loadWorld(LoadWorldOptions.world(multiverseApi.getWorldManager().getWorld(WORLD_NAME).get()));
+                    return prepared.thenCompose(v -> Polar.saveWorld(world, getWorldSource(worldName))).thenApply(v -> world);
+                });
+    }
+
+    public CompletableFuture<World> loadIslandWorld(UUID islandId) {
+        if (!Bukkit.isPrimaryThread()) {
+            CompletableFuture<World> result = new CompletableFuture<>();
+            Utils.runLater(() -> loadIslandWorld(islandId).whenComplete((world, error) -> {
+                if (error != null) result.completeExceptionally(error);
+                else result.complete(world);
+            }));
+            return result;
         }
 
-    }
+        CompletableFuture<Void> pendingUnload = unloading.get(islandId);
+        if (pendingUnload != null) return pendingUnload.thenCompose(v -> loadIslandWorld(islandId));
 
-    public int requestNextFreeIndex() {
-        int index = this.nextAvailableIndex;
-        this.nextAvailableIndex++;
-        Utils.runAsync(this::saveGlobalIndexCounter); // Persist the updated counter value immediately
-        return index;
-    }
+        World loaded = getLoadedWorld(islandId);
+        if (loaded != null) return CompletableFuture.completedFuture(loaded);
 
-    public Location getIslandCenter(int islandGridIndex) {
-        World world = getIslandWorld(islandGridIndex);
-
-        int row = islandGridIndex / GRID_WIDTH;
-        int col = islandGridIndex % GRID_WIDTH;
-
-        double x = col * ISLAND_GAP;
-        double y = 64;
-        double z = row * ISLAND_GAP;
-
-        return new Location(world, x, y, z);
-    }
-
-    public Location getIslandCenter(IslandData islandData) {
-        return getIslandCenter(islandData.getGridIndex());
-    }
-
-    /**
-     * Method to get island world, we have single world so it's just a world name look up for now.
-     */
-    public World getIslandWorld(int gridIndex) {
-        World world = Bukkit.getWorld(WORLD_NAME);
-        if (world == null) {
-            loadSkyblockWorld();
-            throw new IllegalStateException(WORLD_NAME + " does not exist! Will attempt to create a new one...");
-        }
-        return world;
-    }
-
-    /**
-     * Method to get island world, we have single world so it's just a world name look up for now.
-     */
-    public World getIslandWorld(IslandData islandData) {
-        return getIslandWorld(islandData.getGridIndex());
-    }
-
-    private @Blocking void loadGlobalIndexCounter() {
-        File file = new File(plugin.getDataFolder(), INDEX_FILE_NAME);
-        if (!file.exists()) {
-            return;
+        if (!isWorldAvailable(islandId)) {
+            return CompletableFuture.failedFuture(new IllegalStateException("Island world file is missing for " + islandId));
         }
 
-        try (FileReader reader = new FileReader(file)) {
-            IndexTracker tracker = Utils.GSON.fromJson(reader, IndexTracker.class);
-            if (tracker != null) {
-                this.nextAvailableIndex = tracker.next_available_index;
+        CompletableFuture<World> inFlight = loading.get(islandId);
+        if (inFlight != null) return inFlight;
+
+        String worldName = getWorldName(islandId);
+        PolarSource source = getWorldSource(worldName);
+        CompletableFuture<World> future = Polar.createWorld(source, worldName, buildConfig());
+        loading.put(islandId, future);
+        future.whenComplete((world, error) -> Utils.runLater(() -> {
+            loading.remove(islandId);
+            if (error != null) RogueSmpCore.LOGGER.error("Failed to load island world {}", worldName, error);
+            else if (world == null) RogueSmpCore.LOGGER.error("Island world {} was not created by Polar", worldName);
+            else {
+                world.getWorldBorder().setCenter(0, 0);
+                world.getWorldBorder().setSize(BORDER_DIAMETER);
             }
+        }));
+        return future;
+    }
+
+    public void unloadIslandWorld(UUID islandId) {
+        World world = getLoadedWorld(islandId);
+        if (world == null || unloading.containsKey(islandId)) return;
+
+        CompletableFuture<Void> pendingUnload = new CompletableFuture<>();
+        unloading.put(islandId, pendingUnload);
+        evacuate(world);
+        Polar.saveWorld(world, getWorldSource(getWorldId(world)))
+                .thenRun(() -> Utils.runLater(() -> {
+                    Bukkit.unloadWorld(world, false);
+                    unloading.remove(islandId);
+                    pendingUnload.complete(null);
+                }))
+                .exceptionally(error -> {
+                    RogueSmpCore.LOGGER.error("Failed to save island world {}", getWorldId(world), error);
+                    Utils.runLater(() -> {
+                        unloading.remove(islandId);
+                        pendingUnload.complete(null);
+                    });
+                    return null;
+                });
+    }
+
+    public CompletableFuture<Void> discardWorld(World world) {
+        UUID islandId = getIslandId(world);
+        CompletableFuture<Void> pendingUnload = islandId == null ? null : unloading.get(islandId);
+        if (pendingUnload != null) return pendingUnload;
+
+        evacuate(world);
+        Polar.stopAutoSaveTask(world.getKey());
+
+        CompletableFuture<Void> discarded = new CompletableFuture<>();
+        Utils.runLater(() -> {
+            Bukkit.unloadWorld(world, false);
+            discarded.complete(null);
+        }, EVACUATION_DELAY_TICKS);
+        return discarded;
+    }
+
+    public void deleteWorldFile(UUID islandId) {
+        try {
+            getWorldSource(getWorldName(islandId)).delete();
         } catch (Exception e) {
-            RogueSmpCore.LOGGER.error("Failed to load global skyblock grid index counter", e);
+            RogueSmpCore.LOGGER.error("Failed to delete island world file for {}", islandId, e);
         }
     }
 
-    private @Blocking void saveGlobalIndexCounter() {
-        File file = new File(plugin.getDataFolder(), INDEX_FILE_NAME);
-        try (FileWriter writer = new FileWriter(file)) {
-            Utils.GSON.toJson(new IndexTracker(this.nextAvailableIndex), writer);
-        } catch (Exception e) {
-            RogueSmpCore.LOGGER.error("Failed to save global skyblock grid index counter", e);
+    public void evacuate(World world) {
+        multiverseApi.getWorldManager().getDefaultWorld().peek(hub -> {
+            for (Player player : world.getPlayers()) {
+                player.sendMessage(Utils.fromString("<yellow>Đảo đã đóng cửa nên bạn được đưa về hub."));
+                multiverseApi.getSafetyTeleporter()
+                        .to(hub.getSpawnLocation())
+                        .passengerMode(PassengerModes.RETAIN_ALL)
+                        .teleportSingle(player);
+            }
+        });
+    }
+
+    private Config buildConfig() {
+        return Config.Builder.defaults()
+                .spawn(new Location(null, 0.5, CENTER_Y + 2, 0.5))
+                .loadOnStartup(false)
+                .saveOnStop(true)
+                .autoSaveIntervalTicks(AUTO_SAVE_TICKS)
+                .announceAutosave(false)
+                .build();
+    }
+
+    private void generateBaselineIslandStructure(Location center) {
+        center.getChunk().load(true);
+        center.getBlock().setType(Material.BEDROCK);
+
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                if (x == 0 && z == 0) continue;
+                center.clone().add(x, 0, z).getBlock().setType(Material.DIRT);
+            }
+        }
+
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                center.clone().add(x, 1, z).getBlock().setType(Material.GRASS_BLOCK);
+            }
         }
     }
 
     public MultiverseCoreApi getMultiverseApi() {
         return multiverseApi;
-    }
-
-    public void onDisable() {
-        saveGlobalIndexCounter();
-    }
-
-    // Small DTO helper class matching GSON formatting requirements cleanly
-    private static class IndexTracker {
-        int next_available_index;
-        public IndexTracker(int value) { this.next_available_index = value; }
     }
 }

@@ -124,7 +124,7 @@ public class QuestManager {
      * crash shortly after completion doesn't lose it.
      */
     private void saveQuestDataImmediately(PlayerQuestData data) {
-        Utils.runAsync(() -> questDataManager.saveData(data));
+        questDataManager.saveAsync(data);
     }
 
     /**

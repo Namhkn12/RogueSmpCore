@@ -27,6 +27,7 @@ import com.roguesmp.gui.info.SmpWikiMainMenuGui;
 import com.roguesmp.gui.itemcreator.ItemCreatorGui;
 import com.roguesmp.gui.entitycreator.EntityCreatorGui;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
+import com.roguesmp.island.IslandCommand;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
 import com.roguesmp.gui.loottablecreator.LootTableBrowserGui;
@@ -205,7 +206,7 @@ public final class RogueSmpCore extends JavaPlugin {
         SmpBrowserCommand.register();
         RecipeBrowserGui.registerCommand();
 
-        IslandManager.getInstance().registerCommands();
+        new IslandCommand(IslandManager.getInstance()).register();
         QuestManager.getInstance().registerQuestCommand();
         TabDemoCommand.register();
 

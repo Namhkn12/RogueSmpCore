@@ -31,7 +31,6 @@ public class IslandLeaveConfirmGui extends BaseGui {
     public void setup() {
         clearUi();
 
-        // --- RED BUTTON: PROCEED WITH DELETION ---
         ItemStack confirmButton = ItemStack.of(Material.RED_CONCRETE);
         confirmButton.setData(DataComponentTypes.ITEM_NAME, Component.text("XÁC NHẬN XÓA ĐẢO", NamedTextColor.DARK_RED).decoration(TextDecoration.BOLD, true));
         confirmButton.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
@@ -43,19 +42,16 @@ public class IslandLeaveConfirmGui extends BaseGui {
             event.setCancelled(true);
             if (event.getWhoClicked() instanceof Player executioner) {
                 executioner.closeInventory();
-                // Execute master teardown sequence via singleton
-                IslandManager.getInstance().removeMember(islandId, player.getUniqueId());
+                IslandManager.getInstance().getMembershipService().removeMember(islandId, player.getUniqueId());
             }
         });
 
-        // --- GREEN BUTTON: ABORT AND RETURN ---
         ItemStack abortButton = ItemStack.of(Material.GREEN_CONCRETE);
         abortButton.setData(DataComponentTypes.ITEM_NAME, Component.text("HỦY BỎ", NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true));
         abortButton.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(Utils.text("Quay lại menu chính", NamedTextColor.GRAY))));
 
         addButton(1, 6, abortButton, ClickHandler.openGui(new IslandMainGui(player)));
 
-        // Fill background slots for a clean UI aesthetic
         fillEmpty(FILLER_BLACK);
     }
 

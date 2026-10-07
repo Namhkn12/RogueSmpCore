@@ -1,6 +1,7 @@
 package com.roguesmp.island;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.utils.Utils;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.WorldGuard;
@@ -9,138 +10,114 @@ import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.RegionGroup;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.managers.storage.StorageException;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import com.sk89q.worldguard.protection.regions.RegionContainer;
-import org.bukkit.Location;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class IslandRegionManager {
-    private static final int BORDER_DIAMETER = 160;
-    private static final String REGION_PREFIX = "island_";
+    private static final String REGION_ID = "island";
+    private static final int WORLD_PADDING = 5;
 
-    /**
-     * Provisions a precise WorldGuard cuboid region spanning from sky-limit to bedrock-floor
-     * centered around the newly generated island space.
-     */
-    public void createIslandRegion(Player creator, Location islandCenter, UUID islandId) {
-        World world = islandCenter.getWorld();
-        if (world == null) return;
-
-        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        RegionManager regionManager = container.get(BukkitAdapter.adapt(world));
+    public void createIslandRegion(World world, UUID creatorId) {
+        RegionManager regionManager = getRegionManager(world);
         if (regionManager == null) {
             RogueSmpCore.LOGGER.error("WorldGuard region manager could not be resolved for world: {}", world.getName());
             return;
         }
 
-        int radius = BORDER_DIAMETER / 2;
+        int radius = IslandWorldManager.BORDER_DIAMETER / 2;
+        BlockVector3 minPoint = BlockVector3.at(-radius, world.getMinHeight() - WORLD_PADDING, -radius);
+        BlockVector3 maxPoint = BlockVector3.at(radius, world.getMaxHeight() + WORLD_PADDING, radius);
 
-        BlockVector3 minPoint = BlockVector3.at(
-                islandCenter.getBlockX() - radius,
-                world.getMinHeight() - 5, //Extra 5 for leniency
-                islandCenter.getBlockZ() - radius
-        );
-
-        BlockVector3 maxPoint = BlockVector3.at(
-                islandCenter.getBlockX() + radius,
-                world.getMaxHeight() + 5,
-                islandCenter.getBlockZ() + radius
-        );
-
-        String regionName = getRegionName(islandId); //Essentially island_<uuid>
-        ProtectedRegion region = new ProtectedCuboidRegion(regionName, minPoint, maxPoint);
-        DefaultDomain owners = region.getOwners();
-        owners.addPlayer(creator.getUniqueId());
-        region.setOwners(owners);
-
-        applyIsolationFlags(region);
-
-        regionManager.addRegion(region);
-
-        RogueSmpCore.LOGGER.info("Successfully registered WorldGuard isolation matrix for region: {}", regionName);
-    }
-
-    /**
-     * Tailors specific guard rules ensuring players outside the island team cannot interact with it.
-     */
-    private void applyIsolationFlags(ProtectedRegion region) {
+        ProtectedRegion region = new ProtectedCuboidRegion(REGION_ID, minPoint, maxPoint);
+        DefaultDomain members = region.getMembers();
+        members.addPlayer(creatorId);
+        region.setMembers(members);
 
         region.setFlag(Flags.BUILD, StateFlag.State.ALLOW);
         region.setFlag(Flags.CHEST_ACCESS, StateFlag.State.ALLOW);
         region.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
-        region.setFlag(Flags.EXIT, StateFlag.State.DENY);
 
-        region.setFlag(Flags.BUILD.getRegionGroupFlag(), com.sk89q.worldguard.protection.flags.RegionGroup.MEMBERS);
-        region.setFlag(Flags.CHEST_ACCESS.getRegionGroupFlag(), com.sk89q.worldguard.protection.flags.RegionGroup.MEMBERS);
-        region.setFlag(Flags.INTERACT.getRegionGroupFlag(), com.sk89q.worldguard.protection.flags.RegionGroup.MEMBERS);
-        region.setFlag(Flags.EXIT.getRegionGroupFlag(), com.sk89q.worldguard.protection.flags.RegionGroup.MEMBERS);
+        region.setFlag(Flags.BUILD.getRegionGroupFlag(), RegionGroup.MEMBERS);
+        region.setFlag(Flags.CHEST_ACCESS.getRegionGroupFlag(), RegionGroup.MEMBERS);
+        region.setFlag(Flags.INTERACT.getRegionGroupFlag(), RegionGroup.MEMBERS);
+        regionManager.addRegion(region);
+        saveAsync(regionManager);
     }
 
-    /**
-     * Hooks into WorldGuard backend allocations to grant a player member rights to an island region.
-     */
-    public void addTeammateToIslandRegion(UUID teammateUuid, UUID islandId, World world) {
-        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        RegionManager regionManager = container.get(BukkitAdapter.adapt(world));
+    public void addTeammate(World world, UUID teammateId) {
+        editMembers(world, members -> members.addPlayer(teammateId));
+    }
 
+    public void removeTeammate(World world, UUID teammateId) {
+        editMembers(world, members -> members.removePlayer(teammateId));
+    }
+
+    private void editMembers(World world, Consumer<DefaultDomain> edit) {
+        RegionManager regionManager = getRegionManager(world);
         if (regionManager == null) return;
 
-        ProtectedRegion region = regionManager.getRegion(getRegionName(islandId));
-        if (region != null) {
-            DefaultDomain members = region.getMembers();
-            members.addPlayer(teammateUuid);
-            region.setMembers(members);
+        ProtectedRegion region = regionManager.getRegion(REGION_ID);
+        if (region == null) return;
+
+        DefaultDomain members = region.getMembers();
+        edit.accept(members);
+        region.setMembers(members);
+        saveAsync(regionManager);
+    }
+
+    public void removeIslandRegion(World world) {
+        RegionManager regionManager = getRegionManager(world);
+        if (regionManager != null) regionManager.removeRegion(REGION_ID);
+    }
+
+    public void deleteStoredRegionData(String worldName) {
+        Plugin worldGuard = Bukkit.getPluginManager().getPlugin("WorldGuard");
+        if (worldGuard == null) return;
+
+        Path worldFolder = worldGuard.getDataFolder().toPath().resolve("worlds").resolve(worldName);
+        if (!Files.exists(worldFolder)) return;
+
+        try (var paths = Files.walk(worldFolder)) {
+            paths.sorted(Comparator.reverseOrder()).forEach(path -> path.toFile().delete());
+        } catch (IOException e) {
+            RogueSmpCore.LOGGER.error("Failed to delete WorldGuard data for world {}", worldName, e);
         }
     }
 
-    public void removeTeammateFromIslandRegion(UUID teammateUuid, UUID islandId, World world) {
-        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        RegionManager regionManager = container.get(BukkitAdapter.adapt(world));
-
+    public void saveNow(World world) {
+        RegionManager regionManager = getRegionManager(world);
         if (regionManager == null) return;
 
-        ProtectedRegion region = regionManager.getRegion(getRegionName(islandId));
-        if (region != null) {
-            DefaultDomain members = region.getMembers();
-            members.removePlayer(teammateUuid);
-            region.setMembers(members);
+        try {
+            regionManager.saveChanges();
+        } catch (StorageException e) {
+            RogueSmpCore.LOGGER.error("Failed to save WorldGuard regions of {}", world.getName(), e);
         }
     }
 
-    public boolean isLocationInsideRegion(UUID islandId, Location location) {
-        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        RegionManager regionManager = container.get(BukkitAdapter.adapt(location.getWorld()));
-
-        if (regionManager == null) return false;
-
-        ProtectedRegion region = regionManager.getRegion(getRegionName(islandId));
-        if (region == null) return false;
-        return region.contains(BlockVector3.at(location.x(), location.y(), location.z()));
+    private void saveAsync(RegionManager regionManager) {
+        Utils.runAsync(() -> {
+            try {
+                regionManager.saveChanges();
+            } catch (StorageException e) {
+                RogueSmpCore.LOGGER.error("Failed to save WorldGuard regions", e);
+            }
+        });
     }
 
-    /**
-     * Get the island owning the region at this location
-     * @return The region, or null if no island region is found
-     */
-    public @Nullable ProtectedRegion getRegionAtLocation(Location location) {
-        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        RegionManager regionManager = container.get(BukkitAdapter.adapt(location.getWorld()));
-        if (regionManager == null) return null;
-
-        Set<ProtectedRegion> regionSet = regionManager.getApplicableRegions(BlockVector3.at(location.x(), location.y(), location.z())).getRegions();
-        for (ProtectedRegion region : regionSet) {
-            if (region.getId().startsWith(REGION_PREFIX)) return region;
-        }
-        return null;
-    }
-
-    public String getRegionName(UUID islandId) {
-        return REGION_PREFIX + islandId.toString();
+    private @Nullable RegionManager getRegionManager(World world) {
+        return WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world));
     }
 }
