@@ -8,7 +8,6 @@ import com.roguesmp.gui.ReactiveGui;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
-import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import net.kyori.adventure.text.Component;
@@ -474,14 +473,6 @@ public class FusionGui extends ReactiveGui<FusionGui.GuiState> {
         }
 
         return hash;
-    }
-
-    public static void register() {
-        new CommandAPICommand("fusiondemo")
-                .executesPlayer((player, args) -> {
-                    new FusionGui(player).showInventory(player);
-                })
-                .register(RogueSmpCore.getInstance());
     }
 
 }

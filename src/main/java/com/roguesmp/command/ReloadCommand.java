@@ -3,6 +3,7 @@ package com.roguesmp.command;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.registry.Registry;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.permission.Permissions;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
@@ -14,6 +15,7 @@ public final class ReloadCommand {
 
     public static void register() {
         new CommandAPICommand("smpreload")
+                .withPermission(Permissions.RELOAD.node())
                 .withArguments(
                         new StringArgument("registry")
                                 .replaceSuggestions(ArgumentSuggestions.strings(Registry.getReloadableKeys()))

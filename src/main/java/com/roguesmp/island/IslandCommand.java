@@ -1,6 +1,7 @@
 package com.roguesmp.island;
 
 import com.roguesmp.gui.island.IslandMainGui;
+import com.roguesmp.permission.Permissions;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -12,8 +13,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class IslandCommand {
-
-    private static final String ADMIN_PERMISSION = "roguesmp.island.admin";
 
     private final IslandManager islandManager;
 
@@ -105,7 +104,7 @@ public class IslandCommand {
 
     private CommandAPICommand purgeSub() {
         return new CommandAPICommand("purge")
-                .withPermission(ADMIN_PERMISSION)
+                .withPermission(Permissions.ISLAND_ADMIN.node())
                 .executes((sender, args) -> {
                     sender.sendMessage(Utils.fromString("<yellow>Đang dọn dẹp các đảo bị bỏ hoang..."));
                     islandManager.getPurgeService().purgeArchived(sender);

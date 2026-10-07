@@ -1,7 +1,7 @@
 name: RogueSmpCore
 version: '1.0-SNAPSHOT'
 main: com.roguesmp.RogueSmpCore
-api-version: '1.21.11'
+api-version: '26.2'
 description: Rework plugin
 depend:
   - CommandAPI
@@ -11,3 +11,4 @@ depend:
   - Multiverse-Core
   - WorldGuard
   - polarpaper
+  - LuckPerms

@@ -1,17 +1,13 @@
 package com.roguesmp.gui;
 
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.gui.itemcreator.ItemCreatorGui;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.PlayerManager;
-import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.IntegerArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.dialog.Dialog;
@@ -223,27 +219,10 @@ public class ItemBrowser extends BaseGui {
     }
 
     public static void registerCommand() {
-        new CommandAPICommand("smpitem")
-                .withSubcommand(new CommandAPICommand("give")
-                        .withArguments(new StringArgument("item_id"), new IntegerArgument("amount"))
-                        .executesPlayer((player, commandArguments) -> {
-                            BaseItem template = ItemRegistry.getInstance().getBaseItem((String) commandArguments.get("item_id"));
-                            if (template == null) {
-                                player.sendMessage("No item with that id");
-                                return;
-                            }
-                            player.getInventory().addItem(template.generateItemStack(PlayerManager.getInstance().getSmpPlayer(player.getUniqueId()), (Integer) commandArguments.get("amount")));
-                        })
-                )
-                .withSubcommand(new CommandAPICommand("view")
-                        .executesPlayer((player, commandArguments) -> {
-                            new ItemBrowser().showInventory(player);
-                        })
-                )
-                .withSubcommand(new CommandAPICommand("blacksmith")
-                        .executesPlayer((player, commandArguments) -> {
-                            new BlacksmithGui(player).showInventory(player);
-                        }))
+        new CommandAPICommand("blacksmith")
+                .executesPlayer((player, commandArguments) -> {
+                    new BlacksmithGui(player).showInventory(player);
+                })
                 .register();
     }
 }

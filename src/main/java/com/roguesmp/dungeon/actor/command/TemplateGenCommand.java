@@ -3,6 +3,7 @@ package com.roguesmp.dungeon.actor.command;
 import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.dungeon.data.definition.spawner.Spawner;
 import com.roguesmp.loot.context.LootOrigin;
+import com.roguesmp.permission.Permissions;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.dungeon.manager.DungeonManager;
 import com.roguesmp.loot.manager.LootTableManager;
@@ -51,11 +52,11 @@ public class TemplateGenCommand {
 
     public void register() {
         registerRoot("template");
-        registerRoot("templates");
     }
 
     private void registerRoot(String rootCommand) {
         new CommandAPICommand(rootCommand)
+                .withPermission(Permissions.DUNGEON_BUILD.node())
                 .withSubcommand(buildSpawnerCommand())
                 .withSubcommand(buildLootTableCommand())
                 .withSubcommand(buildReloadCommand())

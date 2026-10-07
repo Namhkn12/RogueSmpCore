@@ -1,6 +1,7 @@
 package com.roguesmp.island;
 
 import com.roguesmp.island.setting.IslandSettings;
+import com.roguesmp.permission.Permissions;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.utils.Utils;
@@ -10,8 +11,6 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 
 public class IslandVisitService {
-
-    public static final String BYPASS_PERMISSION = "roguesmp.island.visit.bypass";
 
     private final PlayerManager playerManager;
     private final IslandDataManager dataManager;
@@ -45,7 +44,7 @@ public class IslandVisitService {
                 }
 
                 boolean mayVisit = loaded.isMember(visitor.getUniqueId())
-                        || visitor.hasPermission(BYPASS_PERMISSION)
+                        || Permissions.ISLAND_VISIT_BYPASS.has(visitor)
                         || loaded.getSettingValue(IslandSettings.ALLOW_GUEST);
                 if (!mayVisit) {
                     visitor.sendMessage(Utils.fromString("<red>Đảo này không cho người chơi khác thăm!"));
@@ -75,7 +74,7 @@ public class IslandVisitService {
 
         if (!allowed && worldManager.getLoadedWorld(islandData.getIslandId()) != null) {
             for (Player player : worldManager.getLoadedWorld(islandData.getIslandId()).getPlayers()) {
-                if (islandData.isMember(player.getUniqueId()) || player.hasPermission(BYPASS_PERMISSION)) continue;
+                if (islandData.isMember(player.getUniqueId()) || Permissions.ISLAND_VISIT_BYPASS.has(player)) continue;
 
                 player.sendMessage(Utils.fromString("<yellow>Chủ đảo đã đóng cửa đảo nên bạn được đưa về hub."));
                 teleportService.sendToHub(player);

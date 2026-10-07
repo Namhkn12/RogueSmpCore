@@ -7,6 +7,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.annotation.GsonIgnore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.permission.Permissions;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.StringArgument;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -151,6 +152,7 @@ public class SkinRegistry {
 
     public static void registerSkinFetchCommand() {
         new CommandAPICommand("skinfetch")
+                .withPermission(Permissions.CONTENT.node())
                 .withArguments(new StringArgument("mineskin_uuid"))
                 .withArguments(new StringArgument("id"))
                 .executes((sender, args) -> {

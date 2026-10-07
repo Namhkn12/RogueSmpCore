@@ -4,7 +4,6 @@ import com.roguesmp.loot.LootTable;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
-import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -201,13 +200,5 @@ public class LootTableBrowserGui extends BaseGui {
                 Utils.text("Click để chỉnh sửa.", NamedTextColor.GREEN)
         )));
         return item;
-    }
-
-    public static void registerCommand() {
-        new CommandAPICommand("smploot")
-                .executesPlayer((player, args) -> {
-                    new LootTableBrowserGui(player).showInventory(player);
-                })
-                .register();
     }
 }

@@ -8,6 +8,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.permission.Permissions;
 import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -158,6 +159,7 @@ public class AbilityCatalogue extends BaseGui {
                     new AbilityCatalogue(smpPlayer).showInventory(player1);
                 })
                 .withSubcommand(new CommandAPICommand("unlock")
+                        .withPermission(Permissions.ABILITY_UNLOCK.node())
                         .executesPlayer((player, commandArguments) -> {
                             SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player.getUniqueId());
                             if (smpPlayer == null) return;
@@ -173,12 +175,6 @@ public class AbilityCatalogue extends BaseGui {
                             SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player.getUniqueId());
                             if (smpPlayer == null) return;
                             new AbilityLoadoutGui(smpPlayer).showInventory(player);
-                        }))
-                .withSubcommand(new CommandAPICommand("catalogue")
-                        .executesPlayer((player, commandArguments) -> {
-                            SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player.getUniqueId());
-                            if (smpPlayer == null) return;
-                            new AbilityCatalogue(smpPlayer).showInventory(player);
                         }))
                 .register(RogueSmpCore.getInstance());
     }

@@ -3,8 +3,6 @@ package com.roguesmp;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.command.ReloadCommand;
 import com.roguesmp.command.SmpBrowserCommand;
-import com.roguesmp.gui.crafting.FusionGui;
-import com.roguesmp.gui.crafting.RecipeBrowserGui;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.entity.component.EntityComponentKeys;
@@ -12,7 +10,6 @@ import com.roguesmp.registry.Registries;
 import com.roguesmp.dungeon.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
-import com.roguesmp.fx.FxCommand;
 import com.roguesmp.fx.FxEngine;
 import com.roguesmp.goal.zombified_piglin.PigZombieSpawnListener;
 import com.roguesmp.gui.CreatorHubGui;
@@ -24,17 +21,11 @@ import com.roguesmp.gui.ability.AbilityCatalogue;
 import com.roguesmp.gui.classes.ClassSelectionGui;
 import com.roguesmp.gui.crafting.CraftingGui;
 import com.roguesmp.gui.info.SmpWikiMainMenuGui;
-import com.roguesmp.gui.itemcreator.ItemCreatorGui;
-import com.roguesmp.gui.entitycreator.EntityCreatorGui;
+import com.roguesmp.integration.LuckPermsIntegration;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.island.IslandCommand;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
-import com.roguesmp.gui.loottablecreator.LootTableBrowserGui;
-import com.roguesmp.gui.loottablecreator.LootTableGuiCreator;
-import com.roguesmp.gui.npccreator.NpcBrowserGui;
-import com.roguesmp.gui.npccreator.NpcCreatorGui;
-import com.roguesmp.gui.recipecreator.RecipeCreatorGui;
 import com.roguesmp.loot.manager.LootTableManager;
 import com.roguesmp.loot.service.LootService;
 import com.roguesmp.npc.NpcManager;
@@ -44,10 +35,8 @@ import com.roguesmp.registry.*;
 import com.roguesmp.server.DailyResetScheduler;
 import com.roguesmp.server.PlayerDataAutoSaveScheduler;
 import com.roguesmp.server.VanillaRecipeReplacer;
-import com.roguesmp.tab.TabDemoCommand;
 import com.roguesmp.tab.TabEngine;
 import com.roguesmp.text.GlyphFontCommand;
-import com.roguesmp.text.Glyphs;
 import com.roguesmp.utils.GlowUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -87,6 +76,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         //Island
         IslandManager.init(this, PlayerManager.getInstance());
+        LuckPermsIntegration.init(this);
 
         //Quest
         QuestManager.init(this);
@@ -157,6 +147,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
     // Register Listener here
     public void initListeners() {
+        registerListener(new ChatListener());
         registerListener(new GuiListener());
         registerListener(new BlockListener());
 
@@ -176,22 +167,7 @@ public final class RogueSmpCore extends JavaPlugin {
         SkinRegistry.registerSkinFetchCommand();
         SkinBrowserGui.registerCommand();
         ItemBrowser.registerCommand();
-
-        ItemCreatorGui.registerCommand();
-        EntityCreatorGui.registerCommand();
-        LootTableGuiCreator.registerCommand();
-        LootTableBrowserGui.registerCommand();
-        RecipeCreatorGui.registerCommand();
         CreatorHubGui.registerCommand();
-
-        EffectManager.registerCommand();
-        EntityManager.registerCommand();
-
-        FxCommand.register();
-
-        NpcManager.getInstance().registerCommand();
-        NpcCreatorGui.registerCommand();
-        NpcBrowserGui.registerCommand();
 
         AbilityCatalogue.register();
         ClassSelectionGui.register();
@@ -202,16 +178,12 @@ public final class RogueSmpCore extends JavaPlugin {
 
         ItemRepairGui.registerCommand();
         CraftingGui.registerCmd();
-        FusionGui.register();
         SmpBrowserCommand.register();
-        RecipeBrowserGui.registerCommand();
 
         new IslandCommand(IslandManager.getInstance()).register();
         QuestManager.getInstance().registerQuestCommand();
-        TabDemoCommand.register();
 
         ReloadCommand.register();
-        Glyphs.registerTestCommand();
         GlyphFontCommand.register();
     }
 
@@ -245,6 +217,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         FxEngine.getInstance().shutdown();
         TabEngine.getInstance().shutdown();
+        LuckPermsIntegration.getInstance().shutdown();
 
         Bukkit.getOnlinePlayers().forEach(player -> {
             player.closeInventory();

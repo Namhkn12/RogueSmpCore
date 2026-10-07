@@ -4,6 +4,7 @@ package com.roguesmp.dungeon.actor.command;
 import com.roguesmp.dungeon.controller.SchemetaController;
 import com.roguesmp.dungeon.data.definition.Schemeta;
 import com.roguesmp.dungeon.manager.SchemetaManager;
+import com.roguesmp.permission.Permissions;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
@@ -26,6 +27,7 @@ public class SchemetaCommand {
     public void register() {
 
         new CommandAPICommand("schemeta")
+                .withPermission(Permissions.DUNGEON_BUILD.node())
                 .withSubcommand(
                         new CommandAPICommand("save")
                                 .withRequirement(inBuildingWorld())

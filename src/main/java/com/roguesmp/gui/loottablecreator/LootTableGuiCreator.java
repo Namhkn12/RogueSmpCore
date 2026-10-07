@@ -18,9 +18,6 @@ import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.StringArgument;
 import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -669,24 +666,4 @@ public class LootTableGuiCreator {
     // ==========================================
     // COMMAND
     // ==========================================
-
-    public static void registerCommand() {
-        new CommandAPICommand("smplootcreator")
-                .withSubcommand(new CommandAPICommand("new")
-                        .executesPlayer((player, args) -> {
-                            new LootTableGuiCreator().openMainDialog(player);
-                        }))
-                .withSubcommand(new CommandAPICommand("edit")
-                        .withArguments(new StringArgument("table_id").replaceSuggestions(ArgumentSuggestions.strings(Registries.LOOT_TABLE.getAll().keySet())))
-                        .executesPlayer((player, args) -> {
-                            String tableId = (String) args.get("table_id");
-                            LootTable existing = Registries.LOOT_TABLE.get(tableId);
-                            if (existing == null) {
-                                player.sendMessage(Utils.text("Không tìm thấy loot table với ID '" + tableId + "'.", NamedTextColor.RED));
-                                return;
-                            }
-                            LootTableGuiCreator.editExisting(tableId, existing).openMainDialog(player);
-                        }))
-                .register();
-    }
 }

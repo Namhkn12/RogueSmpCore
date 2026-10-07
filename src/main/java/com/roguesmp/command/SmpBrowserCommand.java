@@ -6,6 +6,7 @@ import com.roguesmp.gui.entitycreator.EntityBrowserGui;
 import com.roguesmp.gui.loottablecreator.LootTableBrowserGui;
 import com.roguesmp.gui.npccreator.NpcBrowserGui;
 import com.roguesmp.gui.tageditor.TagEditorGui;
+import com.roguesmp.permission.Permissions;
 import dev.jorel.commandapi.CommandAPICommand;
 
 public class SmpBrowserCommand {
@@ -14,8 +15,7 @@ public class SmpBrowserCommand {
         CommandAPICommand itemCommand = new CommandAPICommand("item")
                 .executesPlayer((sender, args) -> {
                     new ItemBrowser().showInventory(sender);
-                })
-                .withSubcommand(new CommandAPICommand("edit"));
+                });
 
         CommandAPICommand recipeCommand = new CommandAPICommand("recipe")
                 .executesPlayer((sender, args) -> {
@@ -43,6 +43,7 @@ public class SmpBrowserCommand {
                 });
 
         new CommandAPICommand("smpbrowser")
+                .withPermission(Permissions.CONTENT.node())
                 .withSubcommand(itemCommand)
                 .withSubcommand(recipeCommand)
                 .withSubcommand(entityCommand)

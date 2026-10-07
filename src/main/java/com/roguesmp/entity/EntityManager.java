@@ -7,9 +7,6 @@ import com.roguesmp.constant.Keys;
 import com.roguesmp.entity.component.impl.SpellComponent;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -165,32 +162,5 @@ public class EntityManager {
             throw new RuntimeException("EntityManager is null");
         }
         return INSTANCE;
-    }
-
-    public static void registerCommand() {
-
-        // Spawn command
-        new CommandAPICommand("smpentity")
-                .withArguments(
-                        new StringArgument("entity_id")
-                                .replaceSuggestions(ArgumentSuggestions.strings(info ->
-                                        EntityManager.getInstance().getAllIds().toArray(String[]::new)
-                                ))
-                )
-                .executesPlayer((player, args) -> {
-
-                    String id = (String) args.get("entity_id");
-
-                    BaseEntity base = EntityManager.getInstance().getBaseEntity(id);
-
-                    if (base == null) {
-                        player.sendMessage("Id not found");
-                        return;
-                    }
-
-                    base.spawn(player.getLocation());
-
-                })
-                .register();
     }
 }

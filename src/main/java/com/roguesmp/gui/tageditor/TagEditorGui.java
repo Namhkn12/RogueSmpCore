@@ -6,7 +6,6 @@ import com.roguesmp.tag.SmpTag;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
-import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -242,12 +241,4 @@ public final class TagEditorGui {
     // ==========================================
     // COMMAND
     // ==========================================
-
-    public static void registerCommand() {
-        new CommandAPICommand("smptag")
-                .executesPlayer((player, args) -> {
-                    open(player);
-                })
-                .register();
-    }
 }

@@ -2,10 +2,7 @@ package com.roguesmp.text;
 
 import com.roguesmp.constant.Keys;
 import com.roguesmp.registry.Registries;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.StringArgument;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
 
 public final class Glyphs {
 
@@ -29,20 +26,5 @@ public final class Glyphs {
 
     public static void bootstrap() {
 
-    }
-
-    public static void registerTestCommand() {
-        new CommandAPICommand("glyph")
-                .withArguments(new StringArgument("glyph_id"))
-                .executesPlayer((sender, args) -> {
-                    String glyphId = (String) args.get("glyph_id");
-                    Glyph glyph = Registries.GLYPH.get(glyphId);
-                    if (glyph == null) {
-                        sender.sendMessage("No glyph found for " + glyphId);
-                        return;
-                    }
-                    sender.sendMessage(Component.text("Prepend text").append(glyph.create()).append(Component.text("and additional text")));
-                })
-                .register();
     }
 }
