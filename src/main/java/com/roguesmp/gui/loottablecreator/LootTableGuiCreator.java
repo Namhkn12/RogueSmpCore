@@ -6,7 +6,6 @@ import com.roguesmp.loot.LootPool;
 import com.roguesmp.loot.LootTable;
 import com.roguesmp.loot.condition.LootCondition;
 import com.roguesmp.loot.condition.impl.AndCondition;
-import com.roguesmp.loot.condition.impl.ChanceCondition;
 import com.roguesmp.loot.condition.impl.NotCondition;
 import com.roguesmp.loot.condition.impl.OrCondition;
 import com.roguesmp.loot.condition.impl.OriginCondition;
@@ -75,7 +74,7 @@ public class LootTableGuiCreator {
                 entryDraft.weight = entry.getWeight();
                 entryDraft.conditions = fromRealConditions(entry.getConditions());
                 if (entryDraft.conditions.size() < entry.getConditions().size()) droppedAny = true;
-                if (!entry.getFunctions().isEmpty()) droppedAny = true;
+                if (!entry.getFunctions().isEmpty() || entry.getQuality() != 0.0) droppedAny = true;
 
                 if (entry instanceof ItemEntry item) {
                     entryDraft.kind = EntryKind.ITEM;
@@ -243,10 +242,10 @@ public class LootTableGuiCreator {
     private static List<LootEntry> toRealEntries(List<EntryDraft> drafts) {
         List<LootEntry> entries = new ArrayList<>();
         for (EntryDraft draft : drafts) {
-            LootEntry.BaseProperties base = new LootEntry.BaseProperties(draft.weight, toRealConditions(draft.conditions), List.of());
+            LootEntry.BaseProperties base = new LootEntry.BaseProperties(draft.weight, 0.0, toRealConditions(draft.conditions), List.of());
             entries.add(switch (draft.kind) {
                 case ITEM -> new ItemEntry(base, draft.itemId, draft.minAmount, draft.maxAmount);
-                case LOOT_TABLE -> new NestedTableEntry(base, draft.nestedTableId);
+                case LOOT_TABLE -> new NestedTableEntry(base, Registries.LOOT_TABLE.getHolder(draft.nestedTableId));
                 case EMPTY -> new EmptyEntry(base);
             });
         }
@@ -445,25 +444,6 @@ public class LootTableGuiCreator {
         Runnable backToList = () -> player.showDialog(buildConditionListDialog(player, conditions, onBack));
 
         switch (draft.kind) {
-            case CHANCE -> {
-                DialogBuilder builder = DialogBuilder.create(Component.text("Condition: chance"))
-                        .canCloseWithEscape(false)
-                        .addTextInput("chance", Component.text("chance (0.0 - 1.0)"), b -> b.initial(String.valueOf(draft.chance)).maxLength(8));
-
-                DialogTypeBuilder.MultiAction multi = builder.multiAction();
-                multi.addButton(Component.text("Lưu"), null, (response, audience) -> {
-                    Double parsed = parseDouble(response.getText("chance"), 0.0, 1.0);
-                    if (parsed != null) draft.chance = parsed;
-                    Utils.runLater(backToList);
-                });
-                multi.addButton(Component.text("Xoá", NamedTextColor.RED), null, (response, audience) -> {
-                    conditions.remove(index);
-                    Utils.runLater(backToList);
-                });
-                multi.columns(3);
-                multi.exitButton(Component.text("« Quay lại"), (response, audience) -> Utils.runLater(backToList));
-                return multi.build();
-            }
             case ORIGIN -> {
                 DialogBuilder builder = DialogBuilder.create(Component.text("Condition: origin"))
                         .canCloseWithEscape(false);
@@ -529,7 +509,6 @@ public class LootTableGuiCreator {
 
     private static String describeConditionLabel(ConditionDraft draft) {
         return switch (draft.kind) {
-            case CHANCE -> "chance(" + draft.chance + ")";
             case ORIGIN -> "origin(" + draft.origins + ")";
             case AND -> "and(" + draft.children.size() + ")";
             case OR -> "or(" + draft.children.size() + ")";
@@ -548,7 +527,6 @@ public class LootTableGuiCreator {
 
     private static @Nullable LootCondition toRealCondition(ConditionDraft draft) {
         return switch (draft.kind) {
-            case CHANCE -> new ChanceCondition(draft.chance);
             case ORIGIN -> draft.origins.isEmpty() ? null : new OriginCondition(EnumSet.copyOf(draft.origins));
             case AND -> new AndCondition(toRealConditions(draft.children));
             case OR -> new OrCondition(toRealConditions(draft.children));
@@ -570,10 +548,7 @@ public class LootTableGuiCreator {
 
     private static @Nullable ConditionDraft fromRealCondition(LootCondition condition) {
         ConditionDraft draft = new ConditionDraft();
-        if (condition instanceof ChanceCondition chance) {
-            draft.kind = ConditionKind.CHANCE;
-            draft.chance = chance.getChance();
-        } else if (condition instanceof OriginCondition origin) {
+        if (condition instanceof OriginCondition origin) {
             draft.kind = ConditionKind.ORIGIN;
             draft.origins = EnumSet.copyOf(origin.getOrigins());
         } else if (condition instanceof AndCondition and) {
@@ -637,8 +612,7 @@ public class LootTableGuiCreator {
     }
 
     private static class ConditionDraft {
-        ConditionKind kind = ConditionKind.CHANCE;
-        double chance = 0.5;
+        ConditionKind kind = ConditionKind.ORIGIN;
         Set<LootOrigin> origins = EnumSet.noneOf(LootOrigin.class);
         List<ConditionDraft> children = new ArrayList<>(); // AND/OR: all children. NOT: first child only.
     }
@@ -654,7 +628,7 @@ public class LootTableGuiCreator {
     }
 
     private enum ConditionKind {
-        CHANCE("chance"), ORIGIN("origin"), AND("and"), OR("or"), NOT("not");
+        ORIGIN("origin"), AND("and"), OR("or"), NOT("not");
 
         final String label;
 

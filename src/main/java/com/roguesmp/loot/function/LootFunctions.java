@@ -1,6 +1,8 @@
 package com.roguesmp.loot.function;
 
 import com.roguesmp.codec.Codec;
+import com.roguesmp.loot.function.impl.LootingFunction;
+import com.roguesmp.loot.function.impl.SetCountFunction;
 import com.roguesmp.registry.Registries;
 
 /**
@@ -9,6 +11,9 @@ import com.roguesmp.registry.Registries;
  * force that to happen.
  */
 public class LootFunctions {
+
+    public static final Codec<SetCountFunction> SET_COUNT = register(SetCountFunction.TYPE_KEY, SetCountFunction.CODEC);
+    public static final Codec<LootingFunction> LOOTING = register(LootingFunction.TYPE_KEY, LootingFunction.CODEC);
 
     public static void loadClass() {
 

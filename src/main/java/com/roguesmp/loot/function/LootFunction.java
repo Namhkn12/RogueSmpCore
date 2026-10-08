@@ -24,8 +24,8 @@ public interface LootFunction {
 
     /**
      * @param items   the stacks produced so far (by the entry itself, or by a previous function
-     *                in the chain) — implementations may mutate and return the same list, or
-     *                return a new one
+     *                in the chain) — an immutable list - return a new one (or the same
+     *                list unchanged), never mutate it
      * @param context the roll's context
      * @return the resulting stacks, passed to the next function in the chain
      */

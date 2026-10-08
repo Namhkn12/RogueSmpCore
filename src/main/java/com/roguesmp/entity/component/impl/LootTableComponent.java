@@ -5,7 +5,8 @@ import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.component.EntityComponent;
 import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.loot.context.LootOrigin;
-import com.roguesmp.loot.service.LootService;
+import com.roguesmp.loot.LootTable;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import org.bukkit.entity.LivingEntity;
@@ -43,8 +44,10 @@ public record LootTableComponent(List<String> lootTableIds) implements EntityCom
                 .build();
 
         for (String lootTableId : lootTableIds) {
-            List<ItemStack> drops = LootService.getInstance().roll(lootTableId, context);
-            for (ItemStack drop : drops) {
+            LootTable table = Registries.LOOT_TABLE.get(lootTableId);
+            if (table == null) continue;
+
+            for (ItemStack drop : table.roll(context)) {
                 livingEntity.getWorld().dropItemNaturally(livingEntity.getLocation(), drop);
             }
         }

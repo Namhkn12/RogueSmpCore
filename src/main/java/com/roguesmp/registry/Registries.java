@@ -5,6 +5,8 @@ import com.roguesmp.block.BlockData;
 import com.roguesmp.block.BlockType;
 import com.roguesmp.block.BlockTypes;
 import com.roguesmp.codec.Codec;
+import com.roguesmp.fishing.FishingHotspot;
+import com.roguesmp.fishing.FishingHotspotSpot;
 import com.roguesmp.item.ItemType;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.enchant.Enchants;
@@ -105,6 +107,8 @@ public class Registries {
 
     public static final Registry<LootTable> LOOT_TABLE = new Registry<>(LootConfig.LOOT_TABLE_FOLDER, LootTable.CODEC);
     public static final Registry<ItemType> ITEM_TYPE = new Registry<>("item_types", ItemType.CODEC);
+    public static final Registry<FishingHotspot> FISHING_HOTSPOT = new Registry<>("fishing_hotspots", FishingHotspot.CODEC);
+    public static final Registry<FishingHotspotSpot> FISHING_HOTSPOT_SPOT = new Registry<>("fishing_hotspot_spots", FishingHotspotSpot.CODEC);
     public static final Registry<FuelType> FUEL_TYPE = new Registry<>("fuel_types", FuelType.CODEC);
 
     public static final Registry<Codec<? extends CraftingRecipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());

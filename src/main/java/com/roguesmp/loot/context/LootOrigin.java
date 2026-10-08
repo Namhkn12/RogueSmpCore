@@ -3,8 +3,6 @@ package com.roguesmp.loot.context;
 /**
  * Phân loại nơi phát sinh một lượt roll loot.
  *
- * <p>Listener của {@link com.roguesmp.loot.event.LootRollEvent} dùng giá trị này
- * để lọc nhanh trước khi kiểm tra điều kiện nặng hơn.
  */
 public enum LootOrigin {
 
@@ -19,6 +17,9 @@ public enum LootOrigin {
 
     /** Trả thưởng quest. */
     QUEST,
+
+    /** Câu cá. Source là {@link org.bukkit.entity.FishHook}. */
+    FISHING,
 
     /** Gọi thủ công từ command (debug/test). */
     COMMAND,

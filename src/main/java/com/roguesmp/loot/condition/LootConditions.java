@@ -2,7 +2,6 @@ package com.roguesmp.loot.condition;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.loot.condition.impl.AndCondition;
-import com.roguesmp.loot.condition.impl.ChanceCondition;
 import com.roguesmp.loot.condition.impl.NotCondition;
 import com.roguesmp.loot.condition.impl.OrCondition;
 import com.roguesmp.loot.condition.impl.OriginCondition;
@@ -15,7 +14,6 @@ import com.roguesmp.registry.Registries;
  */
 public class LootConditions {
 
-    public static final Codec<ChanceCondition> CHANCE = register(ChanceCondition.TYPE_KEY, ChanceCondition.CODEC);
     public static final Codec<OriginCondition> ORIGIN = register(OriginCondition.TYPE_KEY, OriginCondition.CODEC);
     public static final Codec<AndCondition> AND = register(AndCondition.TYPE_KEY, AndCondition.CODEC);
     public static final Codec<OrCondition> OR = register(OrCondition.TYPE_KEY, OrCondition.CODEC);

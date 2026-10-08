@@ -1,6 +1,10 @@
 package com.roguesmp.dungeon.actor.command;
 
+import com.roguesmp.loot.LootEntry;
+import com.roguesmp.loot.LootOdds;
 import com.roguesmp.loot.context.LootContext;
+import com.roguesmp.loot.entry.ItemEntry;
+import com.roguesmp.loot.entry.NestedTableEntry;
 import com.roguesmp.dungeon.data.definition.spawner.Spawner;
 import com.roguesmp.loot.context.LootOrigin;
 import com.roguesmp.permission.Permissions;
@@ -10,9 +14,10 @@ import com.roguesmp.loot.manager.LootTableManager;
 import com.roguesmp.dungeon.manager.RoomManager;
 import com.roguesmp.dungeon.manager.SchemetaManager;
 import com.roguesmp.dungeon.manager.SpawnerManager;
-import com.roguesmp.loot.service.ILootService;
+import com.roguesmp.loot.LootTable;
 import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.executors.CommandArguments;
 import dev.jorel.commandapi.arguments.*;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -27,7 +32,6 @@ import java.util.function.Predicate;
 
 public class TemplateGenCommand {
 
-    private final ILootService lootService;
     private final SpawnerManager spawnerManager;
     private final DungeonManager dungeonManager;
     private final RoomManager roomManager;
@@ -35,14 +39,12 @@ public class TemplateGenCommand {
     private final SchemetaManager schemetaManager;
 
     public TemplateGenCommand(
-            ILootService lootService,
             SpawnerManager spawnerManager,
             DungeonManager dungeonManager,
             RoomManager roomManager,
             LootTableManager lootTableManager,
             SchemetaManager schemetaManager
     ) {
-        this.lootService = lootService;
         this.spawnerManager = spawnerManager;
         this.dungeonManager = dungeonManager;
         this.roomManager = roomManager;
@@ -125,25 +127,17 @@ public class TemplateGenCommand {
                                                 })
                                 )
                 )
-                .withSubcommand(
-                        new CommandAPICommand("roll")
-                                .withRequirement(inBuildingWorld())
-                                .withArguments(lootTableIdArgument("tableId"))
-                                .executesPlayer((player, args) -> {
-                                    String tableId = (String) args.get("tableId");
-                                    rollAndGive(player, tableId, LootContext
-                                            .builder(PlayerManager.getInstance().getSmpPlayer(player))
-                                            .origin(LootOrigin.COMMAND, player)
-                                            .build());
-                                })
-                )
+                .withSubcommand(lootDebugSubcommand("roll", false, this::rollAndGive))
+                .withSubcommand(lootDebugSubcommand("roll", true, this::rollAndGive))
+                .withSubcommand(lootDebugSubcommand("odds", false, this::showOdds))
+                .withSubcommand(lootDebugSubcommand("odds", true, this::showOdds))
                 .withSubcommand(
                         new CommandAPICommand("check")
                                 .withRequirement(inBuildingWorld())
                                 .withArguments(lootTableIdArgument("tableId"))
                                 .executesPlayer((player, args) -> {
                                     String tableId = (String) args.get("tableId");
-                                    if (!lootService.exists(tableId)) {
+                                    if (!lootTableManager.exists(tableId)) {
                                         player.sendMessage("§c[LootTable] Not found: §f" + tableId);
                                         return;
                                     }
@@ -230,6 +224,24 @@ public class TemplateGenCommand {
         return "§a[Template] Reloaded schemeta templates: §f" + schemetaManager.getAll().size();
     }
 
+    @FunctionalInterface
+    private interface LootDebugAction {
+        void run(Player player, String tableId, LootContext context);
+    }
+
+    private CommandAPICommand lootDebugSubcommand(String name, boolean withModifiers, LootDebugAction action) {
+        CommandAPICommand command = new CommandAPICommand(name).withRequirement(inBuildingWorld());
+        if (withModifiers) {
+            command.withArguments(new DoubleArgument("luck"), new DoubleArgument("looting"));
+        }
+        return command
+                .withArguments(lootTableIdArgument("tableId"))
+                .executesPlayer((player, args) -> {
+                    String tableId = (String) args.get("tableId");
+                    action.run(player, tableId, debugContext(player, args));
+                });
+    }
+
     private Argument<String> lootTableIdArgument(String nodeName) {
         return new GreedyStringArgument(nodeName)
                 .replaceSuggestions(ArgumentSuggestions.strings(
@@ -247,12 +259,43 @@ public class TemplateGenCommand {
         return spawner.getId();
     }
 
-    private void rollAndGive(Player player, String tableId, LootContext ctx) {
-        if (!lootService.exists(tableId)) {
+    private LootContext debugContext(Player player, CommandArguments args) {
+        return LootContext
+                .builder(PlayerManager.getInstance().getSmpPlayer(player))
+                .origin(LootOrigin.COMMAND, player)
+                .luck((double) args.getOrDefault("luck", 0.0))
+                .looting((double) args.getOrDefault("looting", 0.0))
+                .build();
+    }
+
+    private void showOdds(Player player, String tableId, LootContext ctx) {
+        LootTable table = lootTableManager.getTable(tableId);
+        if (table == null) {
             player.sendMessage("§c[LootTable] Not found: §f" + tableId);
             return;
         }
-        List<ItemStack> items = lootService.roll(tableId, ctx);
+        player.sendMessage("§a[LootTable] Odds for §f" + tableId + " §7(luck " + ctx.getLuck() + ", looting " + ctx.getLooting() + ")");
+        for (LootOdds.PoolOdds pool : table.odds(ctx).pools()) {
+            player.sendMessage("§7Pool " + pool.index() + (pool.active() ? "" : " §c(skipped by conditions)"));
+            for (LootOdds.EntryOdds entry : pool.entries()) {
+                player.sendMessage(String.format("  §f%s §7- weight %.2f, §e%.2f%%", describeEntry(entry.entry()), entry.weight(), entry.chance() * 100));
+            }
+        }
+    }
+
+    private static String describeEntry(LootEntry entry) {
+        if (entry instanceof ItemEntry item) return item.getItemId();
+        if (entry instanceof NestedTableEntry nested) return "table:" + nested.getNestedTableId();
+        return "(nothing)";
+    }
+
+    private void rollAndGive(Player player, String tableId, LootContext ctx) {
+        LootTable table = lootTableManager.getTable(tableId);
+        if (table == null) {
+            player.sendMessage("§c[LootTable] Not found: §f" + tableId);
+            return;
+        }
+        List<ItemStack> items = table.roll(ctx);
         if (items.isEmpty()) {
             player.sendMessage("§e[LootTable] Rolled §f" + tableId + " §e- no items (empty roll)");
             return;

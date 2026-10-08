@@ -1,6 +1,7 @@
 package com.roguesmp;
 
 import com.roguesmp.block.manager.BlockManager;
+import com.roguesmp.command.FishingHotspotCommand;
 import com.roguesmp.command.ReloadCommand;
 import com.roguesmp.command.SmpBrowserCommand;
 import com.roguesmp.crafting.CraftingManager;
@@ -10,6 +11,8 @@ import com.roguesmp.registry.Registries;
 import com.roguesmp.dungeon.DungeonRegistry;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
+import com.roguesmp.fishing.FishingHotspotManager;
+import com.roguesmp.fishing.FishingManager;
 import com.roguesmp.fx.FxEngine;
 import com.roguesmp.goal.zombified_piglin.PigZombieSpawnListener;
 import com.roguesmp.gui.CreatorHubGui;
@@ -26,8 +29,6 @@ import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.island.IslandCommand;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
-import com.roguesmp.loot.manager.LootTableManager;
-import com.roguesmp.loot.service.LootService;
 import com.roguesmp.npc.NpcManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.quest.QuestManager;
@@ -87,8 +88,8 @@ public final class RogueSmpCore extends JavaPlugin {
         //Entity
         EntityManager.init(this);
 
-        //Loot - plugin-wide singleton so any system (mob death, chests, quests, ...) can roll
-        LootService.init(new LootTableManager());
+        FishingManager.init(this);
+        FishingHotspotManager.init(this);
 
         //Npc
         NpcManager.init();
@@ -157,6 +158,7 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new PigZombieSpawnListener(this));
         registerListener(new EntityListener(EntityManager.getInstance()));
         registerListener(new NpcListener(NpcManager.getInstance()));
+        registerListener(new FishingListener(FishingManager.getInstance()));
 
         registerListener(new IslandListener(IslandManager.getInstance()));
         registerListener(new QuestListener(QuestManager.getInstance()));
@@ -184,6 +186,7 @@ public final class RogueSmpCore extends JavaPlugin {
         QuestManager.getInstance().registerQuestCommand();
 
         ReloadCommand.register();
+        FishingHotspotCommand.register();
         GlyphFontCommand.register();
     }
 
