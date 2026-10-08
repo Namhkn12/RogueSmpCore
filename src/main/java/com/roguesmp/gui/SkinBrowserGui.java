@@ -2,6 +2,7 @@ package com.roguesmp.gui;
 
 import com.roguesmp.registry.SkinRegistry;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.permission.Permissions;
 import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -126,6 +127,7 @@ public class SkinBrowserGui extends BaseGui {
 
     public static void registerCommand() {
         new CommandAPICommand("skinbrowser")
+                .withPermission(Permissions.CONTENT.node())
                 .executesPlayer((player, args) -> {
                     new SkinBrowserGui().showInventory(player);
                 })

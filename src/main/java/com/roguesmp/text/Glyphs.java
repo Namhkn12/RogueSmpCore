@@ -2,10 +2,7 @@ package com.roguesmp.text;
 
 import com.roguesmp.constant.Keys;
 import com.roguesmp.registry.Registries;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.StringArgument;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
 
 public final class Glyphs {
 
@@ -16,6 +13,10 @@ public final class Glyphs {
 
     public static final Glyph SERVER_ICON = glyph("icon/server", '\uE000', 8, 7, 8);
     public static final Glyph COIN_ICON = glyph("icon/coin", '\uE001', 8, 7, 8);
+
+    public static final Glyph FISHING_TRACK = glyph("fishing/track", '', 8, 7, 100);
+    public static final Glyph FISHING_BAR_SEGMENT = glyph("fishing/bar_segment", '', 8, 7, 4);
+    public static final Glyph FISHING_INDICATOR = glyph("fishing/indicator", '', 12, 9, 2);
 
     private static Glyph glyph(String name, int symbol, int height, int ascent, int width) {
         return glyph(name, symbol, Keys.GLOBAL_NAMESPACE + ":" + name + ".png", height, ascent, width);
@@ -29,20 +30,5 @@ public final class Glyphs {
 
     public static void bootstrap() {
 
-    }
-
-    public static void registerTestCommand() {
-        new CommandAPICommand("glyph")
-                .withArguments(new StringArgument("glyph_id"))
-                .executesPlayer((sender, args) -> {
-                    String glyphId = (String) args.get("glyph_id");
-                    Glyph glyph = Registries.GLYPH.get(glyphId);
-                    if (glyph == null) {
-                        sender.sendMessage("No glyph found for " + glyphId);
-                        return;
-                    }
-                    sender.sendMessage(Component.text("Prepend text").append(glyph.create()).append(Component.text("and additional text")));
-                })
-                .register();
     }
 }

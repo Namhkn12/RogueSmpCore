@@ -1,10 +1,8 @@
 package com.roguesmp.listener;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.event.*;
-import com.roguesmp.gui.classes.ClassSelectionGui;
 import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.item.BaseItem;
@@ -13,7 +11,7 @@ import com.roguesmp.player.*;
 import com.roguesmp.server.ResourcePackManager;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.SmpItemUtils;
-import com.roguesmp.utils.Utils;
+import com.roguesmp.utils.WorldPos;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.event.entity.EntityEquipmentChangedEvent;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
@@ -49,14 +47,14 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerPreJoin(AsyncPlayerPreLoginEvent event) {
         UUID uuid = event.getUniqueId();
-        PlayerData playerData = playerDataManager.loadPlayerData(uuid);
-        IslandData islandData = islandManager.getIslandDataManager().loadIslandData(playerData.getIslandId());
+        playerDataManager.cacheData(playerDataManager.loadPlayerData(uuid));
+    }
 
-        playerDataManager.cacheData(playerData);
-        if (islandData != null) {
-            islandManager.getIslandDataManager().cache(islandData);
-        }
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerPreJoinDenied(AsyncPlayerPreLoginEvent event) {
+        if (event.getLoginResult() == AsyncPlayerPreLoginEvent.Result.ALLOWED) return;
 
+        playerDataManager.removeCachedData(event.getUniqueId());
     }
 
     @EventHandler
@@ -73,29 +71,14 @@ public class PlayerListener implements Listener {
         if (smpPlayer == null) return;
 
         PlayerData playerData = playerManager.getDataManager().removeCachedData(smpPlayer.getUuid());
+        islandManager.getInviteManager().cancelInvitesInvolving(smpPlayer.getUuid());
+        playerData.setLastLocation(WorldPos.of(player.getLocation()));
         playerManager.untrackPlayer(smpPlayer.getUuid());
 
         IslandData islandData = islandManager.getIslandDataManager().getCachedData(playerData.getIslandId());
-        if (islandData != null) {
-            boolean islandEmpty = true;
-            for (UUID memberId : islandData.getMembers()) {
-                if (memberId.equals(player.getUniqueId())) continue;
+        if (islandData != null) islandManager.releaseIslandIfUnoccupied(islandData, player.getUniqueId());
 
-                Player onlineMember = Bukkit.getPlayer(memberId);
-                if (onlineMember != null && onlineMember.isOnline()) {
-                    islandEmpty = false;
-                    break; // Keep it loaded, some member is still online
-                }
-            }
-            if (islandEmpty) {
-                islandManager.getIslandDataManager().removeCache(playerData.getIslandId());
-                Utils.runAsync(() -> islandManager.getIslandDataManager().saveIslandData(islandData));
-            }
-        }
-
-        Utils.runAsync(() -> {
-            playerManager.getDataManager().savePlayerData(playerData);
-        });
+        playerManager.getDataManager().saveAsync(playerData);
     }
 
     //We use custom durability so this event is always cancelled for custom items

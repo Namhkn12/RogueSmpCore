@@ -27,8 +27,6 @@ import com.roguesmp.dungeon.task.TaskScheduler;
 import com.roguesmp.dungeon.utils.Log4Craft_;
 import com.roguesmp.dungeon.utils.adapter.UUIDTypeAdapter;
 import com.roguesmp.loot.manager.LootTableManager;
-import com.roguesmp.loot.service.ILootService;
-import com.roguesmp.loot.service.LootService;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -106,9 +104,7 @@ public class DungeonRegistry {
         ISpawnerService spawnerService = new SpawnerService(spawnerManager, spawnerInstanceManager, logger);
         IInstanceService instanceService = new InstanceService(instanceManager,
                 dungeonManager, roomManager, regionService, dungeonService, partyService, roomService, schematicService);
-        ILootService lootService = LootService.getInstance();
         IDungeonRewardService rewardService = new DungeonRewardService(
-                lootService,
                 partyService,
                 instanceManager,
                 dungeonManager,
@@ -180,7 +176,6 @@ public class DungeonRegistry {
 
         /*Command*/
         new TemplateGenCommand(
-                lootService,
                 spawnerManager,
                 dungeonManager,
                 roomManager,

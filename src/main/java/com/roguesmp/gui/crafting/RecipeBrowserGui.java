@@ -1,22 +1,16 @@
 package com.roguesmp.gui.crafting;
 
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.crafting.CraftingIngredient;
-import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
 import com.roguesmp.crafting.recipe.FusionRecipe;
 import com.roguesmp.crafting.recipe.ShapedCraftingRecipe;
 import com.roguesmp.crafting.recipe.ShapelessCraftingRecipe;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.gui.crafting.editor.FusionRecipeEditorGui;
-import com.roguesmp.gui.crafting.editor.RecipeCreatorHubGui;
 import com.roguesmp.gui.crafting.editor.ShapedShapelessRecipeEditorGui;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.StringArgument;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.dialog.Dialog;
@@ -277,33 +271,5 @@ public class RecipeBrowserGui extends BaseGui {
         placeholder.setData(DataComponentTypes.ITEM_NAME, Component.text(
                 ingredient == null ? "(không có)" : "Không tìm thấy: " + ingredient.key(), NamedTextColor.RED));
         return placeholder;
-    }
-
-    public static void registerCommand() {
-        new CommandAPICommand("smprecipe")
-                .executesPlayer((player, args) -> {
-                    new RecipeBrowserGui(player).showInventory(player);
-                })
-                .withSubcommand(new CommandAPICommand("view")
-                        .executesPlayer((sender, args) -> {
-                            new RecipeBrowserGui(sender).showInventory(sender);
-                        }))
-                .withSubcommand(new CommandAPICommand("new")
-                        .executesPlayer((sender, args) -> {
-                            new RecipeCreatorHubGui(sender).showInventory(sender);
-                        }))
-                .withSubcommand(new CommandAPICommand("delete")
-                        .withArguments(new StringArgument("recipe_id").replaceSuggestions(ArgumentSuggestions.strings(Registries.CRAFTING_RECIPE.getAll().keySet())))
-                        .executesPlayer((sender, args) -> {
-                            String id = (String) args.get("recipe_id");
-                            if (Registries.CRAFTING_RECIPE.get(id) == null) {
-                                sender.sendMessage(Component.text("No recipe exist: " + id, NamedTextColor.RED));
-                                return;
-                            }
-                            Registries.CRAFTING_RECIPE.removeAndDeleteFiles(RogueSmpCore.getInstance(), id);
-                            CraftingManager.getInstance().rebuild();
-                            sender.sendMessage(Component.text("Removed recipe: " + id, NamedTextColor.RED));
-                        }))
-                .register();
     }
 }

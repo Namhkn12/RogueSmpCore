@@ -2,15 +2,10 @@ package com.roguesmp.effect.impl;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.DamageType;
-import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.Utils;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.DoubleArgument;
-import dev.jorel.commandapi.arguments.IntegerArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Entity;
@@ -101,18 +96,5 @@ public class PotentPoisonEffect extends SmpEffect {
 
     public void setApplier(Entity applier) {
         this.applier = applier;
-    }
-
-    public static CommandAPICommand registerCommand() {
-        return new CommandAPICommand("potentpoison")
-                .withArguments(new IntegerArgument("duration"), new DoubleArgument("damagePerStack"), new IntegerArgument("stacks"), new StringArgument("source"))
-                .executesPlayer((player, args) -> {
-                    int duration = (Integer) args.get("duration");
-                    double damagePerStack = (Double) args.get("damagePerStack");
-                    int stacks = (Integer) args.get("stacks");
-                    String source = (String) args.get("source");
-
-                    EffectManager.getInstance().addEffect(player, source, new PotentPoisonEffect(duration, damagePerStack, stacks));
-                });
     }
 }

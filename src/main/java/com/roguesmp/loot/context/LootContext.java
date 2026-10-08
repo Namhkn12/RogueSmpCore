@@ -10,24 +10,21 @@ import org.jetbrains.annotations.Nullable;
  * <p>Được tạo một lần cho mỗi sự kiện loot (mở rương, mob chết, trả thưởng quest),
  * rồi đi xuyên suốt chuỗi roll. Context mô tả <b>nơi gọi</b> ({@link #getOrigin()} +
  * {@link #getSource()}) và <b>người roll</b> ({@link #getPlayer()}).
- *
- * <p>Cách các hệ thống khác ảnh hưởng tới 1 lượt roll: đừng sửa nơi gọi roll, hãy nghe
- * {@link com.roguesmp.loot.event.LootRollEvent} (huỷ cả lượt roll),
- * {@link com.roguesmp.loot.event.LootPoolPickEvent} (sửa entry nào được chọn trong 1 pool), hoặc
- * {@link com.roguesmp.loot.event.LootEntryResultEvent} / {@link com.roguesmp.loot.event.LootRollCompleteEvent}
- * (sửa item vừa sinh ra) — mọi thứ đi thẳng vào dữ liệu thật (LootEntry/ItemStack), không qua
- * 1 lớp modifier trung gian.
  */
 public class LootContext {
 
     private final @Nullable SmpPlayer player;
     private final @NotNull LootOrigin origin;
     private final @Nullable Object source;
+    private final double luck;
+    private final double looting;
 
     private LootContext(Builder builder) {
         this.player = builder.player;
         this.origin = builder.origin;
         this.source = builder.source;
+        this.luck = builder.luck;
+        this.looting = builder.looting;
     }
 
     public @Nullable SmpPlayer getPlayer() {
@@ -45,6 +42,16 @@ public class LootContext {
      */
     public @Nullable Object getSource() {
         return source;
+    }
+
+    /** Phần trăm dạng thập phân scale weight của entry có {@code quality} (0.35 = +35%). */
+    public double getLuck() {
+        return luck;
+    }
+
+    /** Hệ số nhân thêm cho các {@code looting} function (số lượng drop). */
+    public double getLooting() {
+        return looting;
     }
 
     /**
@@ -70,6 +77,8 @@ public class LootContext {
         private @Nullable SmpPlayer player;
         private @NotNull LootOrigin origin = LootOrigin.UNKNOWN;
         private @Nullable Object source;
+        private double luck;
+        private double looting;
 
         public Builder player(@Nullable SmpPlayer player) {
             this.player = player;
@@ -85,6 +94,16 @@ public class LootContext {
 
         public Builder origin(@NotNull LootOrigin origin) {
             return origin(origin, null);
+        }
+
+        public Builder luck(double luck) {
+            this.luck = luck;
+            return this;
+        }
+
+        public Builder looting(double looting) {
+            this.looting = looting;
+            return this;
         }
 
         public LootContext build() {

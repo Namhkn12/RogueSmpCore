@@ -1,10 +1,10 @@
 package com.roguesmp.text;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.permission.Permissions;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.CommandPermission;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ public final class GlyphFontCommand {
 
     public static void register() {
         new CommandAPICommand("generateglyphs")
-                .withPermission(CommandPermission.OP)
+                .withPermission(Permissions.GLYPH_GENERATE.node())
                 .executes((sender, args) -> {
                     File output = new File(RogueSmpCore.getInstance().getDataFolder(), OUTPUT_FOLDER);
 

@@ -10,7 +10,8 @@ import com.roguesmp.player.PlayerManager;
 import com.roguesmp.dungeon.manager.DungeonManager;
 import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.service.*;
-import com.roguesmp.loot.service.ILootService;
+import com.roguesmp.loot.LootTable;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import com.roguesmp.utils.PlayerUtils;
@@ -31,17 +32,16 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class DungeonRewardService implements IDungeonRewardService {
 
-    private final ILootService lootService;
     private final IPartyService partyService;
     private final InstanceManager instanceManager;
     private final DungeonManager dungeonManager;
     private final ChestOpenAnimation chestOpenAnimation;
 
-    public DungeonRewardService(ILootService lootService, IPartyService partyService, InstanceManager instanceManager, DungeonManager dungeonManager, ChestOpenAnimation chestOpenAnimation) {
-        this.lootService = lootService;
+    public DungeonRewardService(IPartyService partyService, InstanceManager instanceManager, DungeonManager dungeonManager, ChestOpenAnimation chestOpenAnimation) {
         this.partyService = partyService;
         this.instanceManager = instanceManager;
         this.dungeonManager = dungeonManager;
@@ -128,16 +128,16 @@ public class DungeonRewardService implements IDungeonRewardService {
                 .origin(LootOrigin.CHEST, block)
                 .build();
 
-        if (!lootService.exists(tableId)) {
+        LootTable table = Registries.LOOT_TABLE.get(tableId);
+        if (table == null) {
             player.sendMessage("§c[Chest] Loot table not found: §f" + tableId);
             return true;
         }
 
-        List<ItemStack> items = lootService.roll(tableId, ctx);
-
-        if (isDouble) {
-            items.addAll(lootService.roll(tableId, ctx));
-        }
+        List<ItemStack> rolled = table.roll(ctx);
+        List<ItemStack> items = isDouble
+                ? Stream.concat(rolled.stream(), table.roll(ctx).stream()).toList()
+                : rolled;
 
         markClaimed(block, player);
 

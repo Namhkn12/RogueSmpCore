@@ -1,121 +1,98 @@
 package com.roguesmp.island;
 
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.utils.Utils;
+import com.roguesmp.storage.JsonSqliteStore;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Handle saving/loading island data to/from a global SQLite database
- * (replaces the old one-json-file-per-island storage, which had no
- * locking against concurrent saves from multiple online island members).
- */
 public class IslandDataManager {
 
-    private static final String DB_FILE_NAME = "island_data.db";
-
-    private final Map<UUID, IslandData> islandDataCache = new HashMap<>();
-    private final Connection connection;
+    private final Map<UUID, IslandData> islandDataCache = new ConcurrentHashMap<>();
+    private final JsonSqliteStore<IslandData> store;
 
     public IslandDataManager(RogueSmpCore plugin) {
-        this.connection = openConnection(plugin);
-        createTable();
+        this.store = new JsonSqliteStore<>(plugin, "island_data.db", "island_data", "island_id", IslandData.CODEC);
     }
 
-    private Connection openConnection(RogueSmpCore plugin) {
-        File dbFile = new File(plugin.getDataFolder(), DB_FILE_NAME);
-        File parent = dbFile.getParentFile();
-        if (!parent.exists()) {
-            parent.mkdirs();
-        }
+    /**
+     * Must be called on the main thread: the data is encoded immediately so the async write never sees a half-mutated object.
+     */
+    public void saveAsync(IslandData islandData) {
+        String json = store.encode(islandData);
+        if (json == null) return;
 
-        try {
-            return DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to open island data database", e);
-        }
+        islandData.setDirty(false);
+        store.writeAsync(islandData.getIslandId(), json).thenAccept(written -> {
+            if (!written) islandData.setDirty(true);
+        });
     }
 
-    private void createTable() {
-        String sql = """
-                CREATE TABLE IF NOT EXISTS island_data (
-                    island_id TEXT PRIMARY KEY NOT NULL,
-                    data BLOB NOT NULL
-                )
-                """;
+    /**
+     * Main thread only, like {@link #saveAsync}. All islands are written in one transaction.
+     */
+    public CompletableFuture<Void> saveAllAsync(Collection<IslandData> islands) {
+        Map<UUID, String> rows = new HashMap<>();
+        List<IslandData> encoded = new ArrayList<>();
+        for (IslandData islandData : islands) {
+            String json = store.encode(islandData);
+            if (json == null) continue;
 
-        try (Statement statement = connection.createStatement()) {
-            statement.execute(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to create island_data table", e);
-        }
-    }
-
-    public @Blocking synchronized void saveIslandData(IslandData islandData) {
-        if (islandData == null) return;
-        IslandData clone = new IslandData(islandData);
-        RogueSmpCore.LOGGER.info("Saving island data with ID: {}", clone.getIslandId());
-
-        String sql = """
-                INSERT INTO island_data (island_id, data)
-                VALUES (?, jsonb(?))
-                ON CONFLICT(island_id) DO UPDATE SET data = excluded.data
-                """;
-
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, clone.getIslandId().toString());
-            statement.setString(2, Utils.GSON.toJson(clone));
-            statement.executeUpdate();
             islandData.setDirty(false);
-            RogueSmpCore.LOGGER.info("Saved island data with ID: {}", clone.getIslandId());
-        } catch (SQLException e) {
-            RogueSmpCore.LOGGER.error("Failed to save island data for ID: {}", clone.getIslandId(), e);
+            rows.put(islandData.getIslandId(), json);
+            encoded.add(islandData);
         }
+
+        return store.writeAllAsync(rows).thenAccept(written -> {
+            if (!written) encoded.forEach(islandData -> islandData.setDirty(true));
+        });
     }
 
-    public @Nullable @Blocking synchronized IslandData loadIslandData(UUID islandId) {
+    public @Blocking void saveNow(IslandData islandData) {
+        String json = store.encode(islandData);
+        if (json == null) return;
+
+        islandData.setDirty(false);
+        if (!store.write(islandData.getIslandId(), json)) islandData.setDirty(true);
+    }
+
+    public @Nullable @Blocking IslandData loadIslandData(@Nullable UUID islandId) {
         if (islandId == null) return null;
-        RogueSmpCore.LOGGER.info("Loading island data with ID: {}", islandId);
-        if (islandDataCache.containsKey(islandId)) {
-            RogueSmpCore.LOGGER.info("Island data with ID {} is already cached.", islandId);
-            return islandDataCache.get(islandId);
-        }
 
-        String sql = "SELECT json(data) AS data FROM island_data WHERE island_id = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, islandId.toString());
-
-            try (ResultSet result = statement.executeQuery()) {
-                if (!result.next()) {
-                    return null;
-                }
-
-                IslandData islandData = Utils.GSON.fromJson(result.getString("data"), IslandData.class);
-                RogueSmpCore.LOGGER.info("Loaded island data with ID: {}", islandId);
-                return islandData;
-            }
-        } catch (SQLException e) {
-            RogueSmpCore.LOGGER.error("Failed to load island data with ID: {}", islandId, e);
-        }
-        return null;
+        IslandData cached = islandDataCache.get(islandId);
+        return cached != null ? cached : store.load(islandId);
     }
 
-    public @Nullable IslandData getCachedData(UUID islandId) {
-        return islandDataCache.get(islandId);
+    public @Blocking Set<UUID> findArchivedIslandIds() {
+        Set<UUID> archived = new HashSet<>();
+        for (IslandData data : islandDataCache.values()) {
+            if (data.isArchived()) archived.add(data.getIslandId());
+        }
+        store.loadAll().forEach((islandId, data) -> {
+            if (data.isArchived()) archived.add(islandId);
+        });
+        return archived;
+    }
+
+    public @Blocking void delete(UUID islandId) {
+        islandDataCache.remove(islandId);
+        store.delete(islandId);
+    }
+
+    public @Nullable IslandData getCachedData(@Nullable UUID islandId) {
+        return islandId == null ? null : islandDataCache.get(islandId);
     }
 
     public @Unmodifiable Map<UUID, IslandData> getIslandDataCache() {
@@ -127,36 +104,17 @@ public class IslandDataManager {
     }
 
     /**
-     * Cache this data if it's not already cached
+     * @return the cached instance for this island, which is the given one unless another thread cached it first
      */
-    public void cache(IslandData islandData) {
-        islandDataCache.putIfAbsent(islandData.getIslandId(), islandData);
+    public IslandData cache(IslandData islandData) {
+        IslandData existing = islandDataCache.putIfAbsent(islandData.getIslandId(), islandData);
+        return existing != null ? existing : islandData;
     }
 
     public void onDisable() {
-        saveAllIslandData();
-        close();
-    }
-
-    public void saveAllIslandData() {
-        if (islandDataCache.isEmpty()) {
-            return;
-        }
-
-        RogueSmpCore.LOGGER.info("Saving {} active coop islands...", islandDataCache.size());
-
         for (IslandData islandData : islandDataCache.values()) {
-            saveIslandData(islandData);
+            if (islandData.isDirty()) saveNow(islandData);
         }
-
-        RogueSmpCore.LOGGER.info("All island data has been saved.");
-    }
-
-    public void close() {
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            RogueSmpCore.LOGGER.error("Failed to close island data database", e);
-        }
+        store.close();
     }
 }

@@ -7,6 +7,7 @@ import com.roguesmp.gui.recipecreator.RecipeCreatorGui;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
+import com.roguesmp.permission.Permissions;
 import dev.jorel.commandapi.CommandAPICommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -54,6 +55,7 @@ public final class CreatorHubGui {
 
     public static void registerCommand() {
         new CommandAPICommand("smpcreator")
+                .withPermission(Permissions.CONTENT.node())
                 .executesPlayer((player, args) -> {
                     open(player);
                 })

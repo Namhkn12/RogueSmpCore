@@ -5,14 +5,8 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.JsonOps;
-import com.roguesmp.effect.impl.BleedingEffect;
-import com.roguesmp.effect.impl.DamageIncreaseEffect;
-import com.roguesmp.effect.impl.PotentPoisonEffect;
-import com.roguesmp.effect.impl.SpeedEffect;
-import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.utils.Utils;
-import dev.jorel.commandapi.CommandAPICommand;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EvokerFangs;
@@ -142,17 +136,6 @@ public class EffectManager {
         } catch (SQLException e) {
             RogueSmpCore.LOGGER.error("Failed to close player effect data database", e);
         }
-    }
-
-    public static void registerCommand() {
-        new CommandAPICommand("smpeffect")
-                .withSubcommand(new CommandAPICommand("add")
-                        .withSubcommand(DamageIncreaseEffect.registerCommand())
-                        .withSubcommand(SpeedEffect.registerCommand())
-                        .withSubcommand(BleedingEffect.registerCommand())
-                        .withSubcommand(PotentPoisonEffect.registerCommand()))
-
-                .register();
     }
 
     public void addEffect(Entity entity, String sourceId, SmpEffect smpEffect) {

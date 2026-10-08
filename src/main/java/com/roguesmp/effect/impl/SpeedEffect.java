@@ -2,13 +2,8 @@ package com.roguesmp.effect.impl;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.Keys;
-import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.utils.Utils;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.DoubleArgument;
-import dev.jorel.commandapi.arguments.IntegerArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.attribute.Attribute;
@@ -91,23 +86,5 @@ public class SpeedEffect extends SmpEffect {
                 speedInstance.removeModifier(Keys.of(modifierId));
             }
         }
-    }
-
-    public static CommandAPICommand registerCommand() {
-        return new CommandAPICommand("speed")
-                .withArguments(
-                        new IntegerArgument("duration"),
-                        new DoubleArgument("percent"),
-                        new StringArgument("modifierId"),
-                        new StringArgument("source")
-                )
-                .executesPlayer((player, args) -> {
-                    int duration = (Integer) args.get("duration");
-                    double value = (Double) args.get("percent");
-                    String modifierId = (String) args.get("modifierId");
-                    String source = (String) args.get("source");
-
-                    EffectManager.getInstance().addEffect(player, source, new SpeedEffect(duration, value / 100, modifierId));
-                });
     }
 }

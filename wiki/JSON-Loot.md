@@ -13,8 +13,7 @@ Dùng bởi: mob chết ([`loot_table` của entity](JSON-Entities.md#loot_table
       "rolls": 2,
       "conditions": [ { "type": "origin", "origins": ["CHEST", "ENTITY"] } ],
       "entries": [
-        { "type": "item", "weight": 5, "item_id": "ruby_shard", "min_amount": 1, "max_amount": 3,
-          "conditions": [ { "type": "chance", "chance": 0.5 } ] },
+        { "type": "item", "weight": 5, "item_id": "ruby_shard", "min_amount": 1, "max_amount": 3 },
         { "type": "item", "weight": 2, "item_id": "minecraft:golden_apple" },
         { "type": "loot_table", "weight": 1, "name": "dungeons/bonus" },
         { "type": "empty", "weight": 10 }
@@ -44,8 +43,9 @@ Dùng bởi: mob chết ([`loot_table` của entity](JSON-Entities.md#loot_table
 | :--- | :--- | :--- | :--- |
 | `type` | string | bắt buộc | `item`, `loot_table`, `empty`. |
 | `weight` | int | optional, `1` | Trọng số trúng. Trúng với xác suất `weight / tổng weight của các entry đủ điều kiện`. |
+| `quality` | double | optional, `0` | Độ nhạy với `luck`: weight hiệu dụng = `weight * max(0, 1 + luck * quality)`. `luck` 0.35 = +35%. Dương cho item hiếm, âm cho rác, `0` = không bị ảnh hưởng. |
 | `conditions` | mảng condition | optional, `[]` | Entry chỉ là ứng viên khi mọi condition đúng (weight coi như 0 nếu sai). |
-| `functions` | mảng | optional, `[]` | ⚠️ **Hiện chưa có function nào được đăng ký** — chỉ dùng `[]` hoặc bỏ key; mọi phần tử khác làm fail cả file. (Ghi chú `set_count` ở tài liệu cũ không tồn tại.) |
+| `functions` | mảng | optional, `[]` | Chạy tuần tự lên ItemStack vừa sinh ra. Xem bảng bên dưới. |
 
 ### Loại entry
 
@@ -61,7 +61,6 @@ Field chọn loại: `"type"`.
 
 | `type` | Key | Đúng khi |
 | :--- | :--- | :--- |
-| `chance` | `chance` (double, ngay trên object) | Roll ngẫu nhiên `< chance`. **Roll lại ở mỗi lần đánh giá** (mỗi roll, mỗi entry), nên cùng 1 pool có thể đúng lần này sai lần sau. |
 | `origin` | `origins` (mảng enum) | Nguồn mở loot nằm trong danh sách: `CHEST`, `ENTITY`, `BLOCK`, `QUEST`, `COMMAND`, `UNKNOWN` (mặc định khi nơi gọi không khai nguồn). |
 | `and` | `conditions` (mảng) | **Mọi** condition con đúng (rỗng = đúng). |
 | `or` | `conditions` (mảng) | **Ít nhất 1** đúng (rỗng = sai). |
@@ -69,12 +68,21 @@ Field chọn loại: `"type"`.
 
 Nhớ phân biệt `conditions` (số nhiều, mảng — `and`/`or`) và `condition` (số ít, 1 object — `not`).
 
+## Functions
+
+| `type` | Key | Tác dụng |
+| :--- | :--- | :--- |
+| `set_count` | `min`, `max` (int, mặc định 1) | Ghi đè amount bằng số ngẫu nhiên trong `[min, max]`. |
+| `looting` | `max` (int, =1), `limit` (int, không giới hạn) | Cộng thêm `random(0..max) * looting` vào amount (làm tròn), tối đa `limit`. `looting` lấy từ context của nơi roll; bằng 0 thì không làm gì. Chỉ entry nào gắn function này mới scale. |
+
+## Luck & looting
+
+Hai giá trị do nơi gọi roll đặt vào context: `luck` (đổi xác suất qua `quality`) và `looting` (đổi số lượng qua function `looting`). Debug bằng `/template loottable roll <table> [luck] [looting]` và `/template loottable odds <table> [luck] [looting]`.
+
 ## Thuật toán roll
 
-1. Sự kiện `LootRollEvent` bắn ra; plugin khác hủy được → kết quả rỗng.
-2. Duyệt từng **pool** theo thứ tự. Nếu bất kỳ condition cấp pool sai → bỏ pool.
-3. Lặp `max(1, rolls)` lần: tính trọng số từng entry (0 nếu condition sai), loại ứng viên có trọng số ≤ 0, chọn ngẫu nhiên theo trọng số. Tổng trọng số = 0 → lần roll đó không ra gì.
-4. Mỗi lần roll **đánh giá lại** condition (xem `chance`).
+1. Duyệt từng **pool** theo thứ tự. Nếu bất kỳ condition cấp pool sai → bỏ pool.
+2. Lặp `max(1, rolls)` lần: tính trọng số từng entry (`weight * max(0, 1 + luck * quality)`, loại nếu condition sai), loại ứng viên có trọng số ≤ 0, chọn ngẫu nhiên theo trọng số. Tổng trọng số = 0 → lần roll đó không ra gì.
 
 ## Ví dụ — loot boss
 
@@ -83,8 +91,10 @@ Nhớ phân biệt `conditions` (số nhiều, mảng — `and`/`or`) và `condi
   "pools": [
     {
       "rolls": 1,
-      "entries": [ { "type": "item", "item_id": "bosses/crown", "weight": 1 } ],
-      "conditions": [ { "type": "chance", "chance": 0.05 } ]
+      "entries": [
+        { "type": "item", "item_id": "bosses/crown", "weight": 1 },
+        { "type": "empty", "weight": 19 }
+      ]
     },
     {
       "rolls": 3,
@@ -100,7 +110,7 @@ Nhớ phân biệt `conditions` (số nhiều, mảng — `and`/`or`) và `condi
 
 ## Dành cho dev
 
-Thêm entry/condition mới: tạo class + `CODEC` (entry gộp `LootEntry.BASE_CODEC`), đăng ký trong `LootEntries` / `LootConditions` (`LootFunctions` hiện trống). Tên thư mục lấy từ hằng số `LootConfig.LOOT_TABLE_FOLDER = "loottable"`. Luồng roll: `LootService` (bắn `LootRollEvent`, `LootPoolPickEvent`, `LootRollCompleteEvent` để plugin khác can thiệp).
+Thêm entry/condition mới: tạo class + `CODEC` (entry gộp `LootEntry.BASE_CODEC`), đăng ký trong `LootEntries` / `LootConditions` (`LootFunctions` hiện trống). Tên thư mục lấy từ hằng số `LootConfig.LOOT_TABLE_FOLDER = "loottable"`. Luồng roll nằm trong `LootService`; không có event nào can thiệp, kết quả trả về là list bất biến.
 
 ---
 ◀ [JSON-Npcs](JSON-Npcs.md) · Về [Trang chủ](Home.md) · Tiếp theo: [JSON-Crafting](JSON-Crafting.md)

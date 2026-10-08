@@ -9,9 +9,6 @@ import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.StringArgument;
 import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -385,24 +382,4 @@ public class NpcCreatorGui {
     // ==========================================
     // COMMAND
     // ==========================================
-
-    public static void registerCommand() {
-        new CommandAPICommand("smpnpccreator")
-                .withSubcommand(new CommandAPICommand("new")
-                        .executesPlayer((player, args) -> {
-                            new NpcCreatorGui().openMainDialog(player);
-                        }))
-                .withSubcommand(new CommandAPICommand("edit")
-                        .withArguments(new StringArgument("npc_id").replaceSuggestions(ArgumentSuggestions.strings(Registries.NPC.getAll().keySet())))
-                        .executesPlayer((player, args) -> {
-                            String npcId = (String) args.get("npc_id");
-                            BaseNpc existing = Registries.NPC.get(npcId);
-                            if (existing == null) {
-                                player.sendMessage(Utils.text("Không tìm thấy NPC với ID '" + npcId + "'.", NamedTextColor.RED));
-                                return;
-                            }
-                            NpcCreatorGui.editExisting(npcId, existing).openMainDialog(player);
-                        }))
-                .register();
-    }
 }

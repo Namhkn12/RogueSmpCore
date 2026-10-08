@@ -3,6 +3,7 @@ package com.roguesmp.player;
 import com.roguesmp.annotation.GsonIgnore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.ability.AbilityLoadout;
+import com.roguesmp.utils.WorldPos;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -43,46 +44,15 @@ public class PlayerData{
             }
     );
 
-    // Old per-type format ({"ACTIVE": {"0": ...}, "PASSIVE": {...}, "LIFELINE": {...}}), flattened
-    // into the single slot list. Decode-only: withAlternative never encodes through it.
-    private static final List<String> LEGACY_TYPE_ORDER = List.of("ACTIVE", "LIFELINE", "PASSIVE");
-    private static final Codec<List<String>> LEGACY_SLOTS_CODEC = Codec.unboundedMap(Codec.STRING, SPARSE_SLOTS_CODEC).xmap(
-            byType -> {
-                List<String> slots = new ArrayList<>(Collections.nCopies(AbilityLoadout.SLOT_COUNT, (String) null));
-                int next = 0;
-                for (String type : LEGACY_TYPE_ORDER) {
-                    Map<String, String> sparse = byType.get(type);
-                    if (sparse == null) continue;
-                    List<Integer> indices = new ArrayList<>();
-                    for (String indexStr : sparse.keySet()) {
-                        try {
-                            indices.add(Integer.parseInt(indexStr));
-                        } catch (NumberFormatException ignored) {
-                        }
-                    }
-                    Collections.sort(indices);
-                    for (int index : indices) {
-                        if (next >= AbilityLoadout.SLOT_COUNT) break;
-                        slots.set(next++, sparse.get(String.valueOf(index)));
-                    }
-                }
-                return slots;
-            },
-            slots -> {
-                throw new UnsupportedOperationException("legacy equipped-abilities format is decode-only");
-            }
-    );
-
-    private static final Codec<List<String>> EQUIPPED_ABILITIES_CODEC = Codec.withAlternative(SLOTS_CODEC, LEGACY_SLOTS_CODEC);
-
     public static final Codec<PlayerData> CODEC = Codec.composite(
             Codec.UUID.fieldOf("uuid").forGetter(PlayerData::getUuid),
             Codec.INT.optionalFieldOf("level", 0).forGetter(PlayerData::getLevel),
             Codec.UUID.optionalFieldOf("islandId", (UUID) null).forGetter(PlayerData::getIslandId),
             Codec.LONG.optionalFieldOf("money", 0L).forGetter(PlayerData::getMoney),
             Codec.lenientUnboundedMap(Codec.INT).optionalFieldOf("unlockedAbilities", new HashMap<>()).forGetter(PlayerData::getUnlockedAbilities),
-            EQUIPPED_ABILITIES_CODEC.optionalFieldOf("equippedAbilities", List.<String>of()).forGetter(PlayerData::getEquippedAbilities),
+            SLOTS_CODEC.optionalFieldOf("equippedAbilities", List.<String>of()).forGetter(PlayerData::getEquippedAbilities),
             Codec.STRING.optionalFieldOf("classId", (String) null).forGetter(PlayerData::getClassId),
+            Codec.WORLD_POS.optionalFieldOf("lastLocation", (WorldPos) null).forGetter(PlayerData::getLastLocation),
             PlayerData::new
     );
 
@@ -95,6 +65,7 @@ public class PlayerData{
     private final Map<String, Integer> unlockedAbilities;
     private long money;
     private @Nullable String classId;
+    private @Nullable WorldPos lastLocation;
 
     private final List<String> equippedAbilities;
 
@@ -112,8 +83,9 @@ public class PlayerData{
      */
     private PlayerData(UUID uuid, int level, @Nullable UUID islandId, long money,
                         Map<String, Integer> unlockedAbilities, List<String> equippedAbilities,
-                        @Nullable String classId) {
+                        @Nullable String classId, @Nullable WorldPos lastLocation) {
         this.uuid = uuid;
+        this.lastLocation = lastLocation;
         this.level = level;
         this.islandId = islandId;
         this.money = money;
@@ -185,6 +157,15 @@ public class PlayerData{
 
     public @Nullable String getClassId() {
         return classId;
+    }
+
+    public @Nullable WorldPos getLastLocation() {
+        return lastLocation;
+    }
+
+    public void setLastLocation(@Nullable WorldPos lastLocation) {
+        this.lastLocation = lastLocation;
+        this.dirty = true;
     }
 
     public void setClassId(@Nullable String classId) {

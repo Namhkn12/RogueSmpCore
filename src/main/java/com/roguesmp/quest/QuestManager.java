@@ -8,6 +8,7 @@ import com.roguesmp.quest.daily.DailyQuestManager;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.registry.Registry;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.permission.Permissions;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
@@ -124,7 +125,7 @@ public class QuestManager {
      * crash shortly after completion doesn't lose it.
      */
     private void saveQuestDataImmediately(PlayerQuestData data) {
-        Utils.runAsync(() -> questDataManager.saveData(data));
+        questDataManager.saveAsync(data);
     }
 
     /**
@@ -309,6 +310,7 @@ public class QuestManager {
                 });
 
         CommandAPICommand assignSubcommand = new CommandAPICommand("assign")
+                .withPermission(Permissions.QUEST_ASSIGN.node())
                 .withArguments(new EntitySelectorArgument.OnePlayer("target"))
                 .withArguments(new StringArgument("quest_id")
                         .replaceSuggestions(ArgumentSuggestions.strings(info ->

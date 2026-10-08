@@ -5,7 +5,6 @@ import com.roguesmp.npc.BaseNpc;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
-import dev.jorel.commandapi.CommandAPICommand;
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -230,13 +229,5 @@ public class NpcBrowserGui extends BaseGui {
         item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
 
         return item;
-    }
-
-    public static void registerCommand() {
-        new CommandAPICommand("smpnpcbrowser")
-                .executesPlayer((player, args) -> {
-                    new NpcBrowserGui(player).showInventory(player);
-                })
-                .register();
     }
 }

@@ -12,8 +12,6 @@ import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.StringArgument;
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.registry.data.dialog.action.DialogActionCallback;
 import io.papermc.paper.registry.data.dialog.input.SingleOptionDialogInput;
@@ -458,24 +456,4 @@ public class EntityCreatorGui {
     // ==========================================
     // COMMAND
     // ==========================================
-
-    public static void registerCommand() {
-        new CommandAPICommand("smpentitycreator")
-                .withSubcommand(new CommandAPICommand("new")
-                        .executesPlayer((player, args) -> {
-                            new EntityCreatorGui().openMainDialog(player);
-                        }))
-                .withSubcommand(new CommandAPICommand("edit")
-                        .withArguments(new StringArgument("entity_id"))
-                        .executesPlayer((player, args) -> {
-                            String entityId = (String) args.get("entity_id");
-                            BaseEntity existing = Registries.ENTITY.get(entityId);
-                            if (existing == null) {
-                                player.sendMessage(Utils.text("Không tìm thấy entity với ID '" + entityId + "'.", NamedTextColor.RED));
-                                return;
-                            }
-                            EntityCreatorGui.editExisting(existing).openMainDialog(player);
-                        }))
-                .register();
-    }
 }

@@ -12,9 +12,6 @@ import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.StringArgument;
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.registry.data.dialog.body.DialogBody;
@@ -646,24 +643,4 @@ public class RecipeCreatorGui {
     // ==========================================
     // COMMAND
     // ==========================================
-
-    public static void registerCommand() {
-        new CommandAPICommand("smprecipecreator")
-                .withSubcommand(new CommandAPICommand("new")
-                        .executesPlayer((player, args) -> {
-                            new RecipeCreatorGui().openKindPickerDialog(player);
-                        }))
-                .withSubcommand(new CommandAPICommand("edit")
-                        .withArguments(new StringArgument("recipe_id").replaceSuggestions(ArgumentSuggestions.strings(Registries.CRAFTING_RECIPE.getAll().keySet())))
-                        .executesPlayer((player, args) -> {
-                            String recipeId = (String) args.get("recipe_id");
-                            CraftingRecipe existing = Registries.CRAFTING_RECIPE.get(recipeId);
-                            if (existing == null) {
-                                player.sendMessage(Utils.text("Không tìm thấy công thức với ID '" + recipeId + "'.", NamedTextColor.RED));
-                                return;
-                            }
-                            RecipeCreatorGui.editExisting(recipeId, existing).openMainDialog(player);
-                        }))
-                .register();
-    }
 }

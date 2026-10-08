@@ -1,12 +1,7 @@
 package com.roguesmp.npc;
 
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.registry.Registries;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.StringArgument;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
@@ -66,17 +61,5 @@ public class NpcManager {
             throw new IllegalStateException("NpcManager is null!");
         }
         return INSTANCE;
-    }
-
-    public void registerCommand() {
-        new CommandAPICommand("smpnpc")
-                .withArguments(new StringArgument("id"))
-                .executesPlayer((sender, args) -> {
-                    BaseNpc npc = Registries.NPC.get((String) args.get("id"));
-                    if (npc != null) {
-                        npc.spawn(sender.getLocation());
-                        sender.sendMessage(Component.text("Spawned NPC", NamedTextColor.GREEN));
-                    }
-                }).register(RogueSmpCore.getInstance());
     }
 }

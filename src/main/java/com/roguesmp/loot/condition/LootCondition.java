@@ -4,6 +4,8 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.registry.Registries;
 
+import java.util.List;
+
 /**
  * Gates whether a {@link com.roguesmp.loot.LootEntry} is eligible to be picked during a
  * weighted roll — every condition attached to an entry must {@link #test(LootContext)} true
@@ -22,4 +24,11 @@ public interface LootCondition {
     String getTypeId();
 
     boolean test(LootContext context);
+
+    static boolean allPass(List<LootCondition> conditions, LootContext context) {
+        for (LootCondition condition : conditions) {
+            if (!condition.test(context)) return false;
+        }
+        return true;
+    }
 }

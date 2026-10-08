@@ -16,9 +16,6 @@ import com.roguesmp.registry.SkinRegistry;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.StringArgument;
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.registry.data.dialog.action.DialogActionCallback;
 import io.papermc.paper.registry.data.dialog.input.SingleOptionDialogInput;
@@ -796,35 +793,4 @@ public class ItemCreatorGui {
     // ==========================================
     // COMMAND
     // ==========================================
-
-    public static void registerCommand() {
-        new CommandAPICommand("smpitemcreator")
-                .withSubcommand(new CommandAPICommand("new")
-                        .executesPlayer((player, args) -> {
-                            new ItemCreatorGui().openMainDialog(player);
-                        }))
-                .withSubcommand(new CommandAPICommand("edit")
-                        .withArguments(new StringArgument("item_id").replaceSuggestions(ArgumentSuggestions.strings(Registries.ITEM.getAll().keySet())))
-                        .executesPlayer((player, args) -> {
-                            String itemId = (String) args.get("item_id");
-                            BaseItem existing = Registries.ITEM.get(itemId);
-                            if (existing == null) {
-                                player.sendMessage(Utils.text("Không tìm thấy vật phẩm với ID '" + itemId + "'.", NamedTextColor.RED));
-                                return;
-                            }
-                            ItemCreatorGui.editExisting(existing).openMainDialog(player);
-                        }))
-                .withSubcommand(new CommandAPICommand("delete")
-                        .withArguments(new StringArgument("item_id").replaceSuggestions(ArgumentSuggestions.strings(Registries.ITEM.getAll().keySet())))
-                        .executesPlayer((player, commandArguments) -> {
-                            String itemId = (String) commandArguments.get("item_id");
-                            BaseItem existing = Registries.ITEM.get(itemId);
-                            if (existing == null) {
-                                player.sendMessage(Utils.text("Không tìm thấy vật phẩm với ID '" + itemId + "'.", NamedTextColor.RED));
-                                return;
-                            }
-                            Registries.ITEM.removeAndDeleteFiles(RogueSmpCore.getInstance(), itemId);
-                        }))
-                .register();
-    }
 }

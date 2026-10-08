@@ -3,6 +3,7 @@ package com.roguesmp.gui.island;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandManager;
+import com.roguesmp.island.setting.IslandSettings;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -36,7 +37,6 @@ public class IslandMainGui extends BaseGui {
     public void setup() {
         clearUi();
 
-        // 1. Draw frame borders around our inventory layout using fillers
         for (int col = 0; col < 9; col++) {
             addItem(0, col, FILLER_BLACK);
             addItem(4, col, FILLER_BLACK);
@@ -46,14 +46,12 @@ public class IslandMainGui extends BaseGui {
             addItem(row, 8, FILLER_BLACK);
         }
 
-        // 2. Access variables globally using the static IslandManager instance
         IslandManager islandManager = IslandManager.getInstance();
 
         PlayerData playerData = islandManager.getPlayerManager().getDataManager().getData(player.getUniqueId());
         UUID islandId = (playerData != null) ? playerData.getIslandId() : null;
         IslandData islandData = (islandId != null) ? islandManager.getIslandDataManager().getCachedData(islandId) : null;
 
-        // 3. Render contextual nodes based on island state
         if (islandData == null) {
             setupUninhabitedView(islandManager);
         } else {
@@ -61,13 +59,9 @@ public class IslandMainGui extends BaseGui {
             setupTeamManagementView(islandManager, islandData);
         }
 
-        // 4. Paint remaining open background cells smoothly
         fillEmpty(FILLER);
     }
 
-    /**
-     * Renders controls for a player who doesn't currently own or belong to any active skyblock instances.
-     */
     private void setupUninhabitedView(IslandManager islandManager) {
         ItemStack createItem = ItemStack.of(Material.GRASS_BLOCK);
         createItem.setData(DataComponentTypes.ITEM_NAME, Component.text("» Tạo Đảo Mới «", NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true));
@@ -88,11 +82,7 @@ public class IslandMainGui extends BaseGui {
         });
     }
 
-    /**
-     * Renders controls for active island coops including warps, spawn settings, and member rosters.
-     */
     private void setupActiveIslandView(IslandManager islandManager, IslandData islandData) {
-        // --- BUTTON 1: WARP HOME ---
         ItemStack teleportItem = ItemStack.of(Material.BEACON);
         teleportItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Dịch Chuyển Về Đảo", NamedTextColor.AQUA).decoration(TextDecoration.BOLD, true));
         teleportItem.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
@@ -104,10 +94,9 @@ public class IslandMainGui extends BaseGui {
         addButton(2, 2, teleportItem, event -> {
             event.setCancelled(true);
             player.closeInventory();
-            islandManager.teleportToHomeIsland(player);
+            islandManager.getTeleportService().teleportHome(player);
         });
 
-        // --- BUTTON 2: SET SPAWN POINT ---
         ItemStack setSpawnItem = ItemStack.of(Material.COMPASS);
         setSpawnItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Đặt Điểm Spawn", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true));
         setSpawnItem.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
@@ -122,11 +111,10 @@ public class IslandMainGui extends BaseGui {
             boolean success = islandManager.setIslandSpawn(player, player.getLocation());
             if (success) {
                 player.sendMessage(Utils.fromString("<green>Cập nhật vị trí spawn của đảo thành công!"));
-                setup(); // Hot-refresh lore metrics instantly
+                setup();
             }
         });
 
-        // --- BUTTON 3: TEAM MEMBERS LIST ---
         ItemStack teamInfoItem = ItemStack.of(Material.PLAYER_HEAD);
         teamInfoItem.setData(DataComponentTypes.CUSTOM_NAME, Utils.text("Thành Viên Đội Nhóm", NamedTextColor.LIGHT_PURPLE).decoration(TextDecoration.BOLD, true));
 
@@ -150,19 +138,14 @@ public class IslandMainGui extends BaseGui {
         teamLore.add(Utils.text("Tổng: " + members.size() + " người chơi.", NamedTextColor.DARK_GRAY));
         teamInfoItem.setData(DataComponentTypes.LORE, ItemLore.lore(teamLore));
 
-        // Fetch user context skin profile natively using modern Paper APIs
         ResolvableProfile profile = ResolvableProfile.resolvableProfile(player.getPlayerProfile());
         teamInfoItem.setData(DataComponentTypes.PROFILE, profile);
 
         addButton(2, 6, teamInfoItem, event -> event.setCancelled(true));
     }
 
-    /*
-     * Contextual row additions addressing Invites, Leaving, and Disbanding networks securely.
-     */
     private void setupTeamManagementView(IslandManager islandManager, IslandData islandData) {
 
-        // --- BUTTON: INVITE NEW PLAYER ---
         ItemStack inviteItem = ItemStack.of(Material.WRITABLE_BOOK);
         inviteItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Mời Thành Viên", NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true));
         inviteItem.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
@@ -170,13 +153,27 @@ public class IslandMainGui extends BaseGui {
                 Component.empty(),
                 Utils.text("Sử dụng lệnh: ", NamedTextColor.DARK_GRAY).append(Component.text("/is invite <tên>", NamedTextColor.YELLOW))
         )));
+        boolean visitingAllowed = islandData.getSettingValue(IslandSettings.ALLOW_GUEST);
+        ItemStack visitItem = ItemStack.of(visitingAllowed ? Material.LIME_DYE : Material.GRAY_DYE);
+        visitItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Cho Phép Tham Quan", visitingAllowed ? NamedTextColor.GREEN : NamedTextColor.RED).decoration(TextDecoration.BOLD, true));
+        visitItem.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
+                Utils.text("Cho phép người chơi khác ghé thăm đảo.", NamedTextColor.GRAY),
+                Utils.text("Trạng thái: ", NamedTextColor.DARK_GRAY).append(visitingAllowed ? Utils.text("Bật", NamedTextColor.GREEN) : Utils.text("Tắt", NamedTextColor.RED)),
+                Component.empty(),
+                Utils.text("Click chuột để bật/tắt.", NamedTextColor.YELLOW)
+        )));
+        addButton(3, 2, visitItem, event -> {
+            event.setCancelled(true);
+            islandManager.getVisitService().toggleVisiting(player);
+            setup();
+        });
+
         addButton(3, 4, inviteItem, event -> {
             event.setCancelled(true);
             player.closeInventory();
             player.sendMessage("§eSử dụng lệnh §b/is invite <tên> §eđể gửi lời mời tham gia tổ đội!");
         });
 
-        // --- BUTTON: LEAVE OR KICK SYSTEM ---
         ItemStack leaveItem = ItemStack.of(Material.IRON_DOOR);
         leaveItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Rời Tổ Đội", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true));
         leaveItem.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(

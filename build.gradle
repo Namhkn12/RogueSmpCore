@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id("xyz.jpenilla.run-paper") version "2.3.1"
-    id("io.github.goooler.shadow") version "8.1.8"
+    id("com.gradleup.shadow") version "9.6.1"
 }
 
 group = 'com.roguesmp'
@@ -13,7 +13,7 @@ repositories {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
     }
-    maven { url 'https://jitpack.io' }
+    maven { url = 'https://jitpack.io' }
     maven {
         url = 'https://repo.extendedclip.com/releases/'
     }
@@ -23,19 +23,25 @@ repositories {
         url = "https://maven.enginehub.org/repo/"
     }
 
+    maven {
+        url = "https://repo.minehub.live/releases"
+    }
+
     maven { url = "https://repo.onarandombox.com/content/groups/public/" }
 }
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    compileOnly("dev.jorel:commandapi-paper-core:11.1.0")
-    compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit:2.15.0")
-    compileOnly('com.github.NEZNAMY:TAB-API:5.5.0')
-    compileOnly('me.clip:placeholderapi:2.12.2')
-    compileOnly 'org.mvplugins.multiverse.core:multiverse-core:5.6.1-SNAPSHOT'
-    compileOnly 'com.sk89q.worldguard:worldguard-bukkit:7.0.16'
+    compileOnly("io.papermc.paper:paper-api:26.2.build.+")
+    compileOnly("dev.jorel:commandapi-paper-core:12.0.0")
+    compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit:2.16.0")
+    compileOnly('com.github.NEZNAMY:TAB-API:6.1.2')
+    compileOnly('me.clip:placeholderapi:2.12.3')
+    compileOnly 'org.mvplugins.multiverse.core:multiverse-core:5.8.1-SNAPSHOT'
+    compileOnly 'com.sk89q.worldguard:worldguard-bukkit:7.0.19'
+    compileOnly("live.minehub:polarpaper:2.3.0")
+    compileOnly 'net.luckperms:api:5.5'
     implementation('org.apache.commons:commons-math3:3.6.1')
     implementation("com.github.ben-manes.caffeine:caffeine:3.2.4")
-    implementation 'fr.skytasul:glowingentities:1.4.11'
+    implementation 'fr.skytasul:glowingentities:2.0.1'
 }
 
 tasks {
@@ -47,7 +53,7 @@ tasks {
     }
 }
 
-def targetJavaVersion = 21
+def targetJavaVersion = 25
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
@@ -68,7 +74,7 @@ tasks.withType(JavaCompile).configureEach {
 processResources {
     def props = [version: version]
     inputs.properties props
-    filteringCharset 'UTF-8'
+    filteringCharset = 'UTF-8'
     filesMatching('plugin.yml') {
         expand props
     }

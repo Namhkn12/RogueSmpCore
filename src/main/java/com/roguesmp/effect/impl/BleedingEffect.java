@@ -3,7 +3,6 @@ package com.roguesmp.effect.impl;
 import com.destroystokyo.paper.ParticleBuilder;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.DamageType;
-import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.fx.FxEffect;
@@ -14,10 +13,6 @@ import com.roguesmp.fx.render.ParticleRenderer;
 import com.roguesmp.fx.shape.PointShape;
 import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.Utils;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.DoubleArgument;
-import dev.jorel.commandapi.arguments.IntegerArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
@@ -25,7 +20,6 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -126,17 +120,5 @@ public class BleedingEffect extends SmpEffect {
                 (float) random.nextDouble(-0.05, 0.05)
         );
         return new FxPart(new PointShape(), renderer).motion(new GravityMotion(velocity, 0.02f));
-    }
-
-    public static CommandAPICommand registerCommand() {
-        return new CommandAPICommand("bleeding")
-                .withArguments(new IntegerArgument("duration"), new DoubleArgument("damagePerSecond"), new StringArgument("source"))
-                .executesPlayer((player, args) -> {
-                    int duration = (Integer) args.get("duration");
-                    double damagePerSecond = (Double) args.get("damagePerSecond");
-                    String source = (String) args.get("source");
-
-                    EffectManager.getInstance().addEffect(player, source, new BleedingEffect(duration, damagePerSecond, player));
-                });
     }
 }

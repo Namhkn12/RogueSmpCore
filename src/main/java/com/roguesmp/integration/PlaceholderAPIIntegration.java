@@ -71,6 +71,17 @@ public class PlaceholderAPIIntegration extends PlaceholderExpansion {
             return null;
         }
 
+        if (params.startsWith("rank_")) {
+            if (player == null) return null;
+            LuckPermsIntegration luckPerms = LuckPermsIntegration.getInstance();
+            return switch (params) {
+                case "rank_prefix" -> luckPerms.prefix(player);
+                case "rank_suffix" -> luckPerms.suffix(player);
+                case "rank_name" -> luckPerms.groupDisplayName(player);
+                default -> null;
+            };
+        }
+
         if (params.startsWith("player_")) {
             if (params.startsWith("player_level")) {
                 SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player.getUniqueId());
