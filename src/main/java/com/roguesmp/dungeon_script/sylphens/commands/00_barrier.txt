@@ -1,0 +1,6 @@
+# Tường barrier dày 2.5 khối quanh đảo, từ Y-64 đến 319 + sàn và nắp
+//pos1 -104,-64,-104
+//pos2 104,319,104
+//g -r barrier r=sqrt(x*x+z*z);r>100.5&&r<103
+//g -r barrier y==-64&&x*x+z*z<10700
+//g -r barrier y==319&&x*x+z*z<10700

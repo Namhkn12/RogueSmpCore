@@ -1,0 +1,2501 @@
+{
+ "seed": 2026,
+ "floors": {
+  "1": 46,
+  "2": 30,
+  "3": 18,
+  "4": -2,
+  "5": -18
+ },
+ "maze_floor": 3,
+ "rooms": [
+  {
+   "name": "Sảnh Chính",
+   "kind": "hall",
+   "floor": 1,
+   "x": [
+    -15,
+    15
+   ],
+   "z": [
+    -15,
+    15
+   ],
+   "y_floor": 46,
+   "y_ceil": 57,
+   "center": [
+    0,
+    0
+   ],
+   "shape": "round",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Thang Xoắn A ↓T2",
+   "kind": "stair",
+   "floor": 1,
+   "x": [
+    69,
+    77
+   ],
+   "z": [
+    1,
+    9
+   ],
+   "y_floor": 46,
+   "y_ceil": 53,
+   "center": [
+    73,
+    5
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Chân Thang A (từ T1)",
+   "kind": "arrival",
+   "floor": 2,
+   "x": [
+    69,
+    77
+   ],
+   "z": [
+    1,
+    9
+   ],
+   "y_floor": 30,
+   "y_ceil": 37,
+   "center": [
+    73,
+    5
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Thang Xoắn B ↓T2",
+   "kind": "stair",
+   "floor": 1,
+   "x": [
+    -73,
+    -65
+   ],
+   "z": [
+    18,
+    26
+   ],
+   "y_floor": 46,
+   "y_ceil": 53,
+   "center": [
+    -69,
+    22
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Chân Thang B (từ T1)",
+   "kind": "arrival",
+   "floor": 2,
+   "x": [
+    -73,
+    -65
+   ],
+   "z": [
+    18,
+    26
+   ],
+   "y_floor": 30,
+   "y_ceil": 37,
+   "center": [
+    -69,
+    22
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Giếng Trời",
+   "kind": "atrium",
+   "floor": 1,
+   "x": [
+    -35,
+    -15
+   ],
+   "z": [
+    35,
+    55
+   ],
+   "y_floor": 30,
+   "y_ceil": 56,
+   "center": [
+    -25,
+    45
+   ],
+   "shape": "round",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Vườn Rễ Cổ",
+   "kind": "res",
+   "floor": 1,
+   "x": [
+    29,
+    45
+   ],
+   "z": [
+    -28,
+    -6
+   ],
+   "y_floor": 46,
+   "y_ceil": 57,
+   "center": [
+    37,
+    -17
+   ],
+   "shape": "rect",
+   "resource": "Vườn Rễ Cổ",
+   "in_maze": false
+  },
+  {
+   "name": "Thư Khố",
+   "kind": "res",
+   "floor": 1,
+   "x": [
+    45,
+    62
+   ],
+   "z": [
+    17,
+    37
+   ],
+   "y_floor": 46,
+   "y_ceil": 57,
+   "center": [
+    54,
+    27
+   ],
+   "shape": "rect",
+   "resource": "Thư Khố",
+   "in_maze": false
+  },
+  {
+   "name": "Hang Đá",
+   "kind": "cavern",
+   "floor": 1,
+   "x": [
+    -64,
+    -49
+   ],
+   "z": [
+    -47,
+    -30
+   ],
+   "y_floor": 46,
+   "y_ceil": 57,
+   "center": [
+    -56,
+    -38
+   ],
+   "shape": "blob",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hang Đá",
+   "kind": "cavern",
+   "floor": 1,
+   "x": [
+    -64,
+    -42
+   ],
+   "z": [
+    -13,
+    5
+   ],
+   "y_floor": 46,
+   "y_ceil": 57,
+   "center": [
+    -53,
+    -4
+   ],
+   "shape": "blob",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 1",
+   "kind": "combat",
+   "floor": 1,
+   "x": [
+    -40,
+    -28
+   ],
+   "z": [
+    6,
+    20
+   ],
+   "y_floor": 46,
+   "y_ceil": 54,
+   "center": [
+    -34,
+    13
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Lính 1",
+   "kind": "barracks",
+   "floor": 1,
+   "x": [
+    -40,
+    -23
+   ],
+   "z": [
+    -27,
+    -16
+   ],
+   "y_floor": 46,
+   "y_ceil": 53,
+   "center": [
+    -31,
+    -21
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 2",
+   "kind": "combat",
+   "floor": 1,
+   "x": [
+    13,
+    26
+   ],
+   "z": [
+    27,
+    38
+   ],
+   "y_floor": 46,
+   "y_ceil": 53,
+   "center": [
+    20,
+    33
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 3",
+   "kind": "combat",
+   "floor": 1,
+   "x": [
+    -16,
+    -4
+   ],
+   "z": [
+    -52,
+    -39
+   ],
+   "y_floor": 46,
+   "y_ceil": 54,
+   "center": [
+    -10,
+    -45
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 4",
+   "kind": "combat",
+   "floor": 1,
+   "x": [
+    22,
+    36
+   ],
+   "z": [
+    -64,
+    -50
+   ],
+   "y_floor": 46,
+   "y_ceil": 53,
+   "center": [
+    29,
+    -57
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 5",
+   "kind": "combat",
+   "floor": 1,
+   "x": [
+    63,
+    73
+   ],
+   "z": [
+    -24,
+    -14
+   ],
+   "y_floor": 46,
+   "y_ceil": 55,
+   "center": [
+    68,
+    -19
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Lính 2",
+   "kind": "barracks",
+   "floor": 1,
+   "x": [
+    -3,
+    8
+   ],
+   "z": [
+    47,
+    63
+   ],
+   "y_floor": 46,
+   "y_ceil": 52,
+   "center": [
+    3,
+    55
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Đấu Trường 1",
+   "kind": "arena",
+   "floor": 1,
+   "x": [
+    -35,
+    -22
+   ],
+   "z": [
+    -67,
+    -54
+   ],
+   "y_floor": 46,
+   "y_ceil": 55,
+   "center": [
+    -28,
+    -60
+   ],
+   "shape": "round",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 6",
+   "kind": "combat",
+   "floor": 1,
+   "x": [
+    5,
+    15
+   ],
+   "z": [
+    -40,
+    -28
+   ],
+   "y_floor": 46,
+   "y_ceil": 53,
+   "center": [
+    10,
+    -34
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 7",
+   "kind": "combat",
+   "floor": 1,
+   "x": [
+    33,
+    47
+   ],
+   "z": [
+    47,
+    61
+   ],
+   "y_floor": 46,
+   "y_ceil": 53,
+   "center": [
+    40,
+    54
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 8",
+   "kind": "combat",
+   "floor": 1,
+   "x": [
+    48,
+    61
+   ],
+   "z": [
+    -48,
+    -38
+   ],
+   "y_floor": 46,
+   "y_ceil": 53,
+   "center": [
+    55,
+    -43
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Đấu Trường 2",
+   "kind": "arena",
+   "floor": 1,
+   "x": [
+    -1,
+    12
+   ],
+   "z": [
+    -68,
+    -55
+   ],
+   "y_floor": 46,
+   "y_ceil": 57,
+   "center": [
+    6,
+    -61
+   ],
+   "shape": "round",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 9",
+   "kind": "combat",
+   "floor": 1,
+   "x": [
+    25,
+    37
+   ],
+   "z": [
+    4,
+    15
+   ],
+   "y_floor": 46,
+   "y_ceil": 54,
+   "center": [
+    31,
+    10
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 1",
+   "kind": "chest",
+   "floor": 1,
+   "x": [
+    -66,
+    -61
+   ],
+   "z": [
+    -23,
+    -19
+   ],
+   "y_floor": 46,
+   "y_ceil": 52,
+   "center": [
+    -63,
+    -21
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 2",
+   "kind": "chest",
+   "floor": 1,
+   "x": [
+    19,
+    25
+   ],
+   "z": [
+    57,
+    61
+   ],
+   "y_floor": 46,
+   "y_ceil": 52,
+   "center": [
+    22,
+    59
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 3",
+   "kind": "chest",
+   "floor": 1,
+   "x": [
+    -20,
+    -16
+   ],
+   "z": [
+    12,
+    17
+   ],
+   "y_floor": 46,
+   "y_ceil": 52,
+   "center": [
+    -18,
+    15
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 4",
+   "kind": "chest",
+   "floor": 1,
+   "x": [
+    -49,
+    -44
+   ],
+   "z": [
+    50,
+    54
+   ],
+   "y_floor": 46,
+   "y_ceil": 52,
+   "center": [
+    -46,
+    52
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hành Lang Bẫy 1",
+   "kind": "trap",
+   "floor": 1,
+   "x": [
+    -55,
+    -51
+   ],
+   "z": [
+    16,
+    34
+   ],
+   "y_floor": 46,
+   "y_ceil": 52,
+   "center": [
+    -53,
+    25
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Thang Xoắn A ↓T3",
+   "kind": "stair",
+   "floor": 2,
+   "x": [
+    -3,
+    5
+   ],
+   "z": [
+    -76,
+    -68
+   ],
+   "y_floor": 30,
+   "y_ceil": 37,
+   "center": [
+    1,
+    -72
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Chân Thang A (từ T2)",
+   "kind": "arrival",
+   "floor": 3,
+   "x": [
+    -3,
+    5
+   ],
+   "z": [
+    -76,
+    -68
+   ],
+   "y_floor": 18,
+   "y_ceil": 25,
+   "center": [
+    1,
+    -72
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Thang Xoắn B ↓T3",
+   "kind": "stair",
+   "floor": 2,
+   "x": [
+    -39,
+    -31
+   ],
+   "z": [
+    -29,
+    -21
+   ],
+   "y_floor": 30,
+   "y_ceil": 37,
+   "center": [
+    -35,
+    -25
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Chân Thang B (từ T2)",
+   "kind": "arrival",
+   "floor": 3,
+   "x": [
+    -39,
+    -31
+   ],
+   "z": [
+    -29,
+    -21
+   ],
+   "y_floor": 18,
+   "y_ceil": 25,
+   "center": [
+    -35,
+    -25
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Mỏ Quặng Sâu",
+   "kind": "res",
+   "floor": 2,
+   "x": [
+    8,
+    23
+   ],
+   "z": [
+    -27,
+    -6
+   ],
+   "y_floor": 30,
+   "y_ceil": 43,
+   "center": [
+    16,
+    -16
+   ],
+   "shape": "rect",
+   "resource": "Mỏ Quặng Sâu",
+   "in_maze": false
+  },
+  {
+   "name": "Hồ Ngầm",
+   "kind": "res",
+   "floor": 2,
+   "x": [
+    2,
+    20
+   ],
+   "z": [
+    8,
+    27
+   ],
+   "y_floor": 30,
+   "y_ceil": 40,
+   "center": [
+    11,
+    18
+   ],
+   "shape": "rect",
+   "resource": "Hồ Ngầm",
+   "in_maze": false
+  },
+  {
+   "name": "Trạm Nghỉ",
+   "kind": "checkpoint",
+   "floor": 2,
+   "x": [
+    -25,
+    -15
+   ],
+   "z": [
+    16,
+    26
+   ],
+   "y_floor": 30,
+   "y_ceil": 37,
+   "center": [
+    -20,
+    21
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Trạm Dịch Chuyển",
+   "kind": "teleport",
+   "floor": 2,
+   "x": [
+    22,
+    30
+   ],
+   "z": [
+    -48,
+    -40
+   ],
+   "y_floor": 30,
+   "y_ceil": 38,
+   "center": [
+    26,
+    -44
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hang Đá",
+   "kind": "cavern",
+   "floor": 2,
+   "x": [
+    -14,
+    8
+   ],
+   "z": [
+    -45,
+    -32
+   ],
+   "y_floor": 30,
+   "y_ceil": 43,
+   "center": [
+    -3,
+    -38
+   ],
+   "shape": "blob",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Lính 3",
+   "kind": "barracks",
+   "floor": 2,
+   "x": [
+    -62,
+    -50
+   ],
+   "z": [
+    -25,
+    -7
+   ],
+   "y_floor": 30,
+   "y_ceil": 36,
+   "center": [
+    -56,
+    -16
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 10",
+   "kind": "combat",
+   "floor": 2,
+   "x": [
+    -37,
+    -24
+   ],
+   "z": [
+    -11,
+    0
+   ],
+   "y_floor": 30,
+   "y_ceil": 38,
+   "center": [
+    -30,
+    -5
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 11",
+   "kind": "combat",
+   "floor": 2,
+   "x": [
+    44,
+    57
+   ],
+   "z": [
+    -32,
+    -20
+   ],
+   "y_floor": 30,
+   "y_ceil": 38,
+   "center": [
+    51,
+    -26
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Đấu Trường 3",
+   "kind": "arena",
+   "floor": 2,
+   "x": [
+    -55,
+    -41
+   ],
+   "z": [
+    -53,
+    -39
+   ],
+   "y_floor": 30,
+   "y_ceil": 41,
+   "center": [
+    -48,
+    -46
+   ],
+   "shape": "round",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Lính 4",
+   "kind": "barracks",
+   "floor": 2,
+   "x": [
+    -62,
+    -45
+   ],
+   "z": [
+    35,
+    45
+   ],
+   "y_floor": 30,
+   "y_ceil": 36,
+   "center": [
+    -53,
+    40
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 12",
+   "kind": "combat",
+   "floor": 2,
+   "x": [
+    -7,
+    3
+   ],
+   "z": [
+    49,
+    59
+   ],
+   "y_floor": 30,
+   "y_ceil": 38,
+   "center": [
+    -2,
+    54
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 13",
+   "kind": "combat",
+   "floor": 2,
+   "x": [
+    45,
+    58
+   ],
+   "z": [
+    29,
+    41
+   ],
+   "y_floor": 30,
+   "y_ceil": 37,
+   "center": [
+    52,
+    35
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 14",
+   "kind": "combat",
+   "floor": 2,
+   "x": [
+    20,
+    31
+   ],
+   "z": [
+    52,
+    63
+   ],
+   "y_floor": 30,
+   "y_ceil": 37,
+   "center": [
+    26,
+    58
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 15",
+   "kind": "combat",
+   "floor": 2,
+   "x": [
+    33,
+    46
+   ],
+   "z": [
+    1,
+    11
+   ],
+   "y_floor": 30,
+   "y_ceil": 38,
+   "center": [
+    40,
+    6
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 16",
+   "kind": "combat",
+   "floor": 2,
+   "x": [
+    -14,
+    -4
+   ],
+   "z": [
+    -20,
+    -9
+   ],
+   "y_floor": 30,
+   "y_ceil": 37,
+   "center": [
+    -9,
+    -14
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Lính 5",
+   "kind": "barracks",
+   "floor": 2,
+   "x": [
+    -29,
+    -11
+   ],
+   "z": [
+    -60,
+    -49
+   ],
+   "y_floor": 30,
+   "y_ceil": 36,
+   "center": [
+    -20,
+    -54
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 17",
+   "kind": "combat",
+   "floor": 2,
+   "x": [
+    -56,
+    -46
+   ],
+   "z": [
+    11,
+    23
+   ],
+   "y_floor": 30,
+   "y_ceil": 37,
+   "center": [
+    -51,
+    17
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 5",
+   "kind": "chest",
+   "floor": 2,
+   "x": [
+    14,
+    20
+   ],
+   "z": [
+    37,
+    42
+   ],
+   "y_floor": 30,
+   "y_ceil": 36,
+   "center": [
+    17,
+    40
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 6",
+   "kind": "chest",
+   "floor": 2,
+   "x": [
+    -52,
+    -48
+   ],
+   "z": [
+    53,
+    58
+   ],
+   "y_floor": 30,
+   "y_ceil": 36,
+   "center": [
+    -50,
+    56
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 7",
+   "kind": "chest",
+   "floor": 2,
+   "x": [
+    31,
+    37
+   ],
+   "z": [
+    26,
+    32
+   ],
+   "y_floor": 30,
+   "y_ceil": 36,
+   "center": [
+    34,
+    29
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hành Lang Bẫy 3",
+   "kind": "trap",
+   "floor": 2,
+   "x": [
+    45,
+    49
+   ],
+   "z": [
+    -60,
+    -41
+   ],
+   "y_floor": 30,
+   "y_ceil": 36,
+   "center": [
+    47,
+    -50
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hành Lang Bẫy 4",
+   "kind": "trap",
+   "floor": 2,
+   "x": [
+    67,
+    71
+   ],
+   "z": [
+    -27,
+    -12
+   ],
+   "y_floor": 30,
+   "y_ceil": 36,
+   "center": [
+    69,
+    -19
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Thang Xoắn A ↓T4",
+   "kind": "stair",
+   "floor": 3,
+   "x": [
+    54,
+    62
+   ],
+   "z": [
+    30,
+    38
+   ],
+   "y_floor": 18,
+   "y_ceil": 25,
+   "center": [
+    58,
+    34
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Chân Thang A (từ T3)",
+   "kind": "arrival",
+   "floor": 4,
+   "x": [
+    54,
+    62
+   ],
+   "z": [
+    30,
+    38
+   ],
+   "y_floor": -2,
+   "y_ceil": 5,
+   "center": [
+    58,
+    34
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Thang Xoắn B ↓T4",
+   "kind": "stair",
+   "floor": 3,
+   "x": [
+    -26,
+    -18
+   ],
+   "z": [
+    54,
+    62
+   ],
+   "y_floor": 18,
+   "y_ceil": 25,
+   "center": [
+    -22,
+    58
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Chân Thang B (từ T3)",
+   "kind": "arrival",
+   "floor": 4,
+   "x": [
+    -26,
+    -18
+   ],
+   "z": [
+    54,
+    62
+   ],
+   "y_floor": -2,
+   "y_ceil": 5,
+   "center": [
+    -22,
+    58
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Ổ Canh Mê Cung 1",
+   "kind": "combat",
+   "floor": 3,
+   "x": [
+    60,
+    72
+   ],
+   "z": [
+    -36,
+    -16
+   ],
+   "y_floor": 18,
+   "y_ceil": 25,
+   "center": [
+    66,
+    -26
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": true
+  },
+  {
+   "name": "Ổ Canh Mê Cung 2",
+   "kind": "combat",
+   "floor": 3,
+   "x": [
+    -68,
+    -56
+   ],
+   "z": [
+    -44,
+    -32
+   ],
+   "y_floor": 18,
+   "y_ceil": 25,
+   "center": [
+    -62,
+    -38
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": true
+  },
+  {
+   "name": "Ổ Canh Mê Cung 3",
+   "kind": "combat",
+   "floor": 3,
+   "x": [
+    -12,
+    8
+   ],
+   "z": [
+    -52,
+    -40
+   ],
+   "y_floor": 18,
+   "y_ceil": 25,
+   "center": [
+    -2,
+    -46
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": true
+  },
+  {
+   "name": "Ổ Canh Mê Cung 4",
+   "kind": "combat",
+   "floor": 3,
+   "x": [
+    28,
+    40
+   ],
+   "z": [
+    4,
+    16
+   ],
+   "y_floor": 18,
+   "y_ceil": 25,
+   "center": [
+    34,
+    10
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": true
+  },
+  {
+   "name": "Ổ Canh Mê Cung 5",
+   "kind": "combat",
+   "floor": 3,
+   "x": [
+    28,
+    40
+   ],
+   "z": [
+    -60,
+    -48
+   ],
+   "y_floor": 18,
+   "y_ceil": 25,
+   "center": [
+    34,
+    -54
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": true
+  },
+  {
+   "name": "Ổ Canh Mê Cung 6",
+   "kind": "combat",
+   "floor": 3,
+   "x": [
+    28,
+    40
+   ],
+   "z": [
+    -28,
+    -16
+   ],
+   "y_floor": 18,
+   "y_ceil": 25,
+   "center": [
+    34,
+    -22
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": true
+  },
+  {
+   "name": "Ổ Canh Mê Cung 7",
+   "kind": "combat",
+   "floor": 3,
+   "x": [
+    -44,
+    -32
+   ],
+   "z": [
+    20,
+    40
+   ],
+   "y_floor": 18,
+   "y_ceil": 25,
+   "center": [
+    -38,
+    30
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": true
+  },
+  {
+   "name": "Thang Xoắn A ↓T5",
+   "kind": "stair",
+   "floor": 4,
+   "x": [
+    -21,
+    -13
+   ],
+   "z": [
+    -61,
+    -53
+   ],
+   "y_floor": -2,
+   "y_ceil": 5,
+   "center": [
+    -17,
+    -57
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Chân Thang A (từ T4)",
+   "kind": "arrival",
+   "floor": 5,
+   "x": [
+    -21,
+    -13
+   ],
+   "z": [
+    -61,
+    -53
+   ],
+   "y_floor": -18,
+   "y_ceil": -11,
+   "center": [
+    -17,
+    -57
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Thang Xoắn B ↓T5",
+   "kind": "stair",
+   "floor": 4,
+   "x": [
+    -70,
+    -62
+   ],
+   "z": [
+    -11,
+    -3
+   ],
+   "y_floor": -2,
+   "y_ceil": 5,
+   "center": [
+    -66,
+    -7
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Chân Thang B (từ T4)",
+   "kind": "arrival",
+   "floor": 5,
+   "x": [
+    -70,
+    -62
+   ],
+   "z": [
+    -11,
+    -3
+   ],
+   "y_floor": -18,
+   "y_ceil": -11,
+   "center": [
+    -66,
+    -7
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hang Pha Lê",
+   "kind": "res",
+   "floor": 4,
+   "x": [
+    15,
+    37
+   ],
+   "z": [
+    17,
+    34
+   ],
+   "y_floor": -2,
+   "y_ceil": 11,
+   "center": [
+    26,
+    26
+   ],
+   "shape": "rect",
+   "resource": "Hang Pha Lê",
+   "in_maze": false
+  },
+  {
+   "name": "Vườn Nấm",
+   "kind": "res",
+   "floor": 4,
+   "x": [
+    -21,
+    -4
+   ],
+   "z": [
+    -37,
+    -17
+   ],
+   "y_floor": -2,
+   "y_ceil": 10,
+   "center": [
+    -12,
+    -27
+   ],
+   "shape": "rect",
+   "resource": "Vườn Nấm",
+   "in_maze": false
+  },
+  {
+   "name": "Trạm Nghỉ",
+   "kind": "checkpoint",
+   "floor": 4,
+   "x": [
+    -16,
+    -6
+   ],
+   "z": [
+    18,
+    28
+   ],
+   "y_floor": -2,
+   "y_ceil": 5,
+   "center": [
+    -11,
+    23
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Trạm Dịch Chuyển",
+   "kind": "teleport",
+   "floor": 4,
+   "x": [
+    10,
+    18
+   ],
+   "z": [
+    44,
+    52
+   ],
+   "y_floor": -2,
+   "y_ceil": 6,
+   "center": [
+    14,
+    48
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hang Đá",
+   "kind": "cavern",
+   "floor": 4,
+   "x": [
+    21,
+    39
+   ],
+   "z": [
+    -49,
+    -36
+   ],
+   "y_floor": -2,
+   "y_ceil": 11,
+   "center": [
+    30,
+    -42
+   ],
+   "shape": "blob",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hang Đá",
+   "kind": "cavern",
+   "floor": 4,
+   "x": [
+    -29,
+    -7
+   ],
+   "z": [
+    -4,
+    10
+   ],
+   "y_floor": -2,
+   "y_ceil": 10,
+   "center": [
+    -18,
+    3
+   ],
+   "shape": "blob",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 18",
+   "kind": "combat",
+   "floor": 4,
+   "x": [
+    -46,
+    -35
+   ],
+   "z": [
+    35,
+    46
+   ],
+   "y_floor": -2,
+   "y_ceil": 7,
+   "center": [
+    -40,
+    41
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Đấu Trường 4",
+   "kind": "arena",
+   "floor": 4,
+   "x": [
+    33,
+    48
+   ],
+   "z": [
+    -15,
+    0
+   ],
+   "y_floor": -2,
+   "y_ceil": 9,
+   "center": [
+    41,
+    -7
+   ],
+   "shape": "round",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 19",
+   "kind": "combat",
+   "floor": 4,
+   "x": [
+    -2,
+    8
+   ],
+   "z": [
+    -63,
+    -50
+   ],
+   "y_floor": -2,
+   "y_ceil": 7,
+   "center": [
+    3,
+    -56
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 20",
+   "kind": "combat",
+   "floor": 4,
+   "x": [
+    -46,
+    -32
+   ],
+   "z": [
+    -22,
+    -8
+   ],
+   "y_floor": -2,
+   "y_ceil": 7,
+   "center": [
+    -39,
+    -15
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Lính 6",
+   "kind": "barracks",
+   "floor": 4,
+   "x": [
+    -47,
+    -35
+   ],
+   "z": [
+    -47,
+    -34
+   ],
+   "y_floor": -2,
+   "y_ceil": 4,
+   "center": [
+    -41,
+    -40
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 21",
+   "kind": "combat",
+   "floor": 4,
+   "x": [
+    -60,
+    -50
+   ],
+   "z": [
+    6,
+    16
+   ],
+   "y_floor": -2,
+   "y_ceil": 6,
+   "center": [
+    -55,
+    11
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 22",
+   "kind": "combat",
+   "floor": 4,
+   "x": [
+    5,
+    19
+   ],
+   "z": [
+    -21,
+    -8
+   ],
+   "y_floor": -2,
+   "y_ceil": 5,
+   "center": [
+    12,
+    -14
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 23",
+   "kind": "combat",
+   "floor": 4,
+   "x": [
+    60,
+    70
+   ],
+   "z": [
+    -7,
+    7
+   ],
+   "y_floor": -2,
+   "y_ceil": 6,
+   "center": [
+    65,
+    0
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Đấu Trường 5",
+   "kind": "arena",
+   "floor": 4,
+   "x": [
+    48,
+    60
+   ],
+   "z": [
+    -38,
+    -26
+   ],
+   "y_floor": -2,
+   "y_ceil": 11,
+   "center": [
+    54,
+    -32
+   ],
+   "shape": "round",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 24",
+   "kind": "combat",
+   "floor": 4,
+   "x": [
+    -9,
+    1
+   ],
+   "z": [
+    49,
+    63
+   ],
+   "y_floor": -2,
+   "y_ceil": 5,
+   "center": [
+    -4,
+    56
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Lính 7",
+   "kind": "barracks",
+   "floor": 4,
+   "x": [
+    -41,
+    -32
+   ],
+   "z": [
+    12,
+    25
+   ],
+   "y_floor": -2,
+   "y_ceil": 5,
+   "center": [
+    -36,
+    19
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 8",
+   "kind": "chest",
+   "floor": 4,
+   "x": [
+    13,
+    19
+   ],
+   "z": [
+    5,
+    9
+   ],
+   "y_floor": -2,
+   "y_ceil": 4,
+   "center": [
+    16,
+    7
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 9",
+   "kind": "chest",
+   "floor": 4,
+   "x": [
+    6,
+    11
+   ],
+   "z": [
+    -39,
+    -35
+   ],
+   "y_floor": -2,
+   "y_ceil": 4,
+   "center": [
+    9,
+    -37
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 10",
+   "kind": "chest",
+   "floor": 4,
+   "x": [
+    39,
+    44
+   ],
+   "z": [
+    42,
+    46
+   ],
+   "y_floor": -2,
+   "y_ceil": 4,
+   "center": [
+    42,
+    44
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hành Lang Bẫy 6",
+   "kind": "trap",
+   "floor": 4,
+   "x": [
+    26,
+    40
+   ],
+   "z": [
+    -27,
+    -23
+   ],
+   "y_floor": -2,
+   "y_ceil": 4,
+   "center": [
+    33,
+    -25
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Thủ Vệ Rễ",
+   "kind": "guardian",
+   "floor": 5,
+   "x": [
+    -14,
+    14
+   ],
+   "z": [
+    -14,
+    14
+   ],
+   "y_floor": -18,
+   "y_ceil": -5,
+   "center": [
+    0,
+    0
+   ],
+   "shape": "round",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Mỏ Cổ",
+   "kind": "res",
+   "floor": 5,
+   "x": [
+    -49,
+    -24
+   ],
+   "z": [
+    6,
+    22
+   ],
+   "y_floor": -18,
+   "y_ceil": -7,
+   "center": [
+    -36,
+    14
+   ],
+   "shape": "rect",
+   "resource": "Mỏ Cổ",
+   "in_maze": false
+  },
+  {
+   "name": "Trạm Nghỉ",
+   "kind": "checkpoint",
+   "floor": 5,
+   "x": [
+    46,
+    56
+   ],
+   "z": [
+    -5,
+    5
+   ],
+   "y_floor": -18,
+   "y_ceil": -11,
+   "center": [
+    51,
+    0
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hang Đá",
+   "kind": "cavern",
+   "floor": 5,
+   "x": [
+    -13,
+    8
+   ],
+   "z": [
+    -45,
+    -28
+   ],
+   "y_floor": -18,
+   "y_ceil": -6,
+   "center": [
+    -2,
+    -36
+   ],
+   "shape": "blob",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hang Đá",
+   "kind": "cavern",
+   "floor": 5,
+   "x": [
+    19,
+    38
+   ],
+   "z": [
+    -23,
+    -4
+   ],
+   "y_floor": -18,
+   "y_ceil": -6,
+   "center": [
+    29,
+    -13
+   ],
+   "shape": "blob",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Đấu Trường 6",
+   "kind": "arena",
+   "floor": 5,
+   "x": [
+    -47,
+    -33
+   ],
+   "z": [
+    -25,
+    -11
+   ],
+   "y_floor": -18,
+   "y_ceil": -5,
+   "center": [
+    -40,
+    -18
+   ],
+   "shape": "round",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 25",
+   "kind": "combat",
+   "floor": 5,
+   "x": [
+    35,
+    47
+   ],
+   "z": [
+    21,
+    34
+   ],
+   "y_floor": -18,
+   "y_ceil": -10,
+   "center": [
+    41,
+    28
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 26",
+   "kind": "combat",
+   "floor": 5,
+   "x": [
+    -20,
+    -10
+   ],
+   "z": [
+    33,
+    47
+   ],
+   "y_floor": -18,
+   "y_ceil": -10,
+   "center": [
+    -15,
+    40
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Lính 8",
+   "kind": "barracks",
+   "floor": 5,
+   "x": [
+    12,
+    25
+   ],
+   "z": [
+    29,
+    38
+   ],
+   "y_floor": -18,
+   "y_ceil": -12,
+   "center": [
+    19,
+    34
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Phòng Canh 27",
+   "kind": "combat",
+   "floor": 5,
+   "x": [
+    -34,
+    -24
+   ],
+   "z": [
+    -46,
+    -34
+   ],
+   "y_floor": -18,
+   "y_ceil": -11,
+   "center": [
+    -29,
+    -40
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Lính 9",
+   "kind": "barracks",
+   "floor": 5,
+   "x": [
+    17,
+    28
+   ],
+   "z": [
+    -47,
+    -30
+   ],
+   "y_floor": -18,
+   "y_ceil": -11,
+   "center": [
+    23,
+    -38
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Đấu Trường 7",
+   "kind": "arena",
+   "floor": 5,
+   "x": [
+    3,
+    15
+   ],
+   "z": [
+    46,
+    58
+   ],
+   "y_floor": -18,
+   "y_ceil": -9,
+   "center": [
+    9,
+    52
+   ],
+   "shape": "round",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 11",
+   "kind": "chest",
+   "floor": 5,
+   "x": [
+    32,
+    38
+   ],
+   "z": [
+    7,
+    12
+   ],
+   "y_floor": -18,
+   "y_ceil": -12,
+   "center": [
+    35,
+    10
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 12",
+   "kind": "chest",
+   "floor": 5,
+   "x": [
+    -22,
+    -17
+   ],
+   "z": [
+    -24,
+    -18
+   ],
+   "y_floor": -18,
+   "y_ceil": -12,
+   "center": [
+    -19,
+    -21
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 13",
+   "kind": "chest",
+   "floor": 5,
+   "x": [
+    -31,
+    -25
+   ],
+   "z": [
+    -9,
+    -5
+   ],
+   "y_floor": -18,
+   "y_ceil": -12,
+   "center": [
+    -28,
+    -7
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hầm Rương 14",
+   "kind": "chest",
+   "floor": 5,
+   "x": [
+    -16,
+    -10
+   ],
+   "z": [
+    17,
+    21
+   ],
+   "y_floor": -18,
+   "y_ceil": -12,
+   "center": [
+    -13,
+    19
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  },
+  {
+   "name": "Hành Lang Bẫy 7",
+   "kind": "trap",
+   "floor": 5,
+   "x": [
+    -47,
+    -33
+   ],
+   "z": [
+    31,
+    35
+   ],
+   "y_floor": -18,
+   "y_ceil": -12,
+   "center": [
+    -40,
+    33
+   ],
+   "shape": "rect",
+   "resource": null,
+   "in_maze": false
+  }
+ ],
+ "maze": [
+  {
+   "floor": 3,
+   "y_floor": 18,
+   "traps": [
+    {
+     "type": "pit",
+     "x": 2,
+     "y": 19,
+     "z": 30
+    },
+    {
+     "type": "arrow",
+     "x": 46,
+     "y": 19,
+     "z": 26
+    },
+    {
+     "type": "arrow",
+     "x": -66,
+     "y": 19,
+     "z": -6
+    },
+    {
+     "type": "pit",
+     "x": -18,
+     "y": 19,
+     "z": 2
+    },
+    {
+     "type": "pit",
+     "x": -30,
+     "y": 19,
+     "z": -2
+    },
+    {
+     "type": "arrow",
+     "x": -18,
+     "y": 19,
+     "z": 26
+    },
+    {
+     "type": "pit",
+     "x": 22,
+     "y": 19,
+     "z": -62
+    },
+    {
+     "type": "arrow",
+     "x": 34,
+     "y": 19,
+     "z": -66
+    },
+    {
+     "type": "pit",
+     "x": 6,
+     "y": 19,
+     "z": 10
+    },
+    {
+     "type": "arrow",
+     "x": -18,
+     "y": 19,
+     "z": -70
+    },
+    {
+     "type": "web",
+     "x": -38,
+     "y": 19,
+     "z": 62
+    },
+    {
+     "type": "web",
+     "x": -70,
+     "y": 19,
+     "z": -26
+    },
+    {
+     "type": "web",
+     "x": -2,
+     "y": 19,
+     "z": 50
+    },
+    {
+     "type": "web",
+     "x": -26,
+     "y": 19,
+     "z": 34
+    }
+   ],
+   "chests": [
+    {
+     "x": 62,
+     "y": 19,
+     "z": 46
+    },
+    {
+     "x": 30,
+     "y": 19,
+     "z": 70
+    },
+    {
+     "x": -10,
+     "y": 19,
+     "z": 78
+    },
+    {
+     "x": 62,
+     "y": 19,
+     "z": 14
+    },
+    {
+     "x": 22,
+     "y": 19,
+     "z": 46
+    },
+    {
+     "x": 54,
+     "y": 19,
+     "z": -2
+    },
+    {
+     "x": -58,
+     "y": 19,
+     "z": 46
+    },
+    {
+     "x": -34,
+     "y": 19,
+     "z": 46
+    }
+   ]
+  }
+ ]
+}

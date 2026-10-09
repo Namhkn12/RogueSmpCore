@@ -1,0 +1,7 @@
+# Tấm bedrock ngăn tầng đã nằm sẵn trong schem (Y44, Y28, Y14, Y-4) cho vùng r<=88.
+# Lệnh dưới đây nối tấm ra tới mép đảo (r 87-100.5) để không đào vòng ra ngoài rồi xuống được. Chạy SAU khi paste.
+//pos1 -101,-4,-101
+//pos2 101,44,101
+//gmask !air
+//g -r bedrock (y==44||y==28||y==14||y==-4)&&x*x+z*z>7569&&x*x+z*z<=10100
+//gmask

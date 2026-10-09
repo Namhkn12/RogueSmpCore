@@ -1,0 +1,4 @@
+# Hố sụt tâm: phễu mở rộng lên trên, thông xuống trần Layer 1
+//pos1 -24,66,-24
+//pos2 24,130,24
+//g -r air r=sqrt(x*x+z*z);r<=13+max(0,y-80)*0.25+perlin(5,x,y,z,0.08,2,0.5)*1.5

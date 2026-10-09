@@ -1,0 +1,5 @@
+# Phòng boss 'hang vòm lớn' (r46, nền Y-61, vòm Y-25) phình xuống dưới đáy đảo, vỏ deepslate + bedrock giấu,
+# chỉ vào bằng dịch chuyển. Sinh bằng scripts/generate_boss_cavern.py -> output/sylphens_boss_cavern.schem.
+# Schem phủ trọn hộp boss cũ (x-23..23, y-58..-28, z-51..47): dán đè là xóa phòng boss cũ. Vị trí: output/boss_cavern.json
+//schem load sylphens_boss_cavern
+//paste -o -m !structure_void

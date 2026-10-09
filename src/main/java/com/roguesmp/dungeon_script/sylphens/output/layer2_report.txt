@@ -1,0 +1,120 @@
+SEED 2026
+palette 111 khối
+OK  T1 hall       Sảnh Chính                   x-15..15 z-15..15 sàn 46 trần 57
+OK  T1 stair      Thang Xoắn A ↓T2             x69..77 z1..9 sàn 46 trần 53
+OK  T2 arrival    Chân Thang A (từ T1)         x69..77 z1..9 sàn 30 trần 37
+OK  T1 stair      Thang Xoắn B ↓T2             x-73..-65 z18..26 sàn 46 trần 53
+OK  T2 arrival    Chân Thang B (từ T1)         x-73..-65 z18..26 sàn 30 trần 37
+OK  T1 atrium     Giếng Trời                   x-35..-15 z35..55 sàn 30 trần 56
+OK  T1 res        Vườn Rễ Cổ                   x29..45 z-28..-6 sàn 46 trần 57
+OK  T1 res        Thư Khố                      x45..62 z17..37 sàn 46 trần 57
+OK  T1 cavern     Hang Đá                      x-64..-49 z-47..-30 sàn 46 trần 57
+OK  T1 cavern     Hang Đá                      x-64..-42 z-13..5 sàn 46 trần 57
+OK  T1 combat     Phòng Canh 1                 x-40..-28 z6..20 sàn 46 trần 54
+OK  T1 barracks   Hầm Lính 1                   x-40..-23 z-27..-16 sàn 46 trần 53
+OK  T1 combat     Phòng Canh 2                 x13..26 z27..38 sàn 46 trần 53
+OK  T1 combat     Phòng Canh 3                 x-16..-4 z-52..-39 sàn 46 trần 54
+OK  T1 combat     Phòng Canh 4                 x22..36 z-64..-50 sàn 46 trần 53
+OK  T1 combat     Phòng Canh 5                 x63..73 z-24..-14 sàn 46 trần 55
+OK  T1 barracks   Hầm Lính 2                   x-3..8 z47..63 sàn 46 trần 52
+OK  T1 arena      Đấu Trường 1                 x-35..-22 z-67..-54 sàn 46 trần 55
+OK  T1 combat     Phòng Canh 6                 x5..15 z-40..-28 sàn 46 trần 53
+OK  T1 combat     Phòng Canh 7                 x33..47 z47..61 sàn 46 trần 53
+OK  T1 combat     Phòng Canh 8                 x48..61 z-48..-38 sàn 46 trần 53
+OK  T1 arena      Đấu Trường 2                 x-1..12 z-68..-55 sàn 46 trần 57
+OK  T1 combat     Phòng Canh 9                 x25..37 z4..15 sàn 46 trần 54
+OK  T1 chest      Hầm Rương 1                  x-66..-61 z-23..-19 sàn 46 trần 52
+OK  T1 chest      Hầm Rương 2                  x19..25 z57..61 sàn 46 trần 52
+OK  T1 chest      Hầm Rương 3                  x-20..-16 z12..17 sàn 46 trần 52
+OK  T1 chest      Hầm Rương 4                  x-49..-44 z50..54 sàn 46 trần 52
+OK  T1 trap       Hành Lang Bẫy 1              x-55..-51 z16..34 sàn 46 trần 52
+OK  T2 stair      Thang Xoắn A ↓T3             x-3..5 z-76..-68 sàn 30 trần 37
+OK  T3 arrival    Chân Thang A (từ T2)         x-3..5 z-76..-68 sàn 18 trần 25
+OK  T2 stair      Thang Xoắn B ↓T3             x-39..-31 z-29..-21 sàn 30 trần 37
+OK  T3 arrival    Chân Thang B (từ T2)         x-39..-31 z-29..-21 sàn 18 trần 25
+OK  T2 res        Mỏ Quặng Sâu                 x8..23 z-27..-6 sàn 30 trần 43
+OK  T2 res        Hồ Ngầm                      x2..20 z8..27 sàn 30 trần 40
+OK  T2 checkpoint Trạm Nghỉ                    x-25..-15 z16..26 sàn 30 trần 37
+OK  T2 teleport   Trạm Dịch Chuyển             x22..30 z-48..-40 sàn 30 trần 38
+OK  T2 cavern     Hang Đá                      x-14..8 z-45..-32 sàn 30 trần 43
+OK  T2 barracks   Hầm Lính 3                   x-62..-50 z-25..-7 sàn 30 trần 36
+OK  T2 combat     Phòng Canh 10                x-37..-24 z-11..0 sàn 30 trần 38
+OK  T2 combat     Phòng Canh 11                x44..57 z-32..-20 sàn 30 trần 38
+OK  T2 arena      Đấu Trường 3                 x-55..-41 z-53..-39 sàn 30 trần 41
+OK  T2 barracks   Hầm Lính 4                   x-62..-45 z35..45 sàn 30 trần 36
+OK  T2 combat     Phòng Canh 12                x-7..3 z49..59 sàn 30 trần 38
+OK  T2 combat     Phòng Canh 13                x45..58 z29..41 sàn 30 trần 37
+OK  T2 combat     Phòng Canh 14                x20..31 z52..63 sàn 30 trần 37
+OK  T2 combat     Phòng Canh 15                x33..46 z1..11 sàn 30 trần 38
+OK  T2 combat     Phòng Canh 16                x-14..-4 z-20..-9 sàn 30 trần 37
+OK  T2 barracks   Hầm Lính 5                   x-29..-11 z-60..-49 sàn 30 trần 36
+OK  T2 combat     Phòng Canh 17                x-56..-46 z11..23 sàn 30 trần 37
+OK  T2 chest      Hầm Rương 5                  x14..20 z37..42 sàn 30 trần 36
+OK  T2 chest      Hầm Rương 6                  x-52..-48 z53..58 sàn 30 trần 36
+OK  T2 chest      Hầm Rương 7                  x31..37 z26..32 sàn 30 trần 36
+OK  T2 trap       Hành Lang Bẫy 3              x45..49 z-60..-41 sàn 30 trần 36
+OK  T2 trap       Hành Lang Bẫy 4              x67..71 z-27..-12 sàn 30 trần 36
+OK  T3 stair      Thang Xoắn A ↓T4             x54..62 z30..38 sàn 18 trần 25
+OK  T4 arrival    Chân Thang A (từ T3)         x54..62 z30..38 sàn -2 trần 5
+OK  T3 stair      Thang Xoắn B ↓T4             x-26..-18 z54..62 sàn 18 trần 25
+OK  T4 arrival    Chân Thang B (từ T3)         x-26..-18 z54..62 sàn -2 trần 5
+OK  T3 combat     Ổ Canh Mê Cung 1             x60..72 z-36..-16 sàn 18 trần 25
+OK  T3 combat     Ổ Canh Mê Cung 2             x-68..-56 z-44..-32 sàn 18 trần 25
+OK  T3 combat     Ổ Canh Mê Cung 3             x-12..8 z-52..-40 sàn 18 trần 25
+OK  T3 combat     Ổ Canh Mê Cung 4             x28..40 z4..16 sàn 18 trần 25
+OK  T3 combat     Ổ Canh Mê Cung 5             x28..40 z-60..-48 sàn 18 trần 25
+OK  T3 combat     Ổ Canh Mê Cung 6             x28..40 z-28..-16 sàn 18 trần 25
+OK  T3 combat     Ổ Canh Mê Cung 7             x-44..-32 z20..40 sàn 18 trần 25
+OK  T4 stair      Thang Xoắn A ↓T5             x-21..-13 z-61..-53 sàn -2 trần 5
+OK  T5 arrival    Chân Thang A (từ T4)         x-21..-13 z-61..-53 sàn -18 trần -11
+OK  T4 stair      Thang Xoắn B ↓T5             x-70..-62 z-11..-3 sàn -2 trần 5
+OK  T5 arrival    Chân Thang B (từ T4)         x-70..-62 z-11..-3 sàn -18 trần -11
+OK  T4 res        Hang Pha Lê                  x15..37 z17..34 sàn -2 trần 11
+OK  T4 res        Vườn Nấm                     x-21..-4 z-37..-17 sàn -2 trần 10
+OK  T4 checkpoint Trạm Nghỉ                    x-16..-6 z18..28 sàn -2 trần 5
+OK  T4 teleport   Trạm Dịch Chuyển             x10..18 z44..52 sàn -2 trần 6
+OK  T4 cavern     Hang Đá                      x21..39 z-49..-36 sàn -2 trần 11
+OK  T4 cavern     Hang Đá                      x-29..-7 z-4..10 sàn -2 trần 10
+OK  T4 combat     Phòng Canh 18                x-46..-35 z35..46 sàn -2 trần 7
+OK  T4 arena      Đấu Trường 4                 x33..48 z-15..0 sàn -2 trần 9
+OK  T4 combat     Phòng Canh 19                x-2..8 z-63..-50 sàn -2 trần 7
+OK  T4 combat     Phòng Canh 20                x-46..-32 z-22..-8 sàn -2 trần 7
+OK  T4 barracks   Hầm Lính 6                   x-47..-35 z-47..-34 sàn -2 trần 4
+OK  T4 combat     Phòng Canh 21                x-60..-50 z6..16 sàn -2 trần 6
+OK  T4 combat     Phòng Canh 22                x5..19 z-21..-8 sàn -2 trần 5
+OK  T4 combat     Phòng Canh 23                x60..70 z-7..7 sàn -2 trần 6
+OK  T4 arena      Đấu Trường 5                 x48..60 z-38..-26 sàn -2 trần 11
+OK  T4 combat     Phòng Canh 24                x-9..1 z49..63 sàn -2 trần 5
+OK  T4 barracks   Hầm Lính 7                   x-41..-32 z12..25 sàn -2 trần 5
+OK  T4 chest      Hầm Rương 8                  x13..19 z5..9 sàn -2 trần 4
+OK  T4 chest      Hầm Rương 9                  x6..11 z-39..-35 sàn -2 trần 4
+OK  T4 chest      Hầm Rương 10                 x39..44 z42..46 sàn -2 trần 4
+OK  T4 trap       Hành Lang Bẫy 6              x26..40 z-27..-23 sàn -2 trần 4
+OK  T5 guardian   Thủ Vệ Rễ                    x-14..14 z-14..14 sàn -18 trần -5
+OK  T5 res        Mỏ Cổ                        x-49..-24 z6..22 sàn -18 trần -7
+OK  T5 checkpoint Trạm Nghỉ                    x46..56 z-5..5 sàn -18 trần -11
+OK  T5 cavern     Hang Đá                      x-13..8 z-45..-28 sàn -18 trần -6
+OK  T5 cavern     Hang Đá                      x19..38 z-23..-4 sàn -18 trần -6
+OK  T5 arena      Đấu Trường 6                 x-47..-33 z-25..-11 sàn -18 trần -5
+OK  T5 combat     Phòng Canh 25                x35..47 z21..34 sàn -18 trần -10
+OK  T5 combat     Phòng Canh 26                x-20..-10 z33..47 sàn -18 trần -10
+OK  T5 barracks   Hầm Lính 8                   x12..25 z29..38 sàn -18 trần -12
+OK  T5 combat     Phòng Canh 27                x-34..-24 z-46..-34 sàn -18 trần -11
+OK  T5 barracks   Hầm Lính 9                   x17..28 z-47..-30 sàn -18 trần -11
+OK  T5 arena      Đấu Trường 7                 x3..15 z46..58 sàn -18 trần -9
+OK  T5 chest      Hầm Rương 11                 x32..38 z7..12 sàn -18 trần -12
+OK  T5 chest      Hầm Rương 12                 x-22..-17 z-24..-18 sàn -18 trần -12
+OK  T5 chest      Hầm Rương 13                 x-31..-25 z-9..-5 sàn -18 trần -12
+OK  T5 chest      Hầm Rương 14                 x-16..-10 z17..21 sàn -18 trần -12
+OK  T5 trap       Hành Lang Bẫy 7              x-47..-33 z31..35 sàn -18 trần -12
+T1: 26 phòng, 204 ô hành lang, ngõ cụt 9, nối hỏng []
+T2: 27 phòng, 175 ô hành lang, ngõ cụt 10, nối hỏng []
+T4: 25 phòng, 198 ô hành lang, ngõ cụt 7, nối hỏng []
+T5: 19 phòng, 153 ô hành lang, ngõ cụt 4, nối hỏng []
+T3 MÊ CUNG: 306 ô, 276 đoạn đường, 7 phòng combat, bẫy {'pit': 5, 'arrow': 5, 'web': 4}, rương 8, nút không nối []
+vòm cửa 200, đuốc 697
+TẤT CẢ PHÒNG THÔNG: True
+tầng 1|2: tấm Y44, 107 ô lỗ được bọc, lớp bọc 207 khối
+tầng 2|3: tấm Y28, 289 ô lỗ được bọc, lớp bọc 533 khối
+tầng 3|4: tấm Y14, 0 ô lỗ được bọc, lớp bọc 0 khối
+tầng 4|5: tấm Y-4, 10 ô lỗ được bọc, lớp bọc 42 khối

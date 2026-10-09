@@ -1,0 +1,10 @@
+# CHỈ chạy nếu trước đó đã chạy file 05_layer2 hoặc 06 boss của bản cũ (trả vùng về deepslate)
+//pos1 -90,-2,-90
+//pos2 90,60,90
+//g -r deepslate x*x+z*z<=7921
+//pos1 -72,-26,-72
+//pos2 72,-3,72
+//g -r deepslate x*x+z*z<=4900
+//pos1 -23,-42,-51
+//pos2 23,-12,47
+//set deepslate

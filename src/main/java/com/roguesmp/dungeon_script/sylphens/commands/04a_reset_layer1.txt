@@ -1,0 +1,8 @@
+# CHỈ chạy nếu đã chạy 04_layer1_cave bản cũ (ngưỡng sai, cột tràn ra khung vuông ngoài đảo).
+# Sau file này chạy lại 03_crater_shaft rồi 04_layer1_cave.
+//pos1 -104,61,-104
+//pos2 104,85,104
+# xóa khối tràn ngoài mép đảo, dựng lại barrier, lấp lại đá trong đảo (Y61-85)
+//g -r air r=sqrt(x*x+z*z);n=perlin(7,x,0,z,0.03,3,0.5);r>min(99,97+n*3)&&(r<=100.5||r>=103)
+//g -r barrier r=sqrt(x*x+z*z);r>100.5&&r<103
+//g -r stone r=sqrt(x*x+z*z);n=perlin(7,x,0,z,0.03,3,0.5);r<=min(99,97+n*3)

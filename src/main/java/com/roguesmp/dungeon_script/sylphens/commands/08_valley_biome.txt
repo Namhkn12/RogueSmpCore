@@ -1,0 +1,5 @@
+# Chạy SAU 07. Cây thông, podzol, cỏ hoa đã nằm sẵn trong sylphens_surface.schem (FAWE cho MC 26.x: //forest trồng 0 cây).
+# Ở đây chỉ đổi biome taiga cổ thụ cho cả mặt đảo (thoát/vào lại server để thấy màu cỏ, lá mới).
+//pos1 -100,86,-100
+//pos2 100,200,100
+//setbiome old_growth_spruce_taiga

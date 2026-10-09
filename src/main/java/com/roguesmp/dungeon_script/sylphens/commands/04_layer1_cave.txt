@@ -1,0 +1,63 @@
+# Khoét hang Layer 1 (sàn ~64±2, trần ~80±4, r 80±6)
+//pos1 -90,61,-90
+//pos2 90,85,90
+//g -r air r=sqrt(x*x+z*z);n=(perlin(11,x,0,z,0.04,2,0.5)*2-1);c=80+(perlin(12,x,0,z,0.03,2,0.5)*2-1)*4;r<=80+n*6&&y>64+n*2&&y<c
+# Tâm hang phẳng r<=24: sàn 64, không gian 65-79
+//g -r stone x*x+z*z<=576&&y>=61&&y<=64
+//g -r air x*x+z*z<=576&&y>=65&&y<=79
+# Hồ đáy hố (r 8-19, sâu 4) + đảo đá giữa hồ (r<=7) + ống xuống Sảnh Chính (r<=3.5)
+//g -r water r=sqrt(x*x+z*z);r>7.5&&r<=19+(perlin(3,x,0,z,0.1,1,0.5)*2-1)*2&&y>=61&&y<=64
+//g -r stone x*x+z*z<=56&&y>=61&&y<=65
+//g -r moss_block x*x+z*z<=56&&y==66
+//g -r air x*x+z*z<=12.5&&y>=61&&y<=66
+# Cột đá đủ cỡ (2 lớp noise: cột nhỏ + cột khổng lồ), phình ở chân và đỉnh. Giới hạn r để không tràn ra ngoài đảo
+//g -r stone r=sqrt(x*x+z*z);k=abs(y-72)*0.01;r>27&&r<=88&&(perlin(13,x,0,z,0.09,2,0.5)>0.84-k||perlin(14,x,0,z,0.035,2,0.5)>0.78-k)
+# Vách ngăn: đường đồng mức noise=0.5, chia cho độ dốc để dày đều ~2 khối; noise thứ 2 cắt khe hở
+//g -r stone r=sqrt(x*x+z*z);m=perlin(15,x,0,z,0.02,2,0.5);a=perlin(15,x+1,0,z,0.02,2,0.5)-m;b=perlin(15,x,0,z+1,0.02,2,0.5)-m;r>30&&r<=88&&abs(m-0.5)<0.9*(abs(a)+abs(b))&&perlin(16,x,0,z,0.05,1,0.5)>0.4
+# Quặng trong vách/cột Layer 1 (chỉ thay stone), mỗi loại ~1-3% khối đá
+//gmask stone
+//g -r coal_ore perlin(51,x,y,z,0.12,1,0.5)>0.86
+//g -r iron_ore perlin(52,x,y,z,0.13,1,0.5)>0.89
+//g -r copper_ore perlin(53,x,y,z,0.11,1,0.5)>0.89
+//g -r gold_ore perlin(54,x,y,z,0.14,1,0.5)>0.92
+//gmask
+# --- Biome nền: đánh dấu sàn (moss_block) và trần (smooth_stone tạm) — chỉ thay đá, không đụng khí/nước
+//gmask <air
+//replace stone,coal_ore,iron_ore,copper_ore,gold_ore moss_block
+//gmask >air
+//replace stone,coal_ore,iron_ore,copper_ore,gold_ore smooth_stone
+# --- phủ Thạch Nhũ / Pha Lê / Nấm theo noise b (Pha Lê trước Nấm vì vùng Pha Lê nằm trong vùng Nấm)
+//gmask =perlin(31,x,0,z,0.018,2,0.5)<0.3
+//replace moss_block 70%dripstone_block,30%tuff
+//replace smooth_stone dripstone_block
+//gmask =perlin(31,x,0,z,0.018,2,0.5)>0.76
+//replace moss_block 60%calcite,40%amethyst_block
+//replace smooth_stone 70%calcite,20%smooth_basalt,10%amethyst_block
+//gmask =perlin(31,x,0,z,0.018,2,0.5)>0.6
+//replace moss_block mycelium
+//replace smooth_stone 85%stone,15%shroomlight
+# --- trần còn lại (vùng Rêu mặc định)
+//gmask
+//replace smooth_stone 70%stone,30%moss_block
+# --- Trang trí (đặt vào khối khí sát sàn/trần)
+//gmask >moss_block
+//replace air 62%air,30%moss_carpet,4%azalea,2%flowering_azalea,2%short_grass
+//gmask <moss_block
+//replace air 93%air,6%cave_vines[berries=true],1%spore_blossom
+//gmask >dripstone_block
+//replace air 92%air,8%pointed_dripstone[vertical_direction=up]
+//gmask <dripstone_block
+//replace air 88%air,12%pointed_dripstone[vertical_direction=down]
+//gmask >mycelium
+//replace air 80%air,10%red_mushroom,10%brown_mushroom
+//gmask >amethyst_block
+//replace air 85%air,8%amethyst_cluster,7%large_amethyst_bud
+//gmask
+# --- Dây leo xuống hố
+//pos1 -24,60,-24
+//pos2 24,95,24
+# Dây leo cave vines (leo được) ở 6 hướng:
+# đoạn 1 bám vách phễu Y81-91, đoạn 2 treo từ mép trần Layer 1 xuống sát mặt hồ
+//g -r cave_vines_plant r=sqrt(x*x+z*z);t=atan2(z,x);k=(y-80)*0.25;abs(sin(t*3))<0.07&&r>11.8+k&&r<12.8+k&&y>=81&&y<=91
+//g -r cave_vines_plant r=sqrt(x*x+z*z);t=atan2(z,x);abs(sin(t*3))<0.07&&r>14&&r<15&&y>=67&&y<=79
+//g -r cave_vines[berries=true] r=sqrt(x*x+z*z);t=atan2(z,x);abs(sin(t*3))<0.07&&r>14&&r<15&&y==66

@@ -1,0 +1,4 @@
+# Hang spawn ở sườn núi nam (cửa nhìn vào tâm) + đường gấp khúc xuống thung lũng + sông phía bắc vào miệng hố.
+# Sinh bằng scripts/generate_surface.py -> output/sylphens_surface.schem (chỉ chứa ô thay đổi). Chạy SAU 01 và 03.
+//schem load sylphens_surface
+//paste -o -m !structure_void

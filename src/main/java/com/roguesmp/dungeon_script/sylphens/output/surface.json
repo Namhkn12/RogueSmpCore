@@ -1,0 +1,32 @@
+{
+ "spawn": {
+  "x": 0,
+  "y": 122,
+  "z": 80,
+  "yaw": 180,
+  "note": "giữa buồng hang, nhìn về bắc (ra cửa)"
+ },
+ "cave_mouth": {
+  "x": 0,
+  "y": 122,
+  "z": 70
+ },
+ "path_end": [
+  -2,
+  99,
+  49
+ ],
+ "river": {
+  "source_pool": {
+   "x": -2,
+   "y": 100,
+   "z": -64,
+   "note": "hồ nhỏ ở chân núi bắc, chỗ đón thác"
+  },
+  "end": {
+   "x": -3,
+   "y": 89,
+   "z": -8
+  }
+ }
+}

@@ -1,0 +1,8 @@
+# Layer 2 sinh bằng scripts/generate_layer2.py -> output/sylphens_layer2.schem (5 tầng, sàn 46/30/18/-2/-18, T3 là mê cung)
+# Bỏ file .schem vào plugins/FastAsyncWorldEdit/schematics/ rồi chạy (đứng đâu cũng được, -o dán đúng gốc -88,-21,-88):
+//schem load sylphens_layer2
+//paste -o -m !structure_void
+# Nếu bản FAWE không nhận cờ -m: dùng mặt nạ toàn cục thay thế
+#   //gmask deepslate
+#   //paste -o
+#   //gmask

@@ -1,0 +1,4 @@
+numpy>=1.24
+matplotlib>=3.7
+# tùy chọn: đọc lại file .schem để so sánh/kiểm tra
+nbtlib>=2.0
