@@ -47,8 +47,8 @@ public class IslandPurgeService {
     }
 
     private void finishPurge(UUID islandId, String worldName) {
-        regionManager.deleteStoredRegionData(worldName);
         Utils.runAsync(() -> {
+            regionManager.deleteStoredRegionData(worldName);
             worldManager.deleteWorldFile(islandId);
             dataManager.delete(islandId);
             RogueSmpCore.LOGGER.info("Purged abandoned island {}", islandId);

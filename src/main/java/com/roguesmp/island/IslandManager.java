@@ -130,9 +130,6 @@ public class IslandManager {
     }
 
     public void onDisable() {
-        for (World world : Bukkit.getWorlds()) {
-            if (islandWorldManager.isIslandWorld(world)) islandRegionManager.saveNow(world);
-        }
         islandDataManager.onDisable();
     }
 

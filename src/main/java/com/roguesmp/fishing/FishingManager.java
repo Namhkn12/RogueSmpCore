@@ -8,7 +8,6 @@ import com.roguesmp.registry.Holder;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.player.PlayerManager;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
-import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
@@ -60,7 +59,7 @@ public final class FishingManager {
 
         FishTier tier = rollTier(hotspot);
 
-        if (hotspot != null) player.sendActionBar(Utils.fromString("<aqua>Hotspot: ").append(Utils.fromString(hotspot.displayName())));
+        FishingEffects.bite(player, hook.getLocation(), tier, hotspot != null);
 
         FishingMinigame game = new FishingMinigame(FishingMinigameSettings.of(tier, hotspot));
         Session session = new Session(new FishingDisplay(player, hook), hook, game, tier, hotspot);
@@ -94,6 +93,8 @@ public final class FishingManager {
 
         if (state == FishingMinigame.State.RUNNING) {
             session.display.update(session.game);
+            FishingEffects.progress(player, session.hook.getLocation(), session.game, session.tier, session.hotspot != null, session.ticks++, session.wasOnTarget);
+            session.wasOnTarget = session.game.isOnTarget();
             return;
         }
 
@@ -101,8 +102,10 @@ public final class FishingManager {
 
         if (state == FishingMinigame.State.CAUGHT) {
             reward(player, session);
+            FishingEffects.caught(player, session.hook.getLocation(), session.tier, session.hotspot != null);
         } else {
             player.sendActionBar(Component.text("The fish got away...", NamedTextColor.RED));
+            FishingEffects.escaped(player, session.hook.getLocation());
         }
         removeHook(session.hook);
     }
@@ -180,6 +183,8 @@ public final class FishingManager {
         private final FishTier tier;
         private final @Nullable FishingHotspot hotspot;
         private ScheduledTask task;
+        private int ticks;
+        private boolean wasOnTarget;
 
         private Session(FishingDisplay display, FishHook hook, FishingMinigame game, FishTier tier, @Nullable FishingHotspot hotspot) {
             this.tier = tier;

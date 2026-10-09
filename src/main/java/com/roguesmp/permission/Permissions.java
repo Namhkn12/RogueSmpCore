@@ -11,7 +11,8 @@ public enum Permissions {
     RELOAD("reload"),
     QUEST_ASSIGN("quest.assign"),
     ABILITY_UNLOCK("ability.unlock"),
-    FISHING_ADMIN("fishing.admin");
+    FISHING_ADMIN("fishing.admin"),
+    REGION_ADMIN("region.admin");
 
     private static final String ROOT = "roguesmp.";
 

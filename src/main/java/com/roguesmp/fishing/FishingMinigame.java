@@ -89,6 +89,10 @@ public final class FishingMinigame {
         return center >= barPosition && center <= barPosition + barWidth;
     }
 
+    public boolean isOnTarget() {
+        return isIndicatorInsideBar();
+    }
+
     public int barPosition() {
         return (int) Math.round(barPosition);
     }

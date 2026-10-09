@@ -2,7 +2,15 @@ package com.roguesmp;
 
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.command.FishingHotspotCommand;
+import com.roguesmp.command.RegionCommand;
 import com.roguesmp.command.ReloadCommand;
+import com.roguesmp.fishing.listener.FishingListener;
+import com.roguesmp.region.listener.RegionListener;
+import com.roguesmp.region.SmpRegionFlags;
+import com.roguesmp.region.ServerRegionManager;
+import com.roguesmp.region.editor.RegionSelections;
+import com.roguesmp.region.editor.RegionVisualizer;
+import com.roguesmp.region.editor.RegionWandListener;
 import com.roguesmp.command.SmpBrowserCommand;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.item.component.ItemComponentKeys;
@@ -74,6 +82,10 @@ public final class RogueSmpCore extends JavaPlugin {
 
         //Player
         PlayerManager.init(this);
+
+        ServerRegionManager.init();
+        RegionSelections.init();
+        RegionVisualizer.init(this);
 
         //Island
         IslandManager.init(this, PlayerManager.getInstance());
@@ -152,14 +164,17 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new GuiListener());
         registerListener(new BlockListener());
 
+        registerListener(new RegionListener(ServerRegionManager.getInstance()));
+
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance(), IslandManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
         registerListener(new PigZombieSpawnListener(this));
         registerListener(new EntityListener(EntityManager.getInstance()));
         registerListener(new NpcListener(NpcManager.getInstance()));
-        registerListener(new FishingListener(FishingManager.getInstance()));
+        registerListener(new FishingListener(FishingManager.getInstance(), FishingHotspotManager.getInstance()));
 
+        registerListener(new RegionWandListener(RegionSelections.getInstance(), RegionVisualizer.getInstance()));
         registerListener(new IslandListener(IslandManager.getInstance()));
         registerListener(new QuestListener(QuestManager.getInstance()));
     }
@@ -187,7 +202,13 @@ public final class RogueSmpCore extends JavaPlugin {
 
         ReloadCommand.register();
         FishingHotspotCommand.register();
+        RegionCommand.register();
         GlyphFontCommand.register();
+    }
+
+    @Override
+    public void onLoad() {
+        SmpRegionFlags.register();
     }
 
     @Override
