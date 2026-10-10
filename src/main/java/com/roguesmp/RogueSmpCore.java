@@ -3,6 +3,8 @@ package com.roguesmp;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.command.FishingHotspotCommand;
 import com.roguesmp.command.RegionCommand;
+import com.roguesmp.command.PolarTemplateCommand;
+import com.roguesmp.world.PolarTemplateManager;
 import com.roguesmp.command.ReloadCommand;
 import com.roguesmp.fishing.listener.FishingListener;
 import com.roguesmp.region.listener.RegionListener;
@@ -84,6 +86,7 @@ public final class RogueSmpCore extends JavaPlugin {
         PlayerManager.init(this);
 
         ServerRegionManager.init();
+        PolarTemplateManager.init(this);
         RegionSelections.init();
         RegionVisualizer.init(this);
 
@@ -203,6 +206,7 @@ public final class RogueSmpCore extends JavaPlugin {
         ReloadCommand.register();
         FishingHotspotCommand.register();
         RegionCommand.register();
+        PolarTemplateCommand.register();
         GlyphFontCommand.register();
     }
 

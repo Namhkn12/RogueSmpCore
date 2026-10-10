@@ -36,6 +36,7 @@ import com.roguesmp.npc.BaseNpc;
 import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.npc.action.NpcActions;
 import com.roguesmp.player.ability.*;
+import com.roguesmp.world.PolarTemplateData;
 import com.roguesmp.player.ability.trigger.TriggerOption;
 import com.roguesmp.player.ability.trigger.TriggerOptions;
 import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
@@ -107,6 +108,7 @@ public class Registries {
     public static final Registry<LootTable> LOOT_TABLE = new Registry<>(LootConfig.LOOT_TABLE_FOLDER, LootTable.CODEC);
     public static final Registry<ItemType> ITEM_TYPE = new Registry<>("item_types", ItemType.CODEC);
     public static final Registry<FishingHotspot> FISHING_HOTSPOT = new Registry<>("fishing_hotspots", FishingHotspot.CODEC);
+    public static final Registry<PolarTemplateData> POLAR_TEMPLATE_DATA = new Registry<>("polar_template_data", PolarTemplateData.CODEC);
     public static final Registry<FuelType> FUEL_TYPE = new Registry<>("fuel_types", FuelType.CODEC);
 
     public static final Registry<Codec<? extends CraftingRecipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());

@@ -33,16 +33,18 @@ public class IslandTeleportService {
             return;
         }
 
-        if (!worldManager.isWorldAvailable(islandData.getIslandId())) {
+        worldManager.isWorldAvailable(islandData.getIslandId()).thenAccept(available -> Utils.runLater(() -> {
+            if (available) {
+                teleportToIsland(player, islandData);
+                return;
+            }
+
             player.sendMessage(Utils.fromString("<red>Dữ liệu thế giới đảo của bạn đã bị mất, bạn đã được gỡ khỏi đảo này."));
             islandData.removeMember(player.getUniqueId());
             if (islandData.getMembers().isEmpty()) islandData.setArchived(true);
             playerData.setIslandId(null);
             dataManager.saveAsync(islandData);
-            return;
-        }
-
-        teleportToIsland(player, islandData);
+        }));
     }
 
     public void teleportToIsland(Player player, IslandData islandData) {
