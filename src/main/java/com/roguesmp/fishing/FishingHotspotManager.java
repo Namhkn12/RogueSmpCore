@@ -74,7 +74,7 @@ public final class FishingHotspotManager {
         ActiveHotspot active = new ActiveHotspot(hotspotId, hotspot, world, regionId, expiresAt);
         activeByRegion.put(key, active);
 
-        Bukkit.broadcast(FishingHotspotMessages.appeared(active));
+        world.getPlayers().forEach(player -> player.sendMessage(FishingHotspotMessages.appeared(active)));
         List<ProtectedRegion> shapes = ServerRegionManager.getInstance().pieces(world, regionId);
         for (Player player : world.getPlayers()) {
             Location location = player.getLocation();

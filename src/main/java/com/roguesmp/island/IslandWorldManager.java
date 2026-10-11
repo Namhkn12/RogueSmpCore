@@ -1,12 +1,11 @@
 package com.roguesmp.island;
 
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.utils.AsyncUtils;
+import com.roguesmp.world.PolarTemplateManager;
+import com.roguesmp.world.PolarWorldKey;
 import com.roguesmp.world.PolarWorldManager;
+import com.roguesmp.world.WorldEvacuator;
 import live.minehub.polarpaper.core.config.Config;
-import live.minehub.polarpaper.core.source.FilePolarSource;
-import live.minehub.polarpaper.core.world.PolarReader;
-import live.minehub.polarpaper.core.world.PolarWorld;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,34 +20,34 @@ import java.util.concurrent.CompletableFuture;
 
 public class IslandWorldManager {
 
-    public static final String WORLD_PREFIX = "island_";
+    public static final String NAMESPACE = "island";
+    public static final String WORLD_PREFIX = NAMESPACE + "_";
     public static final int BORDER_DIAMETER = 160;
     public static final int CENTER_Y = 65;
 
     private static final String WORLD_FOLDER_NAME = "island_worlds";
-    private static final String TEMPLATE_FILE_NAME = "island_template.polar";
+    private static final String TEMPLATE_NAME = "private_island";
     private static final int AUTO_SAVE_TICKS = 6000;
 
-    private final RogueSmpCore plugin;
     private final PolarWorldManager backend;
 
     @Blocking
     public IslandWorldManager(RogueSmpCore plugin) {
-        this.plugin = plugin;
-        this.backend = new PolarWorldManager(new File(plugin.getDataFolder(), WORLD_FOLDER_NAME).toPath(), name -> buildConfig(), this::applyBorder);
+        this.backend = new PolarWorldManager(new File(plugin.getDataFolder(), WORLD_FOLDER_NAME).toPath(), NAMESPACE, key -> buildConfig(), (key, world) -> applyBorder(world), WorldEvacuator.none());
+        this.backend.sweepOrphans(key -> isIslandId(key.name()));
     }
 
-    @Blocking
-    private @Nullable PolarWorld readTemplate() {
-        File file = new File(plugin.getDataFolder(), TEMPLATE_FILE_NAME);
-        if (!file.exists()) return null;
-
+    private static boolean isIslandId(String name) {
         try {
-            return new PolarReader().read(new FilePolarSource(file.toPath()));
-        } catch (IOException e) {
-            RogueSmpCore.LOGGER.error("Failed to read island template {}", file.getPath(), e);
-            return null;
+            UUID.fromString(name);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
+    }
+
+    private PolarWorldKey key(UUID islandId) {
+        return backend.key(islandId.toString());
     }
 
     private Config buildConfig() {
@@ -66,8 +65,8 @@ public class IslandWorldManager {
         world.getWorldBorder().setSize(BORDER_DIAMETER);
     }
 
-    public String getWorldName(UUID islandId) {
-        return WORLD_PREFIX + islandId;
+    public String getRegionDataName(UUID islandId) {
+        return backend.regionDataName(key(islandId));
     }
 
     public boolean isIslandWorld(World world) {
@@ -89,7 +88,7 @@ public class IslandWorldManager {
     }
 
     public @Nullable World getLoadedWorld(UUID islandId) {
-        return backend.getLoaded(getWorldName(islandId));
+        return backend.getLoaded(key(islandId));
     }
 
     public Location getDefaultSpawn(@Nullable World world) {
@@ -97,34 +96,36 @@ public class IslandWorldManager {
     }
 
     public CompletableFuture<Boolean> isWorldAvailable(UUID islandId) {
-        return backend.exists(getWorldName(islandId));
+        return backend.exists(key(islandId));
     }
 
     public CompletableFuture<World> createIslandWorld(UUID islandId) {
-        return AsyncUtils.supply(this::readTemplate).thenCompose(template -> backend.create(getWorldName(islandId), template, world -> {
-            if (template == null) generateBaselineIslandStructure(new Location(world, 0, CENTER_Y, 0));
-        }));
+        PolarWorldManager templates = PolarTemplateManager.getInstance().worlds();
+        PolarWorldKey template = templates.key(TEMPLATE_NAME);
+        return templates.exists(template).thenCompose(hasTemplate -> hasTemplate
+                ? backend.copyFrom(templates, template, key(islandId))
+                : backend.create(key(islandId), null, world -> generateBaselineIslandStructure(new Location(world, 0, CENTER_Y, 0))));
     }
 
     public CompletableFuture<World> loadIslandWorld(UUID islandId) {
-        return backend.load(getWorldName(islandId));
+        return backend.load(key(islandId));
     }
 
     public void unloadIslandWorld(UUID islandId) {
-        backend.unload(getWorldName(islandId), true);
+        backend.unload(key(islandId), true);
+    }
+
+    @Blocking
+    public void saveAllOnStop() {
+        backend.saveAllOnStop();
     }
 
     public CompletableFuture<Void> discardWorld(World world) {
         return backend.discard(world);
     }
 
-    @Blocking
-    public void deleteWorldFile(UUID islandId) {
-        try {
-            backend.deleteStored(getWorldName(islandId));
-        } catch (IOException e) {
-            RogueSmpCore.LOGGER.error("Failed to delete island world file for {}", islandId, e);
-        }
+    public CompletableFuture<Void> deleteWorld(UUID islandId) {
+        return backend.delete(key(islandId));
     }
 
     private void generateBaselineIslandStructure(Location center) {

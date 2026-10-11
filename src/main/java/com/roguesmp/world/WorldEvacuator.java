@@ -1,0 +1,45 @@
+package com.roguesmp.world;
+
+import com.roguesmp.utils.AsyncUtils;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.mvplugins.multiverse.core.MultiverseCoreApi;
+import org.mvplugins.multiverse.core.world.LoadedMultiverseWorld;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+/**
+ * Moves every player out of a world before it is unloaded or deleted. Runs on the main thread; a failed future
+ * aborts the operation and leaves the world loaded.
+ */
+@FunctionalInterface
+public interface WorldEvacuator {
+
+    CompletableFuture<Void> evacuate(World world);
+
+    static WorldEvacuator none() {
+        return world -> CompletableFuture.completedFuture(null);
+    }
+
+    static WorldEvacuator toDefaultWorld() {
+        return world -> {
+            if (world.getPlayers().isEmpty()) return CompletableFuture.completedFuture(null);
+
+            LoadedMultiverseWorld hub = MultiverseCoreApi.get().getWorldManager().getDefaultWorld().getOrNull();
+            if (hub == null) return CompletableFuture.failedFuture(new IllegalStateException("No default world to evacuate players to"));
+
+            Location hubSpawn = hub.getSpawnLocation();
+            if (world.equals(hubSpawn.getWorld())) {
+                return CompletableFuture.failedFuture(new IllegalStateException("The default world cannot be evacuated"));
+            }
+
+            List<CompletableFuture<Boolean>> teleports = world.getPlayers().stream().map(player -> player.teleportAsync(hubSpawn)).toList();
+
+            return CompletableFuture.allOf(teleports.toArray(CompletableFuture[]::new))
+                    .thenCompose(v -> AsyncUtils.onMainThread(() -> world.getPlayers().isEmpty()
+                            ? CompletableFuture.<Void>completedFuture(null)
+                            : CompletableFuture.<Void>failedFuture(new IllegalStateException("Could not evacuate every player from " + world.getName()))));
+        };
+    }
+}

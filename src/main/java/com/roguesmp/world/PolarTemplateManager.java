@@ -2,21 +2,16 @@ package com.roguesmp.world;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.registry.Registries;
+import com.roguesmp.region.ServerRegionManager;
 import com.roguesmp.utils.AsyncUtils;
+import live.minehub.polarpaper.Polar;
 import live.minehub.polarpaper.core.config.Config;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
-import org.mvplugins.multiverse.core.MultiverseCoreApi;
-import org.mvplugins.multiverse.core.world.LoadedMultiverseWorld;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
@@ -25,17 +20,18 @@ import java.util.function.Supplier;
 public final class PolarTemplateManager {
 
     private static final String FOLDER_NAME = "polar_template_worlds";
+    public static final String NAMESPACE = "template";
 
     private static PolarTemplateManager INSTANCE;
 
     private final RogueSmpCore plugin;
     private final PolarWorldManager worldManager;
-    private final Set<String> busy = ConcurrentHashMap.newKeySet();
 
     @Blocking
     private PolarTemplateManager(RogueSmpCore plugin) {
         this.plugin = plugin;
-        this.worldManager = new PolarWorldManager(plugin.getDataFolder().toPath().resolve(FOLDER_NAME), this::configFor, this::applyBorder);
+        this.worldManager = new PolarWorldManager(plugin.getDataFolder().toPath().resolve(FOLDER_NAME), NAMESPACE, this::configFor, this::applyBorder, WorldEvacuator.toDefaultWorld());
+        this.worldManager.sweepOrphans(key -> true);
     }
 
     @Blocking
@@ -51,85 +47,158 @@ public final class PolarTemplateManager {
         return worldManager;
     }
 
-    public PolarTemplateData data(String name) {
-        PolarTemplateData data = Registries.POLAR_TEMPLATE_DATA.get(name);
+    public PolarTemplateData data(PolarWorldKey key) {
+        PolarTemplateData data = Registries.POLAR_TEMPLATE_DATA.get(key.name());
         return data != null ? data : PolarTemplateData.DEFAULT;
     }
 
-    public @Nullable String nameOf(World world) {
-        return worldManager.getManagedName(world);
+    public @Nullable PolarWorldKey keyOf(World world) {
+        return worldManager.getManagedKey(world);
     }
 
-    public CompletableFuture<World> create(String name, @Nullable String templateName) {
-        return exclusive(List.of(name), () -> {
-            if (templateName == null) return worldManager.create(name, null, world -> { });
+    public CompletableFuture<World> create(PolarWorldKey key, @Nullable PolarWorldKey template) {
+        if (template == null) return worldManager.create(key, null, world -> { });
 
-            return worldManager.readStored(templateName).thenCompose(base -> {
-                if (base == null) {
-                    return CompletableFuture.<World>failedFuture(new IllegalArgumentException("Template world not found: " + templateName));
-                }
-                return worldManager.create(name, base, world -> { });
-            });
+        return worldManager.readStored(template).thenCompose(base -> {
+            if (base == null) {
+                return CompletableFuture.<World>failedFuture(new IllegalArgumentException("Template world not found: " + template));
+            }
+            return cloneOf(template, key, () -> worldManager.create(key, base, world -> { }));
         });
     }
 
-    public CompletableFuture<World> load(String name) {
-        return exclusive(List.of(name), () -> worldManager.load(name));
+    public CompletableFuture<World> load(PolarWorldKey key) {
+        return worldManager.load(key);
     }
 
-    public CompletableFuture<Void> save(String name) {
-        return exclusive(List.of(name), () -> worldManager.save(name));
+    public CompletableFuture<Void> save(PolarWorldKey key) {
+        World world = worldManager.getLoaded(key);
+        if (world != null) ServerRegionManager.getInstance().saveChanges(world);
+        return worldManager.save(key);
     }
 
-    public CompletableFuture<Void> unload(String name, boolean save) {
-        return exclusive(List.of(name), () -> evacuate(worldManager.getLoaded(name)).thenCompose(v -> AsyncUtils.onMainThread(() -> worldManager.unload(name, save))));
+    /**
+     * Saves a world as a template. A loaded template world is saved in place; any other Polar world, such as one not
+     * created by this manager, is exported as a new template, with its WorldGuard regions and spawn, under {@code target}.
+     *
+     * @return the key of the template that was saved
+     */
+    public CompletableFuture<PolarWorldKey> saveWorld(World world, PolarWorldKey target) {
+        PolarWorldKey managed = worldManager.getManagedKey(world);
+
+        if (worldManager.getLoaded(target) != null) return save(target).thenApply(v -> target);
+        if (managed != null) return CompletableFuture.failedFuture(new IllegalStateException("Template world is not loaded: " + target));
+        if (!PolarWorldManager.isPolar(world)) {
+            return CompletableFuture.failedFuture(new IllegalStateException("This is not a Polar world, so it cannot be saved as a template."));
+        }
+
+        return worldManager.serialized(target, () -> worldManager.exists(target).thenCompose(exists -> {
+            if (exists) {
+                return CompletableFuture.<PolarWorldKey>failedFuture(new IllegalStateException("Template " + target + " already exists, delete it first or pick another name."));
+            }
+            return exportAsTemplate(world, target);
+        }));
     }
 
-    public CompletableFuture<Void> delete(String name) {
-        return exclusive(List.of(name), () -> evacuate(worldManager.getLoaded(name))
-                .thenCompose(v -> AsyncUtils.onMainThread(() -> worldManager.delete(name)))
-                .thenCompose(v -> AsyncUtils.onMainThread(() -> Registries.POLAR_TEMPLATE_DATA.removeAndDeleteFilesAsync(plugin, name)))
-                .thenAccept(removed -> { }));
+    public CompletableFuture<Void> unload(PolarWorldKey key, boolean save) {
+        return worldManager.unload(key, save);
     }
 
-    public CompletableFuture<World> copy(String sourceName, String targetName) {
-        return exclusive(List.of(sourceName, targetName), () -> worldManager.copyFrom(worldManager, sourceName, targetName)
-                .thenCompose(world -> AsyncUtils.onMainThread(() -> Registries.POLAR_TEMPLATE_DATA
-                        .registerAndSaveAsync(plugin, targetName, data(sourceName))
-                        .thenApply(saved -> world))));
+    public CompletableFuture<Void> delete(PolarWorldKey key) {
+        return worldManager.delete(key)
+                .thenCompose(v -> deleteRegionData(key))
+                .thenCompose(v -> AsyncUtils.onMainThread(() -> Registries.POLAR_TEMPLATE_DATA.removeAndDeleteFilesAsync(plugin, key.name())))
+                .thenAccept(removed -> { });
     }
 
-    public CompletableFuture<Void> setSpawn(String name, Location spawn) {
-        World world = worldManager.getLoaded(name);
+    public CompletableFuture<World> copy(PolarWorldKey source, PolarWorldKey target) {
+        return cloneOf(source, target, () -> worldManager.copyFrom(worldManager, source, target));
+    }
+
+    public CompletableFuture<Void> setSpawn(PolarWorldKey key, Location spawn) {
+        World world = worldManager.getLoaded(key);
         if (world != null) {
             Location located = spawn.clone();
             located.setWorld(world);
             world.setSpawnLocation(located);
         }
-        return Registries.POLAR_TEMPLATE_DATA.registerAndSaveAsync(plugin, name, data(name).withSpawn(spawn)).thenAccept(saved -> { });
+        return Registries.POLAR_TEMPLATE_DATA.registerAndSaveAsync(plugin, key.name(), data(key).withSpawn(spawn)).thenAccept(saved -> { });
     }
 
-    public CompletableFuture<Void> setBorder(String name, double diameter) {
-        return worldManager.exists(name).thenCompose(exists -> {
-            if (!exists) return CompletableFuture.<Void>failedFuture(new IllegalArgumentException("Unknown template world: " + name));
+    public CompletableFuture<Void> setBorder(PolarWorldKey key, double diameter) {
+        return worldManager.exists(key).thenCompose(exists -> {
+            if (!exists) return CompletableFuture.<Void>failedFuture(new IllegalArgumentException("Unknown template world: " + key));
 
             return AsyncUtils.onMainThread(() -> {
                 CompletableFuture<Void> saved = Registries.POLAR_TEMPLATE_DATA
-                        .registerAndSaveAsync(plugin, name, data(name).withBorderDiameter(diameter))
+                        .registerAndSaveAsync(plugin, key.name(), data(key).withBorderDiameter(diameter))
                         .thenAccept(data -> { });
 
-                World world = worldManager.getLoaded(name);
+                World world = worldManager.getLoaded(key);
                 if (world == null) return saved;
                 if (diameter <= 0) world.getWorldBorder().reset();
-                else applyBorder(world);
+                else applyBorder(key, world);
                 return saved;
             });
         });
     }
 
-    private Config configFor(String name) {
+    private CompletableFuture<PolarWorldKey> exportAsTemplate(World world, PolarWorldKey target) {
+        String sourceDataName = world.getKey().getNamespace() + "_" + world.getKey().getKey();
+        Location spawn = world.getSpawnLocation();
+
+        return AsyncUtils.onMainThread(() -> {
+            ServerRegionManager.getInstance().saveChanges(world);
+            return Polar.saveWorld(world, worldManager.source(target));
+        })
+                .thenCompose(v -> AsyncUtils.run(() -> ServerRegionManager.getInstance().copyStoredData(sourceDataName, worldManager.regionDataName(target))))
+                .thenCompose(v -> AsyncUtils.onMainThread(() -> Registries.POLAR_TEMPLATE_DATA
+                        .registerAndSaveAsync(plugin, target.name(), PolarTemplateData.DEFAULT.withSpawn(spawn))))
+                .thenApply(saved -> target);
+    }
+
+    public CompletableFuture<Void> saveRegions(PolarWorldKey key) {
+        return AsyncUtils.onMainThread(() -> {
+            World world = worldManager.getLoaded(key);
+            if (world != null) ServerRegionManager.getInstance().saveChanges(world);
+            return CompletableFuture.completedFuture(null);
+        });
+    }
+
+    /**
+     * Copies the saved regions data and things like border, spawn of {@code source} to {@code target} before the world is
+     * created. The target must not exist yet, or its own regions would be overwritten.
+     * A failed creation removes what was copied.
+     */
+    private CompletableFuture<World> cloneOf(PolarWorldKey source, PolarWorldKey target, Supplier<CompletableFuture<World>> creation) {
+        return worldManager.exists(target).thenCompose(exists -> {
+            if (exists) return CompletableFuture.<World>failedFuture(new IllegalStateException("World already exists: " + target));
+
+            return saveRegions(source)
+                    .thenCompose(v -> AsyncUtils.onMainThread(() -> Registries.POLAR_TEMPLATE_DATA.registerAndSaveAsync(plugin, target.name(), data(source))))
+                    .thenCompose(data -> AsyncUtils.run(() -> ServerRegionManager.getInstance().copyStoredData(worldManager.regionDataName(source), worldManager.regionDataName(target))))
+                    .thenCompose(v -> creation.get())
+                    .exceptionallyCompose(error -> discardClone(target).handle((v, cleanupError) -> null)
+                            .thenCompose(v -> CompletableFuture.<World>failedFuture(error)));
+        });
+    }
+
+    private CompletableFuture<Void> discardClone(PolarWorldKey target) {
+        return worldManager.exists(target).thenCompose(exists -> {
+            if (exists) return CompletableFuture.<Void>completedFuture(null);
+            return deleteRegionData(target)
+                    .thenCompose(v -> AsyncUtils.onMainThread(() -> Registries.POLAR_TEMPLATE_DATA.removeAndDeleteFilesAsync(plugin, target.name())))
+                    .thenAccept(removed -> { });
+        });
+    }
+
+    private CompletableFuture<Void> deleteRegionData(PolarWorldKey key) {
+        return AsyncUtils.run(() -> ServerRegionManager.getInstance().deleteStoredData(worldManager.regionDataName(key)));
+    }
+
+    private Config configFor(PolarWorldKey key) {
         return Config.Builder.defaults()
-                .spawn(data(name).spawn())
+                .spawn(data(key).spawn())
                 .loadOnStartup(false)
                 .saveOnStop(false)
                 .autoSaveIntervalTicks(-1)
@@ -137,47 +206,11 @@ public final class PolarTemplateManager {
                 .build();
     }
 
-    private void applyBorder(World world) {
-        double diameter = data(world.getKey().getKey()).borderDiameter();
+    private void applyBorder(PolarWorldKey key, World world) {
+        double diameter = data(key).borderDiameter();
         if (diameter <= 0) return;
         world.getWorldBorder().setCenter(0, 0);
         world.getWorldBorder().setSize(diameter);
     }
 
-    private CompletableFuture<Void> evacuate(@Nullable World world) {
-        if (world == null || world.getPlayers().isEmpty()) return CompletableFuture.completedFuture(null);
-
-        LoadedMultiverseWorld hub = MultiverseCoreApi.get().getWorldManager().getDefaultWorld().getOrNull();
-        if (hub == null) return CompletableFuture.failedFuture(new IllegalStateException("No default world to evacuate players to"));
-
-        Location hubSpawn = hub.getSpawnLocation();
-        List<CompletableFuture<Boolean>> teleports = new ArrayList<>();
-        for (Player player : world.getPlayers()) {
-            teleports.add(player.teleportAsync(hubSpawn));
-        }
-
-        return CompletableFuture.allOf(teleports.toArray(CompletableFuture[]::new))
-                .thenCompose(v -> AsyncUtils.onMainThread(() -> world.getPlayers().isEmpty()
-                        ? CompletableFuture.<Void>completedFuture(null)
-                        : CompletableFuture.<Void>failedFuture(new IllegalStateException("Could not evacuate every player from " + world.getName()))));
-    }
-
-    private <T> CompletableFuture<T> exclusive(List<String> names, Supplier<CompletableFuture<T>> action) {
-        List<String> acquired = new ArrayList<>();
-        for (String name : names) {
-            if (!busy.add(name)) {
-                acquired.forEach(busy::remove);
-                return CompletableFuture.failedFuture(new IllegalStateException("Another operation is already running on world " + name));
-            }
-            acquired.add(name);
-        }
-
-        CompletableFuture<T> result;
-        try {
-            result = action.get();
-        } catch (RuntimeException e) {
-            result = CompletableFuture.failedFuture(e);
-        }
-        return result.whenComplete((value, error) -> acquired.forEach(busy::remove));
-    }
 }

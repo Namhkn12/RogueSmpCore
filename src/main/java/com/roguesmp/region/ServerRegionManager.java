@@ -23,11 +23,14 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -36,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -267,7 +271,7 @@ public final class ServerRegionManager {
     }
 
     /**
-     * This is not blocking
+     * Writes the region file on the calling thread, which is a small synchronous disk write.
      */
     public boolean saveChanges(World world) {
         RegionManager regionManager = getRegionManager(world);
@@ -279,7 +283,7 @@ public final class ServerRegionManager {
             regionManager.saveChanges();
             return true;
         } catch (StorageException e) {
-            RogueSmpCore.LOGGER.error("WorldGuard region manager could not save changes for world: {}", regionManager.getName());
+            RogueSmpCore.LOGGER.error("WorldGuard region manager could not save changes for world: {}", regionManager.getName(), e);
         }
         return false;
     }
@@ -351,6 +355,54 @@ public final class ServerRegionManager {
         return true;
     }
 
+    @Blocking
+    public void copyStoredData(String fromWorldName, String toWorldName) {
+        Plugin worldGuard = Bukkit.getPluginManager().getPlugin("WorldGuard");
+        if (worldGuard == null) return;
+
+        Path worldsFolder = worldGuard.getDataFolder().toPath().resolve("worlds");
+        Path from = worldsFolder.resolve(fromWorldName);
+        Path to = worldsFolder.resolve(toWorldName);
+        if (!Files.exists(from)) return;
+
+        try (var paths = Files.walk(from)) {
+            for (Path path : (Iterable<Path>) paths::iterator) {
+                Path destination = to.resolve(from.relativize(path).toString());
+                if (Files.isDirectory(path)) Files.createDirectories(destination);
+                else Files.copy(path, destination, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Deletes the stored data of every world whose name matches, and returns how many were deleted.
+     */
+    @Blocking
+    public int deleteStoredDataWhere(Predicate<String> worldName) {
+        Plugin worldGuard = Bukkit.getPluginManager().getPlugin("WorldGuard");
+        if (worldGuard == null) return 0;
+
+        Path worldsFolder = worldGuard.getDataFolder().toPath().resolve("worlds");
+        if (!Files.isDirectory(worldsFolder)) return 0;
+
+        int deleted = 0;
+        try (var folders = Files.list(worldsFolder)) {
+            for (Path folder : (Iterable<Path>) folders::iterator) {
+                String name = folder.getFileName().toString();
+                if (!Files.isDirectory(folder) || !worldName.test(name)) continue;
+
+                deleteStoredData(name);
+                deleted++;
+            }
+        } catch (IOException e) {
+            RogueSmpCore.LOGGER.error("Failed to list WorldGuard data in {}", worldsFolder, e);
+        }
+        return deleted;
+    }
+
+    @Blocking
     public void deleteStoredData(String worldName) {
         Plugin worldGuard = Bukkit.getPluginManager().getPlugin("WorldGuard");
         if (worldGuard == null) return;
@@ -359,7 +411,9 @@ public final class ServerRegionManager {
         if (!Files.exists(worldFolder)) return;
 
         try (var paths = Files.walk(worldFolder)) {
-            paths.sorted(Comparator.reverseOrder()).forEach(path -> path.toFile().delete());
+            for (Path path : (Iterable<Path>) paths.sorted(Comparator.reverseOrder())::iterator) {
+                if (!path.toFile().delete()) RogueSmpCore.LOGGER.warn("Could not delete {}, it will be retried by the next orphan sweep", path);
+            }
         } catch (IOException e) {
             RogueSmpCore.LOGGER.error("Failed to delete WorldGuard data for world {}", worldName, e);
         }
