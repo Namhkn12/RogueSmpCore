@@ -51,7 +51,6 @@ public final class BlockVisual {
 
             PersistentDataContainer data = display.getPersistentDataContainer();
             data.set(Keys.BLOCK_ID, PersistentDataType.STRING, blockId);
-            data.set(Keys.BLOCK_POS, PersistentDataType.STRING, pos.serialize());
         });
     }
 
@@ -144,11 +143,9 @@ public final class BlockVisual {
 
         PersistentDataContainer data = entity.getPersistentDataContainer();
         String blockId = data.get(Keys.BLOCK_ID, PersistentDataType.STRING);
-        String serializedPos = data.get(Keys.BLOCK_POS, PersistentDataType.STRING);
-        if (blockId == null || serializedPos == null) return null;
+        if (blockId == null) return null;
 
-        var pos = BlockPos.parse(serializedPos);
-        if (!pos.isSuccess() || !pos.result().matches(entity.getLocation())) return null;
-        return new Marker(blockId, pos.result());
+        var pos = BlockPos.of(entity.getLocation());
+        return new Marker(blockId, pos);
     }
 }
