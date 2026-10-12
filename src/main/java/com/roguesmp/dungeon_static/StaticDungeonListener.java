@@ -4,7 +4,9 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.event.DailyResetEvent;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
+import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.region.ServerRegionManager;
+import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.WorldPos;
 import io.papermc.paper.event.player.AsyncPlayerSpawnLocationEvent;
 import org.bukkit.World;
@@ -12,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
@@ -63,6 +66,25 @@ public class StaticDungeonListener implements Listener {
     @EventHandler
     public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
         manager.unloadIfIdleLater(event.getFrom());
+        syncTabLayout(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        Utils.runLater(() -> syncTabLayout(player));
+    }
+
+    private void syncTabLayout(Player player) {
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+        if (smpPlayer == null) return;
+
+        StaticDungeonInstance instance = manager.getByWorld(player.getWorld());
+        if (instance == null) {
+            smpPlayer.getTabLayouts().release(StaticDungeonTabLayout.KEY);
+        } else {
+            smpPlayer.getTabLayouts().claim(StaticDungeonTabLayout.claim(instance));
+        }
     }
 
     @EventHandler

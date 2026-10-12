@@ -1,10 +1,13 @@
 package com.roguesmp.tab.element;
 
 import com.roguesmp.tab.TabContext;
+import com.roguesmp.tab.TabKey;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Defines how one scoreboard line or tablist slot renders. {@link #render} is the only required method.
@@ -49,6 +52,10 @@ public interface TabElement {
     /** Like {@link #of(Function)}, but re-renders whenever any of the given context keys change. */
     static TabElement of(Function<TabContext, String> renderer, String... dependencies) {
         return new FunctionElement(renderer, Set.of(dependencies), 0);
+    }
+
+    static TabElement of(Function<TabContext, String> renderer, TabKey<?>... dependencies) {
+        return new FunctionElement(renderer, Arrays.stream(dependencies).map(TabKey::name).collect(Collectors.toSet()), 0);
     }
 
     /** An element that re-renders automatically every {@code everyTicks} server ticks. */

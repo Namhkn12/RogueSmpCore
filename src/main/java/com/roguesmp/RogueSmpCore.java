@@ -9,6 +9,7 @@ import com.roguesmp.command.ReloadCommand;
 import com.roguesmp.fishing.listener.FishingListener;
 import com.roguesmp.region.listener.RegionListener;
 import com.roguesmp.region.SmpRegionFlags;
+import com.roguesmp.region.RegionBoundaryHandler;
 import com.roguesmp.region.ServerRegionManager;
 import com.roguesmp.region.editor.RegionSelections;
 import com.roguesmp.region.editor.RegionVisualizer;
@@ -173,7 +174,8 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new GuiListener());
         registerListener(new BlockListener());
 
-        registerListener(new RegionListener(ServerRegionManager.getInstance()));
+        RegionBoundaryHandler.register();
+        registerListener(new RegionListener(PlayerManager.getInstance()));
 
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance(), IslandManager.getInstance()));
@@ -253,6 +255,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         FxEngine.getInstance().shutdown();
         TabEngine.getInstance().shutdown();
+        RegionBoundaryHandler.unregister();
         LuckPermsIntegration.getInstance().shutdown();
 
         Bukkit.getOnlinePlayers().forEach(player -> {

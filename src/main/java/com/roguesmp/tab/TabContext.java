@@ -44,6 +44,18 @@ public final class TabContext {
         return (T) values.getOrDefault(key, defaultValue);
     }
 
+    public <T> void set(TabKey<T> key, T value) {
+        set(key.name(), value);
+    }
+
+    public <T> T get(TabKey<T> key) {
+        return get(key.name());
+    }
+
+    public <T> T get(TabKey<T> key, T defaultValue) {
+        return get(key.name(), defaultValue);
+    }
+
     /** Returns {@code true} if a value is currently stored under {@code key}. */
     public boolean has(String key) {
         return values.containsKey(key);

@@ -1,5 +1,8 @@
 package com.roguesmp.tab;
 
+import com.roguesmp.player.PlayerManager;
+import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.tab.layout.TabLayoutManager;
 import com.roguesmp.utils.Utils;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
@@ -117,7 +120,7 @@ public final class TabEngine implements Listener {
         Map<Class<?>, TabView> views = viewsByPlayer.computeIfAbsent(view.playerId(), id -> new ConcurrentHashMap<>());
         TabView previous = views.get(view.getClass());
         if (previous != null && previous != view) {
-            previous.destroy(); // also calls unregister(previous), so this runs before views.put below
+            previous.destroy(false); // also calls unregister(previous), so this runs before views.put below
         }
         views.put(view.getClass(), view);
         active.add(view);
@@ -156,6 +159,9 @@ public final class TabEngine implements Listener {
     /** Destroys every view still open for a player who just disconnected. */
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(event.getPlayer());
+        if (smpPlayer != null) smpPlayer.getTabLayouts().detach();
+
         Map<Class<?>, TabView> views = viewsByPlayer.remove(event.getPlayer().getUniqueId());
         if (views == null) return;
         for (TabView view : List.copyOf(views.values())) {
@@ -165,15 +171,18 @@ public final class TabEngine implements Listener {
     }
 
     /**
-     * Shows the server's global tablist and scoreboard ({@link GlobalInfoTab}, which sets its own
+     * Shows the server's global tablist and scoreboard ({@link GlobalTabLayout}, which sets its own
      * header/footer) as soon as TAB finishes loading a player. Uses TAB's own load event, not Bukkit's
      * join event, since TAB isn't ready to show anything yet at the point Bukkit's join event fires.
      */
     private void onLoad(PlayerLoadEvent event) {
         Player player = (Player) event.getPlayer().getPlayer();
         Utils.runLater(() -> { //Run later so that other system have time to initialize
-            GlobalInfoTab.tabListView(player).show();
-            GlobalInfoTab.scoreboardView(player).show();
+            SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+            if (smpPlayer == null || !player.isOnline()) return;
+            TabLayoutManager layouts = smpPlayer.getTabLayouts();
+            layouts.claim(GlobalTabLayout.CLAIM);
+            layouts.attach(player);
         });
     }
 }

@@ -12,6 +12,8 @@ import com.roguesmp.player.classes.PlayerClass;
 import com.roguesmp.player.mechanic.*;
 import com.roguesmp.registry.Holder;
 import com.roguesmp.registry.Registries;
+import com.roguesmp.tab.TabContext;
+import com.roguesmp.tab.layout.TabLayoutManager;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import net.kyori.adventure.text.Component;
@@ -48,11 +50,22 @@ public class SmpPlayer {
     private int projectileCleanupTimer = 0;
     private @Nullable Holder<PlayerClass> playerClass;
 
+    private final TabContext tabContext = new TabContext();
+    private final TabLayoutManager tabLayouts = new TabLayoutManager(tabContext);
+
     // Wall-clock (not tick-count) cooldown tracking for passive item abilities (ItemAbility) -
     // lives here rather than on the ability/component instance since non-unique SmpItems (and
     // thus their components/abilities) get rebuilt fresh on every wrap and would otherwise lose
     // any cooldown state constantly.
     private final Map<String, Long> abilityCooldowns = new HashMap<>();
+
+    public TabContext getTabContext() {
+        return tabContext;
+    }
+
+    public TabLayoutManager getTabLayouts() {
+        return tabLayouts;
+    }
 
     public SmpPlayer(PlayerData playerData) {
         this.uuid = playerData.getUuid();
