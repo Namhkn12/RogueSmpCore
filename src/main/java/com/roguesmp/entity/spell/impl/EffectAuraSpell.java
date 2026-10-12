@@ -1,0 +1,63 @@
+package com.roguesmp.entity.spell.impl;
+
+import com.roguesmp.codec.Codec;
+import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellParams;
+import com.roguesmp.entity.spell.common.PotionEffectSpec;
+import com.roguesmp.utils.PlayerUtils;
+import org.bukkit.entity.LivingEntity;
+
+import java.util.List;
+
+/**
+ * Every {@code intervalTicks}, applies {@code effects} to players within {@code radius}. Effect
+ * durations should exceed {@code intervalTicks} for the aura to feel continuous.
+ */
+public class EffectAuraSpell extends Spell {
+
+    public static final String TYPE_KEY = "effect_aura_spell";
+
+    public record Params(double radius, List<PotionEffectSpec> effects, boolean requireLineOfSight, int intervalTicks) implements SpellParams {
+        public static final Codec<Params> CODEC = Codec.composite(
+                Codec.DOUBLE.optionalFieldOf("radius", 5.0).forGetter(Params::radius),
+                PotionEffectSpec.LIST_CODEC.fieldOf("effects").forGetter(Params::effects),
+                Codec.BOOLEAN.optionalFieldOf("requireLineOfSight", true).forGetter(Params::requireLineOfSight),
+                Codec.INT.optionalFieldOf("intervalTicks", 20).forGetter(Params::intervalTicks),
+                Params::new
+        );
+
+        @Override
+        public String getTypeId() {
+            return TYPE_KEY;
+        }
+    }
+
+    private final LivingEntity owner;
+    private final Params params;
+    private int cooldownRemaining;
+
+    public EffectAuraSpell(LivingEntity owner, Params params) {
+        this.owner = owner;
+        this.params = params;
+    }
+
+    @Override
+    public void run(int interval) {
+        cooldownRemaining -= interval;
+        if (cooldownRemaining > 0) return;
+        cooldownRemaining = params.intervalTicks();
+
+        PlayerUtils.playersInRange(owner.getLocation(), params.radius(), false).stream()
+                .filter(player -> !params.requireLineOfSight() || owner.hasLineOfSight(player))
+                .forEach(player -> PotionEffectSpec.applyAll(player, params.effects()));
+    }
+
+    @Override
+    public int cooldownTicks() {
+        return 0;
+    }
+
+    public static EffectAuraSpell create(Params params, LivingEntity owner) {
+        return new EffectAuraSpell(owner, params);
+    }
+}
