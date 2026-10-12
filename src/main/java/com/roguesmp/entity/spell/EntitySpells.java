@@ -35,6 +35,45 @@ public class EntitySpells {
             register(DeathGripSpell.TYPE_KEY, DeathGripSpell.Params.CODEC, DeathGripSpell::create, SpellUsage.ACTIVE);
     public static final SpellType<FireRestanceSpell.Params> FIRE_RESISTANCE =
             register(FireRestanceSpell.TYPE_KEY, FireRestanceSpell.Params.CODEC, FireRestanceSpell::create, SpellUsage.PASSIVE);
+
+    public static final SpellType<ApplyEffectOnHitSpell.Params> APPLY_EFFECT_ON_HIT =
+            register(ApplyEffectOnHitSpell.TYPE_KEY, ApplyEffectOnHitSpell.Params.CODEC, ApplyEffectOnHitSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<BleedOnHitSpell.Params> BLEED_ON_HIT =
+            register(BleedOnHitSpell.TYPE_KEY, BleedOnHitSpell.Params.CODEC, BleedOnHitSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<ArmorShredOnHitSpell.Params> ARMOR_SHRED_ON_HIT =
+            register(ArmorShredOnHitSpell.TYPE_KEY, ArmorShredOnHitSpell.Params.CODEC, ArmorShredOnHitSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<HungerDrainOnHitSpell.Params> HUNGER_DRAIN_ON_HIT =
+            register(HungerDrainOnHitSpell.TYPE_KEY, HungerDrainOnHitSpell.Params.CODEC, HungerDrainOnHitSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<LifestealOnHitSpell.Params> LIFESTEAL_ON_HIT =
+            register(LifestealOnHitSpell.TYPE_KEY, LifestealOnHitSpell.Params.CODEC, LifestealOnHitSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<KnockbackOnHitSpell.Params> KNOCKBACK_ON_HIT =
+            register(KnockbackOnHitSpell.TYPE_KEY, KnockbackOnHitSpell.Params.CODEC, KnockbackOnHitSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<SuffocateOnHitSpell.Params> SUFFOCATE_ON_HIT =
+            register(SuffocateOnHitSpell.TYPE_KEY, SuffocateOnHitSpell.Params.CODEC, SuffocateOnHitSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<ThornsSpell.Params> THORNS =
+            register(ThornsSpell.TYPE_KEY, ThornsSpell.Params.CODEC, ThornsSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<DeathCloudSpell.Params> DEATH_CLOUD =
+            register(DeathCloudSpell.TYPE_KEY, DeathCloudSpell.Params.CODEC, DeathCloudSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<ToxicZoneSpell.Params> TOXIC_ZONE =
+            register(ToxicZoneSpell.TYPE_KEY, ToxicZoneSpell.Params.CODEC, ToxicZoneSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<SpeedBurstSpell.Params> SPEED_BURST =
+            register(SpeedBurstSpell.TYPE_KEY, SpeedBurstSpell.Params.CODEC, SpeedBurstSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<ProximityDetonateSpell.Params> PROXIMITY_DETONATE =
+            register(ProximityDetonateSpell.TYPE_KEY, ProximityDetonateSpell.Params.CODEC, ProximityDetonateSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<ChargeSpell.Params> CHARGE =
+            register(ChargeSpell.TYPE_KEY, ChargeSpell.Params.CODEC, ChargeSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<ExtendedReachSpell.Params> EXTENDED_REACH =
+            register(ExtendedReachSpell.TYPE_KEY, ExtendedReachSpell.Params.CODEC, ExtendedReachSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<EffectAuraSpell.Params> EFFECT_AURA =
+            register(EffectAuraSpell.TYPE_KEY, EffectAuraSpell.Params.CODEC, EffectAuraSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<HomingProjectileSpell.Params> HOMING_PROJECTILE =
+            register(HomingProjectileSpell.TYPE_KEY, HomingProjectileSpell.Params.CODEC, HomingProjectileSpell::create, SpellUsage.PASSIVE);
+    public static final SpellType<ThrowTntSpell.Params> THROW_TNT =
+            register(ThrowTntSpell.TYPE_KEY, ThrowTntSpell.Params.CODEC, ThrowTntSpell::create, SpellUsage.ACTIVE);
+    public static final SpellType<UndermineSpell.Params> UNDERMINE =
+            register(UndermineSpell.TYPE_KEY, UndermineSpell.Params.CODEC, UndermineSpell::create, SpellUsage.ACTIVE);
+    public static final SpellType<HealAlliesSpell.Params> HEAL_ALLIES =
+            register(HealAlliesSpell.TYPE_KEY, HealAlliesSpell.Params.CODEC, HealAlliesSpell::create, SpellUsage.ACTIVE);
 //    public static final SpellType<PrimordialSlimeAltarSpell.Params> PRIMORDIAL_SLIME_ALTAR =
 //            register(PrimordialSlimeAltarSpell.TYPE_KEY, PrimordialSlimeAltarSpell.Params.CODEC, PrimordialSlimeAltarSpell::create, SpellUsage.PASSIVE);
 

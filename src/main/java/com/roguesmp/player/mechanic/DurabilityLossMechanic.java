@@ -86,7 +86,7 @@ public class DurabilityLossMechanic implements PlayerMechanic {
         }
     }
 
-    private static void damageItem(SmpPlayer player, SmpItem smpItem, int amount, EquipSlot equipSlot) {
+    public static void damageItem(SmpPlayer player, SmpItem smpItem, int amount, EquipSlot equipSlot) {
         if (smpItem == null || amount <= 0) return;
         if (smpItem.hasComponent(ItemComponentKeys.BROKEN)) return;
 
