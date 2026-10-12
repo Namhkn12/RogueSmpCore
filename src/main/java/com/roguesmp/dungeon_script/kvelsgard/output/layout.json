@@ -1,0 +1,774 @@
+{
+  "world_note": "tọa độ thật; floor = Y khối sàn, người đứng floor+1",
+  "spawn": {
+    "pos": [
+      0,
+      99,
+      105
+    ],
+    "yaw": 180
+  },
+  "yard": {
+    "y": 120,
+    "mouth": [
+      -4,
+      30
+    ]
+  },
+  "tunnel": {
+    "points": [
+      [
+        -4,
+        30
+      ],
+      [
+        -10,
+        14
+      ],
+      [
+        6,
+        -2
+      ],
+      [
+        12,
+        -20
+      ],
+      [
+        -8,
+        -34
+      ],
+      [
+        -12,
+        -48
+      ],
+      [
+        0,
+        -62
+      ]
+    ],
+    "floor_from": 120,
+    "floor_to": 106
+  },
+  "pit": {
+    "center": [
+      0,
+      -62
+    ],
+    "r": 12,
+    "top": 106,
+    "bottom": 72
+  },
+  "seals": {
+    "l1": "min(101, mặt đất - 3)",
+    "under_l2": 69,
+    "under_l3": 37,
+    "under_l4": 3
+  },
+  "layers": [
+    {
+      "id": 2,
+      "name": "Hầm Mỏ Cũ",
+      "floor": 72,
+      "rooms": [
+        {
+          "name": "Trạm Tời",
+          "type": "combat",
+          "note": "Sảnh đầu tầng, tời kéo và lồng thang gãy giữa phòng.",
+          "min": [
+            -14,
+            73,
+            -40
+          ],
+          "max": [
+            13,
+            81,
+            -19
+          ],
+          "center": [
+            0,
+            73,
+            -29
+          ]
+        },
+        {
+          "name": "Lán Công Nhân",
+          "type": "rest",
+          "note": "Giường tầng, bàn ăn, lò sưởi tắt.",
+          "min": [
+            -52,
+            73,
+            -46
+          ],
+          "max": [
+            -29,
+            79,
+            -27
+          ],
+          "center": [
+            -40,
+            73,
+            -36
+          ]
+        },
+        {
+          "name": "Kho Dụng Cụ",
+          "type": "store",
+          "note": "Giá cuốc xẻng, thùng, dây thừng.",
+          "min": [
+            30,
+            73,
+            -44
+          ],
+          "max": [
+            53,
+            79,
+            -27
+          ],
+          "center": [
+            42,
+            73,
+            -35
+          ]
+        },
+        {
+          "name": "Xưởng Rèn Nguội",
+          "type": "combat",
+          "note": "Lò rèn tắt, đe, máng nước.",
+          "min": [
+            -50,
+            73,
+            -8
+          ],
+          "max": [
+            -25,
+            81,
+            13
+          ],
+          "center": [
+            -37,
+            73,
+            3
+          ]
+        },
+        {
+          "name": "Phòng Sàng Quặng",
+          "type": "combat",
+          "note": "Băng chuyền gỗ và phễu sàng.",
+          "min": [
+            24,
+            73,
+            -10
+          ],
+          "max": [
+            51,
+            82,
+            13
+          ],
+          "center": [
+            38,
+            73,
+            2
+          ]
+        },
+        {
+          "name": "Kho Quản Đốc",
+          "type": "reward",
+          "note": "Phòng rương thưởng.",
+          "min": [
+            -10,
+            73,
+            2
+          ],
+          "max": [
+            9,
+            79,
+            17
+          ],
+          "center": [
+            0,
+            73,
+            10
+          ]
+        }
+      ],
+      "cavern": {
+        "name": "Hang Mạch Lộ",
+        "center": [
+          0,
+          73,
+          52
+        ],
+        "rx": 46,
+        "rz": 28,
+        "top": 98
+      }
+    },
+    {
+      "id": 3,
+      "name": "Rừng Thạch Nhũ",
+      "floor": 40,
+      "rooms": [
+        {
+          "name": "Chân Thang",
+          "type": "entry",
+          "note": "Điểm tới của giếng thang, ngã ba đi 3 hướng.",
+          "min": [
+            -30,
+            41,
+            54
+          ],
+          "max": [
+            -15,
+            48,
+            69
+          ],
+          "center": [
+            -22,
+            41,
+            62
+          ]
+        },
+        {
+          "name": "Trạm Bơm Nước",
+          "type": "combat",
+          "note": "Nửa phòng ngập, máy bơm và ống đồng.",
+          "min": [
+            -62,
+            41,
+            30
+          ],
+          "max": [
+            -37,
+            49,
+            51
+          ],
+          "center": [
+            -49,
+            41,
+            41
+          ]
+        },
+        {
+          "name": "Kho Thuốc Nổ",
+          "type": "store",
+          "note": "Thùng xếp hàng, tường gia cố.",
+          "min": [
+            4,
+            41,
+            44
+          ],
+          "max": [
+            25,
+            47,
+            63
+          ],
+          "center": [
+            15,
+            41,
+            54
+          ]
+        },
+        {
+          "name": "Nhà Ăn Tập Thể",
+          "type": "rest",
+          "note": "Bàn dài, bếp, kệ bát. Checkpoint giữa tầng.",
+          "min": [
+            -20,
+            41,
+            14
+          ],
+          "max": [
+            5,
+            48,
+            33
+          ],
+          "center": [
+            -7,
+            41,
+            24
+          ]
+        },
+        {
+          "name": "Hầm Sập",
+          "type": "combat",
+          "note": "Trần sập một góc, đá tảng làm vật cản.",
+          "min": [
+            36,
+            41,
+            14
+          ],
+          "max": [
+            63,
+            50,
+            39
+          ],
+          "center": [
+            50,
+            41,
+            27
+          ]
+        },
+        {
+          "name": "Phòng Khảo Sát",
+          "type": "reward",
+          "note": "Bàn bản đồ, mẫu đá, két.",
+          "min": [
+            -66,
+            41,
+            -6
+          ],
+          "max": [
+            -45,
+            47,
+            11
+          ],
+          "center": [
+            -55,
+            41,
+            3
+          ]
+        },
+        {
+          "name": "Bãi Xe Goòng",
+          "type": "combat",
+          "note": "Ba tuyến ray, xe goòng. Chắn cửa hang.",
+          "min": [
+            -24,
+            41,
+            -16
+          ],
+          "max": [
+            13,
+            50,
+            1
+          ],
+          "center": [
+            -5,
+            41,
+            -7
+          ]
+        }
+      ],
+      "cavern": {
+        "name": "Động Nhũ Thạch",
+        "center": [
+          8,
+          41,
+          -50
+        ],
+        "rx": 50,
+        "rz": 26,
+        "top": 66
+      }
+    },
+    {
+      "id": 4,
+      "name": "Vực Deepslate",
+      "floor": 8,
+      "rooms": [
+        {
+          "name": "Hồ Rơi",
+          "type": "entry",
+          "note": "Hồ sâu 4 block đón thác từ tầng 3.",
+          "min": [
+            20,
+            9,
+            -66
+          ],
+          "max": [
+            39,
+            18,
+            -47
+          ],
+          "center": [
+            30,
+            9,
+            -56
+          ]
+        },
+        {
+          "name": "Trạm Gác Sâu",
+          "type": "combat",
+          "note": "Chòi canh, rào chắn, giá vũ khí.",
+          "min": [
+            48,
+            9,
+            -40
+          ],
+          "max": [
+            71,
+            16,
+            -19
+          ],
+          "center": [
+            60,
+            9,
+            -29
+          ]
+        },
+        {
+          "name": "Lò Luyện",
+          "type": "combat",
+          "note": "Lò nung lớn, máng dung nham giữa phòng.",
+          "min": [
+            -14,
+            9,
+            -44
+          ],
+          "max": [
+            13,
+            18,
+            -21
+          ],
+          "center": [
+            0,
+            9,
+            -32
+          ]
+        },
+        {
+          "name": "Hầm Trú Ẩn",
+          "type": "rest",
+          "note": "Giường, nhật ký. Checkpoint trước thủ vệ.",
+          "min": [
+            -58,
+            9,
+            -50
+          ],
+          "max": [
+            -35,
+            15,
+            -31
+          ],
+          "center": [
+            -46,
+            9,
+            -40
+          ]
+        },
+        {
+          "name": "Kho Niêm Phong",
+          "type": "reward",
+          "note": "Rương thưởng.",
+          "min": [
+            -66,
+            9,
+            -12
+          ],
+          "max": [
+            -45,
+            16,
+            7
+          ],
+          "center": [
+            -55,
+            9,
+            -2
+          ]
+        },
+        {
+          "name": "Giếng Thang Gãy",
+          "type": "combat",
+          "note": "Phòng cao, lồng thang rơi vỡ giữa nền.",
+          "min": [
+            30,
+            9,
+            -4
+          ],
+          "max": [
+            53,
+            20,
+            17
+          ],
+          "center": [
+            42,
+            9,
+            7
+          ]
+        },
+        {
+          "name": "Cổng Niêm Phong",
+          "type": "store",
+          "note": "Tiền sảnh, kho tiếp tế trước thủ vệ.",
+          "min": [
+            -12,
+            9,
+            -4
+          ],
+          "max": [
+            11,
+            17,
+            11
+          ],
+          "center": [
+            0,
+            9,
+            4
+          ]
+        }
+      ],
+      "cavern": {
+        "name": "Lõi Kvelsgard",
+        "center": [
+          0,
+          9,
+          50
+        ],
+        "rx": 48,
+        "rz": 28,
+        "top": 34
+      }
+    }
+  ],
+  "connectors": {
+    "well": {
+      "x": -22,
+      "z": 62,
+      "top": 76,
+      "bottom": 40
+    },
+    "sinkhole": {
+      "x": 30,
+      "z": -56,
+      "top": 43,
+      "bottom": 8,
+      "waterfall": [
+        37,
+        -53
+      ]
+    }
+  },
+  "boss": {
+    "name": "Cổ Thành Câm Lặng",
+    "spawn": [
+      0,
+      -40,
+      50
+    ],
+    "yaw": 180,
+    "teleport_from": [
+      0,
+      11,
+      50
+    ],
+    "floor": -44,
+    "apex": -2,
+    "wall_top": -14,
+    "radius": 60,
+    "hall": [
+      0,
+      -43,
+      -21
+    ],
+    "summon_table": [
+      0,
+      -35,
+      -36
+    ],
+    "fire_trench": {
+      "x": [
+        -13,
+        13
+      ],
+      "y": -36,
+      "z": -40
+    },
+    "gate": {
+      "min": [
+        -20,
+        -35,
+        -48
+      ],
+      "max": [
+        20,
+        -15,
+        -44
+      ],
+      "opening_min": [
+        -13,
+        -29,
+        -48
+      ],
+      "opening_max": [
+        13,
+        -21,
+        -44
+      ]
+    },
+    "structures": [
+      {
+        "id": "T1",
+        "min": [
+          -47,
+          -43,
+          -23
+        ],
+        "max": [
+          -37,
+          -43,
+          -13
+        ]
+      },
+      {
+        "id": "T2",
+        "min": [
+          33,
+          -43,
+          -35
+        ],
+        "max": [
+          43,
+          -43,
+          -25
+        ]
+      },
+      {
+        "id": "T3",
+        "min": [
+          -44,
+          -43,
+          25
+        ],
+        "max": [
+          -34,
+          -43,
+          35
+        ]
+      },
+      {
+        "id": "H1",
+        "min": [
+          -25,
+          -43,
+          4
+        ],
+        "max": [
+          -13,
+          -43,
+          12
+        ]
+      },
+      {
+        "id": "H2",
+        "min": [
+          -36,
+          -43,
+          14
+        ],
+        "max": [
+          -24,
+          -43,
+          22
+        ]
+      },
+      {
+        "id": "H3",
+        "min": [
+          -22,
+          -43,
+          38
+        ],
+        "max": [
+          -14,
+          -43,
+          48
+        ]
+      },
+      {
+        "id": "H4",
+        "min": [
+          44,
+          -43,
+          -12
+        ],
+        "max": [
+          56,
+          -43,
+          -4
+        ]
+      },
+      {
+        "id": "M",
+        "min": [
+          13,
+          -43,
+          12
+        ],
+        "max": [
+          35,
+          -43,
+          28
+        ]
+      },
+      {
+        "id": "N",
+        "min": [
+          12,
+          -43,
+          40
+        ],
+        "max": [
+          18,
+          -43,
+          44
+        ]
+      },
+      {
+        "id": "N",
+        "min": [
+          38,
+          -43,
+          30
+        ],
+        "max": [
+          44,
+          -43,
+          34
+        ]
+      },
+      {
+        "id": "N",
+        "min": [
+          -50,
+          -43,
+          -6
+        ],
+        "max": [
+          -44,
+          -43,
+          -2
+        ]
+      },
+      {
+        "id": "G",
+        "min": [
+          -54,
+          -43,
+          18
+        ],
+        "max": [
+          -46,
+          -43,
+          24
+        ]
+      },
+      {
+        "id": "G",
+        "min": [
+          46,
+          -43,
+          18
+        ],
+        "max": [
+          54,
+          -43,
+          24
+        ]
+      }
+    ],
+    "sculk_blocks": {
+      "sculk_sensor": 20,
+      "sculk_catalyst": 14
+    }
+  }
+}

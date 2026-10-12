@@ -1,0 +1,13 @@
+# Tùy chọn: biome cho màu nước, sương và âm thanh. Thoát/vào lại server để thấy.
+//pos1 -119,102,-119
+//pos2 119,200,119
+//setbiome stony_peaks
+//pos1 -119,69,-119
+//pos2 119,101,119
+//setbiome windswept_gravelly_hills
+//pos1 -119,37,-119
+//pos2 119,68,119
+//setbiome dripstone_caves
+//pos1 -119,-60,-119
+//pos2 119,36,119
+//setbiome deep_dark

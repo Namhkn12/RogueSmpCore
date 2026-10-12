@@ -1,0 +1,6 @@
+# Tường barrier r 119.5-122 quanh đảo (mép đảo xa nhất r117), từ Y-64 đến 319 + sàn và nắp
+//pos1 -123,-64,-123
+//pos2 123,319,123
+//g -r barrier r=sqrt(x*x+z*z);r>119.5&&r<122
+//g -r barrier y==-64&&x*x+z*z<14884
+//g -r barrier y==319&&x*x+z*z<14884

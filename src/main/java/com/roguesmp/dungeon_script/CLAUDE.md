@@ -5,6 +5,7 @@ Mỗi thư mục con là **một dungeon**, tự chứa script, lệnh FAWE, sch
 | Thư mục | Dungeon | Trạng thái |
 |---|---|---|
 | `sylphens/` | **Sylphens**: đảo nổi r100, 3 layer, Layer 2 sinh theo seed | đang dựng (xem `sylphens/docs/07_status_and_todo.md`) |
+| `kvelsgard/` | **Kvelsgard**: mỏ quặng trong núi, đảo r104–117, mặt núi + 3 tầng mỏ + phòng boss, tấm bedrock ngăn tầng, toàn bộ là 5 schem | bản đầu, chưa dựng thử (xem `kvelsgard/docs/04_status_and_todo.md`) |
 
 ## Người dùng và cách làm việc
 - Người dùng: **Abx**, dev, đang xây server Minecraft RPG "When the Dungeon Arise".
@@ -13,9 +14,17 @@ Mỗi thư mục con là **một dungeon**, tự chứa script, lệnh FAWE, sch
 - Abx sẽ chỉ ra khi đề xuất sai và mong được sửa lại đúng. **Đừng đoán cú pháp FAWE**, xem `sylphens/docs/06_fawe_notes.md`.
 - Abx tự lo phần plugin (dịch chuyển, mob, loot, khóa cửa). Phần việc ở đây là **dựng khối** (terrain, phòng, schematic) và **dữ liệu vị trí** cho plugin.
 
+## Yêu cầu của Abx nằm trong `<dungeon>/request.json`
+- Abx ghi yêu cầu vào `<dungeon>/request.json` (mẫu: `dungeon_request.template.json`, ví dụ: `dungeon_request.example.json`) thay vì chat. **Đọc file này trước khi làm**, đọc lại khi Abx nói đã cập nhật.
+- Khóa bắt đầu bằng `_` là ghi chú hướng dẫn, bỏ qua. Giá trị `"tùy bạn"` / `"đề xuất giúp tôi"` / rỗng nghĩa là Claude tự quyết rồi nói rõ đã chọn gì; chỉ hỏi khi lựa chọn đó khó đổi về sau.
+- `player_flow` + `areas[].id` là xương sống: thư mục, script, schem đặt tên theo `meta.name` và `areas[].id`.
+- Mục `feedback`: sau khi sửa xong một góp ý thì đặt `"done": true` (chỉ sửa trường này, không sửa nội dung Abx viết).
+- Thấy yêu cầu mâu thuẫn với giới hạn kỹ thuật (chiều cao, barrier, FAWE…) thì nêu ra và đề xuất cách khác, không tự lờ đi.
+
 ## Cấu trúc chuẩn của một dungeon
 ```
 <dungeon>/
+  request.json     yêu cầu của Abx (theo dungeon_request.template.json)
   CLAUDE.md        bất biến, quy trình kiểm tra, bẫy riêng của dungeon
   README.md        tổng quan
   requirements.txt

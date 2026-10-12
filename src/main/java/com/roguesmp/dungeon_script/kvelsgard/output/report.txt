@@ -1,0 +1,48 @@
+Hộp 239x261x239, gốc (-119,-60,-119), palette 129, mép đảo r 104.0..117.0
+Đỉnh núi cao nhất Y197, đáy đảo thấp nhất Y-59
+Bedrock: 293007 khối, lộ ra ô trống: 0
+  lỗ tấm L1: 549 ô, x -13..13 z -75..-49
+  lỗ tấm Y37: 189 ô, x 22..38 z -64..-48
+  lỗ tấm Y69: 114 ô, x -27..-17 z 57..67
+Đá phủ mỏng nhất trên hang dẫn (bỏ 6% đầu ở cửa): 9 khối
+Ô đứng được đã đi tới: 34127
+  OK  Bãi mỏ
+  OK  Cuối hang dẫn
+  OK  Đáy hố
+  OK  T2 Trạm Tời
+  OK  T2 Lán Công Nhân
+  OK  T2 Kho Dụng Cụ
+  OK  T2 Xưởng Rèn Nguội
+  OK  T2 Phòng Sàng Quặng
+  OK  T2 Kho Quản Đốc
+  OK  T2 Hang Mạch Lộ (tâm)
+  OK  T3 Chân Thang
+  OK  T3 Trạm Bơm Nước
+  OK  T3 Kho Thuốc Nổ
+  OK  T3 Nhà Ăn Tập Thể
+  OK  T3 Hầm Sập
+  OK  T3 Phòng Khảo Sát
+  OK  T3 Bãi Xe Goòng
+  OK  T3 Động Nhũ Thạch (tâm)
+  OK  T4 Hồ Rơi
+  OK  T4 Trạm Gác Sâu
+  OK  T4 Lò Luyện
+  OK  T4 Hầm Trú Ẩn
+  OK  T4 Kho Niêm Phong
+  OK  T4 Giếng Thang Gãy
+  OK  T4 Cổng Niêm Phong
+  OK  T4 Lõi Kvelsgard (tâm)
+  OK  Boss: sảnh bán nguyệt
+  OK  Boss: bậc 2 cạnh bàn triệu hồi
+  OK  Boss: gờ chân cổng
+  OK  Boss: cuối đường chéo tây
+  OK  Boss: hố mộ trong điện mộ
+  OK  Boss: tầng 2 nhà H1
+  OK  Boss: tầng trệt tháp T1
+  OK  Boss: mái tháp T1
+TẤT CẢ KHU THÔNG: True
+Ghi kvelsgard_l5.schem  Y-60..2  (239x63x239)
+Ghi kvelsgard_l4.schem  Y3..36  (239x34x239)
+Ghi kvelsgard_l3.schem  Y37..68  (239x32x239)
+Ghi kvelsgard_l2.schem  Y69..101  (239x33x239)
+Ghi kvelsgard_l1.schem  Y102..200  (239x99x239)

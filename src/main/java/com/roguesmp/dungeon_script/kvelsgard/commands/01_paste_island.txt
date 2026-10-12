@@ -1,0 +1,18 @@
+# Toàn bộ khối đảo, sinh bằng scripts/generate_world.py -> output/kvelsgard_l1..l5.schem
+# Chép 5 file .schem vào plugins/FastAsyncWorldEdit/schematics/ rồi chạy (đứng đâu cũng được, -o dán đúng gốc lưu trong file).
+# 5 dải Y không chồng nhau nên thứ tự nào cũng được. Dán lại 1 dải sau khi sửa script cũng không đụng dải khác.
+# Y-60..2: phòng boss Cổ Thành Câm Lặng + vỏ bedrock + đáy đảo
+//schem load kvelsgard_l5
+//paste -o -m !structure_void
+# Y3..36: Vực Deepslate (tầng 4) + tấm bedrock Y3
+//schem load kvelsgard_l4
+//paste -o -m !structure_void
+# Y37..68: Rừng Thạch Nhũ (tầng 3) + tấm bedrock Y37
+//schem load kvelsgard_l3
+//paste -o -m !structure_void
+# Y69..101: Hầm Mỏ Cũ (tầng 2) + tấm bedrock Y69 và tấm dưới Layer 1
+//schem load kvelsgard_l2
+//paste -o -m !structure_void
+# Y102..đỉnh: núi, bãi mỏ, đường leo, hang dẫn, nửa trên hố
+//schem load kvelsgard_l1
+//paste -o -m !structure_void

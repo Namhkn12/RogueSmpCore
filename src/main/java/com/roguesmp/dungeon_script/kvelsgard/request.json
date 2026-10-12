@@ -1,0 +1,104 @@
+﻿{
+  "_huong_dan": [
+    "Copy file này thành <ten_dungeon>/request.json rồi điền. Khóa bắt đầu bằng '_' là ghi chú, Claude bỏ qua.",
+    "Chưa nghĩ ra thì ghi \"tùy bạn\" hoặc \"đề xuất giúp tôi\". Không cần thì để chuỗi rỗng \"\" hoặc mảng rỗng [].",
+    "Số liệu quan trọng thì ghi số (\"cao 3 khối\", \"rộng 80-100\"). Còn lại mô tả cảm giác bằng lời là đủ.",
+    "Xem dungeon_request.example.json (điền theo Sylphens) để biết mỗi mục viết tới mức nào."
+  ],
+
+  "meta": {
+    "_hint": "Kvelsgard",
+    "name": "Kvelsgard",
+    "display_name": "Kvelsgard",
+    "rank": "",
+    "theme": "Núi đá, hang động, nơi đào quặng, hầm mỏ bỏ hoang",
+    "references": [
+      { "_hint": "File ảnh / .schem / .litematic để Claude xem. Đường dẫn tương đối hoặc tuyệt đối.", "file": "", "note": "" }
+    ]
+  },
+
+  "space": {
+    "_hint": "Tạo 1 world void với muti severcore kết hơp VoidGenerator",
+    "world": "Kvelsgard",
+    "center": [0, 64, 0],
+    "shape": "Đảo bay hình tròn, nhưng không được quá tròn, phải có hình thù tự nhiên hơn",
+    "size": { "width": "200", "length": "200", "height": "phụ thuộc", "radius": "100" },
+    "y_min": "",
+    "y_max": "",
+    "hard_limits": [],
+    "instance": "",
+    "block_breaking": {
+      "_hint": "Người chơi được phá khối không. Liệt kê khối cho phá / cấm phá nếu đã biết.",
+      "allowed": "yes",
+      "whitelist": [],
+      "blacklist": []
+    }
+  },
+
+  "player_flow": {
+    "_hint": "QUAN TRỌNG NHẤT. Theo thứ tự người chơi đi qua, mỗi phần tử 1 bước, dùng đúng id của areas bên dưới.",
+    "spawn": "",
+    "steps": [],
+    "exit": ""
+  },
+
+  "areas": [
+    {
+      "_hint": "Lặp object này cho mỗi khu. id ngắn, không dấu, dùng để nhắc trong player_flow và connects_to.",
+      "id": "",
+      "name": "",
+      "type": "",
+      "shape": "",
+      "size": "",
+      "position": "",
+      "materials": {
+        "main": [],
+        "accent": [],
+        "_hint": "Ghi khối Minecraft (vd deepslate_bricks) hoặc mô tả (vd 'deepslate và biến thể')."
+      },
+      "layers": [
+        { "_hint": "Dùng khi có cấu trúc nhiều lớp. Thứ tự từ dưới lên / ngoài vào.", "order": 1, "block": "", "count": 1, "note": "" }
+      ],
+      "must_have": [],
+      "must_not": [],
+      "lighting": "",
+      "gameplay": [],
+      "connects_to": [
+        { "area": "", "how": "", "locked_or_hidden": "" }
+      ],
+      "notes": ""
+    }
+  ],
+
+  "boss": {
+    "_hint": "Bỏ trống nếu chưa có boss.",
+    "name": "",
+    "fight_style": "",
+    "room_area_id": "",
+    "room_needs": [],
+    "boss_spawn": "",
+    "player_arrival": "",
+    "exit": ""
+  },
+
+  "tech": {
+    "minecraft_version": "",
+    "fawe_version": "",
+    "_hint_output": "schem (khuyên dùng) | commands | both",
+    "output": "schem",
+    "plugin_data": [],
+    "seed": ""
+  },
+
+  "priority": {
+    "now": [],
+    "later": [],
+    "not_needed": []
+  },
+
+  "feedback": [
+    { "_hint": "Sau khi xem trong game, ghi góp ý vào đây thay vì chat. Claude đánh dấu done khi đã sửa.", "area": "", "change": "", "screenshot": "", "done": false }
+  ],
+
+  "notes": ""
+}

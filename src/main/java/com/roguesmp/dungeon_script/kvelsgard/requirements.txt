@@ -1,0 +1,4 @@
+numpy>=1.24
+matplotlib>=3.7
+# đọc lại file .schem (tools/schem_view.py)
+nbtlib>=2.0

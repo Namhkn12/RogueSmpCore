@@ -118,12 +118,20 @@ def write_schem(path, W, pal, offset, data_version=3953):
     def named(t, name):
         return bytes([t]) + tag_str(name)
     NX, NY, NZ = W.shape
-    order = np.transpose(W, (1, 2, 0)).reshape(-1)           # Sponge: x + z*W + y*W*L
-    out = bytearray()
-    for v in order.tolist():
-        while v & ~0x7F:
-            out.append((v & 0x7F) | 0x80); v >>= 7
-        out.append(v)
+    order = np.transpose(W, (1, 2, 0)).reshape(-1).astype(np.int64)   # Sponge: x + z*W + y*W*L
+    if order.size and order.max() < 1 << 14:                 # varint 1-2 byte, mã hóa bằng numpy
+        two = order >= 0x80
+        pos = np.arange(order.size) + np.concatenate(([0], np.cumsum(two)[:-1]))
+        buf = np.empty(order.size + int(two.sum()), dtype=np.uint8)
+        buf[pos] = np.where(two, (order & 0x7F) | 0x80, order).astype(np.uint8)
+        buf[pos[two] + 1] = (order[two] >> 7).astype(np.uint8)
+        out = buf.tobytes()
+    else:
+        out = bytearray()
+        for v in order.tolist():
+            while v & ~0x7F:
+                out.append((v & 0x7F) | 0x80); v >>= 7
+            out.append(v)
     body = bytearray()
     body += named(3, "Version") + struct.pack(">i", 2)
     body += named(3, "DataVersion") + struct.pack(">i", data_version)

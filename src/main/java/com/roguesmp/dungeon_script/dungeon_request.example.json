@@ -1,0 +1,105 @@
+{
+  "_huong_dan": ["Ví dụ điền theo dungeon Sylphens (rút gọn). Không dùng file này để dựng, chỉ để tham khảo cách viết."],
+
+  "meta": {
+    "name": "sylphens",
+    "display_name": "Đảo Rễ Cây Thế Giới",
+    "rank": "B",
+    "theme": "Đảo nổi giữa void, thung lũng rừng thông vây núi, hố sụt dẫn xuống các tầng dungeon dưới lòng đảo",
+    "references": []
+  },
+
+  "space": {
+    "world": "void world riêng làm template, mỗi team 1 bản sao",
+    "center": [0, 64, 0],
+    "shape": "tròn",
+    "size": { "width": "", "length": "", "height": "", "radius": "100" },
+    "y_min": "-64",
+    "y_max": "319",
+    "hard_limits": ["bọc barrier r100.5-103 từ Y-64 tới 319", "Y <= 60 là deepslate"],
+    "instance": "có, mỗi team 1 instance",
+    "block_breaking": {
+      "allowed": "có kiểm soát",
+      "whitelist": ["quặng", "gỗ", "khối trong phòng tài nguyên"],
+      "blacklist": ["bedrock", "barrier", "vỏ phòng"]
+    }
+  },
+
+  "player_flow": {
+    "spawn": "spawn_cave",
+    "steps": ["spawn_cave", "valley", "layer1", "layer2_floors", "maze", "guardian", "boss_room"],
+    "exit": "thắng boss thì plugin dịch chuyển ra; chết thì thua"
+  },
+
+  "areas": [
+    {
+      "id": "spawn_cave",
+      "name": "Hang xuất hiện",
+      "type": "hang nhỏ trong sườn núi",
+      "shape": "buồng elip + đường hầm",
+      "size": "khoảng 18 x 14",
+      "position": "sườn trong phía nam, lưng chừng núi, cửa hang nhìn vào tâm",
+      "materials": { "main": ["đá núi sẵn có"], "accent": ["moss", "lantern"] },
+      "layers": [],
+      "must_have": ["điểm spawn ở giữa hang", "đường dốc gấp khúc xuống thung lũng"],
+      "must_not": ["đường quá dài"],
+      "lighting": "đèn lồng",
+      "gameplay": ["nơi người chơi xuất hiện khi được dịch chuyển vào"],
+      "connects_to": [{ "area": "valley", "how": "đường gấp khúc zig-zag", "locked_or_hidden": "" }],
+      "notes": ""
+    },
+    {
+      "id": "boss_room",
+      "name": "Hang vòm boss",
+      "type": "phòng boss",
+      "shape": "hang vòm lớn, sàn tròn",
+      "size": "rộng 80-100",
+      "position": "dưới cùng, chỉ vào bằng dịch chuyển",
+      "materials": { "main": ["deepslate và biến thể"], "accent": ["kính xanh lá", "light block"] },
+      "layers": [
+        { "order": 1, "block": "blue_concrete", "count": 1, "note": "đáy vết nứt" },
+        { "order": 2, "block": "green_stained_glass", "count": 2, "note": "" },
+        { "order": 3, "block": "lime_stained_glass", "count": 3, "note": "" },
+        { "order": 4, "block": "light", "count": 1, "note": "đặt rải trên một vài vết nứt" }
+      ],
+      "must_have": ["sàn tròn cao hơn nền 3 khối", "vết nứt dạng lưới", "vòng triệu hồi ở tâm",
+                    "gai trần chĩa xuống, gai lớn ở giữa, mũi kính xanh phát sáng", "vài cột", "thạch nhũ tự xây",
+                    "bậc thang lên sàn tròn ở mỗi hướng", "hang nhỏ làm điểm đến + đường xuống"],
+      "must_not": ["dùng pointed_dripstone của Minecraft"],
+      "lighting": "kính xanh + light block + froglight ở mũi gai",
+      "gameplay": ["boss cận chiến + triệu hồi"],
+      "connects_to": [{ "area": "guardian", "how": "pad dịch chuyển khi Thủ Vệ chết", "locked_or_hidden": "chỉ mở khi Thủ Vệ chết" }],
+      "notes": "schem khi dán phải thay thế phòng boss cũ"
+    }
+  ],
+
+  "boss": {
+    "name": "",
+    "fight_style": "cận chiến + triệu hồi",
+    "room_area_id": "boss_room",
+    "room_needs": ["sân trống rộng", "cột để nấp, chia nhóm minion"],
+    "boss_spawn": "tâm vòng triệu hồi",
+    "player_arrival": "hang nhỏ phía nam",
+    "exit": "thắng hoặc chết"
+  },
+
+  "tech": {
+    "minecraft_version": "26.2",
+    "fawe_version": "",
+    "output": "schem",
+    "plugin_data": ["tọa độ spawn", "điểm boss", "điểm spawn minion", "vị trí rương", "checkpoint"],
+    "seed": "2026"
+  },
+
+  "priority": {
+    "now": ["mặt đảo + hang spawn", "phòng boss"],
+    "later": ["loot rương", "cơ chế bẫy"],
+    "not_needed": ["7 dòng suối trên núi"]
+  },
+
+  "feedback": [
+    { "area": "valley", "change": "lệnh //forest không trồng được cây (0 tree)", "screenshot": "", "done": true }
+  ],
+
+  "notes": ""
+}

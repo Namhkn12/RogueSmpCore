@@ -14,7 +14,9 @@ from schem_io import read_schem
 
 # ------------------------------------------------------------------ màu theo tên khối
 COLORS = [  # (từ khóa, màu) — khớp từ khóa đầu tiên
-    ("air", None), ("structure_void", None), ("cave_air", None), ("barrier", None), ("light[", None),
+    ("structure_void", None), ("barrier", None), ("light[", None),
+    ("reinforced_deepslate", (45, 85, 75)), ("sculk_vein", None), ("sculk", (15, 50, 60)), ("soul_lantern", (90, 220, 230)),
+    ("soul_fire", (80, 200, 240)), ("soul_sand", (85, 65, 50)),
     ("water", (60, 110, 220)), ("lava", (240, 110, 20)), ("bedrock", (40, 40, 40)),
     ("red_carpet", (170, 30, 35)), ("yellow_carpet", (225, 190, 40)), ("carpet", (120, 140, 70)),
     ("gold", (240, 200, 60)), ("quartz", (236, 230, 222)), ("calcite", (225, 225, 220)),
@@ -36,6 +38,8 @@ COLORS = [  # (từ khóa, màu) — khớp từ khóa đầu tiên
 ]
 def color_of(name):
     n = name.replace("minecraft:", "")
+    if n.split("[")[0] in ("air", "cave_air", "void_air"):     # so khớp đúng tên: "air" nằm trong "stairs"
+        return None
     for k, c in COLORS:
         if k in n: return c
     h = zlib.crc32(n.split("[")[0].encode())
