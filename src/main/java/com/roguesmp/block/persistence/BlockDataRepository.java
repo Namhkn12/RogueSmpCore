@@ -3,8 +3,11 @@ package com.roguesmp.block.persistence;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.BlockPos;
 
+import org.bukkit.NamespacedKey;
+
 import java.nio.file.Path;
 import java.sql.*;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -13,9 +16,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Storage for custom block data
+ * Storage for custom block data. Rows are keyed by the world key (for example "minecraft:overworld").
  */
 public class BlockDataRepository {
+
+    private record Row(String world, int x, int y, int z) {
+    }
 
     private static final String UPSERT = "INSERT INTO block_data(world, x, y, z, data) VALUES(?, ?, ?, ?, jsonb(?)) "
             + "ON CONFLICT(world, x, y, z) DO UPDATE SET data = excluded.data";
@@ -39,9 +45,10 @@ public class BlockDataRepository {
 
     public CompletableFuture<Optional<String>> load(BlockPos pos) {
         CompletableFuture<Optional<String>> future = new CompletableFuture<>();
+        Row row = rowOf(pos);
         io.execute(() -> {
             try {
-                future.complete(query(pos));
+                future.complete(query(row));
             } catch (SQLException e) {
                 future.completeExceptionally(new IllegalStateException("Failed to load block state at " + pos, e));
             }
@@ -49,24 +56,60 @@ public class BlockDataRepository {
         return future;
     }
 
-    public void save(BlockPos pos, String json) {
-        saveAll(Map.of(pos, json));
-    }
-
     public void saveAll(Map<BlockPos, String> states) {
         if (states.isEmpty()) return;
-        io.execute(() -> writeAll(states));
+        Map<Row, String> rows = rowsOf(states);
+        io.execute(() -> writeAll(rows));
+    }
+
+    /**
+     * Writes {@code pending} first, then copies every row of {@code from} to {@code to}, in one task so the copy sees the pending states.
+     */
+    public CompletableFuture<Void> copyWorld(NamespacedKey from, NamespacedKey to, Map<BlockPos, String> pending) {
+        Map<Row, String> pendingRows = rowsOf(pending);
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        io.execute(() -> {
+            synchronized (lock) {
+                try {
+                    if (!pendingRows.isEmpty()) writeAll(pendingRows);
+                    try (PreparedStatement statement = connection.prepareStatement(
+                            "INSERT OR REPLACE INTO block_data(world, x, y, z, data) SELECT ?, x, y, z, data FROM block_data WHERE world = ?")) {
+                        statement.setString(1, to.asString());
+                        statement.setString(2, from.asString());
+                        statement.executeUpdate();
+                    }
+                    future.complete(null);
+                } catch (SQLException e) {
+                    future.completeExceptionally(new IllegalStateException("Failed to copy block states of world " + from, e));
+                }
+            }
+        });
+        return future;
+    }
+
+    public void deleteWorld(NamespacedKey world) {
+        io.execute(() -> {
+            synchronized (lock) {
+                try (PreparedStatement statement = connection.prepareStatement("DELETE FROM block_data WHERE world = ?")) {
+                    statement.setString(1, world.asString());
+                    statement.executeUpdate();
+                } catch (SQLException e) {
+                    RogueSmpCore.LOGGER.error("Failed to delete block states of world {}", world, e);
+                }
+            }
+        });
     }
 
     public void delete(BlockPos pos) {
+        Row row = rowOf(pos);
         io.execute(() -> {
             synchronized (lock) {
                 try (PreparedStatement statement = connection.prepareStatement(
                         "DELETE FROM block_data WHERE world = ? AND x = ? AND y = ? AND z = ?")) {
-                    bindKey(statement, pos);
+                    bindKey(statement, row);
                     statement.executeUpdate();
                 } catch (SQLException e) {
-                    RogueSmpCore.LOGGER.error("Failed to delete block state at {}", pos, e);
+                    RogueSmpCore.LOGGER.error("Failed to delete block state at {}", row, e);
                 }
             }
         });
@@ -84,8 +127,9 @@ public class BlockDataRepository {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        Map<Row, String> rows = rowsOf(finalStates);
         synchronized (lock) {
-            if (!finalStates.isEmpty()) writeAll(finalStates);
+            if (!rows.isEmpty()) writeAll(rows);
 
             try {
                 connection.close();
@@ -95,11 +139,11 @@ public class BlockDataRepository {
         }
     }
 
-    private Optional<String> query(BlockPos pos) throws SQLException {
+    private Optional<String> query(Row row) throws SQLException {
         synchronized (lock) {
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT json(data) FROM block_data WHERE world = ? AND x = ? AND y = ? AND z = ?")) {
-                bindKey(statement, pos);
+                bindKey(statement, row);
                 try (ResultSet rows = statement.executeQuery()) {
                     return rows.next() ? Optional.of(rows.getString(1)) : Optional.empty();
                 }
@@ -107,12 +151,12 @@ public class BlockDataRepository {
         }
     }
 
-    private void writeAll(Map<BlockPos, String> states) {
+    private void writeAll(Map<Row, String> states) {
         synchronized (lock) {
             try {
                 connection.setAutoCommit(false);
                 try (PreparedStatement statement = connection.prepareStatement(UPSERT)) {
-                    for (Map.Entry<BlockPos, String> entry : states.entrySet()) {
+                    for (Map.Entry<Row, String> entry : states.entrySet()) {
                         bindKey(statement, entry.getKey());
                         statement.setString(5, entry.getValue());
                         statement.addBatch();
@@ -141,11 +185,20 @@ public class BlockDataRepository {
         }
     }
 
-    private void bindKey(PreparedStatement statement, BlockPos pos) throws SQLException {
-        statement.setString(1, pos.world().toString());
-        statement.setInt(2, pos.x());
-        statement.setInt(3, pos.y());
-        statement.setInt(4, pos.z());
+    private void bindKey(PreparedStatement statement, Row row) throws SQLException {
+        statement.setString(1, row.world());
+        statement.setInt(2, row.x());
+        statement.setInt(3, row.y());
+        statement.setInt(4, row.z());
+    }
+    private static Row rowOf(BlockPos pos) {
+        return new Row(pos.world().asString(), pos.x(), pos.y(), pos.z());
+    }
+
+    private static Map<Row, String> rowsOf(Map<BlockPos, String> states) {
+        Map<Row, String> rows = new HashMap<>();
+        states.forEach((pos, json) -> rows.put(rowOf(pos), json));
+        return rows;
     }
 
     private void initialize() throws SQLException {

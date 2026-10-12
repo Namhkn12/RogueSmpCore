@@ -52,6 +52,9 @@ public final class StaticDungeonManager {
         this.worlds = worlds;
         this.store = new JsonSqliteStore<>(plugin, "static_dungeon.db", "static_dungeon", "instance_id", StaticDungeonInstance.CODEC);
         this.instances.putAll(store.loadAll());
+        instances.values().forEach(instance -> {
+            if (instance.worldData() != null) worlds.remember(instance.id(), instance.worldData());
+        });
 
         Set<UUID> recordedIds = store.tryLoadKeys();
         if (recordedIds == null) {
@@ -121,8 +124,8 @@ public final class StaticDungeonManager {
             return CompletableFuture.failedFuture(new IllegalStateException("Phó bản đang được tạo, vui lòng đợi."));
         }
 
-        StaticDungeonInstance instance = new StaticDungeonInstance(ownerId, dungeonId, info.template(), info.expiry().expiresAt(DateUtils.now()));
-        return worlds.create(info.template(), instance.id())
+        StaticDungeonInstance instance = new StaticDungeonInstance(ownerId, dungeonId, info.template(), worlds.snapshotOf(info.template()), info.expiry().expiresAt(DateUtils.now()));
+        return worlds.create(info.template(), instance.id(), instance.worldData())
                 .thenCompose(world -> AsyncUtils.onMainThread(() -> {
                     instances.put(instance.id(), instance);
                     return persist(instance).thenCompose(saved -> saved

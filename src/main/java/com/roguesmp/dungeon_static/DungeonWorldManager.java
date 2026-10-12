@@ -2,7 +2,6 @@ package com.roguesmp.dungeon_static;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.region.ServerRegionManager;
-import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.AsyncUtils;
 import com.roguesmp.world.PolarTemplateData;
 import com.roguesmp.world.PolarTemplateManager;
@@ -15,10 +14,11 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Persistent dungeon worlds cloned from polar templates. An instance world is named {@code <template name>.<instanceId>},
@@ -31,13 +31,12 @@ public class DungeonWorldManager {
     private static final char INSTANCE_SEPARATOR = '.';
     private static final int AUTO_SAVE_TICKS = 6000;
 
-    private final RogueSmpCore plugin;
     private final PolarTemplateManager templates;
     private final PolarWorldManager worlds;
+    private final Map<UUID, PolarTemplateData> worldData = new ConcurrentHashMap<>();
 
     @Blocking
     public DungeonWorldManager(RogueSmpCore plugin, PolarTemplateManager templates) {
-        this.plugin = plugin;
         this.templates = templates;
         this.worlds = new PolarWorldManager(new File(plugin.getDataFolder(), WORLD_FOLDER).toPath(), NAMESPACE, this::buildConfig, this::applyBorder, WorldEvacuator.toDefaultWorld());
     }
@@ -51,43 +50,41 @@ public class DungeonWorldManager {
         return worlds.key(template.name() + INSTANCE_SEPARATOR + instanceId);
     }
 
+    public PolarTemplateData snapshotOf(PolarWorldKey template) {
+        return templates.data(template);
+    }
+
+    public void remember(UUID instanceId, PolarTemplateData data) {
+        worldData.put(instanceId, data);
+    }
+
     /**
-     * Snapshots the template's data (spawn, border), copies its saved WorldGuard region data, then copies the world
-     * itself. A failed creation removes what was copied.
+     * Copies the template's saved WorldGuard region data, then the world itself, which loads with {@code data} (spawn,
+     * border). A failed creation removes what was copied.
      */
-    public CompletableFuture<World> create(PolarWorldKey template, UUID instanceId) {
+    public CompletableFuture<World> create(PolarWorldKey template, UUID instanceId, PolarTemplateData data) {
         PolarWorldKey instance = worldKey(template, instanceId);
+        remember(instanceId, data);
 
         return templates.saveRegions(template)
-                .thenCompose(v -> AsyncUtils.onMainThread(() -> Registries.POLAR_TEMPLATE_DATA.registerAndSaveAsync(plugin, instance.name(), templates.data(template))))
-                .thenCompose(data -> AsyncUtils.run(() -> ServerRegionManager.getInstance().copyStoredData(templates.worlds().regionDataName(template), worlds.regionDataName(instance))))
+                .thenCompose(v -> AsyncUtils.run(() -> ServerRegionManager.getInstance().copyStoredData(templates.worlds().regionDataName(template), worlds.regionDataName(instance))))
                 .thenCompose(v -> worlds.copyFrom(templates.worlds(), template, instance))
-                .exceptionallyCompose(error -> discardPartial(instance).handle((v, cleanupError) -> null)
+                .exceptionallyCompose(error -> discardPartial(instance, instanceId).handle((v, cleanupError) -> null)
                         .thenCompose(v -> CompletableFuture.<World>failedFuture(error)));
     }
 
-    private CompletableFuture<Void> discardPartial(PolarWorldKey instance) {
-        return worlds.exists(instance).thenCompose(exists -> exists
-                ? CompletableFuture.<Void>completedFuture(null)
-                : deleteRegionData(instance).thenCompose(v -> removeSnapshot(instance)));
-    }
-
-    private CompletableFuture<Void> removeSnapshot(PolarWorldKey instance) {
-        return AsyncUtils.onMainThread(() -> Registries.POLAR_TEMPLATE_DATA.removeAndDeleteFilesAsync(plugin, instance.name()))
-                .thenAccept(removed -> { });
-    }
-
-    @Blocking
-    private void deleteOrphanSnapshots(Set<UUID> knownInstanceIds) {
-        for (String name : List.copyOf(Registries.POLAR_TEMPLATE_DATA.getAll().keySet())) {
-            UUID instanceId = parseInstanceId(name);
-            if (instanceId != null && !knownInstanceIds.contains(instanceId)) Registries.POLAR_TEMPLATE_DATA.removeAndDeleteFiles(plugin, name);
-        }
+    private CompletableFuture<Void> discardPartial(PolarWorldKey instance, UUID instanceId) {
+        return worlds.exists(instance).thenCompose(exists -> {
+            if (exists) return CompletableFuture.<Void>completedFuture(null);
+            worldData.remove(instanceId);
+            return deleteRegionData(instance);
+        });
     }
 
     private PolarTemplateData dataOf(PolarWorldKey instance) {
-        PolarTemplateData snapshot = Registries.POLAR_TEMPLATE_DATA.get(instance.name());
-        return snapshot != null ? snapshot : templates.data(templateOf(instance));
+        UUID instanceId = parseInstanceId(instance);
+        PolarTemplateData data = instanceId == null ? null : worldData.get(instanceId);
+        return data != null ? data : templates.data(templateOf(instance));
     }
 
     public CompletableFuture<World> load(PolarWorldKey template, UUID instanceId) {
@@ -100,7 +97,7 @@ public class DungeonWorldManager {
 
     public CompletableFuture<Void> delete(PolarWorldKey template, UUID instanceId) {
         PolarWorldKey instance = worldKey(template, instanceId);
-        return worlds.delete(instance).thenCompose(v -> deleteRegionData(instance)).thenCompose(v -> removeSnapshot(instance));
+        return worlds.delete(instance).thenCompose(v -> deleteRegionData(instance)).thenAccept(v -> worldData.remove(instanceId));
     }
 
     public CompletableFuture<Boolean> exists(PolarWorldKey template, UUID instanceId) {
@@ -114,7 +111,7 @@ public class DungeonWorldManager {
     /**
      * Deletes every dungeon world whose instance id is not in {@code knownInstanceIds}, which are leftovers of a crash
      * between creating a world and recording its instance, then sweeps the region data they left. Worlds whose name does
-     * not parse as an instance are not ours to judge and are kept.
+     * not parse as an instance are kept.
      *
      * @return how many worlds were deleted
      */
@@ -125,7 +122,6 @@ public class DungeonWorldManager {
             return instanceId != null && !knownInstanceIds.contains(instanceId);
         });
         worlds.sweepOrphans(key -> parseInstanceId(key) != null);
-        deleteOrphanSnapshots(knownInstanceIds);
         return deleted;
     }
 

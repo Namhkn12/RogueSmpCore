@@ -24,6 +24,7 @@ import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import live.minehub.polarpaper.core.event.PolarEntitySpawnEvent;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.RogueSmpCore;
 import org.bukkit.entity.Entity;
 import java.util.List;
 import org.bukkit.inventory.EquipmentSlot;
@@ -31,6 +32,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
 public class BlockListener implements Listener {
+
+    private static final int ATTACH_RETRY_TICKS = 100;
     private final BlockManager manager;
 
     public BlockListener(){
@@ -50,9 +53,7 @@ public class BlockListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPolarEntitySpawn(PolarEntitySpawnEvent event){
         Entity entity = event.getBukkitEntity();
-        Utils.runLater(() -> {
-            if(entity.isValid()) manager.onEntitiesLoad(List.of(entity));
-        });
+        manager.onEntitiesLoad(List.of(entity));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
