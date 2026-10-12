@@ -14,9 +14,9 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 
 public class IslandWorldManager {
 
@@ -30,10 +30,14 @@ public class IslandWorldManager {
     private static final int AUTO_SAVE_TICKS = 6000;
 
     private final PolarWorldManager backend;
+    private BiFunction<UUID, World, @Nullable Location> savedSpawns = (islandId, world) -> null;
 
     @Blocking
     public IslandWorldManager(RogueSmpCore plugin) {
-        this.backend = new PolarWorldManager(new File(plugin.getDataFolder(), WORLD_FOLDER_NAME).toPath(), NAMESPACE, key -> buildConfig(), (key, world) -> applyBorder(world), WorldEvacuator.none());
+        this.backend = new PolarWorldManager(new File(plugin.getDataFolder(), WORLD_FOLDER_NAME).toPath(), NAMESPACE, key -> buildConfig(), (key, world) -> {
+            applyBorder(world);
+            applySavedSpawn(key, world);
+        }, WorldEvacuator.none());
         this.backend.sweepOrphans(key -> isIslandId(key.name()));
     }
 
@@ -58,6 +62,21 @@ public class IslandWorldManager {
                 .autoSaveIntervalTicks(AUTO_SAVE_TICKS)
                 .announceAutosave(false)
                 .build();
+    }
+
+    /**
+     * Island spawns are saved in the island data and applied to the Bukkit world as it loads, so everything else can
+     * just ask the world for its spawn.
+     */
+    public void useSavedSpawns(BiFunction<UUID, World, @Nullable Location> savedSpawns) {
+        this.savedSpawns = savedSpawns;
+    }
+
+    private void applySavedSpawn(PolarWorldKey key, World world) {
+        if (!isIslandId(key.name())) return;
+
+        Location spawn = savedSpawns.apply(UUID.fromString(key.name()), world);
+        if (spawn != null) world.setSpawnLocation(spawn);
     }
 
     private void applyBorder(World world) {

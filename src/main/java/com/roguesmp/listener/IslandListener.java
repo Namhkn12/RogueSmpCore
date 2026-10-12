@@ -1,14 +1,12 @@
 package com.roguesmp.listener;
 
-import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.utils.WorldPos;
+import com.roguesmp.world.Hub;
 import io.papermc.paper.event.player.AsyncPlayerSpawnLocationEvent;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -17,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.util.Vector;
 
 import java.util.UUID;
@@ -39,15 +38,15 @@ public class IslandListener implements Listener {
         PlayerData playerData = islandManager.getPlayerManager().getDataManager().getData(uuid);
         if (playerData == null) return;
 
-        UUID islandId = playerData.getIslandId();
-        IslandData loadedData = islandManager.getIslandDataManager().loadIslandData(islandId);
-        IslandData islandData = loadedData == null ? null : islandManager.getIslandDataManager().cache(loadedData);
-
         WorldPos lastLocation = playerData.getLastLocation();
         if (lastLocation == null) return;
 
         UUID lastIslandId = islandManager.getIslandWorldManager().getIslandId(lastLocation.world().asString());
         if (lastIslandId == null) return;
+
+        UUID islandId = playerData.getIslandId();
+        IslandData loadedData = islandManager.getIslandDataManager().loadIslandData(islandId);
+        IslandData islandData = loadedData == null ? null : islandManager.getIslandDataManager().cache(loadedData);
 
         if (islandData != null && !islandData.isArchived() && lastIslandId.equals(islandId)) {
             try {
@@ -59,8 +58,8 @@ public class IslandListener implements Listener {
             }
         }
 
-        islandManager.getTeleportService().getMultiverseApi().getWorldManager().getDefaultWorld()
-                .peek(hub -> event.setSpawnLocation(hub.getSpawnLocation()));
+        Location hub = Hub.spawn();
+        event.setSpawnLocation(hub);
     }
 
     @EventHandler
@@ -74,11 +73,42 @@ public class IslandListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerRespawn(PlayerPostRespawnEvent event) {
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
-        if (!islandManager.getIslandWorldManager().isIslandWorld(player.getWorld())) return;
+        clearLegacyIslandRespawn(player);
 
-        returnToIslandSpawn(player);
+        World world = player.getWorld();
+        if (islandManager.getIslandWorldManager().isIslandWorld(world)) {
+            Location hub = isGuest(player, world) ? hubSpawn() : null;
+            event.setRespawnLocation(hub != null ? hub : islandSpawn(world));
+            return;
+        }
+
+        World respawnWorld = event.getRespawnLocation().getWorld();
+        if (respawnWorld == null || !islandManager.getIslandWorldManager().isIslandWorld(respawnWorld)) return;
+
+        Location hub = hubSpawn();
+        event.setRespawnLocation(hub);
+    }
+
+    private void clearLegacyIslandRespawn(Player player) {
+        Location stored = player.getRespawnLocation();
+        if (stored != null && stored.getWorld() != null && islandManager.getIslandWorldManager().isIslandWorld(stored.getWorld())) {
+            player.setRespawnLocation(null);
+        }
+    }
+
+    private boolean isGuest(Player player, World world) {
+        IslandData islandData = islandManager.getIslandByWorld(world);
+        return islandData == null || !islandData.isMember(player.getUniqueId());
+    }
+
+    private Location islandSpawn(World world) {
+        return world.getSpawnLocation();
+    }
+
+    private Location hubSpawn() {
+        return Hub.spawn();
     }
 
     @EventHandler
@@ -104,13 +134,10 @@ public class IslandListener implements Listener {
 
     private void returnToIslandSpawn(Player player) {
         World world = player.getWorld();
-        IslandData islandData = islandManager.getIslandByWorld(world);
-        Location spawnLocation = islandData == null ? null : islandData.getSpawnLocationWorld(world);
-        if (spawnLocation == null) {
-            player.sendMessage(Component.text("Bạn không có điểm hồi sinh nào nên sẽ được dịch chuyển về hub.", NamedTextColor.YELLOW));
+        if (isGuest(player, world)) {
             islandManager.getTeleportService().sendToHub(player);
             return;
         }
-        player.teleport(spawnLocation);
+        player.teleport(islandSpawn(world));
     }
 }

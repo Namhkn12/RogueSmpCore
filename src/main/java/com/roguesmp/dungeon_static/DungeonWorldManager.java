@@ -9,6 +9,7 @@ import com.roguesmp.world.PolarWorldKey;
 import com.roguesmp.world.PolarWorldManager;
 import com.roguesmp.world.WorldEvacuator;
 import live.minehub.polarpaper.core.config.Config;
+import net.kyori.adventure.key.Key;
 import org.bukkit.World;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
@@ -130,10 +131,10 @@ public class DungeonWorldManager {
     }
 
     /**
-     * @param worldKeyValue a PolarPaper world key such as {@code dungeon_<template>.<instanceId>}, which may belong to a world that is not loaded
+     * @param worldKeyValue a PolarPaper world key such as {@code dungeon_<template>.<instanceId>}, with or without the namespace in front, which may belong to a world that is not loaded
      */
     public @Nullable UUID getInstanceId(String worldKeyValue) {
-        PolarWorldKey key = worlds.keyOf(worldKeyValue);
+        PolarWorldKey key = worlds.keyOf(Key.key(worldKeyValue).value());
         return key == null ? null : parseInstanceId(key);
     }
 

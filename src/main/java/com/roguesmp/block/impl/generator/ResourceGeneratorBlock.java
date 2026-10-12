@@ -45,7 +45,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     private GeneratorStats stats;
     private double energyDebt;
 
-    private BlockFace faceDirection;
+    private BlockFace faceDirection = BlockFace.EAST;
     private int placeDelay;
     private int breakTicksLeft;
     private boolean mining;

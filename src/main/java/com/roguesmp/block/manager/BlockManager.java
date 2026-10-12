@@ -373,7 +373,14 @@ public class BlockManager {
     private @Nullable String dirtyState(SmpBlock block){
         if(!block.isDirty() || !block.isHydrated() || !block.isStateful()) return null;
 
-        DataResult<JsonElement> encoded = block.encodeState();
+        DataResult<JsonElement> encoded;
+        try{
+            encoded = block.encodeState();
+        }
+        catch(RuntimeException e){
+            RogueSmpCore.LOGGER.error("Could not encode state of block at {}", block.getPos(), e);
+            return null;
+        }
         if(!encoded.isSuccess()){
             RogueSmpCore.LOGGER.error("Could not encode state of block at {}: {}", block.getPos(), encoded.error());
             return null;
@@ -436,9 +443,13 @@ public class BlockManager {
         for(SmpBlock block : blocks.values()){
             if(!block.isHydrated() || !block.isStateful()) continue;
 
-            DataResult<JsonElement> encoded = block.encodeState();
-            if(encoded.isSuccess()) states.put(block.getPos(), encoded.result().toString());
-            else RogueSmpCore.LOGGER.error("Could not encode state of block at {}: {}", block.getPos(), encoded.error());
+            try {
+                DataResult<JsonElement> encoded = block.encodeState();
+                if(encoded.isSuccess()) states.put(block.getPos(), encoded.result().toString());
+                else RogueSmpCore.LOGGER.error("Could not encode state of block at {}: {}", block.getPos(), encoded.error());
+            } catch(RuntimeException e) {
+                RogueSmpCore.LOGGER.error("Could not encode state of block at {}", block.getPos(), e);
+            }
         }
 
         repository.closeWith(states);

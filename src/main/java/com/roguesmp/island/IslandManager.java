@@ -34,6 +34,10 @@ public class IslandManager {
         this.playerManager = playerManager;
         this.islandWorldManager = new IslandWorldManager(plugin);
         this.islandDataManager = new IslandDataManager(plugin);
+        this.islandWorldManager.useSavedSpawns((islandId, world) -> {
+            IslandData data = islandDataManager.getCachedData(islandId);
+            return data == null ? null : data.getSpawnLocationWorld(world);
+        });
         this.islandRegionManager = new IslandRegionManager();
         this.teleportService = new IslandTeleportService(playerManager, islandDataManager, islandWorldManager);
         this.membershipService = new IslandMembershipService(playerManager, islandDataManager, islandWorldManager, islandRegionManager, teleportService);
@@ -69,7 +73,7 @@ public class IslandManager {
     }
 
     private void finishIslandCreation(Player creator, IslandData islandData, World world) {
-        Location spawnPoint = islandWorldManager.getDefaultSpawn(world);
+        Location spawnPoint = world.getSpawnLocation();
         islandRegionManager.createIslandRegion(world, creator.getUniqueId());
 
         PlayerData playerData = playerManager.getDataManager().getData(creator.getUniqueId());
@@ -81,8 +85,7 @@ public class IslandManager {
         teleportService.getMultiverseApi().getSafetyTeleporter()
                 .to(spawnPoint)
                 .passengerMode(PassengerModes.RETAIN_ALL)
-                .teleportSingle(creator)
-                .onSuccess(() -> creator.setRespawnLocation(spawnPoint, true));
+                .teleportSingle(creator);
     }
 
     public boolean setIslandSpawn(Player player, Location targetLocation) {
@@ -99,6 +102,7 @@ public class IslandManager {
         }
 
         islandData.setSpawnLocation(targetLocation);
+        targetLocation.getWorld().setSpawnLocation(islandData.getSpawnLocationWorld(targetLocation.getWorld()));
         islandDataManager.saveAsync(islandData);
         return true;
     }
