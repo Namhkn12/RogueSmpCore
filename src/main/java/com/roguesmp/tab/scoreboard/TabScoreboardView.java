@@ -1,5 +1,6 @@
 package com.roguesmp.tab.scoreboard;
 
+import com.roguesmp.tab.ElementBinding;
 import com.roguesmp.tab.TabContext;
 import com.roguesmp.tab.TabEngine;
 import com.roguesmp.tab.TabView;
@@ -22,49 +23,14 @@ import java.util.UUID;
  */
 public final class TabScoreboardView implements TabView {
 
-    /** Ties one {@link TabElement} to the TAB {@link Line} it renders into, and to the context listeners that keep it updated. */
-    private final class Binding {
-        TabElement element;
-        Line line; // null for the title binding
-        int ticksSinceRefresh;
-        final List<Runnable> unbindTasks = new ArrayList<>();
-
-        Binding(TabElement element, Line line) {
-            this.element = element;
-            this.line = line;
-            bind();
-        }
-
-        void bind() {
-            for (String dep : element.dependencies()) {
-                java.util.function.Consumer<TabContext> listener = ctx -> refresh(this);
-                context.onChange(dep, listener);
-                unbindTasks.add(() -> context.removeListener(dep, listener));
-            }
-        }
-
-        void unbind() {
-            unbindTasks.forEach(Runnable::run);
-            unbindTasks.clear();
-        }
-
-        void replace(TabElement newElement) {
-            unbind();
-            this.element = newElement;
-            bind();
-        }
-    }
-
     private final Player player;
     private final TabPlayer tabPlayer;
-    private final TabContext context;
     private final Scoreboard scoreboard;
-    private final List<Binding> bindings = new ArrayList<>();
-    private final Binding titleBinding;
+    private final List<ElementBinding> bindings = new ArrayList<>();
+    private final ElementBinding titleBinding;
 
     private TabScoreboardView(Player player, String name, TabElement title, List<TabElement> lines, TabContext context) {
         this.player = player;
-        this.context = context;
         this.tabPlayer = TabEngine.tabPlayer(player);
         if (tabPlayer == null) {
             throw new IllegalStateException("Player " + player.getName() + " is not yet loaded by TAB; check TabEngine.isReady() first.");
@@ -76,9 +42,10 @@ public final class TabScoreboardView implements TabView {
 
         List<Line> tabLines = scoreboard.getLines();
         for (int i = 0; i < lines.size(); i++) {
-            bindings.add(new Binding(lines.get(i), tabLines.get(i)));
+            Line line = tabLines.get(i);
+            bindings.add(new ElementBinding(context, lines.get(i), binding -> line.setText(binding.render())));
         }
-        this.titleBinding = new Binding(title, null);
+        this.titleBinding = new ElementBinding(context, title, binding -> scoreboard.setTitle(binding.render()));
 
         TabEngine.getInstance().register(this);
     }
@@ -95,31 +62,21 @@ public final class TabScoreboardView implements TabView {
 
     /** Swaps the element rendering a given line, unbinding the old element's context listeners. */
     public void setLine(int index, TabElement element) {
-        Binding binding = bindings.get(index);
+        ElementBinding binding = bindings.get(index);
         binding.replace(element);
-        refresh(binding);
+        binding.refresh();
     }
 
     /** Swaps the element rendering the title, unbinding the old element's context listeners. */
     public void setTitle(TabElement element) {
         titleBinding.replace(element);
-        refresh(titleBinding);
+        titleBinding.refresh();
     }
 
     /** Re-renders every line and the title right now, even the ones with no changed dependency. */
     public void refreshAll() {
-        bindings.forEach(this::refresh);
-        refresh(titleBinding);
-    }
-
-    private void refresh(Binding binding) {
-        String text = binding.element.render(context);
-        if (binding.line != null) {
-            binding.line.setText(text);
-        } else {
-            scoreboard.setTitle(text);
-        }
-        binding.ticksSinceRefresh = 0;
+        bindings.forEach(ElementBinding::refresh);
+        titleBinding.refresh();
     }
 
     @Override
@@ -129,27 +86,19 @@ public final class TabScoreboardView implements TabView {
 
     @Override
     public void tick() {
-        tickBinding(titleBinding);
-        for (Binding binding : bindings) {
-            tickBinding(binding);
-        }
+        titleBinding.tick();
+        bindings.forEach(ElementBinding::tick);
     }
 
-    private void tickBinding(Binding binding) {
-        int interval = binding.element.refreshTicks();
-        if (interval <= 0) return;
-        if (++binding.ticksSinceRefresh >= interval) {
-            refresh(binding);
-        }
-    }
-
-    /** Stops updating this view, switches the player to the library default scoreboard, then removes this one. */
+    /** Stops updating this view and removes it. With {@code restoreDefaults}, switches the player to the library default scoreboard first. */
     @Override
-    public void destroy() {
+    public void destroy(boolean restoreDefaults) {
         TabEngine.getInstance().unregister(this);
         titleBinding.unbind();
-        bindings.forEach(Binding::unbind);
-        Objects.requireNonNull(TabAPI.getInstance().getScoreboardManager()).showScoreboard(tabPlayer, TabEngine.defaultScoreboard(player));
+        bindings.forEach(ElementBinding::unbind);
+        if (restoreDefaults) {
+            Objects.requireNonNull(TabAPI.getInstance().getScoreboardManager()).showScoreboard(tabPlayer, TabEngine.defaultScoreboard(player));
+        }
         scoreboard.unregister();
     }
 
@@ -184,6 +133,12 @@ public final class TabScoreboardView implements TabView {
         /** Adds a line element. Lines render top to bottom in the order they're added. */
         public Builder line(TabElement element) {
             this.lines.add(element);
+            return this;
+        }
+
+        /** Adds several line elements in order. */
+        public Builder lines(List<TabElement> elements) {
+            this.lines.addAll(elements);
             return this;
         }
 

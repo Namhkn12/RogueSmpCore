@@ -1,5 +1,6 @@
 package com.roguesmp.tab.tablist;
 
+import com.roguesmp.tab.ElementBinding;
 import com.roguesmp.tab.TabContext;
 import com.roguesmp.tab.TabEngine;
 import com.roguesmp.tab.TabView;
@@ -11,14 +12,11 @@ import me.neznamy.tab.api.tablist.layout.Layout;
 import me.neznamy.tab.api.tablist.layout.LayoutManager;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
 /**
  * A per-player custom TAB tablist layout, made of numbered slots plus an optional header and footer.
@@ -50,84 +48,23 @@ public final class TabListView implements TabView {
     private static String resolveSlot(TabPlayer viewer, int slotId) {
         TabListView view = ACTIVE.get(viewer.getUniqueId());
         if (view == null) return "";
-        Binding binding = view.slots.get(slotId);
-        return binding == null ? "" : binding.element.render(view.context);
+        Slot slot = view.slots.get(slotId);
+        return slot == null ? "" : slot.binding.render();
     }
 
-    /** Ties one {@link TabElement} to a slot number, its shared placeholder, and the context listeners that keep it updated. */
-    private final class Binding {
+    private final class Slot {
         final int slotId;
-        TabElement element;
         final PlayerPlaceholder placeholder;
+        final ElementBinding binding;
         // What was actually baked into the last sent Layout — unlike text, skin/ping can't be pushed
         // incrementally, so push() compares against these to know whether a full resend is required.
         String lastSkin;
         Integer lastPing;
-        int ticksSinceRefresh;
-        final List<Runnable> unbindTasks = new ArrayList<>();
 
-        Binding(int slotId, TabElement element) {
+        Slot(int slotId, TabElement element) {
             this.slotId = slotId;
-            this.element = element;
             this.placeholder = slotPlaceholder(slotId);
-            bind();
-        }
-
-        void bind() {
-            for (String dep : element.dependencies()) {
-                Consumer<TabContext> listener = ctx -> push(this);
-                context.onChange(dep, listener);
-                unbindTasks.add(() -> context.removeListener(dep, listener));
-            }
-        }
-
-        void unbind() {
-            unbindTasks.forEach(Runnable::run);
-            unbindTasks.clear();
-        }
-
-        void replace(TabElement newElement) {
-            unbind();
-            this.element = newElement;
-            bind();
-        }
-    }
-
-    /** Same reactive wiring as {@link Binding}, minus the slot/placeholder machinery — used for header and footer. */
-    private final class TextBinding {
-        TabElement element;
-        final Consumer<String> push;
-        int ticksSinceRefresh;
-        final List<Runnable> unbindTasks = new ArrayList<>();
-
-        TextBinding(TabElement element, Consumer<String> push) {
-            this.element = element;
-            this.push = push;
-            bind();
-        }
-
-        void bind() {
-            for (String dep : element.dependencies()) {
-                Consumer<TabContext> listener = ctx -> pushNow();
-                context.onChange(dep, listener);
-                unbindTasks.add(() -> context.removeListener(dep, listener));
-            }
-        }
-
-        void pushNow() {
-            push.accept(element.render(context));
-            ticksSinceRefresh = 0;
-        }
-
-        void unbind() {
-            unbindTasks.forEach(Runnable::run);
-            unbindTasks.clear();
-        }
-
-        void replace(TabElement newElement) {
-            unbind();
-            this.element = newElement;
-            bind();
+            this.binding = new ElementBinding(context, element, b -> push(this));
         }
     }
 
@@ -135,10 +72,10 @@ public final class TabListView implements TabView {
     private final TabPlayer tabPlayer;
     private final TabContext context;
     private final String layoutName;
-    private final Map<Integer, Binding> slots = new LinkedHashMap<>();
+    private final Map<Integer, Slot> slots = new LinkedHashMap<>();
     private final Map<String, int[]> groups = new LinkedHashMap<>();
-    private TextBinding headerBinding;
-    private TextBinding footerBinding;
+    private ElementBinding headerBinding;
+    private ElementBinding footerBinding;
     private boolean shown;
 
     private TabListView(Player player, String name, TabContext context) {
@@ -159,13 +96,13 @@ public final class TabListView implements TabView {
 
     /** Sets the element for slot {@code id}, with no custom skin or ping. */
     public TabListView slot(int id, TabElement element) {
-        Binding existing = slots.get(id);
+        Slot existing = slots.get(id);
         if (existing != null) {
-            existing.replace(element);
-            if (shown) push(existing);
+            existing.binding.replace(element);
+            if (shown) existing.binding.refresh();
             return this;
         }
-        slots.put(id, new Binding(id, element));
+        slots.put(id, new Slot(id, element));
         // A new slot id changes the layout's structure, so (unlike a plain content update) this needs
         // one full resend to actually add the slot — rare/one-off, so no need to worry about flicker here.
         if (shown) sendFullLayout();
@@ -181,25 +118,25 @@ public final class TabListView implements TabView {
 
     /** Sets the header element. Can be swapped later by calling this again. */
     public TabListView header(TabElement element) {
-        Consumer<String> push = text -> Objects.requireNonNull(TabAPI.getInstance().getHeaderFooterManager()).setHeader(tabPlayer, text);
         if (headerBinding == null) {
-            headerBinding = new TextBinding(element, push);
+            headerBinding = new ElementBinding(context, element,
+                    b -> Objects.requireNonNull(TabAPI.getInstance().getHeaderFooterManager()).setHeader(tabPlayer, b.render()));
         } else {
             headerBinding.replace(element);
         }
-        if (shown) headerBinding.pushNow();
+        if (shown) headerBinding.refresh();
         return this;
     }
 
     /** Sets the footer element. Can be swapped later by calling this again. */
     public TabListView footer(TabElement element) {
-        Consumer<String> push = text -> Objects.requireNonNull(TabAPI.getInstance().getHeaderFooterManager()).setFooter(tabPlayer, text);
         if (footerBinding == null) {
-            footerBinding = new TextBinding(element, push);
+            footerBinding = new ElementBinding(context, element,
+                    b -> Objects.requireNonNull(TabAPI.getInstance().getHeaderFooterManager()).setFooter(tabPlayer, b.render()));
         } else {
             footerBinding.replace(element);
         }
-        if (shown) footerBinding.pushNow();
+        if (shown) footerBinding.refresh();
         return this;
     }
 
@@ -209,49 +146,50 @@ public final class TabListView implements TabView {
         shown = true;
         sendFullLayout();
 
-        if (headerBinding != null) headerBinding.pushNow();
-        if (footerBinding != null) footerBinding.pushNow();
+        if (headerBinding != null) headerBinding.refresh();
+        if (footerBinding != null) footerBinding.refresh();
     }
 
-    private void push(Binding binding) {
-        String skin = binding.element.skin(context);
-        Integer ping = binding.element.ping(context);
-        if (!Objects.equals(skin, binding.lastSkin) || !Objects.equals(ping, binding.lastPing)) {
+    private void push(Slot slot) {
+        TabElement element = slot.binding.element();
+        String skin = element.skin(context);
+        Integer ping = element.ping(context);
+        if (!Objects.equals(skin, slot.lastSkin) || !Objects.equals(ping, slot.lastPing)) {
             // Skin/ping are baked into the Layout at send time, not substitutable through the placeholder
             // like text is — the only way to change either is a full resend. Rare in practice (only when
             // what a slot represents actually changes, e.g. a different player now occupying it).
             sendFullLayout();
             return;
         }
-        binding.placeholder.updateValue(tabPlayer, binding.element.render(context));
-        binding.ticksSinceRefresh = 0;
+        slot.placeholder.updateValue(tabPlayer, slot.binding.render());
     }
 
     private void sendFullLayout() {
         LayoutManager lm = Objects.requireNonNull(TabAPI.getInstance().getLayoutManager());
         Layout layout = lm.createNewLayout(layoutName);
-        for (Binding binding : slots.values()) {
-            addFixedSlot(layout, binding);
+        for (Slot slot : slots.values()) {
+            addFixedSlot(layout, slot);
         }
         groups.forEach(layout::addGroup);
         lm.sendLayout(tabPlayer, layout);
     }
 
-    private void addFixedSlot(Layout layout, Binding binding) {
-        String text = "%roguesmp_tabslot_" + binding.slotId + "%";
-        String skin = binding.element.skin(context);
-        Integer ping = binding.element.ping(context);
-        binding.lastSkin = skin;
-        binding.lastPing = ping;
+    private void addFixedSlot(Layout layout, Slot slot) {
+        String text = "%roguesmp_tabslot_" + slot.slotId + "%";
+        TabElement element = slot.binding.element();
+        String skin = element.skin(context);
+        Integer ping = element.ping(context);
+        slot.lastSkin = skin;
+        slot.lastPing = ping;
 
         if (skin != null && !skin.isEmpty() && ping != null) {
-            layout.addFixedSlot(binding.slotId, text, skin, ping);
+            layout.addFixedSlot(slot.slotId, text, skin, ping);
         } else if (skin != null && !skin.isEmpty()) {
-            layout.addFixedSlot(binding.slotId, text, skin);
+            layout.addFixedSlot(slot.slotId, text, skin);
         } else if (ping != null) {
-            layout.addFixedSlot(binding.slotId, text, ping);
+            layout.addFixedSlot(slot.slotId, text, ping);
         } else {
-            layout.addFixedSlot(binding.slotId, text);
+            layout.addFixedSlot(slot.slotId, text);
         }
     }
 
@@ -262,44 +200,35 @@ public final class TabListView implements TabView {
 
     @Override
     public void tick() {
-        for (Binding binding : slots.values()) {
-            int interval = binding.element.refreshTicks();
-            if (interval <= 0) continue;
-            if (++binding.ticksSinceRefresh >= interval) {
-                push(binding);
-            }
-        }
-        tickText(headerBinding);
-        tickText(footerBinding);
+        slots.values().forEach(slot -> slot.binding.tick());
+        if (headerBinding != null) headerBinding.tick();
+        if (footerBinding != null) footerBinding.tick();
     }
 
-    private void tickText(TextBinding binding) {
-        if (binding == null) return;
-        int interval = binding.element.refreshTicks();
-        if (interval <= 0) return;
-        if (++binding.ticksSinceRefresh >= interval) {
-            binding.pushNow();
-        }
-    }
-
-    /** Stops updating this view and, if it was shown, resets the layout and restores the library default header/footer. */
+    /**
+     * Stops updating this view. If it was shown, restores the library default header/footer and, with
+     * {@code restoreDefaults}, also resets the layout. A replacing view sends its own layout, so skipping the
+     * reset avoids briefly showing the default tablist in between.
+     */
     @Override
-    public void destroy() {
+    public void destroy(boolean restoreDefaults) {
         TabEngine.getInstance().unregister(this);
         ACTIVE.remove(player.getUniqueId(), this);
-        slots.values().forEach(Binding::unbind);
+        slots.values().forEach(slot -> slot.binding.unbind());
         if (headerBinding != null) headerBinding.unbind();
         if (footerBinding != null) footerBinding.unbind();
-        if (shown) {
+        if (!shown) return;
+
+        if (restoreDefaults) {
             Objects.requireNonNull(TabAPI.getInstance().getLayoutManager()).resetLayout(tabPlayer);
-            // TAB has no "unset header/footer" call — only restore what this view actually touched, so we
-            // don't stomp on header/footer some other system might be managing independently of this view.
-            if (headerBinding != null) {
-                Objects.requireNonNull(TabAPI.getInstance().getHeaderFooterManager()).setHeader(tabPlayer, TabEngine.defaultHeader(player));
-            }
-            if (footerBinding != null) {
-                Objects.requireNonNull(TabAPI.getInstance().getHeaderFooterManager()).setFooter(tabPlayer, TabEngine.defaultFooter(player));
-            }
+        }
+        // TAB has no "unset header/footer" call — only restore what this view actually touched, so we
+        // don't stomp on header/footer some other system might be managing independently of this view.
+        if (headerBinding != null) {
+            Objects.requireNonNull(TabAPI.getInstance().getHeaderFooterManager()).setHeader(tabPlayer, TabEngine.defaultHeader(player));
+        }
+        if (footerBinding != null) {
+            Objects.requireNonNull(TabAPI.getInstance().getHeaderFooterManager()).setFooter(tabPlayer, TabEngine.defaultFooter(player));
         }
     }
 }

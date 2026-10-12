@@ -1,18 +1,14 @@
 package com.roguesmp.command;
 
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.fishing.FishingHotspotManager;
-import com.roguesmp.fishing.FishingHotspotSpot;
 import com.roguesmp.permission.Permissions;
+import com.roguesmp.region.ServerRegionManager;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
-import com.roguesmp.utils.WorldPos;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.ListArgumentBuilder;
 import dev.jorel.commandapi.arguments.StringArgument;
-
-import java.util.List;
+import org.bukkit.entity.Player;
 
 public final class FishingHotspotCommand {
 
@@ -22,27 +18,21 @@ public final class FishingHotspotCommand {
     public static void register() {
         new CommandAPICommand("fishhotspot")
                 .withPermission(Permissions.FISHING_ADMIN.node())
-                .withSubcommand(new CommandAPICommand("addspot")
-                        .withArguments(new StringArgument("id"))
-                        .withOptionalArguments(new ListArgumentBuilder<String>("hotspots")
-                                .withList(() -> Registries.FISHING_HOTSPOT.getAll().keySet())
-                                .withMapper(hotspotId -> hotspotId)
-                                .buildGreedy())
-                        .executesPlayer((player, args) -> {
-                            String id = (String) args.get("id");
-                            List<String> hotspots = (List<String>) args.getOrDefault("hotspots", List.of());
-                            FishingHotspotSpot spot = new FishingHotspotSpot(WorldPos.of(player.getLocation()), List.copyOf(hotspots));
-                            Registries.FISHING_HOTSPOT_SPOT.registerAndSave(RogueSmpCore.getInstance(), id, spot);
-                            player.sendMessage(Utils.fromString("<green>Hotspot spot '" + id + "' saved at your position ("
-                                    + (hotspots.isEmpty() ? "any hotspot type" : String.join(", ", hotspots)) + ")."));
-                        }))
                 .withSubcommand(new CommandAPICommand("spawn")
-                        .withArguments(new StringArgument("hotspot")
-                                .replaceSuggestions(ArgumentSuggestions.strings(info -> Registries.FISHING_HOTSPOT.getAll().keySet().toArray(String[]::new))))
+                        .withArguments(
+                                new StringArgument("hotspot")
+                                        .replaceSuggestions(ArgumentSuggestions.strings(info -> Registries.FISHING_HOTSPOT.getAll().keySet().toArray(String[]::new))),
+                                new StringArgument("region")
+                                        .replaceSuggestions(ArgumentSuggestions.strings(info -> info.sender() instanceof Player player
+                                                ? ServerRegionManager.getInstance().regions(player.getWorld()).keySet().toArray(String[]::new)
+                                                : new String[0])))
                         .executesPlayer((player, args) -> {
                             String hotspotId = (String) args.get("hotspot");
-                            boolean activated = FishingHotspotManager.getInstance().activate("manual_" + player.getUniqueId(), hotspotId, player.getLocation());
-                            if (!activated) player.sendMessage(Utils.fromString("<red>No hotspot named '" + hotspotId + "'."));
+                            String regionId = (String) args.get("region");
+                            boolean activated = FishingHotspotManager.getInstance().activate(hotspotId, player.getWorld(), regionId);
+                            if (!activated) {
+                                player.sendMessage(Utils.fromString("<red>Could not activate: unknown hotspot or region, or the region already has a hotspot."));
+                            }
                         }))
                 .withSubcommand(new CommandAPICommand("clear")
                         .executes((sender, args) -> {

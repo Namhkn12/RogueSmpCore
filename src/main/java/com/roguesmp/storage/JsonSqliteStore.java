@@ -2,6 +2,7 @@ package com.roguesmp.storage;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
@@ -18,7 +19,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -152,6 +155,24 @@ public class JsonSqliteStore<V> {
         }, executor).join();
     }
 
+    /**
+     * @return every stored key, including rows that no longer decode, or null if the table could not be read
+     */
+    public @Blocking @Nullable Set<UUID> tryLoadKeys() {
+        return CompletableFuture.supplyAsync(() -> {
+            Set<UUID> keys = new HashSet<>();
+            String sql = "SELECT " + keyColumn + " FROM " + table;
+
+            try (Statement statement = connection.createStatement(); ResultSet result = statement.executeQuery(sql)) {
+                while (result.next()) keys.add(UUID.fromString(result.getString(keyColumn)));
+                return keys;
+            } catch (SQLException | IllegalArgumentException e) {
+                RogueSmpCore.LOGGER.error("Failed to scan {} keys", table, e);
+                return null;
+            }
+        }, executor).join();
+    }
+
     public @Blocking Map<UUID, V> loadAll() {
         return CompletableFuture.supplyAsync(() -> {
             Map<UUID, V> all = new HashMap<>();
@@ -159,7 +180,14 @@ public class JsonSqliteStore<V> {
 
             try (Statement statement = connection.createStatement(); ResultSet result = statement.executeQuery(sql)) {
                 while (result.next()) {
-                    UUID key = UUID.fromString(result.getString(keyColumn));
+                    String rawKey = result.getString(keyColumn);
+                    UUID key;
+                    try {
+                        key = UUID.fromString(rawKey);
+                    } catch (IllegalArgumentException e) {
+                        RogueSmpCore.LOGGER.warn("Skipping {} row with invalid key {}", table, rawKey);
+                        continue;
+                    }
                     V value = decode(key, result.getString("data"));
                     if (value != null) all.put(key, value);
                 }
@@ -199,7 +227,13 @@ public class JsonSqliteStore<V> {
     }
 
     private @Nullable V decode(UUID key, String rawJson) {
-        JsonObject json = Utils.GSON.fromJson(rawJson, JsonObject.class);
+        JsonObject json;
+        try {
+            json = Utils.GSON.fromJson(rawJson, JsonObject.class);
+        } catch (JsonParseException e) {
+            RogueSmpCore.LOGGER.warn("Failed to parse {} data (key: {})", table, key, e);
+            return null;
+        }
         if (json == null) return null;
 
         DataResult<V> decoded = codec.decode(json, JsonOps.INSTANCE);

@@ -30,6 +30,8 @@ public class Keys {
 
     public static final NamespacedKey NPC_ID = of("npc");
 
+    public static final NamespacedKey REGION_WAND = of("region_wand");
+
     public static final NamespacedKey BLOCK_ID = of("block_id");
 
     public static final NamespacedKey BLOCK_POS = of("block_pos");

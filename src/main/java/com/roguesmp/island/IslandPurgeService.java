@@ -1,6 +1,7 @@
 package com.roguesmp.island;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.utils.AsyncUtils;
 import com.roguesmp.utils.Utils;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -34,7 +35,7 @@ public class IslandPurgeService {
 
     public void purge(UUID islandId) {
         World world = worldManager.getLoadedWorld(islandId);
-        String worldName = worldManager.getWorldName(islandId);
+        String worldName = worldManager.getRegionDataName(islandId);
 
         if (world == null) {
             finishPurge(islandId, worldName);
@@ -47,11 +48,14 @@ public class IslandPurgeService {
     }
 
     private void finishPurge(UUID islandId, String worldName) {
-        regionManager.deleteStoredRegionData(worldName);
-        Utils.runAsync(() -> {
-            worldManager.deleteWorldFile(islandId);
-            dataManager.delete(islandId);
-            RogueSmpCore.LOGGER.info("Purged abandoned island {}", islandId);
-        });
+        worldManager.deleteWorld(islandId)
+                .thenCompose(v -> AsyncUtils.run(() -> {
+                    regionManager.deleteStoredRegionData(worldName);
+                    dataManager.delete(islandId);
+                }))
+                .whenComplete((v, error) -> {
+                    if (error != null) RogueSmpCore.LOGGER.error("Failed to purge abandoned island {}", islandId, error);
+                    else RogueSmpCore.LOGGER.info("Purged abandoned island {}", islandId);
+                });
     }
 }

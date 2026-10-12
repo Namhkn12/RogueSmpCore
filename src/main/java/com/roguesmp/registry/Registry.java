@@ -6,6 +6,7 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.JsonOps;
 import com.roguesmp.tag.SmpTag;
+import com.roguesmp.utils.AsyncUtils;
 import com.roguesmp.utils.Utils;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 public class Registry<T> {
@@ -325,6 +327,11 @@ public class Registry<T> {
         return value;
     }
 
+    public <U extends T> CompletableFuture<U> registerAndSaveAsync(RogueSmpCore plugin, String id, U value) {
+        register(id, value);
+        return AsyncUtils.supply(() -> saveEntry(plugin, id, value)).thenApply(saved -> value);
+    }
+
     private boolean saveEntry(RogueSmpCore plugin, String id, T value) {
         if (locationKey == null || codec == null) {
             RogueSmpCore.LOGGER.warn("Attempted to save to an in-memory registry '{}'", id);
@@ -382,10 +389,18 @@ public class Registry<T> {
             return unregister(id);
         }
 
-        // 1. Remove from in-memory maps
         boolean wasRegistered = unregister(id);
+        return deleteEntryFile(plugin, id, wasRegistered);
+    }
 
-        // 2. Delete file from disk
+    public CompletableFuture<Boolean> removeAndDeleteFilesAsync(RogueSmpCore plugin, String id) {
+        if (locationKey == null) return CompletableFuture.completedFuture(unregister(id));
+
+        boolean wasRegistered = unregister(id);
+        return AsyncUtils.supply(() -> deleteEntryFile(plugin, id, wasRegistered));
+    }
+
+    private boolean deleteEntryFile(RogueSmpCore plugin, String id, boolean wasRegistered) {
         File folder = new File(plugin.getDataFolder(), locationKey);
         File file = new File(folder, id + ".json");
 

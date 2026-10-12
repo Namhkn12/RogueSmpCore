@@ -2,7 +2,18 @@ package com.roguesmp;
 
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.command.FishingHotspotCommand;
+import com.roguesmp.command.RegionCommand;
+import com.roguesmp.command.PolarTemplateCommand;
+import com.roguesmp.world.PolarTemplateManager;
 import com.roguesmp.command.ReloadCommand;
+import com.roguesmp.fishing.listener.FishingListener;
+import com.roguesmp.region.listener.RegionListener;
+import com.roguesmp.region.SmpRegionFlags;
+import com.roguesmp.region.RegionBoundaryHandler;
+import com.roguesmp.region.ServerRegionManager;
+import com.roguesmp.region.editor.RegionSelections;
+import com.roguesmp.region.editor.RegionVisualizer;
+import com.roguesmp.region.editor.RegionWandListener;
 import com.roguesmp.command.SmpBrowserCommand;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.item.component.ItemComponentKeys;
@@ -26,6 +37,10 @@ import com.roguesmp.gui.crafting.CraftingGui;
 import com.roguesmp.gui.info.SmpWikiMainMenuGui;
 import com.roguesmp.integration.LuckPermsIntegration;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
+import com.roguesmp.dungeon_static.DungeonWorldManager;
+import com.roguesmp.dungeon_static.StaticDungeonCommand;
+import com.roguesmp.dungeon_static.StaticDungeonListener;
+import com.roguesmp.dungeon_static.StaticDungeonManager;
 import com.roguesmp.island.IslandCommand;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
@@ -75,8 +90,14 @@ public final class RogueSmpCore extends JavaPlugin {
         //Player
         PlayerManager.init(this);
 
+        ServerRegionManager.init();
+        PolarTemplateManager.init(this);
+        RegionSelections.init();
+        RegionVisualizer.init(this);
+
         //Island
         IslandManager.init(this, PlayerManager.getInstance());
+        StaticDungeonManager.init(this, new DungeonWorldManager(this, PolarTemplateManager.getInstance()));
         LuckPermsIntegration.init(this);
 
         //Quest
@@ -141,6 +162,7 @@ public final class RogueSmpCore extends JavaPlugin {
         DungeonRegistry.onDisable();
 
         IslandManager.getInstance().onDisable();
+        StaticDungeonManager.getInstance().onDisable();
         QuestManager.getInstance().onDisable();
 
         EffectManager.getInstance().close();
@@ -152,15 +174,20 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new GuiListener());
         registerListener(new BlockListener());
 
+        RegionBoundaryHandler.register();
+        registerListener(new RegionListener(PlayerManager.getInstance()));
+
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance(), IslandManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
         registerListener(new PigZombieSpawnListener(this));
         registerListener(new EntityListener(EntityManager.getInstance()));
         registerListener(new NpcListener(NpcManager.getInstance()));
-        registerListener(new FishingListener(FishingManager.getInstance()));
+        registerListener(new FishingListener(FishingManager.getInstance(), FishingHotspotManager.getInstance()));
 
+        registerListener(new RegionWandListener(RegionSelections.getInstance(), RegionVisualizer.getInstance()));
         registerListener(new IslandListener(IslandManager.getInstance()));
+        registerListener(new StaticDungeonListener(StaticDungeonManager.getInstance()));
         registerListener(new QuestListener(QuestManager.getInstance()));
     }
 
@@ -187,7 +214,15 @@ public final class RogueSmpCore extends JavaPlugin {
 
         ReloadCommand.register();
         FishingHotspotCommand.register();
+        RegionCommand.register();
+        PolarTemplateCommand.register();
+        StaticDungeonCommand.register();
         GlyphFontCommand.register();
+    }
+
+    @Override
+    public void onLoad() {
+        SmpRegionFlags.register();
     }
 
     @Override
@@ -220,6 +255,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         FxEngine.getInstance().shutdown();
         TabEngine.getInstance().shutdown();
+        RegionBoundaryHandler.unregister();
         LuckPermsIntegration.getInstance().shutdown();
 
         Bukkit.getOnlinePlayers().forEach(player -> {

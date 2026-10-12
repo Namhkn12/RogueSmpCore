@@ -44,6 +44,7 @@ public class IslandManager {
 
     public void createIsland(Player creator) {
         UUID creatorId = creator.getUniqueId();
+        creator.sendMessage(Utils.fromString("<green>Đang chuẩn bị thế giới... Vui lòng chờ..."));
         if (!creating.add(creatorId)) {
             creator.sendMessage(Utils.fromString("<red>Đảo của bạn đang được tạo, vui lòng chờ!"));
             return;
@@ -76,14 +77,12 @@ public class IslandManager {
 
         islandDataManager.cache(islandData);
         islandDataManager.saveAsync(islandData);
-
+        creator.sendMessage(Utils.fromString("<green>Tạo đảo thành công! Chuẩn bị dịch chuyển..."));
         teleportService.getMultiverseApi().getSafetyTeleporter()
                 .to(spawnPoint)
                 .passengerMode(PassengerModes.RETAIN_ALL)
                 .teleportSingle(creator)
                 .onSuccess(() -> creator.setRespawnLocation(spawnPoint, true));
-
-        creator.sendMessage(Utils.fromString("<green>Tạo đảo thành công!"));
     }
 
     public boolean setIslandSpawn(Player player, Location targetLocation) {
@@ -130,9 +129,7 @@ public class IslandManager {
     }
 
     public void onDisable() {
-        for (World world : Bukkit.getWorlds()) {
-            if (islandWorldManager.isIslandWorld(world)) islandRegionManager.saveNow(world);
-        }
+        islandWorldManager.saveAllOnStop();
         islandDataManager.onDisable();
     }
 

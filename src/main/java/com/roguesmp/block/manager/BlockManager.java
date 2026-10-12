@@ -261,6 +261,27 @@ public class BlockManager {
         if(changed != null) repository.saveAll(changed);
     }
 
+    /**
+     * Saves and detaches every custom block of a world that is about to unload. Chunks of an unloading world may not
+     * fire the entity unload event (e.g. Polar world), which would leave stale blocks tracked and their changes unsaved.
+     */
+    public void onWorldUnload(World world){
+        UUID worldId = world.getUID();
+        Map<BlockPos, String> changed = new HashMap<>();
+        for(SmpBlock block : List.copyOf(blocks.values())){
+            BlockPos pos = block.getPos();
+            if(!pos.world().equals(worldId)) continue;
+
+            String state = dirtyState(block);
+            if(state != null) changed.put(pos, state);
+            block.onUnload();
+            mining.cancelAt(pos);
+            blocks.remove(pos);
+            if(block instanceof Tickable) tickingBlocks.remove(block);
+        }
+        repository.saveAll(changed);
+    }
+
     public void sweepLoadedChunks(){
         for(World world : Bukkit.getWorlds()){
             for(Chunk chunk : world.getLoadedChunks()){

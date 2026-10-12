@@ -2,13 +2,15 @@ package com.roguesmp.block.persistence;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.BlockPos;
-import com.roguesmp.utils.Utils;
 
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Storage for custom block data
@@ -20,6 +22,7 @@ public class BlockDataRepository {
 
     private final Connection connection;
     private final Object lock = new Object();
+    private final ExecutorService io = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "block-data-sqlite"));
 
     public BlockDataRepository(Path databaseFile) {
 
@@ -36,7 +39,7 @@ public class BlockDataRepository {
 
     public CompletableFuture<Optional<String>> load(BlockPos pos) {
         CompletableFuture<Optional<String>> future = new CompletableFuture<>();
-        Utils.runAsync(() -> {
+        io.execute(() -> {
             try {
                 future.complete(query(pos));
             } catch (SQLException e) {
@@ -52,11 +55,11 @@ public class BlockDataRepository {
 
     public void saveAll(Map<BlockPos, String> states) {
         if (states.isEmpty()) return;
-        Utils.runAsync(() -> writeAll(states));
+        io.execute(() -> writeAll(states));
     }
 
     public void delete(BlockPos pos) {
-        Utils.runAsync(() -> {
+        io.execute(() -> {
             synchronized (lock) {
                 try (PreparedStatement statement = connection.prepareStatement(
                         "DELETE FROM block_data WHERE world = ? AND x = ? AND y = ? AND z = ?")) {
@@ -75,6 +78,12 @@ public class BlockDataRepository {
      * passing the complete current state here.
      */
     public void closeWith(Map<BlockPos, String> finalStates) {
+        io.shutdown();
+        try {
+            io.awaitTermination(30, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         synchronized (lock) {
             if (!finalStates.isEmpty()) writeAll(finalStates);
 
