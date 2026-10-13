@@ -1,22 +1,22 @@
 package com.roguesmp.dungeon_core.feature;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.dungeon_core.DungeonDefinition;
 import com.roguesmp.dungeon_core.DungeonFeature;
 import com.roguesmp.dungeon_core.DungeonInstance;
 import com.roguesmp.dungeon_core.DungeonManager;
 import com.roguesmp.dungeon_core.FeatureContext;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 /**
- * Who may join a run. With {@code one_per_player} a player belongs to at most one run of the dungeon; with
- * {@code invites} the owner can invite players, who have {@code invite_seconds} to accept. Pending invites are not saved.
- * Rule violations throw {@link IllegalStateException} with a player-facing message.
+ * What players may do with a run besides entering it. With {@code invites} the owner can invite players, who have
+ * {@code invite_seconds} to accept; pending invites are not saved. With {@code abandon} a member can leave the run for
+ * good, and the owner abandoning ends it.
  */
-public record MembershipFeature(boolean onePerPlayer, boolean invites, int inviteSeconds) implements DungeonFeature<MembershipFeature.State> {
+public record MembershipFeature(boolean invites, int inviteSeconds, boolean abandon) implements DungeonFeature<MembershipFeature.State> {
 
     public static final String TYPE_KEY = "membership";
 
@@ -27,19 +27,26 @@ public record MembershipFeature(boolean onePerPlayer, boolean invites, int invit
     }
 
     public static final Codec<MembershipFeature> CODEC = Codec.composite(
-            Codec.BOOLEAN.optionalFieldOf("one_per_player", true).forGetter(MembershipFeature::onePerPlayer),
             Codec.BOOLEAN.optionalFieldOf("invites", true).forGetter(MembershipFeature::invites),
             Codec.INT.optionalFieldOf("invite_seconds", 60).forGetter(MembershipFeature::inviteSeconds),
+            Codec.BOOLEAN.optionalFieldOf("abandon", true).forGetter(MembershipFeature::abandon),
             MembershipFeature::new
     );
 
     /**
-     * Checks a new run of {@code dungeonId} for {@code ownerId}, before it is created.
+     * @return the runs of {@code dungeonId} that have a pending invite for the player
      */
-    public static void checkCreate(DungeonManager manager, DungeonDefinition definition, String dungeonId, UUID ownerId) {
-        boolean onePerPlayer = definition.features().values().stream()
-                .anyMatch(feature -> feature instanceof MembershipFeature membership && membership.onePerPlayer());
-        if (onePerPlayer && manager.findFor(ownerId, dungeonId) != null) throw new IllegalStateException("Bạn đã có phó bản này rồi.");
+    public static List<DungeonInstance> invitesFor(DungeonManager manager, UUID playerId, String dungeonId) {
+        long now = System.currentTimeMillis();
+        return manager.instances().stream()
+                .filter(instance -> instance.dungeonId().equals(dungeonId))
+                .filter(instance -> {
+                    FeatureContext<State> membership = manager.feature(instance, MembershipFeature.class);
+                    if (membership == null) return false;
+                    Long expiresAt = membership.state().invites.get(playerId);
+                    return expiresAt != null && expiresAt >= now;
+                })
+                .toList();
     }
 
     public void invite(FeatureContext<State> context, UUID inviterId, UUID inviteeId) {
@@ -47,7 +54,7 @@ public record MembershipFeature(boolean onePerPlayer, boolean invites, int invit
         if (!invites) throw new IllegalStateException("Phó bản này không cho phép mời người khác.");
         if (!instance.ownerId().equals(inviterId)) throw new IllegalStateException("Chỉ chủ phó bản mới có thể mời người khác.");
         if (instance.isMember(inviteeId)) throw new IllegalStateException("Người này đã ở trong phó bản rồi.");
-        checkJoin(context, inviteeId);
+        if (context.manager().findFor(inviteeId, instance.dungeonId()) != null) throw new IllegalStateException("Người này đã có phó bản này rồi.");
 
         context.state().invites.put(inviteeId, System.currentTimeMillis() + inviteSeconds * 1000L);
     }
@@ -59,19 +66,16 @@ public record MembershipFeature(boolean onePerPlayer, boolean invites, int invit
         if (expiresAt == null || expiresAt < System.currentTimeMillis()) {
             throw new IllegalStateException("Bạn chưa được mời hoặc lời mời đã hết hạn.");
         }
-        addMember(context, inviteeId);
+        context.manager().addMember(context.instance(), inviteeId);
     }
 
-    public void addMember(FeatureContext<State> context, UUID playerId) {
-        checkJoin(context, playerId);
-        context.manager().addMember(context.instance(), playerId);
-    }
-
-    private void checkJoin(FeatureContext<State> context, UUID playerId) {
+    public void abandon(FeatureContext<State> context, UUID playerId) {
         DungeonInstance instance = context.instance();
-        if (onePerPlayer && context.manager().findFor(playerId, instance.dungeonId()) != null) {
-            throw new IllegalStateException("Người chơi này đã có phó bản này rồi.");
-        }
+        if (!abandon) throw new IllegalStateException("Không thể rời bỏ phó bản này.");
+        if (!instance.isMember(playerId)) throw new IllegalStateException("Bạn không phải thành viên của phó bản này.");
+
+        if (instance.ownerId().equals(playerId)) context.end("đã bị chủ phó bản huỷ");
+        else context.manager().removeMember(instance, playerId);
     }
 
     @Override

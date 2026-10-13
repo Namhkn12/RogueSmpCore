@@ -108,8 +108,8 @@ public final class DungeonManager {
     }
 
     /**
-     * Clones the template, runs the features' start hooks, saves the run, then sends {@link DungeonSignal.Started}.
-     * Rules about who may create a run belong to the caller.
+     * Clones the template, runs the features' start hooks, saves the run, then sends {@link DungeonSignal.Started}. A
+     * player can belong to only one run of each dungeon, so this fails if the owner or a member already has one.
      */
     public CompletableFuture<DungeonInstance> create(String dungeonId, UUID ownerId, Set<UUID> members) {
         DungeonDefinition definition = Registries.DUNGEON.get(dungeonId);
@@ -119,8 +119,17 @@ public final class DungeonManager {
         if (!creating.add(pendingKey)) return CompletableFuture.failedFuture(new IllegalStateException("Phó bản đang được tạo, vui lòng đợi."));
 
         DungeonInstance instance = new DungeonInstance(dungeonId, definition, worlds.snapshotOf(definition.template()), ownerId, members);
+        try {
+            instance.members().forEach(member -> requireNoRun(member, dungeonId));
+        } catch (IllegalStateException e) {
+            creating.remove(pendingKey);
+            return CompletableFuture.failedFuture(e);
+        }
         return worlds.create(instance.template(), instance.id(), instance.worldData())
                 .thenCompose(world -> AsyncUtils.onMainThread(() -> {
+                    if (instance.members().stream().anyMatch(member -> findFor(member, dungeonId) != null)) {
+                        return discard(instance, new IllegalStateException("Bạn đã có phó bản này rồi."));
+                    }
                     instances.put(instance.id(), instance);
                     dispatch(instance, DungeonFeature::onStart);
                     return persist(instance).thenCompose(saved -> {
@@ -174,7 +183,12 @@ public final class DungeonManager {
         player.teleportAsync(Hub.spawn());
     }
 
+    /**
+     * @throws IllegalStateException if the player already belongs to another run of the same dungeon
+     */
     public void addMember(DungeonInstance instance, UUID playerId) {
+        if (instance.isMember(playerId)) return;
+        requireNoRun(playerId, instance.dungeonId());
         instance.addMember(playerId);
         save(instance);
     }
@@ -291,9 +305,20 @@ public final class DungeonManager {
 
     private CompletableFuture<DungeonInstance> discardUnsaved(DungeonInstance instance) {
         instances.remove(instance.id());
+        return discard(instance, new IllegalStateException("Không thể lưu phó bản, vui lòng thử lại."));
+    }
+
+    private CompletableFuture<DungeonInstance> discard(DungeonInstance instance, Throwable reason) {
         return worlds.delete(instance.template(), instance.id())
                 .handle((v, error) -> null)
-                .thenCompose(v -> CompletableFuture.<DungeonInstance>failedFuture(new IllegalStateException("Không thể lưu phó bản, vui lòng thử lại.")));
+                .thenCompose(v -> CompletableFuture.<DungeonInstance>failedFuture(reason));
+    }
+
+    private void requireNoRun(UUID playerId, String dungeonId) {
+        if (findFor(playerId, dungeonId) == null) return;
+        Player player = Bukkit.getPlayer(playerId);
+        String name = player != null ? player.getName() : playerId.toString();
+        throw new IllegalStateException(name + " đã có phó bản này rồi.");
     }
 
     private void notifyMembers(DungeonInstance instance, String reason) {

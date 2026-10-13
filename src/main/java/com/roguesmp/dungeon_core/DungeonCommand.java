@@ -2,7 +2,7 @@ package com.roguesmp.dungeon_core;
 
 import com.roguesmp.command.CommandFeedback;
 import com.roguesmp.dungeon_core.feature.ExpiryFeature;
-import com.roguesmp.dungeon_core.feature.MembershipFeature;
+import com.roguesmp.gui.dungeon.DungeonBrowserGui;
 import com.roguesmp.permission.Permissions;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.DateUtils;
@@ -21,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import static com.roguesmp.command.CommandFeedback.report;
@@ -42,12 +41,16 @@ public class DungeonCommand {
                 .withSubcommand(createSub())
                 .withSubcommand(joinSub())
                 .withSubcommand(inviteSub())
+                .withSubcommand(abandonSub())
                 .withSubcommand(listSub())
                 .withSubcommand(new CommandAPICommand("leave")
                         .executesPlayer((player, args) -> {
                             if (manager.getByWorld(player.getWorld()) != null) manager.leave(player);
                         }))
                 .withSubcommand(adminSub())
+                .executesPlayer((player, args) -> {
+                    new DungeonBrowserGui(player).showInventory(player);
+                })
                 .register();
     }
 
@@ -55,22 +58,7 @@ public class DungeonCommand {
         return new CommandAPICommand("create")
                 .withArguments(dungeonArgument())
                 .executesPlayer((player, args) -> {
-                    String dungeonId = (String) args.get("dungeon");
-                    DungeonDefinition definition = Registries.DUNGEON.get(dungeonId);
-                    if (definition == null) {
-                        player.sendMessage(Utils.fromString("<red>Phó bản này không tồn tại."));
-                        return;
-                    }
-                    try {
-                        MembershipFeature.checkCreate(manager, definition, dungeonId, player.getUniqueId());
-                    } catch (IllegalStateException e) {
-                        CommandFeedback.error(player, e);
-                        return;
-                    }
-
-                    player.sendMessage(Utils.fromString("<yellow>Đang tạo phó bản..."));
-                    report(player, manager.create(dungeonId, player.getUniqueId(), Set.of()).thenCompose(instance -> manager.enter(player, instance)),
-                            "<green>Đã vào phó bản <yellow>" + definition.displayName() + "<green>.");
+                    DungeonPlayerActions.create(player, (String) args.get("dungeon"));
                 });
     }
 
@@ -80,16 +68,21 @@ public class DungeonCommand {
                 .withOptionalArguments(playerArgument("owner"))
                 .executesPlayer((player, args) -> {
                     String dungeonId = (String) args.get("dungeon");
-                    DungeonInstance instance;
-                    try {
-                        instance = args.getOptional("owner").isPresent()
-                                ? acceptInvite(player, (String) args.get("owner"), dungeonId)
-                                : requireOwn(player, dungeonId);
-                    } catch (IllegalStateException e) {
-                        CommandFeedback.error(player, e);
+                    if (args.getOptional("owner").isEmpty()) {
+                        DungeonInstance own = manager.findFor(player.getUniqueId(), dungeonId);
+                        if (own == null) player.sendMessage(Utils.fromString("<red>Bạn chưa có phó bản này, hãy dùng /dungeonrun create " + dungeonId + "."));
+                        else DungeonPlayerActions.enter(player, own);
                         return;
                     }
-                    if (instance != null) report(player, manager.enter(player, instance), "<green>Đã vào phó bản <yellow>" + displayName(instance) + "<green>.");
+
+                    OfflinePlayer owner = knownPlayer(player, (String) args.get("owner"));
+                    if (owner == null) return;
+                    DungeonInstance invited = manager.instances().stream()
+                            .filter(run -> run.dungeonId().equals(dungeonId) && run.ownerId().equals(owner.getUniqueId()))
+                            .findFirst()
+                            .orElse(null);
+                    if (invited == null) player.sendMessage(Utils.fromString("<red>Không tìm thấy phó bản này."));
+                    else DungeonPlayerActions.acceptInvite(player, invited);
                 });
     }
 
@@ -103,25 +96,24 @@ public class DungeonCommand {
                         player.sendMessage(Utils.fromString("<red>Người chơi này không trực tuyến."));
                         return;
                     }
-                    String dungeonId = (String) args.getOptional("dungeon").orElse(null);
-                    DungeonInstance instance = dungeonId == null ? manager.getByWorld(player.getWorld()) : manager.findFor(player.getUniqueId(), dungeonId);
-                    if (instance == null) {
-                        player.sendMessage(Utils.fromString("<red>Hãy đứng trong phó bản hoặc ghi rõ tên phó bản."));
-                        return;
-                    }
-
-                    try {
-                        FeatureContext<MembershipFeature.State> membership = requireMembership(instance);
-                        ((MembershipFeature) membership.feature()).invite(membership, player.getUniqueId(), target.getUniqueId());
-                    } catch (IllegalStateException e) {
-                        CommandFeedback.error(player, e);
-                        return;
-                    }
-
-                    player.sendMessage(Utils.fromString("<green>Đã mời <yellow>" + target.getName() + "<green>."));
-                    target.sendMessage(Utils.fromString("<yellow>" + player.getName() + "<green> mời bạn vào phó bản <yellow>" + displayName(instance)
-                            + "<green>. Dùng <yellow>/dungeonrun join " + instance.dungeonId() + " " + player.getName() + "<green> để tham gia."));
+                    DungeonInstance instance = currentOrNamed(player, (String) args.getOptional("dungeon").orElse(null));
+                    if (instance != null) DungeonPlayerActions.invite(player, instance, target);
                 });
+    }
+
+    private CommandAPICommand abandonSub() {
+        return new CommandAPICommand("abandon")
+                .withOptionalArguments(dungeonArgument())
+                .executesPlayer((player, args) -> {
+                    DungeonInstance instance = currentOrNamed(player, (String) args.getOptional("dungeon").orElse(null));
+                    if (instance != null) DungeonPlayerActions.abandon(player, instance);
+                });
+    }
+
+    private @Nullable DungeonInstance currentOrNamed(Player player, @Nullable String dungeonId) {
+        DungeonInstance instance = dungeonId == null ? manager.getByWorld(player.getWorld()) : manager.findFor(player.getUniqueId(), dungeonId);
+        if (instance == null) player.sendMessage(Utils.fromString("<red>Hãy đứng trong phó bản hoặc ghi rõ tên phó bản."));
+        return instance;
     }
 
     private CommandAPICommand listSub() {
@@ -133,7 +125,7 @@ public class DungeonCommand {
                         return;
                     }
                     for (DungeonInstance instance : mine) {
-                        player.sendMessage(Utils.fromString("<yellow>" + displayName(instance) + " <gray>- hạn <white>" + deadline(instance)
+                        player.sendMessage(Utils.fromString("<yellow>" + DungeonPlayerActions.displayName(instance) + " <gray>- hạn <white>" + deadline(instance)
                                 + " <gray>(" + instance.members().size() + " thành viên)"));
                     }
                 });
@@ -214,43 +206,13 @@ public class DungeonCommand {
 
         UUID playerId = player.getUniqueId();
         try {
-            if (!add) {
-                manager.removeMember(instance, playerId);
-            } else {
-                FeatureContext<MembershipFeature.State> membership = manager.feature(instance, MembershipFeature.class);
-                if (membership != null) ((MembershipFeature) membership.feature()).addMember(membership, playerId);
-                else manager.addMember(instance, playerId);
-            }
+            if (add) manager.addMember(instance, playerId);
+            else manager.removeMember(instance, playerId);
         } catch (IllegalStateException e) {
             CommandFeedback.error(sender, e);
             return;
         }
         sender.sendMessage(Utils.fromString("<green>" + (add ? "Added " : "Removed ") + "<yellow>" + name(playerId)));
-    }
-
-    private @Nullable DungeonInstance acceptInvite(Player player, String ownerName, String dungeonId) {
-        OfflinePlayer owner = knownPlayer(player, ownerName);
-        if (owner == null) return null;
-
-        DungeonInstance instance = manager.instances().stream()
-                .filter(run -> run.dungeonId().equals(dungeonId) && run.ownerId().equals(owner.getUniqueId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Không tìm thấy phó bản này."));
-        FeatureContext<MembershipFeature.State> membership = requireMembership(instance);
-        ((MembershipFeature) membership.feature()).acceptInvite(membership, player.getUniqueId());
-        return instance;
-    }
-
-    private DungeonInstance requireOwn(Player player, String dungeonId) {
-        DungeonInstance instance = manager.findFor(player.getUniqueId(), dungeonId);
-        if (instance == null) throw new IllegalStateException("Bạn chưa có phó bản này, hãy dùng /dungeonrun create " + dungeonId + ".");
-        return instance;
-    }
-
-    private FeatureContext<MembershipFeature.State> requireMembership(DungeonInstance instance) {
-        FeatureContext<MembershipFeature.State> membership = manager.feature(instance, MembershipFeature.class);
-        if (membership == null) throw new IllegalStateException("Phó bản này không cho phép mời người khác.");
-        return membership;
     }
 
     private @Nullable DungeonInstance instance(CommandSender sender, String id) {
@@ -266,11 +228,6 @@ public class DungeonCommand {
     private String deadline(DungeonInstance instance) {
         FeatureContext<ExpiryFeature.State> expiry = manager.feature(instance, ExpiryFeature.class);
         return expiry == null ? "không giới hạn" : DateUtils.toZonedDateTime(expiry.state().expiresAt()).format(DEADLINE_FORMAT);
-    }
-
-    private static String displayName(DungeonInstance instance) {
-        DungeonDefinition definition = instance.definition();
-        return definition != null ? definition.displayName() : instance.dungeonId();
     }
 
     private static Argument<String> playerArgument(String nodeName) {

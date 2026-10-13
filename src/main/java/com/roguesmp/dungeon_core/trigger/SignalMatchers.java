@@ -43,7 +43,7 @@ public class SignalMatchers {
 
         @Override
         public boolean matches(FeatureContext<?> context, DungeonSignal signal) {
-            return signal instanceof DungeonSignal.PlayerEntered entered && allowed(context, entered.player(), ownerOnly);
+            return signal instanceof DungeonSignal.PlayerEntered(Player player) && allowed(context, player, ownerOnly);
         }
     }
 
@@ -60,7 +60,7 @@ public class SignalMatchers {
 
         @Override
         public boolean matches(FeatureContext<?> context, DungeonSignal signal) {
-            return signal instanceof DungeonSignal.PlayerLeft left && allowed(context, left.player(), ownerOnly);
+            return signal instanceof DungeonSignal.PlayerLeft(Player player) && allowed(context, player, ownerOnly);
         }
     }
 
@@ -78,7 +78,9 @@ public class SignalMatchers {
 
         @Override
         public boolean matches(FeatureContext<?> context, DungeonSignal signal) {
-            return signal instanceof DungeonSignal.RegionEntered entered && matchesId(region, entered.region()) && allowed(context, entered.player(), ownerOnly);
+            return signal instanceof DungeonSignal.RegionEntered(
+                    Player player, String region1
+            ) && matchesId(region, region1) && allowed(context, player, ownerOnly);
         }
     }
 
@@ -96,7 +98,9 @@ public class SignalMatchers {
 
         @Override
         public boolean matches(FeatureContext<?> context, DungeonSignal signal) {
-            return signal instanceof DungeonSignal.RegionLeft left && matchesId(region, left.region()) && allowed(context, left.player(), ownerOnly);
+            return signal instanceof DungeonSignal.RegionLeft(
+                    Player player, String region1
+            ) && matchesId(region, region1) && allowed(context, player, ownerOnly);
         }
     }
 
@@ -131,7 +135,7 @@ public class SignalMatchers {
 
         @Override
         public boolean matches(FeatureContext<?> context, DungeonSignal signal) {
-            return signal instanceof DungeonSignal.PlayerDied died && allowed(context, died.player(), ownerOnly);
+            return signal instanceof DungeonSignal.PlayerDied(Player player) && allowed(context, player, ownerOnly);
         }
     }
 
@@ -148,7 +152,9 @@ public class SignalMatchers {
 
         @Override
         public boolean matches(FeatureContext<?> context, DungeonSignal signal) {
-            return signal instanceof DungeonSignal.QuestCompleted completed && matchesId(quest, completed.quest().getId());
+            return signal instanceof DungeonSignal.QuestCompleted(
+                    com.roguesmp.quest.Quest quest1
+            ) && matchesId(quest, quest1.getId());
         }
     }
 
