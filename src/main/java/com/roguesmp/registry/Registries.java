@@ -43,7 +43,13 @@ import com.roguesmp.npc.BaseNpc;
 import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.npc.action.NpcActions;
 import com.roguesmp.player.ability.*;
-import com.roguesmp.dungeon_static.StaticDungeonInfo;
+import com.roguesmp.dungeon_core.DungeonDefinition;
+import com.roguesmp.dungeon_core.DungeonFeature;
+import com.roguesmp.dungeon_core.action.DungeonAction;
+import com.roguesmp.dungeon_core.action.DungeonActions;
+import com.roguesmp.dungeon_core.feature.DungeonFeatures;
+import com.roguesmp.dungeon_core.trigger.SignalMatcher;
+import com.roguesmp.dungeon_core.trigger.SignalMatchers;
 import com.roguesmp.world.PolarTemplateData;
 import com.roguesmp.player.ability.trigger.TriggerOption;
 import com.roguesmp.player.ability.trigger.TriggerOptions;
@@ -73,6 +79,10 @@ public class Registries {
     public static final Registry<Codec<? extends SmpEffect>> EFFECT_CODEC = register(registry -> EffectCodecs.loadClass());
     public static final Registry<Codec<? extends ItemAbility>> ITEM_ABILITY_CODEC = register(registry -> ItemAbilities.loadClass());
     public static final Registry<Codec<? extends GeneratorBehavior>> GENERATOR_BEHAVIOR_CODEC = register(registry -> GeneratorBehaviors.loadClass());
+
+    public static final Registry<Codec<? extends DungeonFeature<?>>> DUNGEON_FEATURE_CODEC = register(registry -> DungeonFeatures.loadClass());
+    public static final Registry<Codec<? extends DungeonAction>> DUNGEON_ACTION_CODEC = register(registry -> DungeonActions.loadClass());
+    public static final Registry<Codec<? extends SignalMatcher>> DUNGEON_SIGNAL_MATCHER_CODEC = register(registry -> SignalMatchers.loadClass());
 
     public static final Registry<Codec<? extends QuestObjective>> QUEST_OBJECTIVE_CODEC = register(registry -> QuestObjectives.loadClass());
     public static final Registry<Codec<? extends QuestRequirement>> QUEST_REQUIREMENT_CODEC = register(registry -> QuestRequirements.loadClass());
@@ -117,7 +127,7 @@ public class Registries {
     public static final Registry<ItemType> ITEM_TYPE = new Registry<>("item_types", ItemType.CODEC);
     public static final Registry<FishingHotspot> FISHING_HOTSPOT = new Registry<>("fishing_hotspots", FishingHotspot.CODEC);
     public static final Registry<PolarTemplateData> POLAR_TEMPLATE_DATA = new Registry<>("polar_template_data", PolarTemplateData.CODEC);
-    public static final Registry<StaticDungeonInfo> STATIC_DUNGEON_INFO = new Registry<>("static_dungeon_info", StaticDungeonInfo.CODEC);
+    public static final Registry<DungeonDefinition> DUNGEON = new Registry<>("dungeon_definitions", DungeonDefinition.CODEC);
     public static final Registry<FuelType> FUEL_TYPE = new Registry<>("fuel_types", FuelType.CODEC);
 
     public static final Registry<Codec<? extends CraftingRecipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());

@@ -41,9 +41,9 @@ import com.roguesmp.gui.info.SmpWikiMainMenuGui;
 import com.roguesmp.integration.LuckPermsIntegration;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
 import com.roguesmp.world.DungeonWorldManager;
-import com.roguesmp.dungeon_static.StaticDungeonCommand;
-import com.roguesmp.dungeon_static.StaticDungeonListener;
-import com.roguesmp.dungeon_static.StaticDungeonManager;
+import com.roguesmp.dungeon_core.DungeonCommand;
+import com.roguesmp.dungeon_core.DungeonListener;
+import com.roguesmp.dungeon_core.DungeonManager;
 import com.roguesmp.island.IslandCommand;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
@@ -101,7 +101,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         //Island
         IslandManager.init(this, PlayerManager.getInstance());
-        StaticDungeonManager.init(this, new DungeonWorldManager(this, PolarTemplateManager.getInstance(), "dungeon_worlds", "dungeon"));
+        DungeonManager.init(this, new DungeonWorldManager(this, PolarTemplateManager.getInstance(), "dungeon_runs", "dungeonrun"));
         LuckPermsIntegration.init(this);
 
         //Quest
@@ -140,6 +140,7 @@ public final class RogueSmpCore extends JavaPlugin {
     // Load data from files, databases, etc
     public void loadData() {
         Registries.loadAllData(this);
+        DungeonManager.getInstance().load(); // binds runs to dungeon definitions and sweeps quest groups - must run after both are loaded above
 
         CraftingManager.init(); // indexes Registries.CRAFTING_RECIPE - must run after it's loaded above
         VanillaRecipeReplacer.replaceAll(); // swaps matching vanilla tool/armor recipes - must run after items load above
@@ -169,7 +170,7 @@ public final class RogueSmpCore extends JavaPlugin {
         PartyManager.getInstance().saveAll();
 
         IslandManager.getInstance().onDisable();
-        StaticDungeonManager.getInstance().onDisable();
+        DungeonManager.getInstance().onDisable();
         QuestManager.getInstance().onDisable();
 
         EffectManager.getInstance().close();
@@ -195,7 +196,7 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new RegionWandListener(RegionSelections.getInstance(), RegionVisualizer.getInstance()));
         registerListener(new IslandListener(IslandManager.getInstance()));
         registerListener(new PartyListener(PartyManager.getInstance()));
-        registerListener(new StaticDungeonListener(StaticDungeonManager.getInstance()));
+        registerListener(new DungeonListener(DungeonManager.getInstance()));
         registerListener(new QuestListener(QuestManager.getInstance()));
     }
 
@@ -225,7 +226,7 @@ public final class RogueSmpCore extends JavaPlugin {
         FishingHotspotCommand.register();
         RegionCommand.register();
         PolarTemplateCommand.register();
-        StaticDungeonCommand.register();
+        new DungeonCommand(DungeonManager.getInstance()).register();
         GlyphFontCommand.register();
     }
 

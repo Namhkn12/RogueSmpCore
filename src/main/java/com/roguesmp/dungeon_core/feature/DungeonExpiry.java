@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon_static;
+package com.roguesmp.dungeon_core.feature;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
