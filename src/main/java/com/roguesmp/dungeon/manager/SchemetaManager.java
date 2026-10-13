@@ -1,9 +1,9 @@
 package com.roguesmp.dungeon.manager;
 
+import com.roguesmp.dungeon.repository.SchemetaRepository;
+import com.roguesmp.dungeon.repository.SchematicRepository;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.data.definition.Schemeta;
-import com.roguesmp.dungeon.repository.ISchematicRepository;
-import com.roguesmp.dungeon.repository.ISchemetaRepository;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 
 import java.util.*;
@@ -16,11 +16,11 @@ public class SchemetaManager {
     // Lazy cache — Clipboard nặng, chỉ load khi lần đầu paste
     private final Map<String, Clipboard> clipboardCache = new HashMap<>();
 
-    private final ISchemetaRepository schemetaRepo;
-    private final ISchematicRepository schematicRepo;
+    private final SchemetaRepository schemetaRepo;
+    private final SchematicRepository schematicRepo;
 
-    public SchemetaManager(ISchemetaRepository schemetaRepo,
-                           ISchematicRepository schematicRepo) {
+    public SchemetaManager(SchemetaRepository schemetaRepo,
+                           SchematicRepository schematicRepo) {
         this.schemetaRepo = schemetaRepo;
         this.schematicRepo = schematicRepo;
         loadAll();

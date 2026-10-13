@@ -1,12 +1,12 @@
 package com.roguesmp.dungeon.manager;
 
+import com.roguesmp.dungeon.repository.InstanceRepository;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.data.definition.objective.PersistableObjective;
 import com.roguesmp.dungeon.data.definition.room.roomevent.PersistableRoomEvent;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon.data.runtime.RoomInstance;
 import com.roguesmp.dungeon.data.runtime.session.DungeonProgress;
-import com.roguesmp.dungeon.repository.IInstanceRepository;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,9 +16,9 @@ public class InstanceManager {
 
     private final Map<String, DungeonInstance> instances = new LinkedHashMap<>();
 
-    private final IInstanceRepository instanceRepository;
+    private final InstanceRepository instanceRepository;
 
-    public InstanceManager(IInstanceRepository instanceRepository) {
+    public InstanceManager(InstanceRepository instanceRepository) {
         this.instanceRepository = instanceRepository;
 
         loadAll();

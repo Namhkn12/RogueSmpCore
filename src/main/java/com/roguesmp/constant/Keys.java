@@ -36,6 +36,24 @@ public class Keys {
 
     public static final NamespacedKey BLOCK_POS = of("block_pos");
 
+    public static final String DUNGEON_NAMESPACE = "roguesmpcore";
+
+    public static final NamespacedKey SPAWNER_IID = new NamespacedKey(DUNGEON_NAMESPACE, "spawner_iid");
+
+    public static final NamespacedKey SPAWNER_TID = new NamespacedKey(DUNGEON_NAMESPACE, "spawner_tid");
+
+    public static final NamespacedKey REWARD_CID = new NamespacedKey(DUNGEON_NAMESPACE, "reward_cid");
+
+    public static final NamespacedKey REWARD_CLAIMED = new NamespacedKey(DUNGEON_NAMESPACE, "reward_claimed");
+
+    public static final NamespacedKey NEXT_DOOR = new NamespacedKey(DUNGEON_NAMESPACE, "next_door");
+
+    public static final NamespacedKey END_DOOR = new NamespacedKey(DUNGEON_NAMESPACE, "end_door");
+
+    public static final NamespacedKey REVIVE_POINT = new NamespacedKey(DUNGEON_NAMESPACE, "revive_point");
+
+    public static final NamespacedKey PIGZOMBIE_ATTACK = of("pigzombie_attack");
+
     //Metadata key
     public static final String IN_STEALTH_META_KEY = "in_stealth";
 }

@@ -1,10 +1,10 @@
 package com.roguesmp.dungeon.actor.listener;
 
+import com.roguesmp.constant.Keys;
 import com.roguesmp.world.DungeonWorldManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import com.roguesmp.dungeon.controller.PlayerActionController;
-import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
@@ -90,7 +90,7 @@ public class DungeonListener implements Listener {
     @EventHandler
     public void onMannequinInteract(PlayerInteractAtEntityEvent e) {
         if (e.getRightClicked() instanceof Mannequin mannequin) {
-            if (mannequin.getPersistentDataContainer().has(NameSpaceKeys.REVIVE_POINT_KEY)) {
+            if (mannequin.getPersistentDataContainer().has(Keys.REVIVE_POINT)) {
                 e.setCancelled(true);
             }
         }
@@ -99,7 +99,7 @@ public class DungeonListener implements Listener {
     @EventHandler
     public void onMannequinDamage(EntityDamageEvent e) {
         if (e.getEntity() instanceof Mannequin mannequin) {
-            if (mannequin.getPersistentDataContainer().has(NameSpaceKeys.REVIVE_POINT_KEY)) {
+            if (mannequin.getPersistentDataContainer().has(Keys.REVIVE_POINT)) {
                 e.setCancelled(true);
             }
         }

@@ -24,10 +24,7 @@ import com.roguesmp.dungeon.manager.*;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.presentation.presenter.RevivePointPresenter;
 import com.roguesmp.dungeon.repository.*;
-import com.roguesmp.dungeon.repository.impl.*;
 import com.roguesmp.dungeon.service.*;
-import com.roguesmp.dungeon.service.impl.*;
-import com.roguesmp.dungeon.utils.adapter.UUIDTypeAdapter;
 import com.roguesmp.loot.manager.LootTableManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -45,18 +42,17 @@ public class DungeonRegistry {
     private static InstanceWorldService worldService;
 
     public static void onEnable(Plugin plugin) {
-        Gson gson = new GsonBuilder().registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
-                .setPrettyPrinting()
+        Gson gson = new GsonBuilder().setPrettyPrinting()
                 .create();
         DungeonPresenter dungeonPresenter = new DungeonPresenter();
 
         /*Repository*/
-        ISchematicRepository schematicRepository = new SchematicRepository(plugin);
-        ISchemetaRepository schemetaRepository = new SchemetaRepository(plugin, gson);
-        IRoomRepository roomRepository = new RoomRepository(plugin, gson);
-        IDungeonRepository dungeonRepository = new DungeonRepository(plugin, gson);
+        SchematicRepository schematicRepository = new SchematicRepository(plugin);
+        SchemetaRepository schemetaRepository = new SchemetaRepository(plugin, gson);
+        RoomRepository roomRepository = new RoomRepository(plugin, gson);
+        DungeonRepository dungeonRepository = new DungeonRepository(plugin, gson);
         SpawnerRepository spawnerRepository = new SpawnerRepository(plugin, gson);
-        IInstanceRepository instanceRepository = new InstanceRepository(plugin, gson);
+        InstanceRepository instanceRepository = new InstanceRepository(plugin, gson);
 
         /*Manager*/
         SchemetaManager schemetaManager = new SchemetaManager(schemetaRepository, schematicRepository);
@@ -74,20 +70,20 @@ public class DungeonRegistry {
                 PolarTemplateManager.getInstance().worlds().key("instance"));
 
         /*Service*/
-        ISchematicService schematicService = new SchematicService(schemetaManager);
-        ISchemetaService schemetaService = new SchemetaService(schemetaManager);
-        IRoomService roomService = new RoomService(roomManager);
+        SchematicService schematicService = new SchematicService(schemetaManager);
+        SchemetaService schemetaService = new SchemetaService(schemetaManager);
+        RoomService roomService = new RoomService(roomManager);
         PartyManager partyManager = PartyManager.getInstance();
-        IDungeonService dungeonService = new DungeonService(roomManager, dungeonManager);
-        IInstanceService instanceService = new InstanceService(instanceManager,
+        DungeonService dungeonService = new DungeonService(roomManager, dungeonManager);
+        InstanceService instanceService = new InstanceService(instanceManager,
                 dungeonManager, roomManager, worldService, dungeonService, partyManager, roomService, schematicService);
-        IDungeonRewardService rewardService = new DungeonRewardService(
+        DungeonRewardService rewardService = new DungeonRewardService(
                 partyManager,
                 instanceManager,
                 dungeonManager,
                 new ChestOpenAnimation()
                 );
-        IReviveService reviveService = new ReviveService(reviveManager, partyManager, instanceManager, dungeonPresenter);
+        ReviveService reviveService = new ReviveService(reviveManager, partyManager, instanceManager, dungeonPresenter);
         ObjectiveDispatchService objectiveDispatchService = new ObjectiveDispatchService(partyManager, instanceManager);
         SpectatorBoundaryService spectatorBoundaryService = new SpectatorBoundaryService(partyManager, instanceManager);
         RoomRuntimeService roomRuntimeService = new RoomRuntimeService(

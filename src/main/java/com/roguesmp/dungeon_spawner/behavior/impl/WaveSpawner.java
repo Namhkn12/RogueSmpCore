@@ -1,10 +1,10 @@
 package com.roguesmp.dungeon_spawner.behavior.impl;
 
+import com.roguesmp.utils.LocationUtils;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon_spawner.behavior.BaseBehavior;
 import com.roguesmp.dungeon_spawner.behavior.BehaviorData;
-import com.roguesmp.dungeon.utils.SpawnLocationRazdon;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
@@ -62,7 +62,7 @@ public class WaveSpawner extends BaseBehavior {
         if (world == null) return true;
 
         for (int i = 0; i < extra; i++) {
-            Location spawnLoc = SpawnLocationRazdon.getRandomLocation(location);
+            Location spawnLoc = LocationUtils.randomStandableNear(location);
             entity.copy(spawnLoc);
         }
 

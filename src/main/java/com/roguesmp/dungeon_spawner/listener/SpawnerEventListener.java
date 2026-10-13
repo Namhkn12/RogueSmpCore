@@ -1,5 +1,8 @@
 package com.roguesmp.dungeon_spawner.listener;
 
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.event.block.Action;
+import com.roguesmp.constant.Keys;
 import com.roguesmp.world.DungeonWorldManager;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
@@ -7,14 +10,6 @@ import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.roguesmp.dungeon.actor.ui.TriggerBossGui;
 import com.roguesmp.dungeon.controller.BossRoomController;
 import com.roguesmp.dungeon_spawner.controller.SpawnerEventController;
-import com.roguesmp.dungeon.utils.NameSpaceKeys;
-import com.roguesmp.dungeon.utils.PdcUtil;
-import com.roguesmp.dungeon.utils.filterchain.EventFilter;
-import com.roguesmp.dungeon.utils.filterchain.FilterChain;
-import com.roguesmp.dungeon.utils.filterchain.impl.BlockBreakFilters;
-import com.roguesmp.dungeon.utils.filterchain.impl.BlockPlaceFilters;
-import com.roguesmp.dungeon.utils.filterchain.impl.EntityFilters;
-import com.roguesmp.dungeon.utils.filterchain.impl.InteractFilters;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -42,34 +37,20 @@ public class SpawnerEventListener implements Listener {
 
     @EventHandler
     public void onSpawnerPlace(BlockPlaceEvent event){
-        boolean passes = FilterChain.of(BlockPlaceEvent.class)
-                .require(BlockPlaceFilters.blockType(Material.SPAWNER))
-                .require(BlockPlaceFilters.hasMeta())
-                .require(BlockPlaceFilters.hasPdc(NameSpaceKeys.SPAWNER_TID_KEY, event.getItemInHand().getItemMeta()))
-                .build().test(event);
-        if (!passes) return;
+        if (event.getBlock().getType() != Material.SPAWNER) return;
+        String sid = event.getItemInHand().getPersistentDataContainer().get(Keys.SPAWNER_TID, PersistentDataType.STRING);
+        if (sid == null) return;
 
-        String sid = PdcUtil.getOrDefault(
-                event.getItemInHand(),
-                NameSpaceKeys.SPAWNER_TID_KEY,
-                PersistentDataType.STRING,
-                "unknown"
-        );
         event.getPlayer().sendMessage(Component.text("Place spawner with sid: " + sid, NamedTextColor.GRAY));
         spawnerController.handlePlaceSpawner(event.getBlock(), sid);
     }
 
     @EventHandler
     public void onSpawnerAddToWorld(EntityAddToWorldEvent event){
-        boolean filter = FilterChain.of(EntityAddToWorldEvent.class)
-                .require(EntityFilters.entityType(Marker.class))
-                .build()
-                .test(event);
-        if(!filter) return;
-        if(!DungeonWorldManager.isAnyDungeonWorld(event.getWorld())) return;
-        Entity entity = event.getEntity();
+        if (!(event.getEntity() instanceof Marker marker)) return;
+        if (!DungeonWorldManager.isAnyDungeonWorld(event.getWorld())) return;
 
-        spawnerController.handleSpawnerAppear((Marker) entity);
+        spawnerController.handleSpawnerAppear(marker);
     }
 
 //    @EventHandler
@@ -80,12 +61,8 @@ public class SpawnerEventListener implements Listener {
 
     @EventHandler
     public void onSpawnerBreak(BlockBreakEvent event){
-        boolean filter = FilterChain.of(BlockBreakEvent.class)
-                .require(BlockBreakFilters.blockType(Material.SPAWNER))
-                .require(BlockBreakFilters.inDungeonWorld())
-                .build()
-                .test(event);
-        if(!filter) return;
+        Block block = event.getBlock();
+        if (block.getType() != Material.SPAWNER || !DungeonWorldManager.isAnyDungeonWorld(block.getWorld())) return;
         boolean allowBreak  = spawnerController.handleSpawnerBreak(event.getBlock(), event.getPlayer());
         event.setCancelled(!allowBreak );
     }
@@ -100,28 +77,12 @@ public class SpawnerEventListener implements Listener {
 
     @EventHandler
     public void onTrialSpawnerActive(PlayerInteractEvent event) {
-        if (!TRIAL_FILTER.test(event)) return;
-
-        Player player = event.getPlayer();
         Block block = event.getClickedBlock();
-        if (block == null) return;
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() != EquipmentSlot.HAND || block == null) return;
+        if (!(block.getState() instanceof TrialSpawner) || !DungeonWorldManager.isAnyDungeonWorld(block.getWorld())) return;
 
-        BlockState state = block.getState();
-
-        if (!(state instanceof TrialSpawner trialSpawner)) return;
-
-        new TriggerBossGui(block, p -> {
-            bossRoomController.handleTriggerBossRoom(p, block);
-        }).showInventory(player);
+        new TriggerBossGui(block, p -> bossRoomController.handleTriggerBossRoom(p, block)).showInventory(event.getPlayer());
     }
 
-    private static final EventFilter<PlayerInteractEvent> TRIAL_FILTER =
-            FilterChain.of(PlayerInteractEvent.class)
-                    .require(InteractFilters.rightClickBlock())
-                    .require(InteractFilters.mainHand())
-                    .require(InteractFilters.hasBlock())
-                    .require(InteractFilters.blockState(TrialSpawner.class))
-                    .require(InteractFilters.clickedBlockInDungeonWorld())
-                    .build();
 
 }

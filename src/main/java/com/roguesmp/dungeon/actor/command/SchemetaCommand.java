@@ -1,6 +1,7 @@
 package com.roguesmp.dungeon.actor.command;
 
 
+import com.roguesmp.constant.Keys;
 import com.roguesmp.dungeon.controller.SchemetaController;
 import com.roguesmp.dungeon.data.definition.Schemeta;
 import com.roguesmp.dungeon.manager.SchemetaManager;
@@ -60,7 +61,7 @@ public class SchemetaCommand {
 //                                            ItemStack item = new ItemStack(Material.VAULT);
 //                                            ItemMeta meta = item.getItemMeta();
 //                                            meta.displayName(Component.text("Next Door"));
-//                                            meta.getPersistentDataContainer().set(NameSpaceKeys.NEXT_DOOR_KEY, PersistentDataType.STRING, DungeonDoorType.NEXTDOOR.getType());
+//                                            meta.getPersistentDataContainer().set(Keys.NEXT_DOOR, PersistentDataType.STRING, DungeonDoorType.NEXTDOOR.getType());
 //                                            item.setItemMeta(meta);
 //                                            player.getInventory().addItem(item);
 //                                            player.sendMessage("Give Next Door");
@@ -71,7 +72,7 @@ public class SchemetaCommand {
 //                                            ItemStack item = new ItemStack(Material.LODESTONE);
 //                                            ItemMeta meta = item.getItemMeta();
 //                                            meta.displayName(Component.text("End Door"));
-//                                            meta.getPersistentDataContainer().set(NameSpaceKeys.END_DOOR_KEY, PersistentDataType.STRING, DungeonDoorType.ENDDOOR.getType());
+//                                            meta.getPersistentDataContainer().set(Keys.END_DOOR, PersistentDataType.STRING, DungeonDoorType.ENDDOOR.getType());
 //                                            item.setItemMeta(meta);
 //                                            player.getInventory().addItem(item);
 //                                            player.sendMessage("Give End Door");

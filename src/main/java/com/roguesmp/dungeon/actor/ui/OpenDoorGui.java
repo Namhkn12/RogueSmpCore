@@ -14,7 +14,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
 import java.util.List;
 import java.util.UUID;
-import static com.roguesmp.dungeon.utils.HiddenItemBuilder.makeHidden;
+import static com.roguesmp.utils.ItemStackUtils.hideTooltip;
 
 public class OpenDoorGui extends BaseGui {
 
@@ -53,11 +53,11 @@ public class OpenDoorGui extends BaseGui {
         this.door = door;
         this.rooms = rooms;
         this.selectRoomCallback = callback;
-        border    = makeHidden(ItemStack.of(Material.MAGENTA_STAINED_GLASS_PANE));
-        filler    = makeHidden(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE));
-        connector = makeHidden(ItemStack.of(Material.BLUE_STAINED_GLASS_PANE));
-        bounder   = makeHidden(ItemStack.of(Material.BLUE_STAINED_GLASS_PANE));
-        playerIcon = makeHidden(ItemStack.of(Material.PLAYER_HEAD));
+        border    = hideTooltip(ItemStack.of(Material.MAGENTA_STAINED_GLASS_PANE));
+        filler    = hideTooltip(ItemStack.of(Material.BLACK_STAINED_GLASS_PANE));
+        connector = hideTooltip(ItemStack.of(Material.BLUE_STAINED_GLASS_PANE));
+        bounder   = hideTooltip(ItemStack.of(Material.BLUE_STAINED_GLASS_PANE));
+        playerIcon = hideTooltip(ItemStack.of(Material.PLAYER_HEAD));
     }
 
     @Override

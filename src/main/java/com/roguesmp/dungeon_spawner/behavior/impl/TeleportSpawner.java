@@ -1,10 +1,11 @@
 package com.roguesmp.dungeon_spawner.behavior.impl;
 
+import com.roguesmp.utils.LocationUtils;
+import java.util.concurrent.ThreadLocalRandom;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon_spawner.behavior.BaseBehavior;
 import com.roguesmp.dungeon_spawner.behavior.BehaviorData;
-import com.roguesmp.dungeon.utils.Razdon;
 import org.bukkit.*;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.LivingEntity;
@@ -86,7 +87,7 @@ public class TeleportSpawner extends BaseBehavior {
         for (Player player : players) {
             if (!player.getWorld().equals(world)) continue;
 
-            int count = Razdon.getInstance().nextIntInRange(2, 4);
+            int count = ThreadLocalRandom.current().nextInt(2, 4 + 1);
             for (int i = 0; i < count; i++) {
                 Location dest = findSafeLocationNearPlayer(player);
                 if (dest == null) continue;
@@ -102,21 +103,18 @@ public class TeleportSpawner extends BaseBehavior {
 
     /** Find a safe location */
     private Location findSafeLocationNearPlayer(Player player) {
-        Razdon rng = Razdon.getInstance();
         Location playerLoc = player.getLocation();
 
         for (int i = 0; i < 15; i++) {
-            Location candidate = rng.nextLocationXZ(playerLoc, 1.5, safeCheckRadius);
+            Location candidate = LocationUtils.randomOffsetXZ(playerLoc, 1.5, safeCheckRadius);
             if (isSafe(candidate)) return candidate;
         }
         return null;
     }
 
     private Location findTeleportDestination(Location current, World world) {
-        Razdon rng = Razdon.getInstance();
-
         for (int i = 0; i < 15; i++) {
-            Location candidate = rng.nextLocationXZ(current, 10.0, teleportRadius);
+            Location candidate = LocationUtils.randomOffsetXZ(current, 10.0, teleportRadius);
             if (isSafe(candidate)) return candidate;
         }
         return null;

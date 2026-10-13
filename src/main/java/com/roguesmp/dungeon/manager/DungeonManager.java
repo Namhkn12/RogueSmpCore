@@ -1,8 +1,8 @@
 package com.roguesmp.dungeon.manager;
 
+import com.roguesmp.dungeon.repository.DungeonRepository;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.data.definition.Dungeon;
-import com.roguesmp.dungeon.repository.IDungeonRepository;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,9 +12,9 @@ public class DungeonManager {
 
     private final Map<String, Dungeon> cache = new HashMap<>();
 
-    private final IDungeonRepository dungeonRepository;
+    private final DungeonRepository dungeonRepository;
 
-    public DungeonManager(IDungeonRepository dungeonRepository) {
+    public DungeonManager(DungeonRepository dungeonRepository) {
         this.dungeonRepository = dungeonRepository;
 
         loadAll();

@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon.actor.command;
 
+import com.roguesmp.constant.Keys;
 import com.roguesmp.loot.LootEntry;
 import com.roguesmp.loot.LootOdds;
 import com.roguesmp.loot.context.LootContext;
@@ -15,7 +16,6 @@ import com.roguesmp.dungeon.manager.RoomManager;
 import com.roguesmp.dungeon.manager.SchemetaManager;
 import com.roguesmp.dungeon_spawner.manager.SpawnerManager;
 import com.roguesmp.loot.LootTable;
-import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.executors.CommandArguments;
 import dev.jorel.commandapi.arguments.*;
@@ -311,7 +311,7 @@ public class TemplateGenCommand {
         ItemStack item = new ItemStack(Material.SPAWNER);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text(displayName));
-        meta.getPersistentDataContainer().set(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING, templateId);
+        meta.getPersistentDataContainer().set(Keys.SPAWNER_TID, PersistentDataType.STRING, templateId);
         item.setItemMeta(meta);
         return item;
     }
@@ -324,7 +324,7 @@ public class TemplateGenCommand {
         meta.setDisplayName("Treasure Chest");
 
         meta.getPersistentDataContainer().set(
-                NameSpaceKeys.REWARD_CID_KEY,
+                Keys.REWARD_CID,
                 PersistentDataType.STRING,
                 rewardId
         );
