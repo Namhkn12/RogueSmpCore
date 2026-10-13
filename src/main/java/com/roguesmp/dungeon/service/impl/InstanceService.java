@@ -1,5 +1,7 @@
 package com.roguesmp.dungeon.service.impl;
 
+import com.roguesmp.dungeon_party.Party;
+import com.roguesmp.dungeon_party.PartyManager;
 import com.roguesmp.dungeon.data.definition.Dungeon;
 import com.roguesmp.dungeon.data.definition.objective.IObjective;
 import com.roguesmp.dungeon.data.definition.objective.factory.ObjectiveConfig;
@@ -28,17 +30,17 @@ public class InstanceService implements IInstanceService {
     private final RoomManager roomManager;
     private final IRegionService regionService;
     private final IDungeonService dungeonService;
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final IRoomService roomService;
     private final ISchematicService schematicService;
 
-    public InstanceService(InstanceManager instanceManager, DungeonManager dungeonManager, RoomManager roomManager, IRegionService regionService, IDungeonService dungeonService, IPartyService partyService, IRoomService roomService, ISchematicService schematicService) {
+    public InstanceService(InstanceManager instanceManager, DungeonManager dungeonManager, RoomManager roomManager, IRegionService regionService, IDungeonService dungeonService, PartyManager partyManager, IRoomService roomService, ISchematicService schematicService) {
         this.instanceManager = instanceManager;
         this.dungeonManager = dungeonManager;
         this.roomManager = roomManager;
         this.regionService = regionService;
         this.dungeonService = dungeonService;
-        this.partyService = partyService;
+        this.partyManager = partyManager;
         this.roomService = roomService;
         this.schematicService = schematicService;
     }
@@ -126,7 +128,7 @@ public class InstanceService implements IInstanceService {
 
     @Override
     public void removeDungeonInstance(DungeonInstance instance) {
-        Party party = partyService.getPartyById(instance.getSession().getPartyId());
+        Party party = partyManager.getPartyById(instance.getSession().getPartyId());
         if(party != null) party.setInstanceId(null);
         instanceManager.remove(instance.getSession().getSessionId());
     }

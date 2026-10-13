@@ -1,27 +1,27 @@
 package com.roguesmp.dungeon.service.impl;
 
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
-import com.roguesmp.dungeon.data.runtime.Party;
+import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon.data.runtime.session.PlayerStatus;
 import com.roguesmp.dungeon.manager.DungeonManager;
 import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.manager.ScoreBoardManager;
-import com.roguesmp.dungeon.service.IPartyService;
+import com.roguesmp.dungeon_party.PartyManager;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
 public class PlayerSessionService {
 
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final InstanceManager instanceManager;
     private final ScoreBoardManager scoreBoardManager;
     private final DungeonManager dungeonManager;
     private final PlayerDeathService playerDeathService;
 
-    public PlayerSessionService(IPartyService partyService, InstanceManager instanceManager,
+    public PlayerSessionService(PartyManager partyManager, InstanceManager instanceManager,
                                 ScoreBoardManager scoreBoardManager, DungeonManager dungeonManager,
                                 PlayerDeathService playerDeathService) {
-        this.partyService = partyService;
+        this.partyManager = partyManager;
         this.instanceManager = instanceManager;
         this.scoreBoardManager = scoreBoardManager;
         this.dungeonManager = dungeonManager;
@@ -29,7 +29,7 @@ public class PlayerSessionService {
     }
 
     public void handlePlayerReconnect(Player player) {
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if (party == null) return;
         String iid = party.getInstanceId();
         if (iid == null || iid.isBlank()) return;
@@ -56,7 +56,7 @@ public class PlayerSessionService {
     }
 
     public void handlePlayerDisconnect(Player player) {
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if (party == null) return;
         String iid = party.getInstanceId();
         if (iid == null || iid.isBlank()) return;

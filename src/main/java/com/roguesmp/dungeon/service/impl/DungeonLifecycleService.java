@@ -4,7 +4,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon.data.definition.Dungeon;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
-import com.roguesmp.dungeon.data.runtime.Party;
+import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon.data.runtime.Region;
 import com.roguesmp.dungeon.data.runtime.RoomInstance;
 import com.roguesmp.dungeon.data.runtime.session.DungeonProgress;
@@ -16,7 +16,7 @@ import com.roguesmp.dungeon.manager.ScoreBoardManager;
 import com.roguesmp.dungeon_spawner.manager.SpawnerInstanceManager;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.service.IInstanceService;
-import com.roguesmp.dungeon.service.IPartyService;
+import com.roguesmp.dungeon_party.PartyManager;
 import com.roguesmp.dungeon.service.IRegionService;
 import com.roguesmp.dungeon.service.IReviveService;
 import com.roguesmp.dungeon.utils.Teleporter;
@@ -31,7 +31,7 @@ public class DungeonLifecycleService {
 
     private final IInstanceService instanceService;
     private final InstanceManager instanceManager;
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final IRegionService regionService;
     private final ScoreBoardManager scoreBoardManager;
     private final DungeonManager dungeonManager;
@@ -39,10 +39,10 @@ public class DungeonLifecycleService {
     private final RoomRuntimeService roomRuntimeService;
     private final IReviveService reviveService;
 
-    public DungeonLifecycleService(IInstanceService instanceService, InstanceManager instanceManager, IPartyService partyService, IRegionService regionService, ScoreBoardManager scoreBoardManager, DungeonManager dungeonManager, SpawnerInstanceManager spawnerInstanceManager, DungeonPresenter presenter, RoomRuntimeService roomRuntimeService, IReviveService reviveService) {
+    public DungeonLifecycleService(IInstanceService instanceService, InstanceManager instanceManager, PartyManager partyManager, IRegionService regionService, ScoreBoardManager scoreBoardManager, DungeonManager dungeonManager, SpawnerInstanceManager spawnerInstanceManager, DungeonPresenter presenter, RoomRuntimeService roomRuntimeService, IReviveService reviveService) {
         this.instanceService = instanceService;
         this.instanceManager = instanceManager;
-        this.partyService = partyService;
+        this.partyManager = partyManager;
         this.regionService = regionService;
         this.scoreBoardManager = scoreBoardManager;
         this.dungeonManager = dungeonManager;
@@ -53,7 +53,7 @@ public class DungeonLifecycleService {
 
 
     public void onStartDungeon(String did, Player player) {
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if (party == null) return;
         Dungeon dungeon = dungeonManager.get(did);
 
@@ -76,14 +76,14 @@ public class DungeonLifecycleService {
         if (region == null) return;
 
         Teleporter.teleportAllByIdString(party.getMembers(), region.getRegionPoint());
-        partyService.getOnlineMembers(party).forEach(p -> {
+        partyManager.getOnlineMembers(party).forEach(p -> {
             scoreBoardManager.createBoard(p, instance, dungeon);
             presenter.onEnterDungeon(p, dungeon.getName());
         });
     }
 
     public void onLeaveDungeon(Player player) {
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if (party == null) { player.sendMessage(Component.text("Is you still in party?", NamedTextColor.YELLOW)); return; }
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
         if (instance == null) { player.sendMessage(Component.text("Is your party still in dungeon?", NamedTextColor.YELLOW)); return; }
@@ -92,7 +92,7 @@ public class DungeonLifecycleService {
         players.remove(player.getUniqueId().toString());
 
         if (instance.getProgress().getStatus() == DungeonProgress.Status.IN_PROGRESS) {
-            partyService.forceKick(player);
+            partyManager.forceKick(player);
             instance.getDungeonPlayers().setPlayerStatus(
                     player.getUniqueId().toString(), PlayerStatus.Status.OUT);
             player.sendMessage(Component.text("Bạn đã rời khỏi dungeon khi đang chơi, đồng thời cũng sẽ rời khỏi party!", NamedTextColor.GRAY));
@@ -124,7 +124,7 @@ public class DungeonLifecycleService {
 
         instanceService.removeDungeonInstance(instance);
         instanceManager.remove(instance.getSession().getSessionId());
-        Party party = partyService.getPartyById(instance.getSession().getPartyId());
+        Party party = partyManager.getPartyById(instance.getSession().getPartyId());
         party.setInstanceId("");
         party.getMembers().forEach(s -> {
             Player p = UuidUtil.getPlayerById(s);

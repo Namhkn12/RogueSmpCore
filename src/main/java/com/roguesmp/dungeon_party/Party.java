@@ -1,12 +1,9 @@
-package com.roguesmp.dungeon.data.runtime;
+package com.roguesmp.dungeon_party;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Runtime party aggregate used to enter and own dungeon sessions.
- */
 public class Party {
 
     private String partyId;
@@ -123,16 +120,6 @@ public class Party {
 
     public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
-    }
-
-    @Deprecated
-    public boolean isStatus() {
-        return locked;
-    }
-
-    @Deprecated
-    public void setStatus(boolean status) {
-        this.locked = status;
     }
 
     @Override

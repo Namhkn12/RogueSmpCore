@@ -1,6 +1,5 @@
-package com.roguesmp.dungeon.task;
+package com.roguesmp.dungeon_party;
 
-import com.roguesmp.dungeon.service.IPartyService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,26 +12,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class PartyInviteTask {
-
-    // targetUUID → (inviterUUID → expireTask)
+public class PartyInviteManager {
     private final Map<UUID, Map<UUID, BukkitTask>> pendingInvites = new HashMap<>();
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final Plugin plugin;
 
-    public PartyInviteTask(Plugin plugin, IPartyService partyService) {
-        this.partyService = partyService;
+    public PartyInviteManager(Plugin plugin, PartyManager partyManager) {
+        this.partyManager = partyManager;
         this.plugin = plugin;
     }
 
     public boolean sendInvite(Player inviter, Player target) {
 
-        if (!partyService.isOwner(inviter)) {
+        if (!partyManager.isOwner(inviter)) {
             inviter.sendMessage("§cChỉ chủ party mới có thể mời người khác!");
             return false;
         }
 
-        if (partyService.isInParty(target)) {
+        if (partyManager.isInParty(target)) {
             inviter.sendMessage("§cNgười chơi này đã ở trong party!");
             return false;
         }
@@ -89,7 +86,7 @@ public class PartyInviteTask {
         }
 
         removeInvite(target.getUniqueId(), inviter.getUniqueId());
-        partyService.joinParty(target, inviter);
+        partyManager.joinParty(target, inviter);
         inviter.sendMessage("§a" + target.getName() + " đã tham gia party!");
     }
 
@@ -122,8 +119,6 @@ public class PartyInviteTask {
             if (task != null) task.cancel();
         }
     }
-
-    // ── Internal ─────────────────────────────────────────────
 
     private boolean hasInviteFrom(Player target, Player inviter) {
         Map<UUID, BukkitTask> invites = pendingInvites.get(target.getUniqueId());

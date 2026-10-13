@@ -4,11 +4,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import com.roguesmp.dungeon.data.definition.room.Room;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
-import com.roguesmp.dungeon.data.runtime.Party;
+import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon.data.runtime.Region;
 import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.manager.RoomManager;
-import com.roguesmp.dungeon.service.IPartyService;
+import com.roguesmp.dungeon_party.PartyManager;
 import com.roguesmp.dungeon.service.IRegionService;
 import com.roguesmp.dungeon.service.ISchematicService;
 import com.roguesmp.dungeon.utils.Teleporter;
@@ -20,15 +20,15 @@ import org.bukkit.entity.Player;
 
 public class TreasureService {
 
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final InstanceManager instanceManager;
     private final IRegionService regionService;
     private final RoomManager roomManager;
     private final ISchematicService schematicService;
     private final Plugin plugin;
 
-    public TreasureService(IPartyService partyService, InstanceManager instanceManager, IRegionService regionService, RoomManager roomManager, ISchematicService schematicService, Plugin plugin) {
-        this.partyService = partyService;
+    public TreasureService(PartyManager partyManager, InstanceManager instanceManager, IRegionService regionService, RoomManager roomManager, ISchematicService schematicService, Plugin plugin) {
+        this.partyManager = partyManager;
         this.instanceManager = instanceManager;
         this.regionService = regionService;
         this.roomManager = roomManager;
@@ -48,7 +48,7 @@ public class TreasureService {
     }
 
     public void handleGetIntoTreasurePortal(Player player) {
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if (party == null || party.getInstanceId() == null || party.getInstanceId().isBlank()) return;
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
         if (instance == null) return;

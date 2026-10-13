@@ -1,25 +1,25 @@
 package com.roguesmp.dungeon.service.impl;
 
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
-import com.roguesmp.dungeon.data.runtime.Party;
+import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon.manager.InstanceManager;
-import com.roguesmp.dungeon.service.IPartyService;
+import com.roguesmp.dungeon_party.PartyManager;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 
 public class SpectatorBoundaryService {
 
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final InstanceManager instanceManager;
 
-    public SpectatorBoundaryService(IPartyService partyService, InstanceManager instanceManager) {
-        this.partyService = partyService;
+    public SpectatorBoundaryService(PartyManager partyManager, InstanceManager instanceManager) {
+        this.partyManager = partyManager;
         this.instanceManager = instanceManager;
     }
 
     public void handlePlayerMoveInDeadMode(Player player) {
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if (party == null || party.getInstanceId() == null || party.getInstanceId().isBlank()) return;
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
         if (instance == null) return;

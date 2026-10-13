@@ -3,13 +3,13 @@ package com.roguesmp.dungeon.service.impl;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
-import com.roguesmp.dungeon.data.runtime.Party;
+import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon.data.runtime.session.DungeonProgress;
 import com.roguesmp.dungeon.data.runtime.session.PlayerStatus;
 import com.roguesmp.dungeon.helper.SerializableLocation;
 import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
-import com.roguesmp.dungeon.service.IPartyService;
+import com.roguesmp.dungeon_party.PartyManager;
 import com.roguesmp.dungeon.service.IReviveService;
 import com.roguesmp.dungeon.utils.Teleporter;
 import com.roguesmp.dungeon.utils.UuidUtil;
@@ -20,15 +20,15 @@ import org.bukkit.entity.Player;
 
 public class PlayerDeathService {
 
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final InstanceManager instanceManager;
     private final IReviveService reviveService;
     private final DungeonLifecycleService dungeonLifecycleService;
     private final DungeonPresenter presenter;
 
-    public PlayerDeathService(IPartyService partyService, InstanceManager instanceManager,
+    public PlayerDeathService(PartyManager partyManager, InstanceManager instanceManager,
                               IReviveService reviveService, DungeonLifecycleService dungeonLifecycleService, DungeonPresenter presenter) {
-        this.partyService = partyService;
+        this.partyManager = partyManager;
         this.instanceManager = instanceManager;
         this.reviveService = reviveService;
         this.dungeonLifecycleService = dungeonLifecycleService;
@@ -78,7 +78,7 @@ public class PlayerDeathService {
     }
 
     private DungeonInstance resolveInstance(Player player) {
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if (party == null || party.getInstanceId() == null || party.getInstanceId().isBlank()) return null;
         return instanceManager.get(party.getInstanceId());
     }

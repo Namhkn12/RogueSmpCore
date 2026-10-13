@@ -1,19 +1,19 @@
 package com.roguesmp.dungeon.data.definition.room.roomevent;
 
-import com.roguesmp.dungeon.data.runtime.Party;
+import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon.data.runtime.RoomInstance;
-import com.roguesmp.dungeon.service.IPartyService;
+import com.roguesmp.dungeon_party.PartyManager;
 
 public class RoomEventContext {
 
     private final RoomInstance roomInstance;
     private final Party party;
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
 
-    public RoomEventContext(RoomInstance roomInstance, Party party, IPartyService partyService) {
+    public RoomEventContext(RoomInstance roomInstance, Party party, PartyManager partyManager) {
         this.roomInstance = roomInstance;
         this.party = party;
-        this.partyService = partyService;
+        this.partyManager = partyManager;
     }
 
     public RoomInstance getRoomInstance() {
@@ -24,7 +24,7 @@ public class RoomEventContext {
         return party;
     }
 
-    public IPartyService getPartyService() {
-        return partyService;
+    public PartyManager getPartyService() {
+        return partyManager;
     }
 }

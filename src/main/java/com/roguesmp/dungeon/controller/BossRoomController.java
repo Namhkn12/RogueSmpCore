@@ -4,10 +4,10 @@ import com.roguesmp.dungeon.data.definition.objective.impl.DemonSlayer;
 import com.roguesmp.dungeon.data.definition.room.Room;
 import com.roguesmp.dungeon.data.definition.room.RoomType;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
-import com.roguesmp.dungeon.data.runtime.Party;
+import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.manager.RoomManager;
-import com.roguesmp.dungeon.service.IPartyService;
+import com.roguesmp.dungeon_party.PartyManager;
 import com.roguesmp.entity.EntityManager;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -16,17 +16,17 @@ import org.bukkit.entity.Player;
 public class BossRoomController {
 
     private final InstanceManager instanceManager;
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final RoomManager roomManager;
 
-    public BossRoomController(InstanceManager instanceManager, IPartyService partyService, RoomManager roomManager) {
+    public BossRoomController(InstanceManager instanceManager, PartyManager partyManager, RoomManager roomManager) {
         this.instanceManager = instanceManager;
-        this.partyService = partyService;
+        this.partyManager = partyManager;
         this.roomManager = roomManager;
     }
 
     public void handleOpenBossRoom(Player player, Block spawn){
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if(party == null || party.getInstanceId() == null || party.getInstanceId().isBlank()) return;
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
         if (instance == null) return;
@@ -48,7 +48,7 @@ public class BossRoomController {
     }
 
     public void handleTriggerBossRoom(Player player, Block trigger){
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if(party == null || party.getInstanceId() == null || party.getInstanceId().isBlank()) return;
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
         if (instance == null) return;

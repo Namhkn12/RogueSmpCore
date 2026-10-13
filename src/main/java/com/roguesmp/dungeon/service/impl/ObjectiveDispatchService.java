@@ -7,10 +7,10 @@ import com.roguesmp.dungeon.data.definition.objective.event.IBlockBreakAware;
 import com.roguesmp.dungeon.data.definition.objective.event.IEntityKillAware;
 import com.roguesmp.dungeon.data.definition.objective.event.IItemCollectAware;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
-import com.roguesmp.dungeon.data.runtime.Party;
+import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon.data.runtime.RoomInstance;
 import com.roguesmp.dungeon.manager.InstanceManager;
-import com.roguesmp.dungeon.service.IPartyService;
+import com.roguesmp.dungeon_party.PartyManager;
 import com.roguesmp.dungeon.utils.PdcUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
@@ -25,11 +25,11 @@ import java.util.function.Consumer;
 
 public class ObjectiveDispatchService {
 
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final InstanceManager instanceManager;
 
-    public ObjectiveDispatchService(IPartyService partyService, InstanceManager instanceManager) {
-        this.partyService = partyService;
+    public ObjectiveDispatchService(PartyManager partyManager, InstanceManager instanceManager) {
+        this.partyManager = partyManager;
         this.instanceManager = instanceManager;
     }
 
@@ -72,7 +72,7 @@ public class ObjectiveDispatchService {
 
     private ActionContext resolveContext(Player player, org.bukkit.util.Vector actionPosition) {
         if (player == null) return null;
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if (party == null || party.getInstanceId() == null || party.getInstanceId().isEmpty()) return null;
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
         if (instance == null || instance.getProgress() == null) return null;

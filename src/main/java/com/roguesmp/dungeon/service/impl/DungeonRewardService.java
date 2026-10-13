@@ -1,11 +1,12 @@
 package com.roguesmp.dungeon.service.impl;
 
+import com.roguesmp.dungeon_party.PartyManager;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon.data.definition.Dungeon;
 import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
-import com.roguesmp.dungeon.data.runtime.Party;
+import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.loot.context.LootOrigin;
 import com.roguesmp.dungeon.itemdisplay.impl.ChestOpenAnimation;
 import com.roguesmp.player.PlayerManager;
@@ -37,13 +38,13 @@ import java.util.stream.Stream;
 
 public class DungeonRewardService implements IDungeonRewardService {
 
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final InstanceManager instanceManager;
     private final DungeonManager dungeonManager;
     private final ChestOpenAnimation chestOpenAnimation;
 
-    public DungeonRewardService(IPartyService partyService, InstanceManager instanceManager, DungeonManager dungeonManager, ChestOpenAnimation chestOpenAnimation) {
-        this.partyService = partyService;
+    public DungeonRewardService(PartyManager partyManager, InstanceManager instanceManager, DungeonManager dungeonManager, ChestOpenAnimation chestOpenAnimation) {
+        this.partyManager = partyManager;
         this.instanceManager = instanceManager;
         this.dungeonManager = dungeonManager;
         this.chestOpenAnimation = chestOpenAnimation;
@@ -111,7 +112,7 @@ public class DungeonRewardService implements IDungeonRewardService {
         String tableId;
 
         if ("dungeon".equals(cidValue)) {
-            Party party = partyService.getPartyByPlayer(player);
+            Party party = partyManager.getPartyByPlayer(player);
             if (party == null) return false;
             String instanceId = party.getInstanceId();
             if (instanceId == null || instanceId.isBlank()) return false;

@@ -1,8 +1,8 @@
 package com.roguesmp.dungeon.actor.listener;
 
 import com.roguesmp.dungeon.controller.DungeonFlowController;
-import com.roguesmp.dungeon.data.runtime.Party;
-import com.roguesmp.dungeon.service.IPartyService;
+import com.roguesmp.dungeon_party.Party;
+import com.roguesmp.dungeon_party.PartyManager;
 import com.roguesmp.dungeon.utils.filterchain.EventFilter;
 import com.roguesmp.dungeon.utils.filterchain.FilterChain;
 import com.roguesmp.dungeon.utils.filterchain.impl.InteractFilters;
@@ -29,14 +29,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DoorInteractListener implements Listener {
 
     private final DungeonFlowController dungeonFlowController;
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final Map<UUID, String> treasureEnteredByInstance = new ConcurrentHashMap<>();
     private final Set<UUID> insideGateway = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
 
-    public DoorInteractListener(DungeonFlowController dungeonFlowController, IPartyService partyService) {
+    public DoorInteractListener(DungeonFlowController dungeonFlowController, PartyManager partyManager) {
         this.dungeonFlowController = dungeonFlowController;
-        this.partyService = partyService;
+        this.partyManager = partyManager;
     }
 
     @EventHandler
@@ -130,7 +130,7 @@ public class DoorInteractListener implements Listener {
 
     private String resolveInstanceId(Player player) {
         if (player == null) return null;
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if(party == null) return null;
         return party.getInstanceId();
     }

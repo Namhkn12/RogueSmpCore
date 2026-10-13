@@ -4,13 +4,13 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon.data.runtime.DeadEntry;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
-import com.roguesmp.dungeon.data.runtime.Party;
+import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon.data.runtime.session.DungeonPlayer;
 import com.roguesmp.dungeon.data.runtime.session.PlayerStatus;
 import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.manager.ReviveManager;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
-import com.roguesmp.dungeon.service.IPartyService;
+import com.roguesmp.dungeon_party.PartyManager;
 import com.roguesmp.dungeon.service.IReviveService;
 import com.roguesmp.dungeon.utils.Teleporter;
 import com.roguesmp.dungeon.utils.UuidUtil;
@@ -33,13 +33,13 @@ public class ReviveService implements IReviveService {
     private static final int PROGRESS_PER_TICK = 20;  // +1s mỗi lần check
 
     private final ReviveManager reviveManager;
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final InstanceManager instanceManager;
     private final DungeonPresenter dungeonPresenter;
 
-    public ReviveService(ReviveManager reviveManager, IPartyService partyService, InstanceManager instanceManager, DungeonPresenter dungeonPresenter) {
+    public ReviveService(ReviveManager reviveManager, PartyManager partyManager, InstanceManager instanceManager, DungeonPresenter dungeonPresenter) {
         this.reviveManager = reviveManager;
-        this.partyService  = partyService;
+        this.partyManager  = partyManager;
         this.instanceManager = instanceManager;
         this.dungeonPresenter = dungeonPresenter;
 
@@ -62,7 +62,7 @@ public class ReviveService implements IReviveService {
             Player player = Bukkit.getPlayer(deadEntry.getDeadID());
             if(player == null) return;
 
-            Party party = partyService.getPartyByPlayer(player);
+            Party party = partyManager.getPartyByPlayer(player);
             if (party == null) return;
 
             String instanceId = party.getInstanceId();
@@ -137,10 +137,10 @@ public class ReviveService implements IReviveService {
     private List<Player> findRescuer(DungeonPlayer teammates, Player dead, Location deadLocation) {
         if (deadLocation == null || deadLocation.getWorld() == null) return List.of();
 
-        Party party = partyService.getPartyByPlayer(dead);
+        Party party = partyManager.getPartyByPlayer(dead);
         if (party == null) return List.of();
 
-        return partyService.getOnlineMembers(party).stream()
+        return partyManager.getOnlineMembers(party).stream()
                 .filter(player -> !player.equals(dead))
                 .filter(player -> {
                     PlayerStatus s = teammates.getPlayers().get(player.getUniqueId().toString());
@@ -181,7 +181,7 @@ public class ReviveService implements IReviveService {
     private Location resolveDeadLocation(Player deadPlayer) {
         if (deadPlayer == null) return null;
 
-        Party party = partyService.getPartyByPlayer(deadPlayer);
+        Party party = partyManager.getPartyByPlayer(deadPlayer);
         if (party == null) return deadPlayer.getLocation();
 
         String instanceId = party.getInstanceId();

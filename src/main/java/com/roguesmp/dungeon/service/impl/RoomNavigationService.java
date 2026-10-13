@@ -5,7 +5,7 @@ import org.bukkit.plugin.Plugin;
 import com.roguesmp.dungeon.actor.ui.OpenDoorGui;
 import com.roguesmp.dungeon.data.definition.room.Room;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
-import com.roguesmp.dungeon.data.runtime.Party;
+import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon.data.runtime.RoomInstance;
 import com.roguesmp.dungeon.data.runtime.session.DungeonProgress;
 import com.roguesmp.dungeon.helper.SerializableBounds;
@@ -14,7 +14,7 @@ import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.manager.RoomManager;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.service.IDungeonService;
-import com.roguesmp.dungeon.service.IPartyService;
+import com.roguesmp.dungeon_party.PartyManager;
 import com.roguesmp.dungeon.service.IRoomService;
 import com.roguesmp.dungeon.service.ISchematicService;
 import com.roguesmp.dungeon.utils.UuidUtil;
@@ -29,7 +29,7 @@ import java.util.List;
 
 public class RoomNavigationService {
 
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final InstanceManager instanceManager;
     private final RoomManager roomManager;
     private final ISchematicService schematicService;
@@ -39,9 +39,9 @@ public class RoomNavigationService {
     private final DungeonPresenter presenter;
     private final Plugin plugin;
 
-    public RoomNavigationService(IPartyService partyService, InstanceManager instanceManager, RoomManager roomManager, ISchematicService schematicService, IDungeonService dungeonService, IRoomService roomService, RoomRuntimeService roomRuntimeService, DungeonPresenter presenter, Plugin plugin){
+    public RoomNavigationService(PartyManager partyManager, InstanceManager instanceManager, RoomManager roomManager, ISchematicService schematicService, IDungeonService dungeonService, IRoomService roomService, RoomRuntimeService roomRuntimeService, DungeonPresenter presenter, Plugin plugin){
 
-        this.partyService = partyService;
+        this.partyManager = partyManager;
         this.instanceManager = instanceManager;
         this.roomManager = roomManager;
         this.schematicService = schematicService;
@@ -53,7 +53,7 @@ public class RoomNavigationService {
     }
 
     public void handleOpenNextDoor(Block door, Player player) {
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if (party == null || party.getInstanceId() == null || party.getInstanceId().isBlank()) return;
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
         if (instance == null) return;
@@ -88,7 +88,7 @@ public class RoomNavigationService {
     }
 
     public void handleSelectNextRoom(Player player, Block door, Room room) {
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if (party == null || party.getInstanceId() == null || party.getInstanceId().isBlank()) return;
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
         if (instance == null) return;
@@ -119,7 +119,7 @@ public class RoomNavigationService {
         if (!roomInstance.isCompleted() && room.getType().isCombat()) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 BoundingBox activeZone = roomInstance.getBounds().toBukkit();
-                for (Player member : partyService.getOnlineMembers(party)) {
+                for (Player member : partyManager.getOnlineMembers(party)) {
                     if (!member.isOnline()) continue;
                     if (!activeZone.contains(member.getLocation().toVector())) {
                         member.teleport(doorLoc.clone().add(0, 0, -2));

@@ -12,12 +12,12 @@ import com.roguesmp.dungeon.data.definition.room.roomevent.RoomEventContext;
 import com.roguesmp.dungeon.data.definition.room.roomevent.factory.RoomEventConfig;
 import com.roguesmp.dungeon.data.definition.room.roomevent.factory.RoomEventFactory;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
-import com.roguesmp.dungeon.data.runtime.Party;
+import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon.data.runtime.RoomInstance;
 import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.manager.RoomManager;
 import com.roguesmp.dungeon_spawner.manager.SpawnerInstanceManager;
-import com.roguesmp.dungeon.service.IPartyService;
+import com.roguesmp.dungeon_party.PartyManager;
 import com.roguesmp.dungeon.service.IRegionService;
 import com.roguesmp.dungeon.utils.PdcUtil;
 import org.bukkit.Bukkit;
@@ -40,16 +40,16 @@ public class RoomRuntimeService {
 
     private final RoomManager roomManager;
     private final InstanceManager instanceManager;
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private RoomCompletionService completionService;
     private final IRegionService regionService;
     private final SpawnerInstanceManager spawnerInstanceManager;
 
     public RoomRuntimeService(RoomManager roomManager, InstanceManager instanceManager,
-                              IPartyService partyService, IRegionService regionService, SpawnerInstanceManager spawnerInstanceManager) {
+                              PartyManager partyManager, IRegionService regionService, SpawnerInstanceManager spawnerInstanceManager) {
         this.roomManager = roomManager;
         this.instanceManager = instanceManager;
-        this.partyService = partyService;
+        this.partyManager = partyManager;
         this.regionService = regionService;
         this.spawnerInstanceManager = spawnerInstanceManager;
     }
@@ -132,7 +132,7 @@ public class RoomRuntimeService {
 
         for (RoomEvent event : events) {
             if (event instanceof BaseRoomEvent base) {
-                base.setContext(new RoomEventContext(roomInstance, party, partyService));
+                base.setContext(new RoomEventContext(roomInstance, party, partyManager));
                 base.setCallback((roomEvent, phase) -> {
                     /*Hook if needed*/
                 });

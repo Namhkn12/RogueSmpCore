@@ -1,6 +1,6 @@
 package com.roguesmp.dungeon.itemdisplay.impl;
 
-import com.roguesmp.dungeon.data.runtime.Party;
+import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon.itemdisplay.AnimationHandle;
 import com.roguesmp.dungeon.itemdisplay.FloatingItemAnimation;
 import net.kyori.adventure.text.Component;
