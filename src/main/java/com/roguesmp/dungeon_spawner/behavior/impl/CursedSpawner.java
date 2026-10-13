@@ -1,8 +1,9 @@
 package com.roguesmp.dungeon_spawner.behavior.impl;
 
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon_spawner.behavior.BaseBehavior;
 import com.roguesmp.dungeon_spawner.behavior.BehaviorData;
-import com.roguesmp.dungeon.utils.DungeonEcho;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
@@ -83,8 +84,7 @@ public class CursedSpawner extends BaseBehavior {
                                 0
                         )
                 );
-                DungeonEcho.error(player,
-                        "You are afflicted with nausea!");
+                player.sendMessage(Component.text("You are afflicted with nausea!", NamedTextColor.RED));
                 break;
 
             case BLINDNESS:
@@ -95,8 +95,7 @@ public class CursedSpawner extends BaseBehavior {
                                 0
                         )
                 );
-                DungeonEcho.error(player,
-                        "Darkness consumes your vision!");
+                player.sendMessage(Component.text("Darkness consumes your vision!", NamedTextColor.RED));
                 break;
 
             case POISON:
@@ -107,8 +106,7 @@ public class CursedSpawner extends BaseBehavior {
                                 0
                         )
                 );
-                DungeonEcho.error(player,
-                        "Poison courses through your veins!");
+                player.sendMessage(Component.text("Poison courses through your veins!", NamedTextColor.RED));
                 break;
 
             case COBWEB:
@@ -124,15 +122,13 @@ public class CursedSpawner extends BaseBehavior {
                             .setType(Material.COBWEB);
                 }
 
-                DungeonEcho.error(player,
-                        "Webs entangle your feet!");
+                player.sendMessage(Component.text("Webs entangle your feet!", NamedTextColor.RED));
                 break;
 
             case FIRE:
                 player.setFireTicks(80);
 
-                DungeonEcho.error(player,
-                        "You are engulfed in flames!");
+                player.sendMessage(Component.text("You are engulfed in flames!", NamedTextColor.RED));
                 break;
         }
     }

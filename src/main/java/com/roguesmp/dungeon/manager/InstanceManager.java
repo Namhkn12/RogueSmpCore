@@ -1,12 +1,12 @@
 package com.roguesmp.dungeon.manager;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.data.definition.objective.PersistableObjective;
 import com.roguesmp.dungeon.data.definition.room.roomevent.PersistableRoomEvent;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon.data.runtime.RoomInstance;
 import com.roguesmp.dungeon.data.runtime.session.DungeonProgress;
 import com.roguesmp.dungeon.repository.IInstanceRepository;
-import com.roguesmp.dungeon.utils.Log4Craft_;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,12 +18,10 @@ public class InstanceManager {
 
     private final IInstanceRepository instanceRepository;
     private final ScoreBoardManager scoreBoardManager;
-    private final Log4Craft_ logger;
 
-    public InstanceManager(IInstanceRepository instanceRepository, ScoreBoardManager scoreBoardManager, Log4Craft_ logger) {
+    public InstanceManager(IInstanceRepository instanceRepository, ScoreBoardManager scoreBoardManager) {
         this.instanceRepository = instanceRepository;
         this.scoreBoardManager = scoreBoardManager;
-        this.logger = logger;
 
         loadAll();
     }
@@ -85,7 +83,7 @@ public class InstanceManager {
     }
 
     public DungeonInstance remove(String ssid){
-        logger.info(this.getClass(), "Remove dungeon instance with id: " + ssid);
+        RogueSmpCore.LOGGER.info("Remove dungeon instance with id: {}", ssid);
         instanceRepository.delete(ssid);
         return instances.remove(ssid);
     }

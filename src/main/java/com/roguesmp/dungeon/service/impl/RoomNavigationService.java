@@ -1,5 +1,7 @@
 package com.roguesmp.dungeon.service.impl;
 
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import com.roguesmp.dungeon.actor.ui.OpenDoorGui;
 import com.roguesmp.dungeon.data.definition.room.Room;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
@@ -15,7 +17,6 @@ import com.roguesmp.dungeon.service.IDungeonService;
 import com.roguesmp.dungeon.service.IPartyService;
 import com.roguesmp.dungeon.service.IRoomService;
 import com.roguesmp.dungeon.service.ISchematicService;
-import com.roguesmp.dungeon.task.TaskScheduler;
 import com.roguesmp.dungeon.utils.UuidUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -36,9 +37,9 @@ public class RoomNavigationService {
     private final IRoomService roomService;
     private final RoomRuntimeService roomRuntimeService;
     private final DungeonPresenter presenter;
-    private final TaskScheduler taskScheduler;
+    private final Plugin plugin;
 
-    public RoomNavigationService(IPartyService partyService, InstanceManager instanceManager, RoomManager roomManager, ISchematicService schematicService, IDungeonService dungeonService, IRoomService roomService, RoomRuntimeService roomRuntimeService, DungeonPresenter presenter, TaskScheduler taskScheduler){
+    public RoomNavigationService(IPartyService partyService, InstanceManager instanceManager, RoomManager roomManager, ISchematicService schematicService, IDungeonService dungeonService, IRoomService roomService, RoomRuntimeService roomRuntimeService, DungeonPresenter presenter, Plugin plugin){
 
         this.partyService = partyService;
         this.instanceManager = instanceManager;
@@ -48,7 +49,7 @@ public class RoomNavigationService {
         this.roomService = roomService;
         this.roomRuntimeService = roomRuntimeService;
         this.presenter = presenter;
-        this.taskScheduler = taskScheduler;
+        this.plugin = plugin;
     }
 
     public void handleOpenNextDoor(Block door, Player player) {
@@ -116,7 +117,7 @@ public class RoomNavigationService {
         });
 
         if (!roomInstance.isCompleted() && room.getType().isCombat()) {
-            taskScheduler.runLater(100L, () -> {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 BoundingBox activeZone = roomInstance.getBounds().toBukkit();
                 for (Player member : partyService.getOnlineMembers(party)) {
                     if (!member.isOnline()) continue;
@@ -125,7 +126,7 @@ public class RoomNavigationService {
                     }
                 }
                 roomService.closeRoomDoor(doorLoc);
-            });
+            }, 100L);
         }
     }
 

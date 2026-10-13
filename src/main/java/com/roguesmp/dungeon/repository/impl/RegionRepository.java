@@ -1,10 +1,10 @@
 package com.roguesmp.dungeon.repository.impl;
 
+import com.roguesmp.RogueSmpCore;
 import com.google.gson.Gson;
 import com.roguesmp.dungeon.config.DataFolderConfig;
 import com.roguesmp.dungeon.data.definition.DungeonWorld;
 import com.roguesmp.dungeon.repository.IRegionRepository;
-import com.roguesmp.dungeon.utils.Log4Craft_;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;
@@ -16,16 +16,14 @@ public class RegionRepository implements IRegionRepository {
 
     private final Gson gson;
     private final File regionFolder;
-    private final Log4Craft_ logger;
 
-    public RegionRepository(Plugin plugin, Gson gson, Log4Craft_ logger) {
+    public RegionRepository(Plugin plugin, Gson gson) {
         this.gson = gson;
 
         this.regionFolder = new File(
                 plugin.getDataFolder(),
                 DataFolderConfig.getRegionFolder()
         );
-        this.logger = logger;
 
         if (!regionFolder.exists()) {
             regionFolder.mkdirs();
@@ -48,7 +46,7 @@ public class RegionRepository implements IRegionRepository {
                     result.add(world);
                 }
             } catch (IOException e) {
-                logger.fire(this.getClass(), "Failed to load region file: " + file.getName(), e);
+                RogueSmpCore.LOGGER.error("Failed to load region file: {}", file.getName(), e);
             }
         }
 
@@ -61,7 +59,7 @@ public class RegionRepository implements IRegionRepository {
         try (Writer writer = new FileWriter(file)) {
             gson.toJson(dungeonWorld, writer);
         } catch (IOException e) {
-            logger.fire(this.getClass(), "Failed to save region file for world: " + dungeonWorld.getWorldName(), e);
+            RogueSmpCore.LOGGER.error("Failed to save region file for world: {}", dungeonWorld.getWorldName(), e);
         }
     }
 
@@ -73,7 +71,7 @@ public class RegionRepository implements IRegionRepository {
         try (Reader reader = new FileReader(file)) {
             return Optional.ofNullable(gson.fromJson(reader, DungeonWorld.class));
         } catch (IOException e) {
-            logger.fire(this.getClass(), "Failed to load region file for world: " + worldName, e);
+            RogueSmpCore.LOGGER.error("Failed to load region file for world: {}", worldName, e);
             return Optional.empty();
         }
     }
@@ -82,7 +80,7 @@ public class RegionRepository implements IRegionRepository {
     public void delete(String worldName) {
         File file = getFile(worldName);
         if (file.exists() && !file.delete()) {
-            logger.warn(this.getClass(), "Failed to delete region file for world: " + worldName);
+            RogueSmpCore.LOGGER.warn("Failed to delete region file for world: {}", worldName);
 
         }
     }

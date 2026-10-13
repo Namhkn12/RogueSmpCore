@@ -1,8 +1,6 @@
 package com.roguesmp.dungeon.service.impl;
 
 import com.roguesmp.dungeon.data.definition.Schemeta;
-import com.roguesmp.dungeon.exception.impl.schemeta.SchemetaNotFoundException;
-import com.roguesmp.dungeon.exception.impl.schemeta.SchemetaOperationException;
 import com.roguesmp.dungeon.manager.SchemetaManager;
 import com.roguesmp.dungeon.service.ISchematicService;
 import com.sk89q.worldedit.WorldEdit;
@@ -32,12 +30,11 @@ public class SchematicService implements ISchematicService {
     private BoundingBox pasteInternal(String schemetaId, Location location) {
         // 1. Lấy metadata — fail fast nếu không tồn tại
         Schemeta schemeta = schemetaManager.get(schemetaId)
-                .orElseThrow(() -> new SchemetaNotFoundException(schemetaId));
+                .orElseThrow(() -> new IllegalArgumentException("Schemeta not found: " + schemetaId));
 
         // 2. Lấy clipboard qua lazy cache — dùng id, không dùng name
         Clipboard clipboard = schemetaManager.getClipboard(schemeta.getId())
-                .orElseThrow(() -> new SchemetaNotFoundException(
-                        "Schematic file missing for: " + schemetaId));
+                .orElseThrow(() -> new IllegalStateException("Schematic file missing for: " + schemetaId));
 
         try (var editSession = WorldEdit.getInstance()
                 .newEditSession(BukkitAdapter.adapt(location.getWorld()))) {
@@ -54,7 +51,7 @@ public class SchematicService implements ISchematicService {
             return calcBoundingBox(clipboard, location);
 
         } catch (Exception e) {
-            throw new SchemetaOperationException("paste schematic: " + schemetaId, e);
+            throw new IllegalStateException("Failed to paste schematic: " + schemetaId, e);
         }
     }
 

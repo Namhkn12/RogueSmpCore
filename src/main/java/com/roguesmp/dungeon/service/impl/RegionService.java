@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon.service.impl;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.utils.DungeonWorldGenerator;
 import com.roguesmp.dungeon.config.DataFolderConfig;
 import com.roguesmp.dungeon.config.WorldConfig;
@@ -8,7 +9,6 @@ import com.roguesmp.dungeon.data.runtime.Region;
 import com.roguesmp.dungeon.data.runtime.RegionStatus;
 import com.roguesmp.dungeon.manager.RegionManager;
 import com.roguesmp.dungeon.service.IRegionService;
-import com.roguesmp.dungeon.utils.Log4Craft_;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -16,11 +16,9 @@ import org.bukkit.WorldCreator;
 public class RegionService implements IRegionService {
 
     private final RegionManager manager;
-    private final Log4Craft_ logger;
 
-    public RegionService(RegionManager manager, Log4Craft_ logger) {
+    public RegionService(RegionManager manager) {
         this.manager = manager;
-        this.logger = logger;
         loadBukkitWorld();
     }
 
@@ -41,7 +39,7 @@ public class RegionService implements IRegionService {
         }
 
         if (manager.getAllWorlds().size() >= WorldConfig.MAX_WORLD_PER_SERVER) {
-            logger.info(this.getClass(),"All dungeon worlds are full. Cannot create more.");
+            RogueSmpCore.LOGGER.info("All dungeon worlds are full. Cannot create more.");
             return null;
         }
 
@@ -114,13 +112,13 @@ public class RegionService implements IRegionService {
 
         World world = creator.createWorld();
         if (world == null) {
-            logger.fire(this.getClass(),"Failed to create dungeon world: " + worldName, null);
+            RogueSmpCore.LOGGER.error("Failed to create dungeon world: {}", worldName);
             return null;
         }
 
         DungeonWorld dungeonWorld = new DungeonWorld(worldName);
         manager.addWorld(dungeonWorld);
-        logger.info(this.getClass(),"Created new dungeon world: " + worldName);
+        RogueSmpCore.LOGGER.info("Created new dungeon world: {}", worldName);
         return dungeonWorld;
     }
 
@@ -130,10 +128,10 @@ public class RegionService implements IRegionService {
                 WorldCreator creator = new WorldCreator(world.getWorldName());
                 creator.generator(new DungeonWorldGenerator());
                 creator.createWorld();
-                logger.info(this.getClass(), "Reloaded world: " + world.getWorldName());
+                RogueSmpCore.LOGGER.info("Reloaded world: {}", world.getWorldName());
             }
         }
 
-        logger.info(this.getClass(),"Loaded " + manager.getAllWorlds().size() + " dungeon worlds.");
+        RogueSmpCore.LOGGER.info("Loaded {} dungeon worlds.", manager.getAllWorlds().size());
     }
 }

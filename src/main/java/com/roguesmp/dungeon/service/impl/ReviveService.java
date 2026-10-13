@@ -1,5 +1,7 @@
 package com.roguesmp.dungeon.service.impl;
 
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon.data.runtime.DeadEntry;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon.data.runtime.Party;
@@ -10,7 +12,6 @@ import com.roguesmp.dungeon.manager.ReviveManager;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.service.IPartyService;
 import com.roguesmp.dungeon.service.IReviveService;
-import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.Teleporter;
 import com.roguesmp.dungeon.utils.UuidUtil;
 import org.bukkit.Bukkit;
@@ -109,7 +110,7 @@ public class ReviveService implements IReviveService {
             player.setGameMode(GameMode.SURVIVAL);
             player.setHealth(5);
             dungeonPresenter.onPlayerRevive(player, player.getLocation());
-            DungeonEcho.success(player, "Fate grants you another chance!");
+            player.sendMessage(Component.text("Fate grants you another chance!", NamedTextColor.GREEN));
         }
         else status.setStatus(PlayerStatus.Status.DISCONNECT);
     }

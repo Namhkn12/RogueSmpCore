@@ -1,12 +1,10 @@
 package com.roguesmp.dungeon.repository.impl;
 
+import com.roguesmp.RogueSmpCore;
 import com.google.gson.Gson;
-import com.roguesmp.dungeon.exception.impl.data.DataDeleteException;
-import com.roguesmp.dungeon.exception.impl.data.DataSaveException;
 import com.roguesmp.dungeon.config.DataFolderConfig;
 import com.roguesmp.dungeon.data.definition.Dungeon;
 import com.roguesmp.dungeon.repository.IDungeonRepository;
-import com.roguesmp.dungeon.utils.Log4Craft;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
@@ -42,7 +40,7 @@ public class DungeonRepository implements IDungeonRepository {
                     dungeons.add(dungeon);
                 }
             }catch (Exception e){
-                Log4Craft.fire("Failed to load dungeon file: " + file.getName(), e);
+                RogueSmpCore.LOGGER.error("Failed to load dungeon file: {}", file.getName(), e);
             }
         }
         return dungeons;
@@ -52,7 +50,8 @@ public class DungeonRepository implements IDungeonRepository {
     public boolean delete(String id) {
         File file = toFile(id);
         if (file.exists() && !file.delete()) {
-            throw new DataDeleteException(file.getName(), null);
+            RogueSmpCore.LOGGER.error("Failed to delete file: {}", file.getName());
+            return false;
         }
         return true;
     }
@@ -63,7 +62,8 @@ public class DungeonRepository implements IDungeonRepository {
         try (Writer writer = new FileWriter(file, StandardCharsets.UTF_8)){
             gson.toJson(dungeon, writer);
         }catch (Exception e){
-            throw new DataSaveException(file.getName(), e);
+            RogueSmpCore.LOGGER.error("Failed to save file: {}", file.getName(), e);
+            return null;
         }
         return dungeon;
     }

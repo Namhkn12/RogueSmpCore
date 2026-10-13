@@ -1,11 +1,11 @@
 package com.roguesmp.dungeon.manager;
 
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.data.definition.DungeonWorld;
 import com.roguesmp.dungeon.data.runtime.Region;
 import com.roguesmp.dungeon.data.runtime.RegionStatus;
 import com.roguesmp.dungeon.repository.IRegionRepository;
-import com.roguesmp.dungeon.utils.Log4Craft_;
 
 import java.util.*;
 
@@ -21,11 +21,9 @@ public class RegionManager {
     private final Map<String, Region> regionIndex = new HashMap<>();
 
     private final IRegionRepository repository;
-    private final Log4Craft_ logger;
 
-    public RegionManager(IRegionRepository repository, Log4Craft_ logger) {
+    public RegionManager(IRegionRepository repository) {
         this.repository = repository;
-        this.logger = logger;
 
         loadAll();
     }
@@ -53,7 +51,7 @@ public class RegionManager {
      * Gọi khi server close — ghi toàn bộ xuống file
      */
     public void saveAll() {
-        logger.info(this.getClass(),"Start save all dungeon worlds: " + worldMap.size());
+        RogueSmpCore.LOGGER.info("Start save all dungeon worlds: {}", worldMap.size());
         worldMap.values().forEach(repository::save);
     }
 

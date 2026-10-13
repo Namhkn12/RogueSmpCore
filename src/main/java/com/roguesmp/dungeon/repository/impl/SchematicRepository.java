@@ -1,7 +1,6 @@
 package com.roguesmp.dungeon.repository.impl;
 
-import com.roguesmp.dungeon.exception.impl.data.DataLoadException;
-import com.roguesmp.dungeon.exception.impl.data.DataSaveException;
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.config.DataFolderConfig;
 import com.roguesmp.dungeon.repository.ISchematicRepository;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
@@ -28,20 +27,21 @@ public class SchematicRepository implements ISchematicRepository {
                 .getWriter(new FileOutputStream(file))) {
             writer.write(clipboard);
         } catch (IOException e) {
-            throw new DataSaveException(file.getName(), e);
+            RogueSmpCore.LOGGER.error("Failed to save file: {}", file.getName(), e);
         }
     }
 
     @Override
     public Clipboard load(String name) {
         File file = toFile(name);
-        if (!file.exists()) throw new DataLoadException(file.getName(), null);
+        if (!file.exists()) return null;
 
         try (ClipboardReader reader = BuiltInClipboardFormat.SPONGE_SCHEMATIC
                 .getReader(new FileInputStream(file))) {
             return reader.read();
         } catch (IOException e) {
-            throw new DataLoadException(file.getName(), e);
+            RogueSmpCore.LOGGER.error("Failed to load file: {}", file.getName(), e);
+            return null;
         }
     }
 

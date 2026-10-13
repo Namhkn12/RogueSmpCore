@@ -1,5 +1,7 @@
 package com.roguesmp.dungeon.service.impl;
 
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon.data.definition.Dungeon;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon.data.runtime.Party;
@@ -17,7 +19,6 @@ import com.roguesmp.dungeon.service.IInstanceService;
 import com.roguesmp.dungeon.service.IPartyService;
 import com.roguesmp.dungeon.service.IRegionService;
 import com.roguesmp.dungeon.service.IReviveService;
-import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.Teleporter;
 import com.roguesmp.dungeon.utils.UuidUtil;
 import org.bukkit.Bukkit;
@@ -83,9 +84,9 @@ public class DungeonLifecycleService {
 
     public void onLeaveDungeon(Player player) {
         Party party = partyService.getPartyByPlayer(player);
-        if (party == null) { DungeonEcho.warn(player, "Is you still in party?"); return; }
+        if (party == null) { player.sendMessage(Component.text("Is you still in party?", NamedTextColor.YELLOW)); return; }
         DungeonInstance instance = instanceManager.get(party.getInstanceId());
-        if (instance == null) { DungeonEcho.warn(player, "Is your party still in dungeon?"); return; }
+        if (instance == null) { player.sendMessage(Component.text("Is your party still in dungeon?", NamedTextColor.YELLOW)); return; }
 
         Map<String, PlayerStatus> players = instance.getDungeonPlayers().getPlayers();
         players.remove(player.getUniqueId().toString());
@@ -94,7 +95,7 @@ public class DungeonLifecycleService {
             partyService.forceKick(player);
             instance.getDungeonPlayers().setPlayerStatus(
                     player.getUniqueId().toString(), PlayerStatus.Status.OUT);
-            DungeonEcho.info(player, "Bạn đã rời khỏi dungeon khi đang chơi, đồng thời cũng sẽ rời khỏi party!");
+            player.sendMessage(Component.text("Bạn đã rời khỏi dungeon khi đang chơi, đồng thời cũng sẽ rời khỏi party!", NamedTextColor.GRAY));
         }
 
         Teleporter.teleport(player,
@@ -112,9 +113,9 @@ public class DungeonLifecycleService {
             Player player = UuidUtil.getPlayerById(uuid);
             if (player == null) return;
             if (instance.getProgress().getStatus() == DungeonProgress.Status.FAILED) {
-                DungeonEcho.warn(player, "The dungeon has collapsed! You barely escaped...");
+                player.sendMessage(Component.text("The dungeon has collapsed! You barely escaped...", NamedTextColor.YELLOW));
             } else {
-                DungeonEcho.success(player, "The dungeon has been conquered! Glory to your party!");
+                player.sendMessage(Component.text("The dungeon has been conquered! Glory to your party!", NamedTextColor.GREEN));
             }
             scoreBoardManager.removeBoard(player);
             Teleporter.teleport(player,
@@ -146,8 +147,8 @@ public class DungeonLifecycleService {
         instance.getDungeonPlayers().getPlayers().forEach((s, playerStatus) -> {
             Player p = UuidUtil.getPlayerById(s);
             if(p == null) return;
-            DungeonEcho.error(p, "Your entire party has fallen — the dungeon claims victory. " +
-                    "It will collapse in 10 seconds!");
+            p.sendMessage(Component.text("Your entire party has fallen — the dungeon claims victory. " +
+                    "It will collapse in 10 seconds!", NamedTextColor.RED));
         });
     }
 

@@ -1,8 +1,8 @@
 package com.roguesmp.dungeon_spawner.manager;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon_spawner.data.Spawner;
 import com.roguesmp.dungeon_spawner.repository.SpawnerRepository;
-import com.roguesmp.dungeon.utils.Log4Craft_;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,11 +11,9 @@ import java.util.Map;
 public class SpawnerManager {
     private final Map<String, Spawner> cache = new HashMap<>();
     private final SpawnerRepository spawnerRepository;
-    private final Log4Craft_ logger;
 
-    public SpawnerManager(SpawnerRepository spawnerRepository, Log4Craft_ logger) {
+    public SpawnerManager(SpawnerRepository spawnerRepository) {
         this.spawnerRepository = spawnerRepository;
-        this.logger = logger;
 
         load();
     }
@@ -24,13 +22,13 @@ public class SpawnerManager {
         cache.clear();
         List<Spawner> spawners = spawnerRepository.loadAll();
         if(spawners == null) {
-            logger.debug(this.getClass(), "No data found" );
+            RogueSmpCore.LOGGER.debug("No data found" );
             return;
         }
         spawners.forEach(spawner -> {
             cache.put(spawner.getId(), spawner);
         });
-        logger.info(this.getClass(), "Loaded data: " + cache.size() + " record");
+        RogueSmpCore.LOGGER.info("Loaded data: {} record", cache.size());
     }
 
     public Spawner getById(String id){

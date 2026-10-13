@@ -1,5 +1,7 @@
 package com.roguesmp.dungeon.service.impl;
 
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon.data.definition.Dungeon;
 import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
@@ -12,7 +14,6 @@ import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.service.*;
 import com.roguesmp.loot.LootTable;
 import com.roguesmp.registry.Registries;
-import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import com.roguesmp.utils.PlayerUtils;
 import org.bukkit.Material;
@@ -61,7 +62,7 @@ public class DungeonRewardService implements IDungeonRewardService {
         PersistentDataContainer lootChest = tileState.getPersistentDataContainer();
         lootChest.set(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING, rewardCid);
         tileState.update();
-        DungeonEcho.info(e.getPlayer(), "Place a reward chest");
+        e.getPlayer().sendMessage(Component.text("Place a reward chest", NamedTextColor.GRAY));
         return true;
     }
 
@@ -76,7 +77,7 @@ public class DungeonRewardService implements IDungeonRewardService {
         PersistentDataContainer blockPdc = tileState.getPersistentDataContainer();
         if(blockPdc.has(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING)){
             e.setCancelled(true);
-            DungeonEcho.warn(e.getPlayer(), "Không thể phá rương thưởng");
+            e.getPlayer().sendMessage(Component.text("Không thể phá rương thưởng", NamedTextColor.YELLOW));
             return true;
         }
 

@@ -1,15 +1,13 @@
 package com.roguesmp.dungeon_spawner.controller;
 
 
+import com.roguesmp.RogueSmpCore;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import com.roguesmp.dungeon_spawner.data.SpawnerInstance;
-import com.roguesmp.dungeon.exception.BaseException;
-import com.roguesmp.dungeon.exception.GlobalException;
-import com.roguesmp.dungeon_spawner.exception.SpawnerNotFoundException;
 import com.roguesmp.dungeon_spawner.manager.SpawnerInstanceManager;
 import com.roguesmp.dungeon_spawner.manager.SpawnerManager;
 import com.roguesmp.dungeon_spawner.data.Spawner;
-import com.roguesmp.dungeon.task.TaskScheduler;
-import com.roguesmp.dungeon.utils.Log4Craft_;
 import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,14 +25,12 @@ public class SpawnerEventController {
 
     private final SpawnerManager spawnerManager;
     private final SpawnerInstanceManager spawnerInstanceManager;
-    private final TaskScheduler taskScheduler;
-    private final Log4Craft_ logger;
+    private final Plugin plugin;
 
-    public SpawnerEventController(SpawnerManager spawnerManager, SpawnerInstanceManager spawnerInstanceManager, TaskScheduler taskScheduler, Log4Craft_ logger) {
+    public SpawnerEventController(SpawnerManager spawnerManager, SpawnerInstanceManager spawnerInstanceManager, Plugin plugin) {
         this.spawnerManager = spawnerManager;
         this.spawnerInstanceManager = spawnerInstanceManager;
-        this.taskScheduler = taskScheduler;
-        this.logger = logger;
+        this.plugin = plugin;
     }
 
     public boolean handleSpawnerBreak(Block block, Player player){
@@ -46,21 +42,14 @@ public class SpawnerEventController {
             return true;
 
         String iid = pdc.get(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING);
-        try {
-            SpawnerInstance instance = spawnerInstanceManager.get(iid);
-            if (instance == null) return true;
+        SpawnerInstance instance = spawnerInstanceManager.get(iid);
+        if (instance == null) return true;
 
-            boolean allowed = instance.runBreak(player, block.getLocation());
-            if (allowed) {
-                spawnerInstanceManager.remove(iid);
-            }
-            return allowed;
-        } catch (SpawnerNotFoundException e) {
-            return true;
-        } catch (BaseException e) {
-            GlobalException.handle(e);
-            return true;
+        boolean allowed = instance.runBreak(player, block.getLocation());
+        if (allowed) {
+            spawnerInstanceManager.remove(iid);
         }
+        return allowed;
     }
 
     public boolean handleSpawnerSpawn(CreatureSpawner spawner, Entity entity, List<Player> player){
@@ -69,17 +58,10 @@ public class SpawnerEventController {
             return true;
 
         String iid = pdc.get(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING);
-        try {
-            SpawnerInstance instance = spawnerInstanceManager.get(iid);
-            if (instance == null) return true;
+        SpawnerInstance instance = spawnerInstanceManager.get(iid);
+        if (instance == null) return true;
 
-            return instance.runSpawn((LivingEntity) entity, player,spawner.getLocation());
-        } catch (SpawnerNotFoundException e) {
-            return true;
-        } catch (BaseException e) {
-            GlobalException.handle(e);
-            return true;
-        }
+        return instance.runSpawn((LivingEntity) entity, player,spawner.getLocation());
     }
 
     public void handleSpawnerLoad(List<Entity> entities, String worldName){
@@ -90,19 +72,15 @@ public class SpawnerEventController {
             PersistentDataContainer pdc = entity.getPersistentDataContainer();
             if (!pdc.has(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING)) continue;
 
-            try {
-                String sid = pdc.get(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING);
-                Block blockBelow = entity.getLocation().getBlock();
+            String sid = pdc.get(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING);
+            Block blockBelow = entity.getLocation().getBlock();
 
-                if (blockBelow.getType() != Material.SPAWNER) {
-                    entity.remove();
-                    continue;
-                }
-
-                registerSpawner(blockBelow, sid);
-            } catch (BaseException e) {
-                GlobalException.handle(e);
+            if (blockBelow.getType() != Material.SPAWNER) {
+                entity.remove();
+                continue;
             }
+
+            registerSpawner(blockBelow, sid);
         }
     }
 
@@ -112,15 +90,15 @@ public class SpawnerEventController {
         String sid = pdc.get(NameSpaceKeys.SPAWNER_TID_KEY, PersistentDataType.STRING);
         if (sid == null || sid.isEmpty()) return;
 
-        taskScheduler.runLater(5L, () -> {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (!marker.isValid()) return;
             Block block = marker.getLocation().getBlock();
             if (block.getType() != Material.SPAWNER) {
-                taskScheduler.runLater(10L, () -> retryRegisterSpawner(marker, sid));
+                Bukkit.getScheduler().runTaskLater(plugin, () -> retryRegisterSpawner(marker, sid), 10L);
                 return;
             }
             registerSpawner(block, sid);
-        });
+        }, 5L);
     }
 
     public void handlePlaceSpawner(Block block, String sid){
@@ -137,39 +115,35 @@ public class SpawnerEventController {
 
     /*Helper*/
     private void registerSpawner(Block block, String templateId) {
-        try {
-            CreatureSpawner creatureSpawner = (CreatureSpawner) block.getState();
-            PersistentDataContainer spawnerPdc = creatureSpawner.getPersistentDataContainer();
+        CreatureSpawner creatureSpawner = (CreatureSpawner) block.getState();
+        PersistentDataContainer spawnerPdc = creatureSpawner.getPersistentDataContainer();
 
-            String iid;
-            if (spawnerPdc.has(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING)) {
-                iid = spawnerPdc.get(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING);
-                if (spawnerInstanceManager.get(iid) != null) return;
-            } else {
-                iid = UUID.randomUUID().toString();
-            }
-
-            Location location = block.getLocation();
-
-            block.setType(Material.AIR, false);
-            block.setType(Material.SPAWNER, false);
-
-            CreatureSpawner newSpawner = (CreatureSpawner) location.getBlock().getState();
-
-            PersistentDataContainer newPdc = newSpawner.getPersistentDataContainer();
-            newPdc.set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, iid);
-            newSpawner.update();
-
-            Spawner template = spawnerManager.getById(templateId);
-            if (template == null) {
-                logger.error(this.getClass(), "Spawner template not found: " + templateId);
-                return;
-            }
-            spawnerInstanceManager.create(iid, template, location);
-            template.applyTo(newSpawner);
-        } catch (BaseException e) {
-            GlobalException.handle(e);
+        String iid;
+        if (spawnerPdc.has(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING)) {
+            iid = spawnerPdc.get(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING);
+            if (spawnerInstanceManager.get(iid) != null) return;
+        } else {
+            iid = UUID.randomUUID().toString();
         }
+
+        Location location = block.getLocation();
+
+        block.setType(Material.AIR, false);
+        block.setType(Material.SPAWNER, false);
+
+        CreatureSpawner newSpawner = (CreatureSpawner) location.getBlock().getState();
+
+        PersistentDataContainer newPdc = newSpawner.getPersistentDataContainer();
+        newPdc.set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, iid);
+        newSpawner.update();
+
+        Spawner template = spawnerManager.getById(templateId);
+        if (template == null) {
+            RogueSmpCore.LOGGER.error("Spawner template not found: {}", templateId);
+            return;
+        }
+        spawnerInstanceManager.create(iid, template, location);
+        template.applyTo(newSpawner);
     }
 
     private void retryRegisterSpawner(Marker marker, String templateId) {

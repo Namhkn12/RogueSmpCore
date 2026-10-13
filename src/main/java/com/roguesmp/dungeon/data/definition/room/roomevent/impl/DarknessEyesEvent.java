@@ -1,7 +1,8 @@
 package com.roguesmp.dungeon.data.definition.room.roomevent.impl;
 
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon.data.definition.room.roomevent.BaseRoomEvent;
-import com.roguesmp.dungeon.utils.DungeonEcho;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -33,7 +34,7 @@ public class DarknessEyesEvent extends BaseRoomEvent {
     protected void onStartInternal() {
         if (context == null || context.getParty() == null || context.getPartyService() == null) return;
         context.getPartyService().getOnlineMembers(context.getParty()).forEach(player -> {
-            DungeonEcho.warn(player, "The darkness is watching you...");
+            player.sendMessage(Component.text("The darkness is watching you...", NamedTextColor.YELLOW));
         });
     }
 

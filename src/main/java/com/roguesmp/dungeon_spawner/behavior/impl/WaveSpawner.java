@@ -1,8 +1,9 @@
 package com.roguesmp.dungeon_spawner.behavior.impl;
 
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon_spawner.behavior.BaseBehavior;
 import com.roguesmp.dungeon_spawner.behavior.BehaviorData;
-import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.SpawnLocationRazdon;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -40,13 +41,11 @@ public class WaveSpawner extends BaseBehavior {
         if(completed) return true;
 
         if(waveCount < waves){
-            DungeonEcho.info(player,
-                    "You must survive " + (waves - waveCount) + " more waves.");
+            player.sendMessage(Component.text("You must survive " + (waves - waveCount) + " more waves.", NamedTextColor.GRAY));
             return false;
         }
 
-        DungeonEcho.success(player,
-                "All waves cleared. The spawner is now vulnerable.");
+        player.sendMessage(Component.text("All waves cleared. The spawner is now vulnerable.", NamedTextColor.GREEN));
         return true;
     }
 

@@ -1,6 +1,6 @@
 package com.roguesmp.dungeon.itemdisplay;
 
-import com.roguesmp.dungeon.task.TaskScheduler;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Display;
@@ -23,7 +23,6 @@ import java.util.function.Consumer;
 public class FloatingItemAnimation {
 
     private final Plugin plugin;
-    private final TaskScheduler taskScheduler;
     private final Location location;
     private final int duration;
     private final float spinSpeed;
@@ -38,7 +37,6 @@ public class FloatingItemAnimation {
 
     private FloatingItemAnimation(Builder builder) {
         this.plugin            = builder.plugin;
-        this.taskScheduler     = builder.taskScheduler;
         this.location          = builder.location;
         this.duration          = builder.duration;
         this.spinSpeed         = builder.spinSpeed;
@@ -84,7 +82,7 @@ public class FloatingItemAnimation {
         AtomicReference<Float> angleRef = new AtomicReference<>(0f);
         AnimationHandle handle = new AnimationHandle(() -> cancelFlag.set(true));
 
-        BukkitTask task = taskScheduler.runTimerCancellable(0L, 1L, () -> {
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             if (cancelFlag.get()) {
                 cleanup(display);
                 return;
@@ -132,7 +130,7 @@ public class FloatingItemAnimation {
                 if (onEnd != null) onEnd.accept(endCtx);
                 cancelFlag.set(true);
             }
-        });
+        }, 0L, 1L);
 
         handle.attachTask(task);
         return handle;
@@ -144,13 +142,12 @@ public class FloatingItemAnimation {
 
     // ── Builder ───────────────────────────────────────────────────
 
-    public static Builder builder(Plugin plugin, Location location, TaskScheduler taskScheduler) {
-        return new Builder(plugin, taskScheduler, location);
+    public static Builder builder(Plugin plugin, Location location) {
+        return new Builder(plugin, location);
     }
 
     public static class Builder {
         private final Plugin plugin;
-        private final TaskScheduler taskScheduler;
         private final Location location;
 
         private int duration            = 60;
@@ -164,9 +161,8 @@ public class FloatingItemAnimation {
         private Consumer<AnimationContext> onTick;
         private Consumer<AnimationContext> onEnd;
 
-        private Builder(Plugin plugin, TaskScheduler taskScheduler, Location location) {
+        private Builder(Plugin plugin, Location location) {
             this.plugin         = plugin;
-            this.taskScheduler  = taskScheduler;
             this.location       = location;
         }
 

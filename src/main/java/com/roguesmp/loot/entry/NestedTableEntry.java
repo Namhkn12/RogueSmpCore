@@ -39,7 +39,7 @@ public final class NestedTableEntry extends LootEntry {
     @Override
     protected @NotNull List<ItemStack> generate(@NotNull LootContext context, int depth) {
         if (!nestedTable.isBound()) {
-            RogueSmpCore.LOGGER.warn("[LootTable] Loot table not found: '" + nestedTable.getId() + "'");
+            RogueSmpCore.LOGGER.warn("[LootTable] Loot table not found: '{}'", nestedTable.getId());
             return List.of();
         }
 

@@ -1,5 +1,8 @@
 package com.roguesmp.dungeon.service.impl;
 
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.audience.Audience;
 import com.roguesmp.dungeon.data.definition.objective.BaseObjective;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon.data.runtime.Party;
@@ -10,7 +13,6 @@ import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.service.IPartyService;
 import com.roguesmp.dungeon.service.IReviveService;
 import com.roguesmp.dungeon.service.IRoomService;
-import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.UuidUtil;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -45,7 +47,7 @@ public class RoomCompletionService {
 
         room.setCompleted(true);
         roomRuntimeService.triggerRoomEnd(room);
-        DungeonEcho.success(partyService.getOnlineMembers(party), "Room clear!");
+        Audience.audience(partyService.getOnlineMembers(party)).sendMessage(Component.text("Room clear!", NamedTextColor.GREEN));
         reviveAll(instance);
 
         if (room.getDoor() != null) {
@@ -58,7 +60,7 @@ public class RoomCompletionService {
         instance.getProgress().setStatus(DungeonProgress.Status.BOSS_DEFEATED);
         long newEndTime = System.currentTimeMillis() + 5 * 60 * 1000L;
         instance.getTimer().setEndTime(newEndTime);
-        DungeonEcho.success(partyService.getOnlineMembers(party), "Boss defeated!!!");
+        Audience.audience(partyService.getOnlineMembers(party)).sendMessage(Component.text("Boss defeated!!!", NamedTextColor.GREEN));
         reviveAll(instance);
         partyService.getOnlineMembers(party).forEach(presenter::onCompleteDungeon);
     }
@@ -73,7 +75,7 @@ public class RoomCompletionService {
                 player.teleport(playerStatus.getCheckPoint().toBukkit());
                 player.setGameMode(GameMode.SURVIVAL);
                 presenter.onPlayerRevive(player, playerStatus.getCheckPoint().toBukkit());
-                DungeonEcho.success(player, "Fate grants you another chance!");
+                player.sendMessage(Component.text("Fate grants you another chance!", NamedTextColor.GREEN));
             }
         });
     }

@@ -1,8 +1,8 @@
 package com.roguesmp.dungeon.manager;
 
+import org.bukkit.plugin.Plugin;
 import com.roguesmp.dungeon.data.runtime.DeadEntry;
 import com.roguesmp.dungeon.presentation.presenter.RevivePointPresenter;
-import com.roguesmp.dungeon.task.TaskScheduler;
 import org.bukkit.Location;
 import org.bukkit.Bukkit;
 import org.bukkit.boss.BarColor;
@@ -24,17 +24,17 @@ public class ReviveManager {
     private final Map<UUID, BossBar>   bossBars    = new ConcurrentHashMap<>();
     private final Map<UUID, BukkitTask> revivePointTasks = new ConcurrentHashMap<>();
     private final Map<UUID, Mannequin> revivePointDisplays = new ConcurrentHashMap<>();
-    private final TaskScheduler taskScheduler;
+    private final Plugin plugin;
     private final RevivePointPresenter revivePointPresenter;
     private BukkitTask task;
 
-    public ReviveManager(TaskScheduler taskScheduler, RevivePointPresenter revivePointPresenter) {
-        this.taskScheduler = taskScheduler;
+    public ReviveManager(Plugin plugin, RevivePointPresenter revivePointPresenter) {
+        this.plugin = plugin;
         this.revivePointPresenter = revivePointPresenter;
     }
 
     public void startTask(Runnable tickLogic) {
-        task = taskScheduler.runTimerCancellable(0L, 20L, tickLogic);
+        task = Bukkit.getScheduler().runTaskTimer(plugin, tickLogic, 0L, 20L);
     }
 
     public void stopTask() {
@@ -157,12 +157,12 @@ public class ReviveManager {
         revivePointDisplays.put(deadUUID, display);
         AtomicInteger tickRef = new AtomicInteger(0);
 
-        BukkitTask reviveTask = taskScheduler.runTimerCancellable(0L, REVIVE_POINT_PERIOD_TICKS, () -> {
+        BukkitTask reviveTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             if (display.isDead()) {
                 stopRevivePoint(deadUUID);
             }
             revivePointPresenter.tickRevivePoint(display, deathLocation, tickRef.getAndIncrement());
-        });
+        }, 0L, REVIVE_POINT_PERIOD_TICKS);
 
         revivePointTasks.put(deadUUID, reviveTask);
     }

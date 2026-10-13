@@ -1,8 +1,8 @@
 package com.roguesmp.dungeon.manager;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.data.runtime.Party;
 import com.roguesmp.dungeon.repository.IPartyRepository;
-import com.roguesmp.dungeon.utils.Log4Craft_;
 
 import java.util.*;
 
@@ -19,11 +19,9 @@ public class PartyManager {
     private final Map<String, String> playerIndex = new HashMap<>();
 
     private final IPartyRepository repository;
-    private final Log4Craft_ logger;
 
-    public PartyManager(IPartyRepository repository, Log4Craft_ logger) {
+    public PartyManager(IPartyRepository repository) {
         this.repository = repository;
-        this.logger = logger;
 
         loadAll();
     }
@@ -36,7 +34,7 @@ public class PartyManager {
                 playerIndex.put(memberId, party.getPartyId());
             }
         }
-        logger.info(this.getClass(), "Loaded party to cache: " + parties.size() + " party");
+        RogueSmpCore.LOGGER.info("Loaded party to cache: {} party", parties.size());
     }
 
     // Gọi khi server stop — save từng party một
@@ -44,7 +42,7 @@ public class PartyManager {
         for (Party party : partyMap.values()) {
             repository.save(party);
         }
-        logger.info(this.getClass(),"Saved party to file: " + partyMap.size() + " party");
+        RogueSmpCore.LOGGER.info("Saved party to file: {} party", partyMap.size());
     }
 
     public Party createParty(UUID ownerId) {

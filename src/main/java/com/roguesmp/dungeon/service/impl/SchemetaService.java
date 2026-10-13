@@ -2,8 +2,6 @@ package com.roguesmp.dungeon.service.impl;
 
 import com.roguesmp.dungeon.config.DataFolderConfig;
 import com.roguesmp.dungeon.data.definition.Schemeta;
-import com.roguesmp.dungeon.exception.impl.schemeta.SchemetaOperationException;
-import com.roguesmp.dungeon.exception.impl.schemeta.SelectionNotFoundException;
 import com.roguesmp.dungeon.manager.SchemetaManager;
 import com.roguesmp.dungeon.service.ISchemetaService;
 import com.sk89q.worldedit.WorldEdit;
@@ -82,7 +80,7 @@ public class SchemetaService implements ISchemetaService {
             Operations.complete(copy);
 
         } catch (Exception e) {
-            throw new SchemetaOperationException("copy region", e);
+            throw new IllegalStateException("Failed to copy region", e);
         }
         return clipboard;
     }
@@ -94,7 +92,7 @@ public class SchemetaService implements ISchemetaService {
                     .get(BukkitAdapter.adapt(player));
             return session.getSelection(session.getSelectionWorld());
         } catch (Exception e) {
-            throw new SelectionNotFoundException(e);
+            throw new IllegalStateException("WorldEdit selection was not found", e);
         }
     }
 }

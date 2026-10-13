@@ -1,7 +1,8 @@
 package com.roguesmp.dungeon.actor.listener;
 
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import com.roguesmp.dungeon.controller.PlayerActionController;
-import com.roguesmp.dungeon.task.TaskScheduler;
 import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -22,11 +23,11 @@ import org.bukkit.event.world.PortalCreateEvent;
 public class DungeonListener implements Listener {
 
     private final PlayerActionController actionController;
-    private final TaskScheduler taskScheduler;
+    private final Plugin plugin;
 
-    public DungeonListener(PlayerActionController actionController, TaskScheduler taskScheduler) {
+    public DungeonListener(PlayerActionController actionController, Plugin plugin) {
         this.actionController = actionController;
-        this.taskScheduler = taskScheduler;
+        this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -67,9 +68,9 @@ public class DungeonListener implements Listener {
     @EventHandler
     public void onPlayerReJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
-        taskScheduler.runLater(2L, () -> {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
             actionController.handlePlayerReconnect(player);
-        });
+        }, 2L);
     }
 
     @EventHandler

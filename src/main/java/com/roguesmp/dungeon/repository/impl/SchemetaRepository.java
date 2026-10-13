@@ -1,12 +1,10 @@
 package com.roguesmp.dungeon.repository.impl;
 
+import com.roguesmp.RogueSmpCore;
 import com.google.gson.Gson;
-import com.roguesmp.dungeon.exception.impl.data.DataDeleteException;
-import com.roguesmp.dungeon.exception.impl.data.DataSaveException;
 import com.roguesmp.dungeon.config.DataFolderConfig;
 import com.roguesmp.dungeon.data.definition.Schemeta;
 import com.roguesmp.dungeon.repository.ISchemetaRepository;
-import com.roguesmp.dungeon.utils.Log4Craft_;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;
@@ -20,12 +18,10 @@ public class SchemetaRepository implements ISchemetaRepository {
 
     private final File schemetaFolder;
     private final Gson gson;
-    private final Log4Craft_ logger;
 
-    public SchemetaRepository(Plugin plugin, Gson gson, Log4Craft_ logger) {
+    public SchemetaRepository(Plugin plugin, Gson gson) {
         this.schemetaFolder = new File(plugin.getDataFolder(), DataFolderConfig.getSchemetaFolder());
         this.gson = gson;
-        this.logger = logger;
         if (!schemetaFolder.exists()) schemetaFolder.mkdirs();
     }
 
@@ -42,7 +38,7 @@ public class SchemetaRepository implements ISchemetaRepository {
                     result.add(schemeta);
                 }
             } catch (Exception e) {
-                logger.fire(this.getClass(), "Failed to load schemeta file: " + file.getName(), e);
+                RogueSmpCore.LOGGER.error("Failed to load schemeta file: {}", file.getName(), e);
             }
         }
         return result;
@@ -56,7 +52,7 @@ public class SchemetaRepository implements ISchemetaRepository {
         try (Reader reader = Files.newBufferedReader(file.toPath())) {
             return Optional.ofNullable(gson.fromJson(reader, Schemeta.class));
         } catch (Exception e) {
-            logger.fire(this.getClass(), "Failed to load schemeta: " + id, e);
+            RogueSmpCore.LOGGER.error("Failed to load schemeta: {}", id, e);
             return Optional.empty();
         }
     }
@@ -67,7 +63,7 @@ public class SchemetaRepository implements ISchemetaRepository {
         try (Writer writer = new FileWriter(file, StandardCharsets.UTF_8)) {
             gson.toJson(schemeta, writer);
         } catch (IOException e) {
-            throw new DataSaveException(file.getName(), e);
+            RogueSmpCore.LOGGER.error("Failed to save file: {}", file.getName(), e);
         }
     }
 
@@ -75,7 +71,7 @@ public class SchemetaRepository implements ISchemetaRepository {
     public void delete(String id) {
         File file = toFile(id);
         if (file.exists() && !file.delete()) {
-            throw new DataDeleteException(file.getName(), null);
+            RogueSmpCore.LOGGER.error("Failed to delete file: {}", file.getName());
         }
     }
 

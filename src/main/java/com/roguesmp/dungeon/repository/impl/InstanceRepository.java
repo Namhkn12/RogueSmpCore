@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon.repository.impl;
 
+import com.roguesmp.RogueSmpCore;
 import com.google.gson.Gson;
 import com.roguesmp.dungeon.config.DataFolderConfig;
 import com.roguesmp.dungeon.data.definition.objective.IObjective;
@@ -10,7 +11,6 @@ import com.roguesmp.dungeon.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon.data.runtime.RoomInstance;
 import com.roguesmp.dungeon.data.runtime.session.DungeonProgress;
 import com.roguesmp.dungeon.repository.IInstanceRepository;
-import com.roguesmp.dungeon.utils.Log4Craft_;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
@@ -25,12 +25,10 @@ import java.util.Map;
 
 public class InstanceRepository implements IInstanceRepository {
 
-    private final Log4Craft_ logger;
     private final Gson gson;
     private final File dataFolder;
 
-    public InstanceRepository(Plugin plugin, Gson gson, Log4Craft_ logger) {
-        this.logger = logger;
+    public InstanceRepository(Plugin plugin, Gson gson) {
         this.gson = gson;
         this.dataFolder = new File(plugin.getDataFolder(), DataFolderConfig.getDungeonSessionFolder());
         if (!dataFolder.exists()) dataFolder.mkdirs();
@@ -46,7 +44,7 @@ public class InstanceRepository implements IInstanceRepository {
         try (Writer writer = new FileWriter(file)) {
             gson.toJson(instance, writer);
         } catch (IOException e) {
-            logger.warn(this.getClass(), "Failed to save instance: " + sessionId);
+            RogueSmpCore.LOGGER.warn("Failed to save instance: {}", sessionId);
         }
     }
 
@@ -54,7 +52,7 @@ public class InstanceRepository implements IInstanceRepository {
     public boolean delete(String sessionId) {
         File file = getFile(sessionId);
         if (file.exists() && !file.delete()) {
-            logger.error(this.getClass(), "Failed to delete instance file: " + sessionId);
+            RogueSmpCore.LOGGER.error("Failed to delete instance file: {}", sessionId);
             return false;
         }
         return true;
@@ -71,13 +69,13 @@ public class InstanceRepository implements IInstanceRepository {
                 DungeonInstance instance = gson.fromJson(reader, DungeonInstance.class);
                 if (instance == null) continue;
                 if (instance.getSession() == null || instance.getSession().getSessionId() == null || instance.getSession().getSessionId().isBlank()) {
-                    logger.warn(this.getClass(), "Skip instance file with invalid session id: " + file.getName());
+                    RogueSmpCore.LOGGER.warn("Skip instance file with invalid session id: {}", file.getName());
                     continue;
                 }
                 restoreRoomRuntime(instance);
                 result.add(instance);
             } catch (IOException e) {
-                logger.error(this.getClass(), "Failed to load instance file: " + file.getName());
+                RogueSmpCore.LOGGER.error("Failed to load instance file: {}", file.getName());
             }
         }
         return result;
@@ -110,7 +108,7 @@ public class InstanceRepository implements IInstanceRepository {
             try {
                 restored.add(ObjectiveFactory.restore(state));
             } catch (Exception e) {
-                logger.warn(this.getClass(), "Failed to restore objective type: " + state.get("type"));
+                RogueSmpCore.LOGGER.warn("Failed to restore objective type: {}", state.get("type"));
             }
         }
         return restored;
@@ -125,7 +123,7 @@ public class InstanceRepository implements IInstanceRepository {
             try {
                 restored.add(RoomEventFactory.restore(state));
             } catch (Exception e) {
-                logger.warn(this.getClass(), "Failed to restore room event type: " + state.get("type"));
+                RogueSmpCore.LOGGER.warn("Failed to restore room event type: {}", state.get("type"));
             }
         }
         return restored;

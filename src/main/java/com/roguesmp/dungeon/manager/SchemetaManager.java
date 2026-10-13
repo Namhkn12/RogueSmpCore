@@ -1,6 +1,6 @@
 package com.roguesmp.dungeon.manager;
 
-import com.roguesmp.dungeon.utils.Log4Craft;
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.data.definition.Schemeta;
 import com.roguesmp.dungeon.repository.ISchematicRepository;
 import com.roguesmp.dungeon.repository.ISchemetaRepository;
@@ -32,7 +32,7 @@ public class SchemetaManager {
         schemetaCache.clear();
         clipboardCache.clear(); // invalidate clipboard cache cùng lúc
         schemetaRepo.loadAll().forEach(s -> schemetaCache.put(s.getId(), s));
-        Log4Craft.success("Loaded " + schemetaCache.size() + " schemeta(s) into cache.");
+        RogueSmpCore.LOGGER.info("Loaded {} schemeta(s) into cache.", schemetaCache.size());
     }
 
     // ── Schemeta CRUD ────────────────────────────────────────
@@ -77,11 +77,12 @@ public class SchemetaManager {
         }
 
         if (!schematicRepo.exists(id)) {
-            Log4Craft.fire("Schematic file not found for id: " + id, null);
+            RogueSmpCore.LOGGER.error("Schematic file not found for id: {}", id);
             return Optional.empty();
         }
 
         Clipboard clipboard = schematicRepo.load(id);
+        if (clipboard == null) return Optional.empty();
         clipboardCache.put(id, clipboard);
         return Optional.of(clipboard);
     }
@@ -98,6 +99,6 @@ public class SchemetaManager {
      */
     public void evictAllClipboards() {
         clipboardCache.clear();
-        Log4Craft.success("Clipboard cache cleared.");
+        RogueSmpCore.LOGGER.info("Clipboard cache cleared.");
     }
 }

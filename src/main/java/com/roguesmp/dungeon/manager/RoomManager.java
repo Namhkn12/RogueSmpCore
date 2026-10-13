@@ -1,8 +1,8 @@
 package com.roguesmp.dungeon.manager;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.data.definition.room.Room;
 import com.roguesmp.dungeon.repository.IRoomRepository;
-import com.roguesmp.dungeon.utils.Log4Craft_;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,11 +13,9 @@ public class RoomManager {
     private final Map<String, Room> cache = new HashMap<>();
 
     private final IRoomRepository roomRepository;
-    private final Log4Craft_ logger;
 
-    public RoomManager(IRoomRepository roomRepository, Log4Craft_ logger) {
+    public RoomManager(IRoomRepository roomRepository) {
         this.roomRepository = roomRepository;
-        this.logger = logger;
 
         loadAll();
     }
@@ -25,7 +23,7 @@ public class RoomManager {
     public void loadAll(){
         cache.clear();
         roomRepository.loadAll().forEach(r -> cache.put(r.getId(), r));
-        logger.info(this.getClass(),"Loaded data" + cache.size() + " record");
+        RogueSmpCore.LOGGER.info("Loaded data: {} record", cache.size());
     }
 
     public boolean delete(String rid){

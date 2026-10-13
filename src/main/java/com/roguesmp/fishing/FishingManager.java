@@ -164,7 +164,7 @@ public final class FishingManager {
         List<ItemStack> results = new ArrayList<>();
         for (Holder<LootTable> table : tables) {
             if (!table.isBound()) {
-                RogueSmpCore.LOGGER.warn("[Fishing] Loot table not found: '" + table.getId() + "'");
+                RogueSmpCore.LOGGER.warn("[Fishing] Loot table not found: '{}'", table.getId());
                 continue;
             }
             results.addAll(table.value().roll(context));

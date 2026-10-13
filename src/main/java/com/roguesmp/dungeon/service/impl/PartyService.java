@@ -1,9 +1,10 @@
 package com.roguesmp.dungeon.service.impl;
 
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon.data.runtime.Party;
 import com.roguesmp.dungeon.manager.PartyManager;
 import com.roguesmp.dungeon.service.IPartyService;
-import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.MCStringBuilder;
 import com.roguesmp.dungeon.utils.UuidUtil;
 import org.bukkit.entity.Player;
@@ -21,17 +22,17 @@ public class PartyService implements IPartyService {
     @Override
     public Party createParty(Player owner) {
         if (partyManager.isInParty(owner.getUniqueId())) {
-            DungeonEcho.warn(owner, "Không thể tạo nhóm khi đang trong 1 nhóm khác");
+            owner.sendMessage(Component.text("Không thể tạo nhóm khi đang trong 1 nhóm khác", NamedTextColor.YELLOW));
             return null;
         }
-        DungeonEcho.success(owner, "Tạo nhóm thành công");
+        owner.sendMessage(Component.text("Tạo nhóm thành công", NamedTextColor.GREEN));
         return partyManager.createParty(owner.getUniqueId());
     }
 
     @Override
     public void disbandParty(Player owner) {
         if (!partyManager.checkIsOwner(owner.getUniqueId())) {
-            DungeonEcho.error(owner, "Bạn không phải chủ nhóm");
+            owner.sendMessage(Component.text("Bạn không phải chủ nhóm", NamedTextColor.RED));
             return;
         }
 
@@ -41,7 +42,7 @@ public class PartyService implements IPartyService {
         for (String memberId : party.getMembers()) {
             Player member = UuidUtil.getPlayerById(memberId);
             if (member != null) {
-                DungeonEcho.warn(member, "Nhóm đã bị giải tán");
+                member.sendMessage(Component.text("Nhóm đã bị giải tán", NamedTextColor.YELLOW));
             }
         }
 
@@ -51,12 +52,12 @@ public class PartyService implements IPartyService {
     @Override
     public void joinParty(Player player, Player owner) {
         if (partyManager.isInParty(player.getUniqueId())) {
-            DungeonEcho.warn(player, "Bạn đang ở trong nhóm khác");
+            player.sendMessage(Component.text("Bạn đang ở trong nhóm khác", NamedTextColor.YELLOW));
             return;
         }
 
         if (!partyManager.checkIsOwner(owner.getUniqueId())) {
-            DungeonEcho.warn(player, "Người này không phải chủ nhóm");
+            player.sendMessage(Component.text("Người này không phải chủ nhóm", NamedTextColor.YELLOW));
             return;
         }
 
@@ -64,23 +65,23 @@ public class PartyService implements IPartyService {
         if (party == null) return;
 
         if (party.getMembers().size() >= party.getMaxSize()) {
-            DungeonEcho.warn(player, "Nhóm đã đầy");
+            player.sendMessage(Component.text("Nhóm đã đầy", NamedTextColor.YELLOW));
             return;
         }
 
         partyManager.addMember(party.getPartyId(), player.getUniqueId().toString());
-        DungeonEcho.success(player, "Bạn đã tham gia nhóm");
+        player.sendMessage(Component.text("Bạn đã tham gia nhóm", NamedTextColor.GREEN));
     }
 
     @Override
     public void leaveParty(Player player) {
         if (!partyManager.isInParty(player.getUniqueId())) {
-            DungeonEcho.warn(player, "Bạn không ở trong nhóm nào");
+            player.sendMessage(Component.text("Bạn không ở trong nhóm nào", NamedTextColor.YELLOW));
             return;
         }
 
         if (partyManager.checkIsOwner(player.getUniqueId())) {
-            DungeonEcho.warn(player, "Hãy dùng lệnh /disband để giải tán");
+            player.sendMessage(Component.text("Hãy dùng lệnh /disband để giải tán", NamedTextColor.YELLOW));
             return;
         }
 
@@ -88,18 +89,18 @@ public class PartyService implements IPartyService {
         if (party == null) return;
 
         partyManager.removeMember(party.getPartyId(), player.getUniqueId().toString());
-        DungeonEcho.success(player, "Bạn đã rời nhóm");
+        player.sendMessage(Component.text("Bạn đã rời nhóm", NamedTextColor.GREEN));
     }
 
     @Override
     public void kickMember(Player owner, Player target) {
         if (!partyManager.checkIsOwner(owner.getUniqueId())) {
-            DungeonEcho.error(owner, "Bạn không phải chủ nhóm");
+            owner.sendMessage(Component.text("Bạn không phải chủ nhóm", NamedTextColor.RED));
             return;
         }
 
         if (owner.getUniqueId().equals(target.getUniqueId())) {
-            DungeonEcho.error(owner, "Bạn không thể tự đuổi chính mình");
+            owner.sendMessage(Component.text("Bạn không thể tự đuổi chính mình", NamedTextColor.RED));
             return;
         }
 
@@ -107,13 +108,13 @@ public class PartyService implements IPartyService {
         if (party == null) return;
 
         if (!party.getMembers().contains(target.getUniqueId().toString())) {
-            DungeonEcho.error(owner, "Người này không thuộc nhóm của bạn");
+            owner.sendMessage(Component.text("Người này không thuộc nhóm của bạn", NamedTextColor.RED));
             return;
         }
 
         partyManager.removeMember(party.getPartyId(), target.getUniqueId().toString());
-        DungeonEcho.success(owner, "Đã đuổi " + target.getName() + " khỏi party.");
-        DungeonEcho.warn(target, "Bạn đã bị buộc rời nhóm");
+        owner.sendMessage(Component.text("Đã đuổi " + target.getName() + " khỏi party.", NamedTextColor.GREEN));
+        target.sendMessage(Component.text("Bạn đã bị buộc rời nhóm", NamedTextColor.YELLOW));
     }
 
     @Override
@@ -143,17 +144,17 @@ public class PartyService implements IPartyService {
 
             Player newOwner = UuidUtil.getPlayerById(newOwnerId);
             if (newOwner != null) {
-                DungeonEcho.success(newOwner, "Bạn đã trở thành chủ nhóm");
+                newOwner.sendMessage(Component.text("Bạn đã trở thành chủ nhóm", NamedTextColor.GREEN));
             }
         }
         partyManager.removeMember(party.getPartyId(), playerId);
-        DungeonEcho.warn(player, "Bạn đã rời khỏi party (force)");
+        player.sendMessage(Component.text("Bạn đã rời khỏi party (force)", NamedTextColor.YELLOW));
     }
 
     @Override
     public void transferOwnership(Player currentOwner, Player newOwner) {
         if (!partyManager.checkIsOwner(currentOwner.getUniqueId())) {
-            DungeonEcho.error(currentOwner,"Bạn không phải chủ nhóm");
+            currentOwner.sendMessage(Component.text("Bạn không phải chủ nhóm", NamedTextColor.RED));
             return;
         }
 
@@ -161,13 +162,13 @@ public class PartyService implements IPartyService {
         if (party == null) return;
 
         if (!party.getMembers().contains(newOwner.getUniqueId().toString())) {
-            DungeonEcho.error(currentOwner,"Người này không ở trong nhóm của bạn");
+            currentOwner.sendMessage(Component.text("Người này không ở trong nhóm của bạn", NamedTextColor.RED));
             return;
         }
         partyManager.transferOwner(party.getPartyId(), newOwner.getUniqueId().toString());
 
-        DungeonEcho.success(currentOwner,"Đã chuyển quyền chủ nhóm cho " + newOwner.getName() + ".");
-        DungeonEcho.success(newOwner, "Bạn đã trở thành chủ nhóm");
+        currentOwner.sendMessage(Component.text("Đã chuyển quyền chủ nhóm cho " + newOwner.getName() + ".", NamedTextColor.GREEN));
+        newOwner.sendMessage(Component.text("Bạn đã trở thành chủ nhóm", NamedTextColor.GREEN));
     }
 
     @Override

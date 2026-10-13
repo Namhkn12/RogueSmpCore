@@ -3,7 +3,6 @@ package com.roguesmp.dungeon.itemdisplay.impl;
 import com.roguesmp.dungeon.data.runtime.Party;
 import com.roguesmp.dungeon.itemdisplay.AnimationHandle;
 import com.roguesmp.dungeon.itemdisplay.FloatingItemAnimation;
-import com.roguesmp.dungeon.task.TaskScheduler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
@@ -33,14 +32,12 @@ import java.util.stream.Collectors;
 public class ChestOpenAnimation {
 
     private final Plugin plugin;
-    private final TaskScheduler taskScheduler;
 
     // Giữ handle để cancel nếu player disconnect
     private final Map<UUID, AnimationHandle> activeAnimations = new HashMap<>();
 
-    public ChestOpenAnimation(Plugin plugin, TaskScheduler taskScheduler) {
+    public ChestOpenAnimation(Plugin plugin) {
         this.plugin = plugin;
-        this.taskScheduler = taskScheduler;
     }
 
     public void play(Player clicker, Block block, List<ItemStack> items, Runnable onComplete) {
@@ -49,7 +46,7 @@ public class ChestOpenAnimation {
         clicker.playSound(center, Sound.BLOCK_CHEST_OPEN, 1f, 0.7f);
 
         AnimationHandle handle = FloatingItemAnimation
-                .builder(plugin, center, taskScheduler)
+                .builder(plugin, center)
                 .duration(45)
                 .spinSpeed(8f)
                 .items(items)

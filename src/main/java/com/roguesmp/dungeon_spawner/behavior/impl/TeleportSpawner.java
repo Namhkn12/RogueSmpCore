@@ -1,8 +1,9 @@
 package com.roguesmp.dungeon_spawner.behavior.impl;
 
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon_spawner.behavior.BaseBehavior;
 import com.roguesmp.dungeon_spawner.behavior.BehaviorData;
-import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.Razdon;
 import org.bukkit.*;
 import org.bukkit.block.CreatureSpawner;
@@ -50,8 +51,7 @@ public class TeleportSpawner extends BaseBehavior {
 
         if (teleportCount < maxTeleports) {
             int remaining = maxTeleports - teleportCount;
-            DungeonEcho.info(player,
-                    "The spawner phases away! (" + remaining + " escapes remaining)");
+            player.sendMessage(Component.text("The spawner phases away! (" + remaining + " escapes remaining)", NamedTextColor.GRAY));
 
             Location dest = findTeleportDestination(location, player.getWorld());
             if (dest != null) {
@@ -60,18 +60,18 @@ public class TeleportSpawner extends BaseBehavior {
                 teleportCount++;
             } else {
                 teleportCount++;
-                DungeonEcho.info(player, "The spawner trembles but holds its ground.");
+                player.sendMessage(Component.text("The spawner trembles but holds its ground.", NamedTextColor.GRAY));
             }
 
             if (teleportCount >= maxTeleports) {
                 completed = true;
-                DungeonEcho.success(player, "The spawner has nowhere left to run!");
+                player.sendMessage(Component.text("The spawner has nowhere left to run!", NamedTextColor.GREEN));
             }
 
             return false;
         }
 
-        DungeonEcho.success(player, "The spawner is destroyed!");
+        player.sendMessage(Component.text("The spawner is destroyed!", NamedTextColor.GREEN));
         return true;
     }
 

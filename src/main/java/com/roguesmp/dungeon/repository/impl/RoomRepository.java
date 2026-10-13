@@ -1,14 +1,11 @@
 package com.roguesmp.dungeon.repository.impl;
 
+import com.roguesmp.RogueSmpCore;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.roguesmp.dungeon.config.DataFolderConfig;
 import com.roguesmp.dungeon.data.definition.room.Room;
-import com.roguesmp.dungeon.exception.impl.data.DataDeleteException;
-import com.roguesmp.dungeon.exception.impl.data.DataLoadException;
-import com.roguesmp.dungeon.exception.impl.data.DataSaveException;
 import com.roguesmp.dungeon.repository.IRoomRepository;
-import com.roguesmp.dungeon.utils.Log4Craft_;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;
@@ -21,12 +18,10 @@ public class RoomRepository implements IRoomRepository {
 
     private final File dataFolder;
     private final Gson gson;
-    private final Log4Craft_ logger;
 
-    public RoomRepository(Plugin plugin, Gson gson, Log4Craft_ logger) {
+    public RoomRepository(Plugin plugin, Gson gson) {
         this.dataFolder = new File(plugin.getDataFolder(), DataFolderConfig.getRoomTemplateFolder());
         this.gson = gson;
-        this.logger = logger;
 
         if(!dataFolder.exists()) dataFolder.mkdirs();
     }
@@ -35,7 +30,8 @@ public class RoomRepository implements IRoomRepository {
     public List<Room> loadAll() {
         List<Room> rooms = new ArrayList<>();
         if(!dataFolder.exists() || !dataFolder.isDirectory()){
-            throw new DataLoadException(dataFolder.getName(), null);
+            RogueSmpCore.LOGGER.error("Data folder not found: {}", dataFolder.getPath());
+            return rooms;
         }
 
         File[] files = dataFolder.listFiles(((dir, name) -> name.endsWith(DataFolderConfig.JSON_TYPE)));
@@ -47,10 +43,10 @@ public class RoomRepository implements IRoomRepository {
                 if(room != null && room.getId() != null){
                     rooms.add(room);
                 }else{
-                    logger.error(this.getClass(), "Data is null or invalid, please check " + file.getAbsolutePath());
+                    RogueSmpCore.LOGGER.error("Data is null or invalid, please check {}", file.getAbsolutePath());
                 }
             }catch (JsonParseException | IOException e){
-                logger.error(this.getClass(), "Invalid data in file " + file.getAbsolutePath());
+                RogueSmpCore.LOGGER.error("Invalid data in file {}", file.getAbsolutePath());
             }
         }
         return rooms;
@@ -63,7 +59,8 @@ public class RoomRepository implements IRoomRepository {
             gson.toJson(room, writer);
             return room;
         } catch (IOException e){
-            throw new DataSaveException(file.getName(), e);
+            RogueSmpCore.LOGGER.error("Failed to save file: {}", file.getName(), e);
+            return null;
         }
     }
 
@@ -72,7 +69,8 @@ public class RoomRepository implements IRoomRepository {
         File file = new File(dataFolder, DataFolderConfig.ROOM_TEMPLATE_FILE + rid + DataFolderConfig.JSON_TYPE);
         if(!file.exists()) return false;
         if(!file.delete()){
-            throw new DataDeleteException(file.getName(), null);
+            RogueSmpCore.LOGGER.error("Failed to delete file: {}", file.getName());
+            return false;
         }
         return true;
     }

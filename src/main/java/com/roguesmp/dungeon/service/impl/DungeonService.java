@@ -9,7 +9,6 @@ import com.roguesmp.dungeon.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon.manager.DungeonManager;
 import com.roguesmp.dungeon.manager.RoomManager;
 import com.roguesmp.dungeon.service.IDungeonService;
-import com.roguesmp.dungeon.utils.Log4Craft_;
 import com.roguesmp.dungeon.utils.Razdon;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,12 +21,10 @@ public class DungeonService implements IDungeonService {
 
     private final RoomManager roomManager;
     private final DungeonManager dungeonManager;
-    private final Log4Craft_ logger;
 
-    public DungeonService(RoomManager roomManager, DungeonManager dungeonManager, Log4Craft_ logger) {
+    public DungeonService(RoomManager roomManager, DungeonManager dungeonManager) {
         this.roomManager = roomManager;
         this.dungeonManager = dungeonManager;
-        this.logger = logger;
     }
 
     @Override
