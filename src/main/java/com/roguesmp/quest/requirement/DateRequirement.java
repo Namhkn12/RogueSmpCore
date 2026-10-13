@@ -3,7 +3,6 @@ package com.roguesmp.quest.requirement;
 import com.google.gson.JsonObject;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.quest.QuestRequirement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;

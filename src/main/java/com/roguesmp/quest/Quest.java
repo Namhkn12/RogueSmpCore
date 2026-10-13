@@ -1,5 +1,8 @@
 package com.roguesmp.quest;
 
+import com.roguesmp.quest.objective.QuestObjective;
+import com.roguesmp.quest.requirement.QuestRequirement;
+import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.registry.Registries;
@@ -24,6 +27,7 @@ public class Quest {
             Codec.listOf(QuestRequirement.CODEC).optionalFieldOf("requirements", new ArrayList<>()).forGetter(Quest::getRequirements),
             Codec.unboundedMap(QuestObjective.CODEC).optionalFieldOf("objectives", new HashMap<>()).forGetter(Quest::getObjectives),
             Codec.listOf(QuestReward.CODEC).fieldOf("rewards").forGetter(Quest::getRewards),
+            Codec.BOOLEAN.optionalFieldOf("autoClaimRewards", false).forGetter(Quest::isAutoClaimRewards),
             Quest::new
     );
 
@@ -47,8 +51,9 @@ public class Quest {
     private final List<QuestRequirement> requirements;
     private final Map<String, QuestObjective> objectives;
     private final List<QuestReward> rewards;
+    private final boolean autoClaimRewards;
 
-    public Quest(String id, String name, Material icon, @NotNull List<String> description, List<QuestRequirement> requirements, @NotNull Map<String, QuestObjective> objectives, @NotNull List<QuestReward> rewards) {
+    public Quest(String id, String name, Material icon, @NotNull List<String> description, List<QuestRequirement> requirements, @NotNull Map<String, QuestObjective> objectives, @NotNull List<QuestReward> rewards, boolean autoClaimRewards) {
         this.id = id;
         this.name = name;
         this.icon = icon;
@@ -56,6 +61,7 @@ public class Quest {
         this.requirements = requirements;
         this.objectives = objectives;
         this.rewards = rewards;
+        this.autoClaimRewards = autoClaimRewards;
     }
 
     public @Nullable QuestObjective getObjective(String objectiveId) {
@@ -80,6 +86,14 @@ public class Quest {
 
     public @Unmodifiable List<QuestReward> getRewards() {
         return Collections.unmodifiableList(rewards);
+    }
+
+    /**
+     * Only applies to group quests: when true, online members receive the rewards as soon as the quest completes,
+     * and members who were offline can still claim theirs later.
+     */
+    public boolean isAutoClaimRewards() {
+        return autoClaimRewards;
     }
 
     public @Unmodifiable List<QuestRequirement> getRequirements() {

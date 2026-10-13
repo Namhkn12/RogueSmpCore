@@ -1,7 +1,8 @@
-package com.roguesmp.quest;
+package com.roguesmp.quest.objective;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.quest.objective.KillMobObjective;
+import com.roguesmp.quest.objective.SignalObjective;
 import com.roguesmp.registry.Registries;
 
 /**
@@ -14,6 +15,8 @@ public class QuestObjectives {
 
     public static final Codec<KillMobObjective> KILL_MOB =
             register(KillMobObjective.TYPE_KEY, KillMobObjective.CODEC, KillMobObjective.Progress.CODEC);
+    public static final Codec<SignalObjective> SIGNAL =
+            register(SignalObjective.TYPE_KEY, SignalObjective.CODEC, SignalObjective.Progress.CODEC);
 
     public static void loadClass() {
 

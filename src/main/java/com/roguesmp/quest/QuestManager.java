@@ -1,32 +1,46 @@
 package com.roguesmp.quest;
 
+import com.roguesmp.quest.data.GroupQuestData;
+import com.roguesmp.quest.data.PendingQuestReward;
+import com.roguesmp.quest.data.PlayerQuestData;
+import com.roguesmp.quest.data.QuestDataManager;
+import com.roguesmp.quest.data.QuestLog;
+import com.roguesmp.quest.holder.GroupHolder;
+import com.roguesmp.quest.holder.PlayerHolder;
+import com.roguesmp.quest.holder.QuestHolder;
+import com.roguesmp.quest.objective.ObjectiveProgress;
+import com.roguesmp.quest.objective.QuestObjective;
+import com.roguesmp.quest.requirement.QuestRequirement;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.gui.quest.QuestGui;
+import com.roguesmp.event.QuestCompletedEvent;
+import com.roguesmp.event.QuestProgressEvent;
+import com.roguesmp.event.QuestStartedEvent;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.daily.DailyQuestManager;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.registry.Registry;
 import com.roguesmp.utils.Utils;
-import com.roguesmp.permission.Permissions;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.EntitySelectorArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiPredicate;
 
 public class QuestManager {
 
     private static QuestManager INSTANCE;
+    private static final long REWARD_EXPIRY_INTERVAL_TICKS = 20L * 60 * 60;
 
     private final RogueSmpCore plugin;
     private final QuestDataManager questDataManager;
@@ -48,29 +62,128 @@ public class QuestManager {
      * Assigns a specific quest to a player if they don't already have progress on it.
      */
     public boolean assignQuest(Player player, Quest quest) {
-        PlayerQuestData data = getPlayerQuestData(player.getUniqueId());
-        if (data == null) return false;
+        return startQuest(new PlayerHolder(player.getUniqueId()), quest);
+    }
 
-        // Prevent re-assigning if they already have it active or completed
-        if (data.getQuestProgresses().containsKey(quest.getId())) {
+    public @Nullable QuestLog getQuestLog(QuestHolder holder) {
+        if (holder instanceof GroupHolder group) return questDataManager.getCachedGroupData(group.id());
+        return questDataManager.getCachedData(holder.id());
+    }
+
+    /**
+     * @return the quests that were started, skipping those the holder already has
+     */
+    public List<Quest> startQuests(QuestHolder holder, Collection<Quest> quests) {
+        return quests.stream().filter(quest -> startQuest(holder, quest)).toList();
+    }
+
+    /**
+     * Starts a quest for any holder: a single player, or a group whose members all advance and see it. A group must
+     * be bound first, so wait for {@link #bindGroup}.
+     *
+     * @return false if the holder has no loaded quest log or already has progress on this quest
+     */
+    public boolean startQuest(QuestHolder holder, Quest quest) {
+        QuestLog log = getQuestLog(holder);
+        if (log == null) {
+            if (holder instanceof GroupHolder) RogueSmpCore.LOGGER.warn("Cannot start quest {} on group {}: it is not bound yet", quest.getId(), holder.id());
             return false;
         }
-
-        // Initialize fresh progress for this quest
-        QuestProgress newProgress = new QuestProgress(quest);
-        data.setQuestProgress(quest.getId(), newProgress);
-
+        if (log.getQuestProgresses().containsKey(quest.getId())) return false;
+        QuestProgress progress = new QuestProgress(quest);
+        log.setQuestProgress(quest.getId(), progress);
+        new QuestStartedEvent(holder, progress).callEvent();
         return true;
     }
 
     /**
-     * @param objectiveConsumer Function to handle Objective progress
+     * Loads or creates the group's quest log and attaches its members. A group must be bound before quests start on it.
      */
-    public void handleProgress(Player player, java.util.function.BiConsumer<QuestObjective, ObjectiveProgress> objectiveConsumer) {
-        PlayerQuestData playerQuestData = getPlayerQuestData(player.getUniqueId());
-        if (playerQuestData == null) return;
+    public CompletableFuture<GroupQuestData> bindGroup(GroupHolder holder) {
+        return questDataManager.bindGroup(holder);
+    }
 
-        for (QuestProgress questProgress : playerQuestData.getQuestProgresses().values()) {
+    /**
+     * Ends a group: unfinished quests are dropped, unclaimed rewards move to each eligible member.
+     */
+    public void endGroup(GroupHolder holder) {
+        questDataManager.endGroup(holder.id());
+    }
+
+    /**
+     * Startup only: ends every saved group of {@code owner} that is not live any more.
+     *
+     * @return how many groups were ended
+     */
+    public int sweepGroups(String owner, Set<UUID> liveGroupIds) {
+        return questDataManager.sweepGroups(owner, liveGroupIds);
+    }
+
+    /**
+     * Lets the player claim the rewards of every active quest of the group once it completes. Group rewards go only to
+     * eligible players, added only through here by the group's owner. Completed quests are archived.
+     */
+    public void addEligible(GroupHolder holder, UUID playerId) {
+        GroupQuestData group = questDataManager.getCachedGroupData(holder.id());
+        if (group == null) return;
+        group.getQuestProgresses().keySet().forEach(questId -> addEligible(group, questId, playerId));
+    }
+
+    public void addEligible(GroupHolder holder, String questId, UUID playerId) {
+        GroupQuestData group = questDataManager.getCachedGroupData(holder.id());
+        if (group != null) addEligible(group, questId, playerId);
+    }
+
+    private void addEligible(GroupQuestData group, String questId, UUID playerId) {
+        QuestProgress progress = group.getQuestProgress(questId);
+        if (progress != null && progress.addEligible(playerId)) group.setDirty(true);
+    }
+
+    public void removeEligible(GroupHolder holder, UUID playerId) {
+        GroupQuestData group = questDataManager.getCachedGroupData(holder.id());
+        if (group == null) return;
+        group.getQuestProgresses().keySet().forEach(questId -> removeEligible(holder, questId, playerId));
+    }
+
+    public void removeEligible(GroupHolder holder, String questId, UUID playerId) {
+        GroupQuestData group = questDataManager.getCachedGroupData(holder.id());
+        QuestProgress progress = group == null ? null : group.getQuestProgress(questId);
+        if (progress != null && progress.removeEligible(playerId)) group.setDirty(true);
+    }
+
+    /**
+     * Advances the player's own quests and those of every group they can progress.
+     *
+     * @param objectiveConsumer returns whether it changed the objective's progress
+     */
+    public void handleProgress(Player player, BiPredicate<QuestObjective, ObjectiveProgress> objectiveConsumer) {
+        PlayerQuestData playerQuestData = getPlayerQuestData(player.getUniqueId());
+        if (playerQuestData != null) handleProgress(playerQuestData, objectiveConsumer);
+        for (GroupQuestData group : List.copyOf(questDataManager.getCachedGroupQuestData())) {
+            if (group.getHolder().canProgress(player)) handleProgress(group, objectiveConsumer);
+        }
+    }
+
+    /**
+     * Advances one holder's quests directly, for progress that belongs to the holder rather than to a player's action.
+     *
+     * @param objectiveConsumer returns whether it changed the objective's progress
+     */
+    public void handleProgress(QuestHolder holder, BiPredicate<QuestObjective, ObjectiveProgress> objectiveConsumer) {
+        QuestLog log = getQuestLog(holder);
+        if (log != null) handleProgress(log, objectiveConsumer);
+    }
+
+    public void signal(QuestHolder holder, String signal, int amount) {
+        handleProgress(holder, (objective, progress) -> objective.onSignal(signal, amount, progress));
+    }
+
+    public void signal(Player player, String signal, int amount) {
+        handleProgress(player, (objective, progress) -> objective.onSignal(signal, amount, progress));
+    }
+
+    private void handleProgress(QuestLog log, BiPredicate<QuestObjective, ObjectiveProgress> objectiveConsumer) {
+        for (QuestProgress questProgress : List.copyOf(log.getQuestProgresses().values())) {
             if (questProgress.isCompleted()) continue;
 
             Quest quest = questProgress.getQuest();
@@ -78,17 +191,91 @@ public class QuestManager {
             quest.getObjectives().forEach((objectiveId, objective) -> {
                 if (questProgress.isObjectiveCompleted(objectiveId)) return;
 
-                boolean doneQuest = questProgress.updateObjectiveProgress(objectiveId, objectiveProgress -> {
-                    objectiveConsumer.accept(objective, objectiveProgress);
-                });
-                playerQuestData.setDirty(true);
+                if (!questProgress.updateObjectiveProgress(objectiveId, objectiveProgress -> objectiveConsumer.test(objective, objectiveProgress))) return;
+                log.setDirty(true);
+                new QuestProgressEvent(log.getHolder(), questProgress, objectiveId).callEvent();
 
-                if (doneQuest) {
-                    sendQuestDoneNotification(player, quest);
-                    saveQuestDataImmediately(playerQuestData);
-                }
+                if (questProgress.isCompleted()) completeQuest(log, questProgress);
             });
         }
+    }
+
+    private void completeQuest(QuestLog log, QuestProgress progress) {
+        Quest quest = progress.getQuest();
+        UUID source = log.getHolder().id();
+        log.getHolder().audience().forEach(member -> sendQuestDoneNotification(member, quest));
+        if (log instanceof GroupQuestData group) {
+            progress.getEligible().forEach(member -> giveOrDeliver(member, source, progress));
+            questDataManager.saveGroupAsync(group);
+        } else {
+            giveOrDeliver(source, source, progress);
+        }
+        new QuestCompletedEvent(log.getHolder(), progress).callEvent();
+    }
+
+    /**
+     * Gives the rewards right away for an auto-claimed quest when the player is online, otherwise puts them in the inbox.
+     */
+    private void giveOrDeliver(UUID playerId, UUID source, QuestProgress progress) {
+        Quest quest = progress.getQuest();
+        Player player = Bukkit.getPlayer(playerId);
+        PlayerQuestData data = getPlayerQuestData(playerId);
+        if (quest.isAutoClaimRewards() && player != null && data != null && giveRewards(player, quest)) {
+            if (source.equals(playerId)) dailyQuestManager.onRewardClaimed(data, quest);
+            saveQuestDataImmediately(data);
+            return;
+        }
+        questDataManager.deliver(playerId, PendingQuestReward.of(source, progress));
+        if (player != null) sendClaimPrompt(player, source, quest);
+    }
+
+    /**
+     * Claims a reward from the player's inbox.
+     *
+     * @param source the holder that completed the quest: the player themselves or a group
+     */
+    public boolean claimReward(Player player, UUID source, String questId) {
+        PlayerQuestData data = getPlayerQuestData(player.getUniqueId());
+        Quest quest = questRegistry.get(questId);
+        if (data == null || quest == null || !data.hasPendingQuestReward(source, questId)) {
+            player.sendMessage(Utils.fromString("<red>Không có phần thưởng nào để nhận!"));
+            return false;
+        }
+        if (!giveRewards(player, quest)) return false;
+        data.removePendingQuestReward(source, questId);
+        if (source.equals(player.getUniqueId())) dailyQuestManager.onRewardClaimed(data, quest);
+        saveQuestDataImmediately(data);
+        return true;
+    }
+
+    public boolean hasClaimableReward(Player player, String questId) {
+        PlayerQuestData data = getPlayerQuestData(player.getUniqueId());
+        return data != null && data.hasPendingQuestReward(player.getUniqueId(), questId);
+    }
+
+    public void notifyPendingQuestRewards(Player player) {
+        int pending = getPendingRewards(player).size();
+        if (pending == 0) return;
+        player.sendMessage(Utils.fromString("<yellow>Bạn có <gold>" + pending + "</gold> phần thưởng nhiệm vụ chưa nhận. Dùng <gold><click:run_command:'/quest rewards'>/quest rewards</click></gold> để nhận."));
+    }
+
+    public List<PendingQuestReward> getPendingRewards(Player player) {
+        PlayerQuestData data = getPlayerQuestData(player.getUniqueId());
+        return data == null ? List.of() : data.getPendingQuestRewards();
+    }
+
+    private boolean giveRewards(Player member, Quest quest) {
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(member);
+        if (smpPlayer == null) return false;
+        quest.getRewards().forEach(reward -> reward.giveReward(smpPlayer));
+        return true;
+    }
+
+    public void sendClaimPrompt(Player member, UUID source, Quest quest) {
+        String name = quest.getName() != null ? quest.getName() : quest.getId();
+        String command = "/quest claim " + source + " " + quest.getId();
+        String label = source.equals(member.getUniqueId()) ? "Phần thưởng: " : "Phần thưởng nhóm: ";
+        member.sendMessage(Utils.fromString("<gold>" + label + "</gold>" + name + " <green><click:run_command:'" + command + "'>[Nhận thưởng]</click></green>"));
     }
 
     public void sendQuestDoneNotification(Player player, Quest quest) {
@@ -100,22 +287,19 @@ public class QuestManager {
     }
 
     /**
-     * Instantly set a player quest progress to a completed state. Useful for administrative debugging or skip tokens.
+     * Instantly completes a holder's quest, through the normal completion with its rewards. Useful for administrative
+     * debugging or skip tokens.
      *
-     * @return true if the modification was successfully processed.
+     * @return false if the holder has no such unfinished quest
      */
-    public boolean forceCompleteQuest(Player player, Quest quest) {
-        PlayerQuestData data = getPlayerQuestData(player.getUniqueId());
-        if (data == null) return false;
+    public boolean forceCompleteQuest(QuestHolder holder, Quest quest) {
+        QuestLog log = getQuestLog(holder);
+        QuestProgress progress = log == null ? null : log.getQuestProgress(quest.getId());
+        if (progress == null || progress.isCompleted()) return false;
 
-        QuestProgress progress = data.getQuestProgress(quest.getId());
-        if (progress == null || progress.isCompleted()) {
-            return false;
-        }
-
-        progress.complete();
-        data.setDirty(true);
-        saveQuestDataImmediately(data);
+        progress.forceComplete();
+        log.setDirty(true);
+        completeQuest(log, progress);
         return true;
     }
 
@@ -129,20 +313,19 @@ public class QuestManager {
     }
 
     /**
-     * Completely purges a player's quest progress for a specific quest.
-     * Might be needed for seasonal resets or letting a player re-take a repeatable quest.
+     * Restarts a holder's quest from zero, for seasonal resets or re-taking a repeatable quest. A player's unclaimed
+     * reward from the earlier completion is dropped; group rewards already in members' inboxes are kept.
      *
-     * @return true if reset was successful
+     * @return false if the holder has no such quest
      */
-    public boolean resetQuestProgress(Player player, Quest quest) {
-        PlayerQuestData data = getPlayerQuestData(player.getUniqueId());
-        if (data == null) return false;
-
-        QuestProgress progress = data.getQuestProgress(quest.getId());
+    public boolean resetQuestProgress(QuestHolder holder, Quest quest) {
+        QuestLog log = getQuestLog(holder);
+        QuestProgress progress = log == null ? null : log.getQuestProgress(quest.getId());
         if (progress == null) return false;
 
         progress.resetProgresses();
-
+        if (log instanceof PlayerQuestData data) data.removePendingQuestReward(holder.id(), quest.getId());
+        log.setDirty(true);
         return true;
     }
 
@@ -167,43 +350,6 @@ public class QuestManager {
          for (QuestRequirement requirement : quest.getRequirements()) {
              if (!requirement.canMeetRequirement(smpPlayer)) return false;
          }
-
-        return true;
-    }
-
-    /**
-     * Attempt to claim quest reward for player
-     * @param checkCompletion If true, player must have completed the quest and have not already claimed the reward
-     * @param updateClaimed If true, will save "rewardClaimed" status to player quest progress data
-     * @return false if reward can't be given
-     */
-    public boolean claimQuestReward(Player player, Quest quest, boolean checkCompletion, boolean updateClaimed) {
-        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
-        if (smpPlayer == null) return false;
-
-        PlayerQuestData playerQuestData = questDataManager.getCachedData(player.getUniqueId());
-        if (playerQuestData == null) return false;
-
-        QuestProgress questProgress = playerQuestData.getQuestProgress(quest.getId());
-        if (questProgress == null) return false;
-
-        if (checkCompletion && questProgress.isRewardClaimed()) {
-            player.sendMessage(Utils.fromString("<red>Phần thưởng nhiệm vụ này đã được nhận trước đó rồi!"));
-            return false;
-        }
-
-        if (checkCompletion && !questProgress.isCompleted()) {
-            player.sendMessage(Utils.text("<red>Bạn chưa hoàn thành tất cả mục tiêu của nhiệm vụ này!"));
-            return false;
-        }
-
-        for (QuestReward reward : quest.getRewards()) {
-            reward.giveReward(smpPlayer);
-        }
-
-        if (updateClaimed) {
-            questProgress.setRewardClaimed(true);
-        }
 
         return true;
     }
@@ -243,9 +389,7 @@ public class QuestManager {
     public void onKillEntity(EntityDeathEvent event) {
         if (!(event.getDamageSource().getCausingEntity() instanceof Player player)) return;
 
-        handleProgress(player, (questObjective, objectiveProgress) -> {
-            questObjective.onKillEntity(event, objectiveProgress);
-        });
+        handleProgress(player, (questObjective, objectiveProgress) -> questObjective.onKillEntity(event, objectiveProgress));
     }
 
     public void onDisable() {
@@ -253,119 +397,9 @@ public class QuestManager {
         questDataManager.close();
     }
 
-    public void registerQuestCommand() {
-        CommandAPICommand infoSubcommand = new CommandAPICommand("info")
-                .withArguments(new StringArgument("quest_id")
-                        .replaceSuggestions(ArgumentSuggestions.strings(info ->
-                                questRegistry.getAll().keySet().toArray(new String[0])
-                        ))
-                )
-                .executesPlayer((player, args) -> {
-                    String questId = (String) args.get("quest_id");
-                    Quest quest = questRegistry.get(questId);
-
-                    if (quest == null) {
-                        player.sendMessage(Utils.fromString("<red>Không tìm thấy nhiệm vụ với ID: <yellow>" + questId));
-                        return;
-                    }
-
-                    SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
-
-                    // Render Layout Interface Block ra chat
-                    player.sendMessage(Utils.fromString("<dark_gray>=======================================</dark_gray>"));
-                    player.sendMessage(Utils.fromString("<gold><bold>THÔNG TIN NHIỆM VỤ</bold></gold>"));
-                    player.sendMessage(Utils.fromString("<gray>ID: <yellow>" + quest.getId() + "</yellow>"));
-                    player.sendMessage(Utils.fromString("<gray>Tên: " + (quest.getName() != null ? quest.getName() : "<italic>Chưa đặt tên</italic>")));
-
-                    if (!quest.getDescription().isEmpty()) {
-                        player.sendMessage(Utils.fromString("<gray>Mô tả:"));
-                        for (String line : quest.getDescription()) {
-                            player.sendMessage(Utils.fromString("  " + line));
-                        }
-                    }
-
-                    if (!quest.getRequirements().isEmpty()) {
-                        player.sendMessage(Utils.fromString("<red>[!] Yêu cầu:</red>"));
-                        player.sendMessage(Utils.fromString("<gray>  • Có <yellow>" + quest.getRequirements().size() + "</yellow> điều kiện để nhận."));
-                    }
-
-                    player.sendMessage(Utils.fromString("<aqua>[✦] Mục tiêu:</aqua>"));
-                    quest.getObjectives().forEach((trackingKey, objective) -> {
-                        List<Component> components = objective.getDisplay(smpPlayer);
-                        for (Component component : components) {
-                            player.sendMessage(Utils.fromString("  <dark_aqua>• Tracker [" + trackingKey + "]: </dark_aqua>").append(component));
-                        }
-                    });
-
-                    if (!quest.getRewards().isEmpty()) {
-                        player.sendMessage(Utils.fromString("<green>[🎁] Phan thưởng:</green>"));
-                        for (QuestReward reward : quest.getRewards()) {
-                            List<Component> components = reward.getDisplay(smpPlayer);
-                            for (Component component : components) {
-                                player.sendMessage(Utils.text("  ").append(component));
-                            }
-                        }
-                    }
-                    player.sendMessage(Utils.fromString("<dark_gray>=======================================</dark_gray>"));
-                });
-
-        CommandAPICommand assignSubcommand = new CommandAPICommand("assign")
-                .withPermission(Permissions.QUEST_ASSIGN.node())
-                .withArguments(new EntitySelectorArgument.OnePlayer("target"))
-                .withArguments(new StringArgument("quest_id")
-                        .replaceSuggestions(ArgumentSuggestions.strings(info ->
-                                questRegistry.getAll().keySet().toArray(new String[0])
-                        ))
-                )
-                .executes((sender, args) -> {
-                    Player target = (Player) args.get("target");
-                    String questId = (String) args.get("quest_id");
-
-                    if (target == null) {
-                        sender.sendMessage(Utils.fromString("<red>Người chơi không trực tuyến!"));
-                        return;
-                    }
-
-                    Quest quest = questRegistry.get(questId);
-                    if (quest == null) {
-                        sender.sendMessage(Utils.fromString("<red>Không tìm thấy nhiệm vụ với ID: <yellow>" + questId));
-                        return;
-                    }
-
-                    boolean success = assignQuest(target, quest);
-
-                    Component qName = quest.getName() != null ? Utils.fromString(quest.getName()) : Component.text(quest.getId());
-
-                    if (success) {
-                        sender.sendMessage(Utils.text("Đã giao nhiệm vụ thành công cho " + target.getName(), NamedTextColor.GREEN));
-                        target.sendMessage(Utils.text("Bạn đã được giao nhiệm vụ mới: ", NamedTextColor.GOLD).append(qName));
-                    } else {
-                        sender.sendMessage(Utils.text(target.getName() + " đã hoặc đang thực hiện nhiệm vụ này rồi!", NamedTextColor.RED));
-                    }
-                });
-
-        // /quest
-        new CommandAPICommand("quest")
-                .withSubcommand(infoSubcommand)
-                .withSubcommand(assignSubcommand)
-                // no-args open gui
-                .executesPlayer((player, args) -> {
-                    PlayerQuestData questData = questDataManager.getCachedData(player.getUniqueId());
-
-                    if (questData == null) {
-                        player.sendMessage(Utils.fromString("<red>Không thể tải dữ liệu nhiệm vụ của bạn lúc này."));
-                        return;
-                    }
-
-                    // Khởi tạo và mở thẳng GUI cho người chơi thao tác
-                    QuestGui gui = new QuestGui(player, questData);
-                    gui.showInventory(player);
-                })
-                .register();
-    }
-
     public static void init(RogueSmpCore plugin) {
         INSTANCE = new QuestManager(plugin);
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> INSTANCE.questDataManager.expireRewards(), REWARD_EXPIRY_INTERVAL_TICKS, REWARD_EXPIRY_INTERVAL_TICKS);
     }
 
     public static QuestManager getInstance() {

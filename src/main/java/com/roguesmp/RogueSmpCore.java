@@ -49,6 +49,7 @@ import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
 import com.roguesmp.npc.NpcManager;
 import com.roguesmp.player.PlayerManager;
+import com.roguesmp.quest.QuestCommand;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.registry.*;
 import com.roguesmp.server.DailyResetScheduler;
@@ -218,7 +219,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         new IslandCommand(IslandManager.getInstance()).register();
         new PartyCommand(PartyManager.getInstance()).register();
-        QuestManager.getInstance().registerQuestCommand();
+        new QuestCommand(QuestManager.getInstance()).register();
 
         ReloadCommand.register();
         FishingHotspotCommand.register();

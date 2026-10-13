@@ -1,5 +1,6 @@
 package com.roguesmp.entity.spell;
 
+import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.registry.Registries;
 

@@ -2,7 +2,6 @@ package com.roguesmp.quest.reward;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.quest.QuestReward;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 

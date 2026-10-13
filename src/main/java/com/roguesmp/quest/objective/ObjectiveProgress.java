@@ -1,4 +1,4 @@
-package com.roguesmp.quest;
+package com.roguesmp.quest.objective;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.registry.Registries;

@@ -1,4 +1,4 @@
-package com.roguesmp.quest;
+package com.roguesmp.quest.requirement;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.quest.requirement.DateRequirement;

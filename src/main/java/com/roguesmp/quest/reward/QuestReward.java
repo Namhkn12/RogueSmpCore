@@ -1,5 +1,6 @@
-package com.roguesmp.quest;
+package com.roguesmp.quest.reward;
 
+import com.roguesmp.quest.Quest;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.Registries;

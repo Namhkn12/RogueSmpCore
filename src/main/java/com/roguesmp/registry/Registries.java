@@ -1,5 +1,12 @@
 package com.roguesmp.registry;
 
+import com.roguesmp.quest.objective.ObjectiveProgress;
+import com.roguesmp.quest.objective.QuestObjective;
+import com.roguesmp.quest.objective.QuestObjectives;
+import com.roguesmp.quest.requirement.QuestRequirement;
+import com.roguesmp.quest.requirement.QuestRequirements;
+import com.roguesmp.quest.reward.QuestReward;
+import com.roguesmp.quest.reward.QuestRewards;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.BlockData;
 import com.roguesmp.block.BlockType;

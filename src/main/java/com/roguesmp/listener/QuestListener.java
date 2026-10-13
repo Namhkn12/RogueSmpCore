@@ -2,7 +2,6 @@ package com.roguesmp.listener;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.event.DailyResetEvent;
-import com.roguesmp.quest.PlayerQuestData;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
@@ -13,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class QuestListener implements Listener {
@@ -23,27 +23,32 @@ public class QuestListener implements Listener {
         this.questManager = questManager;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerPreJoin(AsyncPlayerPreLoginEvent event) {
-        PlayerQuestData playerQuestData = questManager.getQuestDataManager().loadData(event.getUniqueId());
-        Utils.runLater(() -> {
-            questManager.getQuestDataManager().cache(playerQuestData);
-        });
+        if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) return;
+        questManager.getQuestDataManager().stagePendingJoin(questManager.getQuestDataManager().loadData(event.getUniqueId()));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerLogin(PlayerLoginEvent event) {
+        if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
+            questManager.getQuestDataManager().discardPendingJoin(event.getPlayer().getUniqueId());
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
+        if (!questManager.getQuestDataManager().cachePendingJoin(event.getPlayer().getUniqueId())) {
+            RogueSmpCore.LOGGER.error("No quest data was loaded for {} before joining", event.getPlayer().getName());
+            return;
+        }
         questManager.getDailyQuestManager().onPlayerJoin(event.getPlayer());
+        questManager.notifyPendingQuestRewards(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerLeave(PlayerQuitEvent event) {
-        PlayerQuestData playerQuestData = questManager.getPlayerQuestData(event.getPlayer().getUniqueId());
-        if (playerQuestData == null) {
-            RogueSmpCore.LOGGER.error("No quest data found");
-            return;
-        }
-        questManager.getQuestDataManager().saveAsync(playerQuestData);
+        questManager.getQuestDataManager().saveAndUncache(event.getPlayer().getUniqueId());
     }
 
     @EventHandler

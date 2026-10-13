@@ -1,5 +1,8 @@
 package com.roguesmp.gui.quest;
 
+import com.roguesmp.quest.data.PlayerQuestData;
+import com.roguesmp.quest.objective.ObjectiveProgress;
+import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.player.PlayerManager;
@@ -122,10 +125,10 @@ public class DailyQuestGui extends BaseGui {
                     event.setCancelled(true);
 
                     if (progress.isCompleted()) {
-                        if (progress.isRewardClaimed()) {
+                        if (!questManager.hasClaimableReward(player, quest.getId())) {
                             player.sendMessage(Utils.fromString("<yellow>Bạn đã nhận phần thưởng nhiệm vụ này rồi."));
                         } else {
-                            boolean claimed = dailyQuestManager.claimAndReplenish(player, quest);
+                            boolean claimed = questManager.claimReward(player, player.getUniqueId(), quest.getId());
                             if (claimed) {
                                 player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
                                 setup();
@@ -145,6 +148,7 @@ public class DailyQuestGui extends BaseGui {
     private ItemStack buildQuestIcon(QuestProgress progress, String tierName, Material defaultMaterial) {
         Quest quest = progress.getQuest();
         SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+        boolean claimable = progress.isCompleted() && questManager.hasClaimableReward(player, quest.getId());
 
         Material questMaterial = quest.getIcon() != null ? quest.getIcon() : defaultMaterial;
         Material iconMat = progress.isCompleted() ? Material.BOOKSHELF : questMaterial;
@@ -152,7 +156,7 @@ public class DailyQuestGui extends BaseGui {
         ItemStack item = ItemStack.of(iconMat);
         item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Set.of(DataComponentTypes.ATTRIBUTE_MODIFIERS)).build());
 
-        if (progress.isCompleted() && !progress.isRewardClaimed()) {
+        if (claimable) {
             item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
         }
 
@@ -164,7 +168,7 @@ public class DailyQuestGui extends BaseGui {
         lore.add(Component.empty());
 
         if (progress.isCompleted()) {
-            if (progress.isRewardClaimed()) {
+            if (!claimable) {
                 lore.add(Utils.fromString("<!i><green>✔ Đã nhận thưởng"));
             } else {
                 lore.add(Utils.fromString("<!i><gold>★ Đã hoàn thành! Click để nhận thưởng"));
@@ -212,7 +216,7 @@ public class DailyQuestGui extends BaseGui {
         }
 
         lore.add(Component.empty());
-        if (progress.isCompleted() && !progress.isRewardClaimed()) {
+        if (claimable) {
             lore.add(Utils.fromString("<!i><yellow>▶ Click để nhận thưởng!"));
         }
 

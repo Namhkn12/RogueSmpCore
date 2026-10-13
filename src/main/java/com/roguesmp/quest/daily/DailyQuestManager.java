@@ -1,8 +1,7 @@
 package com.roguesmp.quest.daily;
 
+import com.roguesmp.quest.data.PlayerQuestData;
 import com.roguesmp.registry.Registries;
-import com.roguesmp.player.PlayerManager;
-import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.*;
 import com.roguesmp.tag.SmpTag;
 import com.roguesmp.tag.Tags;
@@ -89,39 +88,19 @@ public class DailyQuestManager {
         return assignedAny;
     }
 
-    public boolean claimAndReplenish(Player player, Quest quest) {
-        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
-        if (smpPlayer == null) return false;
-
-        PlayerQuestData data = questManager.getPlayerQuestData(player.getUniqueId());
-        if (data == null) return false;
-
-        QuestProgress progress = data.getQuestProgress(quest.getId());
-        if (progress == null || !progress.isCompleted() || progress.isRewardClaimed()) {
-            return false;
-        }
-
-        for (QuestReward reward : quest.getRewards()) {
-            reward.giveReward(smpPlayer);
-        }
-
+    /**
+     * Frees a claimed daily quest's slot and fills it with the next quest of its tier, unless the daily reset already
+     * removed it.
+     */
+    public void onRewardClaimed(PlayerQuestData data, Quest quest) {
         SmpTag<Quest> tag = getDailyTagForQuest(quest);
-        if (tag != null) {
-            data.incrementDailyCompletionForTag(tag.getId());
-            data.removeQuestProgress(quest.getId());
+        if (tag == null || data.getQuestProgress(quest.getId()) == null) return;
 
-            int completedToday = getCompletedCountToday(data, tag);
-            int maxLimit = getDailyLimitForTag(tag);
-
-            if (completedToday < maxLimit) {
-                assignNextQuestFromTag(data, tag, quest);
-            }
-        } else {
-            progress.setRewardClaimed(true);
+        data.incrementDailyCompletionForTag(tag.getId());
+        data.removeQuestProgress(quest.getId());
+        if (getCompletedCountToday(data, tag) < getDailyLimitForTag(tag)) {
+            assignNextQuestFromTag(data, tag, quest);
         }
-
-        questManager.getQuestDataManager().saveAsync(data);
-        return true;
     }
 
     private boolean assignNextQuestFromTag(PlayerQuestData data, SmpTag<Quest> tag, Quest previousQuest) {
@@ -136,9 +115,7 @@ public class DailyQuestManager {
         if (candidates.isEmpty()) return false;
 
         Quest selectedQuest = candidates.get(Utils.RANDOM.nextInt(candidates.size()));
-        QuestProgress newProgress = new QuestProgress(selectedQuest);
-        data.setQuestProgress(selectedQuest.getId(), newProgress);
-        return true;
+        return questManager.startQuest(data.getHolder(), selectedQuest);
     }
 
     public List<QuestProgress> getActiveDailyQuestsForTag(PlayerQuestData data, SmpTag<Quest> tag) {

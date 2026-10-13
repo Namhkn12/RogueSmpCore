@@ -1,10 +1,12 @@
-package com.roguesmp.quest;
+package com.roguesmp.quest.objective;
 
+import com.roguesmp.quest.Quest;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.Registries;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -21,7 +23,14 @@ public interface QuestObjective {
     /**
      * Get objective display with progress data. Can be used to display player's current objective progress for example
      */
-    List<Component> getDisplay(SmpPlayer smpPlayer, ObjectiveProgress progress);
+    List<Component> getDisplay(@Nullable SmpPlayer smpPlayer, ObjectiveProgress progress);
+
+    /**
+     * Display that needs no viewer, for progress shared by a group such as a scoreboard line.
+     */
+    default List<Component> getDisplay(ObjectiveProgress progress) {
+        return getDisplay(null, progress);
+    }
 
     /**
      * Get objective display. Can be used to display an objective info for example
@@ -44,8 +53,18 @@ public interface QuestObjective {
 
     }
 
-    default void onKillEntity(EntityDeathEvent event, ObjectiveProgress progress) {
+    /**
+     * @return whether the progress changed
+     */
+    default boolean onKillEntity(EntityDeathEvent event, ObjectiveProgress progress) {
+        return false;
+    }
 
+    /**
+     * @return whether the progress changed
+     */
+    default boolean onSignal(String signal, int amount, ObjectiveProgress progress) {
+        return false;
     }
 
 }
