@@ -1,8 +1,8 @@
 package com.roguesmp.dungeon.manager;
 
+import com.roguesmp.dungeon.repository.DungeonRepository;
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.data.definition.Dungeon;
-import com.roguesmp.dungeon.repository.IDungeonRepository;
-import com.roguesmp.dungeon.utils.Log4Craft_;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,12 +12,10 @@ public class DungeonManager {
 
     private final Map<String, Dungeon> cache = new HashMap<>();
 
-    private final IDungeonRepository dungeonRepository;
-    private final Log4Craft_ logger;
+    private final DungeonRepository dungeonRepository;
 
-    public DungeonManager(IDungeonRepository dungeonRepository, Log4Craft_ logger) {
+    public DungeonManager(DungeonRepository dungeonRepository) {
         this.dungeonRepository = dungeonRepository;
-        this.logger = logger;
 
         loadAll();
     }
@@ -25,7 +23,7 @@ public class DungeonManager {
     public void loadAll(){
         cache.clear();
         dungeonRepository.loadAll().forEach(d -> cache.put(d.getId(), d));
-        logger.info(this.getClass(),"Loaded data" + cache.size() + " record");
+        RogueSmpCore.LOGGER.info("Loaded data: {} record", cache.size());
     }
 
     public boolean delete(String did){

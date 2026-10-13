@@ -1,11 +1,11 @@
 package com.roguesmp.dungeon.actor.listener;
 
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.event.block.Action;
+import com.roguesmp.world.DungeonWorldManager;
 import com.roguesmp.dungeon.controller.DungeonFlowController;
-import com.roguesmp.dungeon.data.runtime.Party;
-import com.roguesmp.dungeon.service.IPartyService;
-import com.roguesmp.dungeon.utils.filterchain.EventFilter;
-import com.roguesmp.dungeon.utils.filterchain.FilterChain;
-import com.roguesmp.dungeon.utils.filterchain.impl.InteractFilters;
+import com.roguesmp.dungeon_party.Party;
+import com.roguesmp.dungeon_party.PartyManager;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -29,27 +29,24 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DoorInteractListener implements Listener {
 
     private final DungeonFlowController dungeonFlowController;
-    private final IPartyService partyService;
+    private final PartyManager partyManager;
     private final Map<UUID, String> treasureEnteredByInstance = new ConcurrentHashMap<>();
     private final Set<UUID> insideGateway = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
 
-    public DoorInteractListener(DungeonFlowController dungeonFlowController, IPartyService partyService) {
+    public DoorInteractListener(DungeonFlowController dungeonFlowController, PartyManager partyManager) {
         this.dungeonFlowController = dungeonFlowController;
-        this.partyService = partyService;
+        this.partyManager = partyManager;
     }
 
     @EventHandler
     public void onPlayerInteractDoor(PlayerInteractEvent event) {
-        if(!VAULT_FILTER.test(event)) return;
+        Block block = event.getClickedBlock();
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() != EquipmentSlot.HAND || block == null) return;
+        if (!(block.getState() instanceof Vault) || !DungeonWorldManager.isAnyDungeonWorld(block.getWorld())) return;
         event.setCancelled(true);
 
-        Block block = event.getClickedBlock();
-        if(block == null) return;
-        Vault vault = (Vault) block.getState();
-        Player player = event.getPlayer();
-
-        dungeonFlowController.handleOpenNextDoor(vault.getBlock(), player);
+        dungeonFlowController.handleOpenNextDoor(block, event.getPlayer());
     }
 
     @EventHandler
@@ -57,8 +54,7 @@ public class DoorInteractListener implements Listener {
         if (!event.hasChangedBlock()) return;
 
         Player player = event.getPlayer();
-        String worldName = player.getWorld().getName();
-        if (!worldName.startsWith("dungeon_")) return;
+        if (!DungeonWorldManager.isAnyDungeonWorld(player.getWorld())) return;
 
         UUID playerId = player.getUniqueId();
         boolean toInsideGateway = isOverlappingBlockType(event, event.getTo(), Material.END_GATEWAY);
@@ -86,8 +82,7 @@ public class DoorInteractListener implements Listener {
         if (!event.hasChangedBlock()) return;
 
         Player player = event.getPlayer();
-        String worldName = player.getWorld().getName();
-        if (!worldName.startsWith("dungeon_")) return;
+        if (!DungeonWorldManager.isAnyDungeonWorld(player.getWorld())) return;
 
         UUID playerId = player.getUniqueId();
         boolean toInsideGateway = isOverlappingBlockType(event, event.getTo(), Material.NETHER_PORTAL);
@@ -105,7 +100,7 @@ public class DoorInteractListener implements Listener {
 
     @EventHandler
     public void onCancelPlayerTeleportByPortal(PlayerTeleportEvent event) {
-        if (!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        if (!DungeonWorldManager.isAnyDungeonWorld(event.getPlayer().getWorld())) return;
 
         PlayerTeleportEvent.TeleportCause cause = event.getCause();
         if (cause == PlayerTeleportEvent.TeleportCause.END_PORTAL
@@ -119,18 +114,10 @@ public class DoorInteractListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
     }
 
-    private static final EventFilter<PlayerInteractEvent> VAULT_FILTER =
-            FilterChain.of(PlayerInteractEvent.class)
-                    .require(InteractFilters.rightClickBlock())
-                    .require(InteractFilters.mainHand())
-                    .require(InteractFilters.hasBlock())
-                    .require(InteractFilters.blockState(Vault.class))
-                    .require(InteractFilters.clickedBlockInWorld("dungeon_"))
-                    .build();
 
     private String resolveInstanceId(Player player) {
         if (player == null) return null;
-        Party party = partyService.getPartyByPlayer(player);
+        Party party = partyManager.getPartyByPlayer(player);
         if(party == null) return null;
         return party.getInstanceId();
     }

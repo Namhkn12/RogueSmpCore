@@ -80,8 +80,8 @@ public class SpawnerBreaker extends BaseObjective implements IProgressable, IDis
     @Override
     public List<String> getScoreBoardLine() {
         String progress = completed
-                ? "§a✔ Break Spawners §f" + require + "§7/§f" + require
-                : "§7Break Spawners §f" + count + "§7/§f" + require;
+                ? "<green>✔ Break Spawners <white>" + require + "<gray>/<white>" + require
+                : "<gray>Break Spawners <white>" + count + "<gray>/<white>" + require;
         return List.of(progress);
     }
 }

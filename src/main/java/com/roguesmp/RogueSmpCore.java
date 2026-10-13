@@ -20,6 +20,9 @@ import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.dungeon.DungeonRegistry;
+import com.roguesmp.dungeon_party.PartyCommand;
+import com.roguesmp.dungeon_party.PartyListener;
+import com.roguesmp.dungeon_party.PartyManager;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.fishing.FishingHotspotManager;
@@ -37,7 +40,7 @@ import com.roguesmp.gui.crafting.CraftingGui;
 import com.roguesmp.gui.info.SmpWikiMainMenuGui;
 import com.roguesmp.integration.LuckPermsIntegration;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
-import com.roguesmp.dungeon_static.DungeonWorldManager;
+import com.roguesmp.world.DungeonWorldManager;
 import com.roguesmp.dungeon_static.StaticDungeonCommand;
 import com.roguesmp.dungeon_static.StaticDungeonListener;
 import com.roguesmp.dungeon_static.StaticDungeonManager;
@@ -97,7 +100,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         //Island
         IslandManager.init(this, PlayerManager.getInstance());
-        StaticDungeonManager.init(this, new DungeonWorldManager(this, PolarTemplateManager.getInstance()));
+        StaticDungeonManager.init(this, new DungeonWorldManager(this, PolarTemplateManager.getInstance(), "dungeon_worlds", "dungeon"));
         LuckPermsIntegration.init(this);
 
         //Quest
@@ -118,6 +121,8 @@ public final class RogueSmpCore extends JavaPlugin {
         ItemRegistry.init(this);
 
         VanillaCraftingRecipeRegistry.init(this);
+
+        PartyManager.init(this);
 
         //dungeon register
         DungeonRegistry.onEnable(this);
@@ -160,6 +165,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         PlayerManager.getInstance().onDisable();
         DungeonRegistry.onDisable();
+        PartyManager.getInstance().saveAll();
 
         IslandManager.getInstance().onDisable();
         StaticDungeonManager.getInstance().onDisable();
@@ -187,6 +193,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         registerListener(new RegionWandListener(RegionSelections.getInstance(), RegionVisualizer.getInstance()));
         registerListener(new IslandListener(IslandManager.getInstance()));
+        registerListener(new PartyListener(PartyManager.getInstance()));
         registerListener(new StaticDungeonListener(StaticDungeonManager.getInstance()));
         registerListener(new QuestListener(QuestManager.getInstance()));
     }
@@ -210,6 +217,7 @@ public final class RogueSmpCore extends JavaPlugin {
         SmpBrowserCommand.register();
 
         new IslandCommand(IslandManager.getInstance()).register();
+        new PartyCommand(PartyManager.getInstance()).register();
         QuestManager.getInstance().registerQuestCommand();
 
         ReloadCommand.register();

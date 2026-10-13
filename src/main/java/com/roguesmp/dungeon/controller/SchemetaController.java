@@ -1,15 +1,15 @@
 package com.roguesmp.dungeon.controller;
 
-import com.roguesmp.dungeon.service.ISchematicService;
-import com.roguesmp.dungeon.service.ISchemetaService;
+import com.roguesmp.dungeon.service.SchemetaService;
+import com.roguesmp.dungeon.service.SchematicService;
 import org.bukkit.entity.Player;
 
 public class SchemetaController {
 
-    private final ISchemetaService schemetaService;
-    private final ISchematicService schematicService;
+    private final SchemetaService schemetaService;
+    private final SchematicService schematicService;
 
-    public SchemetaController(ISchemetaService schemetaService, ISchematicService schematicService) {
+    public SchemetaController(SchemetaService schemetaService, SchematicService schematicService) {
         this.schemetaService = schemetaService;
         this.schematicService = schematicService;
     }

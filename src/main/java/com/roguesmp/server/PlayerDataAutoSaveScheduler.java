@@ -8,6 +8,7 @@ import com.roguesmp.player.PlayerManager;
 import com.roguesmp.quest.PlayerQuestData;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.utils.WorldPos;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -45,6 +46,11 @@ public class PlayerDataAutoSaveScheduler {
     // Runs on the main thread: encodes each dirty value immediately (safe - matches how they're
     // mutated elsewhere) and hands one batched transaction per store to the async writers.
     private void runAutoSave() {
+        for (var player : Bukkit.getOnlinePlayers()) {
+            PlayerData data = PlayerManager.getInstance().getDataManager().getData(player.getUniqueId());
+            if (data != null) data.refreshLastLocation(WorldPos.of(player.getLocation()));
+        }
+
         List<PlayerData> dirtyPlayers = new ArrayList<>();
         for (PlayerData data : PlayerManager.getInstance().getDataManager().getCachedPlayerData()) {
             if (data.isDirty()) dirtyPlayers.add(data);

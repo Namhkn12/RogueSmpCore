@@ -11,7 +11,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
 import java.util.function.Consumer;
-import static com.roguesmp.dungeon.utils.HiddenItemBuilder.makeHidden;
+import static com.roguesmp.utils.ItemStackUtils.hideTooltip;
 
 public class TriggerBossGui extends BaseGui {
 
@@ -26,8 +26,8 @@ public class TriggerBossGui extends BaseGui {
     public TriggerBossGui(Block block, Consumer<Player> onTrigger) {
         super(Component.text("Boss"), TOTAL_ROW);
 
-        filler = makeHidden(ItemStack.of(Material.RED_STAINED_GLASS_PANE));
-        trigger = makeHidden(ItemStack.of(Material.TRIAL_SPAWNER));
+        filler = hideTooltip(ItemStack.of(Material.RED_STAINED_GLASS_PANE));
+        trigger = hideTooltip(ItemStack.of(Material.TRIAL_SPAWNER));
         this.onTrigger = onTrigger;
         this.block = block;
     }

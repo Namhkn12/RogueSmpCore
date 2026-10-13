@@ -1,15 +1,15 @@
 package com.roguesmp.dungeon.controller;
 
-import com.roguesmp.dungeon.service.IDungeonRewardService;
+import com.roguesmp.dungeon.service.DungeonRewardService;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 public class DungeonTreasureController {
 
-    private final IDungeonRewardService rewardService;
+    private final DungeonRewardService rewardService;
 
-    public DungeonTreasureController(IDungeonRewardService rewardService) {
+    public DungeonTreasureController(DungeonRewardService rewardService) {
         this.rewardService = rewardService;
     }
 

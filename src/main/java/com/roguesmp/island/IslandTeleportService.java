@@ -4,6 +4,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.world.Hub;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -49,7 +50,7 @@ public class IslandTeleportService {
 
     public void teleportToIsland(Player player, IslandData islandData) {
         worldManager.loadIslandWorld(islandData.getIslandId())
-                .thenAccept(world -> Utils.runLater(() -> teleport(player, islandData.getSpawnLocationWorld(world))))
+                .thenAccept(world -> Utils.runLater(() -> teleport(player, world.getSpawnLocation())))
                 .exceptionally(error -> {
                     Utils.runLater(() -> player.sendMessage(Utils.fromString("<red>Không thể tải thế giới đảo.")));
                     return null;
@@ -57,19 +58,20 @@ public class IslandTeleportService {
     }
 
     public void sendToHub(Player player) {
-        multiverseApi.getWorldManager().getDefaultWorld().peek(hub -> teleport(player, hub.getSpawnLocation()));
+        Location hub = Hub.spawn();
+        teleport(player, hub);
     }
 
     /**
      * Sends everyone in the world to the hub, so the world can be unloaded.
      */
     public void evacuate(World world) {
-        multiverseApi.getWorldManager().getDefaultWorld().peek(hub -> {
-            for (Player player : world.getPlayers()) {
-                player.sendMessage(Utils.fromString("<yellow>Đảo đã đóng cửa nên bạn được đưa về hub."));
-                teleport(player, hub.getSpawnLocation());
-            }
-        });
+        Location hub = Hub.spawn();
+
+        for (Player player : world.getPlayers()) {
+            player.sendMessage(Utils.fromString("<yellow>Đảo đã đóng cửa nên bạn được đưa về hub."));
+            teleport(player, hub);
+        }
     }
 
     /**

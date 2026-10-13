@@ -1,6 +1,7 @@
 package com.roguesmp.world;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.region.ServerRegionManager;
 import com.roguesmp.utils.AsyncUtils;
@@ -63,7 +64,8 @@ public final class PolarTemplateManager {
             if (base == null) {
                 return CompletableFuture.<World>failedFuture(new IllegalArgumentException("Template world not found: " + template));
             }
-            return cloneOf(template, key, () -> worldManager.create(key, base, world -> { }));
+            return cloneOf(template, key, () -> worldManager.copyBlockState(worldManager, template, key)
+                    .thenCompose(copied -> worldManager.create(key, base, world -> { })));
         });
     }
 
@@ -152,6 +154,7 @@ public final class PolarTemplateManager {
             return Polar.saveWorld(world, worldManager.source(target));
         })
                 .thenCompose(v -> AsyncUtils.run(() -> ServerRegionManager.getInstance().copyStoredData(sourceDataName, worldManager.regionDataName(target))))
+                .thenCompose(v -> AsyncUtils.onMainThread(() -> BlockManager.getInstance().copyWorldState(world.getKey(), worldManager.namespacedKey(target))))
                 .thenCompose(v -> AsyncUtils.onMainThread(() -> Registries.POLAR_TEMPLATE_DATA
                         .registerAndSaveAsync(plugin, target.name(), PolarTemplateData.DEFAULT.withSpawn(spawn))))
                 .thenApply(saved -> target);
@@ -186,6 +189,7 @@ public final class PolarTemplateManager {
     private CompletableFuture<Void> discardClone(PolarWorldKey target) {
         return worldManager.exists(target).thenCompose(exists -> {
             if (exists) return CompletableFuture.<Void>completedFuture(null);
+            BlockManager.getInstance().deleteWorldState(worldManager.namespacedKey(target));
             return deleteRegionData(target)
                     .thenCompose(v -> AsyncUtils.onMainThread(() -> Registries.POLAR_TEMPLATE_DATA.removeAndDeleteFilesAsync(plugin, target.name())))
                     .thenAccept(removed -> { });

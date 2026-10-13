@@ -1,8 +1,10 @@
 package com.roguesmp.dungeon.actor.listener;
 
+import com.roguesmp.constant.Keys;
+import com.roguesmp.world.DungeonWorldManager;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import com.roguesmp.dungeon.controller.PlayerActionController;
-import com.roguesmp.dungeon.task.TaskScheduler;
-import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
@@ -22,11 +24,11 @@ import org.bukkit.event.world.PortalCreateEvent;
 public class DungeonListener implements Listener {
 
     private final PlayerActionController actionController;
-    private final TaskScheduler taskScheduler;
+    private final Plugin plugin;
 
-    public DungeonListener(PlayerActionController actionController, TaskScheduler taskScheduler) {
+    public DungeonListener(PlayerActionController actionController, Plugin plugin) {
         this.actionController = actionController;
-        this.taskScheduler = taskScheduler;
+        this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -57,7 +59,7 @@ public class DungeonListener implements Listener {
 
     @EventHandler
     public void onPlayerMoveInDeadMode(PlayerMoveEvent event){
-        if(!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        if(!DungeonWorldManager.isAnyDungeonWorld(event.getPlayer().getWorld())) return;
         Player player = event.getPlayer();
         if(player.getGameMode() != GameMode.SPECTATOR) return;
 
@@ -67,28 +69,28 @@ public class DungeonListener implements Listener {
     @EventHandler
     public void onPlayerReJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
-        taskScheduler.runLater(2L, () -> {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
             actionController.handlePlayerReconnect(player);
-        });
+        }, 2L);
     }
 
     @EventHandler
     public void onPlayerDead(PlayerDeathEvent event){
-        if(!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        if(!DungeonWorldManager.isAnyDungeonWorld(event.getPlayer().getWorld())) return;
         event.setCancelled(true);
         actionController.handlePlayerDead(event.getPlayer());
     }
 
     @EventHandler
     public void onPlayerDisconnect(PlayerQuitEvent event){
-        if(!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        if(!DungeonWorldManager.isAnyDungeonWorld(event.getPlayer().getWorld())) return;
         actionController.handlePlayerDisconnect(event.getPlayer());
     }
 
     @EventHandler
     public void onMannequinInteract(PlayerInteractAtEntityEvent e) {
         if (e.getRightClicked() instanceof Mannequin mannequin) {
-            if (mannequin.getPersistentDataContainer().has(NameSpaceKeys.REVIVE_POINT_KEY)) {
+            if (mannequin.getPersistentDataContainer().has(Keys.REVIVE_POINT)) {
                 e.setCancelled(true);
             }
         }
@@ -97,7 +99,7 @@ public class DungeonListener implements Listener {
     @EventHandler
     public void onMannequinDamage(EntityDamageEvent e) {
         if (e.getEntity() instanceof Mannequin mannequin) {
-            if (mannequin.getPersistentDataContainer().has(NameSpaceKeys.REVIVE_POINT_KEY)) {
+            if (mannequin.getPersistentDataContainer().has(Keys.REVIVE_POINT)) {
                 e.setCancelled(true);
             }
         }
@@ -119,7 +121,7 @@ public class DungeonListener implements Listener {
 
     @EventHandler
     public void onPortalCreate(PortalCreateEvent event) {
-        if (!event.getWorld().getName().startsWith("dungeon_")) return;
+        if (!DungeonWorldManager.isAnyDungeonWorld(event.getWorld())) return;
         event.setCancelled(true);
     }
 

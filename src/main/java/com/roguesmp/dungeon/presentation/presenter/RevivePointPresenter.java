@@ -1,6 +1,6 @@
 package com.roguesmp.dungeon.presentation.presenter;
 
-import com.roguesmp.dungeon.utils.NameSpaceKeys;
+import com.roguesmp.constant.Keys;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import org.bukkit.Location;
 import org.bukkit.entity.Mannequin;
@@ -58,7 +58,7 @@ public class RevivePointPresenter {
             eq.setItemInOffHand(offHand);
 
             mannequin.getPersistentDataContainer().set(
-                    NameSpaceKeys.REVIVE_POINT_KEY,
+                    Keys.REVIVE_POINT,
                     PersistentDataType.BYTE,
                     (byte) 1
             );

@@ -168,6 +168,16 @@ public class PlayerData{
         this.dirty = true;
     }
 
+    /**
+     * Updates the position without scheduling a save, unless the world changed: a stale position in the right world is
+     * harmless, a position in the wrong world is not.
+     */
+    public void refreshLastLocation(WorldPos location) {
+        boolean worldChanged = lastLocation == null || !lastLocation.world().equals(location.world());
+        this.lastLocation = location;
+        if (worldChanged) this.dirty = true;
+    }
+
     public void setClassId(@Nullable String classId) {
         this.classId = classId;
         this.dirty = true;

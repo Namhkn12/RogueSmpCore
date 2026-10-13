@@ -1,9 +1,9 @@
 package com.roguesmp.goal.zombified_piglin;
 
+import com.roguesmp.constant.Keys;
 import com.destroystokyo.paper.entity.ai.Goal;
 import com.destroystokyo.paper.entity.ai.GoalKey;
 import com.destroystokyo.paper.entity.ai.GoalType;
-import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
 
@@ -62,7 +62,7 @@ public class ZombifiedPiglinGoal implements Goal<PigZombie> {
 
     @Override
     public GoalKey<PigZombie> getKey() {
-        return GoalKey.of(PigZombie.class, NameSpaceKeys.PIGZOMBIE_KEY);
+        return GoalKey.of(PigZombie.class, Keys.PIGZOMBIE_ATTACK);
     }
 
     @Override

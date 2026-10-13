@@ -3,8 +3,6 @@ package com.roguesmp.world;
 import com.roguesmp.utils.AsyncUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.mvplugins.multiverse.core.MultiverseCoreApi;
-import org.mvplugins.multiverse.core.world.LoadedMultiverseWorld;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -26,10 +24,8 @@ public interface WorldEvacuator {
         return world -> {
             if (world.getPlayers().isEmpty()) return CompletableFuture.completedFuture(null);
 
-            LoadedMultiverseWorld hub = MultiverseCoreApi.get().getWorldManager().getDefaultWorld().getOrNull();
-            if (hub == null) return CompletableFuture.failedFuture(new IllegalStateException("No default world to evacuate players to"));
+            Location hubSpawn = Hub.spawn();
 
-            Location hubSpawn = hub.getSpawnLocation();
             if (world.equals(hubSpawn.getWorld())) {
                 return CompletableFuture.failedFuture(new IllegalStateException("The default world cannot be evacuated"));
             }

@@ -5,19 +5,19 @@ import com.roguesmp.event.DailyResetEvent;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.region.ServerRegionManager;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.WorldPos;
+import com.roguesmp.world.Hub;
 import io.papermc.paper.event.player.AsyncPlayerSpawnLocationEvent;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.mvplugins.multiverse.core.MultiverseCoreApi;
+import org.bukkit.event.player.PlayerRespawnEvent;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -60,7 +60,16 @@ public class StaticDungeonListener implements Listener {
             }
         }
 
-        MultiverseCoreApi.get().getWorldManager().getDefaultWorld().peek(hub -> event.setSpawnLocation(hub.getSpawnLocation()));
+        Location hub = Hub.spawn();
+        event.setSpawnLocation(hub);
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        World world = event.getPlayer().getWorld();
+        if (manager.getByWorld(world) == null) return;
+
+        event.setRespawnLocation(world.getSpawnLocation());
     }
 
     @EventHandler

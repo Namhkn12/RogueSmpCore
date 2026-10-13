@@ -1,7 +1,7 @@
 package com.roguesmp.dungeon.actor.listener;
 
+import com.roguesmp.constant.Keys;
 import com.roguesmp.dungeon.controller.DungeonTreasureController;
-import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import org.bukkit.block.Block;
 import org.bukkit.block.TileState;
 import org.bukkit.event.EventHandler;
@@ -42,7 +42,7 @@ public class LootTableListener implements Listener {
     public void onBlockExplode(BlockExplodeEvent event) {
         event.blockList().removeIf(block -> {
             if (!(block.getState() instanceof TileState ts)) return false;
-            return ts.getPersistentDataContainer().has(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING);
+            return ts.getPersistentDataContainer().has(Keys.REWARD_CID, PersistentDataType.STRING);
         });
     }
 
@@ -50,7 +50,7 @@ public class LootTableListener implements Listener {
     public void onEntityExplode(EntityExplodeEvent event) {
         event.blockList().removeIf(block -> {
             if (!(block.getState() instanceof TileState ts)) return false;
-            return ts.getPersistentDataContainer().has(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING);
+            return ts.getPersistentDataContainer().has(Keys.REWARD_CID, PersistentDataType.STRING);
         });
     }
 
@@ -58,7 +58,7 @@ public class LootTableListener implements Listener {
     public void onPistonExtend(BlockPistonExtendEvent event) {
         for (Block block : event.getBlocks()) {
             if (!(block.getState() instanceof TileState ts)) continue;
-            if (ts.getPersistentDataContainer().has(NameSpaceKeys.REWARD_CID_KEY, PersistentDataType.STRING)) {
+            if (ts.getPersistentDataContainer().has(Keys.REWARD_CID, PersistentDataType.STRING)) {
                 event.setCancelled(true);
                 return;
             }

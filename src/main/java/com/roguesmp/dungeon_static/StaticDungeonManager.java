@@ -1,17 +1,19 @@
 package com.roguesmp.dungeon_static;
 
+import com.roguesmp.world.DungeonWorldManager;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.storage.JsonSqliteStore;
 import com.roguesmp.utils.AsyncUtils;
 import com.roguesmp.utils.DateUtils;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.world.Hub;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
-import org.mvplugins.multiverse.core.MultiverseCoreApi;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -52,6 +54,9 @@ public final class StaticDungeonManager {
         this.worlds = worlds;
         this.store = new JsonSqliteStore<>(plugin, "static_dungeon.db", "static_dungeon", "instance_id", StaticDungeonInstance.CODEC);
         this.instances.putAll(store.loadAll());
+        instances.values().forEach(instance -> {
+            if (instance.worldData() != null) worlds.remember(instance.id(), instance.worldData());
+        });
 
         Set<UUID> recordedIds = store.tryLoadKeys();
         if (recordedIds == null) {
@@ -121,8 +126,8 @@ public final class StaticDungeonManager {
             return CompletableFuture.failedFuture(new IllegalStateException("Phó bản đang được tạo, vui lòng đợi."));
         }
 
-        StaticDungeonInstance instance = new StaticDungeonInstance(ownerId, dungeonId, info.template(), info.expiry().expiresAt(DateUtils.now()));
-        return worlds.create(info.template(), instance.id())
+        StaticDungeonInstance instance = new StaticDungeonInstance(ownerId, dungeonId, info.template(), worlds.snapshotOf(info.template()), info.expiry().expiresAt(DateUtils.now()));
+        return worlds.create(info.template(), instance.id(), instance.worldData())
                 .thenCompose(world -> AsyncUtils.onMainThread(() -> {
                     instances.put(instance.id(), instance);
                     return persist(instance).thenCompose(saved -> saved
@@ -190,7 +195,8 @@ public final class StaticDungeonManager {
     }
 
     public void exit(Player player) {
-        MultiverseCoreApi.get().getWorldManager().getDefaultWorld().peek(hub -> player.teleportAsync(hub.getSpawnLocation()));
+        Location hub = Hub.spawn();
+        player.teleportAsync(hub);
     }
 
     public CompletableFuture<Void> destroy(StaticDungeonInstance instance, String reason) {

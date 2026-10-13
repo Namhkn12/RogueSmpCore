@@ -19,8 +19,6 @@ public class DataFolderConfig {
     public static final String SCHEMATIC_FOLDER = "schematic";
     public static final String SPAWNER_TEMPLATE_FOLDER = "spawner_template";
 
-    public static final String PARTY_FOLDER = "party";
-    public static final String REGION_FOLDER = "region";
     public static final String DUNGEON_SESSION_FOLDER = "session";
 
 
@@ -30,7 +28,6 @@ public class DataFolderConfig {
     public static final String DUNGEON_INSTANCE_FILE = "di";
     public static final String SCHEMETA_FILE = "schemeta";
     public static final String SPAWNER_TEMPLATE_FILE = "spawner";
-    public static final String PARTY_FILE = "party";
 
     public static String getRoomTemplateFolder(){
         return buildFolderPath(List.of(
@@ -45,22 +42,6 @@ public class DataFolderConfig {
                 MAIN_FOLDER,
                 TEMPLATE_FOLDER,
                 SPAWNER_TEMPLATE_FOLDER
-        ));
-    }
-
-    public static String getRegionFolder() {
-        return buildFolderPath(List.of(
-                MAIN_FOLDER,
-                RUNTIME_FOLDER,
-                REGION_FOLDER
-        ));
-    }
-
-    public static String getPartyFolder() {
-        return buildFolderPath(List.of(
-                MAIN_FOLDER,
-                RUNTIME_FOLDER,
-                PARTY_FOLDER
         ));
     }
 

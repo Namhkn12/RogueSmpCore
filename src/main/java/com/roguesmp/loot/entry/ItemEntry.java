@@ -93,7 +93,7 @@ public final class ItemEntry extends LootEntry {
             case ItemRef.Vanilla vanilla -> List.of(new ItemStack(vanilla.material(), amount));
             case ItemRef.Custom custom -> {
                 if (!custom.holder().isBound()) {
-                    RogueSmpCore.LOGGER.warn("[LootTable] Unknown item_id '" + custom.id() + "' — skipping.");
+                    RogueSmpCore.LOGGER.warn("[LootTable] Unknown item_id '{}' — skipping.", custom.id());
                     yield List.of();
                 }
                 yield List.of(custom.holder().value().generateItemStack(context.getPlayer(), amount));

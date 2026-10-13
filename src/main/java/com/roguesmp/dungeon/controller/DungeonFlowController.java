@@ -1,9 +1,9 @@
 package com.roguesmp.dungeon.controller;
 
-import com.roguesmp.dungeon.service.impl.DungeonLifecycleService;
-import com.roguesmp.dungeon.service.impl.DungeonTimerService;
-import com.roguesmp.dungeon.service.impl.RoomNavigationService;
-import com.roguesmp.dungeon.service.impl.TreasureService;
+import com.roguesmp.dungeon.service.DungeonLifecycleService;
+import com.roguesmp.dungeon.service.DungeonTimerService;
+import com.roguesmp.dungeon.service.RoomNavigationService;
+import com.roguesmp.dungeon.service.TreasureService;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 

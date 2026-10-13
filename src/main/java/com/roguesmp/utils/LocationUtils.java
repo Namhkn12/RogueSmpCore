@@ -5,6 +5,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public class LocationUtils {
     /**
      * Return a normalized direction vector.
@@ -31,5 +33,22 @@ public class LocationUtils {
     // Player eye height 1.62 when not sneaking
     public static Location getHalfEyeLocation(LivingEntity entity) {
         return entity.getLocation().add(0, entity.getEyeHeight() / 2, 0);
+    }
+
+    public static Location randomOffsetXZ(Location center, double minRadius, double maxRadius) {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        double angle = random.nextDouble() * Math.PI * 2;
+        double distance = minRadius + random.nextDouble() * (maxRadius - minRadius);
+        return center.clone().add(Math.cos(angle) * distance, 0, Math.sin(angle) * distance);
+    }
+
+    public static Location randomStandableNear(Location center) {
+        for (int i = 0; i < 10; i++) {
+            Location candidate = randomOffsetXZ(center, 1.5, 5.0);
+            if (candidate.getBlock().isPassable() && candidate.clone().add(0, 1, 0).getBlock().isPassable()) {
+                return candidate;
+            }
+        }
+        return randomOffsetXZ(center, 0, 2.0);
     }
 }

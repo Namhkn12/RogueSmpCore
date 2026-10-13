@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class BlockManager {
     private static BlockManager INSTANCE = null;
@@ -266,11 +267,11 @@ public class BlockManager {
      * fire the entity unload event (e.g. Polar world), which would leave stale blocks tracked and their changes unsaved.
      */
     public void onWorldUnload(World world){
-        UUID worldId = world.getUID();
+        NamespacedKey worldKey = world.getKey();
         Map<BlockPos, String> changed = new HashMap<>();
         for(SmpBlock block : List.copyOf(blocks.values())){
             BlockPos pos = block.getPos();
-            if(!pos.world().equals(worldId)) continue;
+            if(!pos.world().equals(worldKey)) continue;
 
             String state = dirtyState(block);
             if(state != null) changed.put(pos, state);
@@ -372,7 +373,14 @@ public class BlockManager {
     private @Nullable String dirtyState(SmpBlock block){
         if(!block.isDirty() || !block.isHydrated() || !block.isStateful()) return null;
 
-        DataResult<JsonElement> encoded = block.encodeState();
+        DataResult<JsonElement> encoded;
+        try{
+            encoded = block.encodeState();
+        }
+        catch(RuntimeException e){
+            RogueSmpCore.LOGGER.error("Could not encode state of block at {}", block.getPos(), e);
+            return null;
+        }
         if(!encoded.isSuccess()){
             RogueSmpCore.LOGGER.error("Could not encode state of block at {}: {}", block.getPos(), encoded.error());
             return null;
@@ -409,6 +417,25 @@ public class BlockManager {
         if(changed != null) repository.saveAll(changed);
     }
 
+    /**
+     * Copies the stored state of every custom block of the world named {@code source} to the world named {@code target},
+     * including unsaved changes of blocks that are loaded. Neither world needs to be loaded. Main thread only.
+     */
+    public CompletableFuture<Void> copyWorldState(NamespacedKey source, NamespacedKey target){
+        Map<BlockPos, String> pending = new HashMap<>();
+        for(SmpBlock block : blocks.values()){
+            if(!block.getPos().world().equals(source)) continue;
+
+            String state = dirtyState(block);
+            if(state != null) pending.put(block.getPos(), state);
+        }
+        return repository.copyWorld(source, target, pending);
+    }
+
+    public void deleteWorldState(NamespacedKey world){
+        repository.deleteWorld(world);
+    }
+
     public void shutdown(){
         mining.stopAll();
 
@@ -416,9 +443,13 @@ public class BlockManager {
         for(SmpBlock block : blocks.values()){
             if(!block.isHydrated() || !block.isStateful()) continue;
 
-            DataResult<JsonElement> encoded = block.encodeState();
-            if(encoded.isSuccess()) states.put(block.getPos(), encoded.result().toString());
-            else RogueSmpCore.LOGGER.error("Could not encode state of block at {}: {}", block.getPos(), encoded.error());
+            try {
+                DataResult<JsonElement> encoded = block.encodeState();
+                if(encoded.isSuccess()) states.put(block.getPos(), encoded.result().toString());
+                else RogueSmpCore.LOGGER.error("Could not encode state of block at {}: {}", block.getPos(), encoded.error());
+            } catch(RuntimeException e) {
+                RogueSmpCore.LOGGER.error("Could not encode state of block at {}", block.getPos(), e);
+            }
         }
 
         repository.closeWith(states);

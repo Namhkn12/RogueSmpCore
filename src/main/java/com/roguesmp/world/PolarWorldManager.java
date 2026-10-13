@@ -1,6 +1,7 @@
 package com.roguesmp.world;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.region.ServerRegionManager;
 import com.roguesmp.utils.AsyncUtils;
 import com.roguesmp.utils.Utils;
@@ -132,6 +133,12 @@ public final class PolarWorldManager {
 
     public FilePolarSource source(PolarWorldKey key) {
         return new FilePolarSource(folder.resolve(key.value() + EXTENSION));
+    }
+
+    public NamespacedKey namespacedKey(PolarWorldKey key) {
+        Plugin polarPlugin = Bukkit.getPluginManager().getPlugin("polarpaper");
+        if (polarPlugin == null) throw new IllegalStateException("PolarPaper is not loaded");
+        return new NamespacedKey(polarPlugin, key.value());
     }
 
     public @Nullable World getLoaded(PolarWorldKey key) {
@@ -404,12 +411,14 @@ public final class PolarWorldManager {
 
     public CompletableFuture<Void> delete(PolarWorldKey key) {
         return serialized(key, () -> {
+            NamespacedKey worldKey = namespacedKey(key);
             World world = getLoaded(key);
             CompletableFuture<Void> discarded = world == null ? CompletableFuture.completedFuture(null) : doDiscard(key, world);
             return discarded.thenCompose(v -> AsyncUtils.run(() -> {
                 try {
                     deleteStored(key);
                     deleteDimensionData(dimension -> dimension.equals(key.value()));
+                    BlockManager.getInstance().deleteWorldState(worldKey);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -418,14 +427,19 @@ public final class PolarWorldManager {
     }
 
     /**
-     * Copies the saved file of a world owned by another manager and completes with the loaded copy.
-     * Only the target is serialized: deleting the source while it is being copied makes the copy fail.
+     * Copies the stored state of the custom blocks of {@code source} (a world of {@code from}) to {@code target}, before
+     * {@code target} loads.
      */
+    public CompletableFuture<Void> copyBlockState(PolarWorldManager from, PolarWorldKey source, PolarWorldKey target) {
+        return AsyncUtils.onMainThread(() -> BlockManager.getInstance().copyWorldState(from.namespacedKey(source), namespacedKey(target)));
+    }
+
     public CompletableFuture<World> copyFrom(PolarWorldManager from, PolarWorldKey source, PolarWorldKey target) {
         if (!from.owns(source)) return foreign(source);
 
         Path sourcePath = from.source(source).path();
         Path targetPath = source(target).path();
+        NamespacedKey targetKey = namespacedKey(target);
         return serialized(target, () -> {
             if (getLoaded(target) != null) {
                 return CompletableFuture.failedFuture(new IllegalStateException("World already exists: " + target));
@@ -439,12 +453,13 @@ public final class PolarWorldManager {
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }
-            }).thenCompose(v -> doLoad(target).exceptionallyCompose(error -> AsyncUtils.run(() -> {
+            }).thenCompose(v -> copyBlockState(from, source, target).thenCompose(copied -> doLoad(target)).exceptionallyCompose(error -> AsyncUtils.run(() -> {
                 try {
                     deleteStored(target);
                 } catch (IOException e) {
                     RogueSmpCore.LOGGER.warn("Could not remove the partial copy {}, the next orphan sweep may find it", target, e);
                 }
+                BlockManager.getInstance().deleteWorldState(targetKey);
             }).thenCompose(cleaned -> CompletableFuture.<World>failedFuture(error))));
         });
     }

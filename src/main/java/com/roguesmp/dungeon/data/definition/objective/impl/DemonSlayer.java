@@ -29,8 +29,8 @@ public class DemonSlayer extends MonsterHunter {
     public List<String> getScoreBoardLine() {
         String bossName = getTargetId() != null ? getTargetId() : "Boss";
         String line = isCompleted()
-                ? "§a✔ Slay " + bossName
-                : "§7Slay §c" + bossName;
+                ? "<green>✔ Slay " + bossName
+                : "<gray>Slay <red>" + bossName;
         return List.of(line);
     }
 }

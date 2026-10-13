@@ -1,5 +1,6 @@
 package com.roguesmp.permission;
 
+import com.roguesmp.world.DungeonWorldManager;
 import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandManager;
 import net.luckperms.api.context.ContextCalculator;
@@ -41,7 +42,7 @@ public class SmpContextCalculator implements ContextCalculator<Player> {
         }
 
         String worldName = world.getName();
-        if (worldName.startsWith("dungeon_")) {
+        if (DungeonWorldManager.isAnyDungeonWorld(world)) {
             consumer.accept(WORLD_KEY, WORLD_DUNGEON);
         } else if (worldName.startsWith("building")) {
             consumer.accept(WORLD_KEY, WORLD_BUILDING);

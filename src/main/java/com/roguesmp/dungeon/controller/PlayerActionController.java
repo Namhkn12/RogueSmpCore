@@ -1,6 +1,6 @@
 package com.roguesmp.dungeon.controller;
 
-import com.roguesmp.dungeon.service.impl.*;
+import com.roguesmp.dungeon.service.*;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
