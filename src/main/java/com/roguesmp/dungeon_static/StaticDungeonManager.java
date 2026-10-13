@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon_static;
 
+import com.roguesmp.world.DungeonWorldManager;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.storage.JsonSqliteStore;

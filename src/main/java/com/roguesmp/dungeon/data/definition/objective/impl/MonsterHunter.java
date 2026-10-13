@@ -92,8 +92,8 @@ public class MonsterHunter extends BaseObjective implements IProgressable, IDisp
     public List<String> getScoreBoardLine() {
         String label = targetId == null ? "Kill Mobs" : "Kill " + targetId;
         String progress = completed
-                ? "§a✔ " + label + " §f" + require + "§7/§f" + require
-                : "§7" + label + " §f" + count + "§7/§f" + require;
+                ? "<green>✔ " + label + " <white>" + require + "<gray>/<white>" + require
+                : "<gray>" + label + " <white>" + count + "<gray>/<white>" + require;
         return List.of(progress);
     }
 }

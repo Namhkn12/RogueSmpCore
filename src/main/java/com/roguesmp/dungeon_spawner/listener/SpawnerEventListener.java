@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon_spawner.listener;
 
+import com.roguesmp.world.DungeonWorldManager;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
@@ -65,7 +66,7 @@ public class SpawnerEventListener implements Listener {
                 .build()
                 .test(event);
         if(!filter) return;
-        if(!event.getWorld().getName().startsWith("dungeon_")) return;
+        if(!DungeonWorldManager.isAnyDungeonWorld(event.getWorld())) return;
         Entity entity = event.getEntity();
 
         spawnerController.handleSpawnerAppear((Marker) entity);
@@ -73,15 +74,15 @@ public class SpawnerEventListener implements Listener {
 
 //    @EventHandler
 //    public void onMarkerLoad(EntitiesLoadEvent event){
-//        if (!event.getWorld().getName().startsWith("dungeon_")) return;
-//        spawnerController.handleSpawnerLoad(event.getEntities(), event.getWorld().getName());
+//        if (!DungeonWorldManager.isAnyDungeonWorld(event.getWorld())) return;
+//        spawnerController.handleSpawnerLoad(event.getEntities(), event.getWorld());
 //    }
 
     @EventHandler
     public void onSpawnerBreak(BlockBreakEvent event){
         boolean filter = FilterChain.of(BlockBreakEvent.class)
                 .require(BlockBreakFilters.blockType(Material.SPAWNER))
-                .require(BlockBreakFilters.inWorld("dungeon_"))
+                .require(BlockBreakFilters.inDungeonWorld())
                 .build()
                 .test(event);
         if(!filter) return;
@@ -120,7 +121,7 @@ public class SpawnerEventListener implements Listener {
                     .require(InteractFilters.mainHand())
                     .require(InteractFilters.hasBlock())
                     .require(InteractFilters.blockState(TrialSpawner.class))
-                    .require(InteractFilters.clickedBlockInWorld("dungeon_"))
+                    .require(InteractFilters.clickedBlockInDungeonWorld())
                     .build();
 
 }

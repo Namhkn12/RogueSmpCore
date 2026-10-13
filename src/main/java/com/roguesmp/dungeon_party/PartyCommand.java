@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon_party;
 
+import com.roguesmp.world.DungeonWorldManager;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
@@ -60,6 +61,6 @@ public class PartyCommand {
     }
 
     private Predicate<CommandSender> notInDungeonWorld() {
-        return sender -> sender instanceof Player player && !player.getWorld().getName().startsWith("dungeon_");
+        return sender -> sender instanceof Player player && !DungeonWorldManager.isAnyDungeonWorld(player.getWorld());
     }
 }

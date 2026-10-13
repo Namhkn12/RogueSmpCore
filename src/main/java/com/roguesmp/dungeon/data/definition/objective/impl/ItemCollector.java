@@ -70,8 +70,8 @@ public class ItemCollector extends BaseObjective implements IDisplayable, IProgr
     public List<String> getScoreBoardLine() {
         String label = targetItemId == null ? "Collect Items" : "Collect " + targetItemId;
         String line = completed
-                ? "§a✔ " + label + " §f" + require + "§7/§f" + require
-                : "§7" + label + " §f" + count + "§7/§f" + require;
+                ? "<green>✔ " + label + " <white>" + require + "<gray>/<white>" + require
+                : "<gray>" + label + " <white>" + count + "<gray>/<white>" + require;
         return List.of(line);
     }
 

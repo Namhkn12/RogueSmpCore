@@ -17,11 +17,9 @@ public class InstanceManager {
     private final Map<String, DungeonInstance> instances = new LinkedHashMap<>();
 
     private final IInstanceRepository instanceRepository;
-    private final ScoreBoardManager scoreBoardManager;
 
-    public InstanceManager(IInstanceRepository instanceRepository, ScoreBoardManager scoreBoardManager) {
+    public InstanceManager(IInstanceRepository instanceRepository) {
         this.instanceRepository = instanceRepository;
-        this.scoreBoardManager = scoreBoardManager;
 
         loadAll();
     }

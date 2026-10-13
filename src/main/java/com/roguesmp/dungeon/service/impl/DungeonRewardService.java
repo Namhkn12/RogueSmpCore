@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon.service.impl;
 
+import com.roguesmp.world.DungeonWorldManager;
 import com.roguesmp.dungeon_party.PartyManager;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
@@ -69,7 +70,7 @@ public class DungeonRewardService implements IDungeonRewardService {
 
     @Override
     public boolean onBreak(BlockBreakEvent e) {
-        if(!e.getBlock().getWorld().getName().startsWith("dungeon_")) return false;
+        if(!DungeonWorldManager.isAnyDungeonWorld(e.getBlock().getWorld())) return false;
         Block block = e.getBlock();
         if(block.getType() != Material.CHEST) return false;
 
@@ -91,7 +92,7 @@ public class DungeonRewardService implements IDungeonRewardService {
         if (!e.hasBlock()) return false;
         Block block = e.getClickedBlock();
         if (block == null || block.getType() != Material.CHEST) return false;
-        if (!block.getWorld().getName().startsWith("dungeon_")) return false;
+        if (!DungeonWorldManager.isAnyDungeonWorld(block.getWorld())) return false;
         if (!(block.getState() instanceof TileState tileState)) return false;
 
         PersistentDataContainer blockPdc = tileState.getPersistentDataContainer();

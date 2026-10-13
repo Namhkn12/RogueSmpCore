@@ -1,5 +1,8 @@
 package com.roguesmp.dungeon;
 
+import com.roguesmp.utils.Utils;
+import com.roguesmp.world.PolarTemplateManager;
+import com.roguesmp.world.DungeonWorldManager;
 import com.roguesmp.dungeon_party.PartyManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,7 +19,6 @@ import com.roguesmp.dungeon_spawner.manager.SpawnerInstanceManager;
 import com.roguesmp.dungeon_spawner.manager.SpawnerManager;
 import com.roguesmp.dungeon_spawner.repository.SpawnerRepository;
 import com.roguesmp.dungeon.controller.*;
-import com.roguesmp.dungeon.expansion.DungeonExpansion;
 import com.roguesmp.dungeon.itemdisplay.impl.ChestOpenAnimation;
 import com.roguesmp.dungeon.manager.*;
 import com.roguesmp.dungeon.presentation.*;
@@ -41,6 +43,7 @@ public class DungeonRegistry {
 
     private static InstanceManager instanceManager;
     private static ReviveManager reviveManager;
+    private static InstanceWorldService worldService;
 
     public static void onEnable(Plugin plugin) {
         Gson gson = new GsonBuilder().registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
@@ -48,12 +51,6 @@ public class DungeonRegistry {
                 .create();
         /*Scheduler*/
 
-        /*ScoreBoard*/
-        DungeonExpansion papiExpansion = new DungeonExpansion();
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            papiExpansion.register();
-        }
-        ScoreBoardManager scoreBoardManager = new ScoreBoardManager(papiExpansion);
 
         /*Logging and Messaging*/
 
@@ -70,7 +67,6 @@ public class DungeonRegistry {
         /*Repository*/
         ISchematicRepository schematicRepository = new SchematicRepository(plugin);
         ISchemetaRepository schemetaRepository = new SchemetaRepository(plugin, gson);
-        IRegionRepository regionRepository = new RegionRepository(plugin, gson);
         IRoomRepository roomRepository = new RoomRepository(plugin, gson);
         IDungeonRepository dungeonRepository = new DungeonRepository(plugin, gson);
         SpawnerRepository spawnerRepository = new SpawnerRepository(plugin, gson);
@@ -78,7 +74,6 @@ public class DungeonRegistry {
 
         /*Manager*/
         SchemetaManager schemetaManager = new SchemetaManager(schemetaRepository, schematicRepository);
-        RegionManager regionManager = new RegionManager(regionRepository);
         RoomManager roomManager = new RoomManager(roomRepository);
         DungeonManager dungeonManager = new DungeonManager(dungeonRepository);
         SpawnerManager spawnerManager = new SpawnerManager(spawnerRepository);
@@ -87,17 +82,19 @@ public class DungeonRegistry {
         reviveManager = new ReviveManager(plugin, revivePointPresenter);
 
         SpawnerInstanceManager spawnerInstanceManager = new SpawnerInstanceManager();
-        instanceManager = new InstanceManager(instanceRepository, scoreBoardManager);
+        instanceManager = new InstanceManager(instanceRepository);
+        worldService = new InstanceWorldService(
+                new DungeonWorldManager((RogueSmpCore) plugin, PolarTemplateManager.getInstance(), "spawner_dungeon_worlds", "spawner_dungeon"),
+                PolarTemplateManager.getInstance().worlds().key("instance"));
 
         /*Service*/
         ISchematicService schematicService = new SchematicService(schemetaManager);
         ISchemetaService schemetaService = new SchemetaService(schemetaManager);
         IRoomService roomService = new RoomService(roomManager);
         PartyManager partyManager = PartyManager.getInstance();
-        IRegionService regionService = new RegionService(regionManager);
         IDungeonService dungeonService = new DungeonService(roomManager, dungeonManager);
         IInstanceService instanceService = new InstanceService(instanceManager,
-                dungeonManager, roomManager, regionService, dungeonService, partyManager, roomService, schematicService);
+                dungeonManager, roomManager, worldService, dungeonService, partyManager, roomService, schematicService);
         IDungeonRewardService rewardService = new DungeonRewardService(
                 partyManager,
                 instanceManager,
@@ -108,7 +105,7 @@ public class DungeonRegistry {
         ObjectiveDispatchService objectiveDispatchService = new ObjectiveDispatchService(partyManager, instanceManager);
         SpectatorBoundaryService spectatorBoundaryService = new SpectatorBoundaryService(partyManager, instanceManager);
         RoomRuntimeService roomRuntimeService = new RoomRuntimeService(
-                roomManager, instanceManager, partyManager, regionService, spawnerInstanceManager
+                roomManager, instanceManager, partyManager, worldService, spawnerInstanceManager
         );
         RoomCompletionService roomCompletionService = new RoomCompletionService(
                 partyManager, roomService, reviveService, dungeonPresenter, roomRuntimeService
@@ -118,8 +115,7 @@ public class DungeonRegistry {
                 instanceService,
                 instanceManager,
                 partyManager,
-                regionService,
-                scoreBoardManager,
+                worldService,
                 dungeonManager,
                 spawnerInstanceManager,
                 dungeonPresenter,
@@ -127,7 +123,7 @@ public class DungeonRegistry {
                 reviveService
         );
         PlayerDeathService playerDeathService = new PlayerDeathService(partyManager, instanceManager, reviveService, dungeonLifecycleService,dungeonPresenter);
-        PlayerSessionService playerSessionService = new PlayerSessionService(partyManager, instanceManager, scoreBoardManager, dungeonManager, playerDeathService);
+        PlayerSessionService playerSessionService = new PlayerSessionService(partyManager, instanceManager, dungeonManager, playerDeathService, worldService);
         RoomNavigationService roomNavigationService = new RoomNavigationService(
                 partyManager,
                 instanceManager,
@@ -142,7 +138,7 @@ public class DungeonRegistry {
         TreasureService treasureService = new TreasureService(
                 partyManager,
                 instanceManager,
-                regionService,
+                worldService,
                 roomManager,
                 schematicService,
                 plugin
@@ -200,11 +196,17 @@ public class DungeonRegistry {
                 RogueSmpCore.getInstance()
         );
 
-        /*Runtime tick: refresh scoreboard + monitor dungeon timeout (1s)*/
+        /*Runtime tick: monitor dungeon timeout (1s)*/
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            scoreBoardManager.tickUpdate();
             flowController.handleDungeonTimerTick();
         }, 20L, 20L);
+
+        RogueSmpCore.LOGGER.info("Deleted {} orphaned dungeon world(s)", worldService.deleteOrphans(instanceManager.getAll()));
+        instanceManager.getAll().forEach(instance -> worldService.load(instance).exceptionally(error -> {
+            RogueSmpCore.LOGGER.warn("Dropping dungeon instance {}, its world could not be loaded", instance.getSession().getSessionId(), error);
+            Utils.runLater(() -> instanceService.removeDungeonInstance(instance));
+            return null;
+        }));
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             /*Save dungeon instance to file*/
@@ -220,6 +222,9 @@ public class DungeonRegistry {
         }
         if (instanceManager != null) {
             instanceManager.saveAll();
+        }
+        if (worldService != null) {
+            worldService.saveAllOnStop();
         }
     }
 

@@ -1,6 +1,7 @@
 package com.roguesmp.dungeon_spawner.controller;
 
 
+import com.roguesmp.world.DungeonWorldManager;
 import com.roguesmp.RogueSmpCore;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -64,8 +65,8 @@ public class SpawnerEventController {
         return instance.runSpawn((LivingEntity) entity, player,spawner.getLocation());
     }
 
-    public void handleSpawnerLoad(List<Entity> entities, String worldName){
-        if(!worldName.startsWith("dungeon_")) return;
+    public void handleSpawnerLoad(List<Entity> entities, World world){
+        if(!DungeonWorldManager.isAnyDungeonWorld(world)) return;
         for (Entity entity : entities) {
             if (entity.getType() != EntityType.MARKER) continue;
 

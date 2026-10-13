@@ -1,5 +1,8 @@
 package com.roguesmp.dungeon.service.impl;
 
+import com.roguesmp.RogueSmpCore;
+import org.bukkit.World;
+import org.bukkit.Location;
 import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon_party.PartyManager;
 import com.roguesmp.dungeon.data.definition.Dungeon;
@@ -28,17 +31,17 @@ public class InstanceService implements IInstanceService {
     private final InstanceManager instanceManager;
     private final DungeonManager dungeonManager;
     private final RoomManager roomManager;
-    private final IRegionService regionService;
+    private final InstanceWorldService worldService;
     private final IDungeonService dungeonService;
     private final PartyManager partyManager;
     private final IRoomService roomService;
     private final ISchematicService schematicService;
 
-    public InstanceService(InstanceManager instanceManager, DungeonManager dungeonManager, RoomManager roomManager, IRegionService regionService, IDungeonService dungeonService, PartyManager partyManager, IRoomService roomService, ISchematicService schematicService) {
+    public InstanceService(InstanceManager instanceManager, DungeonManager dungeonManager, RoomManager roomManager, InstanceWorldService worldService, IDungeonService dungeonService, PartyManager partyManager, IRoomService roomService, ISchematicService schematicService) {
         this.instanceManager = instanceManager;
         this.dungeonManager = dungeonManager;
         this.roomManager = roomManager;
-        this.regionService = regionService;
+        this.worldService = worldService;
         this.dungeonService = dungeonService;
         this.partyManager = partyManager;
         this.roomService = roomService;
@@ -46,18 +49,13 @@ public class InstanceService implements IInstanceService {
     }
 
     @Override
-    public DungeonInstance createDungeonInstance(Dungeon dungeon, Party party) {
+    public DungeonInstance createDungeonInstance(Dungeon dungeon, Party party, String sessionId, World world) {
         /*Prepare dungeon instance*/
         DungeonInstance instance = new DungeonInstance();
-        /*Try to acquire a region*/
-        Region region = regionService.acquireRegion();
-        if (region == null || region.getId() == null || region.getId().isBlank()) {
-            return null;
-        }
+        Location origin = worldService.origin(world);
         /*Prepare dungeon session*/
         DungeonSession session = new DungeonSession();
-        session.setSessionId(java.util.UUID.randomUUID().toString());
-        session.setRegionId(region.getId());
+        session.setSessionId(sessionId);
         session.setDungeonId(dungeon.getId());
         session.setPartyId(party.getPartyId());
         session.setStartedAt(System.currentTimeMillis());
@@ -69,8 +67,7 @@ public class InstanceService implements IInstanceService {
         /*Prepare dungeon progress*/
         DungeonProgress progress = new DungeonProgress();
         progress.setScore(0);
-        progress.setCheckpoint(new SerializableLocation(region.getWorldName(),
-                region.getX(), region.getY(), region.getZ(), 0, 0));
+        progress.setCheckpoint(SerializableLocation.from(origin));
         List<String> pool = dungeonService.rollRoomPool(dungeon);
         progress.setRoomPool(pool);
         progress.setMinimumRooms(dungeon.getMinimumRooms());
@@ -83,7 +80,7 @@ public class InstanceService implements IInstanceService {
             PlayerStatus status = new PlayerStatus(
                     0,
                     PlayerStatus.Status.PLAYING,
-                    SerializableLocation.from(region.getRegionPoint().add(0, 1, 0))
+                    SerializableLocation.from(origin.clone().add(0, 1, 0))
             );
             dungeonPlayer.addPlayerStatus(pid, status);
         });
@@ -101,11 +98,10 @@ public class InstanceService implements IInstanceService {
     }
 
     @Override
-    public void startDungeonInstance(DungeonInstance instance) {
+    public void startDungeonInstance(DungeonInstance instance, World world) {
         if (instance == null || instance.getSession() == null || instance.getProgress() == null) return;
-        Region region = regionService.getRegionById(instance.getSession().getRegionId());
         Dungeon dungeon = dungeonManager.get(instance.getSession().getDungeonId());
-        if (region == null || dungeon == null) return;
+        if (dungeon == null) return;
         /*Start rolling next rooms*/
         List<String> pool = instance.getProgress().getRoomPool();
         /*Find spawn room*/
@@ -114,7 +110,7 @@ public class InstanceService implements IInstanceService {
             //fallback
             return;
         }
-        BoundingBox area = schematicService.paste(spawn.getSchemetaId(), region.getRegionPoint());
+        BoundingBox area = schematicService.paste(spawn.getSchemetaId(), worldService.origin(world));
         /*Set room instance state after build*/
         RoomInstance roomInstance = new RoomInstance(spawn.getId(), SerializableBounds.from(area));
         List<IObjective> objs = new ArrayList<>();
@@ -131,6 +127,10 @@ public class InstanceService implements IInstanceService {
         Party party = partyManager.getPartyById(instance.getSession().getPartyId());
         if(party != null) party.setInstanceId(null);
         instanceManager.remove(instance.getSession().getSessionId());
+        worldService.delete(instance).exceptionally(error -> {
+            RogueSmpCore.LOGGER.error("Failed to delete dungeon world of instance {}", instance.getSession().getSessionId(), error);
+            return null;
+        });
     }
 
     @Override

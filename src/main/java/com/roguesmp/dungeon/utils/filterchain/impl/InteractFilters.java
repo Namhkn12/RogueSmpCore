@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon.utils.filterchain.impl;
 
+import com.roguesmp.world.DungeonWorldManager;
 import com.roguesmp.dungeon.utils.filterchain.EventFilter;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -43,10 +44,10 @@ public class InteractFilters {
         };
     }
 
-    public static EventFilter<PlayerInteractEvent> clickedBlockInWorld(String prefix) {
+    public static EventFilter<PlayerInteractEvent> clickedBlockInDungeonWorld() {
         return event -> {
             Block block = event.getClickedBlock();
-            return block != null && block.getWorld().getName().startsWith(prefix);
+            return block != null && DungeonWorldManager.isAnyDungeonWorld(block.getWorld());
         };
     }
 

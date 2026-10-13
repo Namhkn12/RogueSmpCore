@@ -19,7 +19,6 @@ public class DataFolderConfig {
     public static final String SCHEMATIC_FOLDER = "schematic";
     public static final String SPAWNER_TEMPLATE_FOLDER = "spawner_template";
 
-    public static final String REGION_FOLDER = "region";
     public static final String DUNGEON_SESSION_FOLDER = "session";
 
 
@@ -43,14 +42,6 @@ public class DataFolderConfig {
                 MAIN_FOLDER,
                 TEMPLATE_FOLDER,
                 SPAWNER_TEMPLATE_FOLDER
-        ));
-    }
-
-    public static String getRegionFolder() {
-        return buildFolderPath(List.of(
-                MAIN_FOLDER,
-                RUNTIME_FOLDER,
-                REGION_FOLDER
         ));
     }
 

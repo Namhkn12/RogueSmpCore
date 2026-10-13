@@ -1,23 +1,27 @@
 package com.roguesmp.dungeon.service.impl;
 
+import com.roguesmp.utils.Utils;
+import com.roguesmp.RogueSmpCore;
+import org.bukkit.World;
+import java.util.UUID;
+import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.player.PlayerManager;
+import com.roguesmp.dungeon.actor.scoreboard.DungeonTabLayout;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import com.roguesmp.dungeon.data.definition.Dungeon;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_party.Party;
-import com.roguesmp.dungeon.data.runtime.Region;
 import com.roguesmp.dungeon.data.runtime.RoomInstance;
 import com.roguesmp.dungeon.data.runtime.session.DungeonProgress;
 import com.roguesmp.dungeon.data.runtime.session.PlayerStatus;
 import com.roguesmp.dungeon.helper.SerializableLocation;
 import com.roguesmp.dungeon.manager.DungeonManager;
 import com.roguesmp.dungeon.manager.InstanceManager;
-import com.roguesmp.dungeon.manager.ScoreBoardManager;
 import com.roguesmp.dungeon_spawner.manager.SpawnerInstanceManager;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.service.IInstanceService;
 import com.roguesmp.dungeon_party.PartyManager;
-import com.roguesmp.dungeon.service.IRegionService;
 import com.roguesmp.dungeon.service.IReviveService;
 import com.roguesmp.dungeon.utils.Teleporter;
 import com.roguesmp.dungeon.utils.UuidUtil;
@@ -32,19 +36,17 @@ public class DungeonLifecycleService {
     private final IInstanceService instanceService;
     private final InstanceManager instanceManager;
     private final PartyManager partyManager;
-    private final IRegionService regionService;
-    private final ScoreBoardManager scoreBoardManager;
+    private final InstanceWorldService worldService;
     private final DungeonManager dungeonManager;
     private final DungeonPresenter presenter;
     private final RoomRuntimeService roomRuntimeService;
     private final IReviveService reviveService;
 
-    public DungeonLifecycleService(IInstanceService instanceService, InstanceManager instanceManager, PartyManager partyManager, IRegionService regionService, ScoreBoardManager scoreBoardManager, DungeonManager dungeonManager, SpawnerInstanceManager spawnerInstanceManager, DungeonPresenter presenter, RoomRuntimeService roomRuntimeService, IReviveService reviveService) {
+    public DungeonLifecycleService(IInstanceService instanceService, InstanceManager instanceManager, PartyManager partyManager, InstanceWorldService worldService, DungeonManager dungeonManager, SpawnerInstanceManager spawnerInstanceManager, DungeonPresenter presenter, RoomRuntimeService roomRuntimeService, IReviveService reviveService) {
         this.instanceService = instanceService;
         this.instanceManager = instanceManager;
         this.partyManager = partyManager;
-        this.regionService = regionService;
-        this.scoreBoardManager = scoreBoardManager;
+        this.worldService = worldService;
         this.dungeonManager = dungeonManager;
         this.presenter = presenter;
         this.roomRuntimeService = roomRuntimeService;
@@ -55,15 +57,28 @@ public class DungeonLifecycleService {
     public void onStartDungeon(String did, Player player) {
         Party party = partyManager.getPartyByPlayer(player);
         if (party == null) return;
+        if (party.getInstanceId() != null && !party.getInstanceId().isBlank()) return;
         Dungeon dungeon = dungeonManager.get(did);
+        if (dungeon == null) return;
 
-        DungeonInstance instance = instanceService.createDungeonInstance(dungeon, party);
-        if (instance == null || instance.getSession() == null
-                || instance.getSession().getSessionId() == null) return;
+        UUID sessionId = UUID.randomUUID();
+        party.setInstanceId(sessionId.toString());
 
-        party.setInstanceId(instance.getSession().getSessionId());
+        worldService.create(sessionId).thenAccept(world -> Utils.runLater(() -> enterDungeon(dungeon, party, sessionId.toString(), world)))
+                .exceptionally(error -> {
+                    RogueSmpCore.LOGGER.error("Failed to create dungeon world for party {}", party.getPartyId(), error);
+                    Utils.runLater(() -> {
+                        party.setInstanceId(null);
+                        player.sendMessage(Component.text("Không thể tạo dungeon, vui lòng thử lại.", NamedTextColor.RED));
+                    });
+                    return null;
+                });
+    }
+
+    private void enterDungeon(Dungeon dungeon, Party party, String sessionId, World world) {
+        DungeonInstance instance = instanceService.createDungeonInstance(dungeon, party, sessionId, world);
         instanceManager.add(instance);
-        instanceService.startDungeonInstance(instance);
+        instanceService.startDungeonInstance(instance, world);
 
         roomRuntimeService.bindCurrentRoomRuntime(instance, party);
         RoomInstance startRoom = instance.getProgress().getCurrentRoom();
@@ -72,12 +87,10 @@ public class DungeonLifecycleService {
             roomRuntimeService.triggerRoomEnd(startRoom);
         }
 
-        Region region = regionService.getRegionById(instance.getSession().getRegionId());
-        if (region == null) return;
-
-        Teleporter.teleportAllByIdString(party.getMembers(), region.getRegionPoint());
+        Teleporter.teleportAllByIdString(party.getMembers(), worldService.origin(world));
         partyManager.getOnlineMembers(party).forEach(p -> {
-            scoreBoardManager.createBoard(p, instance, dungeon);
+            SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(p);
+            if (smpPlayer != null) smpPlayer.getTabLayouts().claim(DungeonTabLayout.claim(dungeon, instance));
             presenter.onEnterDungeon(p, dungeon.getName());
         });
     }
@@ -100,7 +113,7 @@ public class DungeonLifecycleService {
 
         Teleporter.teleport(player,
                 SerializableLocation.from(new Location(Bukkit.getWorld("building"), 0, 0, 0)));
-        scoreBoardManager.removeBoard(player);
+        releaseTabLayout(player);
 
         if (players.isEmpty()) {
             instanceService.removeDungeonInstance(instance);
@@ -117,7 +130,7 @@ public class DungeonLifecycleService {
             } else {
                 player.sendMessage(Component.text("The dungeon has been conquered! Glory to your party!", NamedTextColor.GREEN));
             }
-            scoreBoardManager.removeBoard(player);
+            releaseTabLayout(player);
             Teleporter.teleport(player,
                     SerializableLocation.from(new Location(Bukkit.getWorld("building"), 0, 0, 0)));
         });
@@ -153,4 +166,9 @@ public class DungeonLifecycleService {
     }
 
 
+
+    private void releaseTabLayout(Player player) {
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+        if (smpPlayer != null) smpPlayer.getTabLayouts().release(DungeonTabLayout.KEY);
+    }
 }

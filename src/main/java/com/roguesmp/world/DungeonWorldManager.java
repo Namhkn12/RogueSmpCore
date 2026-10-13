@@ -1,13 +1,8 @@
-package com.roguesmp.dungeon_static;
+package com.roguesmp.world;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.region.ServerRegionManager;
 import com.roguesmp.utils.AsyncUtils;
-import com.roguesmp.world.PolarTemplateData;
-import com.roguesmp.world.PolarTemplateManager;
-import com.roguesmp.world.PolarWorldKey;
-import com.roguesmp.world.PolarWorldManager;
-import com.roguesmp.world.WorldEvacuator;
 import live.minehub.polarpaper.core.config.Config;
 import net.kyori.adventure.key.Key;
 import org.bukkit.World;
@@ -15,11 +10,13 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Persistent dungeon worlds cloned from polar templates. An instance world is named {@code <template name>.<instanceId>},
@@ -27,8 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DungeonWorldManager {
 
-    private static final String WORLD_FOLDER = "dungeon_worlds";
-    private static final String NAMESPACE = "dungeon";
+    private static final List<DungeonWorldManager> MANAGERS = new CopyOnWriteArrayList<>();
     private static final char INSTANCE_SEPARATOR = '.';
     private static final int AUTO_SAVE_TICKS = 6000;
 
@@ -37,9 +33,14 @@ public class DungeonWorldManager {
     private final Map<UUID, PolarTemplateData> worldData = new ConcurrentHashMap<>();
 
     @Blocking
-    public DungeonWorldManager(RogueSmpCore plugin, PolarTemplateManager templates) {
+    public DungeonWorldManager(RogueSmpCore plugin, PolarTemplateManager templates, String folder, String namespace) {
         this.templates = templates;
-        this.worlds = new PolarWorldManager(new File(plugin.getDataFolder(), WORLD_FOLDER).toPath(), NAMESPACE, this::buildConfig, this::applyBorder, WorldEvacuator.toDefaultWorld());
+        this.worlds = new PolarWorldManager(new File(plugin.getDataFolder(), folder).toPath(), namespace, this::buildConfig, this::applyBorder, WorldEvacuator.toDefaultWorld());
+        MANAGERS.add(this);
+    }
+
+    public static boolean isAnyDungeonWorld(World world) {
+        return MANAGERS.stream().anyMatch(manager -> manager.isDungeonWorld(world));
     }
 
     @Blocking
@@ -70,6 +71,14 @@ public class DungeonWorldManager {
         return templates.saveRegions(template)
                 .thenCompose(v -> AsyncUtils.run(() -> ServerRegionManager.getInstance().copyStoredData(templates.worlds().regionDataName(template), worlds.regionDataName(instance))))
                 .thenCompose(v -> worlds.copyFrom(templates.worlds(), template, instance))
+                .exceptionallyCompose(error -> discardPartial(instance, instanceId).handle((v, cleanupError) -> null)
+                        .thenCompose(v -> CompletableFuture.<World>failedFuture(error)));
+    }
+
+    public CompletableFuture<World> createEmpty(PolarWorldKey template, UUID instanceId, PolarTemplateData data) {
+        PolarWorldKey instance = worldKey(template, instanceId);
+        remember(instanceId, data);
+        return worlds.create(instance, null, world -> { })
                 .exceptionallyCompose(error -> discardPartial(instance, instanceId).handle((v, cleanupError) -> null)
                         .thenCompose(v -> CompletableFuture.<World>failedFuture(error)));
     }

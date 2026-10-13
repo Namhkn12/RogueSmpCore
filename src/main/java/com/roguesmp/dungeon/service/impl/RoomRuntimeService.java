@@ -18,7 +18,6 @@ import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.manager.RoomManager;
 import com.roguesmp.dungeon_spawner.manager.SpawnerInstanceManager;
 import com.roguesmp.dungeon_party.PartyManager;
-import com.roguesmp.dungeon.service.IRegionService;
 import com.roguesmp.dungeon.utils.PdcUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -42,15 +41,15 @@ public class RoomRuntimeService {
     private final InstanceManager instanceManager;
     private final PartyManager partyManager;
     private RoomCompletionService completionService;
-    private final IRegionService regionService;
+    private final InstanceWorldService worldService;
     private final SpawnerInstanceManager spawnerInstanceManager;
 
     public RoomRuntimeService(RoomManager roomManager, InstanceManager instanceManager,
-                              PartyManager partyManager, IRegionService regionService, SpawnerInstanceManager spawnerInstanceManager) {
+                              PartyManager partyManager, InstanceWorldService worldService, SpawnerInstanceManager spawnerInstanceManager) {
         this.roomManager = roomManager;
         this.instanceManager = instanceManager;
         this.partyManager = partyManager;
-        this.regionService = regionService;
+        this.worldService = worldService;
         this.spawnerInstanceManager = spawnerInstanceManager;
     }
 
@@ -142,8 +141,7 @@ public class RoomRuntimeService {
 
     public void clearEntitiesInDungeon(DungeonInstance instance) {
         BoundingBox box = instance.getProgress().getCurrentRoom().getBounds().toBukkit();
-        String worldName = regionService.getRegionById(instance.getSession().getRegionId()).getWorldName();
-        World world = Bukkit.getWorld(worldName);
+        World world = worldService.getWorld(instance);
         if (world == null) return;
 
         for (Entity entity : world.getNearbyEntities(box)) {

@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon.actor.listener;
 
+import com.roguesmp.world.DungeonWorldManager;
 import com.roguesmp.dungeon.controller.DungeonFlowController;
 import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.dungeon_party.PartyManager;
@@ -57,8 +58,7 @@ public class DoorInteractListener implements Listener {
         if (!event.hasChangedBlock()) return;
 
         Player player = event.getPlayer();
-        String worldName = player.getWorld().getName();
-        if (!worldName.startsWith("dungeon_")) return;
+        if (!DungeonWorldManager.isAnyDungeonWorld(player.getWorld())) return;
 
         UUID playerId = player.getUniqueId();
         boolean toInsideGateway = isOverlappingBlockType(event, event.getTo(), Material.END_GATEWAY);
@@ -86,8 +86,7 @@ public class DoorInteractListener implements Listener {
         if (!event.hasChangedBlock()) return;
 
         Player player = event.getPlayer();
-        String worldName = player.getWorld().getName();
-        if (!worldName.startsWith("dungeon_")) return;
+        if (!DungeonWorldManager.isAnyDungeonWorld(player.getWorld())) return;
 
         UUID playerId = player.getUniqueId();
         boolean toInsideGateway = isOverlappingBlockType(event, event.getTo(), Material.NETHER_PORTAL);
@@ -105,7 +104,7 @@ public class DoorInteractListener implements Listener {
 
     @EventHandler
     public void onCancelPlayerTeleportByPortal(PlayerTeleportEvent event) {
-        if (!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        if (!DungeonWorldManager.isAnyDungeonWorld(event.getPlayer().getWorld())) return;
 
         PlayerTeleportEvent.TeleportCause cause = event.getCause();
         if (cause == PlayerTeleportEvent.TeleportCause.END_PORTAL
@@ -125,7 +124,7 @@ public class DoorInteractListener implements Listener {
                     .require(InteractFilters.mainHand())
                     .require(InteractFilters.hasBlock())
                     .require(InteractFilters.blockState(Vault.class))
-                    .require(InteractFilters.clickedBlockInWorld("dungeon_"))
+                    .require(InteractFilters.clickedBlockInDungeonWorld())
                     .build();
 
     private String resolveInstanceId(Player player) {

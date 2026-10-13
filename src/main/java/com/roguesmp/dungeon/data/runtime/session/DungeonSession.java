@@ -8,20 +8,9 @@ public class DungeonSession {
     private String sessionId;
     private String dungeonId;
     private String partyId;
-    private String regionId;
     private long startedAt;
 
     public DungeonSession() {
-    }
-
-    public static DungeonSession create(String dungeonId, String regionId, String partyId) {
-        DungeonSession session = new DungeonSession();
-        session.sessionId = java.util.UUID.randomUUID().toString();
-        session.dungeonId = dungeonId;
-        session.regionId = regionId;
-        session.partyId = partyId;
-        session.startedAt = System.currentTimeMillis();
-        return session;
     }
 
     public String getSessionId() {
@@ -54,13 +43,5 @@ public class DungeonSession {
 
     public void setStartedAt(long startedAt) {
         this.startedAt = startedAt;
-    }
-
-    public String getRegionId() {
-        return regionId;
-    }
-
-    public void setRegionId(String regionId) {
-        this.regionId = regionId;
     }
 }

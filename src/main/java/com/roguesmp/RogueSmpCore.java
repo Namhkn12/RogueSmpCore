@@ -40,7 +40,7 @@ import com.roguesmp.gui.crafting.CraftingGui;
 import com.roguesmp.gui.info.SmpWikiMainMenuGui;
 import com.roguesmp.integration.LuckPermsIntegration;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
-import com.roguesmp.dungeon_static.DungeonWorldManager;
+import com.roguesmp.world.DungeonWorldManager;
 import com.roguesmp.dungeon_static.StaticDungeonCommand;
 import com.roguesmp.dungeon_static.StaticDungeonListener;
 import com.roguesmp.dungeon_static.StaticDungeonManager;
@@ -100,7 +100,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         //Island
         IslandManager.init(this, PlayerManager.getInstance());
-        StaticDungeonManager.init(this, new DungeonWorldManager(this, PolarTemplateManager.getInstance()));
+        StaticDungeonManager.init(this, new DungeonWorldManager(this, PolarTemplateManager.getInstance(), "dungeon_worlds", "dungeon"));
         LuckPermsIntegration.init(this);
 
         //Quest

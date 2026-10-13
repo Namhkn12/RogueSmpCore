@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon.actor.listener;
 
+import com.roguesmp.world.DungeonWorldManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import com.roguesmp.dungeon.controller.PlayerActionController;
@@ -58,7 +59,7 @@ public class DungeonListener implements Listener {
 
     @EventHandler
     public void onPlayerMoveInDeadMode(PlayerMoveEvent event){
-        if(!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        if(!DungeonWorldManager.isAnyDungeonWorld(event.getPlayer().getWorld())) return;
         Player player = event.getPlayer();
         if(player.getGameMode() != GameMode.SPECTATOR) return;
 
@@ -75,14 +76,14 @@ public class DungeonListener implements Listener {
 
     @EventHandler
     public void onPlayerDead(PlayerDeathEvent event){
-        if(!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        if(!DungeonWorldManager.isAnyDungeonWorld(event.getPlayer().getWorld())) return;
         event.setCancelled(true);
         actionController.handlePlayerDead(event.getPlayer());
     }
 
     @EventHandler
     public void onPlayerDisconnect(PlayerQuitEvent event){
-        if(!event.getPlayer().getWorld().getName().startsWith("dungeon_")) return;
+        if(!DungeonWorldManager.isAnyDungeonWorld(event.getPlayer().getWorld())) return;
         actionController.handlePlayerDisconnect(event.getPlayer());
     }
 
@@ -120,7 +121,7 @@ public class DungeonListener implements Listener {
 
     @EventHandler
     public void onPortalCreate(PortalCreateEvent event) {
-        if (!event.getWorld().getName().startsWith("dungeon_")) return;
+        if (!DungeonWorldManager.isAnyDungeonWorld(event.getWorld())) return;
         event.setCancelled(true);
     }
 

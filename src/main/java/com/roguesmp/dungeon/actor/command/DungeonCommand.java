@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon.actor.command;
 
+import com.roguesmp.world.DungeonWorldManager;
 import com.roguesmp.dungeon.controller.DungeonFlowController;
 import com.roguesmp.dungeon.manager.DungeonManager;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -54,7 +55,7 @@ public class DungeonCommand {
     private Predicate<CommandSender> inDungeonWorld() {
         return sender -> {
             if (!(sender instanceof Player player)) return false;
-            return !player.getWorld().getName().startsWith("dungeon_");
+            return !DungeonWorldManager.isAnyDungeonWorld(player.getWorld());
         };
     }
 }
