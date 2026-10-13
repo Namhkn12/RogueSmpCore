@@ -1,6 +1,14 @@
-package com.roguesmp.dungeon.data.definition.spawner;
+package com.roguesmp.dungeon_spawner.data;
 
-import com.roguesmp.dungeon.data.definition.spawner.behavior.BehaviorData;
+import com.roguesmp.entity.BaseEntity;
+import com.roguesmp.entity.EntityManager;
+import com.roguesmp.dungeon_spawner.behavior.BehaviorData;
+import org.bukkit.block.CreatureSpawner;
+import org.bukkit.block.spawner.SpawnRule;
+import org.bukkit.block.spawner.SpawnerEntry;
+import org.bukkit.entity.EntitySnapshot;
+
+import java.util.ArrayList;
 
 import java.util.List;
 import java.util.Map;
@@ -120,5 +128,27 @@ public class Spawner {
 
     public void setBehaviors(List<BehaviorData> behaviors) {
         this.behaviors = behaviors;
+    }
+
+    public void applyTo(CreatureSpawner spawner) {
+        spawner.setDelay(delay);
+        spawner.setSpawnRange(spawnRange);
+        spawner.setMaxNearbyEntities(maxNearBy);
+        spawner.setMinSpawnDelay(minDelay);
+        spawner.setMaxSpawnDelay(maxDelay);
+        spawner.setRequiredPlayerRange(activeRange);
+        spawner.setSpawnCount(spawnCount);
+
+        List<SpawnerEntry> entries = new ArrayList<>();
+        mobs.forEach((mid, weight) -> {
+            BaseEntity baseEntity = EntityManager.getInstance().getBaseEntity(mid);
+            if (baseEntity == null) return;
+            EntitySnapshot snapshot = baseEntity.spawnOnlyEquipmentSnapshot(spawner.getLocation());
+            if (snapshot == null) return;
+            entries.add(new SpawnerEntry(snapshot, weight, new SpawnRule(0, 15, 0, 15)));
+        });
+
+        spawner.setPotentialSpawns(entries);
+        spawner.update();
     }
 }

@@ -1,9 +1,9 @@
-package com.roguesmp.dungeon.actor.listener;
+package com.roguesmp.dungeon_spawner.listener;
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.roguesmp.dungeon.actor.ui.TriggerBossGui;
 import com.roguesmp.dungeon.controller.BossRoomController;
-import com.roguesmp.dungeon.controller.SpawnerEventController;
+import com.roguesmp.dungeon_spawner.controller.SpawnerEventController;
 import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.NameSpaceKeys;
 import com.roguesmp.dungeon.utils.PdcUtil;
@@ -26,7 +26,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.persistence.PersistentDataType;
 
 public class SpawnerEventListener implements Listener {

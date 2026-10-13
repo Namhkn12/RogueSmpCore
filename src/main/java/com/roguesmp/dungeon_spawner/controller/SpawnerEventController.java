@@ -1,13 +1,13 @@
-package com.roguesmp.dungeon.controller;
+package com.roguesmp.dungeon_spawner.controller;
 
 
-import com.roguesmp.dungeon.data.runtime.SpawnerInstance;
+import com.roguesmp.dungeon_spawner.data.SpawnerInstance;
 import com.roguesmp.dungeon.exception.BaseException;
 import com.roguesmp.dungeon.exception.GlobalException;
-import com.roguesmp.dungeon.exception.impl.spawner.SpawnerNotFoundException;
-import com.roguesmp.dungeon.manager.SpawnerInstanceManager;
-import com.roguesmp.dungeon.manager.SpawnerManager;
-import com.roguesmp.dungeon.service.ISpawnerService;
+import com.roguesmp.dungeon_spawner.exception.SpawnerNotFoundException;
+import com.roguesmp.dungeon_spawner.manager.SpawnerInstanceManager;
+import com.roguesmp.dungeon_spawner.manager.SpawnerManager;
+import com.roguesmp.dungeon_spawner.data.Spawner;
 import com.roguesmp.dungeon.task.TaskScheduler;
 import com.roguesmp.dungeon.utils.Log4Craft_;
 import com.roguesmp.dungeon.utils.NameSpaceKeys;
@@ -25,14 +25,12 @@ import java.util.UUID;
 
 public class SpawnerEventController {
 
-    private final ISpawnerService spawnerService;
     private final SpawnerManager spawnerManager;
     private final SpawnerInstanceManager spawnerInstanceManager;
     private final TaskScheduler taskScheduler;
     private final Log4Craft_ logger;
 
-    public SpawnerEventController(ISpawnerService spawnerService, SpawnerManager spawnerManager, SpawnerInstanceManager spawnerInstanceManager, TaskScheduler taskScheduler, Log4Craft_ logger) {
-        this.spawnerService = spawnerService;
+    public SpawnerEventController(SpawnerManager spawnerManager, SpawnerInstanceManager spawnerInstanceManager, TaskScheduler taskScheduler, Log4Craft_ logger) {
         this.spawnerManager = spawnerManager;
         this.spawnerInstanceManager = spawnerInstanceManager;
         this.taskScheduler = taskScheduler;
@@ -52,7 +50,7 @@ public class SpawnerEventController {
             SpawnerInstance instance = spawnerInstanceManager.get(iid);
             if (instance == null) return true;
 
-            boolean allowed = instance.getPipeline().runBreak(player, block.getLocation());
+            boolean allowed = instance.runBreak(player, block.getLocation());
             if (allowed) {
                 spawnerInstanceManager.remove(iid);
             }
@@ -75,7 +73,7 @@ public class SpawnerEventController {
             SpawnerInstance instance = spawnerInstanceManager.get(iid);
             if (instance == null) return true;
 
-            return instance.getPipeline().runSpawn((LivingEntity) entity, player,spawner.getLocation());
+            return instance.runSpawn((LivingEntity) entity, player,spawner.getLocation());
         } catch (SpawnerNotFoundException e) {
             return true;
         } catch (BaseException e) {
@@ -125,11 +123,6 @@ public class SpawnerEventController {
         });
     }
 
-    /*Admin api*/
-    public void handleGetSpawner(){
-
-    }
-
     public void handlePlaceSpawner(Block block, String sid){
         World world = block.getWorld();
         Location loc = block.getLocation().clone().add(0.5, 0, 0.5);
@@ -151,7 +144,7 @@ public class SpawnerEventController {
             String iid;
             if (spawnerPdc.has(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING)) {
                 iid = spawnerPdc.get(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING);
-                if (spawnerService.getInstance(iid) != null) return;
+                if (spawnerInstanceManager.get(iid) != null) return;
             } else {
                 iid = UUID.randomUUID().toString();
             }
@@ -167,8 +160,13 @@ public class SpawnerEventController {
             newPdc.set(NameSpaceKeys.SPAWNER_IID_KEY, PersistentDataType.STRING, iid);
             newSpawner.update();
 
-            spawnerService.createInstance(templateId, iid, location);
-            spawnerService.applyTemplate(templateId, newSpawner);
+            Spawner template = spawnerManager.getById(templateId);
+            if (template == null) {
+                logger.error(this.getClass(), "Spawner template not found: " + templateId);
+                return;
+            }
+            spawnerInstanceManager.create(iid, template, location);
+            template.applyTo(newSpawner);
         } catch (BaseException e) {
             GlobalException.handle(e);
         }

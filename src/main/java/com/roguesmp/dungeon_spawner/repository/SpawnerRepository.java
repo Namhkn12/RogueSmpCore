@@ -1,13 +1,12 @@
-package com.roguesmp.dungeon.repository.impl;
+package com.roguesmp.dungeon_spawner.repository;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.roguesmp.dungeon.config.DataFolderConfig;
-import com.roguesmp.dungeon.data.definition.spawner.Spawner;
+import com.roguesmp.dungeon_spawner.data.Spawner;
 import com.roguesmp.dungeon.exception.impl.data.DataDeleteException;
 import com.roguesmp.dungeon.exception.impl.data.DataLoadException;
 import com.roguesmp.dungeon.exception.impl.data.DataSaveException;
-import com.roguesmp.dungeon.repository.ISpawnerRepository;
 import com.roguesmp.dungeon.utils.Log4Craft_;
 import org.bukkit.plugin.Plugin;
 
@@ -17,7 +16,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpawnerRepository implements ISpawnerRepository {
+public class SpawnerRepository {
 
     private final File dataFolder;
     private final Gson gson;
@@ -31,7 +30,6 @@ public class SpawnerRepository implements ISpawnerRepository {
         if(!dataFolder.exists()) dataFolder.mkdirs();
     }
 
-    @Override
     public List<Spawner> loadAll() {
         List<Spawner> spawners = new ArrayList<>();
         if(!dataFolder.exists() || !dataFolder.isDirectory()){
@@ -56,7 +54,6 @@ public class SpawnerRepository implements ISpawnerRepository {
         return spawners;
     }
 
-    @Override
     public Spawner save(Spawner spawner) {
         File file = new File(dataFolder, DataFolderConfig.SPAWNER_TEMPLATE_FILE + spawner.getId() + DataFolderConfig.JSON_TYPE);
         try(Writer writer = new FileWriter(file, StandardCharsets.UTF_8)){
@@ -67,7 +64,6 @@ public class SpawnerRepository implements ISpawnerRepository {
         }
     }
 
-    @Override
     public boolean delete(String id) {
         File file = new File(dataFolder, DataFolderConfig.SPAWNER_TEMPLATE_FILE + id + DataFolderConfig.JSON_TYPE);
         if(!file.exists()) return false;

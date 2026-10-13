@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.exception.impl.spawner;
+package com.roguesmp.dungeon_spawner.exception;
 
 import com.roguesmp.dungeon.exception.BaseException;
 

@@ -1,7 +1,7 @@
-package com.roguesmp.dungeon.data.definition.spawner.behavior.impl;
+package com.roguesmp.dungeon_spawner.behavior.impl;
 
-import com.roguesmp.dungeon.data.definition.spawner.behavior.BaseBehavior;
-import com.roguesmp.dungeon.data.definition.spawner.behavior.BehaviorData;
+import com.roguesmp.dungeon_spawner.behavior.BaseBehavior;
+import com.roguesmp.dungeon_spawner.behavior.BehaviorData;
 import com.roguesmp.dungeon.utils.DungeonEcho;
 import com.roguesmp.dungeon.utils.Razdon;
 import org.bukkit.*;

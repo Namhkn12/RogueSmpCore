@@ -11,7 +11,7 @@ import com.roguesmp.dungeon.helper.SerializableLocation;
 import com.roguesmp.dungeon.manager.DungeonManager;
 import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.manager.ScoreBoardManager;
-import com.roguesmp.dungeon.manager.SpawnerInstanceManager;
+import com.roguesmp.dungeon_spawner.manager.SpawnerInstanceManager;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.service.IInstanceService;
 import com.roguesmp.dungeon.service.IPartyService;

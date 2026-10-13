@@ -10,7 +10,11 @@ import com.roguesmp.dungeon.actor.command.TemplateGenCommand;
 import com.roguesmp.dungeon.actor.listener.DoorInteractListener;
 import com.roguesmp.dungeon.actor.listener.DungeonListener;
 import com.roguesmp.dungeon.actor.listener.LootTableListener;
-import com.roguesmp.dungeon.actor.listener.SpawnerEventListener;
+import com.roguesmp.dungeon_spawner.listener.SpawnerEventListener;
+import com.roguesmp.dungeon_spawner.controller.SpawnerEventController;
+import com.roguesmp.dungeon_spawner.manager.SpawnerInstanceManager;
+import com.roguesmp.dungeon_spawner.manager.SpawnerManager;
+import com.roguesmp.dungeon_spawner.repository.SpawnerRepository;
 import com.roguesmp.dungeon.controller.*;
 import com.roguesmp.dungeon.expansion.DungeonExpansion;
 import com.roguesmp.dungeon.itemdisplay.impl.ChestOpenAnimation;
@@ -76,7 +80,7 @@ public class DungeonRegistry {
         IRegionRepository regionRepository = new RegionRepository(plugin, gson, logger);
         IRoomRepository roomRepository = new RoomRepository(plugin, gson, logger);
         IDungeonRepository dungeonRepository = new DungeonRepository(plugin, gson);
-        ISpawnerRepository spawnerRepository = new SpawnerRepository(plugin, gson, logger);
+        SpawnerRepository spawnerRepository = new SpawnerRepository(plugin, gson, logger);
         IPartyRepository partyRepository = new PartyRepository(plugin, gson, logger);
         IInstanceRepository instanceRepository = new InstanceRepository(plugin, gson, logger);
 
@@ -101,7 +105,6 @@ public class DungeonRegistry {
         IPartyService partyService = new PartyService(partyManager);
         IRegionService regionService = new RegionService(regionManager, logger);
         IDungeonService dungeonService = new DungeonService(roomManager, dungeonManager,logger);
-        ISpawnerService spawnerService = new SpawnerService(spawnerManager, spawnerInstanceManager, logger);
         IInstanceService instanceService = new InstanceService(instanceManager,
                 dungeonManager, roomManager, regionService, dungeonService, partyService, roomService, schematicService);
         IDungeonRewardService rewardService = new DungeonRewardService(
@@ -167,7 +170,7 @@ public class DungeonRegistry {
                 dungeonLifecycleService, roomNavigationService, treasureService, dungeonTimerService
         );
         SchemetaController schemetaController = new SchemetaController(schemetaService, schematicService);
-        SpawnerEventController spawnerController = new SpawnerEventController(spawnerService, spawnerManager, spawnerInstanceManager, taskScheduler, logger);
+        SpawnerEventController spawnerController = new SpawnerEventController(spawnerManager, spawnerInstanceManager, taskScheduler, logger);
         PlayerActionController actionController = new PlayerActionController(
             objectiveDispatchService, playerDeathService, spectatorBoundaryService, playerSessionService, playerTeleportService
         );

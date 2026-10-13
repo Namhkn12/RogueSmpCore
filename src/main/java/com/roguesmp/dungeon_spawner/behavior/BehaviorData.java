@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.data.definition.spawner.behavior;
+package com.roguesmp.dungeon_spawner.behavior;
 
 import java.util.Collections;
 import java.util.Map;

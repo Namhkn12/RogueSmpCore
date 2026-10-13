@@ -16,7 +16,7 @@ import com.roguesmp.dungeon.data.runtime.Party;
 import com.roguesmp.dungeon.data.runtime.RoomInstance;
 import com.roguesmp.dungeon.manager.InstanceManager;
 import com.roguesmp.dungeon.manager.RoomManager;
-import com.roguesmp.dungeon.manager.SpawnerInstanceManager;
+import com.roguesmp.dungeon_spawner.manager.SpawnerInstanceManager;
 import com.roguesmp.dungeon.service.IPartyService;
 import com.roguesmp.dungeon.service.IRegionService;
 import com.roguesmp.dungeon.utils.PdcUtil;
@@ -31,7 +31,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.BoundingBox;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static com.roguesmp.dungeon.utils.NameSpaceKeys.SPAWNER_IID_KEY;

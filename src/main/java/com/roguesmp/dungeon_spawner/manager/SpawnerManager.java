@@ -1,7 +1,7 @@
-package com.roguesmp.dungeon.manager;
+package com.roguesmp.dungeon_spawner.manager;
 
-import com.roguesmp.dungeon.data.definition.spawner.Spawner;
-import com.roguesmp.dungeon.repository.ISpawnerRepository;
+import com.roguesmp.dungeon_spawner.data.Spawner;
+import com.roguesmp.dungeon_spawner.repository.SpawnerRepository;
 import com.roguesmp.dungeon.utils.Log4Craft_;
 
 import java.util.HashMap;
@@ -10,10 +10,10 @@ import java.util.Map;
 
 public class SpawnerManager {
     private final Map<String, Spawner> cache = new HashMap<>();
-    private final ISpawnerRepository spawnerRepository;
+    private final SpawnerRepository spawnerRepository;
     private final Log4Craft_ logger;
 
-    public SpawnerManager(ISpawnerRepository spawnerRepository, Log4Craft_ logger) {
+    public SpawnerManager(SpawnerRepository spawnerRepository, Log4Craft_ logger) {
         this.spawnerRepository = spawnerRepository;
         this.logger = logger;
 
