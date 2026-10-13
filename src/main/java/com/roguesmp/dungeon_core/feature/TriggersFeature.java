@@ -14,10 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Runs actions when a matching signal arrives. A trigger with {@code count} fires on every count-th match; one marked
- * {@code once} fires a single time per run. Fired triggers are remembered across restarts.
- */
 public record TriggersFeature(List<Trigger> triggers) implements DungeonFeature<TriggersFeature.State> {
 
     public static final String TYPE_KEY = "triggers";
@@ -32,9 +28,6 @@ public record TriggersFeature(List<Trigger> triggers) implements DungeonFeature<
         );
     }
 
-    /**
-     * Trigger indexes that fired for good, and how many matches each counting trigger has seen since it last fired.
-     */
     public static final class State {
         public static final Codec<State> CODEC = Codec.composite(
                 Codec.listOf(Codec.INT).<Set<Integer>>xmap(HashSet::new, ArrayList::new).optionalFieldOf("fired", Set.of()).forGetter(state -> state.fired),

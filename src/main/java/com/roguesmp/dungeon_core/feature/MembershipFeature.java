@@ -11,11 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * What players may do with a run besides entering it. With {@code invites} the owner can invite players, who have
- * {@code invite_seconds} to accept; pending invites are not saved. With {@code abandon} a member can leave the run for
- * good, and the owner abandoning ends it.
- */
 public record MembershipFeature(boolean invites, int inviteSeconds, boolean abandon) implements DungeonFeature<MembershipFeature.State> {
 
     public static final String TYPE_KEY = "membership";
@@ -33,9 +28,6 @@ public record MembershipFeature(boolean invites, int inviteSeconds, boolean aban
             MembershipFeature::new
     );
 
-    /**
-     * @return the runs of {@code dungeonId} that have a pending invite for the player
-     */
     public static List<DungeonInstance> invitesFor(DungeonManager manager, UUID playerId, String dungeonId) {
         long now = System.currentTimeMillis();
         return manager.instances().stream()

@@ -15,9 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Every dungeon, with the viewer's status in each: an active run, pending invites, or nothing yet.
- */
 public class DungeonBrowserGui extends BaseGui {
 
     private static final int PER_PAGE = 28;

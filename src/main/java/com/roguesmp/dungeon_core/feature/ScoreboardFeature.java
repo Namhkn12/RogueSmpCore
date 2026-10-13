@@ -17,16 +17,15 @@ import com.roguesmp.tab.scoreboard.TabScoreboardView;
 import org.bukkit.entity.Player;
 
 import java.time.Duration;
+import java.util.List;
 
-/**
- * Shows the run's scoreboard to players inside it: the dungeon's name and, with an {@link ExpiryFeature}, the time left.
- */
 public record ScoreboardFeature(int priority) implements DungeonFeature<NoState> {
 
     public static final String TYPE_KEY = "scoreboard";
     public static final String LAYOUT_KEY = "dungeon_run";
 
     private static final long WARNING_MILLIS = 5 * 60_000L;
+    private static final int PROGRESS_LINES = 6;
 
     public static final Codec<ScoreboardFeature> CODEC = Codec.composite(
             Codec.INT.optionalFieldOf("priority", 30).forGetter(ScoreboardFeature::priority),
@@ -80,6 +79,17 @@ public record ScoreboardFeature(int priority) implements DungeonFeature<NoState>
                     .line("<gold>Phó bản: <white>" + name);
             FeatureContext<ExpiryFeature.State> expiry = manager.feature(instance, ExpiryFeature.class);
             if (expiry != null) builder.line(TabElement.ticking(20, c -> timeLeftLine(expiry.state())));
+            FeatureContext<RoomsFeature.State> rooms = manager.feature(instance, RoomsFeature.class);
+            if (rooms != null) {
+                builder.line(ScoreboardDefaults.spacer());
+                for (int i = 0; i < PROGRESS_LINES; i++) {
+                    int index = i;
+                    builder.line(TabElement.ticking(20, c -> {
+                        List<String> lines = RoomsFeature.progressLines(rooms.state());
+                        return index < lines.size() ? lines.get(index) : "";
+                    }));
+                }
+            }
             return builder
                     .lines(ScoreboardDefaults.playerInfo(viewer))
                     .line(ScoreboardDefaults.spacer())

@@ -1,23 +1,26 @@
 package com.roguesmp.dungeon_core;
 
 import com.roguesmp.quest.Quest;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-/**
- * Everything that happens inside one run, delivered to every feature of that run through
- * {@link DungeonFeature#onSignal}. Gameplay is turned into signals by {@link DungeonListener}; features send
- * {@link Custom} signals of their own.
- */
 public sealed interface DungeonSignal {
 
-    /**
-     * @return the player who caused it, if any
-     */
     default @Nullable Player player() {
+        return null;
+    }
+
+    default @Nullable Location location() {
         return null;
     }
 
@@ -36,17 +39,52 @@ public sealed interface DungeonSignal {
     record RegionLeft(Player player, String region) implements DungeonSignal {
     }
 
-    /**
-     * @param mobId the custom entity id, or the vanilla entity type key for vanilla mobs
-     */
+    // mobId: custom entity id, or the vanilla type key.
     record MobKilled(Player killer, LivingEntity mob, String mobId) implements DungeonSignal {
         @Override
         public Player player() {
             return killer;
         }
+
+        @Override
+        public Location location() {
+            return mob.getLocation();
+        }
     }
 
-    record PlayerDied(Player player) implements DungeonSignal {
+    // Features may cancel the event.
+    record BlockInteracted(Player player, Block block, PlayerInteractEvent event) implements DungeonSignal {
+        @Override
+        public Location location() {
+            return block.getLocation();
+        }
+    }
+
+    // Features may cancel the event.
+    record BlockBroken(Player player, Block block, BlockBreakEvent event) implements DungeonSignal {
+        @Override
+        public Location location() {
+            return block.getLocation();
+        }
+    }
+
+    // itemId: custom item id, or the vanilla material key.
+    record ItemPickedUp(Player player, ItemStack item, String itemId, int amount) implements DungeonSignal {
+        @Override
+        public Location location() {
+            return player.getLocation();
+        }
+    }
+
+    record PortalEntered(Player player, Material portal, Location location) implements DungeonSignal {
+    }
+
+    // Features may cancel the event.
+    record PlayerDied(Player player, PlayerDeathEvent event) implements DungeonSignal {
+        @Override
+        public Location location() {
+            return player.getLocation();
+        }
     }
 
     record QuestCompleted(Quest quest) implements DungeonSignal {

@@ -7,9 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 
-/**
- * What a feature hook gets: its own state and the run it belongs to.
- */
 public record FeatureContext<S>(DungeonManager manager, DungeonInstance instance, String featureId, DungeonFeature<S> feature, S state) {
 
     public @Nullable World world() {
@@ -37,9 +34,6 @@ public record FeatureContext<S>(DungeonManager manager, DungeonInstance instance
         manager.end(instance, reason);
     }
 
-    /**
-     * Saves the run, for state changes that must survive a crash.
-     */
     public void save() {
         manager.save(instance);
     }

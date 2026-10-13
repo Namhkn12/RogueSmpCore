@@ -19,10 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * One run of a dungeon: its world, its members and the state of each feature. Feature states are kept as saved JSON
- * until the run is bound to its definition, so a run whose dungeon was removed keeps its data untouched.
- */
 public class DungeonInstance {
 
     @SuppressWarnings("unchecked")
@@ -57,6 +53,7 @@ public class DungeonInstance {
     private final UUID ownerId;
     private final Set<UUID> members;
     private final long createdAt;
+    // Raw until bound to a definition, so runs of a removed dungeon keep their data.
     private final Map<String, JsonElement> savedStates = new HashMap<>();
     private final Map<String, Object> states = new HashMap<>();
     private @Nullable DungeonDefinition definition;
@@ -78,9 +75,6 @@ public class DungeonInstance {
         bind(definition);
     }
 
-    /**
-     * Attaches the definition and decodes each feature's saved state. A feature without a readable state starts fresh.
-     */
     void bind(DungeonDefinition definition) {
         this.definition = definition;
         definition.features().forEach((featureId, feature) -> states.put(featureId, decodeState(featureId, feature)));

@@ -5,9 +5,6 @@ import com.roguesmp.dungeon_core.DungeonSignal;
 import com.roguesmp.dungeon_core.FeatureContext;
 import com.roguesmp.registry.Registries;
 
-/**
- * Decides whether a signal fires a trigger, dispatched by its {@code "type"}.
- */
 public interface SignalMatcher {
 
     Codec<SignalMatcher> CODEC = Codec.dispatch(

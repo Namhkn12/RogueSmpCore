@@ -6,9 +6,6 @@ import com.roguesmp.registry.Registries;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Something a dungeon does in response to a trigger, dispatched by its {@code "type"}.
- */
 public interface DungeonAction {
 
     Codec<DungeonAction> CODEC = Codec.dispatch(
@@ -18,8 +15,5 @@ public interface DungeonAction {
 
     String getTypeId();
 
-    /**
-     * @param player the player who caused the trigger, if any
-     */
     void run(FeatureContext<?> context, @Nullable Player player);
 }

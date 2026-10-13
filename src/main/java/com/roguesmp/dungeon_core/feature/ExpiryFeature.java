@@ -5,9 +5,6 @@ import com.roguesmp.dungeon_core.DungeonFeature;
 import com.roguesmp.dungeon_core.FeatureContext;
 import com.roguesmp.utils.DateUtils;
 
-/**
- * Ends the run once its time is up, counted from when it started.
- */
 public record ExpiryFeature(DungeonExpiry duration) implements DungeonFeature<ExpiryFeature.State> {
 
     public static final String TYPE_KEY = "expiry";

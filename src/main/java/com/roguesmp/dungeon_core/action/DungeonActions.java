@@ -11,10 +11,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-/**
- * Every {@link DungeonAction} type. Each constant registers itself into {@link Registries#DUNGEON_ACTION_CODEC} as it's
- * initialized - call {@link #loadClass()} to force that to happen.
- */
 public class DungeonActions {
 
     public record Signal(String signal, int amount) implements DungeonAction {
@@ -35,9 +31,6 @@ public class DungeonActions {
         }
     }
 
-    /**
-     * @param all whether everyone in the run's world gets the message instead of only the player who caused it
-     */
     public record Message(String text, boolean all) implements DungeonAction {
         public static final Codec<Message> CODEC = Codec.composite(
                 Codec.STRING.fieldOf("text").forGetter(Message::text),

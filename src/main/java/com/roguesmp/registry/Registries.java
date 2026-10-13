@@ -44,6 +44,9 @@ import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.npc.action.NpcActions;
 import com.roguesmp.player.ability.*;
 import com.roguesmp.dungeon_core.DungeonDefinition;
+import com.roguesmp.dungeon_core.room.RoomDefinition;
+import com.roguesmp.dungeon_core.room.RoomEffect;
+import com.roguesmp.dungeon_core.room.RoomEffects;
 import com.roguesmp.dungeon_core.DungeonFeature;
 import com.roguesmp.dungeon_core.action.DungeonAction;
 import com.roguesmp.dungeon_core.action.DungeonActions;
@@ -82,6 +85,7 @@ public class Registries {
 
     public static final Registry<Codec<? extends DungeonFeature<?>>> DUNGEON_FEATURE_CODEC = register(registry -> DungeonFeatures.loadClass());
     public static final Registry<Codec<? extends DungeonAction>> DUNGEON_ACTION_CODEC = register(registry -> DungeonActions.loadClass());
+    public static final Registry<Codec<? extends RoomEffect<?>>> DUNGEON_ROOM_EFFECT_CODEC = register(registry -> RoomEffects.loadClass());
     public static final Registry<Codec<? extends SignalMatcher>> DUNGEON_SIGNAL_MATCHER_CODEC = register(registry -> SignalMatchers.loadClass());
 
     public static final Registry<Codec<? extends QuestObjective>> QUEST_OBJECTIVE_CODEC = register(registry -> QuestObjectives.loadClass());
@@ -127,6 +131,7 @@ public class Registries {
     public static final Registry<ItemType> ITEM_TYPE = new Registry<>("item_types", ItemType.CODEC);
     public static final Registry<FishingHotspot> FISHING_HOTSPOT = new Registry<>("fishing_hotspots", FishingHotspot.CODEC);
     public static final Registry<PolarTemplateData> POLAR_TEMPLATE_DATA = new Registry<>("polar_template_data", PolarTemplateData.CODEC);
+    public static final Registry<RoomDefinition> DUNGEON_ROOM = new Registry<>("dungeon_rooms", RoomDefinition.CODEC);
     public static final Registry<DungeonDefinition> DUNGEON = new Registry<>("dungeon_definitions", DungeonDefinition.CODEC);
     public static final Registry<FuelType> FUEL_TYPE = new Registry<>("fuel_types", FuelType.CODEC);
 

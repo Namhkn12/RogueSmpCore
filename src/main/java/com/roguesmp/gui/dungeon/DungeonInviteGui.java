@@ -17,9 +17,6 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * Online players who can be invited to the run: not members and without a run of this dungeon.
- */
 public class DungeonInviteGui extends BaseGui {
 
     private static final int PER_PAGE = 45;

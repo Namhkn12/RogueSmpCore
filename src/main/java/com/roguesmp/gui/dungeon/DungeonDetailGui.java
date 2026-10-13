@@ -27,10 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * One dungeon from the viewer's side. Without a run they can create one or accept a pending invite; with a run they can
- * rejoin it and, when its {@link MembershipFeature} allows, invite players or abandon it.
- */
 public class DungeonDetailGui extends BaseGui {
 
     private static final DateTimeFormatter DEADLINE_FORMAT = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");

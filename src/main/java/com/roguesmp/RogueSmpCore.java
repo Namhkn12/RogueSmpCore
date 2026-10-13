@@ -19,7 +19,9 @@ import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.registry.Registries;
-import com.roguesmp.dungeon.DungeonRegistry;
+import com.roguesmp.dungeon_core.build.DungeonBuildCommand;
+import com.roguesmp.dungeon_core.build.RewardChestListener;
+import com.roguesmp.dungeon_spawner.SpawnerSystem;
 import com.roguesmp.dungeon_party.PartyCommand;
 import com.roguesmp.dungeon_party.PartyListener;
 import com.roguesmp.dungeon_party.PartyManager;
@@ -125,8 +127,8 @@ public final class RogueSmpCore extends JavaPlugin {
 
         PartyManager.init(this);
 
-        //dungeon register
-        DungeonRegistry.onEnable(this);
+        //Dungeon spawners
+        SpawnerSystem.init(this);
 
         this.resetScheduler = new DailyResetScheduler(this);
         this.resetScheduler.start();
@@ -166,7 +168,6 @@ public final class RogueSmpCore extends JavaPlugin {
         BlockManager.getInstance().shutdown();
 
         PlayerManager.getInstance().onDisable();
-        DungeonRegistry.onDisable();
         PartyManager.getInstance().saveAll();
 
         IslandManager.getInstance().onDisable();
@@ -197,6 +198,8 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new IslandListener(IslandManager.getInstance()));
         registerListener(new PartyListener(PartyManager.getInstance()));
         registerListener(new DungeonListener(DungeonManager.getInstance()));
+        registerListener(SpawnerSystem.getInstance().listener());
+        registerListener(new RewardChestListener());
         registerListener(new QuestListener(QuestManager.getInstance()));
     }
 
@@ -227,6 +230,7 @@ public final class RogueSmpCore extends JavaPlugin {
         RegionCommand.register();
         PolarTemplateCommand.register();
         new DungeonCommand(DungeonManager.getInstance()).register();
+        DungeonBuildCommand.register();
         GlyphFontCommand.register();
     }
 

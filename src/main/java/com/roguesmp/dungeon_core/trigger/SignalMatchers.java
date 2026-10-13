@@ -9,11 +9,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-/**
- * Every {@link SignalMatcher} type, one per {@link DungeonSignal}. An empty id filter matches any value, and
- * {@code owner_only} limits a player signal to the run's owner. Each constant registers itself into
- * {@link Registries#DUNGEON_SIGNAL_MATCHER_CODEC} as it's initialized.
- */
 public class SignalMatchers {
 
     public record Started() implements SignalMatcher {
@@ -135,7 +130,7 @@ public class SignalMatchers {
 
         @Override
         public boolean matches(FeatureContext<?> context, DungeonSignal signal) {
-            return signal instanceof DungeonSignal.PlayerDied(Player player) && allowed(context, player, ownerOnly);
+            return signal instanceof DungeonSignal.PlayerDied(Player player, var event) && allowed(context, player, ownerOnly);
         }
     }
 
@@ -158,9 +153,6 @@ public class SignalMatchers {
         }
     }
 
-    /**
-     * @param data entries the custom signal must carry with these exact values
-     */
     public record Custom(String id, Map<String, String> data) implements SignalMatcher {
         public static final Codec<Custom> CODEC = Codec.composite(
                 Codec.STRING.fieldOf("id").forGetter(Custom::id),
@@ -180,6 +172,43 @@ public class SignalMatchers {
         }
     }
 
+    public record BlockBroken(String block, boolean ownerOnly) implements SignalMatcher {
+        public static final Codec<BlockBroken> CODEC = Codec.composite(
+                Codec.STRING.optionalFieldOf("block", "").forGetter(BlockBroken::block),
+                Codec.BOOLEAN.optionalFieldOf("owner_only", false).forGetter(BlockBroken::ownerOnly),
+                BlockBroken::new
+        );
+
+        @Override
+        public String getTypeId() {
+            return "block_broken";
+        }
+
+        @Override
+        public boolean matches(FeatureContext<?> context, DungeonSignal signal) {
+            return signal instanceof DungeonSignal.BlockBroken broken && !broken.event().isCancelled()
+                    && matchesId(block, broken.block().getType().getKey().getKey()) && allowed(context, broken.player(), ownerOnly);
+        }
+    }
+
+    public record ItemPickedUp(String item, boolean ownerOnly) implements SignalMatcher {
+        public static final Codec<ItemPickedUp> CODEC = Codec.composite(
+                Codec.STRING.optionalFieldOf("item", "").forGetter(ItemPickedUp::item),
+                Codec.BOOLEAN.optionalFieldOf("owner_only", false).forGetter(ItemPickedUp::ownerOnly),
+                ItemPickedUp::new
+        );
+
+        @Override
+        public String getTypeId() {
+            return "item_picked_up";
+        }
+
+        @Override
+        public boolean matches(FeatureContext<?> context, DungeonSignal signal) {
+            return signal instanceof DungeonSignal.ItemPickedUp picked && matchesId(item, picked.itemId()) && allowed(context, picked.player(), ownerOnly);
+        }
+    }
+
     public static final Codec<Started> STARTED = register("started", Started.CODEC);
     public static final Codec<PlayerEntered> PLAYER_ENTERED = register("player_entered", PlayerEntered.CODEC);
     public static final Codec<PlayerLeft> PLAYER_LEFT = register("player_left", PlayerLeft.CODEC);
@@ -189,6 +218,8 @@ public class SignalMatchers {
     public static final Codec<PlayerDied> PLAYER_DIED = register("player_died", PlayerDied.CODEC);
     public static final Codec<QuestCompleted> QUEST_COMPLETED = register("quest_completed", QuestCompleted.CODEC);
     public static final Codec<Custom> CUSTOM = register("signal", Custom.CODEC);
+    public static final Codec<BlockBroken> BLOCK_BROKEN = register("block_broken", BlockBroken.CODEC);
+    public static final Codec<ItemPickedUp> ITEM_PICKED_UP = register("item_picked_up", ItemPickedUp.CODEC);
 
     public static void loadClass() {
 

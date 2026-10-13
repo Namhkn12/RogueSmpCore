@@ -23,10 +23,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
-/**
- * Owns every dungeon run: creates its world from the dungeon's template, routes gameplay to its features and destroys
- * it when it ends. Methods that change a run must be called from the main thread.
- */
 public final class DungeonManager {
 
     private static final long TICK_INTERVAL_TICKS = 20L;
@@ -57,10 +53,6 @@ public final class DungeonManager {
         return INSTANCE;
     }
 
-    /**
-     * Startup only, after dungeon definitions and quests are loaded: restores saved runs, deletes worlds and quest groups
-     * left by runs that no longer exist, then starts ticking.
-     */
     @Blocking
     public void load() {
         instances.putAll(store.loadAll());
@@ -107,10 +99,6 @@ public final class DungeonManager {
         return worlds;
     }
 
-    /**
-     * Clones the template, runs the features' start hooks, saves the run, then sends {@link DungeonSignal.Started}. A
-     * player can belong to only one run of each dungeon, so this fails if the owner or a member already has one.
-     */
     public CompletableFuture<DungeonInstance> create(String dungeonId, UUID ownerId, Set<UUID> members) {
         DungeonDefinition definition = Registries.DUNGEON.get(dungeonId);
         if (definition == null) return CompletableFuture.failedFuture(new IllegalStateException("Phó bản này không tồn tại."));
@@ -152,9 +140,6 @@ public final class DungeonManager {
         return instances.values().stream().filter(instance -> instance.isMember(playerId)).toList();
     }
 
-    /**
-     * @return the context of the run's first feature of that type, or null if its dungeon has none
-     */
     @SuppressWarnings("unchecked")
     public <S, F extends DungeonFeature<S>> @Nullable FeatureContext<S> feature(DungeonInstance instance, Class<F> type) {
         DungeonDefinition definition = instance.definition();
@@ -183,9 +168,6 @@ public final class DungeonManager {
         player.teleportAsync(Hub.spawn());
     }
 
-    /**
-     * @throws IllegalStateException if the player already belongs to another run of the same dungeon
-     */
     public void addMember(DungeonInstance instance, UUID playerId) {
         if (instance.isMember(playerId)) return;
         requireNoRun(playerId, instance.dungeonId());
@@ -202,10 +184,7 @@ public final class DungeonManager {
         if (player != null && instance.equals(getByWorld(player.getWorld()))) leave(player);
     }
 
-    /**
-     * Delivers the signal to every feature of the run. Signals sent while handling one are nested; past
-     * {@link #MAX_SIGNAL_DEPTH} levels they are dropped, which stops a trigger that answers its own signal.
-     */
+    // Nested signals past MAX_SIGNAL_DEPTH are dropped to break trigger loops.
     public void signal(DungeonInstance instance, DungeonSignal signal) {
         if (signalDepth >= MAX_SIGNAL_DEPTH) {
             RogueSmpCore.LOGGER.warn("Dropped signal {} in dungeon run {}: signals nested deeper than {}", signal, instance.id(), MAX_SIGNAL_DEPTH);
@@ -219,9 +198,6 @@ public final class DungeonManager {
         }
     }
 
-    /**
-     * Runs the features' end hooks, sends everyone inside back to the hub, then deletes the world and the record.
-     */
     public CompletableFuture<Void> end(DungeonInstance instance, String reason) {
         if (!instances.containsKey(instance.id()) || !ending.add(instance.id())) return CompletableFuture.completedFuture(null);
 
@@ -260,10 +236,6 @@ public final class DungeonManager {
         }, IDLE_UNLOAD_DELAY_TICKS);
     }
 
-    /**
-     * Calls {@code hook} on every feature of the run with its own context. A failing feature is logged and does not stop
-     * the others. Runs that are not bound to a definition or are ending are skipped.
-     */
     public void dispatch(DungeonInstance instance, BiConsumer<DungeonFeature<Object>, FeatureContext<Object>> hook) {
         if (!ending.contains(instance.id())) dispatchAll(instance, hook);
     }

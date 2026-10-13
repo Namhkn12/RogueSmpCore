@@ -1,38 +1,27 @@
 package com.roguesmp.dungeon_spawner.listener;
 
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.event.block.Action;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.world.DungeonWorldManager;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
-import com.roguesmp.dungeon.actor.ui.TriggerBossGui;
-import com.roguesmp.dungeon.controller.BossRoomController;
 import com.roguesmp.dungeon_spawner.controller.SpawnerEventController;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.TrialSpawner;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Marker;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.persistence.PersistentDataType;
 
 public class SpawnerEventListener implements Listener {
 
     private final SpawnerEventController spawnerController;
-    private final BossRoomController bossRoomController;
 
-    public SpawnerEventListener(SpawnerEventController spawnerController, BossRoomController bossRoomController) {
+    public SpawnerEventListener(SpawnerEventController spawnerController) {
         this.spawnerController = spawnerController;
-        this.bossRoomController = bossRoomController;
     }
 
     @EventHandler
@@ -74,15 +63,5 @@ public class SpawnerEventListener implements Listener {
                 event.getLocation().getNearbyPlayers(20).stream().toList());
         event.setCancelled(!allowSpawn);
     }
-
-    @EventHandler
-    public void onTrialSpawnerActive(PlayerInteractEvent event) {
-        Block block = event.getClickedBlock();
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() != EquipmentSlot.HAND || block == null) return;
-        if (!(block.getState() instanceof TrialSpawner) || !DungeonWorldManager.isAnyDungeonWorld(block.getWorld())) return;
-
-        new TriggerBossGui(block, p -> bossRoomController.handleTriggerBossRoom(p, block)).showInventory(event.getPlayer());
-    }
-
 
 }

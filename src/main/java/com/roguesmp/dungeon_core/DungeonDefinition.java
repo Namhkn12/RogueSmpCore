@@ -2,6 +2,7 @@ package com.roguesmp.dungeon_core;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
+import com.roguesmp.codec.DynamicOps;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.world.PolarTemplateManager;
 import com.roguesmp.world.PolarWorldKey;
@@ -14,16 +15,13 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * A dungeon: the template world each run is cloned from, how it is shown to players, and the features that make up
- * its behavior, keyed by an id unique inside the dungeon. The registry id is the dungeon id.
- *
- * @param icon the item model of the dungeon's menu icon
- */
 public record DungeonDefinition(PolarWorldKey template, String displayName, Key icon, List<String> lore, Map<String, DungeonFeature<?>> features) {
+
+    private static final String TYPE_FIELD = "type";
 
     private static final Codec<PolarWorldKey> TEMPLATE_CODEC = Codec.STRING.comapFlatMap(
             name -> {
@@ -36,12 +34,56 @@ public record DungeonDefinition(PolarWorldKey template, String displayName, Key 
             PolarWorldKey::name
     );
 
+    // A feature without "type" uses its key as its type.
+    private static final Codec<Map<String, DungeonFeature<?>>> FEATURES = new Codec<>() {
+        @Override
+        public <O> DataResult<O> encode(Map<String, DungeonFeature<?>> input, DynamicOps<O> ops) {
+            O target = ops.emptyMap();
+            for (Map.Entry<String, DungeonFeature<?>> entry : input.entrySet()) {
+                DataResult<O> encoded = DungeonFeature.CODEC.encode(entry.getValue(), ops);
+                if (!encoded.isSuccess()) return DataResult.error("['" + entry.getKey() + "']: " + encoded.error());
+
+                DataResult<Map<String, O>> fields = ops.getMap(encoded.result());
+                if (!fields.isSuccess()) return DataResult.error("['" + entry.getKey() + "']: " + fields.error());
+                boolean typeIsKey = entry.getKey().equals(entry.getValue().getTypeId());
+                O feature = ops.emptyMap();
+                for (Map.Entry<String, O> field : fields.result().entrySet()) {
+                    if (typeIsKey && field.getKey().equals(TYPE_FIELD)) continue;
+                    feature = ops.setMapEntry(feature, field.getKey(), field.getValue());
+                }
+                target = ops.setMapEntry(target, entry.getKey(), feature);
+            }
+            return DataResult.success(target);
+        }
+
+        @Override
+        public <O> DataResult<Map<String, DungeonFeature<?>>> decode(O input, DynamicOps<O> ops) {
+            DataResult<Map<String, O>> raw = ops.getMap(input);
+            if (!raw.isSuccess()) return DataResult.error(raw.error());
+
+            Map<String, DungeonFeature<?>> features = new LinkedHashMap<>();
+            for (Map.Entry<String, O> entry : raw.result().entrySet()) {
+                DataResult<Map<String, O>> fields = ops.getMap(entry.getValue());
+                if (!fields.isSuccess()) return DataResult.error("['" + entry.getKey() + "']: " + fields.error());
+
+                O feature = ops.emptyMap();
+                for (Map.Entry<String, O> field : fields.result().entrySet()) feature = ops.setMapEntry(feature, field.getKey(), field.getValue());
+                if (!fields.result().containsKey(TYPE_FIELD)) feature = ops.setMapEntry(feature, TYPE_FIELD, ops.createString(entry.getKey()));
+
+                DataResult<DungeonFeature<?>> decoded = DungeonFeature.CODEC.decode(feature, ops);
+                if (!decoded.isSuccess()) return DataResult.error("['" + entry.getKey() + "']: " + decoded.error());
+                features.put(entry.getKey(), decoded.result());
+            }
+            return DataResult.success(features);
+        }
+    };
+
     public static final Codec<DungeonDefinition> CODEC = Codec.composite(
             TEMPLATE_CODEC.fieldOf("template").forGetter(DungeonDefinition::template),
             Codec.STRING.fieldOf("display_name").forGetter(DungeonDefinition::displayName),
             Codec.KEY.optionalFieldOf("icon", Key.key("minecraft:paper")).forGetter(DungeonDefinition::icon),
             Codec.listOf(Codec.STRING).optionalFieldOf("lore", List.of()).forGetter(DungeonDefinition::lore),
-            Codec.unboundedMap(DungeonFeature.CODEC).optionalFieldOf("features", Map.of()).forGetter(DungeonDefinition::features),
+            FEATURES.optionalFieldOf("features", Map.of()).forGetter(DungeonDefinition::features),
             DungeonDefinition::new
     );
 
@@ -49,9 +91,6 @@ public record DungeonDefinition(PolarWorldKey template, String displayName, Key 
         return Utils.fromString(displayName);
     }
 
-    /**
-     * @param extraLore lines shown under the dungeon's own lore, such as the viewer's status
-     */
     public ItemStack toIcon(List<Component> extraLore) {
         ItemStack stack = new ItemStack(Material.PAPER);
         stack.setData(DataComponentTypes.ITEM_MODEL, icon);

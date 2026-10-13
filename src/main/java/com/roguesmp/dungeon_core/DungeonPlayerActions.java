@@ -2,18 +2,18 @@ package com.roguesmp.dungeon_core;
 
 import com.roguesmp.command.CommandFeedback;
 import com.roguesmp.dungeon_core.feature.MembershipFeature;
+import com.roguesmp.dungeon_core.feature.PartyFeature;
+import org.bukkit.Bukkit;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
+import java.util.UUID;
 
 import static com.roguesmp.command.CommandFeedback.report;
 
-/**
- * What a player can do with dungeon runs, shared by the dungeon menu and {@link DungeonCommand}.
- */
 public final class DungeonPlayerActions {
 
     private DungeonPlayerActions() {
@@ -27,8 +27,19 @@ public final class DungeonPlayerActions {
             return;
         }
 
+        Set<UUID> members;
+        try {
+            members = PartyFeature.startingMembers(definition, player);
+        } catch (IllegalStateException e) {
+            CommandFeedback.error(player, e);
+            return;
+        }
+
         player.sendMessage(Utils.fromString("<yellow>Đang tạo phó bản..."));
-        report(player, manager.create(dungeonId, player.getUniqueId(), Set.of()).thenCompose(instance -> manager.enter(player, instance)),
+        report(player, manager.create(dungeonId, player.getUniqueId(), members).thenCompose(instance -> {
+                    members.stream().map(Bukkit::getPlayer).filter(member -> member != null && !member.equals(player)).forEach(member -> enter(member, instance));
+                    return manager.enter(player, instance);
+                }),
                 "<green>Đã vào phó bản <yellow>" + definition.displayName() + "<green>.");
     }
 

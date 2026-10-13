@@ -15,14 +15,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Gives the run a shared quest log: its quests start with the run and members who enter become eligible for their
- * rewards. Custom dungeon signals are forwarded as quest signals by id, and mob kills as {@code kill:<mob id>}.
- * Completed quests come back as {@link DungeonSignal.QuestCompleted}.
- *
- * @param eligibleOnEnter whether every member who enters the run becomes eligible; when false only the members at the
- *                        start are
- */
 public record QuestsFeature(List<Quest> quests, boolean eligibleOnEnter) implements DungeonFeature<NoState> {
 
     public static final String TYPE_KEY = "quests";
@@ -35,9 +27,6 @@ public record QuestsFeature(List<Quest> quests, boolean eligibleOnEnter) impleme
             QuestsFeature::new
     );
 
-    /**
-     * Startup only: ends the quest groups of runs that no longer exist.
-     */
     public static void sweep(Set<UUID> liveRunIds) {
         int ended = QuestManager.getInstance().sweepGroups(OWNER, liveRunIds);
         if (ended > 0) RogueSmpCore.LOGGER.info("Ended {} quest group(s) of dungeon runs that no longer exist", ended);

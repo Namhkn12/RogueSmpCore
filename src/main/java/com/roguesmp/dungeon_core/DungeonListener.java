@@ -25,27 +25,44 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.world.PortalCreateEvent;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.util.BoundingBox;
+import org.jetbrains.annotations.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.block.Block;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
+import com.roguesmp.constant.Keys;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Turns Bukkit gameplay inside a run's world into {@link DungeonSignal}s for that run.
- */
 public class DungeonListener implements Listener {
 
     private static final long WORLD_LOAD_TIMEOUT_SECONDS = 30;
 
+    private static final Set<Material> PORTALS = Set.of(Material.END_GATEWAY, Material.NETHER_PORTAL, Material.END_PORTAL);
+
     private final DungeonManager manager;
+    private final Map<UUID, Material> insidePortal = new HashMap<>();
 
     public DungeonListener(DungeonManager manager) {
         this.manager = manager;
     }
 
-    /**
-     * Puts a player who logged out inside a run back where they were, loading the world if needed, or sends them to the
-     * hub when that run is gone or they are no longer a member.
-     */
     @EventHandler
     public void onSpawnLocation(AsyncPlayerSpawnLocationEvent event) {
         UUID playerId = event.getConnection().getProfile().getId();
@@ -91,6 +108,7 @@ public class DungeonListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        insidePortal.remove(player.getUniqueId());
         World world = player.getWorld();
         if (!signal(world, new DungeonSignal.PlayerLeft(player))) return;
         manager.unloadIfIdleLater(world);
@@ -115,10 +133,72 @@ public class DungeonListener implements Listener {
         signal(mob.getWorld(), new DungeonSignal.MobKilled(killer, mob, mobId));
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onInteract(PlayerInteractEvent event) {
+        Block block = event.getClickedBlock();
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() != EquipmentSlot.HAND || block == null) return;
+        signal(block.getWorld(), new DungeonSignal.BlockInteracted(event.getPlayer(), block, event));
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        Block block = event.getBlock();
+        signal(block.getWorld(), new DungeonSignal.BlockBroken(event.getPlayer(), block, event));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPickup(EntityPickupItemEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        ItemStack item = event.getItem().getItemStack();
+        String itemId = item.getPersistentDataContainer().getOrDefault(Keys.ITEM_ID, PersistentDataType.STRING, item.getType().getKey().getKey());
+        signal(player.getWorld(), new DungeonSignal.ItemPickedUp(player, item, itemId, item.getAmount()));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onMove(PlayerMoveEvent event) {
+        if (!event.hasChangedBlock()) return;
+        Player player = event.getPlayer();
+        if (manager.getByWorld(player.getWorld()) == null) {
+            insidePortal.remove(player.getUniqueId());
+            return;
+        }
+
+        Block portal = touchedPortal(player, event.getTo());
+        if (portal == null) {
+            insidePortal.remove(player.getUniqueId());
+            return;
+        }
+        if (insidePortal.put(player.getUniqueId(), portal.getType()) == portal.getType()) return;
+        signal(player.getWorld(), new DungeonSignal.PortalEntered(player, portal.getType(), portal.getLocation()));
+    }
+
+    @EventHandler
+    public void onPortalTravel(PlayerTeleportEvent event) {
+        PlayerTeleportEvent.TeleportCause cause = event.getCause();
+        boolean portal = cause == PlayerTeleportEvent.TeleportCause.END_PORTAL || cause == PlayerTeleportEvent.TeleportCause.NETHER_PORTAL
+                || cause == PlayerTeleportEvent.TeleportCause.END_GATEWAY;
+        if (portal && manager.getByWorld(event.getPlayer().getWorld()) != null) event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPortalCreate(PortalCreateEvent event) {
+        if (manager.getByWorld(event.getWorld()) != null) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getPlayer();
-        signal(player.getWorld(), new DungeonSignal.PlayerDied(player));
+        signal(player.getWorld(), new DungeonSignal.PlayerDied(player, event));
+    }
+
+    @EventHandler
+    public void onMarkerInteract(PlayerInteractAtEntityEvent event) {
+        if (event.getRightClicked().getPersistentDataContainer().has(Keys.REVIVE_POINT)) event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onMarkerDamage(EntityDamageEvent event) {
+        if (event.getEntity().getPersistentDataContainer().has(Keys.REVIVE_POINT)) event.setCancelled(true);
     }
 
     @EventHandler
@@ -134,9 +214,20 @@ public class DungeonListener implements Listener {
         if (instance != null) manager.signal(instance, new DungeonSignal.QuestCompleted(event.getQuest()));
     }
 
-    /**
-     * @return whether the world belongs to a run
-     */
+    private static @Nullable Block touchedPortal(Player player, Location to) {
+        BoundingBox box = player.getBoundingBox().shift(to.toVector().subtract(player.getLocation().toVector()));
+        World world = player.getWorld();
+        for (int x = (int) Math.floor(box.getMinX()); x <= (int) Math.floor(box.getMaxX()); x++) {
+            for (int y = (int) Math.floor(box.getMinY()); y <= (int) Math.floor(box.getMaxY()); y++) {
+                for (int z = (int) Math.floor(box.getMinZ()); z <= (int) Math.floor(box.getMaxZ()); z++) {
+                    Block block = world.getBlockAt(x, y, z);
+                    if (PORTALS.contains(block.getType())) return block;
+                }
+            }
+        }
+        return null;
+    }
+
     private boolean signal(World world, DungeonSignal signal) {
         DungeonInstance instance = manager.getByWorld(world);
         if (instance == null) return false;
