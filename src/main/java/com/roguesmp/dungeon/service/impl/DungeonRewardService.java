@@ -9,7 +9,7 @@ import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.dungeon.data.runtime.DungeonInstance;
 import com.roguesmp.dungeon_party.Party;
 import com.roguesmp.loot.context.LootOrigin;
-import com.roguesmp.dungeon.itemdisplay.impl.ChestOpenAnimation;
+import com.roguesmp.dungeon.presentation.presenter.ChestOpenAnimation;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.dungeon.manager.DungeonManager;
 import com.roguesmp.dungeon.manager.InstanceManager;

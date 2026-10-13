@@ -19,9 +19,8 @@ import com.roguesmp.dungeon_spawner.manager.SpawnerInstanceManager;
 import com.roguesmp.dungeon_spawner.manager.SpawnerManager;
 import com.roguesmp.dungeon_spawner.repository.SpawnerRepository;
 import com.roguesmp.dungeon.controller.*;
-import com.roguesmp.dungeon.itemdisplay.impl.ChestOpenAnimation;
+import com.roguesmp.dungeon.presentation.presenter.ChestOpenAnimation;
 import com.roguesmp.dungeon.manager.*;
-import com.roguesmp.dungeon.presentation.*;
 import com.roguesmp.dungeon.presentation.presenter.DungeonPresenter;
 import com.roguesmp.dungeon.presentation.presenter.RevivePointPresenter;
 import com.roguesmp.dungeon.repository.*;
@@ -49,20 +48,7 @@ public class DungeonRegistry {
         Gson gson = new GsonBuilder().registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
                 .setPrettyPrinting()
                 .create();
-        /*Scheduler*/
-
-
-        /*Logging and Messaging*/
-
-        /*Presentation*/
-        SoundManager soundManager = new SoundManager(plugin);
-        EffectManager effectManager = new EffectManager(plugin);
-        ScreenMessManager screenMessManager = new ScreenMessManager(plugin);
-        ParticleManager dungeonParticle = new ParticleManager();
-        PresentationManager presentationManager = new PresentationManager(soundManager, effectManager, screenMessManager, dungeonParticle);
-
-        /*Presentation Implement*/
-        DungeonPresenter dungeonPresenter = new DungeonPresenter(presentationManager);
+        DungeonPresenter dungeonPresenter = new DungeonPresenter();
 
         /*Repository*/
         ISchematicRepository schematicRepository = new SchematicRepository(plugin);
@@ -99,7 +85,7 @@ public class DungeonRegistry {
                 partyManager,
                 instanceManager,
                 dungeonManager,
-                new ChestOpenAnimation(plugin)
+                new ChestOpenAnimation()
                 );
         IReviveService reviveService = new ReviveService(reviveManager, partyManager, instanceManager, dungeonPresenter);
         ObjectiveDispatchService objectiveDispatchService = new ObjectiveDispatchService(partyManager, instanceManager);
