@@ -1,7 +1,7 @@
 package com.roguesmp.gui.dungeon;
 
-import com.roguesmp.dungeon_core.DungeonInstance;
-import com.roguesmp.dungeon_core.DungeonPlayerActions;
+import com.roguesmp.dungeon.DungeonInstance;
+import com.roguesmp.dungeon.DungeonPlayerActions;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;

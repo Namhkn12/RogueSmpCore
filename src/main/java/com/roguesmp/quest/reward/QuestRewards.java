@@ -1,8 +1,6 @@
 package com.roguesmp.quest.reward;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.quest.reward.ItemReward;
-import com.roguesmp.quest.reward.MoneyReward;
 import com.roguesmp.registry.Registries;
 
 /**

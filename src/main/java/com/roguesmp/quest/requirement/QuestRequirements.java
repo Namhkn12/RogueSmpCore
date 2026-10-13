@@ -1,7 +1,6 @@
 package com.roguesmp.quest.requirement;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.quest.requirement.DateRequirement;
 import com.roguesmp.registry.Registries;
 
 /**

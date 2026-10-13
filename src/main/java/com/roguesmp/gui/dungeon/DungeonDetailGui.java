@@ -1,12 +1,12 @@
 package com.roguesmp.gui.dungeon;
 
-import com.roguesmp.dungeon_core.DungeonDefinition;
-import com.roguesmp.dungeon_core.DungeonInstance;
-import com.roguesmp.dungeon_core.DungeonManager;
-import com.roguesmp.dungeon_core.DungeonPlayerActions;
-import com.roguesmp.dungeon_core.FeatureContext;
-import com.roguesmp.dungeon_core.feature.ExpiryFeature;
-import com.roguesmp.dungeon_core.feature.MembershipFeature;
+import com.roguesmp.dungeon.DungeonDefinition;
+import com.roguesmp.dungeon.DungeonInstance;
+import com.roguesmp.dungeon.DungeonManager;
+import com.roguesmp.dungeon.DungeonPlayerActions;
+import com.roguesmp.dungeon.FeatureContext;
+import com.roguesmp.dungeon.feature.ExpiryFeature;
+import com.roguesmp.dungeon.feature.MembershipFeature;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.DateUtils;

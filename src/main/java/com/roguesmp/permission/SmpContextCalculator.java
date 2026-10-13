@@ -1,6 +1,6 @@
 package com.roguesmp.permission;
 
-import com.roguesmp.world.DungeonWorldManager;
+import com.roguesmp.dungeon.DungeonWorldManager;
 import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandManager;
 import net.luckperms.api.context.ContextCalculator;

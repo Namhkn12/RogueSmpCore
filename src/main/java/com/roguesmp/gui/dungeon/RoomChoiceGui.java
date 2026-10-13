@@ -1,6 +1,6 @@
 package com.roguesmp.gui.dungeon;
 
-import com.roguesmp.dungeon_core.room.RoomDefinition;
+import com.roguesmp.dungeon.room.RoomDefinition;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;

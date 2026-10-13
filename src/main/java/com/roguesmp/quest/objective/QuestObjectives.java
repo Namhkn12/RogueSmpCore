@@ -1,8 +1,6 @@
 package com.roguesmp.quest.objective;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.quest.objective.KillMobObjective;
-import com.roguesmp.quest.objective.SignalObjective;
 import com.roguesmp.registry.Registries;
 
 /**

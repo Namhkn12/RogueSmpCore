@@ -1,8 +1,8 @@
 package com.roguesmp.gui.dungeon;
 
-import com.roguesmp.dungeon_core.DungeonInstance;
-import com.roguesmp.dungeon_core.DungeonManager;
-import com.roguesmp.dungeon_core.DungeonPlayerActions;
+import com.roguesmp.dungeon.DungeonInstance;
+import com.roguesmp.dungeon.DungeonManager;
+import com.roguesmp.dungeon.DungeonPlayerActions;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
