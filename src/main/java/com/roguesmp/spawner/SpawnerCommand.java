@@ -6,7 +6,7 @@ import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel.commandapi.arguments.TextArgument;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -21,7 +21,7 @@ public final class SpawnerCommand {
         new CommandAPICommand("spawner")
                 .withPermission(Permissions.SPAWNER_ADMIN.node())
                 .withSubcommand(new CommandAPICommand("give")
-                        .withArguments(new StringArgument("template").replaceSuggestions(ArgumentSuggestions.strings(
+                        .withArguments(new TextArgument("template").replaceSuggestions(ArgumentSuggestions.strings(
                                 info -> SpawnerSystem.getInstance().templates().getAllIds().toArray(String[]::new))))
                         .executesPlayer((player, args) -> {
                             String templateId = (String) args.get("template");

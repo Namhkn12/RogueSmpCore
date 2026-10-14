@@ -13,6 +13,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel.commandapi.arguments.TextArgument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
@@ -30,7 +31,7 @@ public class QuestCommand {
 
     public void register() {
         CommandAPICommand infoSubcommand = new CommandAPICommand("info")
-                .withArguments(new StringArgument("quest_id")
+                .withArguments(new TextArgument("quest_id")
                         .replaceSuggestions(ArgumentSuggestions.strings(info ->
                                 Registries.QUEST.getAll().keySet().toArray(new String[0])
                         ))
@@ -87,7 +88,7 @@ public class QuestCommand {
         CommandAPICommand assignSubcommand = new CommandAPICommand("assign")
                 .withPermission(Permissions.QUEST_ASSIGN.node())
                 .withArguments(new EntitySelectorArgument.OnePlayer("target"))
-                .withArguments(new StringArgument("quest_id")
+                .withArguments(new TextArgument("quest_id")
                         .replaceSuggestions(ArgumentSuggestions.strings(info ->
                                 Registries.QUEST.getAll().keySet().toArray(new String[0])
                         ))
@@ -130,7 +131,7 @@ public class QuestCommand {
                 });
 
         CommandAPICommand claimSubcommand = new CommandAPICommand("claim")
-                .withArguments(new StringArgument("source"), new StringArgument("quest_id"))
+                .withArguments(new StringArgument("source"), new TextArgument("quest_id"))
                 .executesPlayer((player, args) -> {
                     UUID source;
                     try {

@@ -15,6 +15,7 @@ import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel.commandapi.arguments.TextArgument;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -55,7 +56,7 @@ public final class DungeonBuildCommand {
                                     }
                                 })))
                 .withSubcommand(new CommandAPICommand("rewardchest")
-                        .withArguments(new StringArgument("table").replaceSuggestions(ArgumentSuggestions.strings(info -> Stream.concat(
+                        .withArguments(new TextArgument("table").replaceSuggestions(ArgumentSuggestions.strings(info -> Stream.concat(
                                 Stream.of(RewardChestsFeature.DUNGEON_TABLE), Registries.LOOT_TABLE.getAll().keySet().stream().sorted()).toArray(String[]::new))))
                         .executesPlayer((player, args) -> {
                             String table = (String) args.get("table");
@@ -65,7 +66,7 @@ public final class DungeonBuildCommand {
                             PlayerUtils.giveItem(player, item);
                         }))
                 .withSubcommand(new CommandAPICommand("loottable")
-                        .withArguments(new StringArgument("table").replaceSuggestions(ArgumentSuggestions.strings(
+                        .withArguments(new TextArgument("table").replaceSuggestions(ArgumentSuggestions.strings(
                                 info -> Registries.LOOT_TABLE.getAll().keySet().stream().sorted().toArray(String[]::new))))
                         .executesPlayer((player, args) -> {
                             String tableId = (String) args.get("table");

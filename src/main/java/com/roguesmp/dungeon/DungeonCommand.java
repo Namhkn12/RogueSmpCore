@@ -13,6 +13,7 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.DoubleArgument;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel.commandapi.arguments.TextArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -235,7 +236,7 @@ public class DungeonCommand {
     }
 
     private static Argument<String> dungeonArgument() {
-        return new StringArgument("dungeon").replaceSuggestions(ArgumentSuggestions.strings(
+        return new TextArgument("dungeon").replaceSuggestions(ArgumentSuggestions.strings(
                 info -> Registries.DUNGEON.getAll().keySet().toArray(String[]::new)));
     }
 
