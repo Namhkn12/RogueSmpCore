@@ -13,7 +13,7 @@ import com.roguesmp.dungeon.room.RoomEffectContext;
 import com.roguesmp.dungeon.room.RoomObjective;
 import com.roguesmp.dungeon.room.RoomSchematics;
 import com.roguesmp.dungeon.room.RoomType;
-import com.roguesmp.dungeon.spawner.SpawnerSystem;
+import com.roguesmp.spawner.SpawnerSystem;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.gui.dungeon.BossTriggerGui;
 import com.roguesmp.gui.dungeon.RoomChoiceGui;

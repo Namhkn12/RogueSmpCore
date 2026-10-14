@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.spawner.behavior;
+package com.roguesmp.spawner.behavior;
 
 import com.roguesmp.utils.LocationUtils;
 import java.util.concurrent.ThreadLocalRandom;

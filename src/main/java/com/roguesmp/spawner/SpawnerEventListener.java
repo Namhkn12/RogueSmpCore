@@ -1,7 +1,6 @@
-package com.roguesmp.dungeon.spawner;
+package com.roguesmp.spawner;
 
 import com.roguesmp.constant.Keys;
-import com.roguesmp.dungeon.DungeonWorldManager;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
@@ -36,27 +35,25 @@ public class SpawnerEventListener implements Listener {
     @EventHandler
     public void onSpawnerAddToWorld(EntityAddToWorldEvent event){
         if (!(event.getEntity() instanceof Marker marker)) return;
-        if (!DungeonWorldManager.isAnyDungeonWorld(event.getWorld())) return;
+        if (!SpawnerSystem.isActive(marker.getLocation())) return;
 
         spawnerController.handleSpawnerAppear(marker);
     }
 
-//    @EventHandler
-//    public void onMarkerLoad(EntitiesLoadEvent event){
-//        if (!DungeonWorldManager.isAnyDungeonWorld(event.getWorld())) return;
-//        spawnerController.handleSpawnerLoad(event.getEntities(), event.getWorld());
-//    }
-
     @EventHandler
     public void onSpawnerBreak(BlockBreakEvent event){
         Block block = event.getBlock();
-        if (block.getType() != Material.SPAWNER || !DungeonWorldManager.isAnyDungeonWorld(block.getWorld())) return;
+        if (block.getType() != Material.SPAWNER || !SpawnerSystem.isActive(block.getLocation())) return;
         boolean allowBreak  = spawnerController.handleSpawnerBreak(event.getBlock(), event.getPlayer());
         event.setCancelled(!allowBreak );
     }
 
     @EventHandler
     public void onSpawnerSpawn(SpawnerSpawnEvent event){
+        if (!SpawnerSystem.isActive(event.getLocation())) {
+            if (event.getSpawner() != null && event.getSpawner().getPersistentDataContainer().has(Keys.SPAWNER_TID)) event.setCancelled(true);
+            return;
+        }
         boolean allowSpawn = spawnerController.handleSpawnerSpawn(event.getSpawner(),
                 event.getEntity(),
                 event.getLocation().getNearbyPlayers(20).stream().toList());

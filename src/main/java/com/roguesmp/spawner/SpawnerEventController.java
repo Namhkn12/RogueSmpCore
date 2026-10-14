@@ -1,8 +1,7 @@
-package com.roguesmp.dungeon.spawner;
+package com.roguesmp.spawner;
 
 
 import com.roguesmp.constant.Keys;
-import com.roguesmp.dungeon.DungeonWorldManager;
 import com.roguesmp.RogueSmpCore;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -59,26 +58,6 @@ public class SpawnerEventController {
         if (instance == null) return true;
 
         return instance.runSpawn((LivingEntity) entity, player,spawner.getLocation());
-    }
-
-    public void handleSpawnerLoad(List<Entity> entities, World world){
-        if(!DungeonWorldManager.isAnyDungeonWorld(world)) return;
-        for (Entity entity : entities) {
-            if (entity.getType() != EntityType.MARKER) continue;
-
-            PersistentDataContainer pdc = entity.getPersistentDataContainer();
-            if (!pdc.has(Keys.SPAWNER_TID, PersistentDataType.STRING)) continue;
-
-            String sid = pdc.get(Keys.SPAWNER_TID, PersistentDataType.STRING);
-            Block blockBelow = entity.getLocation().getBlock();
-
-            if (blockBelow.getType() != Material.SPAWNER) {
-                entity.remove();
-                continue;
-            }
-
-            registerSpawner(blockBelow, sid);
-        }
     }
 
     public void handleSpawnerAppear(Marker marker) {

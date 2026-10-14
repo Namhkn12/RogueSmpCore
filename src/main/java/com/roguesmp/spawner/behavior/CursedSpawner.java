@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.spawner.behavior;
+package com.roguesmp.spawner.behavior;
 
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;

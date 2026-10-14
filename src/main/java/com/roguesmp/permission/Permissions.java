@@ -14,6 +14,7 @@ public enum Permissions {
     FISHING_ADMIN("fishing.admin"),
     REGION_ADMIN("region.admin"),
     DUNGEON_ADMIN("dungeon.admin"),
+    SPAWNER_ADMIN("spawner.admin"),
     POLAR_TEMPLATE_ADMIN("polartemplate.admin");
 
     private static final String ROOT = "roguesmp.";

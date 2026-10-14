@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.spawner;
+package com.roguesmp.spawner;
 
 import com.roguesmp.RogueSmpCore;
 import com.google.gson.Gson;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class SpawnerRepository {
 
-    private static final String FOLDER = "dungeon_v2/template/spawner_template";
+    private static final String FOLDER = "spawners";
     private static final String FILE_PREFIX = "spawner";
 
     private final File dataFolder;

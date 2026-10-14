@@ -4,8 +4,6 @@ import com.roguesmp.command.CommandFeedback;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.dungeon.feature.RewardChestsFeature;
 import com.roguesmp.dungeon.room.RoomSchematics;
-import com.roguesmp.dungeon.spawner.SpawnerSystem;
-import com.roguesmp.dungeon.spawner.Spawner;
 import com.roguesmp.loot.LootTable;
 import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.permission.Permissions;
@@ -56,22 +54,6 @@ public final class DungeonBuildCommand {
                                         CommandFeedback.error(player, e);
                                     }
                                 })))
-                .withSubcommand(new CommandAPICommand("spawner")
-                        .withArguments(new StringArgument("template").replaceSuggestions(ArgumentSuggestions.strings(
-                                info -> SpawnerSystem.getInstance().templates().getAllIds().toArray(String[]::new))))
-                        .executesPlayer((player, args) -> {
-                            String templateId = (String) args.get("template");
-                            Spawner template = SpawnerSystem.getInstance().templates().getById(templateId);
-                            if (template == null) {
-                                player.sendMessage(Utils.fromString("<red>Không tìm thấy mẫu spawner " + templateId + "."));
-                                return;
-                            }
-                            ItemStack item = ItemStack.of(Material.SPAWNER);
-                            String name = template.getName() != null ? template.getName() : templateId;
-                            item.setData(DataComponentTypes.ITEM_NAME, Utils.fromString("<gold>Spawner: " + name));
-                            item.editPersistentDataContainer(pdc -> pdc.set(Keys.SPAWNER_TID, PersistentDataType.STRING, templateId));
-                            PlayerUtils.giveItem(player, item);
-                        }))
                 .withSubcommand(new CommandAPICommand("rewardchest")
                         .withArguments(new StringArgument("table").replaceSuggestions(ArgumentSuggestions.strings(info -> Stream.concat(
                                 Stream.of(RewardChestsFeature.DUNGEON_TABLE), Registries.LOOT_TABLE.getAll().keySet().stream().sorted()).toArray(String[]::new))))

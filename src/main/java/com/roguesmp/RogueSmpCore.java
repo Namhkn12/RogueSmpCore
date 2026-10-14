@@ -21,7 +21,8 @@ import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.dungeon.build.DungeonBuildCommand;
 import com.roguesmp.dungeon.listener.RewardChestListener;
-import com.roguesmp.dungeon.spawner.SpawnerSystem;
+import com.roguesmp.spawner.SpawnerCommand;
+import com.roguesmp.spawner.SpawnerSystem;
 import com.roguesmp.party.PartyCommand;
 import com.roguesmp.party.PartyListener;
 import com.roguesmp.party.PartyManager;
@@ -228,6 +229,7 @@ public final class RogueSmpCore extends JavaPlugin {
         PolarTemplateCommand.register();
         new DungeonCommand(DungeonManager.getInstance()).register();
         DungeonBuildCommand.register();
+        SpawnerCommand.register();
         GlyphFontCommand.register();
     }
 

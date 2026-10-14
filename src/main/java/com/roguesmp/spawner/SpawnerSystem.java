@@ -1,8 +1,13 @@
-package com.roguesmp.dungeon.spawner;
+package com.roguesmp.spawner;
 
 import com.google.gson.GsonBuilder;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.Keys;
+import com.roguesmp.region.SmpRegionFlags;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.WorldGuard;
+import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -35,6 +40,11 @@ public final class SpawnerSystem {
 
     public SpawnerEventListener listener() {
         return listener;
+    }
+
+    public static boolean isActive(Location location) {
+        var query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
+        return query.testState(BukkitAdapter.adapt(location), (LocalPlayer) null, SmpRegionFlags.SPAWNERS);
     }
 
     public void disarm(CreatureSpawner spawner) {

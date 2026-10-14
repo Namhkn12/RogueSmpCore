@@ -1,4 +1,4 @@
-package com.roguesmp.dungeon.spawner;
+package com.roguesmp.spawner;
 
 import com.roguesmp.RogueSmpCore;
 

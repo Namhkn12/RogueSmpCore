@@ -1,6 +1,6 @@
-package com.roguesmp.dungeon.spawner;
+package com.roguesmp.spawner;
 
-import com.roguesmp.dungeon.spawner.behavior.BehaviorData;
+import com.roguesmp.spawner.behavior.BehaviorData;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
 import org.bukkit.block.CreatureSpawner;

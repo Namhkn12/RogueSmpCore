@@ -1,6 +1,6 @@
-package com.roguesmp.dungeon.spawner;
+package com.roguesmp.spawner;
 
-import com.roguesmp.dungeon.spawner.behavior.BaseBehavior;
+import com.roguesmp.spawner.behavior.BaseBehavior;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;

@@ -1,7 +1,7 @@
-package com.roguesmp.dungeon.spawner;
+package com.roguesmp.spawner;
 
-import com.roguesmp.dungeon.spawner.behavior.BaseBehavior;
-import com.roguesmp.dungeon.spawner.behavior.BehaviorFactory;
+import com.roguesmp.spawner.behavior.BaseBehavior;
+import com.roguesmp.spawner.behavior.BehaviorFactory;
 import org.bukkit.Location;
 
 import java.util.HashMap;
