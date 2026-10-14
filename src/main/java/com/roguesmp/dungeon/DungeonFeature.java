@@ -22,7 +22,7 @@ public interface DungeonFeature<S> {
     Codec<S> stateCodec();
 
     // Runs before the instance exists; may add starting members or refuse the creation.
-    default DataResult<Void> prepare(Player owner, Set<UUID> members) {
+    default DataResult<Void> prepare(Player creator, Set<UUID> members) {
         return DataResult.success(null);
     }
 

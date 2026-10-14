@@ -26,8 +26,8 @@ public class DungeonAbandonGui extends BaseGui {
     @Override
     public void setup() {
         clearUi();
-        boolean owner = run.ownerId().equals(player.getUniqueId());
-        String warning = owner ? "<red>Phó bản sẽ bị huỷ cho mọi thành viên!" : "<gray>Bạn sẽ mất quyền vào phó bản này.";
+        boolean last = run.members().size() <= 1;
+        String warning = last ? "<red>Bạn là thành viên cuối cùng: phó bản sẽ bị huỷ!" : "<gray>Bạn sẽ mất quyền vào phó bản này.";
 
         addButton(1, 2, DungeonDetailGui.button(Material.RED_CONCRETE, "<dark_red><b>XÁC NHẬN RỜI BỎ",
                 List.of(Utils.fromString(warning), Utils.fromString("<red>Không thể hoàn tác!"))), event -> {

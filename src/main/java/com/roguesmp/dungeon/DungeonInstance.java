@@ -39,7 +39,6 @@ public class DungeonInstance {
             Codec.STRING.fieldOf("dungeon").forGetter(DungeonInstance::dungeonId),
             PolarWorldKey.CODEC.fieldOf("template").forGetter(DungeonInstance::template),
             PolarTemplateData.CODEC.optionalFieldOf("world").forGetter(instance -> Optional.ofNullable(instance.worldData)),
-            Codec.UUID.fieldOf("owner").forGetter(DungeonInstance::ownerId),
             Codec.listOf(Codec.UUID).<Set<UUID>>xmap(LinkedHashSet::new, ArrayList::new).fieldOf("members").forGetter(instance -> instance.members),
             Codec.LONG.fieldOf("created_at").forGetter(DungeonInstance::createdAt),
             Codec.unboundedMap(JSON).optionalFieldOf("features", Map.of()).forGetter(DungeonInstance::encodeStates),
@@ -50,7 +49,6 @@ public class DungeonInstance {
     private final String dungeonId;
     private final PolarWorldKey template;
     private final @Nullable PolarTemplateData worldData;
-    private final UUID ownerId;
     private final Set<UUID> members;
     private final long createdAt;
     // Raw until bound to a definition, so runs of a removed dungeon keep their data.
@@ -58,20 +56,18 @@ public class DungeonInstance {
     private final Map<String, Object> states = new HashMap<>();
     private @Nullable DungeonDefinition definition;
 
-    private DungeonInstance(UUID id, String dungeonId, PolarWorldKey template, Optional<PolarTemplateData> worldData, UUID ownerId, Set<UUID> members, long createdAt, Map<String, JsonElement> savedStates) {
+    private DungeonInstance(UUID id, String dungeonId, PolarWorldKey template, Optional<PolarTemplateData> worldData, Set<UUID> members, long createdAt, Map<String, JsonElement> savedStates) {
         this.id = id;
         this.dungeonId = dungeonId;
         this.template = template;
         this.worldData = worldData.orElse(null);
-        this.ownerId = ownerId;
         this.members = new LinkedHashSet<>(members);
         this.createdAt = createdAt;
         this.savedStates.putAll(savedStates);
     }
 
-    public DungeonInstance(String dungeonId, DungeonDefinition definition, PolarTemplateData worldData, UUID ownerId, Set<UUID> members) {
-        this(UUID.randomUUID(), dungeonId, definition.template(), Optional.of(worldData), ownerId, members, System.currentTimeMillis(), Map.of());
-        this.members.add(ownerId);
+    public DungeonInstance(String dungeonId, DungeonDefinition definition, PolarTemplateData worldData, Set<UUID> members) {
+        this(UUID.randomUUID(), dungeonId, definition.template(), Optional.of(worldData), members, System.currentTimeMillis(), Map.of());
         bind(definition);
     }
 
@@ -137,10 +133,6 @@ public class DungeonInstance {
 
     public @Nullable PolarTemplateData worldData() {
         return worldData;
-    }
-
-    public UUID ownerId() {
-        return ownerId;
     }
 
     public Set<UUID> members() {

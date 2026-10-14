@@ -9,6 +9,7 @@ import com.roguesmp.party.PartyManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -32,10 +33,10 @@ public record PartyFeature() implements DungeonFeature<PartyFeature.State> {
     public static final Codec<PartyFeature> CODEC = Codec.unit(PartyFeature::new);
 
     @Override
-    public DataResult<Void> prepare(Player owner, Set<UUID> members) {
-        Party party = PartyManager.getInstance().getPartyByPlayer(owner);
-        if (party == null) return DataResult.error("Phó bản này cần một nhóm, hãy tạo nhóm bằng /party create.");
-        if (!party.isOwner(owner.getUniqueId().toString())) return DataResult.error("Chỉ trưởng nhóm mới có thể bắt đầu phó bản.");
+    public DataResult<Void> prepare(Player creator, Set<UUID> members) {
+        Party party = PartyManager.getInstance().getPartyByPlayer(creator);
+        if (party == null) return DataResult.success(null);
+        if (!party.isOwner(creator.getUniqueId().toString())) return DataResult.error("Chỉ trưởng nhóm mới có thể tạo phó bản cho cả nhóm.");
         if (party.getInstanceId() != null && !party.getInstanceId().isBlank()) return DataResult.error("Nhóm của bạn đang ở trong một phó bản khác.");
 
         party.getMembers().forEach(member -> members.add(UUID.fromString(member)));
@@ -59,8 +60,13 @@ public record PartyFeature() implements DungeonFeature<PartyFeature.State> {
 
     @Override
     public void onStart(FeatureContext<State> context) {
-        Player owner = Bukkit.getPlayer(context.instance().ownerId());
-        Party party = owner == null ? null : PartyManager.getInstance().getPartyByPlayer(owner);
+        Party party = context.instance().members().stream()
+                .map(Bukkit::getPlayer)
+                .filter(Objects::nonNull)
+                .map(PartyManager.getInstance()::getPartyByPlayer)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
         if (party == null) return;
         party.setInstanceId(context.instance().id().toString());
         context.state().partyId = party.getPartyId();

@@ -65,24 +65,24 @@ public class DungeonCommand {
     private CommandAPICommand joinSub() {
         return new CommandAPICommand("join")
                 .withArguments(dungeonArgument())
-                .withOptionalArguments(playerArgument("owner"))
+                .withOptionalArguments(playerArgument("inviter"))
                 .executesPlayer((player, args) -> {
                     String dungeonId = (String) args.get("dungeon");
-                    if (args.getOptional("owner").isEmpty()) {
-                        DungeonInstance own = manager.findFor(player.getUniqueId(), dungeonId);
-                        if (own == null) player.sendMessage(Utils.fromString("<red>Bạn chưa có phó bản này, hãy dùng /dungeonrun create " + dungeonId + "."));
-                        else manager.enter(player, own);
+                    DungeonInstance own = manager.findFor(player.getUniqueId(), dungeonId);
+                    if (own != null) {
+                        manager.enter(player, own);
                         return;
                     }
 
-                    OfflinePlayer owner = knownPlayer(player, (String) args.get("owner"));
-                    if (owner == null) return;
-                    DungeonInstance invited = manager.instances().stream()
-                            .filter(run -> run.dungeonId().equals(dungeonId) && run.ownerId().equals(owner.getUniqueId()))
+                    String inviterName = (String) args.getOptional("inviter").orElse(null);
+                    OfflinePlayer inviter = inviterName == null ? null : knownPlayer(player, inviterName);
+                    if (inviterName != null && inviter == null) return;
+                    DungeonManager.Invite invite = manager.invitesFor(player.getUniqueId(), dungeonId).stream()
+                            .filter(pending -> inviter == null || pending.inviterId().equals(inviter.getUniqueId()))
                             .findFirst()
                             .orElse(null);
-                    if (invited == null) player.sendMessage(Utils.fromString("<red>Không tìm thấy phó bản này."));
-                    else manager.acceptInvite(player, invited);
+                    if (invite == null) player.sendMessage(Utils.fromString("<red>Bạn chưa có phó bản này, hãy dùng /dungeonrun create " + dungeonId + "."));
+                    else manager.acceptInvite(player, invite.instance());
                 });
     }
 
@@ -138,7 +138,7 @@ public class DungeonCommand {
                         .executes((sender, args) -> {
                             for (DungeonInstance instance : manager.instances()) {
                                 sender.sendMessage(Utils.fromString("<yellow>" + instance.id() + " <gray>" + instance.dungeonId()
-                                        + " owner=" + name(instance.ownerId()) + " members=" + instance.members().size() + " expires=" + deadline(instance)));
+                                        + " members=" + instance.members().size() + " expires=" + deadline(instance)));
                             }
                         }))
                 .withSubcommand(new CommandAPICommand("info")
@@ -148,7 +148,6 @@ public class DungeonCommand {
                             if (instance == null) return;
 
                             sender.sendMessage(Utils.fromString("<yellow>" + instance.id() + " <gray>" + instance.dungeonId()));
-                            sender.sendMessage(Utils.fromString("<gray>Owner: <white>" + name(instance.ownerId())));
                             sender.sendMessage(Utils.fromString("<gray>Members: <white>" + instance.members().stream().map(DungeonCommand::name).toList()));
                             sender.sendMessage(Utils.fromString("<gray>Expires: <white>" + deadline(instance)));
                         }))

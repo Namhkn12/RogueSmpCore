@@ -63,7 +63,6 @@ public class DungeonDetailGui extends BaseGui {
 
     private void setupRun(DungeonInstance run) {
         List<Component> runLore = new ArrayList<>();
-        runLore.add(Utils.fromString("<gray>Chủ phó bản: <white>" + name(run.ownerId())));
         runLore.add(Utils.fromString("<gray>Thành viên: <white>" + run.members().size()));
         FeatureContext<ExpiryFeature.State> expiry = DungeonManager.getInstance().feature(run, ExpiryFeature.class);
         if (expiry != null) {
@@ -78,15 +77,15 @@ public class DungeonDetailGui extends BaseGui {
         });
 
         DungeonManager manager = DungeonManager.getInstance();
-        boolean owner = run.ownerId().equals(player.getUniqueId());
-        if (manager.allowsInvites(run) && owner) {
+        boolean last = run.members().size() <= 1;
+        if (manager.allowsInvites(run)) {
             addButton(2, 4, button(Material.PLAYER_HEAD, "<aqua><b>Mời người chơi", List.of(Utils.fromString("<yellow>▶ Click để chọn người chơi"))), event -> {
                 event.setCancelled(true);
                 new DungeonInviteGui(player, run).showInventory(player);
             });
         }
         if (manager.allowsAbandon(run)) {
-            String warning = owner ? "<red>Bạn là chủ: phó bản sẽ bị huỷ cho mọi người!" : "<gray>Bạn sẽ không thể vào lại nếu không được mời.";
+            String warning = last ? "<red>Bạn là thành viên cuối cùng: phó bản sẽ bị huỷ!" : "<gray>Bạn sẽ không thể vào lại nếu không được mời.";
             addButton(2, 6, button(Material.BARRIER, "<red><b>Rời bỏ phó bản", List.of(Utils.fromString(warning))), event -> {
                 event.setCancelled(true);
                 new DungeonAbandonGui(player, run).showInventory(player);
@@ -101,17 +100,17 @@ public class DungeonDetailGui extends BaseGui {
             manager.create(player, dungeonId);
         });
 
-        List<DungeonInstance> invites = manager.invitesFor(player.getUniqueId(), dungeonId);
+        List<DungeonManager.Invite> invites = manager.invitesFor(player.getUniqueId(), dungeonId);
         for (int i = 0; i < Math.min(invites.size(), 7); i++) {
-            DungeonInstance invite = invites.get(i);
-            ItemStack head = button(Material.PLAYER_HEAD, "<aqua>Lời mời từ <white>" + name(invite.ownerId()),
-                    List.of(Utils.fromString("<gray>Thành viên: <white>" + invite.members().size()), Utils.fromString("<yellow>▶ Click để tham gia")));
-            OfflinePlayer owner = Bukkit.getOfflinePlayer(invite.ownerId());
-            head.setData(DataComponentTypes.PROFILE, ResolvableProfile.resolvableProfile(owner.getPlayerProfile()));
+            DungeonManager.Invite invite = invites.get(i);
+            ItemStack head = button(Material.PLAYER_HEAD, "<aqua>Lời mời từ <white>" + name(invite.inviterId()),
+                    List.of(Utils.fromString("<gray>Thành viên: <white>" + invite.instance().members().size()), Utils.fromString("<yellow>▶ Click để tham gia")));
+            OfflinePlayer inviter = Bukkit.getOfflinePlayer(invite.inviterId());
+            head.setData(DataComponentTypes.PROFILE, ResolvableProfile.resolvableProfile(inviter.getPlayerProfile()));
             addButton(3, 1 + i, head, event -> {
                 event.setCancelled(true);
                 player.closeInventory();
-                manager.acceptInvite(player, invite);
+                manager.acceptInvite(player, invite.instance());
             });
         }
     }
