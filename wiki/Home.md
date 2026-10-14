@@ -15,12 +15,13 @@ Mỗi trang = 1 thư mục dữ liệu: **mỗi key làm gì, kiểu gì, bắt 
 | [JSON-Entities](JSON-Entities.md) | `entities/` | Mob/boss: component, spell, boss bar, loot |
 | [JSON-Abilities](JSON-Abilities.md) | `ability_info/` | Chỉ số theo level, phím kích hoạt, chi phí nâng cấp, bảng ability có sẵn |
 | [JSON-Classes](JSON-Classes.md) | `classes/` | Lớp nhân vật: roster ability, giới hạn vũ khí |
-| [JSON-Quests](JSON-Quests.md) | `quests/` | Quest, objective, reward, quest hằng ngày |
+| [JSON-Quests](JSON-Quests.md) | `quests/` | Quest, objective, reward, hộp thư thưởng, quest hằng ngày, quest nhóm |
 | [JSON-Npcs](JSON-Npcs.md) | `npcs/` | NPC và action khi click |
 | [JSON-Loot](JSON-Loot.md) | `loottable/` | Pool, entry, condition, thuật toán roll |
 | [JSON-Crafting](JSON-Crafting.md) | `crafting_recipes/` | `shaped`, `shapeless`, `fusion` |
 | [JSON-Blocks](JSON-Blocks.md) | `blocks/`, `fuel_types/` | Block, máy phát (generator), module, nhiên liệu, altar |
-| [JSON-Dungeons](JSON-Dungeons.md) | `dungeon_v2/template/` | Dungeon, phòng, objective, room event, spawner (hệ riêng, dùng Gson) |
+| [JSON-Dungeons](JSON-Dungeons.md) | `dungeon/` | Dungeon, feature, phòng, script (sự kiện, condition, action, biến) |
+| [JSON-Spawners](JSON-Spawners.md) | `spawners/` | Spawner tuỳ chỉnh, behavior, flag `smp-spawners` |
 
 ## 2. Kiến trúc — cho dev
 
@@ -33,7 +34,7 @@ Giải thích **vì sao** hệ thống chạy như vậy và cách mở rộng b
 5. **[GUI Framework](GUI-Framework.md)** — `BaseGui` + `GuiListener`, `ReactiveGui<S>`.
 6. **[Entity, Boss & Spell System](Entity-Boss-Spell-System.md)** — `BaseEntity`/`SmpEntity`, `EntityComponent`, `SpellComponent`, `PhaseComponent`.
 7. **[Player Ability System](Player-Ability-System.md)** — `Ability`, `AbilityInfo` (code) tách khỏi `AbilityConfig` (JSON), `AbilityLoadout`, trigger & capture.
-8. **[Dungeon System](Dungeon-System.md)** — bảy tầng phân lớp nghiêm ngặt (definition → runtime → repository → manager → service → controller → actor).
+8. **[Dungeon System](Dungeon-System.md)** — lõi instance nhỏ + feature, sự kiện, script JSON, kiểm tra khi nạp.
 9. **[Fx System](Fx-System.md)** — hiệu ứng particle/display thuần hiển thị: `FxShape` + `FxMotion` + `FxRenderer`. Không JSON-hóa được.
 
 Mọi thứ khởi động từ [`RogueSmpCore`](../src/main/java/com/roguesmp/RogueSmpCore.java): `init()` (khởi tạo singleton + bootstrap các bảng tra codec), `loadData()` (decode mọi `*.json` qua Registry), `initListeners()`, `initCommands()`.

@@ -17,6 +17,8 @@ import com.roguesmp.region.event.RegionEnterEvent;
 import com.roguesmp.region.event.RegionLeaveEvent;
 import com.roguesmp.utils.EntityUtils;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -134,6 +136,19 @@ public class DungeonListener implements Listener {
         BaseEntity base = EntityUtils.getBaseEntity(mob);
         String mobId = base != null ? base.getId() : mob.getType().getKey().getKey();
         fire(mob.getWorld(), new DungeonEvent.MobKilled(killer, mob, mobId));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof LivingEntity mob) || mob instanceof Player) return;
+        if (manager.getByWorld(mob.getWorld()) == null) return;
+        BaseEntity base = EntityUtils.getBaseEntity(mob);
+        String mobId = base != null ? base.getId() : mob.getType().getKey().getKey();
+        AttributeInstance maxHealth = mob.getAttribute(Attribute.MAX_HEALTH);
+        double max = maxHealth != null ? maxHealth.getValue() : mob.getHealth();
+        double after = Math.max(0, mob.getHealth() - event.getFinalDamage());
+        Player attacker = event.getDamageSource().getCausingEntity() instanceof Player player ? player : null;
+        fire(mob.getWorld(), new DungeonEvent.MobDamaged(attacker, mob, mobId, event.getFinalDamage(), max <= 0 ? 0 : after / max * 100));
     }
 
     @EventHandler(priority = EventPriority.HIGH)

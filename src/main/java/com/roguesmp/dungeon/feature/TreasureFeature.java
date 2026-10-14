@@ -2,6 +2,7 @@ package com.roguesmp.dungeon.feature;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
+import com.roguesmp.dungeon.script.DungeonValidation;
 import com.roguesmp.dungeon.DungeonFeature;
 import com.roguesmp.dungeon.DungeonEvent;
 import com.roguesmp.dungeon.FeatureContext;
@@ -54,6 +55,11 @@ public record TreasureFeature(List<String> rooms, int extendSeconds, int spacing
             Codec.INT.optionalFieldOf("spacing", 32).forGetter(TreasureFeature::spacing),
             TreasureFeature::new
     );
+
+    @Override
+    public void validate(String featureId, DungeonValidation check) {
+        for (int i = 0; i < rooms.size(); i++) check.at("rooms[" + i + "]").checkRoom(rooms.get(i));
+    }
 
     @Override
     public String getTypeId() {

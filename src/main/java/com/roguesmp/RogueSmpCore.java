@@ -47,6 +47,7 @@ import com.roguesmp.dungeon.DungeonWorldManager;
 import com.roguesmp.dungeon.DungeonCommand;
 import com.roguesmp.dungeon.listener.DungeonListener;
 import com.roguesmp.dungeon.DungeonManager;
+import com.roguesmp.dungeon.script.DungeonValidation;
 import com.roguesmp.island.IslandCommand;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
@@ -141,6 +142,7 @@ public final class RogueSmpCore extends JavaPlugin {
     // Load data from files, databases, etc
     public void loadData() {
         Registries.loadAllData(this);
+        DungeonValidation.validateAll();
         DungeonManager.getInstance().load(); // binds runs to dungeon definitions and sweeps quest groups - must run after both are loaded above
 
         CraftingManager.init(); // indexes Registries.CRAFTING_RECIPE - must run after it's loaded above

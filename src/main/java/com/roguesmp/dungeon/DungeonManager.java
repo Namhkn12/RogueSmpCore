@@ -90,6 +90,10 @@ public final class DungeonManager {
         return instances.values();
     }
 
+    public boolean isLive(DungeonInstance instance) {
+        return instances.get(instance.id()) == instance && !ending.contains(instance.id());
+    }
+
     public @Nullable DungeonInstance get(UUID instanceId) {
         return instances.get(instanceId);
     }

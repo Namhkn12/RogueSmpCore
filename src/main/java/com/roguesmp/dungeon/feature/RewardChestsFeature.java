@@ -1,6 +1,7 @@
 package com.roguesmp.dungeon.feature;
 
 import com.roguesmp.codec.Codec;
+import com.roguesmp.dungeon.script.DungeonValidation;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.dungeon.DungeonFeature;
 import com.roguesmp.dungeon.DungeonEvent;
@@ -41,6 +42,11 @@ public record RewardChestsFeature(String lootTable) implements DungeonFeature<No
             Codec.STRING.optionalFieldOf("loot_table", "").forGetter(RewardChestsFeature::lootTable),
             RewardChestsFeature::new
     );
+
+    @Override
+    public void validate(String featureId, DungeonValidation check) {
+        if (!lootTable.isEmpty()) check.at("loot_table").checkLootTable(lootTable);
+    }
 
     @Override
     public String getTypeId() {

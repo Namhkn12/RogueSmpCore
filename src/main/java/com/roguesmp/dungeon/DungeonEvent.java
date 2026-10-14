@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon;
 
+import com.roguesmp.dungeon.script.DataValue;
 import com.roguesmp.quest.Quest;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,8 +15,26 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Set;
 
 public sealed interface DungeonEvent {
+
+    // Data keys each built-in event carries.
+    Map<String, Set<String>> BUILT_IN = Map.ofEntries(
+            Map.entry("started", Set.of()),
+            Map.entry("player_entered", Set.of()),
+            Map.entry("player_left", Set.of()),
+            Map.entry("region_entered", Set.of()),
+            Map.entry("region_left", Set.of()),
+            Map.entry("mob_killed", Set.of()),
+            Map.entry("mob_damaged", Set.of("damage", "health_percent")),
+            Map.entry("block_interacted", Set.of()),
+            Map.entry("block_broken", Set.of()),
+            Map.entry("item_picked_up", Set.of("amount")),
+            Map.entry("portal_entered", Set.of()),
+            Map.entry("player_died", Set.of()),
+            Map.entry("quest_completed", Set.of())
+    );
 
     String id();
 
@@ -23,7 +42,7 @@ public sealed interface DungeonEvent {
         return "";
     }
 
-    default Map<String, String> data() {
+    default Map<String, DataValue> data() {
         return Map.of();
     }
 
@@ -111,6 +130,33 @@ public sealed interface DungeonEvent {
         }
     }
 
+    record MobDamaged(@Nullable Player attacker, LivingEntity mob, String mobId, double damage, double healthPercent) implements DungeonEvent {
+        @Override
+        public String id() {
+            return "mob_damaged";
+        }
+
+        @Override
+        public String subject() {
+            return mobId;
+        }
+
+        @Override
+        public Map<String, DataValue> data() {
+            return Map.of("damage", DataValue.of(damage), "health_percent", DataValue.of(healthPercent));
+        }
+
+        @Override
+        public @Nullable Player player() {
+            return attacker;
+        }
+
+        @Override
+        public Location location() {
+            return mob.getLocation();
+        }
+    }
+
     // Features may cancel the event.
     record BlockInteracted(Player player, Block block, PlayerInteractEvent event) implements DungeonEvent {
         @Override
@@ -165,6 +211,11 @@ public sealed interface DungeonEvent {
         }
 
         @Override
+        public Map<String, DataValue> data() {
+            return Map.of("amount", DataValue.of(amount));
+        }
+
+        @Override
         public String subject() {
             return itemId;
         }
@@ -212,7 +263,7 @@ public sealed interface DungeonEvent {
         }
     }
 
-    record Custom(String id, int amount, @Nullable Player source, Map<String, String> data) implements DungeonEvent {
+    record Custom(String id, int amount, @Nullable Player source, Map<String, DataValue> data) implements DungeonEvent {
         public Custom(String id, int amount, @Nullable Player source) {
             this(id, amount, source, Map.of());
         }

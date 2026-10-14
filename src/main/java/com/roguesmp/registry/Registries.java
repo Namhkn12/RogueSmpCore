@@ -50,6 +50,8 @@ import com.roguesmp.dungeon.room.RoomEffects;
 import com.roguesmp.dungeon.DungeonFeature;
 import com.roguesmp.dungeon.action.DungeonAction;
 import com.roguesmp.dungeon.action.DungeonActions;
+import com.roguesmp.dungeon.script.DungeonCondition;
+import com.roguesmp.dungeon.script.DungeonConditions;
 import com.roguesmp.dungeon.feature.DungeonFeatures;
 import com.roguesmp.world.PolarTemplateData;
 import com.roguesmp.player.ability.trigger.TriggerOption;
@@ -83,6 +85,7 @@ public class Registries {
 
     public static final Registry<Codec<? extends DungeonFeature<?>>> DUNGEON_FEATURE_CODEC = register(registry -> DungeonFeatures.loadClass());
     public static final Registry<Codec<? extends DungeonAction>> DUNGEON_ACTION_CODEC = register(registry -> DungeonActions.loadClass());
+    public static final Registry<Codec<? extends DungeonCondition>> DUNGEON_CONDITION_CODEC = register(registry -> DungeonConditions.loadClass());
     public static final Registry<Codec<? extends RoomEffect<?>>> DUNGEON_ROOM_EFFECT_CODEC = register(registry -> RoomEffects.loadClass());
 
     public static final Registry<Codec<? extends QuestObjective>> QUEST_OBJECTIVE_CODEC = register(registry -> QuestObjectives.loadClass());

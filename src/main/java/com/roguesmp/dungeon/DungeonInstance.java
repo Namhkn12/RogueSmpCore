@@ -5,6 +5,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.DynamicOps;
+import com.roguesmp.dungeon.script.DataValue;
 import com.roguesmp.codec.JsonOps;
 import com.roguesmp.world.PolarTemplateData;
 import com.roguesmp.world.PolarWorldKey;
@@ -41,6 +42,7 @@ public class DungeonInstance {
             PolarTemplateData.CODEC.optionalFieldOf("world").forGetter(instance -> Optional.ofNullable(instance.worldData)),
             Codec.listOf(Codec.UUID).<Set<UUID>>xmap(LinkedHashSet::new, ArrayList::new).fieldOf("members").forGetter(instance -> instance.members),
             Codec.LONG.fieldOf("created_at").forGetter(DungeonInstance::createdAt),
+            Codec.unboundedMap(DataValue.CODEC).optionalFieldOf("variables", Map.of()).forGetter(instance -> instance.variables),
             Codec.unboundedMap(JSON).optionalFieldOf("features", Map.of()).forGetter(DungeonInstance::encodeStates),
             DungeonInstance::new
     );
@@ -51,28 +53,31 @@ public class DungeonInstance {
     private final @Nullable PolarTemplateData worldData;
     private final Set<UUID> members;
     private final long createdAt;
+    private final Map<String, DataValue> variables = new HashMap<>();
     // Raw until bound to a definition, so runs of a removed dungeon keep their data.
     private final Map<String, JsonElement> savedStates = new HashMap<>();
     private final Map<String, Object> states = new HashMap<>();
     private @Nullable DungeonDefinition definition;
 
-    private DungeonInstance(UUID id, String dungeonId, PolarWorldKey template, Optional<PolarTemplateData> worldData, Set<UUID> members, long createdAt, Map<String, JsonElement> savedStates) {
+    private DungeonInstance(UUID id, String dungeonId, PolarWorldKey template, Optional<PolarTemplateData> worldData, Set<UUID> members, long createdAt, Map<String, DataValue> variables, Map<String, JsonElement> savedStates) {
         this.id = id;
         this.dungeonId = dungeonId;
         this.template = template;
         this.worldData = worldData.orElse(null);
         this.members = new LinkedHashSet<>(members);
         this.createdAt = createdAt;
+        this.variables.putAll(variables);
         this.savedStates.putAll(savedStates);
     }
 
     public DungeonInstance(String dungeonId, DungeonDefinition definition, PolarTemplateData worldData, Set<UUID> members) {
-        this(UUID.randomUUID(), dungeonId, definition.template(), Optional.of(worldData), members, System.currentTimeMillis(), Map.of());
+        this(UUID.randomUUID(), dungeonId, definition.template(), Optional.of(worldData), members, System.currentTimeMillis(), Map.of(), Map.of());
         bind(definition);
     }
 
     void bind(DungeonDefinition definition) {
         this.definition = definition;
+        definition.variables().forEach(variables::putIfAbsent);
         definition.features().forEach((featureId, feature) -> states.put(featureId, decodeState(featureId, feature)));
         savedStates.clear();
     }
@@ -113,6 +118,14 @@ public class DungeonInstance {
 
     public @Nullable DungeonDefinition definition() {
         return definition;
+    }
+
+    public @Nullable DataValue variable(String name) {
+        return variables.get(name);
+    }
+
+    public void setVariable(String name, DataValue value) {
+        variables.put(name, value);
     }
 
     public String displayName() {

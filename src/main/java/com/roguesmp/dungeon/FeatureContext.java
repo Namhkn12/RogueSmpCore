@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon;
 
+import com.roguesmp.dungeon.script.DataValue;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +27,7 @@ public record FeatureContext<S>(DungeonManager manager, DungeonInstance instance
         fire(new DungeonEvent.Custom(id, amount, source));
     }
 
-    public void signal(String id, int amount, @Nullable Player source, Map<String, String> data) {
+    public void signal(String id, int amount, @Nullable Player source, Map<String, DataValue> data) {
         fire(new DungeonEvent.Custom(id, amount, source, data));
     }
 

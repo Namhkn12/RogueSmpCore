@@ -2,6 +2,7 @@ package com.roguesmp.dungeon;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
+import com.roguesmp.dungeon.script.DungeonValidation;
 import com.roguesmp.registry.Registries;
 import org.bukkit.entity.Player;
 
@@ -24,6 +25,9 @@ public interface DungeonFeature<S> {
     // Runs before the instance exists; may add starting members or refuse the creation.
     default DataResult<Void> prepare(Player creator, Set<UUID> members) {
         return DataResult.success(null);
+    }
+
+    default void validate(String featureId, DungeonValidation check) {
     }
 
     default void onStart(FeatureContext<S> context) {

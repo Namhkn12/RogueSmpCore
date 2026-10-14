@@ -8,6 +8,9 @@ import com.roguesmp.dungeon.DungeonManager;
 import com.roguesmp.dungeon.DungeonEvent;
 import com.roguesmp.dungeon.FeatureContext;
 import com.roguesmp.dungeon.room.RoomDefinition;
+import com.roguesmp.dungeon.script.DataValue;
+import com.roguesmp.dungeon.script.DungeonCondition;
+import com.roguesmp.dungeon.script.DungeonValidation;
 import com.roguesmp.dungeon.room.RoomEffect;
 import com.roguesmp.dungeon.room.RoomEffectContext;
 import com.roguesmp.dungeon.room.RoomObjective;
@@ -180,6 +183,22 @@ public record RoomsFeature(List<Pool> pools, int minimumRooms, int maxChoices) i
     }
 
     @Override
+    public void validate(String featureId, DungeonValidation check) {
+        Set<String> roomKeys = Set.of("room", "type", "cleared", "score");
+        check.emits(ROOM_STARTED, roomKeys);
+        check.emits(ROOM_CLEARED, roomKeys);
+        check.emits(BOSS_DEFEATED, Set.of());
+        for (int i = 0; i < pools.size(); i++) {
+            for (Entry entry : pools.get(i).rooms()) {
+                DungeonValidation at = check.at("pools[" + i + "]");
+                RoomDefinition room = Registries.DUNGEON_ROOM.get(entry.room());
+                if (room == null) at.checkRoom(entry.room());
+                else room.validate(check.at("room '" + entry.room() + "'"));
+            }
+        }
+    }
+
+    @Override
     public String getTypeId() {
         return TYPE_KEY;
     }
@@ -265,7 +284,7 @@ public record RoomsFeature(List<Pool> pools, int minimumRooms, int maxChoices) i
 
         setDoor(doorLocation, Material.AIR);
         startEffects(context, room);
-        context.signal(ROOM_STARTED, 1, null, Map.of("room", roomId, "type", room.type().name().toLowerCase()));
+        context.signal(ROOM_STARTED, 1, null, roomData(state, roomId, room));
 
         if (state.roomCompleted) {
             completeRoom(context, room);
@@ -309,7 +328,7 @@ public record RoomsFeature(List<Pool> pools, int minimumRooms, int maxChoices) i
         for (int i = 0; i < objectives.size(); i++) {
             RoomObjective objective = objectives.get(i);
             int done = state.progress(i);
-            if (done >= objective.count() || !objective.on().matches(context, event)) continue;
+            if (done >= objective.count() || !objective.on().matches(event) || !DungeonCondition.all(objective.conditions(), context, event)) continue;
 
             int now = Math.min(objective.count(), done + Math.max(1, event.amount()));
             state.progress.put(String.valueOf(i), now);
@@ -346,7 +365,12 @@ public record RoomsFeature(List<Pool> pools, int minimumRooms, int maxChoices) i
         }
         clearRoom(context);
         context.onlinePlayers().forEach(player -> player.sendMessage(Utils.fromString("<green>Phòng đã được dọn sạch!")));
-        context.signal(ROOM_CLEARED, 1, null, Map.of("room", roomId, "type", room.type().name().toLowerCase()));
+        context.signal(ROOM_CLEARED, 1, null, roomData(state, roomId, room));
+    }
+
+    private static Map<String, DataValue> roomData(State state, String roomId, RoomDefinition room) {
+        return Map.of("room", DataValue.of(roomId), "type", DataValue.of(room.type().name().toLowerCase()),
+                "cleared", DataValue.of(state.cleared), "score", DataValue.of(state.score));
     }
 
     private void clearRoom(FeatureContext<State> context) {

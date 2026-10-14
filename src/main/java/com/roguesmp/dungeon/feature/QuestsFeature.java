@@ -80,7 +80,7 @@ public record QuestsFeature(List<Quest> quests, boolean eligibleOnEnter) impleme
         QuestManager.getInstance().endGroup(holder(context.instance()));
     }
 
-    private static GroupHolder holder(DungeonInstance instance) {
+    public static GroupHolder holder(DungeonInstance instance) {
         return new GroupHolder(instance.id(), OWNER, instance::members);
     }
 }

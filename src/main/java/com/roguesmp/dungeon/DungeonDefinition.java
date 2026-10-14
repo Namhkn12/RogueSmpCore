@@ -3,6 +3,7 @@ package com.roguesmp.dungeon;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.DynamicOps;
+import com.roguesmp.dungeon.script.DataValue;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.world.PolarTemplateManager;
 import com.roguesmp.world.PolarWorldKey;
@@ -19,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public record DungeonDefinition(PolarWorldKey template, String displayName, Key icon, List<String> lore, Map<String, DungeonFeature<?>> features) {
+public record DungeonDefinition(PolarWorldKey template, String displayName, Key icon, List<String> lore, Map<String, DataValue> variables, Map<String, DungeonFeature<?>> features) {
 
     private static final String TYPE_FIELD = "type";
 
@@ -83,6 +84,7 @@ public record DungeonDefinition(PolarWorldKey template, String displayName, Key 
             Codec.STRING.fieldOf("display_name").forGetter(DungeonDefinition::displayName),
             Codec.KEY.optionalFieldOf("icon", Key.key("minecraft:paper")).forGetter(DungeonDefinition::icon),
             Codec.listOf(Codec.STRING).optionalFieldOf("lore", List.of()).forGetter(DungeonDefinition::lore),
+            Codec.unboundedMap(DataValue.CODEC).optionalFieldOf("variables", Map.of()).forGetter(DungeonDefinition::variables),
             FEATURES.optionalFieldOf("features", Map.of()).forGetter(DungeonDefinition::features),
             DungeonDefinition::new
     );
