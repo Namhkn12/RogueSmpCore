@@ -104,7 +104,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         //Island
         IslandManager.init(this, PlayerManager.getInstance());
-        DungeonManager.init(this, new DungeonWorldManager(this, PolarTemplateManager.getInstance(), "dungeon_runs", "dungeonrun"));
+        DungeonManager.init(this, new DungeonWorldManager(this, PolarTemplateManager.getInstance(), "dungeon/instances", "dungeonrun"));
         LuckPermsIntegration.init(this);
 
         //Quest

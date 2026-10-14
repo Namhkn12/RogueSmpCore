@@ -1,7 +1,12 @@
 package com.roguesmp.dungeon;
 
 import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.DataResult;
 import com.roguesmp.registry.Registries;
+import org.bukkit.entity.Player;
+
+import java.util.Set;
+import java.util.UUID;
 
 public interface DungeonFeature<S> {
 
@@ -15,6 +20,11 @@ public interface DungeonFeature<S> {
     S createState();
 
     Codec<S> stateCodec();
+
+    // Runs before the instance exists; may add starting members or refuse the creation.
+    default DataResult<Void> prepare(Player owner, Set<UUID> members) {
+        return DataResult.success(null);
+    }
 
     default void onStart(FeatureContext<S> context) {
     }

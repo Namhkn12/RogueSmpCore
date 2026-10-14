@@ -1,5 +1,6 @@
 package com.roguesmp.command;
 
+import com.roguesmp.codec.DataResult;
 import com.roguesmp.utils.Utils;
 import org.bukkit.command.CommandSender;
 
@@ -14,6 +15,12 @@ public final class CommandFeedback {
     public static void error(CommandSender sender, Throwable error) {
         Throwable cause = error instanceof CompletionException && error.getCause() != null ? error.getCause() : error;
         sender.sendMessage(Utils.fromString("<red>" + Utils.MINI_MESSAGE.escapeTags(String.valueOf(cause.getMessage()))));
+    }
+
+    public static boolean failed(CommandSender sender, DataResult<?> result) {
+        if (result.isSuccess()) return false;
+        sender.sendMessage(Utils.fromString("<red>" + Utils.MINI_MESSAGE.escapeTags(result.error())));
+        return true;
     }
 
     public static <T> void report(CommandSender sender, CompletableFuture<T> future, String success) {

@@ -3,7 +3,6 @@ package com.roguesmp.gui.dungeon;
 import com.roguesmp.dungeon.DungeonDefinition;
 import com.roguesmp.dungeon.DungeonInstance;
 import com.roguesmp.dungeon.DungeonManager;
-import com.roguesmp.dungeon.feature.MembershipFeature;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
@@ -51,7 +50,7 @@ public class DungeonBrowserGui extends BaseGui {
 
                 List<Component> status = new ArrayList<>();
                 DungeonInstance run = manager.findFor(player.getUniqueId(), dungeonId);
-                int invites = MembershipFeature.invitesFor(manager, player.getUniqueId(), dungeonId).size();
+                int invites = manager.invitesFor(player.getUniqueId(), dungeonId).size();
                 if (run != null) {
                     status.add(Utils.fromString("<green>● Đang tham gia"));
                 } else if (invites > 0) {

@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class RoomSchematics {
 
-    private static final String FOLDER = "dungeon_schematics";
+    private static final String FOLDER = "dungeon/schematics";
     private static final Map<String, Clipboard> CACHE = new ConcurrentHashMap<>();
 
     private RoomSchematics() {

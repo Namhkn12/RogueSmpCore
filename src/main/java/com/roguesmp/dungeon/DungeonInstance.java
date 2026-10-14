@@ -119,6 +119,10 @@ public class DungeonInstance {
         return definition;
     }
 
+    public String displayName() {
+        return definition != null ? definition.displayName() : dungeonId;
+    }
+
     public UUID id() {
         return id;
     }

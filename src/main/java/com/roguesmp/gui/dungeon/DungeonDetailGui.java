@@ -3,10 +3,8 @@ package com.roguesmp.gui.dungeon;
 import com.roguesmp.dungeon.DungeonDefinition;
 import com.roguesmp.dungeon.DungeonInstance;
 import com.roguesmp.dungeon.DungeonManager;
-import com.roguesmp.dungeon.DungeonPlayerActions;
 import com.roguesmp.dungeon.FeatureContext;
 import com.roguesmp.dungeon.feature.ExpiryFeature;
-import com.roguesmp.dungeon.feature.MembershipFeature;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.DateUtils;
@@ -76,18 +74,18 @@ public class DungeonDetailGui extends BaseGui {
         addButton(2, 2, button(Material.ENDER_PEARL, "<green><b>Vào lại phó bản", runLore), event -> {
             event.setCancelled(true);
             player.closeInventory();
-            DungeonPlayerActions.enter(player, run);
+            DungeonManager.getInstance().enter(player, run);
         });
 
-        MembershipFeature membership = DungeonPlayerActions.membershipFeature(run);
+        DungeonManager manager = DungeonManager.getInstance();
         boolean owner = run.ownerId().equals(player.getUniqueId());
-        if (membership != null && membership.invites() && owner) {
+        if (manager.allowsInvites(run) && owner) {
             addButton(2, 4, button(Material.PLAYER_HEAD, "<aqua><b>Mời người chơi", List.of(Utils.fromString("<yellow>▶ Click để chọn người chơi"))), event -> {
                 event.setCancelled(true);
                 new DungeonInviteGui(player, run).showInventory(player);
             });
         }
-        if (membership != null && membership.abandon()) {
+        if (manager.allowsAbandon(run)) {
             String warning = owner ? "<red>Bạn là chủ: phó bản sẽ bị huỷ cho mọi người!" : "<gray>Bạn sẽ không thể vào lại nếu không được mời.";
             addButton(2, 6, button(Material.BARRIER, "<red><b>Rời bỏ phó bản", List.of(Utils.fromString(warning))), event -> {
                 event.setCancelled(true);
@@ -100,10 +98,10 @@ public class DungeonDetailGui extends BaseGui {
         addButton(2, 4, button(Material.LIME_CONCRETE, "<green><b>Tạo phó bản", List.of(Utils.fromString("<yellow>▶ Click để tạo và vào phó bản mới"))), event -> {
             event.setCancelled(true);
             player.closeInventory();
-            DungeonPlayerActions.create(player, dungeonId);
+            manager.create(player, dungeonId);
         });
 
-        List<DungeonInstance> invites = MembershipFeature.invitesFor(manager, player.getUniqueId(), dungeonId);
+        List<DungeonInstance> invites = manager.invitesFor(player.getUniqueId(), dungeonId);
         for (int i = 0; i < Math.min(invites.size(), 7); i++) {
             DungeonInstance invite = invites.get(i);
             ItemStack head = button(Material.PLAYER_HEAD, "<aqua>Lời mời từ <white>" + name(invite.ownerId()),
@@ -113,7 +111,7 @@ public class DungeonDetailGui extends BaseGui {
             addButton(3, 1 + i, head, event -> {
                 event.setCancelled(true);
                 player.closeInventory();
-                DungeonPlayerActions.acceptInvite(player, invite);
+                manager.acceptInvite(player, invite);
             });
         }
     }

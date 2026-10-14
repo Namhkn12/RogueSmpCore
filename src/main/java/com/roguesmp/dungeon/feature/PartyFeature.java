@@ -1,7 +1,7 @@
 package com.roguesmp.dungeon.feature;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.dungeon.DungeonDefinition;
+import com.roguesmp.codec.DataResult;
 import com.roguesmp.dungeon.DungeonFeature;
 import com.roguesmp.dungeon.FeatureContext;
 import com.roguesmp.party.Party;
@@ -9,7 +9,6 @@ import com.roguesmp.party.PartyManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -32,17 +31,15 @@ public record PartyFeature() implements DungeonFeature<PartyFeature.State> {
 
     public static final Codec<PartyFeature> CODEC = Codec.unit(PartyFeature::new);
 
-    public static Set<UUID> startingMembers(DungeonDefinition definition, Player owner) {
-        if (definition.features().values().stream().noneMatch(PartyFeature.class::isInstance)) return Set.of();
-
+    @Override
+    public DataResult<Void> prepare(Player owner, Set<UUID> members) {
         Party party = PartyManager.getInstance().getPartyByPlayer(owner);
-        if (party == null) throw new IllegalStateException("Phó bản này cần một nhóm, hãy tạo nhóm bằng /party create.");
-        if (!party.isOwner(owner.getUniqueId().toString())) throw new IllegalStateException("Chỉ trưởng nhóm mới có thể bắt đầu phó bản.");
-        if (party.getInstanceId() != null && !party.getInstanceId().isBlank()) throw new IllegalStateException("Nhóm của bạn đang ở trong một phó bản khác.");
+        if (party == null) return DataResult.error("Phó bản này cần một nhóm, hãy tạo nhóm bằng /party create.");
+        if (!party.isOwner(owner.getUniqueId().toString())) return DataResult.error("Chỉ trưởng nhóm mới có thể bắt đầu phó bản.");
+        if (party.getInstanceId() != null && !party.getInstanceId().isBlank()) return DataResult.error("Nhóm của bạn đang ở trong một phó bản khác.");
 
-        Set<UUID> members = new LinkedHashSet<>();
         party.getMembers().forEach(member -> members.add(UUID.fromString(member)));
-        return members;
+        return DataResult.success(null);
     }
 
     @Override

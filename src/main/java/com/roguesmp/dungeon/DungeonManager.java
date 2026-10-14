@@ -1,6 +1,9 @@
 package com.roguesmp.dungeon;
 
+import com.roguesmp.codec.DataResult;
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.command.CommandFeedback;
+import com.roguesmp.dungeon.feature.MembershipFeature;
 import com.roguesmp.dungeon.feature.QuestsFeature;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.storage.JsonSqliteStore;
@@ -14,6 +17,7 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +31,7 @@ public final class DungeonManager {
     private static final long TICK_INTERVAL_TICKS = 20L;
     private static final int IDLE_UNLOAD_DELAY_TICKS = 20 * 60;
     private static final int MAX_EVENT_DEPTH = 16;
+    private static final long INVITE_MILLIS = 60_000L;
 
     private static DungeonManager INSTANCE;
 
@@ -36,12 +41,13 @@ public final class DungeonManager {
     private final Map<UUID, DungeonInstance> instances = new ConcurrentHashMap<>();
     private final Set<UUID> ending = ConcurrentHashMap.newKeySet();
     private final Set<String> creating = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, Map<UUID, Long>> invites = new ConcurrentHashMap<>();
     private int eventDepth;
 
     private DungeonManager(RogueSmpCore plugin, DungeonWorldManager worlds) {
         this.plugin = plugin;
         this.worlds = worlds;
-        this.store = new JsonSqliteStore<>(plugin, "dungeon_instance.db", "dungeon_instance", "instance_id", DungeonInstance.CODEC);
+        this.store = new JsonSqliteStore<>(plugin, "dungeon/instances.db", "dungeon_instance", "instance_id", DungeonInstance.CODEC);
     }
 
     public static void init(RogueSmpCore plugin, DungeonWorldManager worlds) {
@@ -98,7 +104,27 @@ public final class DungeonManager {
         return worlds;
     }
 
-    public CompletableFuture<DungeonInstance> create(String dungeonId, UUID ownerId, Set<UUID> members) {
+    public void create(Player owner, String dungeonId) {
+        DungeonDefinition definition = Registries.DUNGEON.get(dungeonId);
+        if (definition == null) {
+            owner.sendMessage(Utils.fromString("<red>Phó bản này không tồn tại."));
+            return;
+        }
+
+        Set<UUID> members = new LinkedHashSet<>();
+        for (DungeonFeature<?> feature : definition.features().values()) {
+            if (CommandFeedback.failed(owner, feature.prepare(owner, members))) return;
+        }
+
+        owner.sendMessage(Utils.fromString("<yellow>Đang tạo phó bản..."));
+        CommandFeedback.report(owner, create(dungeonId, owner.getUniqueId(), members).thenCompose(instance -> {
+                    members.stream().map(Bukkit::getPlayer).filter(member -> member != null && !member.equals(owner)).forEach(member -> enter(member, instance));
+                    return teleportIn(owner, instance);
+                }),
+                "<green>Đã vào phó bản <yellow>" + definition.displayName() + "<green>.");
+    }
+
+    private CompletableFuture<DungeonInstance> create(String dungeonId, UUID ownerId, Set<UUID> members) {
         DungeonDefinition definition = Registries.DUNGEON.get(dungeonId);
         if (definition == null) return CompletableFuture.failedFuture(new IllegalStateException("Phó bản này không tồn tại."));
 
@@ -106,11 +132,11 @@ public final class DungeonManager {
         if (!creating.add(pendingKey)) return CompletableFuture.failedFuture(new IllegalStateException("Phó bản đang được tạo, vui lòng đợi."));
 
         DungeonInstance instance = new DungeonInstance(dungeonId, definition, worlds.snapshotOf(definition.template()), ownerId, members);
-        try {
-            instance.members().forEach(member -> requireNoRun(member, dungeonId));
-        } catch (IllegalStateException e) {
+        for (UUID member : instance.members()) {
+            DataResult<Void> free = checkNoInstance(member, dungeonId);
+            if (free.isSuccess()) continue;
             creating.remove(pendingKey);
-            return CompletableFuture.failedFuture(e);
+            return CompletableFuture.failedFuture(new IllegalStateException(free.error()));
         }
         return worlds.create(instance.template(), instance.id(), instance.worldData())
                 .thenCompose(world -> AsyncUtils.onMainThread(() -> {
@@ -151,7 +177,74 @@ public final class DungeonManager {
         return null;
     }
 
-    public CompletableFuture<Void> enter(Player player, DungeonInstance instance) {
+    public void enter(Player player, DungeonInstance instance) {
+        CommandFeedback.report(player, teleportIn(player, instance), "<green>Đã vào phó bản <yellow>" + instance.displayName() + "<green>.");
+    }
+
+    public void invite(Player inviter, DungeonInstance instance, Player target) {
+        if (CommandFeedback.failed(inviter, checkInvite(instance, inviter.getUniqueId(), target.getUniqueId()))) return;
+        invites.computeIfAbsent(instance.id(), id -> new ConcurrentHashMap<>()).put(target.getUniqueId(), System.currentTimeMillis() + INVITE_MILLIS);
+
+        inviter.sendMessage(Utils.fromString("<green>Đã mời <yellow>" + target.getName() + "<green>."));
+        target.sendMessage(Utils.fromString("<yellow>" + inviter.getName() + "<green> mời bạn vào phó bản <yellow>" + instance.displayName()
+                + "<green>. <yellow><click:run_command:'/dungeonrun join " + instance.dungeonId() + " " + inviter.getName() + "'>[Tham gia]</click>"));
+    }
+
+    public void acceptInvite(Player player, DungeonInstance instance) {
+        UUID playerId = player.getUniqueId();
+        if (!instance.isMember(playerId)) {
+            Map<UUID, Long> pending = invites.get(instance.id());
+            Long expiresAt = pending == null ? null : pending.remove(playerId);
+            if (expiresAt == null || expiresAt < System.currentTimeMillis()) {
+                player.sendMessage(Utils.fromString("<red>Bạn chưa được mời hoặc lời mời đã hết hạn."));
+                return;
+            }
+            if (CommandFeedback.failed(player, addMember(instance, playerId))) return;
+        }
+        enter(player, instance);
+    }
+
+    public void abandon(Player player, DungeonInstance instance) {
+        UUID playerId = player.getUniqueId();
+        if (!allowsAbandon(instance)) {
+            player.sendMessage(Utils.fromString("<red>Không thể rời bỏ phó bản này."));
+            return;
+        }
+        if (instance.ownerId().equals(playerId)) {
+            end(instance, "đã bị chủ phó bản huỷ");
+            return;
+        }
+        if (!instance.isMember(playerId)) {
+            player.sendMessage(Utils.fromString("<red>Bạn không phải thành viên của phó bản này."));
+            return;
+        }
+        if (CommandFeedback.failed(player, removeMember(instance, playerId))) return;
+        player.sendMessage(Utils.fromString("<yellow>Bạn đã rời bỏ phó bản <white>" + instance.displayName() + "<yellow>."));
+    }
+
+    public List<DungeonInstance> invitesFor(UUID playerId, String dungeonId) {
+        long now = System.currentTimeMillis();
+        return instances.values().stream()
+                .filter(instance -> instance.dungeonId().equals(dungeonId))
+                .filter(instance -> {
+                    Map<UUID, Long> pending = invites.get(instance.id());
+                    Long expiresAt = pending == null ? null : pending.get(playerId);
+                    return expiresAt != null && expiresAt >= now;
+                })
+                .toList();
+    }
+
+    public boolean allowsInvites(DungeonInstance instance) {
+        MembershipFeature membership = membership(instance);
+        return membership != null && membership.invites();
+    }
+
+    public boolean allowsAbandon(DungeonInstance instance) {
+        MembershipFeature membership = membership(instance);
+        return membership != null && membership.abandon();
+    }
+
+    private CompletableFuture<Void> teleportIn(Player player, DungeonInstance instance) {
         if (!instance.isMember(player.getUniqueId())) {
             return CompletableFuture.failedFuture(new IllegalStateException("Bạn không phải thành viên của phó bản này."));
         }
@@ -167,20 +260,23 @@ public final class DungeonManager {
         player.teleportAsync(Hub.spawn());
     }
 
-    public void addMember(DungeonInstance instance, UUID playerId) {
-        if (instance.isMember(playerId)) return;
-        requireNoRun(playerId, instance.dungeonId());
+    public DataResult<Void> addMember(DungeonInstance instance, UUID playerId) {
+        if (instance.isMember(playerId)) return DataResult.success(null);
+        DataResult<Void> free = checkNoInstance(playerId, instance.dungeonId());
+        if (!free.isSuccess()) return free;
         instance.addMember(playerId);
         save(instance);
+        return free;
     }
 
-    public void removeMember(DungeonInstance instance, UUID playerId) {
-        if (instance.ownerId().equals(playerId)) throw new IllegalStateException("Không thể gỡ chủ phó bản, hãy kết thúc phó bản.");
+    public DataResult<Void> removeMember(DungeonInstance instance, UUID playerId) {
+        if (instance.ownerId().equals(playerId)) return DataResult.error("Không thể gỡ chủ phó bản, hãy kết thúc phó bản.");
         instance.removeMember(playerId);
         save(instance);
 
         Player player = Bukkit.getPlayer(playerId);
         if (player != null && instance.equals(getByWorld(player.getWorld()))) leave(player);
+        return DataResult.success(null);
     }
 
     // Events nested past MAX_EVENT_DEPTH are dropped to break trigger loops.
@@ -201,6 +297,7 @@ public final class DungeonManager {
         if (!instances.containsKey(instance.id()) || !ending.add(instance.id())) return CompletableFuture.completedFuture(null);
 
         dispatchAll(instance, DungeonFeature::onEnd);
+        invites.remove(instance.id());
         World world = worldOf(instance);
         if (world != null) world.getPlayers().forEach(this::leave);
         notifyMembers(instance, reason);
@@ -264,6 +361,8 @@ public final class DungeonManager {
     }
 
     private void tick() {
+        long now = System.currentTimeMillis();
+        invites.values().forEach(pending -> pending.values().removeIf(expiresAt -> expiresAt < now));
         for (DungeonInstance instance : List.copyOf(instances.values())) {
             dispatch(instance, DungeonFeature::onTick);
         }
@@ -285,16 +384,27 @@ public final class DungeonManager {
                 .thenCompose(v -> CompletableFuture.<DungeonInstance>failedFuture(reason));
     }
 
-    private void requireNoRun(UUID playerId, String dungeonId) {
-        if (findFor(playerId, dungeonId) == null) return;
+    private DataResult<Void> checkInvite(DungeonInstance instance, UUID inviterId, UUID inviteeId) {
+        if (!allowsInvites(instance)) return DataResult.error("Phó bản này không cho phép mời người khác.");
+        if (!instance.ownerId().equals(inviterId)) return DataResult.error("Chỉ chủ phó bản mới có thể mời người khác.");
+        if (instance.isMember(inviteeId)) return DataResult.error("Người này đã ở trong phó bản rồi.");
+        return checkNoInstance(inviteeId, instance.dungeonId());
+    }
+
+    private @Nullable MembershipFeature membership(DungeonInstance instance) {
+        FeatureContext<NoState> context = feature(instance, MembershipFeature.class);
+        return context == null ? null : (MembershipFeature) context.feature();
+    }
+
+    private DataResult<Void> checkNoInstance(UUID playerId, String dungeonId) {
+        if (findFor(playerId, dungeonId) == null) return DataResult.success(null);
         Player player = Bukkit.getPlayer(playerId);
         String name = player != null ? player.getName() : playerId.toString();
-        throw new IllegalStateException(name + " đã có phó bản này rồi.");
+        return DataResult.error(name + " đã có phó bản này rồi.");
     }
 
     private void notifyMembers(DungeonInstance instance, String reason) {
-        DungeonDefinition definition = instance.definition();
-        String name = definition != null ? definition.displayName() : instance.dungeonId();
+        String name = instance.displayName();
         for (UUID memberId : instance.members()) {
             Player member = Bukkit.getPlayer(memberId);
             if (member != null) member.sendMessage(Utils.fromString("<yellow>Phó bản <white>" + name + "<yellow> " + reason + "."));

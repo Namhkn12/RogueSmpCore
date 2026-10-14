@@ -1,7 +1,7 @@
 package com.roguesmp.gui.dungeon;
 
 import com.roguesmp.dungeon.DungeonInstance;
-import com.roguesmp.dungeon.DungeonPlayerActions;
+import com.roguesmp.dungeon.DungeonManager;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -33,7 +33,7 @@ public class DungeonAbandonGui extends BaseGui {
                 List.of(Utils.fromString(warning), Utils.fromString("<red>Không thể hoàn tác!"))), event -> {
             event.setCancelled(true);
             player.closeInventory();
-            DungeonPlayerActions.abandon(player, run);
+            DungeonManager.getInstance().abandon(player, run);
         });
         addButton(1, 6, DungeonDetailGui.button(Material.GREEN_CONCRETE, "<green><b>HUỶ", List.of(Utils.fromString("<gray>Quay lại"))), event -> {
             event.setCancelled(true);

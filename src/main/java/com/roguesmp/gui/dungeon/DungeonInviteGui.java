@@ -2,7 +2,6 @@ package com.roguesmp.gui.dungeon;
 
 import com.roguesmp.dungeon.DungeonInstance;
 import com.roguesmp.dungeon.DungeonManager;
-import com.roguesmp.dungeon.DungeonPlayerActions;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -51,7 +50,7 @@ public class DungeonInviteGui extends BaseGui {
             addButton(slot, head, event -> {
                 event.setCancelled(true);
                 if (!target.isOnline()) return;
-                DungeonPlayerActions.invite(player, run, target);
+                manager.invite(player, run, target);
                 setup();
             });
         }
