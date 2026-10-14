@@ -37,6 +37,7 @@ Thư mục: `quests/` (Registry, id = đường dẫn file: `quests/daily/gather
 | `objectives` | `{}` | Map **tên → objective**. Tên do bạn đặt, dùng làm khoá lưu tiến độ (đổi tên = mất tiến độ của objective đó). Quest hoàn thành khi **mọi** objective xong; không có objective = hoàn thành ngay khi được giao. |
 | `rewards` | bắt buộc (có thể `[]`) | Phần thưởng khi hoàn thành. |
 | `autoClaimRewards` | `false` | Xem [nhận thưởng](#nhận-thưởng). Lưu ý viết **camelCase**. |
+| `conditions` | `[]` | [Điều kiện](#condition) để hành động của người chơi được tính tiến độ. |
 | `requirements` | `[]` | Được nạp nhưng **hiện chưa được kiểm tra ở đâu** — viết vào chưa chặn được gì. |
 
 ## Objective
@@ -47,6 +48,16 @@ Thư mục: `quests/` (Registry, id = đường dẫn file: `quests/daily/gather
 | `signal` | `{ "type": "signal", "signal": "gate_open", "amount": 3, "display": "Mở 3 cổng" }` | Tiến độ khi có **tín hiệu** cùng id được gửi tới (từ dungeon hoặc code). Tín hiệu mang số lượng; tổng không vượt `amount` (mặc định 1). `display` là nhãn trong GUI. |
 
 `signal` là objective dùng chung cho mọi thứ không phải giết mob: dungeon gửi tín hiệu qua action `signal`, hệ thống khác (NPC, block...) có thể gửi bằng code.
+
+## Condition
+
+Hành động của người chơi (giết mob, tín hiệu từ người chơi) chỉ được tính khi **mọi** condition đúng tại thời điểm đó. Tiến độ do hệ thống gửi thẳng cho cả nhóm (action `signal` của dungeon, kill trong instance) không bị kiểm tra.
+
+| `type` | Ví dụ | Đúng khi |
+| :--- | :--- | :--- |
+| `in_dungeon` | `{ "type": "in_dungeon" }`, `{ "type": "in_dungeon", "dungeon": "crypt" }` | Người chơi đang ở trong 1 instance dungeon mà họ là thành viên (tuỳ chọn: đúng dungeon `dungeon`). Với quest nhóm của dungeon, phải là **chính instance đó**. |
+| `world` | `{ "type": "world", "world": "world_nether" }` | Người chơi đang ở world này. |
+| `region` | `{ "type": "region", "region": "village" }` | Người chơi đang ở trong region WorldGuard này. |
 
 ## Reward
 
@@ -100,7 +111,7 @@ Feature `quests` trong [dungeon](JSON-Dungeons.md#quests--quest-nhóm) tạo 1 n
 ```
 
 - Các quest trong danh sách được giao khi instance bắt đầu. Action `start_quest` giao thêm quest trong lúc chơi.
-- Tiến độ **dùng chung**: ai trong nhóm làm cũng tính.
+- Tiến độ **dùng chung**: ai trong nhóm làm cũng tính, **ở bất kỳ đâu**. Muốn chỉ tính khi ở trong dungeon, thêm `"conditions": [ { "type": "in_dungeon" } ]` vào quest.
 - Danh sách nhận thưởng: thành viên ban đầu, cộng người vào instance nếu `eligible_on_enter: true`. Chỉ người trong danh sách mới nhận thưởng.
 - Tiến độ trong dungeon đến từ tín hiệu:
   - Action `signal` của dungeon → objective `signal` cùng id, cộng `amount`.

@@ -1,5 +1,7 @@
 package com.roguesmp.quest;
 
+import com.roguesmp.quest.condition.QuestCondition;
+import com.roguesmp.quest.holder.QuestHolder;
 import com.roguesmp.quest.objective.QuestObjective;
 import com.roguesmp.quest.requirement.QuestRequirement;
 import com.roguesmp.quest.reward.QuestReward;
@@ -8,6 +10,7 @@ import com.roguesmp.codec.DataResult;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.registry.Registry;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -28,6 +31,7 @@ public class Quest {
             Codec.unboundedMap(QuestObjective.CODEC).optionalFieldOf("objectives", new HashMap<>()).forGetter(Quest::getObjectives),
             Codec.listOf(QuestReward.CODEC).fieldOf("rewards").forGetter(Quest::getRewards),
             Codec.BOOLEAN.optionalFieldOf("autoClaimRewards", false).forGetter(Quest::isAutoClaimRewards),
+            Codec.listOf(QuestCondition.CODEC).optionalFieldOf("conditions", List.of()).forGetter(Quest::getConditions),
             Quest::new
     );
 
@@ -52,8 +56,9 @@ public class Quest {
     private final Map<String, QuestObjective> objectives;
     private final List<QuestReward> rewards;
     private final boolean autoClaimRewards;
+    private final List<QuestCondition> conditions;
 
-    public Quest(String id, String name, Material icon, @NotNull List<String> description, List<QuestRequirement> requirements, @NotNull Map<String, QuestObjective> objectives, @NotNull List<QuestReward> rewards, boolean autoClaimRewards) {
+    public Quest(String id, String name, Material icon, @NotNull List<String> description, List<QuestRequirement> requirements, @NotNull Map<String, QuestObjective> objectives, @NotNull List<QuestReward> rewards, boolean autoClaimRewards, List<QuestCondition> conditions) {
         this.id = id;
         this.name = name;
         this.icon = icon;
@@ -62,6 +67,15 @@ public class Quest {
         this.objectives = objectives;
         this.rewards = rewards;
         this.autoClaimRewards = autoClaimRewards;
+        this.conditions = conditions;
+    }
+
+    public List<QuestCondition> getConditions() {
+        return conditions;
+    }
+
+    public boolean canProgress(QuestHolder holder, Player player) {
+        return conditions.stream().allMatch(condition -> condition.test(holder, player));
     }
 
     public @Nullable QuestObjective getObjective(String objectiveId) {

@@ -158,9 +158,9 @@ public class QuestManager {
      */
     public void handleProgress(Player player, BiPredicate<QuestObjective, ObjectiveProgress> objectiveConsumer) {
         PlayerQuestData playerQuestData = getPlayerQuestData(player.getUniqueId());
-        if (playerQuestData != null) handleProgress(playerQuestData, objectiveConsumer);
+        if (playerQuestData != null) handleProgress(playerQuestData, objectiveConsumer, player);
         for (GroupQuestData group : List.copyOf(questDataManager.getCachedGroupQuestData())) {
-            if (group.getHolder().canProgress(player)) handleProgress(group, objectiveConsumer);
+            if (group.getHolder().canProgress(player)) handleProgress(group, objectiveConsumer, player);
         }
     }
 
@@ -171,7 +171,7 @@ public class QuestManager {
      */
     public void handleProgress(QuestHolder holder, BiPredicate<QuestObjective, ObjectiveProgress> objectiveConsumer) {
         QuestLog log = getQuestLog(holder);
-        if (log != null) handleProgress(log, objectiveConsumer);
+        if (log != null) handleProgress(log, objectiveConsumer, null);
     }
 
     public void signal(QuestHolder holder, String signal, int amount) {
@@ -182,11 +182,13 @@ public class QuestManager {
         handleProgress(player, (objective, progress) -> objective.onSignal(signal, amount, progress));
     }
 
-    private void handleProgress(QuestLog log, BiPredicate<QuestObjective, ObjectiveProgress> objectiveConsumer) {
+    // Quest conditions only apply to progress from a player's own action.
+    private void handleProgress(QuestLog log, BiPredicate<QuestObjective, ObjectiveProgress> objectiveConsumer, @Nullable Player player) {
         for (QuestProgress questProgress : List.copyOf(log.getQuestProgresses().values())) {
             if (questProgress.isCompleted()) continue;
 
             Quest quest = questProgress.getQuest();
+            if (player != null && !quest.canProgress(log.getHolder(), player)) continue;
 
             quest.getObjectives().forEach((objectiveId, objective) -> {
                 if (questProgress.isObjectiveCompleted(objectiveId)) return;

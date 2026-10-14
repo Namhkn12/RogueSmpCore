@@ -7,6 +7,9 @@ import com.roguesmp.quest.requirement.QuestRequirement;
 import com.roguesmp.quest.requirement.QuestRequirements;
 import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.quest.reward.QuestRewards;
+import com.roguesmp.quest.condition.QuestCondition;
+import com.roguesmp.quest.condition.QuestConditions;
+import com.roguesmp.dungeon.feature.DungeonQuestConditions;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.BlockData;
 import com.roguesmp.block.BlockType;
@@ -91,6 +94,10 @@ public class Registries {
     public static final Registry<Codec<? extends QuestObjective>> QUEST_OBJECTIVE_CODEC = register(registry -> QuestObjectives.loadClass());
     public static final Registry<Codec<? extends QuestRequirement>> QUEST_REQUIREMENT_CODEC = register(registry -> QuestRequirements.loadClass());
     public static final Registry<Codec<? extends QuestReward>> QUEST_REWARD_CODEC = register(registry -> QuestRewards.loadClass());
+    public static final Registry<Codec<? extends QuestCondition>> QUEST_CONDITION_CODEC = register(registry -> {
+        QuestConditions.loadClass();
+        DungeonQuestConditions.loadClass();
+    });
     // Populated as a side effect of QUEST_OBJECTIVE_CODEC's own loadClass() (each objective type
     // registers its progress codec alongside its own), not independently bootstrapped.
     public static final Registry<Codec<? extends ObjectiveProgress>> OBJECTIVE_PROGRESS_CODEC = new Registry<>();
