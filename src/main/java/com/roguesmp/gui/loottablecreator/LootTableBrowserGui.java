@@ -1,11 +1,16 @@
 package com.roguesmp.gui.loottablecreator;
 
 import com.roguesmp.loot.LootTable;
+import com.roguesmp.loot.context.LootContext;
+import com.roguesmp.player.PlayerManager;
+import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ItemContainerContents;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import com.roguesmp.gui.BaseGui;
 import net.kyori.adventure.text.Component;
@@ -33,6 +38,7 @@ import java.util.List;
 public class LootTableBrowserGui extends BaseGui {
 
     private static final int PAGE_SIZE = 36;
+    private static final int CHEST_CAPACITY = 27;
     private static final int CREATE_NEW_SLOT = 0;
     private static final int GUIDE_SLOT = 4;
     private static final int SEARCH_SLOT = 8;
@@ -86,7 +92,9 @@ public class LootTableBrowserGui extends BaseGui {
         guide.setData(DataComponentTypes.ITEM_NAME, Component.text("Guide", NamedTextColor.GREEN));
         guide.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
                 Utils.text("Click \"+ Tạo mới\" để tạo loot table mới.", NamedTextColor.GREEN),
-                Utils.text("Click một loot table để chỉnh sửa.", NamedTextColor.GREEN)
+                Utils.text("Click trái một loot table để roll.", NamedTextColor.GREEN),
+                Utils.text("Shift-Click trái để nhận rương chứa loot.", NamedTextColor.GREEN),
+                Utils.text("Click phải một loot table để chỉnh sửa.", NamedTextColor.GREEN)
         )));
         addButton(GUIDE_SLOT, guide, ClickHandler.noAction());
 
@@ -111,7 +119,8 @@ public class LootTableBrowserGui extends BaseGui {
         for (String id : getPage()) {
             addButton(slot, previewButtonFor(id), event -> {
                 event.setCancelled(true);
-                openEditor(id);
+                if (event.isRightClick()) openEditor(id);
+                else if (event.isLeftClick()) roll(id, event.isShiftClick());
             });
             slot++;
         }
@@ -131,6 +140,29 @@ public class LootTableBrowserGui extends BaseGui {
             return;
         }
         LootTableGuiCreator.editExisting(id, table).openMainDialog(player);
+    }
+
+    private void roll(String id, boolean asChest) {
+        LootTable table = Registries.LOOT_TABLE.get(id);
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+        if (table == null || smpPlayer == null) {
+            player.sendMessage(Utils.text("Loot table '" + id + "' không còn tồn tại.", NamedTextColor.RED));
+            return;
+        }
+        List<ItemStack> items = table.roll(LootContext.builder(smpPlayer).build());
+        player.sendMessage(LootTable.rollMessage(id, items));
+        PlayerUtils.giveItem(player, asChest ? packIntoChests(id, items) : items);
+    }
+
+    private List<ItemStack> packIntoChests(String id, List<ItemStack> items) {
+        List<ItemStack> chests = new ArrayList<>();
+        for (int from = 0; from < Math.max(1, items.size()); from += CHEST_CAPACITY) {
+            ItemStack chest = ItemStack.of(Material.CHEST);
+            chest.setData(DataComponentTypes.ITEM_NAME, Component.text(id, NamedTextColor.GOLD));
+            chest.setData(DataComponentTypes.CONTAINER, ItemContainerContents.containerContents(items.subList(from, Math.min(from + CHEST_CAPACITY, items.size()))));
+            chests.add(chest);
+        }
+        return chests;
     }
 
     private void updateFilters() {
@@ -197,7 +229,9 @@ public class LootTableBrowserGui extends BaseGui {
         item.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
                 Utils.text(poolCount + " pool" + (poolCount == 1 ? "" : "s"), NamedTextColor.GRAY),
                 Component.empty(),
-                Utils.text("Click để chỉnh sửa.", NamedTextColor.GREEN)
+                Utils.text("Click trái để roll vào túi đồ.", NamedTextColor.GREEN),
+                Utils.text("Shift-Click trái để nhận rương chứa loot.", NamedTextColor.AQUA),
+                Utils.text("Click phải để chỉnh sửa.", NamedTextColor.YELLOW)
         )));
         return item;
     }

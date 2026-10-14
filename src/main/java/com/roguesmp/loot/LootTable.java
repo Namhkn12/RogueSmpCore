@@ -3,6 +3,11 @@ package com.roguesmp.loot;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.loot.context.LootContext;
+import com.roguesmp.utils.Utils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -80,5 +85,15 @@ public class LootTable {
         return new LootOdds(IntStream.range(0, pools.size())
                 .mapToObj(i -> new LootOdds.PoolOdds(i, pools.get(i).isActive(context), pools.get(i).odds(context)))
                 .toList());
+    }
+
+    public static @NotNull Component rollMessage(@NotNull String id, @NotNull List<ItemStack> items) {
+        Component summary = items.isEmpty()
+                ? Component.text("Không có vật phẩm.", NamedTextColor.GRAY)
+                : Component.join(JoinConfiguration.newlines(), items.stream()
+                        .map(item -> Component.text(item.getAmount() + "x ", NamedTextColor.GRAY).append(item.effectiveName()))
+                        .toList());
+        return Utils.fromString("<green>Đã roll <yellow>" + id + "<green>: " + items.size() + " vật phẩm. <gray>(Di chuột để xem)")
+                .hoverEvent(HoverEvent.showText(summary));
     }
 }

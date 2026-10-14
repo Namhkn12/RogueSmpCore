@@ -20,8 +20,10 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.daily.DailyQuestManager;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.registry.Registry;
+import com.roguesmp.gui.quest.RewardInboxGui;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -258,7 +260,12 @@ public class QuestManager {
     public void notifyPendingQuestRewards(Player player) {
         int pending = getPendingRewards(player).size();
         if (pending == 0) return;
-        player.sendMessage(Utils.fromString("<yellow>Bạn có <gold>" + pending + "</gold> phần thưởng nhiệm vụ chưa nhận. Dùng <gold><click:run_command:'/quest rewards'>/quest rewards</click></gold> để nhận."));
+        Component openInbox = Utils.fromString("<gold>[Mở hộp thư]</gold>").clickEvent(ClickEvent.callback(audience -> {
+            if (!(audience instanceof Player viewer)) return;
+            PlayerQuestData data = getPlayerQuestData(viewer.getUniqueId());
+            if (data != null) new RewardInboxGui(viewer, data).showInventory(viewer);
+        }));
+        player.sendMessage(Utils.fromString("<yellow>Bạn có <gold>" + pending + "</gold> phần thưởng nhiệm vụ chưa nhận. ").append(openInbox));
     }
 
     public List<PendingQuestReward> getPendingRewards(Player player) {
@@ -275,9 +282,13 @@ public class QuestManager {
 
     public void sendClaimPrompt(Player member, UUID source, Quest quest) {
         String name = quest.getName() != null ? quest.getName() : quest.getId();
-        String command = "/quest claim " + source + " " + quest.getId();
         String label = source.equals(member.getUniqueId()) ? "Phần thưởng: " : "Phần thưởng nhóm: ";
-        member.sendMessage(Utils.fromString("<gold>" + label + "</gold>" + name + " <green><click:run_command:'" + command + "'>[Nhận thưởng]</click></green>"));
+        Component claim = Utils.fromString("<green>[Nhận thưởng]</green>").clickEvent(ClickEvent.callback(audience -> {
+            if (audience instanceof Player viewer && claimReward(viewer, source, quest.getId())) {
+                viewer.sendMessage(Utils.fromString("<green>Đã nhận thưởng: </green>" + name));
+            }
+        }));
+        member.sendMessage(Utils.fromString("<gold>" + label + "</gold>" + name + " ").append(claim));
     }
 
     public void sendQuestDoneNotification(Player player, Quest quest) {

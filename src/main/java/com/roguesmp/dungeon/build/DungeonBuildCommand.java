@@ -77,7 +77,7 @@ public final class DungeonBuildCommand {
                                 return;
                             }
                             List<ItemStack> items = table.roll(LootContext.builder(smpPlayer).build());
-                            player.sendMessage(Utils.fromString("<green>Đã roll <yellow>" + tableId + "<green>: " + items.size() + " vật phẩm."));
+                            player.sendMessage(LootTable.rollMessage(tableId, items));
                             PlayerUtils.giveItem(player, items);
                         }))
                 .register();
