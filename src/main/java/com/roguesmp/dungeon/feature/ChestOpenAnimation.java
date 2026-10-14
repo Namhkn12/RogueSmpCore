@@ -81,7 +81,7 @@ public class ChestOpenAnimation {
         if (block.getState() instanceof Chest chest
                 && chest.getInventory() instanceof DoubleChestInventory inventory
                 && inventory.getHolder() instanceof DoubleChest doubleChest) {
-            return doubleChest.getLocation();
+            return doubleChest.getLocation().add(0.5, 0, 0.5);
         }
         return block.getLocation().add(0.5, 0, 0.5);
     }

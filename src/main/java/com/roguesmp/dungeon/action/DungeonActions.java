@@ -261,7 +261,12 @@ public class DungeonActions {
             for (int i = 0; i < count; i++) {
                 Location location = new Location(world, x + random.nextDouble(-spread, spread + 1e-9), y, z + random.nextDouble(-spread, spread + 1e-9));
                 if (EntityManager.getInstance().spawnEntity(mob, location) != null) continue;
-                EntityType type = org.bukkit.Registry.ENTITY_TYPE.get(NamespacedKey.fromString(mob));
+                NamespacedKey key = NamespacedKey.fromString(mob);
+                if (key == null) {
+                    RogueSmpCore.LOGGER.warn("spawn_mob: unknown vanilla mob type {} in dungeon {}", mob, context.instance().dungeonId());
+                    return;
+                }
+                EntityType type = org.bukkit.Registry.ENTITY_TYPE.get(key);
                 if (type == null || !type.isSpawnable()) {
                     RogueSmpCore.LOGGER.warn("spawn_mob: unknown mob {} in dungeon {}", mob, context.instance().dungeonId());
                     return;

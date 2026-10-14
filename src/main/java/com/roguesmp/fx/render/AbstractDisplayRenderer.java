@@ -39,6 +39,10 @@ abstract class AbstractDisplayRenderer<T extends Display> implements FxRenderer 
     /** Applies renderer-specific, one-time setup (billboard mode, etc.) to a freshly spawned entity. */
     protected abstract void configure(T display);
 
+    protected Vector3f modelOffset(Vector3f size) {
+        return new Vector3f(size).mul(-0.5f);
+    }
+
     @Override
     public void render(World world, FxTransform transform, List<Vector> localPoints, int tick, Collection<Player> viewers) {
         // Same one-check-per-tick trade-off as ParticleRenderer. Skipping here also matters more:
@@ -53,7 +57,7 @@ abstract class AbstractDisplayRenderer<T extends Display> implements FxRenderer 
         ensureCapacity(world, localPoints.size(), viewers);
 
         Quaternionf rotation = transform.rotation();
-        Vector3f halfSize = new Vector3f(displaySize).mul(-0.5f);
+        Vector3f halfSize = modelOffset(displaySize);
 
         for (int i = 0; i < localPoints.size(); i++) {
             Vector3f worldPos = transform.apply(localPoints.get(i));
