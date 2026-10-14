@@ -123,8 +123,6 @@ public final class RogueSmpCore extends JavaPlugin {
 
         ItemRegistry.init(this);
 
-        VanillaCraftingRecipeRegistry.init(this);
-
         PartyManager.init(this);
 
         //Dungeon spawners
