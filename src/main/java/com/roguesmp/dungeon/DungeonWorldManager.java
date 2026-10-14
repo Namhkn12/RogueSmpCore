@@ -2,12 +2,14 @@ package com.roguesmp.dungeon;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.region.ServerRegionManager;
+import com.roguesmp.region.SmpRegionFlags;
 import com.roguesmp.utils.AsyncUtils;
 import com.roguesmp.world.PolarTemplateData;
 import com.roguesmp.world.PolarTemplateManager;
 import com.roguesmp.world.PolarWorldKey;
 import com.roguesmp.world.PolarWorldManager;
 import com.roguesmp.world.WorldEvacuator;
+import com.sk89q.worldguard.protection.flags.StateFlag;
 import live.minehub.polarpaper.core.config.Config;
 import net.kyori.adventure.key.Key;
 import org.bukkit.World;
@@ -53,6 +55,11 @@ public class DungeonWorldManager {
         worlds.saveAllOnStop();
     }
 
+    private World applyInstanceFlags(World world) {
+        ServerRegionManager.getInstance().editGlobal(world, region -> region.setFlag(SmpRegionFlags.SPAWNERS, StateFlag.State.ALLOW));
+        return world;
+    }
+
     public PolarWorldKey worldKey(PolarWorldKey template, UUID instanceId) {
         return worlds.key(template.name() + INSTANCE_SEPARATOR + instanceId);
     }
@@ -76,6 +83,7 @@ public class DungeonWorldManager {
         return templates.saveRegions(template)
                 .thenCompose(v -> AsyncUtils.run(() -> ServerRegionManager.getInstance().copyStoredData(templates.worlds().regionDataName(template), worlds.regionDataName(instance))))
                 .thenCompose(v -> worlds.copyFrom(templates.worlds(), template, instance))
+                .thenApply(this::applyInstanceFlags)
                 .exceptionallyCompose(error -> discardPartial(instance, instanceId).handle((v, cleanupError) -> null)
                         .thenCompose(v -> CompletableFuture.<World>failedFuture(error)));
     }
@@ -84,6 +92,7 @@ public class DungeonWorldManager {
         PolarWorldKey instance = worldKey(template, instanceId);
         remember(instanceId, data);
         return worlds.create(instance, null, world -> { })
+                .thenApply(this::applyInstanceFlags)
                 .exceptionallyCompose(error -> discardPartial(instance, instanceId).handle((v, cleanupError) -> null)
                         .thenCompose(v -> CompletableFuture.<World>failedFuture(error)));
     }

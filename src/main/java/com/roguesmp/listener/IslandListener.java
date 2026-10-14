@@ -38,15 +38,15 @@ public class IslandListener implements Listener {
         PlayerData playerData = islandManager.getPlayerManager().getDataManager().getData(uuid);
         if (playerData == null) return;
 
+        UUID islandId = playerData.getIslandId();
+        IslandData loadedData = islandManager.getIslandDataManager().loadIslandData(islandId);
+        IslandData islandData = loadedData == null ? null : islandManager.getIslandDataManager().cache(loadedData);
+
         WorldPos lastLocation = playerData.getLastLocation();
         if (lastLocation == null) return;
 
         UUID lastIslandId = islandManager.getIslandWorldManager().getIslandId(lastLocation.world().asString());
         if (lastIslandId == null) return;
-
-        UUID islandId = playerData.getIslandId();
-        IslandData loadedData = islandManager.getIslandDataManager().loadIslandData(islandId);
-        IslandData islandData = loadedData == null ? null : islandManager.getIslandDataManager().cache(loadedData);
 
         if (islandData != null && !islandData.isArchived() && lastIslandId.equals(islandId)) {
             try {

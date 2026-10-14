@@ -12,7 +12,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class QuestListener implements Listener {
@@ -27,13 +26,6 @@ public class QuestListener implements Listener {
     public void onPlayerPreJoin(AsyncPlayerPreLoginEvent event) {
         if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) return;
         questManager.getQuestDataManager().stagePendingJoin(questManager.getQuestDataManager().loadData(event.getUniqueId()));
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerLogin(PlayerLoginEvent event) {
-        if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
-            questManager.getQuestDataManager().discardPendingJoin(event.getPlayer().getUniqueId());
-        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

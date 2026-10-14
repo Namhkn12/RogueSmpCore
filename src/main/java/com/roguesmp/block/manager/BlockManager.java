@@ -35,6 +35,7 @@ public class BlockManager {
     private static BlockManager INSTANCE = null;
     private final Map<BlockPos, SmpBlock> blocks = new HashMap<>();
     private final Set<Tickable> tickingBlocks = new HashSet<>();
+    private @Nullable BlockPos placing;
     private final RogueSmpCore plugin;
     private final BlockDataRepository repository;
     private final MiningManager mining;
@@ -100,7 +101,13 @@ public class BlockManager {
         }
 
         BlockPos pos = BlockPos.of(target);
-        Entity display = BlockVisual.spawn(pos, block);
+        placing = pos;
+        Entity display;
+        try {
+            display = BlockVisual.spawn(pos, block);
+        } finally {
+            placing = null;
+        }
         block.bind(pos, display.getUniqueId());
         if(player != null) block.onPlaced(player, inHand);
         block.markDirty();
@@ -292,6 +299,7 @@ public class BlockManager {
     }
 
     private void attach(BlockVisual.Marker marker, Entity display){
+        if(marker.pos().equals(placing)) return;
         SmpBlock existing = blocks.get(marker.pos());
         if(existing != null){
             if(!existing.getDisplayId().equals(display.getUniqueId())){
