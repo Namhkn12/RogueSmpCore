@@ -5,11 +5,10 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.quest.ObjectiveProgress;
-import com.roguesmp.quest.QuestObjective;
 import com.roguesmp.utils.EntityUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDeathEvent;
 
@@ -65,7 +64,7 @@ public class KillMobObjective implements QuestObjective {
     }
 
     @Override
-    public List<Component> getDisplay(SmpPlayer smpPlayer, ObjectiveProgress progress) {
+    public List<Component> getDisplay(@Nullable SmpPlayer smpPlayer, ObjectiveProgress progress) {
         BaseEntity base = EntityManager.getInstance().getBaseEntity(mobId);
         String mobName = (base != null) ? base.getDisplayName() : mobId;
 
@@ -116,13 +115,14 @@ public class KillMobObjective implements QuestObjective {
     }
 
     @Override
-    public void onKillEntity(EntityDeathEvent event, ObjectiveProgress progress) {
+    public boolean onKillEntity(EntityDeathEvent event, ObjectiveProgress progress) {
         if (!(progress instanceof Progress progress1)) {
-            return;
+            return false;
         }
         Entity entity = event.getEntity();
         BaseEntity base = EntityUtils.getBaseEntity(entity);
-        if (base == null) return;
-        if (base.getId().equals(mobId)) progress1.killed = progress1.killed + 1;
+        if (base == null || !base.getId().equals(mobId)) return false;
+        progress1.killed = progress1.killed + 1;
+        return true;
     }
 }

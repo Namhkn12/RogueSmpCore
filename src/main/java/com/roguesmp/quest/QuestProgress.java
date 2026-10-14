@@ -1,38 +1,43 @@
 package com.roguesmp.quest;
 
+import com.roguesmp.quest.objective.ObjectiveProgress;
+import com.roguesmp.quest.objective.QuestObjective;
 import com.roguesmp.codec.Codec;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Represent player progress for a given {@link Quest}
  */
 public class QuestProgress {
+    private static final Codec<Set<UUID>> UUID_SET = Codec.listOf(Codec.UUID).xmap(HashSet::new, ArrayList::new);
+
 
     public static final Codec<QuestProgress> CODEC = Codec.composite(
             Quest.REFERENCE_CODEC.fieldOf("quest").forGetter(QuestProgress::getQuest),
-            Codec.BOOLEAN.optionalFieldOf("rewardClaimed", false).forGetter(QuestProgress::isRewardClaimed),
             Codec.LONG.fieldOf("acceptTimestamp").forGetter(QuestProgress::getAcceptTimestamp),
             Codec.LONG.optionalFieldOf("completedTimestamp", -1L).forGetter(QuestProgress::getCompletedTimestamp),
             Codec.lenientUnboundedMap(ObjectiveProgress.CODEC).optionalFieldOf("progress", new HashMap<>()).forGetter(QuestProgress::getSavableProgressMap),
+            UUID_SET.optionalFieldOf("eligible", Set.of()).forGetter(QuestProgress::getEligible),
             QuestProgress::new
     );
 
     private final Quest quest;
-    private boolean rewardClaimed;
     private long acceptTimestamp;
     private long completedTimestamp;
     private final Map<String, ObjectiveProgress> progress; // String is the id for each Objective, defined in Quest json data.
 
     private final Set<String> incompleteObjectives; // Checklist for incomplete objectives so we don't have to loop through all objectives every time
+    private final Set<UUID> eligible = new HashSet<>();
 
     /**
      * Create a new progress instance for the given quest.
      */
     public QuestProgress(Quest quest) {
         this.quest = quest;
-        this.rewardClaimed = false;
         this.acceptTimestamp = System.currentTimeMillis();
         this.completedTimestamp = -1;
         this.progress = new HashMap<>();
@@ -44,11 +49,11 @@ public class QuestProgress {
         });
     }
 
-    public QuestProgress(Quest quest, boolean rewardClaimed, long acceptTimestamp, long completedTimestamp, Map<String, ObjectiveProgress> progress) {
+    public QuestProgress(Quest quest, long acceptTimestamp, long completedTimestamp, Map<String, ObjectiveProgress> progress, Set<UUID> eligible) {
         this.quest = quest;
-        this.rewardClaimed = rewardClaimed;
         this.acceptTimestamp = acceptTimestamp;
         this.completedTimestamp = completedTimestamp;
+        this.eligible.addAll(eligible);
         //Init progress data, we can then add old data in to prevent null ObjectiveProgress (because we don't save new/empty progress)
         this.progress = new HashMap<>();
         quest.getObjectives().forEach((key, objective) -> {
@@ -73,13 +78,14 @@ public class QuestProgress {
     }
 
     /**
-     * Updates an objective's progress and returns whether the entire quest is now complete.
+     * Updates an objective's progress.
+     *
+     * @param updater returns whether it changed the progress
+     * @return whether the progress changed
      */
-    public boolean updateObjectiveProgress(String objectiveId, java.util.function.Consumer<ObjectiveProgress> updater) {
+    public boolean updateObjectiveProgress(String objectiveId, Predicate<ObjectiveProgress> updater) {
         ObjectiveProgress objProgress = this.progress.get(objectiveId);
-        if (objProgress == null) return isCompleted();
-
-        updater.accept(objProgress);
+        if (objProgress == null || !updater.test(objProgress)) return false;
 
         QuestObjective objective = quest.getObjective(objectiveId);
         if (objective != null && objective.isCompleted(objProgress)) {
@@ -93,7 +99,7 @@ public class QuestProgress {
             complete();
         }
 
-        return isCompleted();
+        return true;
     }
 
     public boolean isObjectiveCompleted(String objectiveId) {
@@ -104,17 +110,51 @@ public class QuestProgress {
      * <b> !! USE WITH CAUTION !! </b> <br>
      * Reset all progress, including timestamp and reward states.
      */
+    public List<Component> getDisplay() {
+        List<Component> lines = new ArrayList<>();
+        quest.getObjectives().forEach((objectiveId, objective) -> {
+            ObjectiveProgress objectiveProgress = progress.get(objectiveId);
+            if (objectiveProgress != null) lines.addAll(objective.getDisplay(objectiveProgress));
+        });
+        return lines;
+    }
+
+    public void forceComplete() {
+        this.incompleteObjectives.clear();
+        complete();
+    }
+
     public void resetProgresses() {
         this.progress.clear();
         this.incompleteObjectives.clear();
         this.completedTimestamp = -1;
         this.acceptTimestamp = System.currentTimeMillis();
-        this.rewardClaimed = false;
+        this.eligible.clear();
 
         quest.getObjectives().forEach((key, objective) -> {
             this.progress.put(key, objective.createNewProgress());
             this.incompleteObjectives.add(key);
         });
+    }
+
+    /**
+     * Group quests only: lets the player claim the rewards once the quest completes. Fixed once completed.
+     *
+     * @return whether eligibility changed
+     */
+    public boolean addEligible(UUID playerId) {
+        return !isCompleted() && eligible.add(playerId);
+    }
+
+    /**
+     * @return whether eligibility changed
+     */
+    public boolean removeEligible(UUID playerId) {
+        return !isCompleted() && eligible.remove(playerId);
+    }
+
+    public @Unmodifiable Set<UUID> getEligible() {
+        return Collections.unmodifiableSet(eligible);
     }
 
     /**
@@ -154,10 +194,6 @@ public class QuestProgress {
         return quest;
     }
 
-    public boolean isRewardClaimed() {
-        return rewardClaimed;
-    }
-
     public long getAcceptTimestamp() {
         return acceptTimestamp;
     }
@@ -168,9 +204,5 @@ public class QuestProgress {
 
     public long getCompletedTimestamp() {
         return completedTimestamp;
-    }
-
-    public void setRewardClaimed(boolean rewardClaimed) {
-        this.rewardClaimed = rewardClaimed;
     }
 }

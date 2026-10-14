@@ -1,5 +1,15 @@
 package com.roguesmp.registry;
 
+import com.roguesmp.quest.objective.ObjectiveProgress;
+import com.roguesmp.quest.objective.QuestObjective;
+import com.roguesmp.quest.objective.QuestObjectives;
+import com.roguesmp.quest.requirement.QuestRequirement;
+import com.roguesmp.quest.requirement.QuestRequirements;
+import com.roguesmp.quest.reward.QuestReward;
+import com.roguesmp.quest.reward.QuestRewards;
+import com.roguesmp.quest.condition.QuestCondition;
+import com.roguesmp.quest.condition.QuestConditions;
+import com.roguesmp.dungeon.feature.DungeonQuestConditions;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.BlockData;
 import com.roguesmp.block.BlockType;
@@ -36,7 +46,16 @@ import com.roguesmp.npc.BaseNpc;
 import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.npc.action.NpcActions;
 import com.roguesmp.player.ability.*;
-import com.roguesmp.dungeon_static.StaticDungeonInfo;
+import com.roguesmp.dungeon.DungeonDefinition;
+import com.roguesmp.dungeon.room.RoomDefinition;
+import com.roguesmp.dungeon.room.RoomEffect;
+import com.roguesmp.dungeon.room.RoomEffects;
+import com.roguesmp.dungeon.DungeonFeature;
+import com.roguesmp.dungeon.action.DungeonAction;
+import com.roguesmp.dungeon.action.DungeonActions;
+import com.roguesmp.dungeon.script.DungeonCondition;
+import com.roguesmp.dungeon.script.DungeonConditions;
+import com.roguesmp.dungeon.feature.DungeonFeatures;
 import com.roguesmp.world.PolarTemplateData;
 import com.roguesmp.player.ability.trigger.TriggerOption;
 import com.roguesmp.player.ability.trigger.TriggerOptions;
@@ -67,9 +86,18 @@ public class Registries {
     public static final Registry<Codec<? extends ItemAbility>> ITEM_ABILITY_CODEC = register(registry -> ItemAbilities.loadClass());
     public static final Registry<Codec<? extends GeneratorBehavior>> GENERATOR_BEHAVIOR_CODEC = register(registry -> GeneratorBehaviors.loadClass());
 
+    public static final Registry<Codec<? extends DungeonFeature<?>>> DUNGEON_FEATURE_CODEC = register(registry -> DungeonFeatures.loadClass());
+    public static final Registry<Codec<? extends DungeonAction>> DUNGEON_ACTION_CODEC = register(registry -> DungeonActions.loadClass());
+    public static final Registry<Codec<? extends DungeonCondition>> DUNGEON_CONDITION_CODEC = register(registry -> DungeonConditions.loadClass());
+    public static final Registry<Codec<? extends RoomEffect<?>>> DUNGEON_ROOM_EFFECT_CODEC = register(registry -> RoomEffects.loadClass());
+
     public static final Registry<Codec<? extends QuestObjective>> QUEST_OBJECTIVE_CODEC = register(registry -> QuestObjectives.loadClass());
     public static final Registry<Codec<? extends QuestRequirement>> QUEST_REQUIREMENT_CODEC = register(registry -> QuestRequirements.loadClass());
     public static final Registry<Codec<? extends QuestReward>> QUEST_REWARD_CODEC = register(registry -> QuestRewards.loadClass());
+    public static final Registry<Codec<? extends QuestCondition>> QUEST_CONDITION_CODEC = register(registry -> {
+        QuestConditions.loadClass();
+        DungeonQuestConditions.loadClass();
+    });
     // Populated as a side effect of QUEST_OBJECTIVE_CODEC's own loadClass() (each objective type
     // registers its progress codec alongside its own), not independently bootstrapped.
     public static final Registry<Codec<? extends ObjectiveProgress>> OBJECTIVE_PROGRESS_CODEC = new Registry<>();
@@ -110,7 +138,8 @@ public class Registries {
     public static final Registry<ItemType> ITEM_TYPE = new Registry<>("item_types", ItemType.CODEC);
     public static final Registry<FishingHotspot> FISHING_HOTSPOT = new Registry<>("fishing_hotspots", FishingHotspot.CODEC);
     public static final Registry<PolarTemplateData> POLAR_TEMPLATE_DATA = new Registry<>("polar_template_data", PolarTemplateData.CODEC);
-    public static final Registry<StaticDungeonInfo> STATIC_DUNGEON_INFO = new Registry<>("static_dungeon_info", StaticDungeonInfo.CODEC);
+    public static final Registry<RoomDefinition> DUNGEON_ROOM = new Registry<>("dungeon/rooms", RoomDefinition.CODEC);
+    public static final Registry<DungeonDefinition> DUNGEON = new Registry<>("dungeon/definitions", DungeonDefinition.CODEC);
     public static final Registry<FuelType> FUEL_TYPE = new Registry<>("fuel_types", FuelType.CODEC);
 
     public static final Registry<Codec<? extends CraftingRecipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());

@@ -6,7 +6,7 @@ Phần lớn nội dung game (item, mob/boss, ability, class, quest, NPC, loot, 
 
 ## Bản đồ thư mục
 
-Đường dẫn dưới đây tính từ thư mục dữ liệu plugin. "Registry" nghĩa là load qua [Registry System](Registry-System.md) + [Codec System](Codec-System.md); riêng dungeon dùng Gson + repository riêng nên quy tắc khác (xem [JSON-Dungeons](JSON-Dungeons.md)).
+Đường dẫn dưới đây tính từ thư mục dữ liệu plugin. "Registry" nghĩa là load qua [Registry System](Registry-System.md) + [Codec System](Codec-System.md); riêng spawner dùng Gson (xem [JSON-Spawners](JSON-Spawners.md)).
 
 | Thư mục / file | Chứa gì | Trang |
 | :--- | :--- | :--- |
@@ -24,14 +24,14 @@ Phần lớn nội dung game (item, mob/boss, ability, class, quest, NPC, loot, 
 | `fuel_types/` | Loại nhiên liệu cho máy phát | [JSON-Blocks](JSON-Blocks.md#fuel_types--loại-nhiên-liệu) |
 | `<thư mục trên>/tags/` | Tag — nhóm id lại | [Tag](#tag) bên dưới |
 | `enchants/tags/` | Chỉ có tag (enchant là enum cứng, không có file entry) | [JSON-Items](JSON-Items.md#enchant--không-có-json-riêng) |
-| `dungeon_v2/template/dungeon_template/` | Dungeon | [JSON-Dungeons](JSON-Dungeons.md) |
-| `dungeon_v2/template/room_template/` | Phòng | [JSON-Dungeons](JSON-Dungeons.md) |
-| `dungeon_v2/template/spawner_template/` | Spawner | [JSON-Dungeons](JSON-Dungeons.md) |
-| `dungeon_v2/template/schemeta/`, `schematic/` | Metadata + file `.schem` của phòng (sinh bằng lệnh `/schemeta save`) | [JSON-Dungeons](JSON-Dungeons.md) |
+| `dungeon/definitions/` | Dungeon | [JSON-Dungeons](JSON-Dungeons.md) |
+| `dungeon/rooms/` | Phòng | [JSON-Dungeons](JSON-Dungeons.md) |
+| `dungeon/schematics/` | File `.schem` của phòng (sinh bằng `/dungeonbuild schematic save`) | [JSON-Dungeons](JSON-Dungeons.md) |
+| `spawners/` | Spawner tuỳ chỉnh | [JSON-Spawners](JSON-Spawners.md) |
 | `global_config.json` | `mineskinApiKey`, `resourcePackUrl`, `resourcePackHash`, `lastDailyReset` | [Cấu hình chung](#cấu-hình-chung) |
 | `schematics/island.schem` | Mẫu đảo (schematic WorldEdit) | — |
 
-Do runtime tự sinh — **designer không sửa**: `dungeon_v2/runtime/**` (region, party, session), `island_grid_index.json`, các file `*.db` (SQLite: `player_data`, `player_quest_data`, `player_effect_data`, `island_data`, `blocks`), `generated/`. Plugin **không có** `config.yml`.
+Do runtime tự sinh — **designer không sửa**: `dungeon/instances/`, `dungeon/instances.db`, `island_grid_index.json`, các file `*.db` (SQLite: `player_data`, `player_quest_data`, `group_quest_data`, `player_effect_data`, `island_data`, `blocks`), `generated/`. Plugin **không có** `config.yml`.
 
 ## Quy tắc chung cho các thư mục Registry
 
@@ -127,7 +127,7 @@ Field kiểu "id của entry khác" (`item_id` trong yêu cầu nâng cấp abil
 
 ## Reload
 
-Sửa JSON xong có thể nạp lại không cần restart bằng lệnh vận hành reload (`ReloadCommand`; toàn bộ hoặc từng registry). Dungeon có lệnh riêng `/template reload [all|spawner|dungeon|room|loottable|schemeta]`.
+Sửa JSON xong có thể nạp lại không cần restart bằng lệnh vận hành reload (`ReloadCommand`; toàn bộ hoặc từng registry). Dungeon và phòng nạp lại cùng các registry khác; spawner chỉ nạp lúc khởi động.
 
 ## Cấu hình chung
 

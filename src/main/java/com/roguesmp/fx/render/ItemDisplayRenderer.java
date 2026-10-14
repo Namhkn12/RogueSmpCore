@@ -32,4 +32,9 @@ public final class ItemDisplayRenderer extends AbstractDisplayRenderer<ItemDispl
         display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.FIXED);
         display.setBillboard(Display.Billboard.FIXED);
     }
+
+    @Override
+    protected Vector3f modelOffset(Vector3f size) {
+        return new Vector3f();
+    }
 }

@@ -27,6 +27,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * A single-table SQLite store that keeps one codec-encoded JSON document per UUID.
@@ -82,20 +84,22 @@ public class JsonSqliteStore<V> {
      * @return a future that completes with whether the write succeeded
      */
     public CompletableFuture<Boolean> writeAsync(UUID key, String json) {
-        return CompletableFuture.supplyAsync(() -> {
-            String sql = "INSERT INTO " + table + " (" + keyColumn + ", data) VALUES (?, jsonb(?)) "
-                    + "ON CONFLICT(" + keyColumn + ") DO UPDATE SET data = excluded.data";
+        return CompletableFuture.supplyAsync(() -> writeRow(key, json), executor);
+    }
 
-            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setString(1, key.toString());
-                statement.setString(2, json);
-                statement.executeUpdate();
-                return true;
-            } catch (SQLException e) {
-                RogueSmpCore.LOGGER.error("Failed to save {} data (key: {})", table, key, e);
-                return false;
-            }
-        }, executor);
+    private boolean writeRow(UUID key, String json) {
+        String sql = "INSERT INTO " + table + " (" + keyColumn + ", data) VALUES (?, jsonb(?)) "
+                + "ON CONFLICT(" + keyColumn + ") DO UPDATE SET data = excluded.data";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, key.toString());
+            statement.setString(2, json);
+            statement.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            RogueSmpCore.LOGGER.error("Failed to save {} data (key: {})", table, key, e);
+            return false;
+        }
     }
 
     /**
@@ -139,20 +143,42 @@ public class JsonSqliteStore<V> {
     }
 
     public @Blocking @Nullable V load(UUID key) {
+        return loadAsync(key).join();
+    }
+
+    /**
+     * @return a future that completes with the value, or null if there is none or it could not be read
+     */
+    public CompletableFuture<@Nullable V> loadAsync(UUID key) {
+        return CompletableFuture.supplyAsync(() -> read(key), executor);
+    }
+
+    /**
+     * Reads, changes and writes one row as a single queued operation, so no other operation on the store interleaves.
+     */
+    public CompletableFuture<Boolean> updateAsync(UUID key, Supplier<V> absent, Consumer<V> updater) {
         return CompletableFuture.supplyAsync(() -> {
-            String sql = "SELECT json(data) AS data FROM " + table + " WHERE " + keyColumn + " = ?";
+            V value = read(key);
+            if (value == null) value = absent.get();
+            updater.accept(value);
+            String json = encode(value);
+            return json != null && writeRow(key, json);
+        }, executor);
+    }
 
-            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setString(1, key.toString());
+    private @Nullable V read(UUID key) {
+        String sql = "SELECT json(data) AS data FROM " + table + " WHERE " + keyColumn + " = ?";
 
-                try (ResultSet result = statement.executeQuery()) {
-                    return result.next() ? decode(key, result.getString("data")) : null;
-                }
-            } catch (SQLException e) {
-                RogueSmpCore.LOGGER.error("Failed to load {} data (key: {})", table, key, e);
-                return null;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, key.toString());
+
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() ? decode(key, result.getString("data")) : null;
             }
-        }, executor).join();
+        } catch (SQLException e) {
+            RogueSmpCore.LOGGER.error("Failed to load {} data (key: {})", table, key, e);
+            return null;
+        }
     }
 
     /**
@@ -199,14 +225,21 @@ public class JsonSqliteStore<V> {
     }
 
     public @Blocking void delete(UUID key) {
-        CompletableFuture.runAsync(() -> {
+        deleteAsync(key).join();
+    }
+
+    /**
+     * Queued behind every write already submitted, so a pending save cannot bring the row back.
+     */
+    public CompletableFuture<Void> deleteAsync(UUID key) {
+        return CompletableFuture.runAsync(() -> {
             try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + table + " WHERE " + keyColumn + " = ?")) {
                 statement.setString(1, key.toString());
                 statement.executeUpdate();
             } catch (SQLException e) {
                 RogueSmpCore.LOGGER.error("Failed to delete {} data (key: {})", table, key, e);
             }
-        }, executor).join();
+        }, executor);
     }
 
     /**

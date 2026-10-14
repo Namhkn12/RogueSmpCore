@@ -5,7 +5,6 @@ import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.quest.QuestReward;
 import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;

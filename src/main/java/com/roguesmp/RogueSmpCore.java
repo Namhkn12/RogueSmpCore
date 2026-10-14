@@ -19,10 +19,13 @@ import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.registry.Registries;
-import com.roguesmp.dungeon.DungeonRegistry;
-import com.roguesmp.dungeon_party.PartyCommand;
-import com.roguesmp.dungeon_party.PartyListener;
-import com.roguesmp.dungeon_party.PartyManager;
+import com.roguesmp.dungeon.build.DungeonBuildCommand;
+import com.roguesmp.dungeon.listener.RewardChestListener;
+import com.roguesmp.spawner.SpawnerCommand;
+import com.roguesmp.spawner.SpawnerSystem;
+import com.roguesmp.party.PartyCommand;
+import com.roguesmp.party.PartyListener;
+import com.roguesmp.party.PartyManager;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.fishing.FishingHotspotManager;
@@ -40,15 +43,17 @@ import com.roguesmp.gui.crafting.CraftingGui;
 import com.roguesmp.gui.info.SmpWikiMainMenuGui;
 import com.roguesmp.integration.LuckPermsIntegration;
 import com.roguesmp.integration.PlaceholderAPIIntegration;
-import com.roguesmp.world.DungeonWorldManager;
-import com.roguesmp.dungeon_static.StaticDungeonCommand;
-import com.roguesmp.dungeon_static.StaticDungeonListener;
-import com.roguesmp.dungeon_static.StaticDungeonManager;
+import com.roguesmp.dungeon.DungeonWorldManager;
+import com.roguesmp.dungeon.DungeonCommand;
+import com.roguesmp.dungeon.listener.DungeonListener;
+import com.roguesmp.dungeon.DungeonManager;
+import com.roguesmp.dungeon.script.DungeonValidation;
 import com.roguesmp.island.IslandCommand;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.listener.*;
 import com.roguesmp.npc.NpcManager;
 import com.roguesmp.player.PlayerManager;
+import com.roguesmp.quest.QuestCommand;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.registry.*;
 import com.roguesmp.server.DailyResetScheduler;
@@ -100,7 +105,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         //Island
         IslandManager.init(this, PlayerManager.getInstance());
-        StaticDungeonManager.init(this, new DungeonWorldManager(this, PolarTemplateManager.getInstance(), "dungeon_worlds", "dungeon"));
+        DungeonManager.init(this, new DungeonWorldManager(this, PolarTemplateManager.getInstance(), "dungeon/instances", "dungeoninstance"));
         LuckPermsIntegration.init(this);
 
         //Quest
@@ -120,12 +125,10 @@ public final class RogueSmpCore extends JavaPlugin {
 
         ItemRegistry.init(this);
 
-        VanillaCraftingRecipeRegistry.init(this);
-
         PartyManager.init(this);
 
-        //dungeon register
-        DungeonRegistry.onEnable(this);
+        //Dungeon spawners
+        SpawnerSystem.init(this);
 
         this.resetScheduler = new DailyResetScheduler(this);
         this.resetScheduler.start();
@@ -139,6 +142,8 @@ public final class RogueSmpCore extends JavaPlugin {
     // Load data from files, databases, etc
     public void loadData() {
         Registries.loadAllData(this);
+        DungeonValidation.validateAll();
+        DungeonManager.getInstance().load(); // binds runs to dungeon definitions and sweeps quest groups - must run after both are loaded above
 
         CraftingManager.init(); // indexes Registries.CRAFTING_RECIPE - must run after it's loaded above
         VanillaRecipeReplacer.replaceAll(); // swaps matching vanilla tool/armor recipes - must run after items load above
@@ -164,11 +169,9 @@ public final class RogueSmpCore extends JavaPlugin {
         BlockManager.getInstance().shutdown();
 
         PlayerManager.getInstance().onDisable();
-        DungeonRegistry.onDisable();
-        PartyManager.getInstance().saveAll();
 
         IslandManager.getInstance().onDisable();
-        StaticDungeonManager.getInstance().onDisable();
+        DungeonManager.getInstance().onDisable();
         QuestManager.getInstance().onDisable();
 
         EffectManager.getInstance().close();
@@ -194,7 +197,9 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new RegionWandListener(RegionSelections.getInstance(), RegionVisualizer.getInstance()));
         registerListener(new IslandListener(IslandManager.getInstance()));
         registerListener(new PartyListener(PartyManager.getInstance()));
-        registerListener(new StaticDungeonListener(StaticDungeonManager.getInstance()));
+        registerListener(new DungeonListener(DungeonManager.getInstance()));
+        registerListener(SpawnerSystem.getInstance().listener());
+        registerListener(new RewardChestListener());
         registerListener(new QuestListener(QuestManager.getInstance()));
     }
 
@@ -218,13 +223,15 @@ public final class RogueSmpCore extends JavaPlugin {
 
         new IslandCommand(IslandManager.getInstance()).register();
         new PartyCommand(PartyManager.getInstance()).register();
-        QuestManager.getInstance().registerQuestCommand();
+        new QuestCommand(QuestManager.getInstance()).register();
 
         ReloadCommand.register();
         FishingHotspotCommand.register();
         RegionCommand.register();
         PolarTemplateCommand.register();
-        StaticDungeonCommand.register();
+        new DungeonCommand(DungeonManager.getInstance()).register();
+        DungeonBuildCommand.register();
+        SpawnerCommand.register();
         GlyphFontCommand.register();
     }
 

@@ -1,11 +1,12 @@
 package com.roguesmp.server;
 
+import com.roguesmp.quest.data.GroupQuestData;
+import com.roguesmp.quest.data.PlayerQuestData;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
-import com.roguesmp.quest.PlayerQuestData;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.WorldPos;
@@ -66,22 +67,28 @@ public class PlayerDataAutoSaveScheduler {
             if (data.isDirty()) dirtyQuests.add(data);
         }
 
-        int total = dirtyPlayers.size() + dirtyIslands.size() + dirtyQuests.size();
+        List<GroupQuestData> dirtyGroupQuests = new ArrayList<>();
+        for (GroupQuestData data : QuestManager.getInstance().getQuestDataManager().getCachedGroupQuestData()) {
+            if (data.isDirty()) dirtyGroupQuests.add(data);
+        }
+
+        int total = dirtyPlayers.size() + dirtyIslands.size() + dirtyQuests.size() + dirtyGroupQuests.size();
         if (total == 0) {
             return;
         }
 
-        RogueSmpCore.LOGGER.info("[AutoSave] Saving {} dirty entrie(s) ({} player(s), {} island(s), {} quest profile(s))...",
-                total, dirtyPlayers.size(), dirtyIslands.size(), dirtyQuests.size());
+        RogueSmpCore.LOGGER.info("[AutoSave] Saving {} dirty entrie(s) ({} player(s), {} island(s), {} quest profile(s), {} group quest log(s))...",
+                total, dirtyPlayers.size(), dirtyIslands.size(), dirtyQuests.size(), dirtyGroupQuests.size());
 
         for (var player : Bukkit.getOnlinePlayers()) {
-            player.sendMessage(Utils.fromString("<yellow><bold>[!]</bold> <gray>Đang lưu dữ liệu server..."));
+            player.sendMessage(Utils.fromString("<yellow><bold>[!]</bold> <gray>Đang lưu dữ liệu người chơi..."));
         }
 
         CompletableFuture.allOf(
                 PlayerManager.getInstance().getDataManager().saveAllAsync(dirtyPlayers),
                 IslandManager.getInstance().getIslandDataManager().saveAllAsync(dirtyIslands),
-                QuestManager.getInstance().getQuestDataManager().saveAllAsync(dirtyQuests)
+                QuestManager.getInstance().getQuestDataManager().saveAllAsync(dirtyQuests),
+                QuestManager.getInstance().getQuestDataManager().saveAllGroupsAsync(dirtyGroupQuests)
         ).thenRun(() -> RogueSmpCore.LOGGER.info("[AutoSave] Done."));
     }
 }
