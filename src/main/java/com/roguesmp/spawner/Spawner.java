@@ -1,8 +1,14 @@
 package com.roguesmp.spawner;
 
+import com.roguesmp.constant.Keys;
 import com.roguesmp.spawner.behavior.BehaviorData;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
+import com.roguesmp.utils.Utils;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.spawner.SpawnRule;
 import org.bukkit.block.spawner.SpawnerEntry;
@@ -128,6 +134,13 @@ public class Spawner {
 
     public void setBehaviors(List<BehaviorData> behaviors) {
         this.behaviors = behaviors;
+    }
+
+    public ItemStack toItem() {
+        ItemStack item = ItemStack.of(Material.SPAWNER);
+        item.setData(DataComponentTypes.ITEM_NAME, Utils.fromString("<gold>Spawner: " + (name != null ? name : id)));
+        item.editPersistentDataContainer(pdc -> pdc.set(Keys.SPAWNER_TID, PersistentDataType.STRING, id));
+        return item;
     }
 
     public void applyTo(CreatureSpawner spawner) {
