@@ -1,9 +1,9 @@
 package com.roguesmp.gui.spawner;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.spawner.Spawner;
-import com.roguesmp.spawner.SpawnerManager;
-import com.roguesmp.spawner.SpawnerSystem;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.spawner.behavior.BehaviorData;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
@@ -108,12 +108,11 @@ public class SpawnerBrowserGui extends BaseGui {
     }
 
     private List<Spawner> filteredSpawners() {
-        SpawnerManager templates = SpawnerSystem.getInstance().templates();
         String query = searchQuery == null || searchQuery.isBlank() ? null : searchQuery.toLowerCase().trim();
         List<Spawner> result = new ArrayList<>();
-        for (String id : templates.getAllIds()) {
+        for (String id : Registries.SPAWNER.getAll().keySet().stream().sorted().toList()) {
             if (query != null && !id.toLowerCase().contains(query)) continue;
-            result.add(templates.getById(id));
+            result.add(Registries.SPAWNER.get(id));
         }
         return result;
     }
@@ -173,7 +172,7 @@ public class SpawnerBrowserGui extends BaseGui {
                 .addTextBody(Component.text("Hành động này không thể hoàn tác.", NamedTextColor.GRAY))
                 .confirmation()
                 .yesButton(Component.text("Xoá"), null, (response, audience) -> Utils.runLater(() -> {
-                    if (!SpawnerSystem.getInstance().templates().delete(spawner.getId())) {
+                    if (!Registries.SPAWNER.removeAndDeleteFiles(RogueSmpCore.getInstance(), spawner.getId())) {
                         player.sendMessage(Utils.fromString("<red>Không thể xoá spawner " + spawner.getId() + "."));
                     }
                     showInventory(player);

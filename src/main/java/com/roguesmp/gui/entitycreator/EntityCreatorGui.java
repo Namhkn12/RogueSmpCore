@@ -99,6 +99,9 @@ public class EntityCreatorGui {
         multi.addButton(componentLabel(EntityComponentKeys.NAMEPLATE),
                 tooltip("Hiện bảng tên/máu/hiệu ứng nổi phía trên đầu entity.", "Xám = chưa ghi đè, entity vẫn có bảng tên mặc định lúc spawn"),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildNameplateDialog(player))));
+        multi.addButton(componentLabel(EntityComponentKeys.AI),
+                tooltip("Xoá/thêm goal AI vanilla (tấn công, né tránh, đi lang thang, chọn mục tiêu, ...).", "Preset hostile: chỉ nhắm vào người chơi"),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(new AiComponentEditorGui(this, (AiComponent) components.get(EntityComponentKeys.AI.id())).buildHubDialog(player))));
         multi.addButton(componentLabel(EntityComponentKeys.LOOT_TABLE),
                 tooltip("Danh sách loot table roll khi entity chết (mỗi table roll độc lập).", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildLootTableDialog(player))));
@@ -175,6 +178,14 @@ public class EntityCreatorGui {
 
     void removeLootTable() {
         components.remove(EntityComponentKeys.LOOT_TABLE.id());
+    }
+
+    void applyAi(AiComponent component) {
+        components.put(EntityComponentKeys.AI.id(), component);
+    }
+
+    void removeAi() {
+        components.remove(EntityComponentKeys.AI.id());
     }
 
     void reopen(Player player) {

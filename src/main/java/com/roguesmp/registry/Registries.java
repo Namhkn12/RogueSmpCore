@@ -23,6 +23,9 @@ import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.effect.EffectCodecs;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.entity.BaseEntity;
+import com.roguesmp.entity.ai.AiGoal;
+import com.roguesmp.entity.ai.AiGoals;
+import com.roguesmp.spawner.Spawner;
 import com.roguesmp.entity.EntityFactory;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.component.EntityComponent;
@@ -82,6 +85,7 @@ public class Registries {
 
     public static final Registry<Codec<? extends ItemComponent>> ITEM_COMPONENT_CODEC = register(registry -> ItemComponentKeys.loadClass());
     public static final Registry<Codec<? extends EntityComponent>> ENTITY_COMPONENT_CODEC = register(registry -> EntityComponentKeys.loadClass());
+    public static final Registry<Codec<? extends AiGoal>> AI_GOAL_CODEC = register(registry -> AiGoals.loadClass());
     public static final Registry<Codec<? extends SmpEffect>> EFFECT_CODEC = register(registry -> EffectCodecs.loadClass());
     public static final Registry<Codec<? extends ItemAbility>> ITEM_ABILITY_CODEC = register(registry -> ItemAbilities.loadClass());
     public static final Registry<Codec<? extends GeneratorBehavior>> GENERATOR_BEHAVIOR_CODEC = register(registry -> GeneratorBehaviors.loadClass());
@@ -133,6 +137,7 @@ public class Registries {
     public static final Registry<BlockData> BLOCK = new Registry<>("blocks", BlockData.CODEC);
     public static final Registry<BaseNpc> NPC = new Registry<>("npcs", BaseNpc.CODEC);
     public static final Registry<BaseEntity> ENTITY = new Registry<>("entities", BaseEntity.CODEC);
+    public static final Registry<Spawner> SPAWNER = new Registry<>("spawners", Spawner.CODEC);
 
     public static final Registry<LootTable> LOOT_TABLE = new Registry<>(LootConfig.LOOT_TABLE_FOLDER, LootTable.CODEC);
     public static final Registry<ItemType> ITEM_TYPE = new Registry<>("item_types", ItemType.CODEC);

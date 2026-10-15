@@ -2,12 +2,14 @@ package com.roguesmp.entity;
 
 import com.google.gson.annotations.SerializedName;
 import org.bukkit.attribute.Attribute;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * For use in entities only
  */
 public enum EntityAttribute {
 
+    CUBE_SIZE(null),
     @SerializedName("max_health")
     MAX_HEALTH(Attribute.MAX_HEALTH),
     @SerializedName("follow_range")
@@ -48,13 +50,13 @@ public enum EntityAttribute {
     WATER_MOVEMENT_EFFICIENCY(Attribute.WATER_MOVEMENT_EFFICIENCY),
     ;
 
-    private final Attribute bukkitAttribute;
+    private final @Nullable Attribute bukkitAttribute;
 
-    EntityAttribute(Attribute bukkitAttribute) {
+    EntityAttribute(@Nullable Attribute bukkitAttribute) {
         this.bukkitAttribute = bukkitAttribute;
     }
 
-    public Attribute getBukkitAttribute() {
+    public @Nullable Attribute getBukkitAttribute() {
         return bukkitAttribute;
     }
 }

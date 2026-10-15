@@ -1,9 +1,9 @@
 package com.roguesmp.gui.spawner;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.spawner.Spawner;
-import com.roguesmp.spawner.SpawnerManager;
-import com.roguesmp.spawner.SpawnerSystem;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.spawner.behavior.BehaviorData;
 import com.roguesmp.spawner.behavior.BehaviorFactory;
 import com.roguesmp.utils.Utils;
@@ -137,8 +137,7 @@ public class SpawnerCreatorGui {
             return;
         }
 
-        SpawnerManager templates = SpawnerSystem.getInstance().templates();
-        if (!id.equals(originalId) && templates.getById(id) != null) {
+        if (!id.equals(originalId) && Registries.SPAWNER.get(id) != null) {
             open(player, "ID '" + id + "' đã tồn tại.");
             return;
         }
@@ -165,11 +164,8 @@ public class SpawnerCreatorGui {
             return;
         }
 
-        if (templates.create(spawner) == null) {
-            open(player, "Không thể lưu spawner, xem console.");
-            return;
-        }
-        if (originalId != null && !originalId.equals(id)) templates.delete(originalId);
+        if (originalId != null && !originalId.equals(id)) Registries.SPAWNER.removeAndDeleteFiles(RogueSmpCore.getInstance(), originalId);
+        Registries.SPAWNER.registerAndSave(RogueSmpCore.getInstance(), id, spawner);
 
         player.sendMessage(Utils.fromString("<green>Đã lưu spawner " + id + "."));
         new SpawnerBrowserGui(player).showInventory(player);
