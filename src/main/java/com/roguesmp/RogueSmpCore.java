@@ -4,6 +4,7 @@ import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.command.FishingHotspotCommand;
 import com.roguesmp.command.RegionCommand;
 import com.roguesmp.command.PolarTemplateCommand;
+import com.roguesmp.server.goal.EntityGoalSpawnListener;
 import com.roguesmp.world.PolarTemplateManager;
 import com.roguesmp.command.ReloadCommand;
 import com.roguesmp.fishing.listener.FishingListener;
@@ -31,7 +32,6 @@ import com.roguesmp.entity.EntityManager;
 import com.roguesmp.fishing.FishingHotspotManager;
 import com.roguesmp.fishing.FishingManager;
 import com.roguesmp.fx.FxEngine;
-import com.roguesmp.goal.zombified_piglin.PigZombieSpawnListener;
 import com.roguesmp.gui.CreatorHubGui;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.gui.ItemRepairGui;
@@ -189,7 +189,7 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance(), IslandManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
-        registerListener(new PigZombieSpawnListener(this));
+
         registerListener(new EntityListener(EntityManager.getInstance()));
         registerListener(new NpcListener(NpcManager.getInstance()));
         registerListener(new FishingListener(FishingManager.getInstance(), FishingHotspotManager.getInstance()));
@@ -201,6 +201,8 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(SpawnerSystem.getInstance().listener());
         registerListener(new RewardChestListener());
         registerListener(new QuestListener(QuestManager.getInstance()));
+
+        registerListener(new EntityGoalSpawnListener());
     }
 
     //Register CommandAPICommand

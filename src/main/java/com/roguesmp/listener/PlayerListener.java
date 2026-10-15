@@ -30,7 +30,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
-import java.util.UUID;
 
 public class PlayerListener implements Listener {
 
@@ -44,17 +43,10 @@ public class PlayerListener implements Listener {
         this.islandManager = islandManager;
     }
 
-    @EventHandler
-    public void onPlayerPreJoin(AsyncPlayerPreLoginEvent event) {
-        UUID uuid = event.getUniqueId();
-        playerDataManager.cacheData(playerDataManager.loadPlayerData(uuid));
-    }
-
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerPreJoinDenied(AsyncPlayerPreLoginEvent event) {
-        if (event.getLoginResult() == AsyncPlayerPreLoginEvent.Result.ALLOWED) return;
-
-        playerDataManager.removeCachedData(event.getUniqueId());
+    public void onPlayerPreJoin(AsyncPlayerPreLoginEvent event) {
+        if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) return;
+        playerDataManager.cacheData(playerDataManager.loadPlayerData(event.getUniqueId()));
     }
 
     @EventHandler

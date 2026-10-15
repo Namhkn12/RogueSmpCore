@@ -36,6 +36,13 @@ public interface EntityComponent {
     }
 
     /**
+     * Components with a higher order {@link #apply} later, so they can override what lower ones set up.
+     */
+    default int applyOrder() {
+        return 0;
+    }
+
+    /**
      * Called once per {@link SmpEntity} instance during {@link SmpEntity#initialize()}, after
      * {@link #apply}. Unlike {@code apply}, the full {@code SmpEntity} wrapper is available here -
      * use this for setup that needs event dispatch, scheduling, or other components. Do not spawn

@@ -4,6 +4,7 @@ import com.roguesmp.gui.entitycreator.EntityCreatorGui;
 import com.roguesmp.gui.itemcreator.ItemCreatorGui;
 import com.roguesmp.gui.loottablecreator.LootTableGuiCreator;
 import com.roguesmp.gui.recipecreator.RecipeCreatorGui;
+import com.roguesmp.gui.spawner.SpawnerCreatorGui;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
@@ -46,6 +47,9 @@ public final class CreatorHubGui {
 
         multi.addButton(Component.text("Công thức chế tạo (recipe)", NamedTextColor.AQUA), Component.text("/smprecipecreator new"),
                 (response, audience) -> Utils.runLater(() -> new RecipeCreatorGui().openKindPickerDialog(player)));
+
+        multi.addButton(Component.text("Spawner", NamedTextColor.AQUA), Component.text("/spawner browse"),
+                (response, audience) -> Utils.runLater(() -> new SpawnerCreatorGui().open(player)));
 
         multi.columns(2);
         multi.exitButton(Component.text("Đóng"), (response, audience) -> audience.closeDialog());

@@ -1,9 +1,37 @@
 package com.roguesmp.spawner.behavior;
 
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.DataResult;
+import com.roguesmp.codec.DynamicOps;
+
 import java.util.Collections;
 import java.util.Map;
 
 public class BehaviorData {
+
+    private static final Codec<Object> PARAM_VALUE = new Codec<>() {
+        @Override
+        public <O> DataResult<O> encode(Object input, DynamicOps<O> ops) {
+            if (input instanceof Boolean bool) return DataResult.success(ops.createBoolean(bool));
+            if (input instanceof Number number) return DataResult.success(ops.createDouble(number.doubleValue()));
+            return DataResult.success(ops.createString(String.valueOf(input)));
+        }
+
+        @Override
+        public <O> DataResult<Object> decode(O input, DynamicOps<O> ops) {
+            DataResult<Boolean> bool = ops.getBoolean(input);
+            if (bool.isSuccess()) return DataResult.success(bool.result());
+            DataResult<Double> number = ops.getDouble(input);
+            if (number.isSuccess()) return DataResult.success(number.result());
+            return ops.getString(input).map(string -> string);
+        }
+    };
+
+    public static final Codec<BehaviorData> CODEC = Codec.composite(
+            Codec.STRING.fieldOf("type").forGetter(BehaviorData::getType),
+            Codec.unboundedMap(PARAM_VALUE).optionalFieldOf("params", Map.of()).forGetter(BehaviorData::getParams),
+            BehaviorData::new
+    );
 
     private String type;
     private Map<String, Object> params;

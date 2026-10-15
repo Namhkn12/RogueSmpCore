@@ -1,5 +1,7 @@
 package com.roguesmp.listener;
 
+import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
+import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import com.roguesmp.block.BlockPos;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.manager.BlockManager;
@@ -19,13 +21,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageAbortEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.world.EntitiesLoadEvent;
-import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
-import live.minehub.polarpaper.core.event.PolarEntitySpawnEvent;
-import com.roguesmp.utils.Utils;
-import com.roguesmp.RogueSmpCore;
-import org.bukkit.entity.Entity;
 import java.util.List;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -41,19 +37,13 @@ public class BlockListener implements Listener {
     }
 
     @EventHandler
-    public void onEntitiesLoad(EntitiesLoadEvent event){
-        manager.onEntitiesLoad(event.getEntities());
+    public void onEntityAddToWorld(EntityAddToWorldEvent event){
+        manager.onEntitiesLoad(List.of(event.getEntity()));
     }
 
     @EventHandler
-    public void onEntitiesUnload(EntitiesUnloadEvent event){
-        manager.onEntitiesUnload(event.getEntities());
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPolarEntitySpawn(PolarEntitySpawnEvent event){
-        Entity entity = event.getBukkitEntity();
-        manager.onEntitiesLoad(List.of(entity));
+    public void onEntityRemoveFromWorld(EntityRemoveFromWorldEvent event){
+        manager.onEntitiesUnload(List.of(event.getEntity()));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

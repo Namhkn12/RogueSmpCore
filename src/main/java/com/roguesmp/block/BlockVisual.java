@@ -36,7 +36,7 @@ public final class BlockVisual {
         String blockId = block.getId();
 
         Location center = new Location(world, pos.x() + 0.5, pos.y() + 0.5, pos.z() + 0.5, 0f, 0f);
-        return world.spawn(center, ItemDisplay.class, display -> {
+        ItemDisplay spawned = world.spawn(center, ItemDisplay.class, display -> {
             display.setItemStack(stack);
             display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.NONE);
             //Maybe in the future...
@@ -48,10 +48,9 @@ public final class BlockVisual {
 //            ));
             display.setPersistent(true);
             display.setInvulnerable(true);
-
-            PersistentDataContainer data = display.getPersistentDataContainer();
-            data.set(Keys.BLOCK_ID, PersistentDataType.STRING, blockId);
         });
+        spawned.getPersistentDataContainer().set(Keys.BLOCK_ID, PersistentDataType.STRING, blockId);
+        return spawned;
     }
 
     public static ItemStack displayStack(Key model) {

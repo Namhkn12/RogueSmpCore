@@ -1,6 +1,7 @@
 package com.roguesmp.entity.component;
 
 import com.roguesmp.codec.Codec;
+import com.roguesmp.entity.component.impl.AiComponent;
 import com.roguesmp.entity.component.impl.AttributeComponent;
 import com.roguesmp.entity.component.impl.BehaviorComponent;
 import com.roguesmp.entity.component.impl.BossBarComponent;
@@ -23,6 +24,7 @@ public class EntityComponentKeys {
     public static final EntityComponentKey<NameplateComponent> NAMEPLATE;
     public static final EntityComponentKey<PhaseComponent> PHASE;
     public static final EntityComponentKey<LootTableComponent> LOOT_TABLE;
+    public static final EntityComponentKey<AiComponent> AI;
 
     static {
         DISPLAY_NAME = register("display_name", DisplayNameComponent.CODEC);
@@ -34,6 +36,7 @@ public class EntityComponentKeys {
         NAMEPLATE = register("nameplate", NameplateComponent.CODEC);
         PHASE = new EntityComponentKey<>("phase"); // Code-driven only, no CODEC (BossHealthAction isn't JSON-serializable).
         LOOT_TABLE = register("loot_table", LootTableComponent.CODEC);
+        AI = register("ai", AiComponent.CODEC);
     }
 
     public static void loadClass() {

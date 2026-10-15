@@ -9,17 +9,13 @@ import com.roguesmp.entity.component.EntityComponentKey;
 import com.roguesmp.entity.component.impl.DisplayNameComponent;
 import com.roguesmp.registry.Registries;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntitySnapshot;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.*;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represent the data of our smpEntity
@@ -38,11 +34,15 @@ public class BaseEntity {
     private final String id; // ID should remain final as it's the unique identifier
     private final EntityType entityType; // Changing the physical type of entity usually requires a respawn
     private final Map<String, EntityComponent> components;
+    private final List<EntityComponent> sortedComponents;
 
     public BaseEntity(String id, EntityType entityType, Map<String, EntityComponent> components) {
         this.id = id;
         this.entityType = entityType;
         this.components = components;
+        List<EntityComponent> toSort = new ArrayList<>(components.values());
+        toSort.sort(Comparator.comparingInt(EntityComponent::applyOrder));
+        sortedComponents = List.copyOf(toSort);
     }
 
     @SuppressWarnings("unchecked")
@@ -94,9 +94,10 @@ public class BaseEntity {
         PersistentDataContainer pdc = living.getPersistentDataContainer();
         pdc.set(Keys.MOB_ID, PersistentDataType.STRING, id);
 
-        for (EntityComponent component : components.values()) {
+        for (EntityComponent component : sortedComponents) {
             component.apply(living);
         }
+
     }
 
     public String getId() {

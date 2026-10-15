@@ -3,6 +3,7 @@ package com.roguesmp.spawner;
 
 import com.roguesmp.constant.Keys;
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.registry.Registries;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.Location;
@@ -19,12 +20,10 @@ import java.util.UUID;
 
 public class SpawnerEventController {
 
-    private final SpawnerManager spawnerManager;
     private final SpawnerInstanceManager spawnerInstanceManager;
     private final Plugin plugin;
 
-    public SpawnerEventController(SpawnerManager spawnerManager, SpawnerInstanceManager spawnerInstanceManager, Plugin plugin) {
-        this.spawnerManager = spawnerManager;
+    public SpawnerEventController(SpawnerInstanceManager spawnerInstanceManager, Plugin plugin) {
         this.spawnerInstanceManager = spawnerInstanceManager;
         this.plugin = plugin;
     }
@@ -113,7 +112,7 @@ public class SpawnerEventController {
         newPdc.set(Keys.SPAWNER_IID, PersistentDataType.STRING, iid);
         newSpawner.update();
 
-        Spawner template = spawnerManager.getById(templateId);
+        Spawner template = Registries.SPAWNER.get(templateId);
         if (template == null) {
             RogueSmpCore.LOGGER.error("Spawner template not found: {}", templateId);
             return;

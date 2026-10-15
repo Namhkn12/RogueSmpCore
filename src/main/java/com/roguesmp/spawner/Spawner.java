@@ -1,8 +1,15 @@
 package com.roguesmp.spawner;
 
+import com.roguesmp.codec.Codec;
+import com.roguesmp.constant.Keys;
 import com.roguesmp.spawner.behavior.BehaviorData;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
+import com.roguesmp.utils.Utils;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.spawner.SpawnRule;
 import org.bukkit.block.spawner.SpawnerEntry;
@@ -12,8 +19,28 @@ import java.util.ArrayList;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class Spawner {
+
+    public static final Codec<Spawner> CODEC = Codec.composite(
+            Codec.STRING.fieldOf("id").forGetter(Spawner::getId),
+            Codec.STRING.optionalFieldOf("name").forGetter(spawner -> Optional.ofNullable(spawner.getName())),
+            Codec.unboundedMap(Codec.INT).fieldOf("mobs").forGetter(Spawner::getMobs),
+            Codec.INT.fieldOf("delay").forGetter(Spawner::getDelay),
+            Codec.INT.fieldOf("minDelay").forGetter(Spawner::getMinDelay),
+            Codec.INT.fieldOf("maxDelay").forGetter(Spawner::getMaxDelay),
+            Codec.INT.fieldOf("activeRange").forGetter(Spawner::getActiveRange),
+            Codec.INT.fieldOf("spawnRange").forGetter(Spawner::getSpawnRange),
+            Codec.INT.fieldOf("maxNearBy").forGetter(Spawner::getMaxNearBy),
+            Codec.INT.fieldOf("spawnCount").forGetter(Spawner::getSpawnCount),
+            Codec.listOf(BehaviorData.CODEC).optionalFieldOf("behaviors", List.of()).forGetter(Spawner::getBehaviors),
+            (id, name, mobs, delay, minDelay, maxDelay, activeRange, spawnRange, maxNearBy, spawnCount, behaviors) -> {
+                Spawner spawner = new Spawner(id, name.orElse(null), mobs, delay, minDelay, maxDelay, activeRange, spawnRange, maxNearBy, spawnCount);
+                spawner.setBehaviors(behaviors);
+                return spawner;
+            }
+    );
     private String id;
     private String name;
     private Map<String, Integer> mobs;
@@ -123,11 +150,18 @@ public class Spawner {
     }
 
     public List<BehaviorData> getBehaviors() {
-        return behaviors;
+        return behaviors != null ? behaviors : List.of();
     }
 
     public void setBehaviors(List<BehaviorData> behaviors) {
         this.behaviors = behaviors;
+    }
+
+    public ItemStack toItem() {
+        ItemStack item = ItemStack.of(Material.SPAWNER);
+        item.setData(DataComponentTypes.ITEM_NAME, Utils.fromString("<gold>Spawner: " + (name != null ? name : id)));
+        item.editPersistentDataContainer(pdc -> pdc.set(Keys.SPAWNER_TID, PersistentDataType.STRING, id));
+        return item;
     }
 
     public void applyTo(CreatureSpawner spawner) {

@@ -46,6 +46,7 @@ import java.util.regex.Pattern;
 
 public final class ServerRegionManager {
 
+    public static final String GLOBAL_ID = "__global__";
     private static final String SHAPE_INFIX = "_shape_";
     private static final Pattern SHAPE_SUFFIX = Pattern.compile(SHAPE_INFIX + "(\\d+)$");
 
@@ -117,10 +118,39 @@ public final class ServerRegionManager {
         RegionManager regionManager = getRegionManager(world);
         if (regionManager == null) return null;
 
+        if (isGlobal(id)) return global(world);
+
         ProtectedRegion region = regionManager.getRegion(id);
         if (region == null) return null;
         if (region.getType() == RegionType.GLOBAL) return isGroupTemplate(region) ? region : null;
         return region;
+    }
+
+    public static boolean isGlobal(String id) {
+        return GLOBAL_ID.equalsIgnoreCase(id);
+    }
+
+    public @Nullable ProtectedRegion global(World world) {
+        RegionManager regionManager = getRegionManager(world);
+        if (regionManager == null) return null;
+
+        ProtectedRegion region = regionManager.getRegion(GLOBAL_ID);
+        if (region != null) return region;
+
+        region = new GlobalProtectedRegion(GLOBAL_ID);
+        regionManager.addRegion(region);
+        return region;
+    }
+
+    public void editGlobal(World world, Consumer<ProtectedRegion> edit) {
+        ProtectedRegion region = global(world);
+        if (region == null) {
+            RogueSmpCore.LOGGER.error("WorldGuard region manager could not be resolved for world: {}", world.getName());
+            return;
+        }
+
+        edit.accept(region);
+        saveChanges(world);
     }
 
     public record Bounds(BlockVector3 min, BlockVector3 max) {

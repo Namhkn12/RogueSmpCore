@@ -31,6 +31,7 @@ public class RegionBrowserGui extends BaseGui {
     private static final int NEW_SLOT = 0;
     private static final int HEIGHT_SLOT = 2;
     private static final int WAND_SLOT = 4;
+    private static final int GLOBAL_SLOT = 6;
 
     private final Player player;
     private final World world;
@@ -70,6 +71,14 @@ public class RegionBrowserGui extends BaseGui {
                 line("Right click: add corner"), line("Left click: undo corner"), line("Sneak + right click: this menu")), event -> {
             event.setCancelled(true);
             player.getInventory().addItem(RegionWand.create());
+        });
+
+        ProtectedRegion global = ServerRegionManager.getInstance().global(world);
+        int globalFlags = global == null ? 0 : visibleFlags(global).size();
+        addButton(GLOBAL_SLOT, item(Material.FILLED_MAP, ServerRegionManager.GLOBAL_ID, NamedTextColor.LIGHT_PURPLE,
+                line("Applies to the whole world"), line("Flags: " + globalFlags), hint("Click to edit flags")), event -> {
+            event.setCancelled(true);
+            Utils.runLater(() -> new RegionFlagGui(player, ServerRegionManager.GLOBAL_ID).showInventory(player));
         });
 
         List<Map.Entry<String, List<ProtectedRegion>>> regions = new ArrayList<>(ServerRegionManager.getInstance().regions(world).entrySet());

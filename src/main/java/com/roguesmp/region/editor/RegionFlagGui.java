@@ -57,7 +57,7 @@ public class RegionFlagGui extends BaseGui {
 
         addButton(BACK_SLOT, item(Material.ARROW, "Back", NamedTextColor.GRAY), event -> {
             event.setCancelled(true);
-            Utils.runLater(() -> new RegionEditorGui(player, regionId).showInventory(player));
+            Utils.runLater(() -> (ServerRegionManager.isGlobal(regionId) ? new RegionBrowserGui(player) : new RegionEditorGui(player, regionId)).showInventory(player));
         });
 
         addButton(ADD_SLOT, item(Material.EMERALD, "Add flag", NamedTextColor.GREEN,

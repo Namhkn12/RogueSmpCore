@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id("xyz.jpenilla.run-paper") version "2.3.1"
     id("com.gradleup.shadow") version "9.6.1"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.24"
 }
 
 group = 'com.roguesmp'
@@ -30,7 +31,8 @@ repositories {
     maven { url = "https://repo.onarandombox.com/content/groups/public/" }
 }
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:26.2.build.+")
+    paperweight.paperDevBundle("26.2.build.+")
+//    compileOnly("io.papermc.paper:paper-api:26.2.build.+")
     compileOnly("dev.jorel:commandapi-paper-core:12.0.0")
     compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit:2.16.0")
     compileOnly('com.github.NEZNAMY:TAB-API:6.1.2')

@@ -1,6 +1,8 @@
 package com.roguesmp.registry;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
@@ -109,6 +111,7 @@ public class Registry<T> {
             try (FileReader reader = new FileReader(file)) {
                 JsonElement json = Utils.GSON.fromJson(reader, JsonElement.class);
                 if (json == null) continue;
+                alignIdWithPath(json, id);
 
                 DataResult<T> result = codec.decode(json, JsonOps.INSTANCE);
                 if (result.isSuccess()) {
@@ -121,6 +124,14 @@ public class Registry<T> {
                 RogueSmpCore.LOGGER.error("Error reading file '{}' in '{}': {}", file.getName(), locationKey, e.getMessage());
             }
         }
+    }
+
+    private void alignIdWithPath(JsonElement json, String id) {
+        if (!(json instanceof JsonObject object) || !(object.get("id") instanceof JsonPrimitive declared) || !declared.isString()) return;
+        if (declared.getAsString().equals(id)) return;
+
+        RogueSmpCore.LOGGER.warn("Entry '{}/{}.json' declares id '{}', using its path '{}' instead", locationKey, id, declared.getAsString(), id);
+        object.addProperty("id", id);
     }
 
     /**

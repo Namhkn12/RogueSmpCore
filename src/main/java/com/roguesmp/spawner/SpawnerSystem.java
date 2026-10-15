@@ -1,6 +1,5 @@
 package com.roguesmp.spawner;
 
-import com.google.gson.GsonBuilder;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.region.SmpRegionFlags;
@@ -16,14 +15,12 @@ public final class SpawnerSystem {
 
     private static SpawnerSystem INSTANCE;
 
-    private final SpawnerManager templates;
     private final SpawnerInstanceManager instances;
     private final SpawnerEventListener listener;
 
     private SpawnerSystem(RogueSmpCore plugin) {
-        this.templates = new SpawnerManager(new SpawnerRepository(plugin, new GsonBuilder().setPrettyPrinting().create()));
         this.instances = new SpawnerInstanceManager();
-        this.listener = new SpawnerEventListener(new SpawnerEventController(templates, instances, plugin));
+        this.listener = new SpawnerEventListener(new SpawnerEventController(instances, plugin));
     }
 
     public static void init(RogueSmpCore plugin) {
@@ -32,10 +29,6 @@ public final class SpawnerSystem {
 
     public static SpawnerSystem getInstance() {
         return INSTANCE;
-    }
-
-    public SpawnerManager templates() {
-        return templates;
     }
 
     public SpawnerEventListener listener() {
