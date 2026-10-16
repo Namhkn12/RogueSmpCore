@@ -68,7 +68,8 @@ public class StunEffect extends SmpEffect {
                 .stopWhen(() -> !entity.isValid() || entity.isDead())
                 .build();
 
-        FxEngine.getInstance().play(effect);
+        if (orbitHandle != null) orbitHandle.stop();
+        orbitHandle = FxEngine.getInstance().play(effect);
     }
 
     @Override
