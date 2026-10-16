@@ -129,7 +129,7 @@ public class EntityUtils {
 
     private static boolean hasEntityTag(Entity entity, SmpTag<BaseEntity> tag) {
         BaseEntity base = getBaseEntity(entity);
-        return base != null && tag.contains(base);
+        return base != null && tag.contains(base.getId());
     }
 
     public static boolean isInStealth(Entity entity) {

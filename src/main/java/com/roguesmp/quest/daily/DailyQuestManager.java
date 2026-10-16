@@ -10,7 +10,6 @@ import com.roguesmp.utils.Utils;
 import org.bukkit.entity.Player;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class DailyQuestManager {
 
@@ -119,10 +118,7 @@ public class DailyQuestManager {
     }
 
     public List<QuestProgress> getActiveDailyQuestsForTag(PlayerQuestData data, SmpTag<Quest> tag) {
-        Set<String> tagQuestIds = tag.getElements().stream()
-                .map(Quest::getId)
-                .collect(Collectors.toSet());
-
+        Set<String> tagQuestIds = tag.getElementIds();
         return data.getQuestProgresses().values().stream()
                 .filter(qp -> tagQuestIds.contains(qp.getQuest().getId()))
                 .toList();
@@ -141,7 +137,7 @@ public class DailyQuestManager {
 
     public SmpTag<Quest> getDailyTagForQuest(Quest quest) {
         for (SmpTag<Quest> tag : getDailyTags()) {
-            if (tag.contains(quest)) return tag;
+            if (tag.contains(quest.getId())) return tag;
         }
         return null;
     }
@@ -158,7 +154,7 @@ public class DailyQuestManager {
     public List<SmpTag<Quest>> getDailyTags() {
         List<SmpTag<Quest>> tags = new ArrayList<>();
         for (SmpTag<Quest> tag : List.of(Tags.DAILY_EASY_QUEST, Tags.DAILY_MEDIUM_QUEST, Tags.DAILY_HARD_QUEST)) {
-            if (!tag.getElements().isEmpty()) tags.add(tag);
+            if (!tag.getElementIds().isEmpty()) tags.add(tag);
         }
         return tags;
     }

@@ -229,7 +229,7 @@ public class Registry<T> {
 
     private void linkHolderTags(Holder<T> holder) {
         tags.forEach((tagId, tag) -> {
-            if (tag.contains(holder.value())) holder.addTag(tagId);
+            if (tag.contains(holder.getId())) holder.addTag(tagId);
         });
     }
 

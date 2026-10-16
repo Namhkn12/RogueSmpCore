@@ -61,7 +61,7 @@ public class ClassRestrictionMechanic implements PlayerMechanic {
     public static boolean isRestrictedWeapon(SmpPlayer player, @Nullable BaseItem baseItem) {
         if (baseItem == null) return false;
 
-        if (!Tags.WEAPONS.contains(baseItem)) return false; // Not a weapon-type item at all
+        if (!Tags.WEAPONS.contains(baseItem.getId())) return false; // Not a weapon-type item at all
 
         Set<String> itemTagIds = Registries.ITEM.getHolder(baseItem.getId()).getTagIds();
 
