@@ -1,7 +1,13 @@
 package com.roguesmp.listener;
 
+import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
+import com.roguesmp.constant.DamageFlag;
+import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.player.PlayerManager;
+import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.player.death.LastHit;
 import com.roguesmp.utils.DamageDisplayUtils;
 import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.EntityUtils;
@@ -19,7 +25,20 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.util.Vector;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+
 public class DamageListener implements Listener {
+    private record HitWindow(int startTick, double rawDamage) {
+        boolean isActive(LivingEntity victim) {
+            return Bukkit.getCurrentTick() - startTick < victim.getMaximumNoDamageTicks() / 2;
+        }
+    }
+
+    private static final Map<UUID, HitWindow> HIT_WINDOWS = new HashMap<>();
+
     @EventHandler
     public void onDamageEntity(EntityDamageEvent event) {
         if (event.isCancelled()) return;
@@ -52,39 +71,92 @@ public class DamageListener implements Listener {
                 }
             }
 
-            DamageEvent damageEvent;
-            double originalDamage = event.getDamage();
-            if (DamageUtils.nextMetadata != null) { // Damage caused by plugin via DamageUtils
-                damageEvent = new DamageEvent(victim, damager, originalDamage, DamageUtils.nextMetadata);
-                DamageUtils.nextMetadata = null;
-            } else {
-                DamageType damageType = DamageType.getType(event.getCause());
-                damageEvent = new DamageEvent(victim, damager, originalDamage, new DamageEvent.Metadata(damageType));
-            }
-
+            DamageEvent damageEvent = new DamageEvent(victim, damager, event.getDamage(), resolveMetadata(event));
             damageEvent.setCritical(entityDamageByEntityEvent.isCritical());
-            Bukkit.getPluginManager().callEvent(damageEvent);
-
-            event.setCancelled(damageEvent.isCancelled());
-            event.setDamage(damageEvent.getFinalDamage());
+            dispatch(event, damageEvent);
         } else {
             Entity victim = event.getEntity();
-            if (victim instanceof Item) return; //Somehow item burning also call damage event
+            if (victim instanceof Item) return;
 
-            DamageEvent damageEvent;
-            if (DamageUtils.nextMetadata != null) { // Damage caused by plugin via DamageUtils
-                damageEvent = new DamageEvent(victim, null, event.getDamage(), DamageUtils.nextMetadata);
-                DamageUtils.nextMetadata = null;
-            } else {
-                DamageType damageType = DamageType.getType(event.getCause());
-                damageEvent = new DamageEvent(victim, null, event.getDamage(), new DamageEvent.Metadata(damageType));
-            }
-
-            Bukkit.getPluginManager().callEvent(damageEvent);
-            event.setCancelled(damageEvent.isCancelled());
-            event.setDamage(damageEvent.getFinalDamage());
+            dispatch(event, new DamageEvent(victim, null, event.getDamage(), resolveMetadata(event)));
         }
+    }
 
+    private static DamageEvent.Metadata resolveMetadata(EntityDamageEvent event) {
+        if (DamageType.isPluginSource(event.getDamageSource())) {
+            DamageEvent.Metadata metadata = DamageUtils.consumeMetadata();
+            if (metadata != null) return metadata;
+        }
+        return new DamageEvent.Metadata(DamageType.fromSource(event.getDamageSource()));
+    }
+
+    private static void dispatch(EntityDamageEvent event, DamageEvent damageEvent) {
+        damageEvent.setDamageSource(event.getDamageSource());
+        double raw = event.getDamage();
+        double invulnerabilityRatio = getInvulnerabilityRatio(event, raw);
+        if (invulnerabilityRatio <= 0) {
+            event.setCancelled(true);
+            return;
+        }
+        if (invulnerabilityRatio < 1) {
+            damageEvent.addDamageModifier(invulnerabilityRatio, DamageOperation.MORE_FINAL);
+        }
+        damageEvent.setShieldBlockRatio(getShieldBlockRatio(event, raw));
+
+        Bukkit.getPluginManager().callEvent(damageEvent);
+        if (damageEvent.isCancelled()) {
+            event.setCancelled(true);
+            return;
+        }
+        recordHit(event, raw);
+        event.setDamage(damageEvent.getFinalDamage());
+
+        if (event.getEntity() instanceof Player player) {
+            SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+            if (smpPlayer != null) {
+                smpPlayer.setLastHit(new LastHit(damageEvent.getMetadata(), event.getDamageSource().getCausingEntity(), Bukkit.getCurrentTick()));
+            }
+        }
+    }
+
+    private static double getInvulnerabilityRatio(EntityDamageEvent event, double raw) {
+        if (!(event.getEntity() instanceof LivingEntity living) || raw <= 0) return 1;
+        if (DamageType.hasFlag(event.getDamageSource(), DamageFlag.BYPASS_COOLDOWN)) return 1;
+
+        HitWindow window = HIT_WINDOWS.get(living.getUniqueId());
+        if (window == null || !window.isActive(living)) return 1;
+        if (raw <= window.rawDamage()) return 0;
+        return (raw - window.rawDamage()) / raw;
+    }
+
+    private static void recordHit(EntityDamageEvent event, double raw) {
+        if (!(event.getEntity() instanceof LivingEntity living) || raw <= 0) return;
+
+        UUID uuid = living.getUniqueId();
+        HitWindow window = HIT_WINDOWS.get(uuid);
+        boolean continuesWindow = window != null && window.isActive(living)
+                && !DamageType.hasFlag(event.getDamageSource(), DamageFlag.BYPASS_COOLDOWN);
+        int startTick = continuesWindow ? window.startTick() : Bukkit.getCurrentTick();
+        HIT_WINDOWS.put(uuid, new HitWindow(startTick, raw));
+    }
+
+    private static double getShieldBlockRatio(EntityDamageEvent event, double raw) {
+        if (raw <= 0 || !(event.getEntity() instanceof LivingEntity living)) return 0;
+
+        double finalDamage = event.getFinalDamage();
+        double absorption = living.getAbsorptionAmount();
+        double afterBlock;
+        if (finalDamage > 0) {
+            afterBlock = finalDamage + absorption;
+        } else {
+            afterBlock = absorption > 0 && !(living instanceof HumanEntity human && human.isBlocking()) ? raw : 0;
+        }
+        return Math.clamp(1 - afterBlock / raw, 0, 1);
+    }
+
+    @EventHandler
+    public void onEntityRemove(EntityRemoveFromWorldEvent event) {
+        HIT_WINDOWS.remove(event.getEntity().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

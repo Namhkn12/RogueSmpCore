@@ -1,5 +1,6 @@
 package com.roguesmp.listener;
 
+import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.event.*;
@@ -49,6 +50,12 @@ public class PlayerListener implements Listener {
         playerDataManager.cacheData(playerDataManager.loadPlayerData(event.getUniqueId()));
     }
 
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPreAttack(PrePlayerAttackEntityEvent event) {
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer());
+        if (smpPlayer != null) smpPlayer.setAttackStrength(event.getPlayer().getAttackCooldown());
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -79,6 +86,11 @@ public class PlayerListener implements Listener {
         String baseId = ItemStackUtils.getBaseId(event.getItem());
         if (baseId != null) {
             event.setCancelled(true);
+            return;
+        }
+        Player player = event.getPlayer();
+        if (player.isBlocking() && event.getItem().equals(player.getActiveItem())) {
+            event.setDamage(1);
         }
     }
 

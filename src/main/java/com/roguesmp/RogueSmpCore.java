@@ -188,6 +188,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance(), IslandManager.getInstance()));
+        registerListener(new DeathMessageListener(PlayerManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
 
         registerListener(new EntityListener(EntityManager.getInstance()));

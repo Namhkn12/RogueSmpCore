@@ -1,5 +1,6 @@
 package com.roguesmp.registry;
 
+import com.roguesmp.player.death.DeathMessage;
 import com.roguesmp.quest.objective.ObjectiveProgress;
 import com.roguesmp.quest.objective.QuestObjective;
 import com.roguesmp.quest.objective.QuestObjectives;
@@ -128,6 +129,8 @@ public class Registries {
     public static final Registry<TriggerOption> TRIGGER_OPTION =register(registry -> TriggerOptions.loadClass());
 
     public static final Registry<GuiOpenActions.OpenAction> NPC_GUI_OPEN_ACTION = register(registry -> GuiOpenActions.loadClass());
+
+    public static final Registry<DeathMessage> DEATH_MESSAGE = new Registry<>("death_messages", DeathMessage.CODEC);
 
     public static final Registry<SkinRegistry.SkinData> SKIN_DATA = new Registry<>("skins", SkinRegistry.SkinData.CODEC);
 

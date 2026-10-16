@@ -2,6 +2,7 @@ package com.roguesmp.event;
 
 import com.roguesmp.constant.DamageOperation;
 import com.roguesmp.constant.DamageType;
+import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -20,9 +21,9 @@ public class DamageEvent extends Event implements Cancellable {
         private @Nullable String mobSpellId;
         private @Nullable String abilityId;
         private final DamageType damageType;
-        private boolean isBlockable = true;
+        private boolean isBlockable;
         private boolean ignoreIframe;
-        private boolean doKnockback = true;
+        private boolean doKnockback;
 
         public Metadata(DamageType damageType) {
             this(damageType, null, null);
@@ -33,6 +34,8 @@ public class DamageEvent extends Event implements Cancellable {
             this.abilityId = abilityId;
             this.damageType = damageType;
             this.ignoreIframe = ignoreIframe;
+            this.isBlockable = damageType.isBlockableByDefault();
+            this.doKnockback = damageType.knocksBackByDefault();
         }
 
         // FIXED: Explicitly maps abilityId to third argument
@@ -89,11 +92,13 @@ public class DamageEvent extends Event implements Cancellable {
     private final @Nullable Entity damager;
     private final double initialDamage;
     private final Metadata metadata;
+    private @Nullable DamageSource damageSource;
 
     private boolean needUpdateDmg = true;
     private boolean needUpdateDef = true;
 
     private boolean isBlocked;
+    private double shieldBlockRatio;
     private boolean isCancelled;
     private boolean isCritical;
 
@@ -244,11 +249,31 @@ public class DamageEvent extends Event implements Cancellable {
         return metadata.damageType;
     }
 
+    public boolean isShieldBlocked() {
+        return shieldBlockRatio > 0;
+    }
+
+    public boolean isFullyShieldBlocked() {
+        return shieldBlockRatio >= 1;
+    }
+
+    public void setShieldBlockRatio(double shieldBlockRatio) {
+        this.shieldBlockRatio = shieldBlockRatio;
+    }
+
     public void setBlocked(boolean blocked) {
         this.isBlocked = blocked;
         if (blocked) {
             this.addDamageModifier(0, DamageOperation.MORE_FINAL);
         }
+    }
+
+    public @Nullable DamageSource getDamageSource() {
+        return damageSource;
+    }
+
+    public void setDamageSource(@Nullable DamageSource damageSource) {
+        this.damageSource = damageSource;
     }
 
     public Metadata getMetadata() {
