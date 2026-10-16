@@ -123,7 +123,7 @@ public class Fireball extends Ability {
         List<LivingEntity> targets = EntityUtils.getNearbyMobs(loc, radius, radius, radius, living -> true);
 
         for (LivingEntity victim : targets) {
-            DamageUtils.damage(victim, p, damage, new DamageEvent.Metadata(ID, DamageType.MAGIC));
+            DamageUtils.damage(victim, p, damage, DamageEvent.Metadata.ability(DamageType.MAGIC, ID));
 
             // Scaled fire duration
             victim.setFireTicks(40 + (level * 20));

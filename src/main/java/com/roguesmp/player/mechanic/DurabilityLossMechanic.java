@@ -66,7 +66,7 @@ public class DurabilityLossMechanic implements PlayerMechanic {
     public void onDamageEntity(DamageEvent event, SmpPlayer player) {
         if (event.isCancelled()) return;
 
-        if (event.getDamager() instanceof Player && event.getDamageType() == DamageType.MELEE) {
+        if (event.getDamager() instanceof Player && event.isBasic(DamageType.MELEE)) {
             SmpItem currentMainhand = player.getItemAtEquipSlot(EquipSlot.MAINHAND);
             damageItem(player, currentMainhand, 1, EquipSlot.MAINHAND);
         }

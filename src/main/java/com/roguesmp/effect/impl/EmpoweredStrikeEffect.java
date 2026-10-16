@@ -57,7 +57,7 @@ public class EmpoweredStrikeEffect extends SmpEffect {
 
     @Override
     public void onDamageEntity(DamageEvent event) {
-        if (event.getDamageType() != DamageType.MELEE) return;
+        if (!event.isBasic(DamageType.MELEE)) return;
         event.addDamageModifier(value, DamageOperation.INCREASE_BASE);
         setDuration(0); // Consumed - removed on the next tick pass
     }

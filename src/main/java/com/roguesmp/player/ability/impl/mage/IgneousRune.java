@@ -148,7 +148,7 @@ public class IgneousRune extends Ability {
         world.playSound(loc, Sound.BLOCK_FIRE_AMBIENT, 1.5f, 1.5f);
 
         for (LivingEntity e : EntityUtils.getNearbyMobs(loc, radius, 2.0, radius, living -> true)) {
-            DamageUtils.damage(e, p, damage, new DamageEvent.Metadata(ID, DamageType.MAGIC));
+            DamageUtils.damage(e, p, damage, DamageEvent.Metadata.ability(DamageType.MAGIC, ID));
 
             // Scaled knock-up and burn
             e.setVelocity(e.getVelocity().add(new Vector(0, 0.7 + (level * 0.05), 0)));

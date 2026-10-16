@@ -72,7 +72,7 @@ public class ShieldBash extends Ability {
 
         Hitbox hitbox = new Hitbox.SphereHitbox(LocationUtils.getHalfHeightLocation(mob), radius);
         for (LivingEntity le : hitbox.getHitMobs()) {
-            DamageUtils.damage(le, player, damage, new DamageEvent.Metadata(DamageType.MELEE_ABILITY));
+            DamageUtils.damage(le, player, damage, DamageEvent.Metadata.ability(DamageType.MELEE, null));
             if (knockbackStrength > 0) {
                 MovementUtils.knockAway(player, le, (float) knockbackStrength);
             }

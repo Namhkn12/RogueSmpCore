@@ -48,9 +48,9 @@ public class Thorns implements SmpEnchant {
     @Override public void onHurt(DamageEvent event, int level, @NotNull SmpPlayer player) {
         Entity damager = event.getDamager();
         if (damager instanceof LivingEntity living) {
-            DamageUtils.damage(living, player.getBukkitPlayer(), level, new DamageEvent.Metadata(DamageType.THORNS));
+            DamageUtils.damage(living, player.getBukkitPlayer(), level, DamageEvent.Metadata.enchant(DamageType.THORNS));
         } else if (damager instanceof Projectile projectile && projectile.getShooter() instanceof LivingEntity living) {
-            DamageUtils.damage(living, player.getBukkitPlayer(), level, new DamageEvent.Metadata(DamageType.THORNS));
+            DamageUtils.damage(living, player.getBukkitPlayer(), level, DamageEvent.Metadata.enchant(DamageType.THORNS));
         }
     }
 }

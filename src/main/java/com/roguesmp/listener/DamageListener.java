@@ -87,7 +87,10 @@ public class DamageListener implements Listener {
             DamageEvent.Metadata metadata = DamageUtils.consumeMetadata();
             if (metadata != null) return metadata;
         }
-        return new DamageEvent.Metadata(DamageType.fromSource(event.getDamageSource()));
+        DamageType type = DamageType.fromSource(event.getDamageSource());
+        return event.getDamageSource().getCausingEntity() != null
+                ? DamageEvent.Metadata.attack(type)
+                : DamageEvent.Metadata.environment(type);
     }
 
     private static void dispatch(EntityDamageEvent event, DamageEvent damageEvent) {

@@ -56,7 +56,7 @@ public class FireSlayer implements SmpEnchant {
 
     @Override
     public void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
-        if (event.getDamageType() != DamageType.MELEE && event.getDamageType() != DamageType.PROJECTILE) return;
+        if (!event.isBasic(DamageType.MELEE) && !event.isBasic(DamageType.PROJECTILE)) return;
         if (!EntityUtils.isFire(event.getVictim())) return;
         event.addDamageModifier(2 * level, DamageOperation.ADD_BASE);
     }

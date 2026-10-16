@@ -59,7 +59,7 @@ public class Bleeding implements SmpEnchant {
 
     @Override
     public void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
-        if (event.getDamageType() != DamageType.MELEE && event.getDamageType() != DamageType.PROJECTILE) return;
+        if (!event.isBasic(DamageType.MELEE) && !event.isBasic(DamageType.PROJECTILE)) return;
         if (event.getVictim() instanceof LivingEntity victim) {
             EffectManager.getInstance().addEffect(victim, "enchant_bleeding", new BleedingEffect(BLEED_DURATION_TICKS, level, player.getBukkitPlayer()));
         }

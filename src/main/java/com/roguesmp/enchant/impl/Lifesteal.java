@@ -53,7 +53,7 @@ public class Lifesteal implements SmpEnchant {
 
     @Override
     public void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
-        if (event.getDamageType() != DamageType.MELEE) return;
+        if (!event.isBasic(DamageType.MELEE)) return;
         if (player.getAttackStrength() <= 0.96) return;
         player.getBukkitPlayer().heal(Math.sqrt(level));
     }

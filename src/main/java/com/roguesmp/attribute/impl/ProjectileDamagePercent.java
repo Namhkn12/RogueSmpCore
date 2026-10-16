@@ -37,7 +37,7 @@ public class ProjectileDamagePercent implements SmpAttribute {
 
     @Override
     public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
-        if (DamageType.isProjectileDamage(event.getDamageType())) {
+        if (event.isScalable(DamageType.PROJECTILE)) {
             event.addDamageModifier(value, DamageOperation.INCREASE_BASE);
         }
 

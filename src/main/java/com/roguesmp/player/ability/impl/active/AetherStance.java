@@ -128,7 +128,7 @@ public class AetherStance extends Ability {
         p.getWorld().spawnParticle(Particle.END_ROD, p.getEyeLocation(), 15, p.getLocation().getDirection().getX(), p.getLocation().getDirection().getY(), p.getLocation().getDirection().getZ(), 0.5);
 
         if (result != null && result.getHitEntity() instanceof LivingEntity target) {
-            DamageUtils.damage(target, p, beamDamage, new DamageEvent.Metadata(ID, DamageType.MAGIC));
+            DamageUtils.damage(target, p, beamDamage, DamageEvent.Metadata.ability(DamageType.MAGIC, ID));
             // --- Sound: Hit Confirmation ---
             p.playSound(p.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 0.5f, 0.5f);
         }

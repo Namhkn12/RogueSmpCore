@@ -35,7 +35,7 @@ public class Sharpshooter extends Ability {
 
     @Override
     public void onDamageEntity(DamageEvent event) {
-        if (event.getDamageType() == DamageType.PROJECTILE) {
+        if (event.isBasic(DamageType.PROJECTILE)) {
 
             double multiplier = passiveDmg + (stacks * stackDmg);
             event.addDamageModifier(multiplier, DamageOperation.INCREASE_BASE);

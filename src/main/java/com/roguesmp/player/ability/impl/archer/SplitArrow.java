@@ -43,7 +43,7 @@ public class SplitArrow extends Ability {
 
     @Override
     public void onDamageEntity(DamageEvent event) {
-        if (event.getDamageType() != DamageType.PROJECTILE || !(event.getDamager() instanceof Projectile) || EntityUtils.isFriendly(event.getDamager())) return;
+        if (!event.isBasic(DamageType.PROJECTILE) || !(event.getDamager() instanceof Projectile) || EntityUtils.isFriendly(event.getDamager())) return;
         if (!(event.getVictim() instanceof LivingEntity living)) return;
         double damage = event.getFinalDamage() * multiplier;
         LivingEntity sourceEnemy = living;
@@ -71,7 +71,7 @@ public class SplitArrow extends Ability {
             new ParticleBuilder(Particle.CRIT).location(eye).count(30).offset(0, 0,0).extra(0.6).spawn();
             new ParticleBuilder(Particle.ENCHANTED_HIT).location(eye).count(20).offset(0, 0, 0).extra(0.6).spawn();
             world.playSound(Sound.sound(SoundEventKeys.ENTITY_ARROW_HIT, Sound.Source.PLAYER, 1, 1.2f), nearestMob);
-            DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.UNSCALABLE_ABILITY);
+            DamageEvent.Metadata metadata = DamageEvent.Metadata.ability(DamageType.PROJECTILE, null).setScalable(false);
             metadata.setIgnoreIframe(true);
             metadata.setDoKnockback(false);
             DamageUtils.damage(nearestMob, player, damage, metadata);

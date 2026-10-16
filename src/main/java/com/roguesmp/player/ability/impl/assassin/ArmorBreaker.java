@@ -33,7 +33,7 @@ public class ArmorBreaker extends Ability {
 
     @Override
     public void onDamageEntity(DamageEvent event) {
-        if (!DamageType.isMeleeDamage(event.getDamageType())) return;
+        if (!event.isScalable(DamageType.MELEE)) return;
         Entity victim = event.getVictim();
         SmpEffect effect = EffectManager.getInstance().getActiveEffects(victim).get(EFFECT_SOURCE + player.getName());
         if (effect instanceof ArmorBreakerEffect breakerEffect) {

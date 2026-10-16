@@ -90,7 +90,7 @@ public class BleedingEffect extends SmpEffect {
         spawnBloodBurst(livingEntity.getLocation().add(0, livingEntity.getHeight() * 0.6, 0));
 
         if (oneHz) {
-            DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.AILMENT);
+            DamageEvent.Metadata metadata = DamageEvent.Metadata.effect(DamageType.AILMENT);
             metadata.setIgnoreIframe(true);
             metadata.setDoKnockback(false);
             DamageUtils.damage(livingEntity, applier, damagePerSecond, metadata);

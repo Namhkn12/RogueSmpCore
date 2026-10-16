@@ -1,6 +1,8 @@
 package com.roguesmp.constant;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.DataResult;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.registry.TypedKey;
@@ -21,12 +23,7 @@ import java.util.stream.IntStream;
 
 public enum DamageType {
     MELEE("mob"),
-    MELEE_ABILITY("mob"),
     PROJECTILE("arrow"),
-    PROJECTILE_ABILITY("arrow"),
-    UNSCALEABLE("generic"),
-    UNSCALABLE_ABILITY("generic"),
-    UNSCALABLE_ENCHANT("generic"),
     MAGIC("magic"),
     THORNS("thorns", false, true),
     BLAST("explosion"),
@@ -158,15 +155,24 @@ public enum DamageType {
         return OTHER;
     }
 
-    public static boolean isMeleeDamage(DamageType type) {
-        return type == MELEE || type == MELEE_ABILITY;
-    }
+    private static final Map<String, DamageType> LEGACY_NAMES = Map.of(
+            "MELEE_ABILITY", MELEE,
+            "PROJECTILE_ABILITY", PROJECTILE,
+            "UNSCALEABLE", OTHER,
+            "UNSCALABLE_ABILITY", OTHER,
+            "UNSCALABLE_ENCHANT", OTHER
+    );
 
-    public static boolean isProjectileDamage(DamageType type) {
-        return type == PROJECTILE || type == PROJECTILE_ABILITY;
-    }
+    public static final Codec<DamageType> CODEC = Codec.STRING.comapFlatMap(DamageType::byName, DamageType::name);
 
-    public static boolean isRegicideAffected(DamageType type) {
-        return isMeleeDamage(type) || isProjectileDamage(type) || type == MAGIC;
+    private static DataResult<DamageType> byName(String name) {
+        String upper = name.toUpperCase(Locale.ROOT);
+        DamageType legacy = LEGACY_NAMES.get(upper);
+        if (legacy != null) return DataResult.success(legacy);
+        try {
+            return DataResult.success(valueOf(upper));
+        } catch (IllegalArgumentException e) {
+            return DataResult.error("Unknown damage type: " + name);
+        }
     }
 }

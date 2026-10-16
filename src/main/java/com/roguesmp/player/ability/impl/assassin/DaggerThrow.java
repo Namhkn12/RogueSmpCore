@@ -142,7 +142,7 @@ public class DaggerThrow extends Ability {
             if (EntityUtils.hasMetadata(mob, key) && (Integer) EntityUtils.getMetadataValue(mob, key) == Bukkit.getCurrentTick()) continue;
             EntityUtils.addMetadata(mob, key, Bukkit.getCurrentTick());
 
-            DamageEvent.Metadata metadata = new DamageEvent.Metadata(ID, DamageType.MELEE_ABILITY);
+            DamageEvent.Metadata metadata = DamageEvent.Metadata.ability(DamageType.MELEE, ID);
             metadata.setIgnoreIframe(true);
             metadata.setDoKnockback(false);
             DamageUtils.damage(mob, attacker, damage * damageMultiplier, metadata);

@@ -65,7 +65,7 @@ public class Dodging extends Ability {
     @Override
     public void onHurt(DamageEvent event) {
         // Only dodge Projectiles
-        if (event.getDamageType() == DamageType.PROJECTILE) {
+        if (event.isBasic(DamageType.PROJECTILE)) {
             if (attemptDodge()) {
                 event.setCancelled(true);
                 // Grant brief i-frames (20 ticks = 1s)

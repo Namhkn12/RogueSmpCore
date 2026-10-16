@@ -42,7 +42,7 @@ public class MeleeDamageBase implements SmpAttribute {
 
     @Override
     public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
-        if (event.getDamageType() == DamageType.MELEE) {
+        if (event.isBasic(DamageType.MELEE)) {
             event.addDamageModifier(value * getMeleeCooldownMultiplier(player.getAttackStrength()), DamageOperation.BASE);
         }
     }

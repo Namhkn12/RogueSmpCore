@@ -51,7 +51,7 @@ public class SuffocateOnHitSpell extends OnHitSpell {
 
         if (remainingAir <= 0 && drownDamage > 0) {
             Utils.runLater(() -> {
-                DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.OTHER, TYPE_KEY);
+                DamageEvent.Metadata metadata = DamageEvent.Metadata.spell(DamageType.OTHER, TYPE_KEY);
                 metadata.setIgnoreIframe(true);
                 metadata.setDoKnockback(false);
                 DamageUtils.damage(victim, owner, drownDamage, metadata);

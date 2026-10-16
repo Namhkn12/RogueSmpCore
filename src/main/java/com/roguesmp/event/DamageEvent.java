@@ -1,6 +1,7 @@
 package com.roguesmp.event;
 
 import com.roguesmp.constant.DamageOperation;
+import com.roguesmp.constant.DamageOrigin;
 import com.roguesmp.constant.DamageType;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.Entity;
@@ -21,34 +22,56 @@ public class DamageEvent extends Event implements Cancellable {
         private @Nullable String mobSpellId;
         private @Nullable String abilityId;
         private final DamageType damageType;
+        private final DamageOrigin origin;
+        private boolean scalable = true;
         private boolean isBlockable;
         private boolean ignoreIframe;
         private boolean doKnockback;
 
-        public Metadata(DamageType damageType) {
-            this(damageType, null, null);
-        }
-
-        public Metadata(@Nullable String mobSpellId, @Nullable String abilityId, DamageType damageType, boolean ignoreIframe) {
+        private Metadata(DamageType damageType, DamageOrigin origin, @Nullable String mobSpellId, @Nullable String abilityId) {
+            this.damageType = damageType;
+            this.origin = origin;
             this.mobSpellId = mobSpellId;
             this.abilityId = abilityId;
-            this.damageType = damageType;
-            this.ignoreIframe = ignoreIframe;
             this.isBlockable = damageType.isBlockableByDefault();
             this.doKnockback = damageType.knocksBackByDefault();
         }
 
-        // FIXED: Explicitly maps abilityId to third argument
-        public Metadata(@Nullable String abilityId, DamageType damageType) {
-            this(null, abilityId, damageType, false);
+        public static Metadata attack(DamageType damageType) {
+            return new Metadata(damageType, DamageOrigin.ATTACK, null, null);
         }
 
-        public Metadata(DamageType damageType, @Nullable String mobSpellId) {
-            this(mobSpellId, null, damageType, false);
+        public static Metadata environment(DamageType damageType) {
+            return new Metadata(damageType, DamageOrigin.ENVIRONMENT, null, null);
         }
 
-        public Metadata(DamageType damageType, @Nullable String mobSpellId, @Nullable String abilityId) {
-            this(mobSpellId, abilityId, damageType, false);
+        public static Metadata ability(DamageType damageType, @Nullable String abilityId) {
+            return new Metadata(damageType, DamageOrigin.ABILITY, null, abilityId);
+        }
+
+        public static Metadata spell(DamageType damageType, @Nullable String mobSpellId) {
+            return new Metadata(damageType, DamageOrigin.SPELL, mobSpellId, null);
+        }
+
+        public static Metadata enchant(DamageType damageType) {
+            return new Metadata(damageType, DamageOrigin.ENCHANT, null, null);
+        }
+
+        public static Metadata effect(DamageType damageType) {
+            return new Metadata(damageType, DamageOrigin.EFFECT, null, null);
+        }
+
+        public DamageOrigin getOrigin() {
+            return origin;
+        }
+
+        public boolean isScalable() {
+            return scalable;
+        }
+
+        public Metadata setScalable(boolean scalable) {
+            this.scalable = scalable;
+            return this;
         }
 
         public boolean isIgnoreIframe() {
@@ -163,7 +186,7 @@ public class DamageEvent extends Event implements Cancellable {
         finalDamage *= moreFinal;
 
         // Vanilla mechanics
-        if (metadata.damageType == DamageType.MELEE && damager instanceof Player) {
+        if (isBasic(DamageType.MELEE) && damager instanceof Player) {
             if (isCritical) finalDamage *= 1.5;
         }
 
@@ -247,6 +270,22 @@ public class DamageEvent extends Event implements Cancellable {
 
     public DamageType getDamageType() {
         return metadata.damageType;
+    }
+
+    public DamageOrigin getOrigin() {
+        return metadata.origin;
+    }
+
+    public boolean isScalable() {
+        return metadata.scalable;
+    }
+
+    public boolean isBasic(DamageType type) {
+        return metadata.damageType == type && metadata.origin.isVanilla();
+    }
+
+    public boolean isScalable(DamageType type) {
+        return metadata.damageType == type && metadata.scalable;
     }
 
     public boolean isShieldBlocked() {

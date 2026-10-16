@@ -42,14 +42,14 @@ public class ThornsSpell extends Spell {
 
     @Override
     public void onHurt(DamageEvent event) {
-        if (event.isCancelled() || !params.trigger().matches(event.getDamageType())) return;
+        if (event.isCancelled() || !params.trigger().matches(event)) return;
         LivingEntity attacker = resolveAttacker(event.getDamager());
         if (attacker == null || attacker.equals(owner)) return;
 
         double reflected = Math.max(params.minDamage(), event.getFinalDamage() * params.reflectRatio());
         Utils.runLater(() -> {
             if (!attacker.isValid()) return;
-            DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.THORNS, TYPE_KEY);
+            DamageEvent.Metadata metadata = DamageEvent.Metadata.spell(DamageType.THORNS, TYPE_KEY);
             metadata.setDoKnockback(false);
             DamageUtils.damage(attacker, owner, reflected, metadata);
             attacker.getWorld().playSound(attacker.getLocation(), Sound.ENCHANT_THORNS_HIT, 1f, 1f);

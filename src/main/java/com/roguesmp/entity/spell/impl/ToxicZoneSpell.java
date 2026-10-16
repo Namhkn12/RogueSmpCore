@@ -44,7 +44,7 @@ public class ToxicZoneSpell extends Spell {
 
     @Override
     public void onHurt(DamageEvent event) {
-        if (!params.onMeleeHurt() || event.isCancelled() || !DamageType.isMeleeDamage(event.getDamageType())) return;
+        if (!params.onMeleeHurt() || event.isCancelled() || !event.isScalable(DamageType.MELEE)) return;
         int currentTick = Bukkit.getCurrentTick();
         if (currentTick < nextHurtTriggerTick) return;
 

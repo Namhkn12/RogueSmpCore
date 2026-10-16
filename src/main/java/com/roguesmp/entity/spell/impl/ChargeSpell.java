@@ -107,7 +107,7 @@ public class ChargeSpell extends Spell {
     }
 
     private void impact(Player target, Vector direction) {
-        DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.MELEE_ABILITY, TYPE_KEY);
+        DamageEvent.Metadata metadata = DamageEvent.Metadata.spell(DamageType.MELEE, TYPE_KEY);
         metadata.setDoKnockback(false);
         DamageUtils.damage(target, owner, params.contactDamage(), metadata);
         target.setVelocity(direction.multiply(params.launchHorizontal()).setY(params.launchVertical()));

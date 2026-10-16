@@ -66,7 +66,7 @@ public class Smash implements SmpEnchant {
 
     @Override
     public void onDamageEntityFinal(DamageEvent event, int level, @NotNull SmpPlayer player) {
-        if (event.getDamageType() != DamageType.MELEE) return;
+        if (!event.isBasic(DamageType.MELEE)) return;
         if (!event.isCritical()) return;
         Player bukkitPlayer = player.getBukkitPlayer();
         World world = bukkitPlayer.getWorld();
@@ -81,7 +81,7 @@ public class Smash implements SmpEnchant {
         Hitbox.SphereHitbox hurtbox = new Hitbox.SphereHitbox(victim.getLocation().add(0, 0.75, 0), RADIUS);
         for (LivingEntity entity : hurtbox.getHitMobs()) {
             if (entity == victim) continue;
-            DamageUtils.damage(entity, bukkitPlayer, event.getFinalDamage() * RATIO_PER_LEVEL * level, new DamageEvent.Metadata(DamageType.UNSCALABLE_ENCHANT));
+            DamageUtils.damage(entity, bukkitPlayer, event.getFinalDamage() * RATIO_PER_LEVEL * level, DamageEvent.Metadata.enchant(DamageType.MELEE).setScalable(false));
         }
     }
 }

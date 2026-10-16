@@ -122,7 +122,7 @@ public class GloriousBattle extends Ability {
                     for (LivingEntity mob : mobs) {
                         if (charged.contains(mob)) continue;
                         charged.add(mob);
-                        DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.MELEE_ABILITY);
+                        DamageEvent.Metadata metadata = DamageEvent.Metadata.ability(DamageType.MELEE, null);
                         metadata.setDoKnockback(false);
                         DamageUtils.damage(mob, player, collisionDamage, metadata);
                         EffectManager.getInstance().addEffect(mob, "glorious_stun_effect", new StunEffect(stunDuration));
@@ -142,7 +142,7 @@ public class GloriousBattle extends Ability {
 
                         List<LivingEntity> mobs = new Hitbox.SphereHitbox(LocationUtils.getHalfHeightLocation(player), landingRadius).getHitMobs();
                         for (LivingEntity mob : mobs) {
-                            DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.MELEE_ABILITY);
+                            DamageEvent.Metadata metadata = DamageEvent.Metadata.ability(DamageType.MELEE, null);
                             metadata.setDoKnockback(false);
                             metadata.setIgnoreIframe(true);
                             DamageUtils.damage(mob, player, landingDamage, metadata);

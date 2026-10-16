@@ -56,8 +56,7 @@ public class Regicide implements SmpEnchant {
 
     @Override
     public void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
-        DamageType damageType = event.getDamageType();
-        if (!DamageType.isRegicideAffected(damageType)) return;
+        if (!event.isScalable(DamageType.MELEE) && !event.isScalable(DamageType.PROJECTILE) && !event.isScalable(DamageType.MAGIC)) return;
         Entity victim = event.getVictim();
         if (!EntityUtils.isElite(victim) && !EntityUtils.isBoss(victim)) return;
         event.addDamageModifier(level * 0.1, DamageOperation.INCREASE_BASE);

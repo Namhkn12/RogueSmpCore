@@ -51,7 +51,7 @@ public record ExplosionSpec(double radius, double damageMultiplier, boolean fall
         double scale = falloff ? 1 - (1 - EDGE_FALLOFF) * (distance / radius) : 1;
 
         if (baseDamage > 0) {
-            DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.BLAST, spellId);
+            DamageEvent.Metadata metadata = DamageEvent.Metadata.spell(DamageType.BLAST, spellId);
             metadata.setIgnoreIframe(true);
             metadata.setDoKnockback(false);
             DamageUtils.damage(victim, source, baseDamage * scale, metadata);

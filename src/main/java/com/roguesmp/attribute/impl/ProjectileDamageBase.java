@@ -45,7 +45,7 @@ public class ProjectileDamageBase implements SmpAttribute {
 
     @Override
     public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
-        if (event.getDamageType() == DamageType.PROJECTILE && event.getDamager() instanceof Projectile projectile) {
+        if (event.isBasic(DamageType.PROJECTILE) && event.getDamager() instanceof Projectile projectile) {
             if (projectile instanceof AbstractArrow arrow && !(arrow instanceof Trident) && !arrow.isCritical()) {
                 PlayerProjectile playerProjectile = player.getProjectile(projectile.getUniqueId());
                 double speedMult = 1;
