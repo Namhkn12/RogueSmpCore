@@ -3,6 +3,7 @@ package com.roguesmp.block;
 import com.roguesmp.block.data.GeneratorData;
 import com.roguesmp.block.data.NoData;
 import com.roguesmp.block.impl.TallyBlock;
+import com.roguesmp.block.impl.cokeoven.CokeOvenBlock;
 import com.roguesmp.block.impl.altar.AltarMainBlock;
 import com.roguesmp.block.impl.altar.AltarSideBlock;
 import com.roguesmp.codec.Codec;
@@ -21,6 +22,7 @@ public class BlockTypes {
     public static final BlockType<NoData, TallyBlock> TALLY = plain("tally", TallyBlock::new);
     public static final BlockType<NoData, AltarMainBlock> ALTAR_MAIN = plain("altar_main", AltarMainBlock::new);
     public static final BlockType<NoData, AltarSideBlock> ALTAR_SIDE = plain("altar_side", AltarSideBlock::new);
+    public static final BlockType<NoData, CokeOvenBlock> COKE_OVEN = plain("coke_oven", CokeOvenBlock::new);
     public static final BlockType<GeneratorData, ResourceGeneratorBlock> GENERATOR =
             register("generator", GeneratorData.CODEC, GeneratorData.DEFAULT, ResourceGeneratorBlock::new);
 

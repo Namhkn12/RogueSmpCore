@@ -34,7 +34,7 @@ public class BruteForce extends Ability {
 
     @Override
     public void onDamageEntity(DamageEvent event) {
-        if (event.isBasic(DamageType.MELEE)) return;
+        if (!event.isBasic(DamageType.MELEE)) return;
         if (!event.isCritical()) return;
         World world = player.getWorld();
         Entity victim = event.getVictim();
