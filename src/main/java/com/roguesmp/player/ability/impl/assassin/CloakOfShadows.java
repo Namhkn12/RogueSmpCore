@@ -84,7 +84,7 @@ public class CloakOfShadows extends Ability {
                 expiry--;
                 if (!bomb.isValid() || expiry <= 0) {
                     for (LivingEntity entity : new Hitbox.SphereHitbox(bomb.getLocation(), radius).getHitMobs()) {
-                        DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.MELEE_ABILITY);
+                        DamageEvent.Metadata metadata = DamageEvent.Metadata.ability(DamageType.MELEE, null);
                         metadata.setDoKnockback(false);
                         DamageUtils.damage(entity, player, damage, metadata);
                     }
@@ -95,7 +95,7 @@ public class CloakOfShadows extends Ability {
 
                 if (bomb.isOnGround()) {
                     for (LivingEntity entity : new Hitbox.SphereHitbox(bomb.getLocation(), radius).getHitMobs()) {
-                        DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.MELEE_ABILITY);
+                        DamageEvent.Metadata metadata = DamageEvent.Metadata.ability(DamageType.MELEE, null);
                         metadata.setDoKnockback(false);
                         DamageUtils.damage(entity, player, damage, metadata);
                         EffectManager.getInstance().addEffect(entity, "cos_slowness", new SpeedEffect(slownessDuration, - slownessAmplifier, "cos_slowness"));

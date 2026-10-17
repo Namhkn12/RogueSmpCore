@@ -193,12 +193,12 @@ public class BodkinBlitz extends AbilityWithCharge {
 
     @Override
     public void onDamageEntity(DamageEvent event) {
-        if (event.isCancelled() || event.getDamageType() != DamageType.MELEE) return;
+        if (event.isCancelled() || !event.isBasic(DamageType.MELEE)) return;
         if (!hasBonusDmgBuff) return;
 
         Entity victim = event.getVictim();
         if (victim instanceof LivingEntity living) {
-            DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.MELEE_ABILITY);
+            DamageEvent.Metadata metadata = DamageEvent.Metadata.ability(DamageType.MELEE, null);
             metadata.setDoKnockback(false);
             metadata.setIgnoreIframe(true);
             DamageUtils.damage(living, event.getDamager(), bonusDamage, metadata);

@@ -78,7 +78,7 @@ public class DailyQuestGui extends BaseGui {
     }
 
     private void setupTierRow(int row, SmpTag<Quest> tag, String tierName, Material labelMaterial, Material questFallbackMat, PlayerQuestData data) {
-        if (tag.getElements().isEmpty()) return; // no quests/tags/<id>.json with quests for this tier yet
+        if (tag.getElementIds().isEmpty()) return; // no quests/tags/<id>.json with quests for this tier yet
 
         List<QuestProgress> activeQuests = dailyQuestManager.getActiveDailyQuestsForTag(data, tag);
         int completedToday = dailyQuestManager.getCompletedCountToday(data, tag);

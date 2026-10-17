@@ -9,7 +9,6 @@ import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,9 +53,8 @@ public class Lifesteal implements SmpEnchant {
 
     @Override
     public void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
-        if (event.getDamageType() != DamageType.MELEE) return;
-        Player bukkitPlayer = player.getBukkitPlayer();
-        if (bukkitPlayer.getAttackCooldown() <= 0.96) return; //0.96 to be a bit more lenient
+        if (!event.isBasic(DamageType.MELEE)) return;
+        if (player.getAttackStrength() <= 0.96) return;
         player.getBukkitPlayer().heal(Math.sqrt(level));
     }
 }

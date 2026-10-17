@@ -22,7 +22,7 @@ public record HitCondition(double chance, HitTrigger trigger, boolean playersOnl
 
     public boolean test(DamageEvent event) {
         if (event.isCancelled()) return false;
-        if (!trigger.matches(event.getDamageType())) return false;
+        if (!trigger.matches(event)) return false;
         if (!(event.getVictim() instanceof LivingEntity)) return false;
         if (playersOnly && !(event.getVictim() instanceof Player)) return false;
         return chance >= 1 || Utils.RANDOM.nextDouble() < chance;

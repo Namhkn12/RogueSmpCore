@@ -146,7 +146,7 @@ public class FlameSpirit extends Ability {
         world.playSound(loc, Sound.ENTITY_GENERIC_BURN, 0.8f, 1.8f);
 
         for (LivingEntity victim : targets) {
-            DamageUtils.damage(victim, p, damage, new DamageEvent.Metadata(ID, DamageType.MAGIC));
+            DamageUtils.damage(victim, p, damage, DamageEvent.Metadata.ability(DamageType.MAGIC, ID));
             victim.setFireTicks(60); // 3 seconds of fire
         }
     }

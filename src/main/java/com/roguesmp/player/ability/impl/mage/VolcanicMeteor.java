@@ -146,7 +146,7 @@ public class VolcanicMeteor extends Ability {
         // Initial Impact Damage
         for (Entity e : loc.getNearbyEntities(radius, radius, radius)) {
             if (e instanceof LivingEntity victim && !e.equals(caster)) {
-                DamageUtils.damage(victim, caster, damage, new DamageEvent.Metadata(ID, DamageType.MAGIC));
+                DamageUtils.damage(victim, caster, damage, DamageEvent.Metadata.ability(DamageType.MAGIC, ID));
                 victim.setVelocity(victim.getLocation().toVector().subtract(loc.toVector()).normalize().multiply(1.2));
             }
         }
@@ -168,7 +168,7 @@ public class VolcanicMeteor extends Ability {
                     for (Entity e : loc.getNearbyEntities(radius, 2, radius)) {
                         if (e instanceof LivingEntity victim && !(e instanceof Player)) {
                             // Lingering damage is 1/5th of impact damage per tick
-                            DamageUtils.damage(victim, caster, damage / 5, new DamageEvent.Metadata(ID, DamageType.MAGIC));
+                            DamageUtils.damage(victim, caster, damage / 5, DamageEvent.Metadata.ability(DamageType.MAGIC, ID));
                             victim.setFireTicks(60);
                         }
                     }

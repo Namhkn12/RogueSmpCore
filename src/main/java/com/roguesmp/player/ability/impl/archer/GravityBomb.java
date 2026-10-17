@@ -132,7 +132,7 @@ public class GravityBomb extends Ability {
         // Logic using scaled radius and damage
         List<LivingEntity> mobs = new Hitbox.SphereHitbox(location, radius).getHitMobs();
         for (LivingEntity mob : mobs) {
-            DamageUtils.damage(mob, smpPlayer.getBukkitPlayer(), damage, new DamageEvent.Metadata(ID, DamageType.PROJECTILE_ABILITY));
+            DamageUtils.damage(mob, smpPlayer.getBukkitPlayer(), damage, DamageEvent.Metadata.ability(DamageType.PROJECTILE, ID));
 
             Vector dir = mob.getLocation().subtract(location.toVector()).toVector().multiply(-0.4);
             if (dir.getY() < 0 && mob.isOnGround()) {

@@ -69,7 +69,7 @@ public class Scrapshot extends Ability {
             double mult = Math.min(1.0, (range * 1.25 - dist) / range);
             double finalDamage = baseDamage * mult;
 
-            DamageUtils.damage(target, p, finalDamage, new DamageEvent.Metadata(ID, DamageType.PROJECTILE_ABILITY));
+            DamageUtils.damage(target, p, finalDamage, DamageEvent.Metadata.ability(DamageType.PROJECTILE, ID));
 
             // Impact Visuals
             world.spawnParticle(Particle.SQUID_INK, endLoc, 10, 0.2, 0.2, 0.2, 0.1);
@@ -106,7 +106,7 @@ public class Scrapshot extends Ability {
             double angle = Math.toDegrees(direction.angle(toNearby));
 
             if (angle < SHRAPNEL_CONE_ANGLE / 2.0) {
-                DamageUtils.damage(nearby, smpPlayer.getBukkitPlayer(), shrapnelDmg, new DamageEvent.Metadata(ID, DamageType.PROJECTILE_ABILITY));
+                DamageUtils.damage(nearby, smpPlayer.getBukkitPlayer(), shrapnelDmg, DamageEvent.Metadata.ability(DamageType.PROJECTILE, ID));
                 nearby.getWorld().spawnParticle(Particle.CRIT, nearby.getLocation().add(0, 1, 0), 3, 0.2, 0.2, 0.2, 0.1);
             }
         }

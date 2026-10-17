@@ -24,7 +24,7 @@ public record EntityFilter(String raw) {
         if (raw.startsWith("#")) {
             SmpTag<BaseEntity> tag = Registries.ENTITY.getTag(raw.substring(1));
             BaseEntity base = EntityUtils.getBaseEntity(entity);
-            return tag != null && base != null && tag.contains(base);
+            return tag != null && base != null && tag.contains(base.getId());
         }
         if (raw.startsWith(VANILLA_PREFIX)) {
             NamespacedKey key = NamespacedKey.fromString(raw);

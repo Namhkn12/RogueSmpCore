@@ -1,12 +1,13 @@
 package com.roguesmp.gui.crafting;
 
 import com.roguesmp.crafting.CraftingIngredient;
+import com.roguesmp.crafting.gui.RecipeDialogEditor;
+import com.roguesmp.crafting.gui.RecipeViewerGui;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
 import com.roguesmp.crafting.recipe.FusionRecipe;
 import com.roguesmp.crafting.recipe.ShapedCraftingRecipe;
 import com.roguesmp.crafting.recipe.ShapelessCraftingRecipe;
 import com.roguesmp.gui.BaseGui;
-import com.roguesmp.gui.crafting.editor.FusionRecipeEditorGui;
 import com.roguesmp.gui.crafting.editor.ShapedShapelessRecipeEditorGui;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
@@ -15,6 +16,7 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -32,15 +34,15 @@ import java.util.List;
  * Single, unified read-only browser for every registered {@link CraftingRecipe} - replaces what
  * used to be two separate per-kind browsers with one paginated list (same shape as
  * {@code gui.ItemBrowser}), filtered in place by {@link #typeFilter} (cycled via
- * {@link #FILTER_SLOT}) and/or a substring id search (via {@link #SEARCH_SLOT}).
+ * {@link #FILTER_SLOT}) and/or a substring search over recipe id, output item id and output name (via {@link #SEARCH_SLOT}).
  * <p>
- * Left-click an entry to see its read-only breakdown ({@link ShapedShapelessRecipeEditorGui}/
- * {@link FusionRecipeEditorGui} in their locked {@code preview(...)} mode); right-click to jump
- * straight into editing it (same classes, via their {@code editExisting(...)} factory).
+ * Left-click an entry to open it in {@link RecipeViewerGui}; right-click to edit it (grid
+ * editor for shaped/shapeless, {@link RecipeDialogEditor} for every other kind).
  */
 public class RecipeBrowserGui extends BaseGui {
 
     private static final int PAGE_SIZE = 36;
+    private static final int CREATE_NEW_SLOT = 0;
     private static final int FILTER_SLOT = 7;
     private static final int SEARCH_SLOT = 8;
     private static final int GUIDE_SLOT = 4;
@@ -88,6 +90,13 @@ public class RecipeBrowserGui extends BaseGui {
             addButton(i, FILLER_BLACK, ClickHandler.noAction());
         }
         fillEmpty(FILLER);
+
+        ItemStack createNew = ItemStack.of(Material.EMERALD);
+        createNew.setData(DataComponentTypes.ITEM_NAME, Component.text("Tạo mới", NamedTextColor.GREEN));
+        addButton(CREATE_NEW_SLOT, createNew, event -> {
+            event.setCancelled(true);
+            RecipeDialogEditor.openTypePicker(player, () -> new RecipeBrowserGui(player).showInventory(player));
+        });
 
         addButton(FILTER_SLOT, filterButton(), event -> {
             event.setCancelled(true);
@@ -158,12 +167,24 @@ public class RecipeBrowserGui extends BaseGui {
 
         for (CraftingRecipe recipe : allEntries) {
             if (!matchesType(recipe)) continue;
-            if (query != null && !recipe.getId().toLowerCase().contains(query)) continue;
+            if (query != null && !matchesQuery(recipe, query)) continue;
             filteredEntries.add(recipe);
         }
 
         totalPages = Math.max(1, (int) Math.ceil(filteredEntries.size() / (double) PAGE_SIZE));
         currentPage = 0;
+    }
+
+    private static boolean matchesQuery(CraftingRecipe recipe, String query) {
+        if (recipe.getId().toLowerCase().contains(query)) return true;
+
+        for (CraftingIngredient output : recipe.getOutputs()) {
+            if (output.key().toLowerCase().contains(query)) return true;
+
+            ItemStack stack = output.toItemStack();
+            if (stack != null && PlainTextComponentSerializer.plainText().serialize(stack.effectiveName()).toLowerCase().contains(query)) return true;
+        }
+        return false;
     }
 
     private boolean matchesType(CraftingRecipe recipe) {
@@ -182,23 +203,17 @@ public class RecipeBrowserGui extends BaseGui {
     }
 
     private void openDetail(CraftingRecipe recipe) {
-        if (recipe instanceof FusionRecipe fusion) {
-            FusionRecipeEditorGui.preview(player, fusion).showInventory(player);
-        } else {
-            ShapedShapelessRecipeEditorGui.preview(player, recipe).showInventory(player);
-        }
+        RecipeViewerGui.forRecipe(player, recipe, this).showInventory(player);
     }
 
     private void openEditor(CraftingRecipe recipe) {
-        if (recipe instanceof FusionRecipe fusion) {
-            FusionRecipeEditorGui gui = FusionRecipeEditorGui.editExisting(player, fusion);
-            gui.setRefundItem(false);
-            gui.showInventory(player);
-        } else {
+        if (RecipeDialogEditor.usesGridEditor(recipe)) {
             ShapedShapelessRecipeEditorGui gui = ShapedShapelessRecipeEditorGui.editExisting(player, recipe);
             gui.setRefundItem(false);
             gui.showInventory(player);
+            return;
         }
+        RecipeDialogEditor.openExisting(player, recipe, () -> new RecipeBrowserGui(player).showInventory(player));
     }
 
     private ItemStack filterButton() {
@@ -223,7 +238,7 @@ public class RecipeBrowserGui extends BaseGui {
 
     private void openSearchDialog() {
         Dialog dialog = DialogBuilder.create(Component.text("Tìm kiếm công thức"))
-                .addTextInput("value", Component.text("Nhập ID hoặc một phần ID..."), b -> b.initial(searchQuery == null ? "" : searchQuery))
+                .addTextInput("value", Component.text("Nhập ID công thức, ID hoặc tên vật phẩm kết quả..."), b -> b.initial(searchQuery == null ? "" : searchQuery))
                 .confirmation()
                 .yesButton(Component.text("Tìm kiếm"), null, (response, audience) -> {
                     searchQuery = response.getText("value");
@@ -238,7 +253,7 @@ public class RecipeBrowserGui extends BaseGui {
     }
 
     private ItemStack previewButtonFor(CraftingRecipe recipe) {
-        ItemStack result = resolvePreview(recipe.getResult());
+        ItemStack result = resolvePreview(recipe.getPrimaryOutput());
 
         List<Component> lore = new ArrayList<>();
         ItemLore existingLore = result.getData(DataComponentTypes.LORE);
@@ -246,19 +261,12 @@ public class RecipeBrowserGui extends BaseGui {
 
         lore.add(Component.empty());
         lore.add(Utils.text("ID: " + recipe.getId(), NamedTextColor.DARK_GRAY));
-        lore.add(Utils.text("Loại: " + typeLabel(recipe), NamedTextColor.GRAY));
+        lore.add(Utils.text("Loại: " + recipe.getTypeName(), NamedTextColor.GRAY));
         lore.add(Utils.text("Trái-click để xem chi tiết.", NamedTextColor.GREEN));
         lore.add(Utils.text("Phải-click để chỉnh sửa.", NamedTextColor.YELLOW));
 
         result.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
         return result;
-    }
-
-    private static String typeLabel(CraftingRecipe recipe) {
-        if (recipe instanceof ShapedCraftingRecipe) return "Shaped";
-        if (recipe instanceof ShapelessCraftingRecipe) return "Shapeless";
-        if (recipe instanceof FusionRecipe) return "Fusion";
-        return "Unknown";
     }
 
     private static ItemStack resolvePreview(@Nullable CraftingIngredient ingredient) {

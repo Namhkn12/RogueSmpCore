@@ -8,6 +8,7 @@ import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.event.SmpBlockPlaceEvent;
 import com.roguesmp.block.mining.MiningManager;
 import com.roguesmp.block.persistence.BlockDataRepository;
+import com.roguesmp.block.storage.ItemStorageHolder;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
@@ -35,6 +36,7 @@ public class BlockManager {
     private static BlockManager INSTANCE = null;
     private final Map<BlockPos, SmpBlock> blocks = new HashMap<>();
     private final Set<Tickable> tickingBlocks = new HashSet<>();
+    private final Set<ItemStorageHolder> storageBlocks = new HashSet<>();
     private final RogueSmpCore plugin;
     private final BlockDataRepository repository;
     private final MiningManager mining;
@@ -58,10 +60,19 @@ public class BlockManager {
         for(Tickable block : tickingBlocks){
             block.tick();
         }
+        for(ItemStorageHolder block : storageBlocks){
+            block.itemStorage().tick();
+        }
     }
 
     private void registerIfTickable(SmpBlock block){
         if(block instanceof Tickable tickable) tickingBlocks.add(tickable);
+        if(block instanceof ItemStorageHolder holder) storageBlocks.add(holder);
+    }
+
+    private void unregisterTicking(SmpBlock block){
+        if(block instanceof Tickable) tickingBlocks.remove(block);
+        if(block instanceof ItemStorageHolder) storageBlocks.remove(block);
     }
 
     /**
@@ -189,6 +200,7 @@ public class BlockManager {
         block.onUnload();
 
         Location location = event.getBlock().getLocation();
+        if (block instanceof ItemStorageHolder holder) dropContents(holder, location);
         for (ItemStack drop : smpEvent.getDrops()) {
             location.getWorld().dropItemNaturally(location.toCenterLocation(), drop);
         }
@@ -203,10 +215,25 @@ public class BlockManager {
         remove(block, display);
     }
 
+    private void dropContents(ItemStorageHolder holder, Location location){
+        Location center = location.toCenterLocation();
+        for (StoredItem stored : holder.itemStorage().drain()) {
+            int remaining = stored.amount();
+            int maxStack = stored.maxStackSize();
+            while (remaining > 0) {
+                int amount = Math.min(remaining, maxStack);
+                ItemStack stack = stored.withAmount(amount).toItemStack();
+                if (stack == null) break;
+                center.getWorld().dropItemNaturally(center, stack);
+                remaining -= amount;
+            }
+        }
+    }
+
     private void remove(SmpBlock block, @Nullable Entity display){
         BlockPos pos = block.getPos();
         blocks.remove(pos);
-        if (block instanceof Tickable) tickingBlocks.remove(block);
+        unregisterTicking(block);
         mining.cancelAt(pos);
         if(block.isStateful()) repository.delete(pos);
 
@@ -278,7 +305,7 @@ public class BlockManager {
             block.onUnload();
             mining.cancelAt(pos);
             blocks.remove(pos);
-            if(block instanceof Tickable) tickingBlocks.remove(block);
+            unregisterTicking(block);
         }
         repository.saveAll(changed);
     }
@@ -327,7 +354,7 @@ public class BlockManager {
         block.onUnload();
         mining.cancelAt(pos);
         blocks.remove(pos);
-        if (block instanceof Tickable) tickingBlocks.remove(block);
+        unregisterTicking(block);
     }
 
     private void hydrate(SmpBlock block){

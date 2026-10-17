@@ -12,6 +12,7 @@ import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.player.PlayerProjectile;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.registry.keys.SoundEventKeys;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
@@ -65,7 +66,7 @@ public class DurabilityLossMechanic implements PlayerMechanic {
     public void onDamageEntity(DamageEvent event, SmpPlayer player) {
         if (event.isCancelled()) return;
 
-        if (event.getDamager() instanceof Player && event.getDamageType() == DamageType.MELEE) {
+        if (event.getDamager() instanceof Player && event.isBasic(DamageType.MELEE)) {
             SmpItem currentMainhand = player.getItemAtEquipSlot(EquipSlot.MAINHAND);
             damageItem(player, currentMainhand, 1, EquipSlot.MAINHAND);
         }
@@ -77,13 +78,27 @@ public class DurabilityLossMechanic implements PlayerMechanic {
     public void onHurt(DamageEvent event, SmpPlayer player) {
         if (event.isCancelled()) return;
 
+        if (event.isShieldBlocked()) {
+            Player blocker = player.getBukkitPlayer();
+            if (blocker != null) damageBlockingItem(player, blocker);
+            if (event.isFullyShieldBlocked()) return;
+        }
+
         DamageType damageType = event.getDamageType();
         if (damageType != DamageType.AILMENT && damageType != DamageType.FALL && damageType != DamageType.THORNS) {
+            Player bukkitPlayer = player.getBukkitPlayer();
+            if (bukkitPlayer == null) return;
             for (EquipSlot equipSlot : affectedSlot) {
                 SmpItem smpItem = player.getItemAtEquipSlot(equipSlot);
+                if (equipSlot == EquipSlot.OFFHAND && bukkitPlayer.getInventory().getItemInOffHand().hasData(DataComponentTypes.BLOCKS_ATTACKS)) continue;
                 damageItem(player, smpItem, 1, equipSlot);
             }
         }
+    }
+
+    private static void damageBlockingItem(SmpPlayer player, Player bukkitPlayer) {
+        EquipSlot slot = EquipSlot.fromVanilla(bukkitPlayer.getActiveItemHand());
+        damageItem(player, player.getItemAtEquipSlot(slot), 1, slot);
     }
 
     public static void damageItem(SmpPlayer player, SmpItem smpItem, int amount, EquipSlot equipSlot) {

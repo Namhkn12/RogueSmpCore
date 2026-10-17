@@ -34,7 +34,7 @@ public class BruteForce extends Ability {
 
     @Override
     public void onDamageEntity(DamageEvent event) {
-        if (event.getDamageType() == DamageType.MELEE) return;
+        if (!event.isBasic(DamageType.MELEE)) return;
         if (!event.isCritical()) return;
         World world = player.getWorld();
         Entity victim = event.getVictim();
@@ -48,7 +48,7 @@ public class BruteForce extends Ability {
         Hitbox.SphereHitbox hurtbox = new Hitbox.SphereHitbox(victim.getLocation().add(0, 0.75, 0), radius);
         for (LivingEntity entity : hurtbox.getHitMobs()) {
             if (entity == victim) continue;
-            DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.MELEE_ABILITY);
+            DamageEvent.Metadata metadata = DamageEvent.Metadata.ability(DamageType.MELEE, null);
             metadata.setIgnoreIframe(true);
             DamageUtils.damage(entity, player, damage, metadata);
         }

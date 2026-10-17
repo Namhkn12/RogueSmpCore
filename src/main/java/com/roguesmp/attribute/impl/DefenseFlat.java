@@ -22,7 +22,7 @@ import java.util.Set;
 
 public class DefenseFlat implements SmpAttribute {
 
-    public static Set<DamageType> protectedType = EnumSet.of(DamageType.MELEE, DamageType.MELEE_ABILITY, DamageType.PROJECTILE, DamageType.PROJECTILE_ABILITY, DamageType.MAGIC, DamageType.BLAST);
+    public static Set<DamageType> protectedType = EnumSet.of(DamageType.MELEE, DamageType.PROJECTILE, DamageType.MAGIC, DamageType.BLAST);
 
     @Override
     public @NotNull String getId() {
@@ -53,7 +53,7 @@ public class DefenseFlat implements SmpAttribute {
 
     @Override
     public void onHurt(DamageEvent event, double value, @NotNull SmpPlayer player) {
-        if (protectedType.contains(event.getDamageType())) {
+        if (event.isScalable() && protectedType.contains(event.getDamageType())) {
             event.addDefenseModifier(value, DamageOperation.ADD_BASE);
         }
     }

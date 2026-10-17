@@ -67,7 +67,7 @@ public class Flamestrike extends Ability {
             double angle = Math.toDegrees(FastMath.acos(Math.max(-1.0, Math.min(1.0, dot)))); // Clamp dot for safety
 
             if (angle <= HALF_ANGLE) {
-                DamageUtils.damage(target, p, damage, new DamageEvent.Metadata(ID, DamageType.MAGIC));
+                DamageUtils.damage(target, p, damage, DamageEvent.Metadata.ability(DamageType.MAGIC, ID));
                 target.setFireTicks(fireTicks);
 
                 Vector kb = target.getLocation().toVector().subtract(origin.toVector()).normalize().multiply(BASE_KNOCKBACK);

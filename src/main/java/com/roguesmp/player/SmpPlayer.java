@@ -1,5 +1,6 @@
 package com.roguesmp.player;
 
+import com.roguesmp.player.death.LastHit;
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.*;
@@ -58,14 +59,8 @@ public class SmpPlayer {
     // thus their components/abilities) get rebuilt fresh on every wrap and would otherwise lose
     // any cooldown state constantly.
     private final Map<String, Long> abilityCooldowns = new HashMap<>();
-
-    public TabContext getTabContext() {
-        return tabContext;
-    }
-
-    public TabLayoutManager getTabLayouts() {
-        return tabLayouts;
-    }
+    private float attackStrength = 1f;
+    private @Nullable LastHit lastHit;
 
     public SmpPlayer(PlayerData playerData) {
         this.uuid = playerData.getUuid();
@@ -295,6 +290,30 @@ public class SmpPlayer {
 
     public @Nullable Player getBukkitPlayer() {
         return Bukkit.getPlayer(uuid);
+    }
+
+    public @Nullable LastHit getLastHit() {
+        return lastHit;
+    }
+
+    public void setLastHit(@Nullable LastHit lastHit) {
+        this.lastHit = lastHit;
+    }
+
+    public float getAttackStrength() {
+        return attackStrength;
+    }
+
+    public void setAttackStrength(float attackStrength) {
+        this.attackStrength = attackStrength;
+    }
+
+    public TabContext getTabContext() {
+        return tabContext;
+    }
+
+    public TabLayoutManager getTabLayouts() {
+        return tabLayouts;
     }
 
     public void sendMessage(Component text) {

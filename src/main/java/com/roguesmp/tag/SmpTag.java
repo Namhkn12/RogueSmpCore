@@ -21,7 +21,7 @@ public class SmpTag<T> {
     private final String id;
     private final Function<String, T> resolver;
     private List<String> rawEntries;
-    private Set<T> elements = Set.of();
+    private Set<String> elementIds = Set.of();
 
     private boolean resolved = false;
 
@@ -37,7 +37,7 @@ public class SmpTag<T> {
      */
     public void reset(List<String> rawEntries) {
         this.rawEntries = rawEntries;
-        this.elements = Set.of();
+        this.elementIds = Set.of();
         this.resolved = false;
     }
 
@@ -60,7 +60,7 @@ public class SmpTag<T> {
 
         stack.add(this.id);
 
-        Set<T> resolvedElements = new HashSet<>();
+        Set<String> resolvedIds = new HashSet<>();
         for (String entry : rawEntries) {
             if (entry.startsWith("#")) {
                 String nestedId = entry.substring(1).toLowerCase();
@@ -69,24 +69,23 @@ public class SmpTag<T> {
                 if (nestedTag != null) {
                     // Recursive call: force the child to calculate its elements first
                     nestedTag.resolve(tagLookup, stack);
-                    resolvedElements.addAll(nestedTag.elements);
+                    resolvedIds.addAll(nestedTag.elementIds);
                 } else {
                     RogueSmpCore.LOGGER.warn("Tag '{}' references unknown nested tag '#{}'", this.id, nestedId);
                 }
             } else {
-                T obj = resolver.apply(entry);
-                if (obj != null) resolvedElements.add(obj);
+                if (resolver.apply(entry) != null) resolvedIds.add(entry);
                 else RogueSmpCore.LOGGER.warn("Tag '{}' references unknown entry '{}'", this.id, entry);
             }
         }
 
         stack.remove(this.id);
-        this.elements = resolvedElements;
+        this.elementIds = resolvedIds;
         this.resolved = true;
     }
 
-    public boolean contains(T value) {
-        return elements.contains(value);
+    public boolean contains(String elementId) {
+        return elementIds.contains(elementId);
     }
 
     /**
@@ -98,7 +97,16 @@ public class SmpTag<T> {
         return Collections.unmodifiableList(rawEntries);
     }
 
+    public @Unmodifiable Set<String> getElementIds() {
+        return Collections.unmodifiableSet(elementIds);
+    }
+
     public @Unmodifiable Set<T> getElements() {
+        Set<T> elements = new HashSet<>();
+        for (String elementId : elementIds) {
+            T element = resolver.apply(elementId);
+            if (element != null) elements.add(element);
+        }
         return Collections.unmodifiableSet(elements);
     }
 

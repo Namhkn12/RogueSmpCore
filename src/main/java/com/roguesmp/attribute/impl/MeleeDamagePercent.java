@@ -37,7 +37,7 @@ public class MeleeDamagePercent implements SmpAttribute {
 
     @Override
     public void onDamageEntity(DamageEvent event, double value, @NotNull SmpPlayer player) {
-        if (DamageType.isMeleeDamage(event.getDamageType())) {
+        if (event.isScalable(DamageType.MELEE)) {
             event.addDamageModifier(value, DamageOperation.INCREASE_BASE);
         }
     }

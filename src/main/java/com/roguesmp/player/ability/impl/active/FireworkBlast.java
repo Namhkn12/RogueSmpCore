@@ -140,7 +140,7 @@ public class FireworkBlast extends Ability {
 
         for (Entity e : loc.getNearbyEntities(RADIUS, RADIUS, RADIUS)) {
             if (e instanceof LivingEntity victim && !e.equals(p)) {
-                DamageUtils.damage(victim, p, damage, new DamageEvent.Metadata(ID, DamageType.PROJECTILE_ABILITY));
+                DamageUtils.damage(victim, p, damage, DamageEvent.Metadata.ability(DamageType.PROJECTILE, ID));
                 Vector kb = victim.getLocation().subtract(loc.toVector()).toVector().multiply(0.4);
                 victim.setVelocity(kb);
             }

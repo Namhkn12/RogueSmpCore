@@ -60,10 +60,9 @@ public class Poisoning implements SmpEnchant {
 
     @Override
     public void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
-        DamageType damageType = event.getDamageType();
-        if (damageType != DamageType.MELEE && damageType != DamageType.PROJECTILE) return;
+        if (!event.isBasic(DamageType.MELEE) && !event.isBasic(DamageType.PROJECTILE)) return;
         if (!(event.getVictim() instanceof LivingEntity victim)) return;
-        if (player.getBukkitPlayer().getAttackCooldown() < 0.96) return;
+        if (player.getAttackStrength() < 0.96) return;
 
         SmpEffect existing = EffectManager.getInstance().getActiveEffects(victim).get(SOURCE);
         if (existing instanceof PotentPoisonEffect poison) {

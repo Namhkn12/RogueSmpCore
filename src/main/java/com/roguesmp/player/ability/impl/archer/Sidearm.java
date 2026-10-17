@@ -63,7 +63,7 @@ public class Sidearm extends AbilityWithCharge {
 
         // 2. Damage Logic using cached damage
         if (result != null && result.getHitEntity() instanceof LivingEntity victim) {
-            DamageUtils.damage(victim, p, damage, new DamageEvent.Metadata(ID, DamageType.PROJECTILE_ABILITY));
+            DamageUtils.damage(victim, p, damage, DamageEvent.Metadata.ability(DamageType.PROJECTILE, ID));
             playImpactEffects(endPoint);
         }
 

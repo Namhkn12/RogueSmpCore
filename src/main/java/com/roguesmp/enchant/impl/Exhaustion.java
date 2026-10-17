@@ -21,7 +21,7 @@ import java.util.Set;
 public class Exhaustion implements SmpEnchant {
 
     private static final EnumSet<DamageType> affectedTypes = EnumSet.of(
-            DamageType.MELEE, DamageType.MELEE_ABILITY, DamageType.PROJECTILE, DamageType.PROJECTILE_ABILITY, DamageType.MAGIC
+            DamageType.MELEE, DamageType.PROJECTILE, DamageType.MAGIC
     );
 
     @Override
@@ -61,7 +61,7 @@ public class Exhaustion implements SmpEnchant {
 
     @Override
     public void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
-        if (!affectedTypes.contains(event.getDamageType())) return;
+        if (!event.isScalable() || !affectedTypes.contains(event.getDamageType())) return;
         Player bukkitPlayer = player.getBukkitPlayer();
         if (bukkitPlayer.getGameMode() == GameMode.CREATIVE) return;
 

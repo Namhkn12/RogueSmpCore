@@ -70,7 +70,7 @@ public class Channeling implements SmpEnchant {
 
         world.strikeLightningEffect(hitEntity.getLocation());
         if (hitEntity instanceof LivingEntity living) {
-            DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.MAGIC);
+            DamageEvent.Metadata metadata = DamageEvent.Metadata.enchant(DamageType.MAGIC);
             metadata.setIgnoreIframe(true);
             DamageUtils.damage(living, player.getBukkitPlayer(), DMG_PER_LEVEL * level, metadata);
         }

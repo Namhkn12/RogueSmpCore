@@ -19,16 +19,14 @@ public class ResistanceEffect extends SmpEffect {
     public static final String ID = "resistance";
     public static final Set<DamageType> DEFAULT_DAMAGE_TYPE = EnumSet.of(
             DamageType.MELEE,
-            DamageType.MELEE_ABILITY,
             DamageType.PROJECTILE,
-            DamageType.PROJECTILE_ABILITY,
             DamageType.BLAST,
             DamageType.MAGIC);
 
     public static final Codec<ResistanceEffect> CODEC = Codec.composite(
             SmpEffect.BASE_CODEC.forGetter(SmpEffect::getBaseProperties),
             Codec.DOUBLE.fieldOf("value").forGetter(ResistanceEffect::getMagnitude),
-            Codec.listOf(Codec.enumOf(DamageType.class))
+            Codec.listOf(DamageType.CODEC)
                     .optionalFieldOf("allowed_damage_types", List.copyOf(DEFAULT_DAMAGE_TYPE))
                     .forGetter(effect -> List.copyOf(effect.allowedDamageType)),
             (base, value, damageTypesList) -> new ResistanceEffect(
@@ -80,7 +78,7 @@ public class ResistanceEffect extends SmpEffect {
 
     @Override
     public void onHurt(DamageEvent event) {
-        if (allowedDamageType.contains(event.getDamageType())) {
+        if (event.isScalable() && allowedDamageType.contains(event.getDamageType())) {
             event.addDamageModifier(1 - value, DamageOperation.MORE_FINAL);
         }
 

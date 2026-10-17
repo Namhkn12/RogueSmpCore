@@ -108,7 +108,7 @@ public class InfernalOverdrive extends Ability {
         for (LivingEntity e : loc.getNearbyLivingEntities(explosionRadius * mult)) {
             if ((e instanceof Player)) continue;
             DamageUtils.damage(e, smpPlayer.getBukkitPlayer(), explosionDmg * mult,
-                    new DamageEvent.Metadata(ID, DamageType.MAGIC));
+                    DamageEvent.Metadata.ability(DamageType.MAGIC, ID));
         }
     }
 

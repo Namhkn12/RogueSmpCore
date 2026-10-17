@@ -257,7 +257,7 @@ public class FusionGui extends ReactiveGui<FusionGui.GuiState> {
         FusionRecipe matched = CraftingManager.getInstance().match(CraftingRecipes.FUSION, items, 0, 0);
         if (matched == null) return;
 
-        ItemStack result = matched.getResultStack();
+        ItemStack result = matched.getPrimaryOutputStack();
         if (result == null) return;
 
         state = State.PROCESSING;

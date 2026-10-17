@@ -68,7 +68,7 @@ public class ArmorBreakerEffect extends SmpEffect {
 
     @Override
     public void onHurt(DamageEvent event) {
-        if (!DamageType.isMeleeDamage(event.getDamageType())) return;
+        if (!event.isScalable(DamageType.MELEE)) return;
         if (event.getDamager() != null && event.getDamager().getUniqueId().equals(applier.getUniqueId())) {
             event.addDamageModifier(bonusPerStack * stacks, DamageOperation.INCREASE_BASE);
         }

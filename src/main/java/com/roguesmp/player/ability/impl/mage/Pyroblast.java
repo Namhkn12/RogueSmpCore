@@ -116,7 +116,7 @@ public class Pyroblast extends Ability {
         // Damage logic
         for (Entity e : loc.getNearbyEntities(radius, radius, radius)) {
             if (e instanceof LivingEntity victim && !(e instanceof Player)) {
-                DamageUtils.damage(victim, p, damage, new DamageEvent.Metadata(ID, DamageType.MAGIC));
+                DamageUtils.damage(victim, p, damage, DamageEvent.Metadata.ability(DamageType.MAGIC, ID));
                 victim.setFireTicks(FIRE_DURATION_TICKS);
             }
         }

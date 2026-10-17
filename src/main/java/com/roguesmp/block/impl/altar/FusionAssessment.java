@@ -17,6 +17,6 @@ public record FusionAssessment(FusionIssue issue, @Nullable FusionRecipe recipe,
     }
 
     public @Nullable ItemStack result() {
-        return recipe == null ? null : recipe.getResultStack();
+        return recipe == null ? null : recipe.getPrimaryOutputStack();
     }
 }

@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -81,10 +82,23 @@ public class Utils {
         return MINI_MESSAGE.deserialize(miniMessage);
     }
 
+    public static Component fromString(String miniMessage, TagResolver... resolvers) {
+        if (miniMessage == null) return null;
+        return MINI_MESSAGE.deserialize(miniMessage, resolvers);
+    }
+
     public static List<Component> fromStrings(List<String> miniMessages) {
         List<Component> components = new ArrayList<>();
         for (String miniMessage : miniMessages) {
             components.add(MINI_MESSAGE.deserialize(miniMessage));
+        }
+        return components;
+    }
+
+    public static List<Component> fromStrings(List<String> miniMessages, TagResolver... resolvers) {
+        List<Component> components = new ArrayList<>();
+        for (String miniMessage : miniMessages) {
+            components.add(MINI_MESSAGE.deserialize(miniMessage, resolvers));
         }
         return components;
     }

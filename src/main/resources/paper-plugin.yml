@@ -1,0 +1,40 @@
+name: RogueSmpCore
+version: '1.0-SNAPSHOT'
+main: com.roguesmp.RogueSmpCore
+bootstrapper: com.roguesmp.RogueSmpBootstrap
+api-version: '26.2'
+description: Rework plugin
+dependencies:
+  server:
+    CommandAPI:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    FastAsyncWorldEdit:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    TAB:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    PlaceholderAPI:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    Multiverse-Core:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    WorldGuard:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    polarpaper:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    LuckPerms:
+      load: BEFORE
+      required: true
+      join-classpath: true

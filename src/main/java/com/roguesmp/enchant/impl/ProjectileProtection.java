@@ -50,7 +50,7 @@ public class ProjectileProtection implements SmpEnchant {
 
     @Override
     public void onHurt(DamageEvent event, int level, @NotNull SmpPlayer player) {
-        if (event.getDamageType() == DamageType.PROJECTILE) {
+        if (event.isBasic(DamageType.PROJECTILE)) {
 
             // Vanilla-matching scaling: +3.0 Defense per level
             // Level IV (4) = +12.0 Defense

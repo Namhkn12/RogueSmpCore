@@ -79,7 +79,7 @@ public class PotentPoisonEffect extends SmpEffect {
     public void onTick(Entity entity, boolean oneHz, boolean twoHz) {
         if (!(entity instanceof LivingEntity livingEntity) || !livingEntity.isValid()) return;
         if (oneHz) {
-            DamageEvent.Metadata metadata = new DamageEvent.Metadata(DamageType.AILMENT);
+            DamageEvent.Metadata metadata = DamageEvent.Metadata.effect(DamageType.AILMENT);
             metadata.setIgnoreIframe(true);
             metadata.setDoKnockback(false);
             DamageUtils.damage(livingEntity, applier, getMagnitude(), metadata);

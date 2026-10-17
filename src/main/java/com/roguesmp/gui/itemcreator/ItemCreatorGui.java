@@ -1,7 +1,11 @@
 package com.roguesmp.gui.itemcreator;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.attribute.Attributes;
+import com.roguesmp.codec.DataResult;
+import com.roguesmp.codec.JsonOps;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.Enchants;
 import com.roguesmp.gui.ItemBrowser;
@@ -157,6 +161,15 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.BLOCK_PLACE),
                 tooltip("Vật phẩm này có thể dùng để đặt block custom", null),
                 (response, audience) -> player.showDialog(buildBlockPlaceDialog(player)));
+        multi.addButton(componentLabel(ItemComponentKeys.RECIPE_VIEWER),
+                tooltip("Chuột phải để xem công thức sử dụng vật phẩm này.", "Có thể đặt công thức ưu tiên hiển thị trước"),
+                (response, audience) -> player.showDialog(buildRecipeViewerDialog(player)));
+        multi.addButton(componentLabel(ItemComponentKeys.DYED_COLOR),
+                tooltip("Nhuộm màu giáp da (hoặc vật phẩm nhuộm được).", null),
+                (response, audience) -> player.showDialog(buildDyedColorDialog(player)));
+        multi.addButton(componentLabel(ItemComponentKeys.ARMOR_TRIM),
+                tooltip("Thêm hoa văn giáp (armor trim).", "Cần cả material và pattern, hỗ trợ datapack"),
+                (response, audience) -> player.showDialog(buildArmorTrimDialog(player)));
 
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
@@ -787,6 +800,74 @@ public class ItemCreatorGui {
                 (response, audience) -> {
                     components.remove(ItemComponentKeys.BLOCK_PLACE.id());
                     openMainDialog(player);
+                });
+    }
+
+    private Dialog buildRecipeViewerDialog(Player player) {
+        RecipeViewerComponent current = (RecipeViewerComponent) components.get(ItemComponentKeys.RECIPE_VIEWER.id());
+        String initial = current == null ? "" : current.preferredRecipe();
+        DialogBuilder builder = DialogBuilder.create(Component.text("Xem công thức"))
+                .canCloseWithEscape(false)
+                .addTextBody(Component.text("Để trống để mở công thức sử dụng vật phẩm này.", NamedTextColor.GRAY))
+                .addTextInput("value", Component.text("ID công thức ưu tiên (tuỳ chọn)"), b -> b.initial(initial).maxLength(256));
+
+        return wrapComponentDialog(player, ItemComponentKeys.RECIPE_VIEWER, builder,
+                (response, audience) -> {
+                    String value = Objects.requireNonNullElse(response.getText("value"), "").trim();
+                    if (!value.isEmpty() && Registries.CRAFTING_RECIPE.get(value) == null) {
+                        player.sendMessage(Utils.text("Không tìm thấy công thức '" + value + "'.", NamedTextColor.RED));
+                    } else {
+                        components.put(ItemComponentKeys.RECIPE_VIEWER.id(), new RecipeViewerComponent(value));
+                    }
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.RECIPE_VIEWER.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
+    }
+
+    private Dialog buildDyedColorDialog(Player player) {
+        DyedColorComponent current = (DyedColorComponent) components.get(ItemComponentKeys.DYED_COLOR.id());
+        String initial = current == null ? "" : String.format("#%06X", current.color().asRGB());
+        DialogBuilder builder = DialogBuilder.create(Component.text("Màu nhuộm"))
+                .canCloseWithEscape(false)
+                .addTextInput("value", Component.text("Mã màu hex (vd: #A06540)"), b -> b.initial(initial).maxLength(16));
+
+        return wrapComponentDialog(player, ItemComponentKeys.DYED_COLOR, builder,
+                (response, audience) -> {
+                    String value = Objects.requireNonNullElse(response.getText("value"), "").trim();
+                    DataResult<DyedColorComponent> result = DyedColorComponent.CODEC.decode(new JsonPrimitive(value), JsonOps.INSTANCE);
+                    if (result.isSuccess()) components.put(ItemComponentKeys.DYED_COLOR.id(), result.result());
+                    else player.sendMessage(Utils.text(result.error(), NamedTextColor.RED));
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.DYED_COLOR.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
+    }
+
+    private Dialog buildArmorTrimDialog(Player player) {
+        ArmorTrimComponent current = (ArmorTrimComponent) components.get(ItemComponentKeys.ARMOR_TRIM.id());
+        DialogBuilder builder = DialogBuilder.create(Component.text("Hoa văn giáp"))
+                .canCloseWithEscape(false)
+                .addTextInput("material", Component.text("Material (vd: diamond, gold, netherite)"), b -> b.initial(current == null ? "" : current.material().asString()).maxLength(128))
+                .addTextInput("pattern", Component.text("Pattern (vd: silence, wild, rib)"), b -> b.initial(current == null ? "" : current.pattern().asString()).maxLength(128));
+
+        return wrapComponentDialog(player, ItemComponentKeys.ARMOR_TRIM, builder,
+                (response, audience) -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("material", Objects.requireNonNullElse(response.getText("material"), "").trim());
+                    json.addProperty("pattern", Objects.requireNonNullElse(response.getText("pattern"), "").trim());
+                    DataResult<ArmorTrimComponent> result = ArmorTrimComponent.CODEC.decode(json, JsonOps.INSTANCE);
+                    if (result.isSuccess()) components.put(ItemComponentKeys.ARMOR_TRIM.id(), result.result());
+                    else player.sendMessage(Utils.text(result.error(), NamedTextColor.RED));
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.ARMOR_TRIM.id());
+                    Utils.runLater(() -> openMainDialog(player));
                 });
     }
 

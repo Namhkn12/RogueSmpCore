@@ -55,7 +55,7 @@ public class IceAspect implements SmpEnchant {
 
     @Override
     public void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
-        if (event.getDamageType() != DamageType.MELEE && event.getDamageType() != DamageType.PROJECTILE) return;
+        if (!event.isBasic(DamageType.MELEE) && !event.isBasic(DamageType.PROJECTILE)) return;
         EffectManager.getInstance().addEffect(event.getVictim(), "ice_aspect_slowness", new SpeedEffect(40, -0.1 * level, "ice_aspect_slowness"));
     }
 }
