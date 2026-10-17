@@ -103,6 +103,7 @@ public class PlayerListener implements Listener {
             EquipmentSlot equipmentSlot = entry.getKey();
             EntityEquipmentChangedEvent.EquipmentChange equipmentChange = entry.getValue();
             EquipSlot equipSlot = EquipSlot.fromVanilla(equipmentSlot);
+            if (equipSlot == null) continue;
             SmpItem newItem = null;
             ItemStack newStack = equipmentChange.newItem();
             if (ItemStackUtils.isValidItem(newStack)) {

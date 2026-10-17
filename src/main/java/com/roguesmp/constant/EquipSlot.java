@@ -30,7 +30,7 @@ public enum EquipSlot {
         this.id = id;
     }
 
-    public static EquipSlot fromVanilla(EquipmentSlot slot) {
+    public static @Nullable EquipSlot fromVanilla(EquipmentSlot slot) {
         return vanillaToSlot.get(slot);
     }
 
