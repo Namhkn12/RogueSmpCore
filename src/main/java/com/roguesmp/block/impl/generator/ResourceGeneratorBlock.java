@@ -6,11 +6,16 @@ import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.gui.ResourceGeneratorGui;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.block.persistence.StateSection;
+import com.roguesmp.block.storage.FixedSlots;
+import com.roguesmp.block.storage.ItemStorage;
+import com.roguesmp.block.storage.ItemStorageHolder;
+import com.roguesmp.block.storage.PooledSlots;
+import com.roguesmp.block.storage.SlotAccess;
+import com.roguesmp.item.component.impl.GeneratorFuelComponent;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.MapCodec;
 import com.roguesmp.block.impl.generator.stat.GeneratorEffect;
 import com.roguesmp.block.impl.generator.part.GeneratorFuel;
-import com.roguesmp.block.impl.generator.part.GeneratorLoot;
 import com.roguesmp.block.impl.generator.stat.GeneratorStats;
 import com.roguesmp.block.impl.generator.part.ModuleInstallResult;
 import com.roguesmp.block.impl.generator.part.ModuleSlots;
@@ -19,6 +24,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -28,8 +34,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Directional, EnergyStorage {
+public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Directional, EnergyStorage, ItemStorageHolder {
 
     private static final int GUI_REFRESH_INTERVAL = 10;
 
@@ -39,8 +46,10 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     private final GeneratorData data;
     private final @Nullable Material placeMaterial;
     private final ModuleSlots modules;
-    private final GeneratorLoot loot = new GeneratorLoot();
-    private final GeneratorFuel fuel = new GeneratorFuel(this, this::rebuildStats, this::markDirty);
+    private final ItemStorage storage = new ItemStorage(this).lockFaces(() -> Set.of(this.faceDirection));
+    private final FixedSlots fuelSlot = storage.add(new FixedSlots("fuel", 1, SlotAccess.INSERT, item -> GeneratorFuelComponent.of(item.item()) != null), this::onFuelSlotChanged);
+    private final PooledSlots loot = storage.add(new PooledSlots("loot", () -> this.stats.lootCapacity(), SlotAccess.EXTRACT));
+    private final GeneratorFuel fuel = new GeneratorFuel(this, fuelSlot, this::rebuildStats, this::markDirty);
     private final CrackDisplay crack = new CrackDisplay();
     private GeneratorStats stats;
     private double energyDebt;
@@ -176,8 +185,8 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         }
         stats.behaviors().forEach(behavior -> behavior.onHarvest(this, drops));
         for (StoredItem drop : drops) {
-            StoredItem overflow = loot.store(drop, stats.lootCapacity());
-            if (overflow != null) dropAtCenter(overflow);
+            int overflow = drop.amount() - loot.insert(drop, false);
+            if (overflow > 0) dropAtCenter(drop.withAmount(overflow));
         }
         fuel.onHarvest();
         markDirty();
@@ -211,7 +220,21 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         return modules;
     }
 
-    public GeneratorLoot loot() {
+    private void onFuelSlotChanged() {
+        fuel.consume();
+        if (gui != null) gui.refresh();
+    }
+
+    @Override
+    public ItemStorage itemStorage() {
+        return storage;
+    }
+
+    public FixedSlots fuelSlot() {
+        return fuelSlot;
+    }
+
+    public PooledSlots loot() {
         return loot;
     }
 
@@ -273,9 +296,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
      * stored. The loot entry shrinks or disappears accordingly.
      */
     public @Nullable StoredItem takeLoot(String item, int amount) {
-        StoredItem taken = loot.take(item, amount);
-        if (taken != null) markDirty();
-        return taken;
+        return loot.take(item, amount, false);
     }
 
     @Override
@@ -291,8 +312,12 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         event.setCancelled(true);
+        openGui(event.getPlayer());
+    }
+
+    public void openGui(HumanEntity viewer) {
         if (gui == null) gui = new ResourceGeneratorGui(this);
-        gui.showInventory(event.getPlayer());
+        gui.showInventory(viewer);
     }
 
     public void releaseGui(ResourceGeneratorGui closed) {
@@ -301,11 +326,8 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
 
     @Override
     public void onBlockBreak(SmpBlockBreakEvent event) {
-        loot.drain().forEach(this::dropAtCenter);
+        if (gui != null) gui.closeAll();
         modules.drain().forEach(moduleId -> dropAtCenter(new StoredItem(moduleId, 1)));
-
-        StoredItem fuelSlot = fuel.drainSlot();
-        if (fuelSlot != null) dropAtCenter(fuelSlot);
     }
 
     @Override
@@ -318,10 +340,8 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         super.collectSections(sections);
         sections.add(StateSection.of(DIRECTION_CODEC, () -> faceDirection, direction -> this.faceDirection = direction));
         sections.add(StateSection.of(ENERGY_CODEC, () -> Optional.of(energy), value -> energy = value.orElse(data.maxEnergy())));
-        sections.add(loot.section());
         sections.add(modules.section());
         sections.add(fuel.burnSection());
-        sections.add(fuel.slotSection());
     }
 
     @Override

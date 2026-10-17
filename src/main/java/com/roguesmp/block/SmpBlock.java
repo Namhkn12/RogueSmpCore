@@ -3,6 +3,7 @@ package com.roguesmp.block;
 import com.google.gson.JsonElement;
 import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.persistence.StateSection;
+import com.roguesmp.block.storage.ItemStorageHolder;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.player.SmpPlayer;
 import net.kyori.adventure.key.Key;
@@ -119,6 +120,7 @@ public class SmpBlock {
         if (sections == null) {
             List<StateSection<?>> collected = new ArrayList<>();
             collectSections(collected);
+            if (this instanceof ItemStorageHolder holder) holder.itemStorage().collectSections(collected);
             sections = collected.isEmpty() ? NO_SECTIONS : List.copyOf(collected);
         }
         return sections;

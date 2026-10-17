@@ -3,6 +3,7 @@ package com.roguesmp.block.impl.generator.part;
 import com.roguesmp.block.EnergyStorage;
 import com.roguesmp.block.StoredItem;
 import com.roguesmp.block.persistence.StateSection;
+import com.roguesmp.block.storage.FixedSlots;
 import com.roguesmp.codec.MapCodec;
 import com.roguesmp.item.component.impl.GeneratorFuelComponent;
 import com.roguesmp.block.impl.generator.stat.GeneratorEffect;
@@ -13,27 +14,27 @@ import java.util.Optional;
 
 public final class GeneratorFuel {
 
-    private static final MapCodec<Optional<StoredItem>> SLOT_CODEC = StoredItem.CODEC.optionalFieldOf("fuel");
     private static final MapCodec<Optional<ActiveBurn>> BURN_CODEC = ActiveBurn.CODEC.optionalFieldOf("burn");
 
     private final EnergyStorage energy;
+    private final FixedSlots fuelSlot;
     private final Runnable onEffectsChanged;
     private final Runnable onStateChanged;
 
-    private @Nullable StoredItem slot;
     private @Nullable String slotComponentItem;
     private @Nullable GeneratorFuelComponent slotComponent;
     private @Nullable ActiveBurn burn;
     private @Nullable GeneratorFuelComponent burningComponent;
 
-    public GeneratorFuel(EnergyStorage energy, Runnable onEffectsChanged, Runnable onStateChanged) {
+    public GeneratorFuel(EnergyStorage energy, FixedSlots fuelSlot, Runnable onEffectsChanged, Runnable onStateChanged) {
         this.energy = energy;
+        this.fuelSlot = fuelSlot;
         this.onEffectsChanged = onEffectsChanged;
         this.onStateChanged = onStateChanged;
     }
 
     public @Nullable StoredItem slot() {
-        return slot;
+        return fuelSlot.get(0);
     }
 
     public @Nullable ActiveBurn burn() {
@@ -48,18 +49,6 @@ public final class GeneratorFuel {
         return burn == null ? null : burn.item();
     }
 
-    public void setSlot(@Nullable StoredItem item) {
-        slot = item;
-        consume();
-        onStateChanged.run();
-    }
-
-    public @Nullable StoredItem drainSlot() {
-        StoredItem drained = slot;
-        slot = null;
-        return drained;
-    }
-
     public void resolve() {
         burningComponent = burn == null ? null : GeneratorFuelComponent.of(burn.item());
         if (burningComponent == null) burn = null;
@@ -70,18 +59,18 @@ public final class GeneratorFuel {
     }
 
     public void consume() {
+        StoredItem slot = slot();
         if (slot == null) return;
 
-        GeneratorFuelComponent component = slotComponent();
+        GeneratorFuelComponent component = slotComponent(slot);
         if (component == null) return;
 
-        int consumed = Math.min(slot.amount(), consumableCount(component));
+        int consumed = Math.min(slot.amount(), consumableCount(slot, component));
         if (consumed <= 0) return;
 
         energy.addEnergy(consumed * component.energy());
-        startBurn(component, consumed);
-        int remaining = slot.amount() - consumed;
-        slot = remaining > 0 ? slot.withAmount(remaining) : null;
+        startBurn(slot.item(), component, consumed);
+        fuelSlot.extract(0, consumed, false);
         onStateChanged.run();
     }
 
@@ -91,10 +80,6 @@ public final class GeneratorFuel {
 
     public void onHarvest() {
         if (burningComponent != null && burningComponent.unit() == BurnUnit.HARVESTS) advance();
-    }
-
-    public StateSection<Optional<StoredItem>> slotSection() {
-        return StateSection.of(SLOT_CODEC, () -> Optional.ofNullable(slot), value -> slot = value.orElse(null));
     }
 
     public StateSection<Optional<ActiveBurn>> burnSection() {
@@ -109,7 +94,7 @@ public final class GeneratorFuel {
         onStateChanged.run();
     }
 
-    private @Nullable GeneratorFuelComponent slotComponent() {
+    private @Nullable GeneratorFuelComponent slotComponent(StoredItem slot) {
         if (!slot.item().equals(slotComponentItem)) {
             slotComponentItem = slot.item();
             slotComponent = GeneratorFuelComponent.of(slotComponentItem);
@@ -117,7 +102,7 @@ public final class GeneratorFuel {
         return slotComponent;
     }
 
-    private int consumableCount(GeneratorFuelComponent component) {
+    private int consumableCount(StoredItem slot, GeneratorFuelComponent component) {
         if (component.energy() > 0) return (energy.getMaxEnergy() - energy.getEnergy()) / component.energy();
         return component.hasEffect() && !isBurning(slot.item()) ? 1 : 0;
     }
@@ -126,15 +111,15 @@ public final class GeneratorFuel {
         return burn != null && burn.item().equals(itemId);
     }
 
-    private void startBurn(GeneratorFuelComponent component, int count) {
+    private void startBurn(String item, GeneratorFuelComponent component, int count) {
         if (!component.hasEffect()) return;
 
         int duration = component.duration() * count;
-        if (isBurning(slot.item())) {
+        if (isBurning(item)) {
             burn.extend(duration);
             return;
         }
-        burn = new ActiveBurn(slot.item(), duration);
+        burn = new ActiveBurn(item, duration);
         onEffectsChanged.run();
     }
 }

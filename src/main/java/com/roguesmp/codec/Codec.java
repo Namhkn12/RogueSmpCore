@@ -842,7 +842,7 @@ public interface Codec<A> {
                 DataResult<Map<String, O>> rawMap = ops.getMap(input);
                 if (!rawMap.isSuccess()) return DataResult.error(rawMap.error());
 
-                Map<K, V> map = new HashMap<>();
+                Map<K, V> map = new LinkedHashMap<>();
                 for (Map.Entry<String, O> entry : rawMap.result().entrySet()) {
                     DataResult<K> keyDec = keyCodec.decode(ops.createString(entry.getKey()), ops);
                     if (!keyDec.isSuccess()) return DataResult.error("['" + entry.getKey() + "']: invalid map key: " + keyDec.error());

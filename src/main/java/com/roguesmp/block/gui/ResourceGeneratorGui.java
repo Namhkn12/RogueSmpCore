@@ -1,7 +1,6 @@
 package com.roguesmp.block.gui;
 
 import com.roguesmp.block.StoredItem;
-import com.roguesmp.gui.BaseGui;
 import com.roguesmp.item.component.impl.GeneratorFuelComponent;
 import com.roguesmp.item.component.impl.GeneratorModuleComponent;
 import com.roguesmp.utils.ItemStackUtils;
@@ -21,20 +20,19 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ResourceGeneratorGui extends BaseGui {
+public class ResourceGeneratorGui extends MachineGui {
 
     private static final int MAIN_INFO_SLOT = 4;
     private static final int STATUS_SLOT = 5;
     private static final int BUFF_SUMMARY_SLOT = 6;
     private static final int TAKE_ALL_SLOT = 34;
+    private static final int SIDES_SLOT = 35;
     private static final int FUEL_SLOT = 10;
     private static final int BURN_SLOT = 19;
     private static final int[] LOOT_SLOTS = {12, 13, 14, 15, 16, 21, 22, 23, 24, 25};
@@ -43,21 +41,16 @@ public class ResourceGeneratorGui extends BaseGui {
     private final ResourceGeneratorBlock generator;
 
     public ResourceGeneratorGui(ResourceGeneratorBlock generator) {
-        super(Component.text("Resource Generator"), 4);
+        super(Component.text("Resource Generator"), 4, generator.itemStorage(), generator::openGui);
         this.generator = generator;
     }
 
     @Override
     public void setup() {
-        fillEmpty(FILLER_BLACK);
-        renderMainInfo();
-        renderStatus();
+        super.setup();
         renderTakeAllButton();
-        renderFuelSlot();
-        renderBurnSlot();
-        renderBuffSummary();
-        renderLootSlots();
         renderModuleSlots();
+        addSidesButton(SIDES_SLOT);
     }
 
     private void renderMainInfo() {
@@ -66,7 +59,7 @@ public class ResourceGeneratorGui extends BaseGui {
         ItemStackUtils.setItemName(item, Utils.fromString(generator.getProperties().displayName()));
         List<Component> infoLore = new ArrayList<>();
         infoLore.add(Utils.text("Năng lượng: ", NamedTextColor.YELLOW).append(Component.text(generator.getEnergy() + "/" + generator.getMaxEnergy(), NamedTextColor.GRAY)));
-        infoLore.add(Utils.text("Sức chứa: ", NamedTextColor.YELLOW).append(Component.text(generator.loot().occupied() + "/" + generator.stats().lootCapacity(), NamedTextColor.GRAY)));
+        infoLore.add(Utils.text("Sức chứa: ", NamedTextColor.YELLOW).append(Component.text(generator.loot().occupied() + "/" + generator.loot().capacity(), NamedTextColor.GRAY)));
         infoLore.add(Utils.text("Thời gian đặt: ", NamedTextColor.YELLOW).append(Component.text(Utils.formatDecimal(generator.stats().placeDelayTicks() / 20d) + "s", NamedTextColor.GRAY)));
         infoLore.add(Utils.text("Thời gian khai thác: ", NamedTextColor.YELLOW).append(Component.text(Utils.formatDecimal(generator.stats().breakDelayTicks() / 20d) + "s", NamedTextColor.GRAY)));
         infoLore.add(Utils.text("Năng lượng/tick: ", NamedTextColor.YELLOW).append(Component.text(Utils.formatDecimal(generator.stats().energyPerTick()), NamedTextColor.GRAY)));
@@ -110,7 +103,7 @@ public class ResourceGeneratorGui extends BaseGui {
         StoredItem fuel = generator.fuel().slot();
         ItemStack display = fuel != null ? fuel.toItemStack() : null;
         if (display != null && GeneratorFuelComponent.of(fuel.item()) == null) withWarning(display, "Không còn là nhiên liệu, không có tác dụng");
-        addButton(FUEL_SLOT, display != null ? display : fuelPlaceholder(), this::onFuelClick);
+        bindSlotDisplay(FUEL_SLOT, generator.fuelSlot(), 0, display != null ? display : fuelPlaceholder());
     }
 
     private void withWarning(ItemStack item, String warning) {
@@ -191,11 +184,6 @@ public class ResourceGeneratorGui extends BaseGui {
         return item;
     }
 
-    private boolean isFuel(ItemStack stack) {
-        StoredItem stored = StoredItem.of(stack);
-        return stored != null && GeneratorFuelComponent.of(stored.item()) != null;
-    }
-
     private void renderBuffSummary() {
         ItemStack item = ItemStack.of(Material.BEACON);
         ItemStackUtils.setItemName(item, Utils.text("Hiệu ứng đang hoạt động", NamedTextColor.GOLD));
@@ -235,34 +223,6 @@ public class ResourceGeneratorGui extends BaseGui {
         ItemStackUtils.setItemName(item, Utils.text("Hiệu ứng nhiên liệu", NamedTextColor.GRAY));
         ItemStackUtils.setLore(item, List.of(Utils.text("Chưa có hiệu ứng nào", NamedTextColor.DARK_GRAY)));
         return item;
-    }
-
-    private void onFuelClick(InventoryClickEvent event) {
-        event.setCancelled(true);
-
-        ItemStack cursor = event.getView().getCursor();
-        boolean cursorEmpty = cursor.getType().isAir();
-        StoredItem currentFuel = generator.fuel().slot();
-        if (currentFuel == null && cursorEmpty) return;
-
-        Player player = (Player) event.getWhoClicked();
-        if (!cursorEmpty && !isFuel(cursor)) {
-            player.sendMessage(Utils.text("Vật phẩm này không phải nhiên liệu.", NamedTextColor.RED));
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
-            return;
-        }
-
-        if (cursorEmpty) {
-            player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1f, 1f);
-        } else {
-            player.playSound(player.getLocation(), Sound.ITEM_FLINTANDSTEEL_USE, 1f, 1.2f);
-        }
-
-        generator.fuel().setSlot(cursorEmpty ? null : StoredItem.of(cursor));
-        event.getView().setCursor(currentFuel != null ? currentFuel.toItemStack() : null);
-        renderFuelSlot();
-        renderBurnSlot();
-        renderBuffSummary();
     }
 
     private void onLootClick(InventoryClickEvent event) {
@@ -386,22 +346,11 @@ public class ResourceGeneratorGui extends BaseGui {
     }
 
     @Override
-    public void onClickBottomInventory(InventoryClickEvent event) {
-        if (event.isShiftClick()) event.setCancelled(true);
+    protected void onAllViewersClosed() {
+        generator.releaseGui(this);
     }
 
     @Override
-    public void onDragInventory(InventoryDragEvent event) {
-        event.setCancelled(true);
-    }
-
-    @Override
-    public void onCloseInventory(InventoryCloseEvent event) {
-        Utils.runLater(() -> {
-            if (getInventory().getViewers().isEmpty()) generator.releaseGui(this);
-        });
-    }
-
     public void refresh() {
         renderMainInfo();
         renderStatus();
