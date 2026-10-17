@@ -5,6 +5,7 @@ import com.roguesmp.gui.crafting.RecipeBrowserGui;
 import com.roguesmp.gui.entitycreator.EntityBrowserGui;
 import com.roguesmp.gui.loottablecreator.LootTableBrowserGui;
 import com.roguesmp.gui.npccreator.NpcBrowserGui;
+import com.roguesmp.gui.spawner.SpawnerBrowserGui;
 import com.roguesmp.gui.tageditor.TagEditorGui;
 import com.roguesmp.permission.Permissions;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -37,6 +38,11 @@ public class SmpBrowserCommand {
                     new NpcBrowserGui(player).showInventory(player);
                 });
 
+        CommandAPICommand spawnerCommand = new CommandAPICommand("spawner")
+                .executesPlayer((player, args) -> {
+                    new SpawnerBrowserGui(player).showInventory(player);
+                });
+
         CommandAPICommand tagCommand = new CommandAPICommand("tag")
                 .executesPlayer((player, args) -> {
                     TagEditorGui.open(player);
@@ -49,6 +55,7 @@ public class SmpBrowserCommand {
                 .withSubcommand(entityCommand)
                 .withSubcommand(lootCommand)
                 .withSubcommand(npcCommand)
+                .withSubcommand(spawnerCommand)
                 .withSubcommand(tagCommand)
                 .register();
     }

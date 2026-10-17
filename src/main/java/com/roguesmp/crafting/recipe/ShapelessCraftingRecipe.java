@@ -16,6 +16,7 @@ import java.util.TreeMap;
 // Duplicate keys are separate slot requirements, not summed: 4 + 6 redstone needs two slots, one stack of 10 does not match.
 public final class ShapelessCraftingRecipe extends CraftingRecipe {
     public static final String TYPE_KEY = "shapeless";
+    public static final String TYPE_NAME = "Chế tạo không định hình";
 
     public static final Codec<ShapelessCraftingRecipe> CODEC = Codec.composite(
             CraftingRecipe.BASE_CODEC.forGetter(CraftingRecipe::getBaseProperties),
@@ -49,6 +50,11 @@ public final class ShapelessCraftingRecipe extends CraftingRecipe {
     @Override
     public @NotNull String getTypeId() {
         return TYPE_KEY;
+    }
+
+    @Override
+    public @NotNull String getTypeName() {
+        return TYPE_NAME;
     }
 
     @Override

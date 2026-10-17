@@ -20,7 +20,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -48,41 +47,25 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
     private static final String SYMBOL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     private final Player player;
-    private final boolean isPreview;
 
     private String recipeId;
     private boolean mirrored = true;
     private boolean refundItem = true;
-    private @Nullable CraftingRecipe sourceRecipe;
 
     public ShapedShapelessRecipeEditorGui(Player player) {
-        this(player, false, "Shaped Recipe");
-    }
-
-    private ShapedShapelessRecipeEditorGui(Player player, boolean isPreview, String title) {
-        super(Component.text(title, NamedTextColor.DARK_GRAY), 6);
+        super(Component.text("Shaped Recipe", NamedTextColor.DARK_GRAY), 6);
         this.player = player;
-        this.isPreview = isPreview;
     }
 
     /** Opens this editor pre-filled from an existing recipe (id, grid/result contents, mirrored flag) - used by the recipe viewer's right-click-to-edit. */
     public static ShapedShapelessRecipeEditorGui editExisting(Player player, CraftingRecipe recipe) {
-        ShapedShapelessRecipeEditorGui gui = new ShapedShapelessRecipeEditorGui(player, false, "Shaped Recipe");
-        gui.prefill(recipe, false);
+        ShapedShapelessRecipeEditorGui gui = new ShapedShapelessRecipeEditorGui(player);
+        gui.prefill(recipe);
         return gui;
     }
 
-    /** Opens a locked, read-only view of an existing recipe - used by the recipe viewer's left-click-to-inspect. */
-    public static ShapedShapelessRecipeEditorGui preview(Player player, CraftingRecipe recipe) {
-        ShapedShapelessRecipeEditorGui gui = new ShapedShapelessRecipeEditorGui(player, true, "Công thức: " + recipe.getId());
-        gui.refundItem = false;
-        gui.prefill(recipe, true);
-        return gui;
-    }
-
-    private void prefill(CraftingRecipe recipe, boolean withLabel) {
+    private void prefill(CraftingRecipe recipe) {
         this.recipeId = recipe.getId();
-        this.sourceRecipe = recipe;
 
         Inventory inv = getInventory();
         if (recipe instanceof ShapedCraftingRecipe shaped) {
@@ -97,19 +80,19 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
                     if (symbol == ' ') continue;
 
                     CraftingIngredient ingredient = keyMap.get(String.valueOf(symbol));
-                    ItemStack stack = resolveStack(ingredient, withLabel);
+                    ItemStack stack = resolveStack(ingredient);
                     if (stack != null) inv.setItem(GRID_SLOTS[row * GRID_WIDTH + col], stack);
                 }
             }
         } else if (recipe instanceof ShapelessCraftingRecipe shapeless) {
             List<CraftingIngredient> ingredients = shapeless.getIngredients();
             for (int i = 0; i < ingredients.size() && i < GRID_SLOTS.length; i++) {
-                ItemStack stack = resolveStack(ingredients.get(i), withLabel);
+                ItemStack stack = resolveStack(ingredients.get(i));
                 if (stack != null) inv.setItem(GRID_SLOTS[i], stack);
             }
         }
 
-        ItemStack resultStack = resolveStack(recipe.getPrimaryOutput(), withLabel);
+        ItemStack resultStack = resolveStack(recipe.getPrimaryOutput());
         if (resultStack != null) inv.setItem(RESULT_SLOT, resultStack);
     }
 
@@ -123,12 +106,6 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
             event.setCancelled(true);
             new RecipeBrowserGui(player).showInventory(player);
         });
-
-        if (isPreview) {
-            addButton(RECIPE_ID_SETTER, infoItem(), ClickHandler.noAction());
-            lockContentSlots();
-            return;
-        }
 
         addButton(RECIPE_ID_SETTER, recipeIdButton(), event -> {
             event.setCancelled(true);
@@ -164,17 +141,6 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
             event.setCancelled(true);
             openDeleteDialog((Player) event.getWhoClicked());
         });
-    }
-
-    /** Binds a locked ({@link ClickHandler#noAction()}) handler over whatever's already sitting in each grid/result slot - only meaningful in preview mode. */
-    private void lockContentSlots() {
-        Inventory inv = getInventory();
-        for (int slot : GRID_SLOTS) {
-            ItemStack item = inv.getItem(slot);
-            if (item != null) addButton(slot, item, ClickHandler.noAction());
-        }
-        ItemStack result = inv.getItem(RESULT_SLOT);
-        if (result != null) addButton(RESULT_SLOT, result, ClickHandler.noAction());
     }
 
     private void openDeleteDialog(Player player) {
@@ -218,22 +184,6 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
                 Utils.text("Click để đặt ID công thức.", NamedTextColor.GRAY),
                 Utils.text("Bắt buộc phải đặt trước khi lưu.", NamedTextColor.DARK_GRAY)
         )));
-        return item;
-    }
-
-    private ItemStack infoItem() {
-        ItemStack item = ItemStack.of(Material.NAME_TAG);
-        item.setData(DataComponentTypes.ITEM_NAME, Component.text("Recipe ID: " + recipeId, NamedTextColor.GREEN));
-
-        List<Component> lore = new ArrayList<>();
-        if (sourceRecipe instanceof ShapedCraftingRecipe shaped) {
-            lore.add(Utils.text("Loại: Shaped", NamedTextColor.GRAY));
-            lore.add(Utils.text("Pattern: " + String.join(" | ", shaped.getPattern()), NamedTextColor.GRAY));
-            lore.add(Utils.text("Mirrored: " + shaped.isMirrored(), NamedTextColor.GRAY));
-        } else {
-            lore.add(Utils.text("Loại: Shapeless", NamedTextColor.GRAY));
-        }
-        item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
         return item;
     }
 
@@ -388,22 +338,12 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
         return new ShapelessCraftingRecipe(new CraftingRecipe.BaseProperties(id, result), ingredients);
     }
 
-    /** Resolves an ingredient to a placeable stack - {@code withLabel} additionally appends a "key xN" lore line, used only in {@link #isPreview} mode. */
-    private static @Nullable ItemStack resolveStack(@Nullable CraftingIngredient ingredient, boolean withLabel) {
+    private static @Nullable ItemStack resolveStack(@Nullable CraftingIngredient ingredient) {
         if (ingredient == null) return null;
         ItemStack resolved = ingredient.toItemStack();
         if (resolved == null) return null;
 
-        ItemStack stack = resolved.clone();
-        if (withLabel) {
-            List<Component> lore = new ArrayList<>();
-            ItemLore existing = stack.getData(DataComponentTypes.LORE);
-            if (existing != null) lore.addAll(existing.lines());
-            lore.add(Component.empty());
-            lore.add(Component.text(ingredient.key() + " x" + ingredient.count(), NamedTextColor.WHITE));
-            stack.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
-        }
-        return stack;
+        return resolved.clone();
     }
 
     public void setRefundItem(boolean refundItem) {
@@ -420,10 +360,5 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
         }
         ItemStack result = inv.getItem(RESULT_SLOT);
         if (result != null && !result.getType().isAir()) PlayerUtils.giveItem(player, result);
-    }
-
-    @Override
-    public void onClickBottomInventory(InventoryClickEvent event) {
-        if (isPreview) event.setCancelled(true);
     }
 }

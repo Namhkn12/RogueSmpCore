@@ -16,6 +16,7 @@ import java.util.TreeMap;
 
 public final class FusionRecipe extends CraftingRecipe {
     public static final String TYPE_KEY = "fusion";
+    public static final String TYPE_NAME = "Dung hợp";
 
     public static final Codec<FusionRecipe> CODEC = Codec.composite(
             CraftingRecipe.BASE_CODEC.forGetter(CraftingRecipe::getBaseProperties),
@@ -44,6 +45,11 @@ public final class FusionRecipe extends CraftingRecipe {
     @Override
     public @NotNull String getTypeId() {
         return TYPE_KEY;
+    }
+
+    @Override
+    public @NotNull String getTypeName() {
+        return TYPE_NAME;
     }
 
     @Override

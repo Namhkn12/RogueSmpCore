@@ -14,6 +14,7 @@ import java.util.TreeMap;
 
 public final class CokeOvenRecipe extends CraftingRecipe {
     public static final String TYPE_KEY = "coke_oven";
+    public static final String TYPE_NAME = "Lò luyện cốc";
 
     public static final Codec<CokeOvenRecipe> CODEC = Codec.composite(
             CraftingRecipe.BASE_CODEC.forGetter(CraftingRecipe::getBaseProperties),
@@ -39,6 +40,11 @@ public final class CokeOvenRecipe extends CraftingRecipe {
     @Override
     public @NotNull String getTypeId() {
         return TYPE_KEY;
+    }
+
+    @Override
+    public @NotNull String getTypeName() {
+        return TYPE_NAME;
     }
 
     @Override

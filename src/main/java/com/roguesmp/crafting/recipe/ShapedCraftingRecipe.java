@@ -9,11 +9,13 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public final class ShapedCraftingRecipe extends CraftingRecipe {
     public static final String TYPE_KEY = "shaped";
+    public static final String TYPE_NAME = "Chế tạo có định hình";
 
     public static final Codec<ShapedCraftingRecipe> CODEC = Codec.composite(
             CraftingRecipe.BASE_CODEC.forGetter(CraftingRecipe::getBaseProperties),
@@ -129,6 +131,11 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
     }
 
     @Override
+    public @NotNull String getTypeName() {
+        return TYPE_NAME;
+    }
+
+    @Override
     public @NotNull List<RecipeInput> getIndexInputs() {
         List<RecipeInput> inputs = new ArrayList<>(2);
         inputs.add(shape.toRecipeInput());
@@ -143,7 +150,14 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
 
     @Override
     public @NotNull @Unmodifiable List<CraftingIngredient> getInputs() {
-        return List.copyOf(keyMap.values());
+        List<CraftingIngredient> inputs = new ArrayList<>();
+        for (String line : pattern) {
+            for (char symbol : line.toCharArray()) {
+                CraftingIngredient ingredient = symbol == ' ' ? null : keyMap.get(String.valueOf(symbol));
+                if (ingredient != null) inputs.add(ingredient);
+            }
+        }
+        return Collections.unmodifiableList(inputs);
     }
 
     @Override

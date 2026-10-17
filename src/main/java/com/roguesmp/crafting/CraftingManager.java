@@ -53,6 +53,10 @@ public class CraftingManager {
         }
     }
 
+    public @NotNull @Unmodifiable Set<String> getCraftableItemKeys() {
+        return Set.copyOf(byOutput.keySet());
+    }
+
     public @NotNull @Unmodifiable List<CraftingRecipe> getRecipesProducing(@NotNull String itemKey) {
         return List.copyOf(byOutput.getOrDefault(itemKey, List.of()));
     }

@@ -10,6 +10,7 @@ import java.util.List;
 
 public final class ScrappingRecipe extends CraftingRecipe {
     public static final String TYPE_KEY = "scrapping";
+    public static final String TYPE_NAME = "Phân rã";
 
     public static final Codec<ScrappingRecipe> CODEC = Codec.composite(
             CraftingRecipe.BASE_CODEC.forGetter(CraftingRecipe::getBaseProperties),
@@ -27,6 +28,11 @@ public final class ScrappingRecipe extends CraftingRecipe {
     @Override
     public @NotNull String getTypeId() {
         return TYPE_KEY;
+    }
+
+    @Override
+    public @NotNull String getTypeName() {
+        return TYPE_NAME;
     }
 
     @Override

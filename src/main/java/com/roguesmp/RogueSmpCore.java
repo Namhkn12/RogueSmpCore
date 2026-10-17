@@ -16,6 +16,7 @@ import com.roguesmp.region.editor.RegionSelections;
 import com.roguesmp.region.editor.RegionVisualizer;
 import com.roguesmp.region.editor.RegionWandListener;
 import com.roguesmp.command.SmpBrowserCommand;
+import com.roguesmp.crafting.gui.RecipeSearchGui;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.entity.component.EntityComponentKeys;
@@ -32,7 +33,6 @@ import com.roguesmp.entity.EntityManager;
 import com.roguesmp.fishing.FishingHotspotManager;
 import com.roguesmp.fishing.FishingManager;
 import com.roguesmp.fx.FxEngine;
-import com.roguesmp.gui.CreatorHubGui;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.gui.ItemRepairGui;
 import com.roguesmp.gui.SkinBrowserGui;
@@ -211,7 +211,6 @@ public final class RogueSmpCore extends JavaPlugin {
         SkinRegistry.registerSkinFetchCommand();
         SkinBrowserGui.registerCommand();
         ItemBrowser.registerCommand();
-        CreatorHubGui.registerCommand();
 
         AbilityCatalogue.register();
         ClassSelectionGui.register();
@@ -222,6 +221,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         ItemRepairGui.registerCommand();
         CraftingGui.registerCmd();
+        RecipeSearchGui.registerCommand();
         SmpBrowserCommand.register();
 
         new IslandCommand(IslandManager.getInstance()).register();

@@ -66,6 +66,8 @@ public abstract class CraftingRecipe {
 
     public abstract @NotNull String getTypeId();
 
+    public abstract @NotNull String getTypeName();
+
     public abstract @NotNull List<RecipeInput> getIndexInputs();
 
     public abstract @NotNull @Unmodifiable List<CraftingIngredient> getInputs();
