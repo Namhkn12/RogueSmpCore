@@ -351,7 +351,7 @@ public class CraftingGui extends ReactiveGui<CraftingGui.CraftingState> {
 
     public record CraftingState(int lastGridHash, @Nullable CraftingRecipe customRecipe, @Nullable ItemStack vanillaResult) {
         private @Nullable ItemStack result() {
-            return customRecipe != null ? customRecipe.getResultStack() : vanillaResult;
+            return customRecipe != null ? customRecipe.getPrimaryOutputStack() : vanillaResult;
         }
     }
 

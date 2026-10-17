@@ -12,18 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-/**
- * A recipe matched by exact layout in the grid - a {@code "pattern"} of up to 3 rows (each up to
- * 3 characters wide) plus a {@code "key"} map from pattern character to {@link CraftingIngredient}
- * (id + how many must be stacked in that cell, defaulting to 1). Matches regardless of where in the
- * grid the shape is placed (both sides trim to their minimal bounding box before comparing), and by
- * default also matches its horizontal mirror image, same as a vanilla shaped recipe.
- * <p>
- * The only kind that reads {@code width}/{@code height} in {@link #matches}/{@link #consume} - see
- * {@link CraftingRecipe}'s class doc for why every kind shares that signature regardless.
- */
 public final class ShapedCraftingRecipe extends CraftingRecipe {
-
     public static final String TYPE_KEY = "shaped";
 
     public static final Codec<ShapedCraftingRecipe> CODEC = Codec.composite(
@@ -39,17 +28,14 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
     private final Map<String, CraftingIngredient> keyMap;
     private final boolean mirrored;
 
-    /** Ingredient key -> remainder key (e.g. {@code "minecraft:water_bucket" -> "minecraft:bucket"}) - see {@link CraftingRecipe#applyConsumption}. */
     private final Map<String, String> remainders;
 
-    /** Trimmed to its minimal bounding box at construction time - identity only, no amounts. */
     private final Grid shape;
 
-    /** Required stack size per cell of {@link #shape}, same row-major order, 0 for an empty cell. */
     private final int[] requiredAmounts;
 
     public ShapedCraftingRecipe(@NotNull BaseProperties base, @NotNull List<String> pattern, @NotNull Map<String, CraftingIngredient> keyMap, boolean mirrored, @NotNull Map<String, String> remainders) {
-        super(base);
+        super(base, 1);
         this.pattern = List.copyOf(pattern);
         this.keyMap = Map.copyOf(keyMap);
         this.mirrored = mirrored;
@@ -60,13 +46,7 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
         this.requiredAmounts = built.amounts();
     }
 
-    // ==========================================
-    // GRID - a private 2D key layout, the recipe's own equivalent of a trimmed runtime grid.
-    // Not shared with any other kind (only ShapedCraftingRecipe cares about position at all).
-    // ==========================================
-
     private record Grid(int width, int height, String[] keys) {
-
         record Bounds(int minRow, int maxRow, int minCol, int maxCol) {}
 
         static @Nullable Bounds boundingBox(int width, int height, String[] keys) {
@@ -83,12 +63,7 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
             return maxRow < 0 ? null : new Bounds(minRow, maxRow, minCol, maxCol);
         }
 
-        /**
-         * True structural equality - a plain record-derived {@code equals()} would only compare
-         * {@link #keys} by reference (records don't deep-compare array components), so this exists
-         * to actually compare shape/ingredient identity. Dimensions checked first so differently
-         * shaped grids never compare equal even if {@link Arrays#equals} would accept a coincidence.
-         */
+        // Record equals() compares arrays by reference.
         boolean sameShapeAs(Grid other) {
             return width == other.width && height == other.height && Arrays.equals(keys, other.keys);
         }
@@ -148,20 +123,11 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
         return new GridData(new Grid(trimmedWidth, trimmedHeight, trimmedKeys), trimmedAmounts);
     }
 
-    // ==========================================
-
     @Override
     public @NotNull String getTypeId() {
         return TYPE_KEY;
     }
 
-    /**
-     * This recipe's own canonical shape, plus its horizontal mirror when {@link #isMirrored()} is
-     * true and the mirror isn't identical to the original (a symmetric pattern would otherwise
-     * double-insert the same path). Identity only - per-cell amount requirements are checked
-     * separately by {@link #matches}, since two recipes can legitimately share a shape/ingredient
-     * path while differing only in amounts.
-     */
     @Override
     public @NotNull List<RecipeInput> getIndexInputs() {
         List<RecipeInput> inputs = new ArrayList<>(2);
@@ -173,6 +139,11 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
         }
 
         return inputs;
+    }
+
+    @Override
+    public @NotNull @Unmodifiable List<CraftingIngredient> getInputs() {
+        return List.copyOf(keyMap.values());
     }
 
     @Override
@@ -189,11 +160,6 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
                 && hasEnoughAmounts(query.amounts(), mirrorAmounts(requiredAmounts, shape.width(), shape.height()));
     }
 
-    /**
-     * Resolves what each cell of {@code items} should become after consuming exactly one craft.
-     * Undefined (may consume nothing) if {@code items} doesn't actually {@link #matches} - check
-     * that first.
-     */
     @Override
     public @NotNull ItemStack[] consume(@NotNull ItemStack @NotNull [] items, int width, int height) {
         requireGridSize(items, width, height);
@@ -209,7 +175,7 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
         } else if (mirrored && query.grid().sameShapeAs(shape.mirrored())) {
             cellAmounts = mirrorAmounts(requiredAmounts, shape.width(), shape.height());
         } else {
-            return applyConsumption(items, amountsToConsume, remainders); // items don't actually match this recipe
+            return applyConsumption(items, amountsToConsume, remainders);
         }
 
         Grid trimmed = query.grid();
@@ -227,7 +193,6 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
         return applyConsumption(items, amountsToConsume, remainders);
     }
 
-    /** Restores the invariant the old {@code CraftingMatrix} constructor used to enforce - a clear error instead of an {@link ArrayIndexOutOfBoundsException} deep in the grid math below. */
     private static void requireGridSize(ItemStack[] items, int width, int height) {
         if (items.length != width * height) {
             throw new IllegalArgumentException("Expected " + (width * height) + " items for a " + width + "x" + height + " grid, got " + items.length);
@@ -236,12 +201,6 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
 
     private record TrimmedQuery(Grid grid, int[] amounts, Grid.Bounds bounds) {}
 
-    /**
-     * Resolves keys and finds the bounding box exactly once, building the trimmed key layout and
-     * the trimmed per-cell amounts together in the same pass (rather than {@code matches}/
-     * {@code consume} each re-resolving/re-trimming from scratch, or doing so twice internally).
-     * {@code null} iff {@code items} is entirely empty.
-     */
     private static @Nullable TrimmedQuery trimQuery(ItemStack[] items, int width, int height) {
         String[] keys = new String[items.length];
         for (int i = 0; i < items.length; i++) keys[i] = CraftingIngredient.resolveKey(items[i]);

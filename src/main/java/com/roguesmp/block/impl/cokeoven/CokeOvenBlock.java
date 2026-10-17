@@ -127,8 +127,8 @@ public class CokeOvenBlock extends SmpBlock implements Tickable, ItemStorageHold
     }
 
     private static List<StoredItem> results(CokeOvenRecipe recipe) {
-        List<StoredItem> results = new ArrayList<>(recipe.getResults().size());
-        for (CraftingIngredient result : recipe.getResults()) results.add(new StoredItem(result.key(), result.count()));
+        List<StoredItem> results = new ArrayList<>(recipe.getOutputs().size());
+        for (CraftingIngredient result : recipe.getOutputs()) results.add(new StoredItem(result.key(), result.count()));
         return results;
     }
 

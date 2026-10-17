@@ -84,7 +84,7 @@ public class FusionRecipeEditorGui extends BaseGui {
             if (stack != null) inv.setItem(INGREDIENT_SLOTS[i], stack);
         }
 
-        ItemStack resultStack = resolveStack(recipe.getResult(), withLabel);
+        ItemStack resultStack = resolveStack(recipe.getPrimaryOutput(), withLabel);
         if (resultStack != null) inv.setItem(OUTPUT_SLOT, resultStack);
     }
 

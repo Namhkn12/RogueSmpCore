@@ -109,7 +109,7 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
             }
         }
 
-        ItemStack resultStack = resolveStack(recipe.getResult(), withLabel);
+        ItemStack resultStack = resolveStack(recipe.getPrimaryOutput(), withLabel);
         if (resultStack != null) inv.setItem(RESULT_SLOT, resultStack);
     }
 

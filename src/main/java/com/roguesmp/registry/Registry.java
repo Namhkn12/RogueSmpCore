@@ -127,10 +127,11 @@ public class Registry<T> {
     }
 
     private void alignIdWithPath(JsonElement json, String id) {
-        if (!(json instanceof JsonObject object) || !(object.get("id") instanceof JsonPrimitive declared) || !declared.isString()) return;
-        if (declared.getAsString().equals(id)) return;
+        if (!(json instanceof JsonObject object)) return;
 
-        RogueSmpCore.LOGGER.warn("Entry '{}/{}.json' declares id '{}', using its path '{}' instead", locationKey, id, declared.getAsString(), id);
+        if (object.get("id") instanceof JsonPrimitive declared && declared.isString() && !declared.getAsString().equals(id))
+            RogueSmpCore.LOGGER.warn("Entry '{}/{}.json' declares id '{}', using its path '{}' instead", locationKey, id, declared.getAsString(), id);
+
         object.addProperty("id", id);
     }
 
@@ -361,6 +362,8 @@ public class Registry<T> {
             RogueSmpCore.LOGGER.error("Failed to encode [{}] in '{}': {}", id, locationKey, result.error());
             return false;
         }
+
+        if (result.result() instanceof JsonObject object) object.remove("id");
 
         File file = new File(folder, id + ".json");
         File parent = file.getParentFile();

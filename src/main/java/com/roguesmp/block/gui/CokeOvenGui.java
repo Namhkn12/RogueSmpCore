@@ -89,7 +89,7 @@ public class CokeOvenGui extends MachineGui {
         CokeOvenRecipe active = oven.activeRecipe();
         CokeOvenRecipe remembered = oven.rememberedRecipe();
         CokeOvenRecipe recipe = active != null ? active : remembered;
-        ItemStack preview = recipe == null || recipe.getResults().isEmpty() ? null : recipe.getResults().getFirst().toItemStack();
+        ItemStack preview = recipe == null ? null : recipe.getPrimaryOutputStack();
         if (preview == null) {
             ItemStack item = ItemStack.of(Material.GRAY_STAINED_GLASS_PANE);
             ItemStackUtils.setItemName(item, Utils.text("Thành phẩm dự kiến", NamedTextColor.GRAY));
@@ -99,7 +99,7 @@ public class CokeOvenGui extends MachineGui {
 
         List<Component> lore = new ArrayList<>();
         lore.add(Utils.text(active != null ? "Đang chế tạo:" : "Công thức ghi nhớ:", NamedTextColor.GOLD));
-        for (CraftingIngredient result : recipe.getResults()) {
+        for (CraftingIngredient result : recipe.getOutputs()) {
             StoredItem stored = new StoredItem(result.key(), result.count());
             lore.add(Utils.text("- " + result.count() + "x ", NamedTextColor.GRAY).append(stored.displayName()));
         }

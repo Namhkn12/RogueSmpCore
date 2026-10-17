@@ -238,7 +238,7 @@ public class RecipeBrowserGui extends BaseGui {
     }
 
     private ItemStack previewButtonFor(CraftingRecipe recipe) {
-        ItemStack result = resolvePreview(recipe.getResult());
+        ItemStack result = resolvePreview(recipe.getPrimaryOutput());
 
         List<Component> lore = new ArrayList<>();
         ItemLore existingLore = result.getData(DataComponentTypes.LORE);

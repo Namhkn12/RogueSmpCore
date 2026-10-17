@@ -13,26 +13,22 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public final class CokeOvenRecipe extends CraftingRecipe {
-
     public static final String TYPE_KEY = "coke_oven";
 
     public static final Codec<CokeOvenRecipe> CODEC = Codec.composite(
             CraftingRecipe.BASE_CODEC.forGetter(CraftingRecipe::getBaseProperties),
             Codec.listOf(CraftingIngredient.CODEC).fieldOf("ingredients").forGetter(CokeOvenRecipe::getIngredients),
-            Codec.listOf(CraftingIngredient.CODEC).fieldOf("results").forGetter(CokeOvenRecipe::getResults),
             Codec.INT.fieldOf("duration").forGetter(CokeOvenRecipe::getDuration),
             CokeOvenRecipe::new
     );
 
     private final List<CraftingIngredient> ingredients;
-    private final List<CraftingIngredient> results;
     private final int duration;
     private final Map<String, Integer> requiredCounts;
 
-    public CokeOvenRecipe(@NotNull BaseProperties base, @NotNull List<CraftingIngredient> ingredients, @NotNull List<CraftingIngredient> results, int duration) {
+    public CokeOvenRecipe(@NotNull BaseProperties base, @NotNull List<CraftingIngredient> ingredients, int duration) {
         super(base);
         this.ingredients = List.copyOf(ingredients);
-        this.results = List.copyOf(results);
         this.duration = Math.max(1, duration);
 
         Map<String, Integer> merged = new TreeMap<>();
@@ -48,6 +44,11 @@ public final class CokeOvenRecipe extends CraftingRecipe {
     @Override
     public @NotNull List<RecipeInput> getIndexInputs() {
         return List.of(RecipeInput.unordered(ingredients));
+    }
+
+    @Override
+    public @NotNull @Unmodifiable List<CraftingIngredient> getInputs() {
+        return ingredients;
     }
 
     @Override
@@ -82,10 +83,6 @@ public final class CokeOvenRecipe extends CraftingRecipe {
 
     public @NotNull @Unmodifiable List<CraftingIngredient> getIngredients() {
         return ingredients;
-    }
-
-    public @NotNull @Unmodifiable List<CraftingIngredient> getResults() {
-        return results;
     }
 
     public @NotNull @Unmodifiable Map<String, Integer> getRequiredCounts() {

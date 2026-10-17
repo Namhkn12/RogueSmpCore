@@ -68,11 +68,9 @@ public class RecipeCreatorGui {
     public static RecipeCreatorGui editExisting(String id, CraftingRecipe recipe) {
         RecipeCreatorGui gui = new RecipeCreatorGui();
         gui.id = id;
-        CraftingIngredient result = recipe.getResult();
-        if (result != null) {
-            gui.resultItemId = result.key();
-            gui.resultCount = result.count();
-        }
+        CraftingIngredient result = recipe.getPrimaryOutput();
+        gui.resultItemId = result.key();
+        gui.resultCount = result.count();
         if (recipe instanceof ShapedCraftingRecipe shaped) {
             gui.kind = RecipeKind.SHAPED;
             gui.pattern = new ArrayList<>(shaped.getPattern());
