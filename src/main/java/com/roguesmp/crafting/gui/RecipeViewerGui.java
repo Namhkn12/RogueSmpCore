@@ -79,6 +79,17 @@ public class RecipeViewerGui extends BaseGui {
         return new RecipeViewerGui(player, new View(Mode.RECIPES, itemKey, null, 0, 0), List.of(), root);
     }
 
+    public static RecipeViewerGui forUses(Player player, String itemKey, @Nullable CraftingRecipe preferred) {
+        RecipeViewerGui uses = new RecipeViewerGui(player, new View(Mode.USES, itemKey, null, 0, 0), List.of(), null);
+        if (preferred != null) {
+            if (!uses.recipesByTab.getOrDefault(RecipeCategories.of(preferred), List.of()).contains(preferred)) return forRecipe(player, preferred, null);
+            uses.select(preferred);
+            return uses;
+        }
+        if (uses.tabs.isEmpty() && !CraftingManager.getInstance().getRecipesProducing(itemKey).isEmpty()) return forItem(player, itemKey, null);
+        return uses;
+    }
+
     private static Component titleOf(View view) {
         return switch (view.mode()) {
             case RECIPES -> Component.text("Cách chế tạo: ").append(resolveDisplay(view.focusKey()).effectiveName());

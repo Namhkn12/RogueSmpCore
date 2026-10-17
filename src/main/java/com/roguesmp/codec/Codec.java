@@ -3,6 +3,7 @@ package com.roguesmp.codec;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.utils.WorldPos;
 import net.kyori.adventure.key.Key;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -168,6 +169,18 @@ public interface Codec<A> {
 
     /** Codec for Kyori Key identifiers (e.g. "minecraft:stone"). */
     Codec<Key> KEY = Codec.STRING.xmap(Key::key, Key::asString);
+
+    /** Codec for an RGB {@link Color} written as a hex string (e.g. "#A06540"). */
+    Codec<Color> HEX_COLOR = Codec.STRING.comapFlatMap(
+            hex -> {
+                try {
+                    return DataResult.success(Color.fromRGB(Integer.parseInt(hex.replace("#", ""), 16)));
+                } catch (IllegalArgumentException e) {
+                    return DataResult.error("Invalid hex color: " + hex);
+                }
+            },
+            color -> String.format("#%06X", color.asRGB())
+    );
 
     /** Codec for {@link WorldPos}, storing the world as a namespaced key. */
     Codec<WorldPos> WORLD_POS = Codec.composite(
