@@ -11,11 +11,11 @@ import com.roguesmp.block.storage.ItemStorage;
 import com.roguesmp.block.storage.ItemStorageHolder;
 import com.roguesmp.block.storage.PooledSlots;
 import com.roguesmp.block.storage.SlotAccess;
-import com.roguesmp.item.component.impl.GeneratorFuelComponent;
+import com.roguesmp.item.component.impl.GeneratorCatalystComponent;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.MapCodec;
 import com.roguesmp.block.impl.generator.stat.GeneratorEffect;
-import com.roguesmp.block.impl.generator.part.GeneratorFuel;
+import com.roguesmp.block.impl.generator.part.GeneratorCatalyst;
 import com.roguesmp.block.impl.generator.stat.GeneratorStats;
 import com.roguesmp.block.impl.generator.part.ModuleInstallResult;
 import com.roguesmp.block.impl.generator.part.ModuleSlots;
@@ -47,9 +47,9 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     private final @Nullable Material placeMaterial;
     private final ModuleSlots modules;
     private final ItemStorage storage = new ItemStorage(this).lockFaces(() -> Set.of(this.faceDirection));
-    private final FixedSlots fuelSlot = storage.add(new FixedSlots("fuel", 1, SlotAccess.INSERT, item -> GeneratorFuelComponent.of(item.item()) != null), this::onFuelSlotChanged);
+    private final FixedSlots catalystSlot = storage.add(new FixedSlots("catalyst", 1, SlotAccess.INSERT, item -> GeneratorCatalystComponent.of(item.item()) != null), this::onCatalystSlotChanged);
     private final PooledSlots loot = storage.add(new PooledSlots("loot", () -> this.stats.lootCapacity(), SlotAccess.EXTRACT));
-    private final GeneratorFuel fuel = new GeneratorFuel(this, fuelSlot, this::rebuildStats, this::markDirty);
+    private final GeneratorCatalyst catalyst = new GeneratorCatalyst(this, catalystSlot, this::rebuildStats, this::markDirty);
     private final CrackDisplay crack = new CrackDisplay();
     private GeneratorStats stats;
     private double energyDebt;
@@ -77,8 +77,8 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
 
     @Override
     public void tick() {
-        fuel.consume();
-        fuel.tick();
+        catalyst.consume();
+        catalyst.tick();
         if (mining) tickMining();
         else if (getEnergy() > 0) tickWaiting();
         tickGuiRefresh();
@@ -188,7 +188,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
             int overflow = drop.amount() - loot.insert(drop, false);
             if (overflow > 0) dropAtCenter(drop.withAmount(overflow));
         }
-        fuel.onHarvest();
+        catalyst.onHarvest();
         markDirty();
     }
 
@@ -201,11 +201,11 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     }
 
     private void rebuildStats() {
-        fuel.resolve();
+        catalyst.resolve();
 
         List<GeneratorEffect> effects = new ArrayList<>();
-        modules.collectEffects(fuel.burningItem(), effects);
-        fuel.collectEffects(effects);
+        modules.collectEffects(catalyst.activeItem(), effects);
+        catalyst.collectEffects(effects);
 
         stats = new GeneratorStats(data, effects);
         energy = Math.min(energy, stats.maxEnergy());
@@ -220,8 +220,8 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         return modules;
     }
 
-    private void onFuelSlotChanged() {
-        fuel.consume();
+    private void onCatalystSlotChanged() {
+        catalyst.consume();
         if (gui != null) gui.refresh();
     }
 
@@ -230,16 +230,16 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         return storage;
     }
 
-    public FixedSlots fuelSlot() {
-        return fuelSlot;
+    public FixedSlots catalystSlot() {
+        return catalystSlot;
     }
 
     public PooledSlots loot() {
         return loot;
     }
 
-    public GeneratorFuel fuel() {
-        return fuel;
+    public GeneratorCatalyst catalyst() {
+        return catalyst;
     }
 
     public boolean isMining() {
@@ -281,14 +281,16 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
 
     @Override
     public int addEnergy(int amount) {
-        energy = Math.min(energy + amount, stats.maxEnergy());
-        return energy;
+        int accepted = Math.min(amount, stats.maxEnergy() - energy);
+        energy += accepted;
+        return accepted;
     }
 
     @Override
     public int removeEnergy(int amount) {
-        energy = Math.max(0, energy - amount);
-        return energy;
+        int removed = Math.min(amount, energy);
+        energy -= removed;
+        return removed;
     }
 
     /**
@@ -341,7 +343,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         sections.add(StateSection.of(DIRECTION_CODEC, () -> faceDirection, direction -> this.faceDirection = direction));
         sections.add(StateSection.of(ENERGY_CODEC, () -> Optional.of(energy), value -> energy = value.orElse(data.maxEnergy())));
         sections.add(modules.section());
-        sections.add(fuel.burnSection());
+        sections.add(catalyst.activeSection());
     }
 
     @Override

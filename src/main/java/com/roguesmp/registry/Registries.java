@@ -73,7 +73,7 @@ import com.roguesmp.entity.spell.EntitySpells;
 import com.roguesmp.npc.action.GuiOpenActions;
 import com.roguesmp.text.Glyph;
 import com.roguesmp.text.Glyphs;
-import com.roguesmp.block.impl.generator.fuel.FuelType;
+import com.roguesmp.block.impl.generator.catalyst.CatalystType;
 import com.roguesmp.block.impl.generator.behavior.GeneratorBehavior;
 import com.roguesmp.block.impl.generator.behavior.GeneratorBehaviors;
 
@@ -148,7 +148,7 @@ public class Registries {
     public static final Registry<PolarTemplateData> POLAR_TEMPLATE_DATA = new Registry<>("polar_template_data", PolarTemplateData.CODEC);
     public static final Registry<RoomDefinition> DUNGEON_ROOM = new Registry<>("dungeon/rooms", RoomDefinition.CODEC);
     public static final Registry<DungeonDefinition> DUNGEON = new Registry<>("dungeon/definitions", DungeonDefinition.CODEC);
-    public static final Registry<FuelType> FUEL_TYPE = new Registry<>("fuel_types", FuelType.CODEC);
+    public static final Registry<CatalystType> CATALYST_TYPE = new Registry<>("catalyst_types", CatalystType.CODEC);
 
     public static final Registry<Codec<? extends CraftingRecipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());
     public static final Registry<CraftingRecipe> CRAFTING_RECIPE = new Registry<>("crafting_recipes", CraftingRecipe.CODEC);

@@ -1,13 +1,13 @@
 package com.roguesmp.block.gui;
 
 import com.roguesmp.block.StoredItem;
-import com.roguesmp.item.component.impl.GeneratorFuelComponent;
+import com.roguesmp.item.component.impl.GeneratorCatalystComponent;
 import com.roguesmp.item.component.impl.GeneratorModuleComponent;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
-import com.roguesmp.block.impl.generator.part.ActiveBurn;
-import com.roguesmp.block.impl.generator.part.BurnUnit;
+import com.roguesmp.block.impl.generator.part.ActiveCatalyst;
+import com.roguesmp.block.impl.generator.part.DurationUnit;
 import com.roguesmp.block.impl.generator.behavior.GeneratorBehavior;
 import com.roguesmp.block.impl.generator.stat.StatModifier;
 import com.roguesmp.block.impl.generator.part.ModuleInstallResult;
@@ -33,8 +33,8 @@ public class ResourceGeneratorGui extends MachineGui {
     private static final int BUFF_SUMMARY_SLOT = 6;
     private static final int TAKE_ALL_SLOT = 34;
     private static final int SIDES_SLOT = 35;
-    private static final int FUEL_SLOT = 10;
-    private static final int BURN_SLOT = 19;
+    private static final int CATALYST_SLOT = 10;
+    private static final int ACTIVE_CATALYST_SLOT = 19;
     private static final int[] LOOT_SLOTS = {12, 13, 14, 15, 16, 21, 22, 23, 24, 25};
     private static final int[] MODULE_SLOTS = {28, 29, 30, 31, 32};
 
@@ -99,11 +99,11 @@ public class ResourceGeneratorGui extends MachineGui {
         addButton(TAKE_ALL_SLOT, item, this::onTakeAllClick);
     }
 
-    private void renderFuelSlot() {
-        StoredItem fuel = generator.fuel().slot();
-        ItemStack display = fuel != null ? fuel.toItemStack() : null;
-        if (display != null && GeneratorFuelComponent.of(fuel.item()) == null) withWarning(display, "Không còn là nhiên liệu, không có tác dụng");
-        bindSlotDisplay(FUEL_SLOT, generator.fuelSlot(), 0, display != null ? display : fuelPlaceholder());
+    private void renderCatalystSlot() {
+        StoredItem catalyst = generator.catalyst().slot();
+        ItemStack display = catalyst != null ? catalyst.toItemStack() : null;
+        if (display != null && GeneratorCatalystComponent.of(catalyst.item()) == null) withWarning(display, "Không còn là chất xúc tác, không có tác dụng");
+        bindSlotDisplay(CATALYST_SLOT, generator.catalystSlot(), 0, display != null ? display : catalystPlaceholder());
     }
 
     private void withWarning(ItemStack item, String warning) {
@@ -177,10 +177,10 @@ public class ResourceGeneratorGui extends MachineGui {
         return display;
     }
 
-    private ItemStack fuelPlaceholder() {
+    private ItemStack catalystPlaceholder() {
         ItemStack item = ItemStack.of(Material.LIME_STAINED_GLASS_PANE);
-        ItemStackUtils.setItemName(item, Utils.text("Nguyên liệu", NamedTextColor.GRAY));
-        ItemStackUtils.setLore(item, List.of(Utils.text("Đặt nguyên liệu vào đây", NamedTextColor.DARK_GRAY)));
+        ItemStackUtils.setItemName(item, Utils.text("Chất xúc tác", NamedTextColor.GRAY));
+        ItemStackUtils.setLore(item, List.of(Utils.text("Đặt chất xúc tác vào đây", NamedTextColor.DARK_GRAY)));
         return item;
     }
 
@@ -196,31 +196,31 @@ public class ResourceGeneratorGui extends MachineGui {
         addButton(BUFF_SUMMARY_SLOT, item, ClickHandler.noAction());
     }
 
-    private void renderBurnSlot() {
-        ActiveBurn burn = generator.fuel().burn();
-        GeneratorFuelComponent fuel = generator.fuel().burningComponent();
-        ItemStack display = burn != null && fuel != null ? burnDisplayItem(burn, fuel) : null;
-        addButton(BURN_SLOT, display != null ? display : burnPlaceholder(), ClickHandler.noAction());
+    private void renderActiveCatalystSlot() {
+        ActiveCatalyst active = generator.catalyst().active();
+        GeneratorCatalystComponent component = generator.catalyst().activeComponent();
+        ItemStack display = active != null && component != null ? activeCatalystDisplayItem(active, component) : null;
+        addButton(ACTIVE_CATALYST_SLOT, display != null ? display : activeCatalystPlaceholder(), ClickHandler.noAction());
     }
 
-    private ItemStack burnDisplayItem(ActiveBurn burn, GeneratorFuelComponent fuel) {
-        ItemStack display = new StoredItem(burn.item(), 1).toItemStack();
+    private ItemStack activeCatalystDisplayItem(ActiveCatalyst active, GeneratorCatalystComponent component) {
+        ItemStack display = new StoredItem(active.item(), 1).toItemStack();
         if (display == null) return null;
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Utils.text("Hiệu ứng nhiên liệu đang chạy", NamedTextColor.GOLD));
-        lore.addAll(fuel.effect().describe());
-        lore.add(Utils.text("Còn lại: " + fuel.unit().format(burn.remaining()), NamedTextColor.GRAY));
-        if (generator.getEnergy() <= 0 && fuel.unit() == BurnUnit.TICKS) {
+        lore.add(Utils.text("Hiệu ứng xúc tác đang chạy", NamedTextColor.GOLD));
+        lore.addAll(component.effect().describe());
+        lore.add(Utils.text("Còn lại: " + component.unit().format(active.remaining()), NamedTextColor.GRAY));
+        if (generator.getEnergy() <= 0 && component.unit() == DurationUnit.TICKS) {
             lore.add(Utils.text("Tạm dừng: hết năng lượng", NamedTextColor.RED));
         }
         ItemStackUtils.setLore(display, lore);
         return display;
     }
 
-    private ItemStack burnPlaceholder() {
+    private ItemStack activeCatalystPlaceholder() {
         ItemStack item = ItemStack.of(Material.GRAY_STAINED_GLASS_PANE);
-        ItemStackUtils.setItemName(item, Utils.text("Hiệu ứng nhiên liệu", NamedTextColor.GRAY));
+        ItemStackUtils.setItemName(item, Utils.text("Hiệu ứng xúc tác", NamedTextColor.GRAY));
         ItemStackUtils.setLore(item, List.of(Utils.text("Chưa có hiệu ứng nào", NamedTextColor.DARK_GRAY)));
         return item;
     }
@@ -354,8 +354,8 @@ public class ResourceGeneratorGui extends MachineGui {
     public void refresh() {
         renderMainInfo();
         renderStatus();
-        renderFuelSlot();
-        renderBurnSlot();
+        renderCatalystSlot();
+        renderActiveCatalystSlot();
         renderBuffSummary();
         renderLootSlots();
     }

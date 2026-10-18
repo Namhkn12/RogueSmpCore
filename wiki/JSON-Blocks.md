@@ -1,6 +1,6 @@
 # JSON Reference — Blocks
 
-Thư mục: `blocks/` (đệ quy, id = đường dẫn bỏ `.json`, **không** có field `"id"`). Thư mục liên quan: `fuel_types/`. Quy tắc chung: [JSON-Overview](JSON-Overview.md).
+Thư mục: `blocks/` (đệ quy, id = đường dẫn bỏ `.json`, **không** có field `"id"`). Thư mục liên quan: `catalyst_types/`. Quy tắc chung: [JSON-Overview](JSON-Overview.md).
 
 Block tùy chỉnh **không phải block Bukkit thật**: nó là 1 entity `ItemDisplay` (hiển thị bằng model của resource pack) đặt tại 1 tọa độ và được plugin theo dõi. Item đặt ra block qua component [`block_place`](JSON-Items.md#block_place) (`"block": "<id file trong blocks/>"`).
 
@@ -96,7 +96,7 @@ Mỗi phần tử **roll độc lập**:
 | `capacity` | int | `1000` | Tổng số item kho chứa được; dư thì rơi ra đất. |
 | `module_slots` | int | `0` | Số ô module (GUI hiện tối đa 5). `0` = không lắp được module. |
 
-Vòng lặp: chỉ chạy khi năng lượng > 0; chờ `place_delay` → đặt → đào `break_delay` → thu hoạch → chờ lại. Ô đích bị vật khác chiếm thì máy chờ và thử lại. Nhiên liệu được nạp qua GUI.
+Vòng lặp: chỉ chạy khi năng lượng > 0; chờ `place_delay` → đặt → đào `break_delay` → thu hoạch → chờ lại. Ô đích bị vật khác chiếm thì máy chờ và thử lại. Chất xúc tác được nạp qua GUI.
 
 ```json
 {
@@ -134,7 +134,7 @@ Item đặt máy (`items/steel_generator.json`):
 
 ## Chỉ số, phép toán và hiệu ứng của máy
 
-Module và nhiên liệu đều dùng chung 1 "payload hiệu ứng" (**phẳng** trong object component, không bọc trong key `effect`):
+Module và chất xúc tác đều dùng chung 1 "payload hiệu ứng" (**phẳng** trong object component, không bọc trong key `effect`):
 
 | Key | Kiểu | Mặc định | Ý nghĩa |
 | :--- | :--- | :--- | :--- |
@@ -163,7 +163,7 @@ Công thức: `giá trị = gốc × max(0.1, (1 + Σ MULTIPLY_BASE) × Π(1 + M
 
 ### Behavior
 
-Field chọn loại: `"type"`. Dùng được ở module, synergy và nhiên liệu (`behaviors`). Hiện có 2 loại:
+Field chọn loại: `"type"`. Dùng được ở module, synergy và chất xúc tác (`behaviors`). Hiện có 2 loại:
 
 | `type` | Key | Ý nghĩa |
 | :--- | :--- | :--- |
@@ -175,7 +175,7 @@ Field chọn loại: `"type"`. Dùng được ở module, synergy và nhiên li�
 { "type": "add_drops", "drops": [ { "item": "minecraft:diamond", "chance": 0.05 } ] }
 ```
 
-Behavior chạy lần lượt: các module (kèm synergy của từng module) trước, nhiên liệu sau. `convert_drops` chỉ đổi những drop đã có tại thời điểm nó chạy, nên `convert_drops` của module **không** đổi drop do `add_drops` của nhiên liệu thêm vào; ngược lại `convert_drops` của nhiên liệu đổi được cả drop do module thêm.
+Behavior chạy lần lượt: các module (kèm synergy của từng module) trước, chất xúc tác sau. `convert_drops` chỉ đổi những drop đã có tại thời điểm nó chạy, nên `convert_drops` của module **không** đổi drop do `add_drops` của chất xúc tác thêm vào; ngược lại `convert_drops` của chất xúc tác đổi được cả drop do module thêm.
 
 <a id="generator_module--item-module"></a>
 ## `generator_module` — item module
@@ -187,9 +187,9 @@ Component đặt trên 1 item (trong `items/`) để biến nó thành module l�
 | `modifiers`, `behaviors` | mảng | `[]` | Hiệu ứng khi module được lắp. |
 | `incompatible` | mảng id item | `[]` | Module xung đột (kiểm tra cả 2 chiều); hiện lore "Xung đột: ...". |
 | `max_per_machine` | int | `0` | Tối đa bao nhiêu bản trong 1 máy; `0` = không giới hạn. |
-| `synergies` | mảng synergy | `[]` | Hiệu ứng thêm khi đang đốt 1 loại nhiên liệu nhất định. |
+| `synergies` | mảng synergy | `[]` | Hiệu ứng thêm khi 1 loại chất xúc tác nhất định đang hoạt động. |
 
-Synergy: `type` (id file trong `fuel_types/`, bắt buộc) + `modifiers`/`behaviors` phẳng trong cùng object. Chỉ hoạt động khi nhiên liệu **loại đó** đang cháy (nhiên liệu có `duration > 0`, không tính nhiên liệu chỉ cấp năng lượng). Module bị rơi ra đất khi phá máy. Lỗi lắp: không phải module, hết ô, xung đột, đạt giới hạn.
+Synergy: `type` (id file trong `catalyst_types/`, bắt buộc) + `modifiers`/`behaviors` phẳng trong cùng object. Chỉ hoạt động khi chất xúc tác **loại đó** đang hoạt động. Module bị rơi ra đất khi phá máy. Lỗi lắp: không phải module, hết ô, xung đột, đạt giới hạn.
 
 ```json
 {
@@ -210,17 +210,16 @@ Synergy: `type` (id file trong `fuel_types/`, bắt buộc) + `modifiers`/`behav
 }
 ```
 
-<a id="generator_fuel--item-nhiên-liệu"></a>
-## `generator_fuel` — item nhiên liệu
+<a id="generator_catalyst--item-chất-xúc-tác"></a>
+## `generator_catalyst` — item chất xúc tác
+
+Chất xúc tác không cấp năng lượng; máy nhận năng lượng từ máy phát năng lượng riêng. Mỗi lần chỉ 1 chất xúc tác hoạt động: khi hết hạn, máy tự lấy 1 item tiếp theo từ ô xúc tác.
 
 | Key | Kiểu | Mặc định | Ý nghĩa |
 | :--- | :--- | :--- | :--- |
-| `energy` | int | `0` | Năng lượng cộng mỗi item. Tự tiêu thụ đủ số item vừa với phần năng lượng còn trống (`floor((max − hiện tại)/energy)`). |
-| `modifiers`, `behaviors` | mảng | `[]` | Hiệu ứng tạm khi nhiên liệu đang "cháy". |
-| `duration` | int | `0` | Thời gian cháy mỗi item, tính theo `unit`. **`0` = không có hiệu ứng** (`modifiers`/`behaviors` bị bỏ qua). |
+| `modifiers`, `behaviors` | mảng | `[]` | Hiệu ứng khi chất xúc tác đang hoạt động. |
+| `duration` | int | bắt buộc | Thời gian hoạt động mỗi item, tính theo `unit`. |
 | `unit` | enum | `TICKS` | `TICKS` (đếm mỗi tick khi máy còn năng lượng) hoặc `HARVESTS` (đếm mỗi lần thu hoạch). |
-
-Ba kiểu dùng: **chỉ năng lượng** (`energy > 0`, `duration 0`); **chỉ hiệu ứng** (`energy 0`, `duration > 0`: tiêu đúng 1 item và chỉ khi chính nhiên liệu đó chưa cháy); **cả hai** (tiêu item và bắt đầu/kéo dài cháy `duration × số item`).
 
 ```json
 {
@@ -228,29 +227,29 @@ Ba kiểu dùng: **chỉ năng lượng** (`energy > 0`, `duration 0`); **chỉ 
   "base": "COAL",
   "components": {
     "name": "<gray>Coal Briquette",
-    "generator_fuel": { "energy": 400, "duration": 1200, "unit": "TICKS",
+    "generator_catalyst": { "duration": 1200, "unit": "TICKS",
       "modifiers": [ { "stat": "PLACE_DELAY", "amount": -0.2 } ],
       "behaviors": [ { "type": "add_drops", "drops": [ { "item": "minecraft:flint", "chance": 0.1 } ] } ] }
   }
 }
 ```
 
-<a id="fuel_types--loại-nhiên-liệu"></a>
-## `fuel_types/` — loại nhiên liệu
+<a id="catalyst_types--loại-chất-xúc-tác"></a>
+## `catalyst_types/` — loại chất xúc tác
 
-Nhóm các item nhiên liệu thành "loại" để module synergy nhắm tới và để lore hiển thị.
+Nhóm các item xúc tác thành "loại" để module synergy nhắm tới và để lore hiển thị.
 
 | Key | Kiểu | Bắt buộc | Ý nghĩa |
 | :--- | :--- | :--- | :--- |
-| `tag` | string | bắt buộc | Tên tag item (`items/tags/<tag>.json`); **chữ thường**. Item nằm trong tag là nhiên liệu loại này. |
-| `display` | string MiniMessage | bắt buộc | Tên hiển thị trong lore ("Loại nhiên liệu: ..." / "Với nhiên liệu ...:"). |
+| `tag` | string | bắt buộc | Tên tag item (`items/tags/<tag>.json`); **chữ thường**. Item nằm trong tag là chất xúc tác loại này. |
+| `display` | string MiniMessage | bắt buộc | Tên hiển thị trong lore ("Loại chất xúc tác: ..." / "Với chất xúc tác ...:"). |
 
 ```json
-// fuel_types/wood.json  (id "wood")
-{ "tag": "wood_fuel", "display": "<#a0522d>Gỗ" }
+// catalyst_types/wood.json  (id "wood")
+{ "tag": "wood_catalyst", "display": "<#a0522d>Gỗ" }
 ```
 ```json
-// items/tags/wood_fuel.json
+// items/tags/wood_catalyst.json
 ["coal_briquette", "oak_log_item"]
 ```
 

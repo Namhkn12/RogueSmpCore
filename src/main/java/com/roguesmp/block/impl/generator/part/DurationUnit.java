@@ -2,7 +2,7 @@ package com.roguesmp.block.impl.generator.part;
 
 import com.roguesmp.utils.Utils;
 
-public enum BurnUnit {
+public enum DurationUnit {
     TICKS,
     HARVESTS;
 

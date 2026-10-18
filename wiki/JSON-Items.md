@@ -50,7 +50,7 @@ Tên component **không có trong bảng** làm fail cả file item. Item có co
 | [`usage_timer`](#usage_timer) | int | Item tự biến mất sau khoảng thời gian trang bị |
 | [`command_executor`](#command_executor) | string | Chạy lệnh khi click |
 | `generator_module` | object | Module cho máy phát — xem [JSON-Blocks](JSON-Blocks.md#generator_module--item-module) |
-| `generator_fuel` | object | Nhiên liệu cho máy phát — xem [JSON-Blocks](JSON-Blocks.md#generator_fuel--item-nhiên-liệu) |
+| `generator_catalyst` | object | Chất xúc tác cho máy phát — xem [JSON-Blocks](JSON-Blocks.md#generator_catalyst--item-chất-xúc-tác) |
 
 ### `name`
 Chuỗi MiniMessage trần. Đặt tên custom (không in nghiêng mặc định).

@@ -2,18 +2,18 @@ package com.roguesmp.block.impl.generator.part;
 
 import com.roguesmp.codec.Codec;
 
-public final class ActiveBurn {
+public final class ActiveCatalyst {
 
-    public static final Codec<ActiveBurn> CODEC = Codec.composite(
-            Codec.STRING.fieldOf("item").forGetter(ActiveBurn::item),
-            Codec.INT.fieldOf("remaining").forGetter(ActiveBurn::remaining),
-            ActiveBurn::new
+    public static final Codec<ActiveCatalyst> CODEC = Codec.composite(
+            Codec.STRING.fieldOf("item").forGetter(ActiveCatalyst::item),
+            Codec.INT.fieldOf("remaining").forGetter(ActiveCatalyst::remaining),
+            ActiveCatalyst::new
     );
 
     private final String item;
     private int remaining;
 
-    public ActiveBurn(String item, int remaining) {
+    public ActiveCatalyst(String item, int remaining) {
         this.item = item;
         this.remaining = remaining;
     }

@@ -19,7 +19,7 @@ Mỗi trang = 1 thư mục dữ liệu: **mỗi key làm gì, kiểu gì, bắt 
 | [JSON-Npcs](JSON-Npcs.md) | `npcs/` | NPC và action khi click |
 | [JSON-Loot](JSON-Loot.md) | `loottable/` | Pool, entry, condition, thuật toán roll |
 | [JSON-Crafting](JSON-Crafting.md) | `crafting_recipes/` | `shaped`, `shapeless`, `fusion` |
-| [JSON-Blocks](JSON-Blocks.md) | `blocks/`, `fuel_types/` | Block, máy phát (generator), module, nhiên liệu, altar |
+| [JSON-Blocks](JSON-Blocks.md) | `blocks/`, `catalyst_types/` | Block, máy phát (generator), module, chất xúc tác, altar |
 | [JSON-Dungeons](JSON-Dungeons.md) | `dungeon/` | Dungeon, feature, phòng, script (sự kiện, condition, action, biến) |
 | [JSON-Spawners](JSON-Spawners.md) | `spawners/` | Spawner tuỳ chỉnh, behavior, flag `smp-spawners` |
 
