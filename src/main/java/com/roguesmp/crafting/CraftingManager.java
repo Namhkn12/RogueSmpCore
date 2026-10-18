@@ -1,5 +1,6 @@
 package com.roguesmp.crafting;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
 import com.roguesmp.crafting.recipe.RecipeInput;
@@ -109,7 +110,7 @@ public class CraftingManager {
 
         List<CraftingIngredient> slots = new ArrayList<>(items.length);
         for (ItemStack stack : items) {
-            String key = CraftingIngredient.resolveKey(stack);
+            String key = ItemRef.idOf(stack);
             slots.add(key == null ? null : new CraftingIngredient(key, 1));
         }
         if (width <= 0 || height <= 0) return RecipeInput.unordered(slots);

@@ -1,5 +1,6 @@
 package com.roguesmp.item.component.impl;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.item.BaseItem;
@@ -34,8 +35,7 @@ public record GeneratorCatalystComponent(
     );
 
     public static @Nullable GeneratorCatalystComponent of(String itemId) {
-        BaseItem item = Registries.ITEM.get(itemId);
-        return item == null ? null : item.getComponent(ItemComponentKeys.GENERATOR_CATALYST);
+        return ItemRef.component(itemId, ItemComponentKeys.GENERATOR_CATALYST);
     }
 
     @Override

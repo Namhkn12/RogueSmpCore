@@ -1,5 +1,6 @@
 package com.roguesmp.block.impl.generator;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.block.*;
 import com.roguesmp.block.data.GeneratorData;
 import com.roguesmp.block.event.SmpBlockBreakEvent;
@@ -65,7 +66,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     public ResourceGeneratorBlock(BlockProperties properties, GeneratorData data) {
         super(properties);
         this.data = data;
-        this.placeMaterial = BlockRef.vanillaMaterial(data.place());
+        this.placeMaterial = ItemRef.vanillaMaterial(data.place());
         this.modules = new ModuleSlots(data.moduleSlots());
         this.stats = new GeneratorStats(data, List.of());
     }

@@ -162,6 +162,8 @@ Item đặt máy (`items/steel_generator.json`):
 "energy_source": { "energy_per_tick": 10, "burn_ticks": 1600 }
 ```
 
+Nhiên liệu vanilla (mọi item lò nung đốt được, **trừ** xô dung nham) cũng dùng được mà không cần JSON: `energy_per_tick = 10`, `burn_ticks = thời gian cháy vanilla / 25` (VD: than 1600 → 64 tick).
+
 ## Chỉ số, phép toán và hiệu ứng của máy
 
 Module và chất xúc tác đều dùng chung 1 "payload hiệu ứng" (**phẳng** trong object component, không bọc trong key `effect`):

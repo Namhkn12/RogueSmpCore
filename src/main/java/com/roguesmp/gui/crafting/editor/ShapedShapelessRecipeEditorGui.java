@@ -1,5 +1,6 @@
 package com.roguesmp.gui.crafting.editor;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.crafting.CraftingIngredient;
 import com.roguesmp.crafting.CraftingManager;
@@ -268,7 +269,7 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
         Inventory inv = getInventory();
 
         ItemStack resultStack = inv.getItem(RESULT_SLOT);
-        String resultKey = CraftingIngredient.resolveKey(resultStack);
+        String resultKey = ItemRef.idOf(resultStack);
         if (resultKey == null) return null;
 
         // One symbol per distinct (key, count) pair - two cells sharing a key but needing different
@@ -281,7 +282,7 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
         for (int row = 0; row < GRID_HEIGHT; row++) {
             for (int col = 0; col < GRID_WIDTH; col++) {
                 ItemStack stack = inv.getItem(GRID_SLOTS[row * GRID_WIDTH + col]);
-                String key = CraftingIngredient.resolveKey(stack);
+                String key = ItemRef.idOf(stack);
                 if (key == null) {
                     rows[row].append(' ');
                     continue;
@@ -322,13 +323,13 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
         Inventory inv = getInventory();
 
         ItemStack resultStack = inv.getItem(RESULT_SLOT);
-        String resultKey = CraftingIngredient.resolveKey(resultStack);
+        String resultKey = ItemRef.idOf(resultStack);
         if (resultKey == null) return null;
 
         List<CraftingIngredient> ingredients = new ArrayList<>();
         for (int slot : GRID_SLOTS) {
             ItemStack stack = inv.getItem(slot);
-            String key = CraftingIngredient.resolveKey(stack);
+            String key = ItemRef.idOf(stack);
             if (key == null) continue;
             ingredients.add(new CraftingIngredient(key, stack.getAmount()));
         }

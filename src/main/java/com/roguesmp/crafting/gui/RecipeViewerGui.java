@@ -1,5 +1,6 @@
 package com.roguesmp.crafting.gui;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.crafting.CraftingIngredient;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.crafting.gui.category.RecipeCategories;
@@ -332,7 +333,7 @@ public class RecipeViewerGui extends BaseGui {
     }
 
     private static ItemStack resolveDisplay(String key) {
-        ItemStack resolved = CraftingIngredient.resolveItemStack(key, 1);
+        ItemStack resolved = ItemRef.toItemStack(key, 1);
         if (resolved != null) return resolved.clone();
         return label(Material.BARRIER, "Không tìm thấy: " + key, NamedTextColor.RED);
     }

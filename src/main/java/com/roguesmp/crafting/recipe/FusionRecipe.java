@@ -1,5 +1,6 @@
 package com.roguesmp.crafting.recipe;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.crafting.CraftingIngredient;
 import org.bukkit.inventory.ItemStack;
@@ -73,7 +74,7 @@ public final class FusionRecipe extends CraftingRecipe {
         if (items.length == 0) return false;
 
         ItemStack inputStack = items[0];
-        String inputKey = CraftingIngredient.resolveKey(inputStack);
+        String inputKey = ItemRef.idOf(inputStack);
         if (inputKey == null || !inputKey.equals(input.key())) return false;
         if (inputStack.getAmount() != input.count()) return false; // exact, not "at least"
 
@@ -95,7 +96,7 @@ public final class FusionRecipe extends CraftingRecipe {
         Map<String, Integer> stillNeeded = new HashMap<>(requiredCounts);
         for (int i = 1; i < items.length; i++) {
             ItemStack stack = items[i];
-            String key = CraftingIngredient.resolveKey(stack);
+            String key = ItemRef.idOf(stack);
             if (key == null) continue;
 
             Integer needed = stillNeeded.get(key);

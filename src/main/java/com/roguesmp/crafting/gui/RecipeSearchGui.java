@@ -1,7 +1,7 @@
 package com.roguesmp.crafting.gui;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.crafting.CraftingIngredient;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.Utils;
@@ -104,7 +104,7 @@ public class RecipeSearchGui extends BaseGui {
     }
 
     private ItemStack resultDisplay(String key) {
-        ItemStack display = CraftingIngredient.resolveItemStack(key, 1);
+        ItemStack display = ItemRef.toItemStack(key, 1);
         display = display == null ? ItemStack.of(Material.BARRIER) : display.clone();
 
         int recipeCount = CraftingManager.getInstance().getRecipesProducing(key).size();

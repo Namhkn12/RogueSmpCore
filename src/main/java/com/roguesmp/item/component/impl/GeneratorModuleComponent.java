@@ -1,12 +1,11 @@
 package com.roguesmp.item.component.impl;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.block.StoredItem;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.context.ItemLoreContext;
-import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.item.component.ItemComponentKeys;
-import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.block.impl.generator.catalyst.CatalystSynergy;
 import com.roguesmp.block.impl.generator.stat.GeneratorEffect;
@@ -36,8 +35,7 @@ public record GeneratorModuleComponent(
     );
 
     public static @Nullable GeneratorModuleComponent of(String itemId) {
-        BaseItem item = Registries.ITEM.get(itemId);
-        return item == null ? null : item.getComponent(ItemComponentKeys.GENERATOR_MODULE);
+        return ItemRef.component(itemId, ItemComponentKeys.GENERATOR_MODULE);
     }
 
     private Component incompatibleLine() {
