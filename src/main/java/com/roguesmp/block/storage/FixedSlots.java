@@ -21,12 +21,12 @@ public final class FixedSlots extends SlotGroup {
 
     private final StoredItem[] slots;
 
-    public FixedSlots(String id, int size, SlotAccess access) {
-        this(id, size, access, item -> true);
+    public FixedSlots(String id, String displayName, int size, SlotAccess access) {
+        this(id, displayName, size, access, item -> true);
     }
 
-    public FixedSlots(String id, int size, SlotAccess access, Predicate<StoredItem> filter) {
-        super(id, access, filter);
+    public FixedSlots(String id, String displayName, int size, SlotAccess access, Predicate<StoredItem> filter) {
+        super(id, displayName, access, filter);
         this.slots = new StoredItem[size];
     }
 

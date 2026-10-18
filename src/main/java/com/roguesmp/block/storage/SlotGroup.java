@@ -17,13 +17,15 @@ import java.util.function.Supplier;
 public abstract class SlotGroup {
 
     private final String id;
+    private final String displayName;
     private final SlotAccess access;
     private final Predicate<StoredItem> filter;
     private Runnable onChange = () -> {};
     private @Nullable Supplier<List<StoredItem>> demandOverride;
 
-    protected SlotGroup(String id, SlotAccess access, Predicate<StoredItem> filter) {
+    protected SlotGroup(String id, String displayName, SlotAccess access, Predicate<StoredItem> filter) {
         this.id = id;
+        this.displayName = displayName;
         this.access = access;
         this.filter = filter;
     }
@@ -51,6 +53,18 @@ public abstract class SlotGroup {
 
         List<StoredItem> overridden = demandOverride == null ? null : demandOverride.get();
         return overridden != null ? overridden : defaultDemand();
+    }
+
+    public boolean supportsDemand() {
+        return access.allowsInsert() && (demandOverride != null || hasDefaultDemand());
+    }
+
+    protected boolean hasDefaultDemand() {
+        return true;
+    }
+
+    public String displayName() {
+        return displayName;
     }
 
     /** Replaces the top-up demand used by smart pulls; the supplier may return null to fall back to it. */

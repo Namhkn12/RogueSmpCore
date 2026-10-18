@@ -18,6 +18,18 @@ public final class SideConfig {
 
     private final Map<BlockFace, SideMode> modes = new EnumMap<>(BlockFace.class);
 
+    public static String displayName(BlockFace face) {
+        return switch (face) {
+            case NORTH -> "Mặt Bắc";
+            case EAST -> "Mặt Đông";
+            case SOUTH -> "Mặt Nam";
+            case WEST -> "Mặt Tây";
+            case UP -> "Mặt trên";
+            case DOWN -> "Mặt dưới";
+            default -> face.name();
+        };
+    }
+
     public SideMode get(BlockFace face) {
         return modes.getOrDefault(face, SideMode.NONE);
     }

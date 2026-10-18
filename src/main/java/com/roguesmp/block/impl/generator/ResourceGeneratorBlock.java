@@ -48,8 +48,8 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     private final @Nullable Material placeMaterial;
     private final ModuleSlots modules;
     private final ItemStorage storage = new ItemStorage(this).lockFaces(() -> Set.of(this.faceDirection));
-    private final FixedSlots catalystSlot = storage.add(new FixedSlots("catalyst", 1, SlotAccess.INSERT, item -> GeneratorCatalystComponent.of(item.item()) != null), this::onCatalystSlotChanged);
-    private final PooledSlots loot = storage.add(new PooledSlots("loot", () -> this.stats.lootCapacity(), SlotAccess.EXTRACT));
+    private final FixedSlots catalystSlot = storage.add(new FixedSlots("catalyst", "Chất xúc tác", 1, SlotAccess.INSERT, item -> GeneratorCatalystComponent.of(item.item()) != null), this::onCatalystSlotChanged);
+    private final PooledSlots loot = storage.add(new PooledSlots("loot", "Kho", () -> this.stats.lootCapacity(), SlotAccess.EXTRACT));
     private final GeneratorCatalyst catalyst = new GeneratorCatalyst(this, catalystSlot, this::rebuildStats, this::markDirty);
     private final CrackDisplay crack = new CrackDisplay();
     private GeneratorStats stats;
