@@ -31,7 +31,7 @@ Giải thích **vì sao** hệ thống chạy như vậy và cách mở rộng b
 2. **[Registry System](Registry-System.md)** — `Registry<T>` (load đệ quy, tag, hot reload), `Registries` gom hơn 30 registry, `Holder<T>` (tham chiếu ổn định theo id).
 3. **[Item System](Item-System.md)** — `BaseItem` (template) / `SmpItem` (wrapper runtime), `ItemComponent`, pipeline `generateItemStack`, `ItemAbility`.
 4. **[Attribute System](Attribute-System.md)** — `SmpAttribute`, enum `Attributes`, attribute wrap vanilla vs. custom theo gameplay-event.
-5. **[GUI Framework](GUI-Framework.md)** — `BaseGui` + `GuiListener`, `ReactiveGui<S>`.
+5. **[GUI Framework](GUI-Framework.md)** — `BaseGui` + `GuiListener`, `scheduleRefresh()`.
 6. **[Entity, Boss & Spell System](Entity-Boss-Spell-System.md)** — `BaseEntity`/`SmpEntity`, `EntityComponent`, `SpellComponent`, `PhaseComponent`.
 7. **[Player Ability System](Player-Ability-System.md)** — `Ability`, `AbilityInfo` (code) tách khỏi `AbilityConfig` (JSON), `AbilityLoadout`, trigger & capture.
 8. **[Dungeon System](Dungeon-System.md)** — lõi instance nhỏ + feature, sự kiện, script JSON, kiểm tra khi nạp.

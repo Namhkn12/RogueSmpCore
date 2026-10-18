@@ -88,21 +88,18 @@ public class IslandLeaveConfirmGui extends BaseGui {
 }
 ```
 
-## Ví dụ 2 — phức tạp, tự vẽ lại theo state: `ReactiveGui<S>`
+## Ví dụ 2 — slot người chơi tự đặt item: `scheduleRefresh()`
 
-> ⚠️ `gui/MachineGui.java` (abstract, cùng cặp mixin `IHaveBlueprint`/`IHaveInputOutput` ở `gui/interfaces/`) **đã bị xóa hoàn toàn** — không còn tồn tại trong codebase. GUI dạng máy/công thức giờ extend [`gui/ReactiveGui.java`](../src/main/java/com/roguesmp/gui/ReactiveGui.java) thay vào đó.
-
-`ReactiveGui<S>` (abstract, `extends BaseGui`) giải quyết đúng vấn đề mà `MachineGui` từng giải quyết (1 GUI đang mở cần tự cập nhật khi state nghiệp vụ phía sau đổi — máy đang chế tạo, thanh năng lượng, ...) nhưng theo hướng khai báo thay vì "tự tay gọi `setItem` khi cần":
+GUI cho phép người chơi đặt item thẳng vào slot (bàn chế tạo, fusion) không đọc được nội dung slot ngay trong handler: `InventoryClickEvent`/`InventoryDragEvent` chạy **trước** khi server di chuyển item. `BaseGui` có sẵn hook trễ 1 tick:
 
 ```java
-public abstract class ReactiveGui<S> extends BaseGui {
-    protected abstract S computeState();           // đọc state nghiệp vụ hiện tại (input slot, recipe, ...)
-    protected abstract void render(S state);        // vẽ lại toàn bộ inventory dựa trên state đó
-    protected boolean isStateEqual(S oldState, S newState) { return Objects.equals(oldState, newState); }
-}
+protected void scheduleRefresh();        // lên lịch onContentsSettled() ở tick sau, tối đa 1 lần/tick
+protected void onContentsSettled() {}    // override: đọc lại slot, khớp công thức, vẽ lại
 ```
 
-Sau mỗi click/drag vào GUI, `ReactiveGui` tự lên lịch (`Utils.runLater`, trễ 1 tick — đợi Bukkit áp dụng xong thay đổi inventory do click gây ra) 1 lần `syncStateInventory()`: gọi lại `computeState()`, so với state đã vẽ lần trước qua `isStateEqual`, và chỉ gọi `render(newState)` nếu thực sự đổi — tránh vẽ lại (và gây nháy màn hình) khi state không đổi. 2 GUI đang dùng pattern này: [`gui/crafting/CraftingGui.java`](../src/main/java/com/roguesmp/gui/crafting/CraftingGui.java) và [`gui/crafting/FusionGui.java`](../src/main/java/com/roguesmp/gui/crafting/FusionGui.java) — xem [JSON-Crafting](JSON-Crafting.md) để biết `CraftingManager`/`RecipeKey` mà state của chúng đọc từ đó.
+Chỉ gọi `scheduleRefresh()` khi thao tác **có thể** đổi slot người chơi đặt: click (không bị cancel) vào chính các slot đó — mọi kiểu click, kể cả phím số/F/Q; shift-click ở inventory dưới; drag có `getRawSlots()` chạm các slot đó; và sau khi GUI tự tiêu nguyên liệu. Click vào filler/nút hay click thường ở inventory dưới thì bỏ qua. Double-click bị `GuiListener` cancel toàn cục. Ví dụ: [`gui/crafting/CraftingGui.java`](../src/main/java/com/roguesmp/gui/crafting/CraftingGui.java), [`gui/crafting/FusionGui.java`](../src/main/java/com/roguesmp/gui/crafting/FusionGui.java).
+
+GUI máy (`block/gui/MachineGui`) đi hướng khác: cancel mọi click và tự gọi storage, nên không cần trễ tick.
 
 ## Mở 1 GUI — call site thật
 
@@ -120,7 +117,7 @@ event.getPlayer().openInventory(gui.getInventory());
 2. Override `setup()`: đổ slot bằng `addButton`/`addAction`/`addItem`, kết thúc bằng `fillEmpty(...)`.
 3. Chỉ override `onClickBottomInventory`/`onDragInventory`/v.v. nếu cần hành vi khác mặc định (đa số GUI chỉ cần cancel click ở inventory dưới để tránh xáo trộn item).
 4. Khởi tạo và gọi `gui.showInventory(player)`.
-5. Với GUI cần tự vẽ lại theo 1 state nghiệp vụ đổi liên tục (máy chế tạo, slot input/output, ...), extend `ReactiveGui<S>` thay vào đó và implement `computeState()`/`render(S)`.
+5. Với GUI có slot người chơi tự đặt item, gọi `scheduleRefresh()` từ các handler liên quan và override `onContentsSettled()` (xem Ví dụ 2).
 
 ## Lưu ý & lỗi thường gặp
 

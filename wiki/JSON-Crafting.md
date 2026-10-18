@@ -102,7 +102,7 @@ Cấu trúc vật lý: 1 block `altar_main` + 8 block `altar_side` ở bán kín
 
 ## Dành cho dev
 
-Loại công thức đa hình dispatch trên `"type"`: class implement `CraftingRecipe` + `CODEC` (gộp `CraftingRecipe.BASE_CODEC`), đăng ký trong [`CraftingRecipes`](../src/main/java/com/roguesmp/crafting/recipe/CraftingRecipes.java). `CraftingManager` (singleton) dựng `Trie` tra nhanh theo mẫu nguyên liệu từ mọi công thức đã load; reload thư mục này tự dựng lại. GUI: `gui/crafting/CraftingGui`, `FusionGui` (kế thừa `ReactiveGui`, xem [GUI Framework](GUI-Framework.md)).
+Loại công thức đa hình dispatch trên `"type"`: class implement `CraftingRecipe` + `CODEC` (gộp `CraftingRecipe.BASE_CODEC`), đăng ký trong [`CraftingRecipes`](../src/main/java/com/roguesmp/crafting/recipe/CraftingRecipes.java). `CraftingManager` (singleton) dựng `Trie` tra nhanh theo mẫu nguyên liệu từ mọi công thức đã load; reload thư mục này tự dựng lại. GUI: `gui/crafting/CraftingGui`, `FusionGui` (dùng `BaseGui.scheduleRefresh()`, xem [GUI Framework](GUI-Framework.md)).
 
 ---
 ◀ [JSON-Loot](JSON-Loot.md) · Về [Trang chủ](Home.md) · Tiếp theo: [JSON-Blocks](JSON-Blocks.md)

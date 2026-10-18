@@ -33,6 +33,7 @@ public abstract class BaseGui implements InventoryHolder {
     private final Map<Integer, ClickHandler> handlerMap = new HashMap<>();
     private final Inventory inventory;
     private final Component name;
+    private boolean refreshQueued;
 
     public BaseGui(Component name, int row) {
         this.name = name;
@@ -59,6 +60,26 @@ public abstract class BaseGui implements InventoryHolder {
     }
 
     public abstract void setup();
+
+    /**
+     * Runs {@link #onContentsSettled()} next tick, at most once per tick. Click/drag events fire before
+     * the server moves the items, so GUIs with player-placeable slots read them back from there.
+     */
+    protected void scheduleRefresh() {
+        if (refreshQueued) return;
+        refreshQueued = true;
+        Utils.runLater(() -> {
+            refreshQueued = false;
+            onContentsSettled();
+        });
+    }
+
+    protected void onContentsSettled() {}
+
+    /** Double-click gathering is cancelled unless a GUI opts in - it would otherwise pull matching display items onto the cursor. */
+    public boolean allowsDoubleClick() {
+        return false;
+    }
 
     public void fillEmpty() {
         for (int i = 0; i < inventory.getSize(); i++) {

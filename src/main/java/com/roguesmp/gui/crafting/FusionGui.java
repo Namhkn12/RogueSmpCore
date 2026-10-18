@@ -4,8 +4,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.crafting.recipe.CraftingRecipes;
 import com.roguesmp.crafting.recipe.FusionRecipe;
 import com.roguesmp.crafting.CraftingManager;
-import com.roguesmp.gui.ReactiveGui;
-import com.roguesmp.utils.ItemStackUtils;
+import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -19,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -45,7 +45,7 @@ import java.util.*;
  * real gameplay path; the demo recipe it registers is additive and in-memory only (never written
  * to disk), and re-registers every time the GUI is opened.
  */
-public class FusionGui extends ReactiveGui<FusionGui.GuiState> {
+public class FusionGui extends BaseGui {
 
     private static final int[] INGREDIENT_SLOTS = {2, 4, 6, 19, 25, 38, 40, 42};
     private static final int INPUT_SLOT = 22;
@@ -120,6 +120,7 @@ public class FusionGui extends ReactiveGui<FusionGui.GuiState> {
     private final Player player;
 
     private State state = State.IDLE;
+    private @Nullable FusionRecipe matched;
 
     /** The real input item, captured right before animating - lets {@link #onCloseInventory} give back the actual item instead of the "Đang hợp nhất" placeholder if the GUI closes mid-fusion. */
     private @Nullable ItemStack frozenInputForClose;
@@ -127,35 +128,30 @@ public class FusionGui extends ReactiveGui<FusionGui.GuiState> {
     public FusionGui(Player player) {
         super(Utils.text("Fusion", NamedTextColor.DARK_GRAY), 6);
         this.player = player;
-        initState(new GuiState(0, null));
     }
 
     @Override
-    protected GuiState computeState() {
-        int newHash = calculateIngredientHash();
-        GuiState current = getState();
-        if (current.slotHash() == newHash) return current;
-
-        ItemStack[] items = currentItems();
-        FusionRecipe recipe = CraftingManager.getInstance().match(CraftingRecipes.FUSION, items, 0, 0);
-        return new GuiState(newHash, recipe);
-    }
-
-    @Override
-    protected void render(GuiState state) {
+    public void setup() {
         addButton(CLOSE_SLOT, closeButton(), event -> player.closeInventory());
         fillBackground();
         processAndRender();
     }
 
-    /**
-     * State never updates mid-animation - the frames themselves overwrite the fusion slots, so a
-     * spurious recompute/redraw here would fight the animation for control of those slots.
-     */
+    /** Skipped mid-animation - the frames themselves overwrite the fusion slots. */
     @Override
-    public void syncStateInventory() {
+    protected void onContentsSettled() {
         if (state == State.PROCESSING) return;
-        super.syncStateInventory();
+
+        matched = CraftingManager.getInstance().match(CraftingRecipes.FUSION, currentItems(), 0, 0);
+        processAndRender();
+    }
+
+    private boolean isFusionSlot(int slot) {
+        if (slot == INPUT_SLOT) return true;
+        for (int ingredient : INGREDIENT_SLOTS) {
+            if (ingredient == slot) return true;
+        }
+        return false;
     }
 
     /** Fills every slot except the ingredient pedestals, their trails, input/output, and the bottom-row buttons. */
@@ -174,6 +170,17 @@ public class FusionGui extends ReactiveGui<FusionGui.GuiState> {
             return;
         }
         super.onClickTopInventory(event);
+        if (!event.isCancelled() && isFusionSlot(event.getSlot())) scheduleRefresh();
+    }
+
+    @Override
+    public void onClickBottomInventory(InventoryClickEvent event) {
+        if (event.isShiftClick()) scheduleRefresh();
+    }
+
+    @Override
+    public void onDragInventory(InventoryDragEvent event) {
+        if (event.getRawSlots().stream().anyMatch(this::isFusionSlot)) scheduleRefresh();
     }
 
     @Override
@@ -209,9 +216,6 @@ public class FusionGui extends ReactiveGui<FusionGui.GuiState> {
         // so freezeSlots()'s noAction from a previous fusion always gets overwritten back to normal here.
         for (int slot : INGREDIENT_SLOTS) addAction(slot, event -> {});
         addAction(INPUT_SLOT, event -> {});
-
-        // Use cached recipe from state
-        FusionRecipe matched = getState().recipe();
 
         addButton(FUSE_BUTTON_SLOT, fuseButtonItem(matched), matched != null ? this::onFuseButtonClick : ClickHandler.noAction());
         renderIngredientTrails(matched != null);
@@ -381,7 +385,7 @@ public class FusionGui extends ReactiveGui<FusionGui.GuiState> {
         frozenInputForClose = null;
         state = State.AWAITING_PICKUP;
 
-        Utils.runLater(this::syncStateInventory);
+        scheduleRefresh();
     }
 
     /** Covers the background, the trails and the (now-empty) ingredient pedestals themselves in green - a "success" screen around the result. */
@@ -450,29 +454,4 @@ public class FusionGui extends ReactiveGui<FusionGui.GuiState> {
         item.setData(DataComponentTypes.ITEM_NAME, Utils.text("Close", NamedTextColor.RED));
         return item;
     }
-
-    public record GuiState(int slotHash, @Nullable FusionRecipe recipe) {}
-
-    private int calculateIngredientHash() {
-        int hash = 1;
-        Inventory inv = getInventory();
-
-        // Include input slot
-        ItemStack input = inv.getItem(INPUT_SLOT);
-        if (!ItemStackUtils.isValidItem(input)) {
-            hash = 31 * hash;
-        } else hash = 31 * input.hashCode();
-        // Include ingredient slots in
-        for (int slot : INGREDIENT_SLOTS) {
-            ItemStack itemStack = inv.getItem(slot);
-            if (!ItemStackUtils.isValidItem(itemStack)) {
-                hash = 31 * hash;
-            } else {
-                hash = 31 * hash + itemStack.hashCode();
-            }
-        }
-
-        return hash;
-    }
-
 }
