@@ -170,6 +170,20 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.ARMOR_TRIM),
                 tooltip("Thêm hoa văn giáp (armor trim).", "Cần cả material và pattern, hỗ trợ datapack"),
                 (response, audience) -> player.showDialog(buildArmorTrimDialog(player)));
+        multi.addButton(componentLabel(ItemComponentKeys.WRENCH),
+                tooltip("Biến vật phẩm thành cờ lê để xoay/tháo khối custom.", null),
+                (response, audience) -> player.showDialog(buildWrenchDialog(player)));
+        multi.addButton(componentLabel(ItemComponentKeys.ENERGY_SOURCE),
+                tooltip("Nhiên liệu cho máy phát năng lượng.", "Tổng năng lượng = energy_per_tick x burn_ticks"),
+                (response, audience) -> player.showDialog(buildEnergySourceDialog(player)));
+        multi.addButton(componentLabel(ItemComponentKeys.GENERATOR_CATALYST),
+                tooltip("Chất xúc tác cho máy tạo tài nguyên.", "Hiệu ứng (modifiers, behaviors) và thời lượng"),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(new GeneratorCatalystEditorGui(this,
+                        (GeneratorCatalystComponent) components.get(ItemComponentKeys.GENERATOR_CATALYST.id())).buildHubDialog(player))));
+        multi.addButton(componentLabel(ItemComponentKeys.GENERATOR_MODULE),
+                tooltip("Module lắp vào máy tạo tài nguyên.", "Hiệu ứng, giới hạn, module xung khắc và synergy"),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(new GeneratorModuleEditorGui(this,
+                        (GeneratorModuleComponent) components.get(ItemComponentKeys.GENERATOR_MODULE.id())).buildHubDialog(player))));
 
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
@@ -262,6 +276,14 @@ public class ItemCreatorGui {
 
     void removePassiveAbility() {
         components.remove(ItemComponentKeys.PASSIVE_ABILITY.id());
+    }
+
+    <T extends ItemComponent> void applyComponent(ComponentKey<T> key, T component) {
+        components.put(key.id(), component);
+    }
+
+    void removeComponent(ComponentKey<?> key) {
+        components.remove(key.id());
     }
 
     void reopen(Player player) {
@@ -867,6 +889,42 @@ public class ItemCreatorGui {
                 },
                 (response, audience) -> {
                     components.remove(ItemComponentKeys.ARMOR_TRIM.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
+    }
+
+    private Dialog buildWrenchDialog(Player player) {
+        DialogBuilder builder = DialogBuilder.create(Component.text("Cờ lê"))
+                .canCloseWithEscape(false)
+                .addTextBody(Component.text("Vật phẩm có thể dùng để xoay hoặc tháo khối custom."));
+
+        return wrapComponentDialog(player, ItemComponentKeys.WRENCH, builder,
+                (response, audience) -> {
+                    components.put(ItemComponentKeys.WRENCH.id(), new WrenchComponent());
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.WRENCH.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
+    }
+
+    private Dialog buildEnergySourceDialog(Player player) {
+        EnergySourceComponent current = (EnergySourceComponent) components.get(ItemComponentKeys.ENERGY_SOURCE.id());
+        DialogBuilder builder = DialogBuilder.create(Component.text("Nguồn năng lượng"))
+                .canCloseWithEscape(false)
+                .addTextInput("energy_per_tick", Component.text("Năng lượng mỗi tick (>= 1)"), b -> b.initial(String.valueOf(current == null ? 1 : current.energyPerTick())).maxLength(16))
+                .addTextInput("burn_ticks", Component.text("Thời gian cháy, đơn vị tick (>= 1)"), b -> b.initial(String.valueOf(current == null ? 200 : current.burnTicks())).maxLength(16));
+
+        return wrapComponentDialog(player, ItemComponentKeys.ENERGY_SOURCE, builder,
+                (response, audience) -> {
+                    Integer energyPerTick = DialogInputUtils.parseInt(response.getText("energy_per_tick"), 1, Integer.MAX_VALUE);
+                    Integer burnTicks = DialogInputUtils.parseInt(response.getText("burn_ticks"), 1, Integer.MAX_VALUE);
+                    if (energyPerTick != null && burnTicks != null) components.put(ItemComponentKeys.ENERGY_SOURCE.id(), new EnergySourceComponent(energyPerTick, burnTicks));
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.ENERGY_SOURCE.id());
                     Utils.runLater(() -> openMainDialog(player));
                 });
     }

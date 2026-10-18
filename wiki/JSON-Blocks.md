@@ -44,6 +44,7 @@ Mẹo âm thanh: âm thanh cũng phát phía client, nên nếu item/model của
 | `block` (mặc định) | — | Block trơ: chỉ phá/rơi đồ/XP theo JSON. |
 | `tally` | — | Block ví dụ: click phải tăng bộ đếm, hiện trên action bar. |
 | `generator` | [GeneratorData](#generator--máy-phát) | Máy phát tài nguyên. |
+| `energy_generator` | [EnergyGeneratorData](#energy_generator--máy-phát-năng-lượng) | Đốt nhiên liệu để tạo năng lượng, truyền sang máy kề bên. |
 | `altar_main` | — | Bàn thờ chính (giữa) của hợp nhất — xem [JSON-Crafting](JSON-Crafting.md#fusion--bàn-thờ-hợp-nhất-altar). |
 | `altar_side` | — | Bàn thờ phụ (1 trong 8 bàn xung quanh). |
 
@@ -83,7 +84,7 @@ Mỗi phần tử **roll độc lập**:
 <a id="generator--máy-phát"></a>
 ## `generator` — máy phát
 
-Đặt 1 block (`place`) ở ô trước mặt, tự "đào" nó, thu vào kho nội bộ, lặp lại — tiêu tốn năng lượng. `data`:
+Đặt 1 block (`place`) ở ô trước mặt, tự "đào" nó, thu vào kho nội bộ, lặp lại — tiêu tốn năng lượng. Máy mới đặt có 0 năng lượng; năng lượng đến từ [`energy_generator`](#energy_generator--máy-phát-năng-lượng) đặt kề bên. `data`:
 
 | Key | Kiểu | Mặc định | Ý nghĩa |
 | :--- | :--- | :--- | :--- |
@@ -130,6 +131,35 @@ Item đặt máy (`items/steel_generator.json`):
 ```json
 { "id": "steel_generator", "base": "STONE",
   "components": { "name": "<gold>Steel Generator", "block_place": { "block": "steel_generator" } } }
+```
+
+<a id="energy_generator--máy-phát-năng-lượng"></a>
+## `energy_generator` — máy phát năng lượng
+
+Đốt item có component [`energy_source`](#energy_source--item-nhiên-liệu) để tạo năng lượng, rồi mỗi tick tự chia đều năng lượng cho mọi block chứa năng lượng ở 6 mặt kề bên (máy phát năng lượng không nhận năng lượng từ nhau). Ô nhiên liệu nạp qua GUI hoặc kéo vào bằng cấu hình các mặt. `data`:
+
+| Key | Kiểu | Mặc định | Ý nghĩa |
+| :--- | :--- | :--- | :--- |
+| `max_energy` | int | `10000` | Trần năng lượng lưu trữ. Đầy thì tạm dừng cháy (không lãng phí nhiên liệu). |
+| `transfer_rate` | int | `20` | Tổng năng lượng tối đa truyền ra mỗi tick (chia đều cho các máy kề bên). |
+
+```json
+{
+  "type": "energy_generator",
+  "data": { "max_energy": 20000, "transfer_rate": 40 }
+}
+```
+
+<a id="energy_source--item-nhiên-liệu"></a>
+### `energy_source` — item nhiên liệu
+
+| Key | Kiểu | Bắt buộc | Ý nghĩa |
+| :--- | :--- | :--- | :--- |
+| `energy_per_tick` | int | bắt buộc | Năng lượng tạo ra mỗi tick khi đang cháy. |
+| `burn_ticks` | int | bắt buộc | Thời gian cháy của 1 item. Tổng = `energy_per_tick × burn_ticks`. |
+
+```json
+"energy_source": { "energy_per_tick": 10, "burn_ticks": 1600 }
 ```
 
 ## Chỉ số, phép toán và hiệu ứng của máy

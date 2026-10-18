@@ -34,6 +34,7 @@ public class ItemComponentKeys {
     public static final ComponentKey<CommandExecutorComponent> COMMAND_EXECUTOR = register("command_executor", CommandExecutorComponent.CODEC);
     public static final ComponentKey<GeneratorModuleComponent> GENERATOR_MODULE = register("generator_module", GeneratorModuleComponent.CODEC);
     public static final ComponentKey<GeneratorCatalystComponent> GENERATOR_CATALYST = register("generator_catalyst", GeneratorCatalystComponent.CODEC);
+    public static final ComponentKey<EnergySourceComponent> ENERGY_SOURCE = register("energy_source", EnergySourceComponent.CODEC);
     public static final ComponentKey<RecipeViewerComponent> RECIPE_VIEWER = register("recipe_viewer", RecipeViewerComponent.CODEC);
     public static final ComponentKey<DyedColorComponent> DYED_COLOR = register("dyed_color", DyedColorComponent.CODEC);
     public static final ComponentKey<ArmorTrimComponent> ARMOR_TRIM = register("trim", ArmorTrimComponent.CODEC);

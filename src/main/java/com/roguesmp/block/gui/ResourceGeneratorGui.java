@@ -19,6 +19,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -200,7 +201,7 @@ public class ResourceGeneratorGui extends MachineGui {
         ActiveCatalyst active = generator.catalyst().active();
         GeneratorCatalystComponent component = generator.catalyst().activeComponent();
         ItemStack display = active != null && component != null ? activeCatalystDisplayItem(active, component) : null;
-        addButton(ACTIVE_CATALYST_SLOT, display != null ? display : activeCatalystPlaceholder(), ClickHandler.noAction());
+        addButton(ACTIVE_CATALYST_SLOT, display != null ? display : activeCatalystPlaceholder(), this::onActiveCatalystClick);
     }
 
     private ItemStack activeCatalystDisplayItem(ActiveCatalyst active, GeneratorCatalystComponent component) {
@@ -214,6 +215,7 @@ public class ResourceGeneratorGui extends MachineGui {
         if (generator.getEnergy() <= 0 && component.unit() == DurationUnit.TICKS) {
             lore.add(Utils.text("Tạm dừng: hết năng lượng", NamedTextColor.RED));
         }
+        lore.add(Utils.text("Shift + chuột phải để hủy hiệu ứng", NamedTextColor.YELLOW));
         ItemStackUtils.setLore(display, lore);
         return display;
     }
@@ -223,6 +225,15 @@ public class ResourceGeneratorGui extends MachineGui {
         ItemStackUtils.setItemName(item, Utils.text("Hiệu ứng xúc tác", NamedTextColor.GRAY));
         ItemStackUtils.setLore(item, List.of(Utils.text("Chưa có hiệu ứng nào", NamedTextColor.DARK_GRAY)));
         return item;
+    }
+
+    private void onActiveCatalystClick(InventoryClickEvent event) {
+        event.setCancelled(true);
+        if (event.getClick() != ClickType.SHIFT_RIGHT || !generator.catalyst().clearActive()) return;
+
+        Player player = (Player) event.getWhoClicked();
+        player.playSound(player.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1f, 1f);
+        refresh();
     }
 
     private void onLootClick(InventoryClickEvent event) {

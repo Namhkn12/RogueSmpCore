@@ -68,6 +68,11 @@ public abstract class AltarBlock extends SmpBlock implements Tickable {
     }
 
     @Override
+    public boolean interactsWhileSneaking() {
+        return true;
+    }
+
+    @Override
     public void onBlockInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 

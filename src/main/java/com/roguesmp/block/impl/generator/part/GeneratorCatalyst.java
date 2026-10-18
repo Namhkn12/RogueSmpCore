@@ -73,6 +73,15 @@ public final class GeneratorCatalyst {
         onStateChanged.run();
     }
 
+    public boolean clearActive() {
+        if (active == null) return false;
+
+        active = null;
+        onEffectsChanged.run();
+        onStateChanged.run();
+        return true;
+    }
+
     public void tick() {
         if (energy.getEnergy() > 0 && activeComponent != null && activeComponent.unit() == DurationUnit.TICKS) advance();
     }

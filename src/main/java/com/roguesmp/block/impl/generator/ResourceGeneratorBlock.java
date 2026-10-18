@@ -283,6 +283,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     public int addEnergy(int amount) {
         int accepted = Math.min(amount, stats.maxEnergy() - energy);
         energy += accepted;
+        if (accepted > 0) markDirty();
         return accepted;
     }
 
@@ -290,6 +291,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     public int removeEnergy(int amount) {
         int removed = Math.min(amount, energy);
         energy -= removed;
+        if (removed > 0) markDirty();
         return removed;
     }
 
@@ -341,7 +343,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     protected void collectSections(List<StateSection<?>> sections) {
         super.collectSections(sections);
         sections.add(StateSection.of(DIRECTION_CODEC, () -> faceDirection, direction -> this.faceDirection = direction));
-        sections.add(StateSection.of(ENERGY_CODEC, () -> Optional.of(energy), value -> energy = value.orElse(data.maxEnergy())));
+        sections.add(StateSection.of(ENERGY_CODEC, () -> Optional.of(energy), value -> energy = value.orElse(0)));
         sections.add(modules.section());
         sections.add(catalyst.activeSection());
     }

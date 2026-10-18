@@ -51,6 +51,7 @@ Tên component **không có trong bảng** làm fail cả file item. Item có co
 | [`command_executor`](#command_executor) | string | Chạy lệnh khi click |
 | `generator_module` | object | Module cho máy phát — xem [JSON-Blocks](JSON-Blocks.md#generator_module--item-module) |
 | `generator_catalyst` | object | Chất xúc tác cho máy phát — xem [JSON-Blocks](JSON-Blocks.md#generator_catalyst--item-chất-xúc-tác) |
+| `energy_source` | object | Nhiên liệu cho máy phát năng lượng — xem [JSON-Blocks](JSON-Blocks.md#energy_source--item-nhiên-liệu) |
 
 ### `name`
 Chuỗi MiniMessage trần. Đặt tên custom (không in nghiêng mặc định).
