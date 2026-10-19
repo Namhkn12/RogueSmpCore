@@ -75,7 +75,7 @@ public class ArmorBreakerEffect extends SmpEffect {
     }
 
     @Override
-    public boolean isPersistent() {
+    protected boolean isPersistentByDefault() {
         return false;
     }
 

@@ -6,6 +6,7 @@ import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -13,35 +14,32 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
+
 public class SpeedEffect extends SmpEffect {
     public static final String EFFECT_ID = "speed";
 
     public static final Codec<SpeedEffect> CODEC = Codec.composite(
             SmpEffect.BASE_CODEC.forGetter(SmpEffect::getBaseProperties),
             Codec.DOUBLE.fieldOf("value").forGetter(SpeedEffect::getMagnitude),
-            Codec.STRING.fieldOf("modifierId").forGetter(SpeedEffect::getModifierId),
             SpeedEffect::new
     );
 
     private final double value;
-    private final String modifierId;
 
-    public SpeedEffect(int duration, double value, DeathBehavior behavior, String modifierId) {
+    public SpeedEffect(int duration, double value, DeathBehavior behavior) {
         super(EFFECT_ID, duration, behavior);
         this.value = value;
-        this.modifierId = modifierId;
     }
 
-    public SpeedEffect(int duration, double value, String modifierId) {
+    public SpeedEffect(int duration, double value) {
         super(EFFECT_ID, duration);
         this.value = value;
-        this.modifierId = modifierId;
     }
 
-    public SpeedEffect(BaseProperties baseProperties, double value, String modifierId) {
+    public SpeedEffect(BaseProperties baseProperties, double value) {
         super(EFFECT_ID, baseProperties);
         this.value = value;
-        this.modifierId = modifierId;
     }
 
     @Override
@@ -50,12 +48,8 @@ public class SpeedEffect extends SmpEffect {
     }
 
     @Override
-    public boolean isPersistent() {
+    protected boolean isPersistentByDefault() {
         return true;
-    }
-
-    public String getModifierId() {
-        return modifierId;
     }
 
     @Override
@@ -66,14 +60,18 @@ public class SpeedEffect extends SmpEffect {
         return Component.text(Utils.formatDecimal(value * 100) + "% tốc chạy", NamedTextColor.GREEN);
     }
 
+    private NamespacedKey modifierKey() {
+        return Keys.of("effect/" + getSource().toLowerCase(Locale.ROOT));
+    }
+
     @Override
     public void onGainEffect(Entity entity) {
         if (entity instanceof LivingEntity le) {
             AttributeInstance speedInstance = le.getAttribute(Attribute.MOVEMENT_SPEED);
             if (speedInstance != null) {
-                speedInstance.removeModifier(Keys.of(modifierId));
-                AttributeModifier modifier = new AttributeModifier(Keys.of(modifierId), value, AttributeModifier.Operation.ADD_SCALAR);
-                speedInstance.addTransientModifier(modifier);
+                NamespacedKey key = modifierKey();
+                speedInstance.removeModifier(key);
+                speedInstance.addTransientModifier(new AttributeModifier(key, value, AttributeModifier.Operation.ADD_SCALAR));
             }
         }
     }
@@ -83,7 +81,7 @@ public class SpeedEffect extends SmpEffect {
         if (entity instanceof LivingEntity le) {
             AttributeInstance speedInstance = le.getAttribute(Attribute.MOVEMENT_SPEED);
             if (speedInstance != null) {
-                speedInstance.removeModifier(Keys.of(modifierId));
+                speedInstance.removeModifier(modifierKey());
             }
         }
     }

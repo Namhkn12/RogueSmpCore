@@ -1,5 +1,6 @@
 package com.roguesmp.effect;
 
+import com.roguesmp.attribute.Attributes;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.MapCodec;
 import com.roguesmp.event.DamageEvent;
@@ -15,7 +16,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Every subclass must declare its own {@code Codec<T>} (built from {@link #BASE_CODEC} plus its
@@ -34,12 +37,19 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
 
     /**
      * A record of common SmpEffect attribute to pass into subclasses codec.
+     *
+     * @param persistent overrides {@link #isPersistentByDefault()} when present
      */
     public record BaseProperties(
             int duration,
             DeathBehavior deathBehavior,
-            DisplayMode displayMode
-    ) {}
+            DisplayMode displayMode,
+            @Nullable Boolean persistent
+    ) {
+        public BaseProperties(int duration, DeathBehavior deathBehavior, DisplayMode displayMode) {
+            this(duration, deathBehavior, displayMode, null);
+        }
+    }
 
     public static final MapCodec<BaseProperties> BASE_CODEC = Codec.composite(
             Codec.INT.fieldOf("duration").forGetter(BaseProperties::duration),
@@ -49,19 +59,23 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
             Codec.enumOf(DisplayMode.class)
                     .optionalFieldOf("display_mode", DisplayMode.WITH_TIME)
                     .forGetter(BaseProperties::displayMode),
-            BaseProperties::new
+            Codec.BOOLEAN.optionalFieldOf("persistent").forGetter(base -> Optional.ofNullable(base.persistent())),
+            (duration, deathBehavior, displayMode, persistent) -> new BaseProperties(duration, deathBehavior, displayMode, persistent.orElse(null))
     );
 
     protected int duration;
     private final String effectID;
     private final DeathBehavior deathBehavior;
     private final DisplayMode displayMode;
+    private final @Nullable Boolean persistent;
+    private String source = "";
 
     public SmpEffect(String effectID, BaseProperties base) {
         this.duration = base.duration();
         this.effectID = effectID;
         this.deathBehavior = base.deathBehavior();
         this.displayMode = base.displayMode();
+        this.persistent = base.persistent();
     }
 
     public SmpEffect(String effectID, int duration, DeathBehavior deathBehavior) {
@@ -73,16 +87,34 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
     }
 
     /**
-     * Used to compare how this effect is stronger (more potent) than another effect of the same type
-     * @return The magnitude of this effect instance
+     * Used to compare how this effect is stronger (more potent) than another effect of the same
+     * source - only meaningful under {@link StackPolicy#HIGHEST_WINS}.
      */
-    public abstract double getMagnitude();
+    public double getMagnitude() {
+        return 0;
+    }
+
+    public StackPolicy getStackPolicy() {
+        return StackPolicy.HIGHEST_WINS;
+    }
 
     /**
-     * Whether the effect stay (written to files) after player logged out
-     * @return Whether the effect stay after player logged out
+     * Player attributes granted while this effect is active - applied and removed by
+     * {@link EffectStack}, keyed by this effect's source.
      */
-    public abstract boolean isPersistent();
+    public Map<Attributes, Double> getAttributeBonus() {
+        return Map.of();
+    }
+
+    /**
+     * Whether the effect stays (written to files) after the player logged out, unless the
+     * definition's {@code persistent} field overrides it.
+     */
+    protected abstract boolean isPersistentByDefault();
+
+    public final boolean isPersistent() {
+        return persistent != null ? persistent : isPersistentByDefault();
+    }
 
     /**
      * This effect's own display content, regardless of {@link #getDisplayMode()} - return null for
@@ -121,7 +153,7 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
     }
 
     public BaseProperties getBaseProperties() {
-        return new BaseProperties(duration, deathBehavior, displayMode);
+        return new BaseProperties(duration, deathBehavior, displayMode, persistent);
     }
 
     public int getDuration() {
@@ -130,6 +162,18 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
 
     public void setDuration(int duration) {
         this.duration = duration;
+    }
+
+    /**
+     * The source id this effect is stacked under - set by {@link EffectStack} before any gain/lose
+     * hook runs, so it can key per-source state such as vanilla attribute modifiers.
+     */
+    public String getSource() {
+        return source;
+    }
+
+    public void bindSource(String source) {
+        this.source = source;
     }
 
     public String getEffectID() {
@@ -156,11 +200,15 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
     @Override
     public SmpEffect clone() {
         try {
-            // TODO: copy mutable state here, so the clone can't change the internals of the original
             return (SmpEffect) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
+    }
+
+    public enum StackPolicy {
+        HIGHEST_WINS,
+        REPLACE
     }
 
     public enum DeathBehavior {

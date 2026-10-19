@@ -77,7 +77,7 @@ public class ShieldBash extends Ability {
                 MovementUtils.knockAway(player, le, (float) knockbackStrength);
             }
             if (EntityUtils.isBoss(le) || EntityUtils.isElite(le)) {
-                EffectManager.getInstance().addEffect(le, "sb_slowness", new SpeedEffect(stunDuration, -0.99, "sb_slowness"));
+                EffectManager.getInstance().addEffect(le, "sb_slowness", new SpeedEffect(stunDuration, -0.99));
             } else {
                 EffectManager.getInstance().addEffect(le, StunEffect.ID, new StunEffect(stunDuration));
             }

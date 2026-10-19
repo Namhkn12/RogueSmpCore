@@ -1,11 +1,17 @@
 package com.roguesmp.effect;
 
+import com.roguesmp.attribute.Attributes;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.player.PlayerManager;
+import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.utils.Utils;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 
@@ -22,7 +28,12 @@ import java.util.function.Predicate;
  */
 public final class EffectStack {
 
+    private final String source;
     private final List<SmpEffect> effects = new CopyOnWriteArrayList<>();
+
+    public EffectStack(String source) {
+        this.source = source;
+    }
 
     public boolean isEmpty() {
         return effects.isEmpty();
@@ -51,6 +62,7 @@ public final class EffectStack {
      * loading a player's effects back from disk.
      */
     public void addAll(List<SmpEffect> loaded) {
+        loaded.forEach(effect -> effect.bindSource(source));
         effects.addAll(loaded);
     }
 
@@ -59,9 +71,18 @@ public final class EffectStack {
      * shorter duration - extends that existing effect's duration instead of stacking a duplicate.
      */
     public void add(Entity entity, SmpEffect smpEffect) {
+        smpEffect.bindSource(source);
         if (effects.isEmpty()) {
             effects.add(smpEffect);
-            smpEffect.onGainEffect(entity);
+            activate(entity, smpEffect);
+            return;
+        }
+
+        if (smpEffect.getStackPolicy() == SmpEffect.StackPolicy.REPLACE) {
+            deactivateActive(entity);
+            effects.clear();
+            effects.add(smpEffect);
+            activate(entity, smpEffect);
             return;
         }
 
@@ -72,8 +93,8 @@ public final class EffectStack {
                     && !existing.isInfinite()
                     && (smpEffect.isInfinite() || existing.getDuration() < smpEffect.getDuration())) {
                 if (existing == activeBefore) {
-                    existing.onLoseEffect(entity);
-                    existing.onGainEffect(entity);
+                    deactivate(entity, existing);
+                    activate(entity, existing);
                 }
                 existing.setDuration(smpEffect.getDuration());
                 return;
@@ -82,8 +103,8 @@ public final class EffectStack {
 
         effects.add(smpEffect);
         if (highest() == smpEffect) {
-            if (activeBefore != null) activeBefore.onLoseEffect(entity);
-            smpEffect.onGainEffect(entity);
+            if (activeBefore != null) deactivate(entity, activeBefore);
+            activate(entity, smpEffect);
         }
     }
 
@@ -106,9 +127,9 @@ public final class EffectStack {
 
         if (!effects.contains(activeBefore)) {
             // The entity could be dead after tickDuration/onTick ran
-            if (entity.isValid() && !entity.isDead()) activeBefore.onLoseEffect(entity);
+            if (entity.isValid() && !entity.isDead()) deactivate(entity, activeBefore);
             SmpEffect activeAfter = highest();
-            if (activeAfter != null) activeAfter.onGainEffect(entity);
+            if (activeAfter != null) activate(entity, activeAfter);
         }
     }
 
@@ -133,9 +154,9 @@ public final class EffectStack {
 
         if (activeBefore != null && !effects.contains(activeBefore)) {
             Entity entity = event.getEntity();
-            activeBefore.onLoseEffect(entity);
+            deactivate(entity, activeBefore);
             SmpEffect activeAfter = highest();
-            if (activeAfter != null) activeAfter.onGainEffect(entity);
+            if (activeAfter != null) activate(entity, activeAfter);
         }
     }
 
@@ -162,8 +183,40 @@ public final class EffectStack {
     public void refresh(Entity entity) {
         SmpEffect active = highest();
         if (active == null) return;
-        active.onLoseEffect(entity);
-        active.onGainEffect(entity);
+        deactivate(entity, active);
+        activate(entity, active);
+    }
+
+    public void deactivateActive(Entity entity) {
+        SmpEffect active = highest();
+        if (active != null) deactivate(entity, active);
+    }
+
+    private void activate(Entity entity, SmpEffect effect) {
+        effect.onGainEffect(entity);
+        Map<Attributes, Double> bonus = effect.getAttributeBonus();
+        if (!bonus.isEmpty() && entity instanceof Player player) applyBonus(player, bonus);
+    }
+
+    private void deactivate(Entity entity, SmpEffect effect) {
+        if (!effect.getAttributeBonus().isEmpty() && entity instanceof Player player) {
+            SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+            if (smpPlayer != null) smpPlayer.removeAttributeBonus(player, source);
+        }
+        effect.onLoseEffect(entity);
+    }
+
+    private void applyBonus(Player player, Map<Attributes, Double> bonus) {
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+        if (smpPlayer != null) {
+            smpPlayer.setAttributeBonus(player, source, bonus);
+            return;
+        }
+        Utils.runLater(() -> {
+            SmpPlayer later = PlayerManager.getInstance().getSmpPlayer(player);
+            SmpEffect active = highest();
+            if (later != null && player.isOnline() && active != null) later.setAttributeBonus(player, source, active.getAttributeBonus());
+        });
     }
 
     public void removeIf(Predicate<SmpEffect> predicate) {

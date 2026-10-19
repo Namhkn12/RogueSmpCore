@@ -35,7 +35,7 @@ public class StealthEffect extends SmpEffect {
     }
 
     @Override
-    public boolean isPersistent() {
+    protected boolean isPersistentByDefault() {
         return true;
     }
 

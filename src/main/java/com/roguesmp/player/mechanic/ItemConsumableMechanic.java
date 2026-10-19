@@ -25,7 +25,7 @@ public class ItemConsumableMechanic implements PlayerMechanic {
 
         ConsumableComponent consumableComponent = smpItem.getComponent(ItemComponentKeys.CONSUMABLE);
         if (consumableComponent != null) {
-            consumableComponent.applyEffects(player.getBukkitPlayer());
+            consumableComponent.applyEffects(player.getBukkitPlayer(), smpItem.getId());
         }
 
         BrewedPotionComponent brewedPotion = smpItem.getComponent(ItemComponentKeys.BREWED_POTION);

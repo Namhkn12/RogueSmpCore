@@ -5,13 +5,10 @@ import com.roguesmp.brewing.BrewResult;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.event.DamageEvent;
-import com.roguesmp.player.PlayerManager;
-import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,7 +17,7 @@ import java.util.Map;
 
 /**
  * A drunk brewed potion: grants its attribute bonuses and runs its bundled effects as one unit.
- * Always applied under the source {@link #ID}, so drinking another potion replaces this one.
+ * Uses {@link StackPolicy#REPLACE}, so drinking another potion replaces this one.
  */
 public class BrewedPotionEffect extends SmpEffect {
 
@@ -56,12 +53,17 @@ public class BrewedPotionEffect extends SmpEffect {
     }
 
     @Override
-    public double getMagnitude() {
-        return 1;
+    public StackPolicy getStackPolicy() {
+        return StackPolicy.REPLACE;
     }
 
     @Override
-    public boolean isPersistent() {
+    public Map<Attributes, Double> getAttributeBonus() {
+        return attributes;
+    }
+
+    @Override
+    protected boolean isPersistentByDefault() {
         return true;
     }
 
@@ -72,29 +74,19 @@ public class BrewedPotionEffect extends SmpEffect {
 
     @Override
     public void onGainEffect(Entity entity) {
-        if (entity instanceof Player player) applyAttributes(player);
         effects.forEach(effect -> effect.onGainEffect(entity));
     }
 
     @Override
     public void onLoseEffect(Entity entity) {
-        if (entity instanceof Player player) {
-            SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
-            if (smpPlayer != null) smpPlayer.removeAttributeBonus(player, ID);
-        }
         effects.forEach(effect -> effect.onLoseEffect(entity));
     }
 
-    private void applyAttributes(Player player) {
-        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
-        if (smpPlayer != null) {
-            smpPlayer.setAttributeBonus(player, ID, attributes);
-            return;
-        }
-        Utils.runLater(() -> {
-            SmpPlayer later = PlayerManager.getInstance().getSmpPlayer(player);
-            if (later != null && player.isOnline()) later.setAttributeBonus(player, ID, attributes);
-        });
+
+    @Override
+    public void bindSource(String source) {
+        super.bindSource(source);
+        effects.forEach(effect -> effect.bindSource(source + "/" + effect.getEffectID()));
     }
 
     @Override

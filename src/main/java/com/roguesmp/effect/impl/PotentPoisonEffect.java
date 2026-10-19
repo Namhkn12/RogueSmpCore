@@ -66,7 +66,7 @@ public class PotentPoisonEffect extends SmpEffect {
     }
 
     @Override
-    public boolean isPersistent() {
+    protected boolean isPersistentByDefault() {
         return false;
     }
 

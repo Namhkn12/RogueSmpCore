@@ -69,6 +69,6 @@ public class IceAspect implements SmpEnchant {
     }
 
     private static void applySlowness(Entity victim, int level) {
-        EffectManager.getInstance().addEffect(victim, "ice_aspect_slowness", new SpeedEffect(40, -0.1 * level, "ice_aspect_slowness"));
+        EffectManager.getInstance().addEffect(victim, "ice_aspect_slowness", new SpeedEffect(40, -0.1 * level));
     }
 }

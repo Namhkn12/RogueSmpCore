@@ -37,6 +37,7 @@ public class ConsumableComponent implements ItemComponent {
             Codec.enumOf(ItemUseAnimation.class).fieldOf("animation").forGetter(ConsumableComponent::getAnimation),
             Codec.KEY.fieldOf("sound").forGetter(ConsumableComponent::getSound),
             Codec.BOOLEAN.fieldOf("hasParticles").forGetter(ConsumableComponent::hasParticles),
+            Codec.STRING.optionalFieldOf("stack_group", "").forGetter(ConsumableComponent::getStackGroup),
             ConsumableComponent::new
     );
 
@@ -50,8 +51,18 @@ public class ConsumableComponent implements ItemComponent {
     private final ItemUseAnimation animation;
     private final Key sound;
     private final boolean hasParticles;
+    private final String stackGroup;
 
     public ConsumableComponent(List<SmpEffect> effects, int hunger, float saturation, boolean canAlwaysEat, float consumeSeconds, ItemUseAnimation animation, Key sound, boolean hasParticles) {
+        this(effects, hunger, saturation, canAlwaysEat, consumeSeconds, animation, sound, hasParticles, "");
+    }
+
+    /**
+     * @param stackGroup effects from consumables sharing a group don't stack with each other;
+     *                   empty means the consuming item's own id
+     */
+    public ConsumableComponent(List<SmpEffect> effects, int hunger, float saturation, boolean canAlwaysEat, float consumeSeconds, ItemUseAnimation animation, Key sound, boolean hasParticles, String stackGroup) {
+        this.stackGroup = stackGroup;
         this.hunger = hunger;
         this.saturation = saturation;
         this.canAlwaysEat = canAlwaysEat;
@@ -110,10 +121,14 @@ public class ConsumableComponent implements ItemComponent {
         return Collections.unmodifiableList(effects);
     }
 
-    public void applyEffects(Player player) {
-        List<SmpEffect> effectList = getEffects();
-        for (SmpEffect smpEffect : effectList) {
-            String source = "consumable_" + smpEffect.getEffectID();
+    public String getStackGroup() {
+        return stackGroup;
+    }
+
+    public void applyEffects(Player player, String itemId) {
+        String group = stackGroup.isEmpty() ? itemId : stackGroup;
+        for (SmpEffect smpEffect : getEffects()) {
+            String source = group + "/" + smpEffect.getEffectID();
             EffectManager.getInstance().addEffect(player, source, smpEffect.clone());
         }
 

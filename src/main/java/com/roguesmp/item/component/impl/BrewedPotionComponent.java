@@ -78,9 +78,7 @@ public class BrewedPotionComponent implements ItemComponent {
         BrewResult evaluated = getResult();
         if (evaluated == null) return;
 
-        EffectManager effectManager = EffectManager.getInstance();
-        effectManager.clearEffects(player, BrewedPotionEffect.ID);
-        effectManager.addEffect(player, BrewedPotionEffect.ID, BrewedPotionEffect.of(evaluated));
+        EffectManager.getInstance().addEffect(player, BrewedPotionEffect.ID, BrewedPotionEffect.of(evaluated));
     }
 
     @Override
