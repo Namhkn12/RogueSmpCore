@@ -2,6 +2,10 @@ package com.roguesmp.item.component.impl;
 
 import com.roguesmp.attribute.Attributes;
 import com.roguesmp.codec.Codec;
+import com.roguesmp.constant.EquipSlot;
+import com.roguesmp.item.SmpItem;
+import com.roguesmp.item.component.ItemComponentKeys;
+import com.roguesmp.player.mechanic.DurabilityLossMechanic;
 import com.roguesmp.item.beam.MageBeam;
 import com.roguesmp.item.component.InteractableComponent;
 import com.roguesmp.item.component.ItemComponent;
@@ -42,8 +46,11 @@ public record MageStaffComponent(Color color) implements InteractableComponent {
     }
 
     private void fire(SmpPlayer smpPlayer, Player player, boolean resetCooldown) {
+        SmpItem staff = smpPlayer.getItemAtEquipSlot(EquipSlot.MAINHAND);
+        if (staff == null || staff.hasComponent(ItemComponentKeys.BROKEN)) return;
         if (player.getAttackCooldown() < 1f) return;
         if (resetCooldown) player.resetCooldown();
+        DurabilityLossMechanic.damageItem(smpPlayer, staff, 1, EquipSlot.MAINHAND);
 
         MageBeam beam = new MageBeam(color);
         smpPlayer.getActiveEnchants().forEach((enchant, level) -> enchant.getEnchant().onMageBeamFire(beam, level, smpPlayer));
