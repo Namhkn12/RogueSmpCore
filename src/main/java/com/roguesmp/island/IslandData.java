@@ -19,6 +19,7 @@ public class IslandData {
             Codec.listOf(Codec.UUID).<Set<UUID>>xmap(HashSet::new, ArrayList::new).optionalFieldOf("members", new HashSet<UUID>()).forGetter(data -> data.members),
             Codec.WORLD_POS.lenientOptionalFieldOf("spawnLocation", null).forGetter(data -> data.spawnLocation),
             Codec.BOOLEAN.optionalFieldOf("archived", false).forGetter(IslandData::isArchived),
+            Codec.INT.optionalFieldOf("level", 0).forGetter(IslandData::getLevel),
             IslandSettings.VALUES_CODEC.optionalFieldOf("settings", new LinkedHashMap<String, Object>()).forGetter(data -> data.settings),
             IslandData::new
     );
@@ -26,16 +27,18 @@ public class IslandData {
     private boolean dirty = true;
 
     private boolean archived;
+    private int level;
     private final UUID islandId;
     private final Set<UUID> members;
     private WorldPos spawnLocation;
     private final Map<String, Object> settings;
 
-    private IslandData(UUID islandId, Set<UUID> members, @Nullable WorldPos spawnLocation, boolean archived, Map<String, Object> settings) {
+    private IslandData(UUID islandId, Set<UUID> members, @Nullable WorldPos spawnLocation, boolean archived, int level, Map<String, Object> settings) {
         this.islandId = islandId;
         this.members = new HashSet<>(members);
         this.spawnLocation = spawnLocation != null ? spawnLocation : defaultSpawn(islandId);
         this.archived = archived;
+        this.level = level;
         this.settings = new LinkedHashMap<>(settings);
         this.dirty = false;
     }
@@ -54,6 +57,7 @@ public class IslandData {
         this.members = new HashSet<>(source.members);
         this.spawnLocation = source.spawnLocation;
         this.archived = source.archived;
+        this.level = source.level;
         this.dirty = source.dirty;
         this.settings = new LinkedHashMap<>(source.settings);
     }
@@ -110,6 +114,15 @@ public class IslandData {
 
     public void setArchived(boolean archived) {
         this.archived = archived;
+        this.dirty = true;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
         this.dirty = true;
     }
 

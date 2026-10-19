@@ -46,7 +46,6 @@ public class PlayerData{
 
     public static final Codec<PlayerData> CODEC = Codec.composite(
             Codec.UUID.fieldOf("uuid").forGetter(PlayerData::getUuid),
-            Codec.INT.optionalFieldOf("level", 0).forGetter(PlayerData::getLevel),
             Codec.UUID.optionalFieldOf("islandId", (UUID) null).forGetter(PlayerData::getIslandId),
             Codec.LONG.optionalFieldOf("money", 0L).forGetter(PlayerData::getMoney),
             Codec.lenientUnboundedMap(Codec.INT).optionalFieldOf("unlockedAbilities", new HashMap<>()).forGetter(PlayerData::getUnlockedAbilities),
@@ -60,7 +59,6 @@ public class PlayerData{
     private boolean dirty = true;
 
     private final UUID uuid;
-    private int level;
     private UUID islandId;
     private final Map<String, Integer> unlockedAbilities;
     private long money;
@@ -81,12 +79,11 @@ public class PlayerData{
     /**
      * Reconstruction constructor used when decoding from storage (see {@link #CODEC}).
      */
-    private PlayerData(UUID uuid, int level, @Nullable UUID islandId, long money,
+    private PlayerData(UUID uuid, @Nullable UUID islandId, long money,
                         Map<String, Integer> unlockedAbilities, List<String> equippedAbilities,
                         @Nullable String classId, @Nullable WorldPos lastLocation) {
         this.uuid = uuid;
         this.lastLocation = lastLocation;
-        this.level = level;
         this.islandId = islandId;
         this.money = money;
         this.classId = classId;
@@ -141,8 +138,6 @@ public class PlayerData{
         this.islandId = islandId;
         this.dirty = true;
     }
-    public int getLevel() { return level; }
-    public void setLevel(int level) { this.level = level; this.dirty = true; }
     public boolean isDirty() { return dirty; }
     public void setDirty(boolean dirty) { this.dirty = dirty; }
 

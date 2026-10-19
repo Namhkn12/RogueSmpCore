@@ -2,6 +2,8 @@ package com.roguesmp.integration;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.effect.SmpEffect;
+import com.roguesmp.island.IslandData;
+import com.roguesmp.island.IslandManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
@@ -86,7 +88,8 @@ public class PlaceholderAPIIntegration extends PlaceholderExpansion {
             if (params.startsWith("player_level")) {
                 SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player.getUniqueId());
                 if (smpPlayer == null) return null;
-                int level = smpPlayer.getPlayerData().getLevel();
+                IslandData island = IslandManager.getInstance().getIslandDataManager().getCachedData(smpPlayer.getPlayerData().getIslandId());
+                int level = island != null ? island.getLevel() : 0;
                 return "["+level+"] ";
             }
 
