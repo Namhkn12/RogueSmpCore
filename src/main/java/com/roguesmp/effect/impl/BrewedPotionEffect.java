@@ -2,6 +2,7 @@ package com.roguesmp.effect.impl;
 
 import com.roguesmp.attribute.Attributes;
 import com.roguesmp.brewing.BrewResult;
+import com.roguesmp.brewing.BrewStat;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.event.DamageEvent;
@@ -12,6 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +72,22 @@ public class BrewedPotionEffect extends SmpEffect {
     @Override
     public @Nullable Component getDisplayComponent() {
         return Utils.text("Thuốc pha chế", NamedTextColor.LIGHT_PURPLE);
+    }
+
+    @Override
+    public List<Component> getDisplayLines() {
+        Component header = getDisplayWithTime();
+        if (header == null) return List.of();
+
+        List<Component> lines = new ArrayList<>();
+        lines.add(header);
+        attributes.forEach((attribute, value) -> new BrewStat.AttributeStat(attribute).display(value, getDuration())
+                .forEach(line -> lines.add(BrewStat.indent(line))));
+        for (SmpEffect effect : effects) {
+            Component line = effect.getDisplayComponent();
+            if (line != null) lines.add(BrewStat.indent(line));
+        }
+        return lines;
     }
 
     @Override

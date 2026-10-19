@@ -6,6 +6,9 @@ import com.roguesmp.codec.DataResult;
 import com.roguesmp.effect.SmpEffect;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Locale;
@@ -25,9 +28,15 @@ public sealed interface BrewStat {
             BrewStat::id
     );
 
+    PersistentDataContainerView NO_ITEM_DATA = ItemStack.of(Material.PAPER).getPersistentDataContainer();
+
+    static Component indent(Component line) {
+        return Component.space().append(line).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
+    }
+
     String id();
 
-    List<Component> display(double value, int durationTicks, PersistentDataContainerView pdc);
+    List<Component> display(double value, int durationTicks);
 
     record AttributeStat(Attributes attribute) implements BrewStat {
 
@@ -37,8 +46,8 @@ public sealed interface BrewStat {
         }
 
         @Override
-        public List<Component> display(double value, int durationTicks, PersistentDataContainerView pdc) {
-            List<Component> lines = attribute.getAttribute().getDisplayText(value, null, pdc);
+        public List<Component> display(double value, int durationTicks) {
+            List<Component> lines = attribute.getAttribute().getDisplayText(value, null, NO_ITEM_DATA);
             return lines == null ? List.of() : lines;
         }
     }
@@ -50,7 +59,7 @@ public sealed interface BrewStat {
         }
 
         @Override
-        public List<Component> display(double value, int durationTicks, PersistentDataContainerView pdc) {
+        public List<Component> display(double value, int durationTicks) {
             Component line = create(value, durationTicks).getDisplayComponent();
             return line == null ? List.of() : List.of(line);
         }

@@ -18,17 +18,16 @@ import java.util.List;
 public class BrewingGui extends MachineGui {
 
     private static final int[] INGREDIENT_SLOTS = {10, 11, 12, 19, 20, 21};
-    private static final int BOTTLE_SLOT = 14;
-    private static final int PROGRESS_SLOT = 15;
-    private static final int OUTPUT_SLOT = 16;
-    private static final int START_SLOT = 24;
+    private static final int[] BOTTLE_SLOTS = {37, 38, 39};
+    private static final int START_SLOT = 14;
+    private static final int PROGRESS_SLOT = 16;
     private static final int ENERGY_SLOT = 25;
-    private static final int SIDES_SLOT = 35;
+    private static final int SIDES_SLOT = 44;
 
     private final BrewingBlock brewer;
 
     public BrewingGui(BrewingBlock brewer) {
-        super(Component.text("Bàn pha chế"), 4, brewer.itemStorage(), brewer::openGui);
+        super(Component.text("Bàn pha chế"), 5, brewer.itemStorage(), brewer::openGui);
         this.brewer = brewer;
     }
 
@@ -37,9 +36,11 @@ public class BrewingGui extends MachineGui {
         for (int i = 0; i < INGREDIENT_SLOTS.length; i++) {
             bindSlot(INGREDIENT_SLOTS[i], brewer.ingredients(), i, placeholder(Material.ORANGE_STAINED_GLASS_PANE, "Nguyên liệu", NamedTextColor.GOLD, "Đặt nguyên liệu pha chế vào đây"));
         }
-        bindSlot(BOTTLE_SLOT, brewer.bottle(), 0, placeholder(Material.LIGHT_BLUE_STAINED_GLASS_PANE, "Bình thủy tinh", NamedTextColor.AQUA, "Đặt bình thủy tinh vào đây"));
+        for (int i = 0; i < BOTTLE_SLOTS.length; i++) {
+            int index = i;
+            addButton(BOTTLE_SLOTS[i], bottleDisplay(i), event -> onBottleClick(event, index));
+        }
         addButton(PROGRESS_SLOT, progressDisplay(), ClickHandler.noAction());
-        addButton(OUTPUT_SLOT, outputDisplay(), this::onOutputClick);
         addButton(START_SLOT, startButton(), this::onStartClick);
         addButton(ENERGY_SLOT, energyDisplay(), ClickHandler.noAction());
         addSidesButton(SIDES_SLOT);
@@ -50,23 +51,44 @@ public class BrewingGui extends MachineGui {
         brewer.releaseGui(this);
     }
 
-    private ItemStack outputDisplay() {
-        ItemStack potion = brewer.outputStack();
-        return potion != null ? potion : placeholder(Material.LIME_STAINED_GLASS_PANE, "Thành phẩm", NamedTextColor.GREEN, "Thuốc pha chế sẽ xuất hiện ở đây");
+    private ItemStack bottleDisplay(int index) {
+        ItemStack stack = brewer.bottleStack(index);
+        return stack != null ? stack : placeholder(Material.LIGHT_BLUE_STAINED_GLASS_PANE, "Bình nước", NamedTextColor.AQUA, "Đặt bình nước vào đây, thuốc sẽ thay thế nó");
     }
 
-    private void onOutputClick(InventoryClickEvent event) {
+    private void onBottleClick(InventoryClickEvent event, int index) {
         event.setCancelled(true);
-        if (brewer.outputStack() == null) return;
+        ItemStack cursor = event.getView().getCursor();
 
-        if (event.isShiftClick()) {
-            ItemStack taken = brewer.takeOutput();
-            if (taken != null) PlayerUtils.giveItem((Player) event.getWhoClicked(), taken);
+        if (brewer.bottleStack(index) != null) {
+            if (event.isShiftClick()) {
+                ItemStack taken = brewer.takeBottle(index);
+                if (taken != null) PlayerUtils.giveItem((Player) event.getWhoClicked(), taken);
+            } else if (cursor.getType().isAir()) {
+                event.getView().setCursor(brewer.takeBottle(index));
+            }
             return;
         }
-        if (!event.getView().getCursor().getType().isAir()) return;
 
-        event.getView().setCursor(brewer.takeOutput());
+        if (BrewingBlock.isWaterBottle(cursor) && brewer.insertWater(index)) {
+            event.getView().setCursor(cursor.getAmount() > 1 ? cursor.asQuantity(cursor.getAmount() - 1) : null);
+        }
+    }
+
+    @Override
+    public void onClickBottomInventory(InventoryClickEvent event) {
+        ItemStack clicked = event.getCurrentItem();
+        if (!event.isShiftClick() || !BrewingBlock.isWaterBottle(clicked)) {
+            super.onClickBottomInventory(event);
+            return;
+        }
+
+        event.setCancelled(true);
+        int remaining = clicked.getAmount();
+        for (int i = 0; i < BrewingBlock.BOTTLE_COUNT && remaining > 0; i++) {
+            if (brewer.insertWater(i)) remaining--;
+        }
+        event.setCurrentItem(remaining > 0 ? clicked.asQuantity(remaining) : null);
     }
 
     private ItemStack startButton() {
@@ -113,7 +135,7 @@ public class BrewingGui extends MachineGui {
     private static String statusText(BrewingBlock.BrewStatus status) {
         return switch (status) {
             case INVALID_POTION -> "Vật phẩm thuốc chưa được cấu hình";
-            case NO_BOTTLE -> "Thiếu bình thủy tinh";
+            case NO_BOTTLE -> "Thiếu bình nước";
             case NO_INGREDIENTS -> "Chưa có nguyên liệu";
             case UNSTABLE -> "Hỗn hợp không ổn định: thời gian hiệu lực quá ngắn";
             case NO_ENERGY -> "Không đủ năng lượng";

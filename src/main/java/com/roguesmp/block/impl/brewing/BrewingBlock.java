@@ -24,30 +24,36 @@ import com.roguesmp.item.component.impl.BrewedPotionComponent;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.ItemRef;
 import com.roguesmp.utils.Utils;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.PotionContents;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class BrewingBlock extends SmpBlock implements Tickable, EnergyStorage, ItemStorageHolder {
 
     public static final int INGREDIENT_COUNT = 6;
-    private static final String GLASS_BOTTLE = ItemRef.vanillaId(Material.GLASS_BOTTLE);
+    public static final int BOTTLE_COUNT = 3;
+    private static final Codec<Map<String, Bottle>> BOTTLES_CODEC = Codec.unboundedMap(Bottle.CODEC);
     private static final int GUI_REFRESH_INTERVAL = 10;
 
     private final BrewingData data;
     private final ItemStorage storage = new ItemStorage(this);
     private final FixedSlots ingredients = storage.add(new FixedSlots("ingredient", "Nguyên liệu", INGREDIENT_COUNT, SlotAccess.INSERT,
             item -> BrewIngredientComponent.of(item.item()) != null), this::onInputsChanged);
-    private final FixedSlots bottle = storage.add(new FixedSlots("bottle", "Bình thủy tinh", 1, SlotAccess.INSERT,
-            item -> item.item().equals(GLASS_BOTTLE)), this::onInputsChanged);
-    private @Nullable BrewRecipe output;
+    private final Bottle[] bottles = new Bottle[BOTTLE_COUNT];
     private boolean brewing;
     private int progress;
     private int energy;
@@ -88,9 +94,11 @@ public class BrewingBlock extends SmpBlock implements Tickable, EnergyStorage, I
             StoredItem taken = ingredients.extract(i, 1, false);
             if (taken != null) used.add(taken.item());
         }
-        bottle.extract(0, 1, false);
-
-        output = new BrewRecipe(used, Utils.RANDOM.nextLong());
+        BrewRecipe brewed = new BrewRecipe(used, Utils.RANDOM.nextLong());
+        for (int i = 0; i < BOTTLE_COUNT; i++) {
+            if (bottles[i] != null && bottles[i].isWater()) bottles[i] = new Bottle(brewed);
+        }
+        recipe = currentRecipe();
         stopBrewing();
         refreshGui();
     }
@@ -129,10 +137,11 @@ public class BrewingBlock extends SmpBlock implements Tickable, EnergyStorage, I
     }
 
     private BrewStatus readiness() {
-        if (output != null) return BrewStatus.OUTPUT_FULL;
         BrewedPotionComponent potion = ItemRef.component(data.potionItem(), ItemComponentKeys.BREWED_POTION);
         if (potion == null) return BrewStatus.INVALID_POTION;
-        if (bottle.get(0) == null) return BrewStatus.NO_BOTTLE;
+        if (Arrays.stream(bottles).noneMatch(bottle -> bottle != null && bottle.isWater())) {
+            return Arrays.stream(bottles).anyMatch(Objects::nonNull) ? BrewStatus.OUTPUT_FULL : BrewStatus.NO_BOTTLE;
+        }
 
         List<BrewIngredientComponent> components = ingredientComponents();
         if (components.isEmpty()) return BrewStatus.NO_INGREDIENTS;
@@ -156,7 +165,7 @@ public class BrewingBlock extends SmpBlock implements Tickable, EnergyStorage, I
             StoredItem stored = ingredients.get(i);
             ids.add(stored == null ? "" : stored.item());
         }
-        ids.add(bottle.get(0) == null ? "" : GLASS_BOTTLE);
+        for (Bottle bottle : bottles) ids.add(bottle != null && bottle.isWater() ? "water" : "");
         return ids;
     }
 
@@ -169,8 +178,10 @@ public class BrewingBlock extends SmpBlock implements Tickable, EnergyStorage, I
         refreshGui();
     }
 
-    public @Nullable ItemStack outputStack() {
-        if (output == null) return null;
+    public @Nullable ItemStack bottleStack(int index) {
+        Bottle bottle = bottles[index];
+        if (bottle == null) return null;
+        if (bottle.isWater()) return waterBottle();
 
         BaseItem potion = Registries.ITEM.get(data.potionItem());
         if (potion == null) return null;
@@ -179,17 +190,38 @@ public class BrewingBlock extends SmpBlock implements Tickable, EnergyStorage, I
         BrewedPotionComponent component = item.getComponent(ItemComponentKeys.BREWED_POTION);
         if (component == null) return null;
 
-        component.setRecipe(output);
+        component.setRecipe(bottle.potion());
         return item.generateItemStack(1);
     }
 
-    public @Nullable ItemStack takeOutput() {
-        ItemStack stack = outputStack();
+    public @Nullable ItemStack takeBottle(int index) {
+        ItemStack stack = bottleStack(index);
         if (stack == null) return null;
 
-        output = null;
+        bottles[index] = null;
+        onInputsChanged();
         markDirty();
-        refreshGui();
+        return stack;
+    }
+
+    public boolean insertWater(int index) {
+        if (bottles[index] != null) return false;
+
+        bottles[index] = Bottle.WATER;
+        onInputsChanged();
+        markDirty();
+        return true;
+    }
+
+    public static boolean isWaterBottle(@Nullable ItemStack stack) {
+        if (stack == null || stack.getType() != Material.POTION || ItemRef.baseItem(ItemRef.idOf(stack)) != null) return false;
+        PotionContents contents = stack.getData(DataComponentTypes.POTION_CONTENTS);
+        return contents != null && contents.potion() == PotionType.WATER && contents.customEffects().isEmpty();
+    }
+
+    private static ItemStack waterBottle() {
+        ItemStack stack = ItemStack.of(Material.POTION);
+        stack.setData(DataComponentTypes.POTION_CONTENTS, PotionContents.potionContents().potion(PotionType.WATER).build());
         return stack;
     }
 
@@ -209,9 +241,6 @@ public class BrewingBlock extends SmpBlock implements Tickable, EnergyStorage, I
         return ingredients;
     }
 
-    public FixedSlots bottle() {
-        return bottle;
-    }
 
     public int progress() {
         return progress;
@@ -273,9 +302,11 @@ public class BrewingBlock extends SmpBlock implements Tickable, EnergyStorage, I
     public void onBlockBreak(SmpBlockBreakEvent event) {
         if (gui != null) gui.closeAll();
 
-        ItemStack potion = outputStack();
-        if (potion != null) event.getDrops().add(potion);
-        output = null;
+        for (int i = 0; i < BOTTLE_COUNT; i++) {
+            ItemStack stack = bottleStack(i);
+            if (stack != null) event.getDrops().add(stack);
+            bottles[i] = null;
+        }
         brewing = false;
         progress = 0;
     }
@@ -286,7 +317,36 @@ public class BrewingBlock extends SmpBlock implements Tickable, EnergyStorage, I
         sections.add(StateSection.of(Codec.BOOLEAN.optionalFieldOf("brewing", false), () -> brewing, value -> brewing = value));
         sections.add(StateSection.of(Codec.INT.optionalFieldOf("progress", 0), () -> progress, value -> progress = value));
         sections.add(StateSection.of(Codec.INT.optionalFieldOf("energy", 0), () -> energy, value -> energy = value));
-        sections.add(StateSection.of(BrewRecipe.CODEC.optionalFieldOf("output"), () -> Optional.ofNullable(output), value -> output = value.orElse(null)));
+        sections.add(StateSection.of(BOTTLES_CODEC.optionalFieldOf("bottles", Map.of()), this::encodeBottles, this::decodeBottles));
+    }
+
+    private Map<String, Bottle> encodeBottles() {
+        Map<String, Bottle> encoded = new LinkedHashMap<>();
+        for (int i = 0; i < BOTTLE_COUNT; i++) {
+            if (bottles[i] != null) encoded.put(String.valueOf(i), bottles[i]);
+        }
+        return encoded;
+    }
+
+    private void decodeBottles(Map<String, Bottle> encoded) {
+        Arrays.fill(bottles, null);
+        encoded.forEach((key, bottle) -> {
+            int index = Integer.parseInt(key);
+            if (index >= 0 && index < BOTTLE_COUNT) bottles[index] = bottle;
+        });
+    }
+
+    public record Bottle(@Nullable BrewRecipe potion) {
+
+        public static final Bottle WATER = new Bottle(null);
+        public static final Codec<Bottle> CODEC = Codec.composite(
+                BrewRecipe.CODEC.optionalFieldOf("potion").forGetter(bottle -> Optional.ofNullable(bottle.potion())),
+                potion -> new Bottle(potion.orElse(null))
+        );
+
+        public boolean isWater() {
+            return potion == null;
+        }
     }
 
     public enum BrewStatus {

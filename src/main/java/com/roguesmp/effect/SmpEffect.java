@@ -140,6 +140,11 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
         return content;
     }
 
+    public List<Component> getDisplayLines() {
+        Component line = getDisplayWithTime();
+        return line == null ? List.of() : List.of(line);
+    }
+
     /**
      * Ticks the effect, called regularly
      *
@@ -273,7 +278,7 @@ public abstract class SmpEffect implements Comparable<SmpEffect>, Cloneable {
     }
 
     static List<Component> getSortedEffectDisplayComponents(LivingEntity entity) {
-        return getSortedEffects(entity).stream().map(SmpEffect::getDisplayWithTime).filter(Objects::nonNull).toList();
+        return getSortedEffects(entity).stream().flatMap(effect -> effect.getDisplayLines().stream()).toList();
     }
 
     /**

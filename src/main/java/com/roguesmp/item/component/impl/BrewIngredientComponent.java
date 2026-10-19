@@ -11,6 +11,7 @@ import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,22 +51,34 @@ public record BrewIngredientComponent(Map<BrewStat, StatRange> stats, int durati
         lore.add(Utils.text("Nguyên liệu pha chế:", NamedTextColor.GRAY));
 
         stats.forEach((stat, range) -> {
-            List<Component> min = stat.display(range.min(), 0, context.data());
+            List<Component> min = stat.display(range.min(), 0);
             if (range.isFixed()) {
-                min.forEach(line -> lore.add(Component.space().append(line)));
+                min.forEach(line -> lore.add(BrewStat.indent(line)));
                 return;
             }
-            List<Component> max = stat.display(range.max(), 0, context.data());
+            List<Component> max = stat.display(range.max(), 0);
             for (int i = 0; i < Math.min(min.size(), max.size()); i++) {
-                lore.add(Component.space().append(min.get(i)).append(Utils.text(" ~ ", NamedTextColor.DARK_GRAY)).append(max.get(i)));
+                lore.add(BrewStat.indent(rangeLine(min.get(i), max.get(i))));
             }
         });
 
         if (duration != 0) {
             String sign = duration > 0 ? "+" : "";
-            lore.add(Component.space().append(Utils.text(sign + duration + "s thời gian hiệu lực", duration > 0 ? NamedTextColor.GREEN : NamedTextColor.RED)));
+            lore.add(BrewStat.indent(Utils.text(sign + duration + "s thời gian hiệu lực", duration > 0 ? NamedTextColor.GREEN : NamedTextColor.RED)));
         }
 
         context.builder().putLines(LORE_PRIORITY, lore);
+    }
+
+    private static Component rangeLine(Component min, Component max) {
+        PlainTextComponentSerializer plain = PlainTextComponentSerializer.plainText();
+        String minText = plain.serialize(min);
+        String maxText = plain.serialize(max);
+        int minSplit = minText.indexOf(' ');
+        int maxSplit = maxText.indexOf(' ');
+        if (minSplit < 0 || maxSplit < 0 || !minText.substring(minSplit).equals(maxText.substring(maxSplit))) {
+            return min.append(Utils.text(" ~ ", NamedTextColor.DARK_GRAY)).append(max);
+        }
+        return Component.text(minText.substring(0, minSplit) + " ~ " + maxText.substring(0, maxSplit) + maxText.substring(maxSplit), max.color());
     }
 }

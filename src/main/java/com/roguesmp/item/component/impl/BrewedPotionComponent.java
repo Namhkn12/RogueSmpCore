@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.roguesmp.brewing.BrewRecipe;
 import com.roguesmp.brewing.BrewResult;
+import com.roguesmp.brewing.BrewStat;
 import com.roguesmp.brewing.Brewing;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
@@ -122,7 +123,7 @@ public class BrewedPotionComponent implements ItemComponent {
 
         lore.add(Utils.text("Khi uống:", NamedTextColor.GRAY));
         evaluated.stats().forEach((stat, value) ->
-                stat.display(value, evaluated.durationTicks(), context.data()).forEach(line -> lore.add(Component.space().append(line))));
+                stat.display(value, evaluated.durationTicks()).forEach(line -> lore.add(BrewStat.indent(line))));
         lore.add(Utils.text("Thời gian: ", NamedTextColor.GRAY).append(Utils.text(Utils.intToMinuteAndSeconds(evaluated.durationTicks() / 20), NamedTextColor.YELLOW)));
         lore.add(Utils.text("Chỉ một thuốc pha chế có hiệu lực cùng lúc", NamedTextColor.DARK_GRAY));
         context.builder().putLines(LORE_PRIORITY, lore);
