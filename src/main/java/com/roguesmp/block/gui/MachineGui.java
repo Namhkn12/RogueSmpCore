@@ -3,6 +3,8 @@ package com.roguesmp.block.gui;
 import com.roguesmp.block.StoredItem;
 import com.roguesmp.block.storage.ItemStorage;
 import com.roguesmp.block.storage.SlotGroup;
+import com.roguesmp.block.transfer.SideConfig;
+import com.roguesmp.block.transfer.SideMode;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.PlayerUtils;
@@ -10,6 +12,7 @@ import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
@@ -19,6 +22,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -55,10 +59,28 @@ public abstract class MachineGui extends BaseGui {
     }
 
     protected void bindSlotDisplay(int guiSlot, SlotGroup group, int index, ItemStack display) {
+        if (storage.isConfigurable()) appendTransferLore(display, group);
         addButton(guiSlot, display, event -> onSlotClick(event, group, index));
     }
 
+    private void appendTransferLore(ItemStack display, SlotGroup group) {
+        List<Component> lore = new ArrayList<>(display.lore() != null ? display.lore() : List.of());
+        if (group.access().allowsInsert()) {
+            lore.add(Utils.text("↓ Nhận từ: ", NamedTextColor.AQUA).append(Component.text(faceNames(storage.facesWhere(SideMode::pulls)), NamedTextColor.GRAY)));
+        }
+        if (group.access().allowsExtract()) {
+            lore.add(Utils.text("↑ Đẩy ra: ", NamedTextColor.GOLD).append(Component.text(faceNames(storage.facesWhere(SideMode::pushes)), NamedTextColor.GRAY)));
+        }
+        ItemStackUtils.setLore(display, lore);
+    }
+
+    private static String faceNames(List<BlockFace> faces) {
+        return faces.isEmpty() ? "chưa có mặt nào" : String.join(", ", faces.stream().map(SideConfig::displayName).toList());
+    }
+
     protected void addSidesButton(int slot) {
+        if (!storage.isConfigurable()) return;
+
         ItemStack item = ItemStack.of(Material.HOPPER);
         ItemStackUtils.setItemName(item, Utils.text("Cấu hình các mặt", NamedTextColor.AQUA));
         ItemStackUtils.setLore(item, List.of(Utils.text("Kéo/đẩy vật phẩm với khối bên cạnh", NamedTextColor.GRAY)));

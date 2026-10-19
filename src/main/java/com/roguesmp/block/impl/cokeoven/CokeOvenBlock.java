@@ -35,8 +35,8 @@ public class CokeOvenBlock extends SmpBlock implements Tickable, ItemStorageHold
     private static final int GUI_REFRESH_INTERVAL = 10;
 
     private final ItemStorage storage = new ItemStorage(this);
-    private final FixedSlots inputs = storage.add(new FixedSlots("input", INPUT_COUNT, SlotAccess.INSERT), this::onInputsChanged);
-    private final FixedSlots outputs = storage.add(new FixedSlots("output", OUTPUT_COUNT, SlotAccess.EXTRACT), this::refreshGui);
+    private final FixedSlots inputs = storage.add(new FixedSlots("input", "Nguyên liệu", INPUT_COUNT, SlotAccess.INSERT), this::onInputsChanged);
+    private final FixedSlots outputs = storage.add(new FixedSlots("output", "Thành phẩm", OUTPUT_COUNT, SlotAccess.EXTRACT), this::refreshGui);
     private @Nullable CokeOvenRecipe activeRecipe;
     private @Nullable String rememberedRecipeId;
     private int progress;

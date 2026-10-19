@@ -1,5 +1,6 @@
 package com.roguesmp.crafting.recipe;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.crafting.CraftingIngredient;
 import org.bukkit.inventory.ItemStack;
@@ -50,7 +51,7 @@ public final class ScrappingRecipe extends CraftingRecipe {
         if (items.length == 0) return false;
 
         ItemStack stack = items[0];
-        String key = CraftingIngredient.resolveKey(stack);
+        String key = ItemRef.idOf(stack);
         return key != null && key.equals(input.key()) && stack.getAmount() == input.count(); // exact, not "at least"
     }
 

@@ -83,6 +83,10 @@ public class SmpBlock {
 
     }
 
+    public boolean interactsWhileSneaking() {
+        return false;
+    }
+
     /**
      * Called when this instance is unloaded, via being broken, or the entity for this block is unloaded.
      */

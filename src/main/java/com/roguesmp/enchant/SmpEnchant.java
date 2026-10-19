@@ -7,6 +7,7 @@ import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.event.ArrowConsumeEvent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.DurabilityChangedEvent;
+import com.roguesmp.item.beam.MageBeam;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -86,6 +87,10 @@ public interface SmpEnchant {
      * Called after onDamageEntity is done processing, should only be used to read final value only.
      */
     default void onDamageEntityFinal(DamageEvent event, int level, @NotNull SmpPlayer player) {
+
+    }
+
+    default void onMageBeamFire(MageBeam beam, int level, @NotNull SmpPlayer player) {
 
     }
 

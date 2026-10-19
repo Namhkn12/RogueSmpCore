@@ -53,7 +53,9 @@ public class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPreAttack(PrePlayerAttackEntityEvent event) {
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer());
-        if (smpPlayer != null) smpPlayer.setAttackStrength(event.getPlayer().getAttackCooldown());
+        if (smpPlayer == null) return;
+        smpPlayer.setAttackStrength(event.getPlayer().getAttackCooldown());
+        smpPlayer.onPreAttack(event);
     }
 
     @EventHandler

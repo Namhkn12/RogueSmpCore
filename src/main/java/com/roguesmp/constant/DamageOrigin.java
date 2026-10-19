@@ -3,6 +3,7 @@ package com.roguesmp.constant;
 public enum DamageOrigin {
     ATTACK,
     ENVIRONMENT,
+    STAFF,
     ABILITY,
     SPELL,
     ENCHANT,

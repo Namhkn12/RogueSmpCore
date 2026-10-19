@@ -58,15 +58,15 @@ public final class ModuleSlots {
         return drained;
     }
 
-    public void collectEffects(@Nullable String burningItemId, List<GeneratorEffect> out) {
+    public void collectEffects(@Nullable String activeCatalystId, List<GeneratorEffect> out) {
         for (String itemId : items) {
             GeneratorModuleComponent module = GeneratorModuleComponent.of(itemId);
             if (module == null) continue;
 
             out.add(module.effect());
-            if (burningItemId == null) continue;
+            if (activeCatalystId == null) continue;
             module.synergies().stream()
-                    .filter(synergy -> synergy.appliesTo(burningItemId))
+                    .filter(synergy -> synergy.appliesTo(activeCatalystId))
                     .forEach(synergy -> out.add(synergy.effect()));
         }
     }

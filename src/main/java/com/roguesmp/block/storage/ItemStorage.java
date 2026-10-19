@@ -12,8 +12,10 @@ import org.bukkit.block.BlockFace;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public final class ItemStorage implements ItemHandler {
@@ -26,6 +28,7 @@ public final class ItemStorage implements ItemHandler {
     private final SideConfig sides = new SideConfig();
     private Supplier<Set<BlockFace>> lockedFaces = Set::of;
     private int transferTicks;
+    private @Nullable List<SideMode> supportedModes;
 
     public ItemStorage(SmpBlock owner) {
         this.owner = owner;
@@ -54,11 +57,40 @@ public final class ItemStorage implements ItemHandler {
     }
 
     public SideMode side(BlockFace face) {
-        return isLocked(face) ? SideMode.NONE : sides.get(face);
+        SideMode mode = sides.get(face);
+        return isLocked(face) || !supportedModes().contains(mode) ? SideMode.NONE : mode;
+    }
+
+    public List<SideMode> supportedModes() {
+        if (supportedModes == null) {
+            boolean pull = !pullTargets().isEmpty();
+            boolean push = !pushSources().isEmpty();
+            boolean smart = groups.stream().anyMatch(SlotGroup::supportsDemand);
+            supportedModes = Arrays.stream(SideMode.values())
+                    .filter(mode -> (!mode.pulls() || pull) && (!mode.pushes() || push) && (!mode.isSmart() || smart))
+                    .toList();
+        }
+        return supportedModes;
+    }
+
+    public boolean isConfigurable() {
+        return supportedModes().size() > 1;
+    }
+
+    public List<SlotGroup> pullTargets() {
+        return groups.stream().filter(group -> group.access().allowsInsert()).toList();
+    }
+
+    public List<SlotGroup> pushSources() {
+        return groups.stream().filter(group -> group.access().allowsExtract()).toList();
+    }
+
+    public List<BlockFace> facesWhere(Predicate<SideMode> condition) {
+        return SideConfig.FACES.stream().filter(face -> condition.test(side(face))).toList();
     }
 
     public void setSide(BlockFace face, SideMode mode) {
-        if (isLocked(face)) return;
+        if (isLocked(face) || !supportedModes().contains(mode)) return;
         sides.set(face, mode);
         owner.markDirty();
     }

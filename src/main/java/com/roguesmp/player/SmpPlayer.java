@@ -1,5 +1,6 @@
 package com.roguesmp.player;
 
+import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import com.roguesmp.player.death.LastHit;
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.attribute.Attributes;
@@ -374,6 +375,12 @@ public class SmpPlayer {
     public void onEntityInteract(PlayerInteractEntityEvent event) {
         for (PlayerMechanic mechanic : mechanics) {
             mechanic.onEntityInteract(event, this);
+        }
+    }
+
+    public void onPreAttack(PrePlayerAttackEntityEvent event) {
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onPreAttack(event, this);
         }
     }
 

@@ -2,7 +2,6 @@ package com.roguesmp.gui.entitycreator;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.JsonOps;
@@ -16,18 +15,17 @@ import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
+import com.roguesmp.utils.dialog.KeyValueParams;
 import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.TreeSet;
 
 public class AiComponentEditorGui {
@@ -192,12 +190,11 @@ public class AiComponentEditorGui {
     }
 
     private @Nullable String updateGoal(int index, @Nullable String text) {
-        JsonObject params = new JsonObject();
-        for (String token : (text == null ? "" : text.trim()).split("\\s+")) {
-            if (token.isEmpty()) continue;
-            int separator = token.indexOf('=');
-            if (separator <= 0) return "Tham số '" + token + "' phải có dạng key=value.";
-            params.add(token.substring(0, separator), parseValue(token.substring(separator + 1)));
+        JsonObject params;
+        try {
+            params = KeyValueParams.parse(text);
+        } catch (IllegalArgumentException e) {
+            return e.getMessage();
         }
 
         params.addProperty("type", goals.get(index).getTypeId());
@@ -209,30 +206,9 @@ public class AiComponentEditorGui {
         return null;
     }
 
-    private static JsonPrimitive parseValue(String raw) {
-        String value = unquote(raw);
-        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) return new JsonPrimitive(Boolean.parseBoolean(value));
-        try {
-            return new JsonPrimitive(new BigDecimal(value));
-        } catch (NumberFormatException e) {
-            return new JsonPrimitive(value);
-        }
-    }
-
-    private static String unquote(String value) {
-        boolean quoted = value.length() >= 2 && (value.startsWith("\"") && value.endsWith("\"") || value.startsWith("'") && value.endsWith("'"));
-        return quoted ? value.substring(1, value.length() - 1) : value;
-    }
-
     private static String formatParams(AiGoal goal) {
         DataResult<JsonElement> result = AiGoal.CODEC.encode(goal, JsonOps.INSTANCE);
-        if (!result.isSuccess() || !result.result().isJsonObject()) return "";
-
-        StringJoiner line = new StringJoiner(" ");
-        result.result().getAsJsonObject().entrySet().stream()
-                .filter(entry -> !entry.getKey().equals("type"))
-                .forEach(entry -> line.add(entry.getKey() + "=" + entry.getValue().getAsString()));
-        return line.toString();
+        return result.isSuccess() ? KeyValueParams.format(result.result(), Set.of("type")) : "";
     }
 
     private static @Nullable AiGoal createDefault(String type) {

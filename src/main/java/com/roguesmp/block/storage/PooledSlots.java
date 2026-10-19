@@ -21,8 +21,8 @@ public final class PooledSlots extends SlotGroup {
     private final Map<String, Integer> entries = new LinkedHashMap<>();
     private final IntSupplier capacity;
 
-    public PooledSlots(String id, IntSupplier capacity, SlotAccess access) {
-        super(id, access, item -> true);
+    public PooledSlots(String id, String displayName, IntSupplier capacity, SlotAccess access) {
+        super(id, displayName, access, item -> true);
         this.capacity = capacity;
     }
 
@@ -97,6 +97,11 @@ public final class PooledSlots extends SlotGroup {
         entries.clear();
         if (!drained.isEmpty()) changed();
         return drained;
+    }
+
+    @Override
+    protected boolean hasDefaultDemand() {
+        return false;
     }
 
     @Override

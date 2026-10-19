@@ -1,5 +1,6 @@
 package com.roguesmp.crafting.recipe;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.MapCodec;
@@ -126,9 +127,9 @@ public abstract class CraftingRecipe {
                 continue;
             }
 
-            String key = CraftingIngredient.resolveKey(stack);
+            String key = ItemRef.idOf(stack);
             String remainderKey = key == null ? null : remainders.get(key);
-            result[i] = remainderKey == null ? null : CraftingIngredient.resolveItemStack(remainderKey, 1);
+            result[i] = remainderKey == null ? null : ItemRef.toItemStack(remainderKey, 1);
         }
 
         return result;

@@ -4,7 +4,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
 import com.roguesmp.crafting.recipe.CraftingRecipes;
-import com.roguesmp.gui.ReactiveGui;
+import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.SmpItemUtils;
 import com.roguesmp.utils.Utils;
@@ -29,7 +29,7 @@ import java.util.*;
  * recipes first, then shapeless (see {@link #matchCustomRecipe}), then falls back to
  * vanilla recipe via {@link Bukkit#craftItem} (see {@link #craftVanillaResult}).
  */
-public class CraftingGui extends ReactiveGui<CraftingGui.CraftingState> {
+public class CraftingGui extends BaseGui {
 
     private static final int[] CRAFT_SLOTS = new int[]{10, 11, 12, 19, 20, 21, 28, 29, 30};
     private static final int TABLE_SHORTCUT_SLOT = 50;
@@ -55,11 +55,12 @@ public class CraftingGui extends ReactiveGui<CraftingGui.CraftingState> {
     );
 
     private final Player player;
+    private @Nullable CraftingRecipe customRecipe;
+    private @Nullable ItemStack vanillaResult;
 
     public CraftingGui(Player player) {
         super(Component.text("Bàn Chế Tạo", NamedTextColor.DARK_GRAY), 6);
         this.player = player;
-        initState(new CraftingState(0, null, null));
     }
 
     private boolean isCraftingGridSlot(int slot) {
@@ -70,20 +71,20 @@ public class CraftingGui extends ReactiveGui<CraftingGui.CraftingState> {
     }
 
     @Override
-    protected CraftingState computeState() {
-        int currentHash = computeGridHash();
-        CraftingState current = getState();
-        if (current.lastGridHash() == currentHash) return current;
-
+    protected void onContentsSettled() {
         ItemStack[] items = getCurrentItems();
-        CraftingRecipe custom = matchCustomRecipe(items);
-        ItemStack vanillaResult = custom != null ? null : craftVanillaResult(items);
-        return new CraftingState(currentHash, custom, vanillaResult);
+        customRecipe = matchCustomRecipe(items);
+        vanillaResult = customRecipe != null ? null : craftVanillaResult(items);
+        setup();
+    }
+
+    private @Nullable ItemStack result() {
+        return customRecipe != null ? customRecipe.getPrimaryOutputStack() : vanillaResult;
     }
 
     @Override
-    protected void render(CraftingState state) {
-        ItemStack resultItem = state.result();
+    public void setup() {
+        ItemStack resultItem = result();
         boolean hasValidRecipe = resultItem != null && !resultItem.getType().isAir();
 
         Material borderMaterial = hasValidRecipe ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
@@ -161,13 +162,23 @@ public class CraftingGui extends ReactiveGui<CraftingGui.CraftingState> {
     }
 
     @Override
+    public boolean allowsDoubleClick() {
+        return true;
+    }
+
+    @Override
     public void onClickTopInventory(InventoryClickEvent event) {
         if (DISALLOWED_ACTION.contains(event.getAction())) {
             event.setCancelled(true);
             return;
         }
+        if (event.getClick() == ClickType.DOUBLE_CLICK) {
+            scheduleRefresh();
+            return;
+        }
 
         super.onClickTopInventory(event);
+        if (!event.isCancelled() && isCraftingGridSlot(event.getSlot())) scheduleRefresh();
     }
 
     @Override
@@ -176,14 +187,22 @@ public class CraftingGui extends ReactiveGui<CraftingGui.CraftingState> {
             event.setCancelled(true);
             return;
         }
-        super.onClickBottomInventory(event);
+        if (event.getClick() == ClickType.DOUBLE_CLICK) {
+            scheduleRefresh();
+            return;
+        }
+        if (event.isShiftClick()) scheduleRefresh();
+    }
+
+    @Override
+    public void onDragInventory(InventoryDragEvent event) {
+        if (event.getRawSlots().stream().anyMatch(this::isCraftingGridSlot)) scheduleRefresh();
     }
 
     private void handleCraft(InventoryClickEvent event) {
         event.setCancelled(true);
 
-        CraftingState state = getState();
-        ItemStack result = state.result();
+        ItemStack result = result();
         if (result == null) return;
 
         ItemStack cleanResultItem = result.clone();
@@ -203,19 +222,19 @@ public class CraftingGui extends ReactiveGui<CraftingGui.CraftingState> {
                 cursor.setAmount(cursor.getAmount() + cleanResultItem.getAmount());
             }
 
-            applyConsumedItems(consume(state.customRecipe(), items, 1));
+            applyConsumedItems(consume(customRecipe, items, 1));
         } else {
-            int maxCrafts = getMaxCraftsByInventory(state.customRecipe(), items, cleanResultItem);
+            int maxCrafts = getMaxCraftsByInventory(customRecipe, items, cleanResultItem);
             if (maxCrafts <= 0) return;
 
             for (int i = 0; i < maxCrafts; i++) {
                 player.getInventory().addItem(cleanResultItem.clone());
             }
 
-            applyConsumedItems(consume(state.customRecipe(), items, maxCrafts));
+            applyConsumedItems(consume(customRecipe, items, maxCrafts));
         }
 
-        Utils.runLater(this::syncStateInventory);
+        scheduleRefresh();
     }
 
     /** Applies {@code crafts} consecutive crafts against {@code items} - via {@code customRecipe} if this was a custom match, or the generic vanilla consumption otherwise. */
@@ -309,20 +328,6 @@ public class CraftingGui extends ReactiveGui<CraftingGui.CraftingState> {
         return anyOccupied ? max : 0;
     }
 
-    private int computeGridHash() {
-        int hash = 1;
-        Inventory inv = getInventory();
-        for (int slot : CRAFT_SLOTS) {
-            ItemStack item = inv.getItem(slot);
-            if (item == null || item.getType().isAir()) {
-                hash = 31 * hash;
-                continue;
-            }
-            hash = 31 * hash + item.hashCode();
-        }
-        return hash;
-    }
-
     private ItemStack[] getCurrentItems() {
         ItemStack[] items = new ItemStack[CRAFT_SLOTS.length];
         Inventory inv = getInventory();
@@ -347,12 +352,6 @@ public class CraftingGui extends ReactiveGui<CraftingGui.CraftingState> {
         ItemStack barrier = ItemStack.of(Material.BARRIER);
         barrier.setData(DataComponentTypes.ITEM_NAME, Component.text("Đóng", NamedTextColor.RED));
         return barrier;
-    }
-
-    public record CraftingState(int lastGridHash, @Nullable CraftingRecipe customRecipe, @Nullable ItemStack vanillaResult) {
-        private @Nullable ItemStack result() {
-            return customRecipe != null ? customRecipe.getPrimaryOutputStack() : vanillaResult;
-        }
     }
 
     public static void registerCmd() {

@@ -3,10 +3,12 @@ package com.roguesmp.enchant.impl;
 import com.roguesmp.enchant.Enchants;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.SmpEnchant;
+import com.roguesmp.item.beam.MageBeam;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +41,12 @@ public class FireAspect implements SmpEnchant {
 
     @Override public @NotNull Set<EquipSlot> getActiveSlots() {
         return EnumSet.of(EquipSlot.MAINHAND);
+    }
+
+    @Override
+    public void onMageBeamFire(MageBeam beam, int level, @NotNull SmpPlayer player) {
+        beam.addTrailParticle(Particle.FLAME);
+        beam.addHitEffect(victim -> victim.setFireTicks(Math.max(victim.getFireTicks(), 80 * level)));
     }
 
     @Override public void attachVanillaEnchant(Map<Enchantment, Integer> vanillaMap, int level) {

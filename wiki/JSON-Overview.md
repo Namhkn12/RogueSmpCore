@@ -18,10 +18,11 @@ Phần lớn nội dung game (item, mob/boss, ability, class, quest, NPC, loot, 
 | `classes/` | Lớp nhân vật | [JSON-Classes](JSON-Classes.md) |
 | `quests/` | Quest | [JSON-Quests](JSON-Quests.md) |
 | `npcs/` | NPC | [JSON-Npcs](JSON-Npcs.md) |
+| `trades/` | Cửa hàng NPC | [JSON-Trades](JSON-Trades.md) |
 | `loottable/` | Loot table (số ít, không gạch dưới) | [JSON-Loot](JSON-Loot.md) |
 | `crafting_recipes/` | Công thức chế tạo | [JSON-Crafting](JSON-Crafting.md) |
 | `blocks/` | Block tùy chỉnh (generator, altar, ...) | [JSON-Blocks](JSON-Blocks.md) |
-| `fuel_types/` | Loại nhiên liệu cho máy phát | [JSON-Blocks](JSON-Blocks.md#fuel_types--loại-nhiên-liệu) |
+| `catalyst_types/` | Loại chất xúc tác cho máy phát | [JSON-Blocks](JSON-Blocks.md#catalyst_types--loại-chất-xúc-tác) |
 | `<thư mục trên>/tags/` | Tag — nhóm id lại | [Tag](#tag) bên dưới |
 | `enchants/tags/` | Chỉ có tag (enchant là enum cứng, không có file entry) | [JSON-Items](JSON-Items.md#enchant--không-có-json-riêng) |
 | `dungeon/definitions/` | Dungeon | [JSON-Dungeons](JSON-Dungeons.md) |
@@ -49,7 +50,7 @@ Mọi chỗ khác tham chiếu entry (loot table gọi item, class liệt kê ab
 <a id="field-id-trong-file-phải-khớp-id-đường-dẫn"></a>
 ### Field `"id"` trong file phải khớp id đường dẫn
 
-Một số định nghĩa có thêm field `"id"` bên trong file (item, entity, quest, npc, class, crafting recipe). **Không có gì kiểm tra** field này khớp với đường dẫn, nhưng nhiều chỗ tra theo 1 trong 2 giá trị, nên lệch sẽ hỏng âm thầm (quest không lưu được tiến độ, entity không nạp lại sau khi chunk reload, NPC không tìm được định nghĩa, ...). **Luôn đặt `"id"` đúng bằng đường dẫn** (`entities/bosses/x.json` → `"id": "bosses/x"`). Loot table, block, ability config, skin, item type, fuel type **không có** field `"id"` — id chỉ đến từ đường dẫn.
+Một số định nghĩa có thêm field `"id"` bên trong file (item, entity, quest, npc, class, crafting recipe). **Không có gì kiểm tra** field này khớp với đường dẫn, nhưng nhiều chỗ tra theo 1 trong 2 giá trị, nên lệch sẽ hỏng âm thầm (quest không lưu được tiến độ, entity không nạp lại sau khi chunk reload, NPC không tìm được định nghĩa, ...). **Luôn đặt `"id"` đúng bằng đường dẫn** (`entities/bosses/x.json` → `"id": "bosses/x"`). Loot table, block, ability config, skin, item type, catalyst type **không có** field `"id"` — id chỉ đến từ đường dẫn.
 
 ### Thư mục `tags/` là chỗ dành riêng
 
@@ -119,7 +120,7 @@ Mọi registry data-driven có thư mục `tags/`: `<thư mục>/tags/<tên>.jso
 - Id tag = **tên file** (không tính thư mục con), được hạ về chữ thường — viết tên tag chữ thường khi tham chiếu.
 - Id trong tag không tồn tại → warning, bỏ qua riêng entry đó.
 - Tag có sẵn (luôn tồn tại, rỗng nếu không có file): item `weapons`; entity `elite`, `boss`, `angelic`, `friendly`; quest `daily_easy_quest`, `daily_medium_quest`, `daily_hard_quest`.
-- Tag được dùng ở: `item_types.tag`, `fuel_types.tag`, `classes.allowedWeapons`, quest hằng ngày, và các kiểm tra boss/elite/friendly của mob.
+- Tag được dùng ở: `item_types.tag`, `catalyst_types.tag`, `classes.allowedWeapons`, quest hằng ngày, và các kiểm tra boss/elite/friendly của mob.
 
 ## Tham chiếu chéo sang registry khác
 

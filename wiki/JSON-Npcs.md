@@ -40,6 +40,7 @@ Field chọn loại: `"type"`. Mọi action trong mảng chạy **tuần tự** 
 | :--- | :--- | :--- | :--- |
 | `run_command` | `command` (string, bắt buộc) | click phải **và** trái | Người chơi chạy lệnh bằng quyền của chính họ (`performCommand`). **Viết không có `/` đầu.** `@p` được thay bằng tên người chơi. |
 | `open_gui` | `gui` (string, bắt buộc) | chỉ click phải | Mở GUI theo id. |
+| `open_trade` | `shop` (id trong `trades/`, bắt buộc) | chỉ click phải | Mở cửa hàng. Xem [JSON-Trades](JSON-Trades.md). |
 
 `gui` hợp lệ — chỉ 2 id, đăng ký cứng trong code: `blacksmith` (thợ rèn), `quest` (quest hằng ngày). Id khác → người chơi nhận thông báo lỗi đỏ + log cảnh báo.
 
@@ -50,4 +51,4 @@ Field chọn loại: `"type"`. Mọi action trong mảng chạy **tuần tự** 
 Action đa hình: đăng ký trong [`NpcActions`](../src/main/java/com/roguesmp/npc/action/NpcActions.java). GUI mở được từ NPC: thêm `GuiOpenActions.OpenAction` mới trong [`GuiOpenActions`](../src/main/java/com/roguesmp/npc/action/GuiOpenActions.java). Lưu ý có 2 tầng dispatch khác nhau: `type` chọn loại action (`run_command`/`open_gui`), `gui` chọn GUI cụ thể trong 1 bảng tra riêng.
 
 ---
-◀ [JSON-Quests](JSON-Quests.md) · Về [Trang chủ](Home.md) · Tiếp theo: [JSON-Loot](JSON-Loot.md)
+◀ [JSON-Quests](JSON-Quests.md) · Về [Trang chủ](Home.md) · Tiếp theo: [JSON-Trades](JSON-Trades.md)

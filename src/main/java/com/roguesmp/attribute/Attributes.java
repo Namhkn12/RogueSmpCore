@@ -5,6 +5,8 @@ import com.roguesmp.attribute.impl.*;
 public enum Attributes {
     // --- COMBAT & OFFENSE ---
     MELEE_DAMAGE_BASE(new MeleeDamageBase()),
+    STAFF_DAMAGE_BASE(new StaffDamageBase()),
+    STAFF_RANGE_BASE(new StaffRangeBase()),
     ATTACK_SPEED_BASE(new AttackSpeedBase()),
     PROJECTILE_DAMAGE_BASE(new ProjectileDamageBase()),
     PROJECTILE_SPEED_BASE(new ProjectileSpeedBase()),

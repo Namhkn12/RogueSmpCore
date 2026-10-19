@@ -1,11 +1,9 @@
 package com.roguesmp.block;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.registry.Registries;
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.utils.Utils;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,11 +26,7 @@ public record BlockDrop(String item, int minAmount, int maxAmount, double chance
         int amount = rollAmount();
         if (amount <= 0) return null;
 
-        ItemStack stack = resolve();
-        if (stack == null) return null;
-
-        stack.setAmount(amount);
-        return stack;
+        return ItemRef.toItemStack(item, amount);
     }
 
     /** Same roll as {@link #roll}, without resolving a live {@link ItemStack} - for id-based storage (see {@link StoredItem}). */
@@ -57,15 +51,5 @@ public record BlockDrop(String item, int minAmount, int maxAmount, double chance
         int whole = (int) scaled;
         double fraction = scaled - whole;
         return fraction > 0 && Utils.RANDOM.nextDouble() < fraction ? whole + 1 : whole;
-    }
-
-    private @Nullable ItemStack resolve() {
-        if (BlockRef.isVanilla(item)) {
-            Material material = BlockRef.vanillaMaterial(item);
-            return material == null ? null : ItemStack.of(material);
-        }
-
-        BaseItem baseItem = Registries.ITEM.get(item);
-        return baseItem == null ? null : baseItem.generateItemStack(1);
     }
 }

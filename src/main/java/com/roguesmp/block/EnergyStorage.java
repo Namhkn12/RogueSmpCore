@@ -13,4 +13,8 @@ public interface EnergyStorage {
      * @return amount actually removed
      */
     int removeEnergy(int amount);
+
+    default boolean canReceiveEnergy() {
+        return true;
+    }
 }

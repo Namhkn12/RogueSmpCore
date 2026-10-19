@@ -1,5 +1,6 @@
 package com.roguesmp.crafting.recipe;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.crafting.CraftingIngredient;
 import org.bukkit.inventory.ItemStack;
@@ -217,7 +218,7 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
 
     private static @Nullable TrimmedQuery trimQuery(ItemStack[] items, int width, int height) {
         String[] keys = new String[items.length];
-        for (int i = 0; i < items.length; i++) keys[i] = CraftingIngredient.resolveKey(items[i]);
+        for (int i = 0; i < items.length; i++) keys[i] = ItemRef.idOf(items[i]);
 
         Grid.Bounds bounds = Grid.boundingBox(width, height, keys);
         if (bounds == null) return null;

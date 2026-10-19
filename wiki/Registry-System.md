@@ -136,7 +136,7 @@ API sửa tag từ code: `Registry.saveTag(plugin, tagId, List<String> rawEntrie
 | `LOOT_TABLE` | `Registry<LootTable>` | `loottable/` | [JSON-Loot](JSON-Loot.md) |
 | `CRAFTING_RECIPE` | `Registry<CraftingRecipe>` | `crafting_recipes/` | [JSON-Crafting](JSON-Crafting.md) |
 | `BLOCK` | `Registry<BlockData>` | `blocks/` | [JSON-Blocks](JSON-Blocks.md) |
-| `FUEL_TYPE` | `Registry<FuelType>` | `fuel_types/` | [JSON-Blocks](JSON-Blocks.md#fuel_types--loại-nhiên-liệu) |
+| `CATALYST_TYPE` | `Registry<CatalystType>` | `catalyst_types/` | [JSON-Blocks](JSON-Blocks.md#catalyst_types--loại-chất-xúc-tác) |
 
 Ý nghĩa từng key của các thư mục này: xem [JSON-Overview](JSON-Overview.md).
 

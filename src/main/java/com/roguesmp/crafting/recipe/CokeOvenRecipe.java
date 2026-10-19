@@ -1,5 +1,6 @@
 package com.roguesmp.crafting.recipe;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.crafting.CraftingIngredient;
 import org.bukkit.inventory.ItemStack;
@@ -74,7 +75,7 @@ public final class CokeOvenRecipe extends CraftingRecipe {
         int[] amountsToConsume = new int[items.length];
         Map<String, Integer> stillNeeded = new HashMap<>(requiredCounts);
         for (int i = 0; i < items.length; i++) {
-            String key = CraftingIngredient.resolveKey(items[i]);
+            String key = ItemRef.idOf(items[i]);
             if (key == null) continue;
 
             Integer needed = stillNeeded.get(key);

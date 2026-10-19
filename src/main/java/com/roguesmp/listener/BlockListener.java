@@ -86,8 +86,10 @@ public class BlockListener implements Listener {
                 return;
             }
 
-            target.onBlockInteract(event);
-            if(event.useInteractedBlock() == Event.Result.DENY) return;
+            if(!event.getPlayer().isSneaking() || target.interactsWhileSneaking()){
+                target.onBlockInteract(event);
+                if(event.useInteractedBlock() == Event.Result.DENY) return;
+            }
         }
 
         if(event.getAction() == Action.RIGHT_CLICK_BLOCK) tryPlace(event, clicked, target);

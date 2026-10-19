@@ -1,5 +1,6 @@
 package com.roguesmp.crafting.recipe;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.crafting.CraftingIngredient;
 import org.bukkit.inventory.ItemStack;
@@ -103,7 +104,7 @@ public final class ShapelessCraftingRecipe extends CraftingRecipe {
     private static @NotNull Map<String, List<SlotAmount>> groupSlotsByKey(@NotNull ItemStack[] items) {
         Map<String, List<SlotAmount>> grouped = new TreeMap<>();
         for (int i = 0; i < items.length; i++) {
-            String key = CraftingIngredient.resolveKey(items[i]);
+            String key = ItemRef.idOf(items[i]);
             if (key == null) continue;
             grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(new SlotAmount(i, items[i].getAmount()));
         }

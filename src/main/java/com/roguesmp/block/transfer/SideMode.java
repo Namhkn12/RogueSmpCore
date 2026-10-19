@@ -29,12 +29,4 @@ public enum SideMode {
     public boolean pushes() {
         return pushes;
     }
-
-    public SideMode next() {
-        return values()[(ordinal() + 1) % values().length];
-    }
-
-    public SideMode previous() {
-        return values()[(ordinal() + values().length - 1) % values().length];
-    }
 }

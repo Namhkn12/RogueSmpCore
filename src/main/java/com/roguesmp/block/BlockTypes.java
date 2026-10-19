@@ -1,9 +1,11 @@
 package com.roguesmp.block;
 
+import com.roguesmp.block.data.EnergyGeneratorData;
 import com.roguesmp.block.data.GeneratorData;
 import com.roguesmp.block.data.NoData;
 import com.roguesmp.block.impl.TallyBlock;
 import com.roguesmp.block.impl.cokeoven.CokeOvenBlock;
+import com.roguesmp.block.impl.energy.EnergyGeneratorBlock;
 import com.roguesmp.block.impl.altar.AltarMainBlock;
 import com.roguesmp.block.impl.altar.AltarSideBlock;
 import com.roguesmp.codec.Codec;
@@ -25,6 +27,8 @@ public class BlockTypes {
     public static final BlockType<NoData, CokeOvenBlock> COKE_OVEN = plain("coke_oven", CokeOvenBlock::new);
     public static final BlockType<GeneratorData, ResourceGeneratorBlock> GENERATOR =
             register("generator", GeneratorData.CODEC, GeneratorData.DEFAULT, ResourceGeneratorBlock::new);
+    public static final BlockType<EnergyGeneratorData, EnergyGeneratorBlock> ENERGY_GENERATOR =
+            register("energy_generator", EnergyGeneratorData.CODEC, EnergyGeneratorData.DEFAULT, EnergyGeneratorBlock::new);
 
     /** Create a new SmpBlock instance of {@code id} from its corresponding registered data, or null if there's no such block. */
     public static @Nullable SmpBlock create(String id) {

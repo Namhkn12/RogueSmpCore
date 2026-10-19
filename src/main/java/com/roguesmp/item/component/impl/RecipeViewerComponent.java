@@ -1,8 +1,8 @@
 package com.roguesmp.item.component.impl;
 
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.context.ItemLoreContext;
-import com.roguesmp.crafting.CraftingIngredient;
 import com.roguesmp.crafting.gui.RecipeViewerGui;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
 import com.roguesmp.item.component.InteractableComponent;
@@ -41,7 +41,7 @@ public record RecipeViewerComponent(String preferredRecipe) implements Interacta
     public void onItemInteract(SmpPlayer smpPlayer, PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_AIR) return;
 
-        String itemKey = CraftingIngredient.resolveKey(event.getItem());
+        String itemKey = ItemRef.idOf(event.getItem());
         if (itemKey == null) return;
 
         Player player = event.getPlayer();

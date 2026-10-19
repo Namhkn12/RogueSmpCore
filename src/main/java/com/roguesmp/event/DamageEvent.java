@@ -45,6 +45,10 @@ public class DamageEvent extends Event implements Cancellable {
             return new Metadata(damageType, DamageOrigin.ENVIRONMENT, null, null);
         }
 
+        public static Metadata staff() {
+            return new Metadata(DamageType.MAGIC, DamageOrigin.STAFF, null, null);
+        }
+
         public static Metadata ability(DamageType damageType, @Nullable String abilityId) {
             return new Metadata(damageType, DamageOrigin.ABILITY, null, abilityId);
         }

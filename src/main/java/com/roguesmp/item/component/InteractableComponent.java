@@ -1,6 +1,7 @@
 package com.roguesmp.item.component;
 
 import com.roguesmp.player.SmpPlayer;
+import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -13,6 +14,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
  */
 public interface InteractableComponent extends ItemComponent {
     default void onItemInteract(SmpPlayer smpPlayer, PlayerInteractEvent event) {
+
+    }
+
+    default void onPreAttack(SmpPlayer smpPlayer, PrePlayerAttackEntityEvent event) {
 
     }
 

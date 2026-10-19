@@ -6,6 +6,7 @@ import com.roguesmp.item.component.InteractableComponent;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.item.component.TickingComponent;
 import com.roguesmp.player.SmpPlayer;
+import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -35,6 +36,18 @@ public class ItemComponentMechanic implements PlayerMechanic {
         for (ItemComponent component : smpItem.getComponents().values()) {
             if (component instanceof InteractableComponent interactable) {
                 interactable.onItemInteract(player, event);
+            }
+        }
+    }
+
+    @Override
+    public void onPreAttack(PrePlayerAttackEntityEvent event, SmpPlayer player) {
+        SmpItem smpItem = player.getItemAtEquipSlot(EquipSlot.MAINHAND);
+        if (smpItem == null) return;
+
+        for (ItemComponent component : smpItem.getComponents().values()) {
+            if (component instanceof InteractableComponent interactable) {
+                interactable.onPreAttack(player, event);
             }
         }
     }
