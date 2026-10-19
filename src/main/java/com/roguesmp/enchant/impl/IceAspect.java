@@ -7,10 +7,13 @@ import com.roguesmp.effect.impl.SpeedEffect;
 import com.roguesmp.enchant.Enchants;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.event.DamageEvent;
+import com.roguesmp.item.beam.MageBeam;
 import com.roguesmp.player.SmpPlayer;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,6 +59,16 @@ public class IceAspect implements SmpEnchant {
     @Override
     public void onDamageEntity(DamageEvent event, int level, @NotNull SmpPlayer player) {
         if (!event.isBasic(DamageType.MELEE) && !event.isBasic(DamageType.PROJECTILE)) return;
-        EffectManager.getInstance().addEffect(event.getVictim(), "ice_aspect_slowness", new SpeedEffect(40, -0.1 * level, "ice_aspect_slowness"));
+        applySlowness(event.getVictim(), level);
+    }
+
+    @Override
+    public void onMageBeamFire(MageBeam beam, int level, @NotNull SmpPlayer player) {
+        beam.addTrailParticle(Particle.SNOWFLAKE);
+        beam.addHitEffect(victim -> applySlowness(victim, level));
+    }
+
+    private static void applySlowness(Entity victim, int level) {
+        EffectManager.getInstance().addEffect(victim, "ice_aspect_slowness", new SpeedEffect(40, -0.1 * level, "ice_aspect_slowness"));
     }
 }

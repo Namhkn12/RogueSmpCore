@@ -1,5 +1,6 @@
 package com.roguesmp.player.mechanic;
 
+import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.event.*;
@@ -31,6 +32,8 @@ public interface PlayerMechanic {
     default void onInteract(PlayerInteractEvent event, SmpPlayer player) {}
 
     default void onEntityInteract(PlayerInteractEntityEvent event, SmpPlayer player) {}
+
+    default void onPreAttack(PrePlayerAttackEntityEvent event, SmpPlayer player) {}
 
     default void onArmSwing(PlayerArmSwingEvent event, SmpPlayer player) {}
 

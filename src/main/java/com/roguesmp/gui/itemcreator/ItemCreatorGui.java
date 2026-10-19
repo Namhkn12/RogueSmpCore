@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.attribute.Attributes;
+import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.JsonOps;
 import com.roguesmp.constant.EquipSlot;
@@ -27,6 +28,7 @@ import io.papermc.paper.registry.data.dialog.input.TextDialogInput;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
@@ -173,6 +175,9 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.WRENCH),
                 tooltip("Biến vật phẩm thành cờ lê để xoay/tháo khối custom.", null),
                 (response, audience) -> player.showDialog(buildWrenchDialog(player)));
+        multi.addButton(componentLabel(ItemComponentKeys.MAGE_STAFF),
+                tooltip("Biến vật phẩm thành trượng phép, chuột trái để bắn tia phép.", "Sát thương theo staff_damage_base, tầm bắn theo magic_range"),
+                (response, audience) -> player.showDialog(buildMageStaffDialog(player)));
         multi.addButton(componentLabel(ItemComponentKeys.ENERGY_SOURCE),
                 tooltip("Nhiên liệu cho máy phát năng lượng.", "Tổng năng lượng = energy_per_tick x burn_ticks"),
                 (response, audience) -> player.showDialog(buildEnergySourceDialog(player)));
@@ -866,6 +871,27 @@ public class ItemCreatorGui {
                 },
                 (response, audience) -> {
                     components.remove(ItemComponentKeys.DYED_COLOR.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
+    }
+
+    private Dialog buildMageStaffDialog(Player player) {
+        MageStaffComponent current = (MageStaffComponent) components.get(ItemComponentKeys.MAGE_STAFF.id());
+        String initial = current == null ? "" : String.format("#%06X", current.color().asRGB());
+        DialogBuilder builder = DialogBuilder.create(Component.text("Trượng phép"))
+                .canCloseWithEscape(false)
+                .addTextInput("color", Component.text("Màu tia phép, mã hex (vd: #B04BFF)"), b -> b.initial(initial).maxLength(16));
+
+        return wrapComponentDialog(player, ItemComponentKeys.MAGE_STAFF, builder,
+                (response, audience) -> {
+                    String value = Objects.requireNonNullElse(response.getText("color"), "").trim();
+                    DataResult<Color> result = Codec.HEX_COLOR.decode(new JsonPrimitive(value), JsonOps.INSTANCE);
+                    if (result.isSuccess()) components.put(ItemComponentKeys.MAGE_STAFF.id(), new MageStaffComponent(result.result()));
+                    else player.sendMessage(Utils.text(result.error(), NamedTextColor.RED));
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.MAGE_STAFF.id());
                     Utils.runLater(() -> openMainDialog(player));
                 });
     }
