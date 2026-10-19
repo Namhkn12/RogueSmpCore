@@ -20,6 +20,7 @@ public class EffectCodecs {
     public static final Codec<SilenceEffect> SILENCE = register(SilenceEffect.ID, SilenceEffect.CODEC);
     public static final Codec<EmpoweredStrikeEffect> EMPOWERED_STRIKE = register(EmpoweredStrikeEffect.ID, EmpoweredStrikeEffect.CODEC);
     public static final Codec<StealthEffect> STEALTH = register(StealthEffect.KEY, StealthEffect.CODEC);
+    public static final Codec<BrewedPotionEffect> BREWED_POTION = register(BrewedPotionEffect.ID, BrewedPotionEffect.CODEC);
 
     public static void loadClass() {
 

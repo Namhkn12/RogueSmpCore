@@ -143,6 +143,11 @@ public class AttributeMechanic implements PlayerMechanic {
 
     @Override
     public void onEquipmentChange(EquipSlot slot, @Nullable SmpItem newItem, SmpPlayer player) {
+        onAttributesChanged(player);
+    }
+
+    @Override
+    public void onAttributesChanged(SmpPlayer player) {
         Map<Attributes, Double> current = player.getActiveAttributes();
 
         Set<Attributes> touched = new HashSet<>(lastKnownValues.keySet());

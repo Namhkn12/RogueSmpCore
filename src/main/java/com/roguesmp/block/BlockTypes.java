@@ -1,6 +1,8 @@
 package com.roguesmp.block;
 
+import com.roguesmp.block.data.BrewingData;
 import com.roguesmp.block.data.EnergyGeneratorData;
+import com.roguesmp.block.impl.brewing.BrewingBlock;
 import com.roguesmp.block.data.GeneratorData;
 import com.roguesmp.block.data.NoData;
 import com.roguesmp.block.impl.TallyBlock;
@@ -29,6 +31,8 @@ public class BlockTypes {
             register("generator", GeneratorData.CODEC, GeneratorData.DEFAULT, ResourceGeneratorBlock::new);
     public static final BlockType<EnergyGeneratorData, EnergyGeneratorBlock> ENERGY_GENERATOR =
             register("energy_generator", EnergyGeneratorData.CODEC, EnergyGeneratorData.DEFAULT, EnergyGeneratorBlock::new);
+    public static final BlockType<BrewingData, BrewingBlock> BREWING =
+            register("brewing", BrewingData.CODEC, BrewingData.DEFAULT, BrewingBlock::new);
 
     /** Create a new SmpBlock instance of {@code id} from its corresponding registered data, or null if there's no such block. */
     public static @Nullable SmpBlock create(String id) {
