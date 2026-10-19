@@ -113,4 +113,4 @@ Hai giá trị do nơi gọi roll đặt vào context: `luck` (đổi xác suấ
 Thêm entry/condition mới: tạo class + `CODEC` (entry gộp `LootEntry.BASE_CODEC`), đăng ký trong `LootEntries` / `LootConditions` (`LootFunctions` hiện trống). Tên thư mục lấy từ hằng số `LootConfig.LOOT_TABLE_FOLDER = "loottable"`. Luồng roll nằm trong `LootService`; không có event nào can thiệp, kết quả trả về là list bất biến.
 
 ---
-◀ [JSON-Npcs](JSON-Npcs.md) · Về [Trang chủ](Home.md) · Tiếp theo: [JSON-Crafting](JSON-Crafting.md)
+◀ [JSON-Trades](JSON-Trades.md) · Về [Trang chủ](Home.md) · Tiếp theo: [JSON-Crafting](JSON-Crafting.md)

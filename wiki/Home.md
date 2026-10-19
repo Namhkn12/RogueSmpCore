@@ -17,6 +17,7 @@ Mỗi trang = 1 thư mục dữ liệu: **mỗi key làm gì, kiểu gì, bắt 
 | [JSON-Classes](JSON-Classes.md) | `classes/` | Lớp nhân vật: roster ability, giới hạn vũ khí |
 | [JSON-Quests](JSON-Quests.md) | `quests/` | Quest, objective, reward, hộp thư thưởng, quest hằng ngày, quest nhóm |
 | [JSON-Npcs](JSON-Npcs.md) | `npcs/` | NPC và action khi click |
+| [JSON-Trades](JSON-Trades.md) | `trades/` | Cửa hàng NPC: giá, điều kiện, phần thưởng, bố cục GUI |
 | [JSON-Loot](JSON-Loot.md) | `loottable/` | Pool, entry, condition, thuật toán roll |
 | [JSON-Crafting](JSON-Crafting.md) | `crafting_recipes/` | `shaped`, `shapeless`, `fusion` |
 | [JSON-Blocks](JSON-Blocks.md) | `blocks/`, `catalyst_types/` | Block, máy phát (generator), module, chất xúc tác, altar |

@@ -49,6 +49,13 @@ import com.roguesmp.loot.function.LootFunctions;
 import com.roguesmp.npc.BaseNpc;
 import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.npc.action.NpcActions;
+import com.roguesmp.trade.TradeShop;
+import com.roguesmp.trade.cost.TradeCost;
+import com.roguesmp.trade.cost.TradeCosts;
+import com.roguesmp.trade.requirement.TradeRequirement;
+import com.roguesmp.trade.requirement.TradeRequirements;
+import com.roguesmp.trade.result.TradeResult;
+import com.roguesmp.trade.result.TradeResults;
 import com.roguesmp.player.ability.*;
 import com.roguesmp.dungeon.DungeonDefinition;
 import com.roguesmp.dungeon.room.RoomDefinition;
@@ -111,6 +118,10 @@ public class Registries {
 
     public static final Registry<Codec<? extends NpcAction>> NPC_ACTION_CODEC = register(registry -> NpcActions.loadClass());
 
+    public static final Registry<Codec<? extends TradeCost>> TRADE_COST_CODEC = register(registry -> TradeCosts.loadClass());
+    public static final Registry<Codec<? extends TradeRequirement>> TRADE_REQUIREMENT_CODEC = register(registry -> TradeRequirements.loadClass());
+    public static final Registry<Codec<? extends TradeResult>> TRADE_RESULT_CODEC = register(registry -> TradeResults.loadClass());
+
     public static final Registry<Codec<? extends LootCondition>> LOOT_CONDITION_CODEC = register(registry -> LootConditions.loadClass());
     public static final Registry<Codec<? extends LootFunction>> LOOT_FUNCTION_CODEC = register(registry -> LootFunctions.loadClass());
     public static final Registry<Codec<? extends LootEntry>> LOOT_ENTRY_CODEC = register(registry -> LootEntries.loadClass());
@@ -139,6 +150,7 @@ public class Registries {
     public static final Registry<BlockType<?, ?>> BLOCK_TYPE = register(registry -> BlockTypes.loadClass());
     public static final Registry<BlockData> BLOCK = new Registry<>("blocks", BlockData.CODEC);
     public static final Registry<BaseNpc> NPC = new Registry<>("npcs", BaseNpc.CODEC);
+    public static final Registry<TradeShop> TRADE_SHOP = new Registry<>("trades", TradeShop.CODEC);
     public static final Registry<BaseEntity> ENTITY = new Registry<>("entities", BaseEntity.CODEC);
     public static final Registry<Spawner> SPAWNER = new Registry<>("spawners", Spawner.CODEC);
 
