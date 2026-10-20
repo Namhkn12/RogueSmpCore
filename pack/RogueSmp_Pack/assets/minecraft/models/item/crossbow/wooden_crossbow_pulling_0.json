@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/crossbow/wooden_crossbow",
+  "textures": {
+    "layer0": "minecraft:item/crossbow/wooden_crossbow_pulling_0"
+  }
+}

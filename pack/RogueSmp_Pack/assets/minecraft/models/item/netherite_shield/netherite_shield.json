@@ -1,0 +1,85 @@
+{
+	"format_version": "1.21.6",
+	"credit": "Made with Blockbench",
+	"textures": {
+		"0": "item/netherite_shield/netherite_shield",
+		"particle": "item/netherite_shield/netherite_shield"
+	},
+	"elements": [
+		{
+			"name": "template_shield_0",
+			"from": [2, 0, 0],
+			"to": [14, 22, 1],
+			"rotation": {"angle": 0, "axis": "y", "origin": [1, -41, 0]},
+			"faces": {
+				"north": {"uv": [0.25, 0.25, 3.25, 5.75], "texture": "#0"},
+				"east": {"uv": [0, 0.25, 0.25, 5.75], "texture": "#0"},
+				"south": {"uv": [3.5, 0.25, 6.5, 5.75], "texture": "#0"},
+				"west": {"uv": [3.25, 0.25, 3.5, 5.75], "texture": "#0"},
+				"up": {"uv": [0.25, 0, 3.25, 0.25], "texture": "#0"},
+				"down": {"uv": [3.25, 0, 6.25, 0.25], "texture": "#0"}
+			}
+		},
+		{
+			"name": "template_shield_1",
+			"from": [7, 8, 1],
+			"to": [9, 14, 7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7.5, 11, 4]},
+			"faces": {
+				"north": {"uv": [8.5, 1.5, 8.75, 3], "texture": "#0"},
+				"east": {"uv": [10, 1.5, 8.5, 3], "texture": "#0"},
+				"south": {"uv": [9.75, 1.5, 10, 3], "texture": "#0"},
+				"west": {"uv": [8.5, 1.5, 10, 3], "texture": "#0"},
+				"up": {"uv": [8.5, 1.5, 10, 1.75], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [8.5, 2.75, 10, 3], "rotation": 270, "texture": "#0"}
+			}
+		}
+	],
+	"gui_light": "front",
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [0, -90, 0],
+			"translation": [-4, -5, 4]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [0, -90, 0],
+			"translation": [-4, -5, 4]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 0, -5],
+			"translation": [-1.25, -12.5, 7.5],
+			"scale": [1.25, 1.25, 1.25]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 0, -5],
+			"translation": [-1.25, -12.5, 7.5],
+			"scale": [1.25, 1.25, 1.25]
+		},
+		"ground": {
+			"translation": [0, 2, 0],
+			"scale": [0.25, 0.25, 0.25]
+		},
+		"gui": {
+			"rotation": [15, 150, 5],
+			"translation": [1.25, -1, 0],
+			"scale": [0.65, 0.65, 0.65]
+		},
+		"fixed": {
+			"translation": [-0.125, -1.5, 2.75],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"on_shelf": {
+			"rotation": [0, -180, 0],
+			"translation": [0, 4, -11],
+			"scale": [1.4, 1.4, 1.4]
+		}
+	},
+	"groups": [
+		{
+			"name": "template_shield",
+			"origin": [8, 8, 8],
+			"color": 0,
+			"children": [0, 1]
+		}
+	]
+}

@@ -1,0 +1,10 @@
+{
+    "layers": {
+        "wings": [
+            {
+                "texture": "minecraft:armored_redstone_elytra",
+                "use_player_texture": false
+            }
+        ]
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "layers": {
+        "humanoid": [
+            {
+                "texture": "minecraft:plate_lapis"
+            }
+        ],
+        "humanoid_leggings": [
+            {
+                "texture": "minecraft:plate_lapis"
+            }
+        ]
+    }
+}

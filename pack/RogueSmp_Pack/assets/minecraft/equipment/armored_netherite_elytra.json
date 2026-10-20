@@ -1,0 +1,10 @@
+{
+    "layers": {
+        "wings": [
+            {
+                "texture": "minecraft:armored_netherite_elytra",
+                "use_player_texture": false
+            }
+        ]
+    }
+}
