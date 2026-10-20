@@ -2,9 +2,7 @@ package com.roguesmp.brewing;
 
 import com.roguesmp.attribute.Attributes;
 import com.roguesmp.effect.SmpEffect;
-import com.roguesmp.effect.impl.DamageIncreaseEffect;
-import com.roguesmp.effect.impl.ResistanceEffect;
-import com.roguesmp.effect.impl.VulnerabilityEffect;
+import com.roguesmp.effect.impl.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -24,6 +22,10 @@ public final class BrewStats {
 
         effect(VulnerabilityEffect.ID, VulnerabilityEffect::new);
         effect(DamageIncreaseEffect.ID, DamageIncreaseEffect::new);
+        effect(RegenerationEffect.ID, RegenerationEffect::new);
+        effect(AbsorptionEffect.ID, (duration, value) -> new AbsorptionEffect(duration, value));
+        effect(FireResistanceEffect.ID, FireResistanceEffect::new);
+        effect(DamageOverTimeEffect.ID, DamageOverTimeEffect::new);
         effect(ResistanceEffect.ID, (duration, value) -> new ResistanceEffect(duration, value, SmpEffect.DeathBehavior.REMOVE_ON_DEATH));
     }
 

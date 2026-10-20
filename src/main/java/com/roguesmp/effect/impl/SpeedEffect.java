@@ -1,7 +1,6 @@
 package com.roguesmp.effect.impl;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.constant.Keys;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -14,7 +13,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Locale;
 
 public class SpeedEffect extends SmpEffect {
     public static final String EFFECT_ID = "speed";
@@ -60,16 +58,12 @@ public class SpeedEffect extends SmpEffect {
         return Component.text(Utils.formatDecimal(value * 100) + "% tốc chạy", NamedTextColor.GREEN);
     }
 
-    private NamespacedKey modifierKey() {
-        return Keys.of("effect/" + getSource().toLowerCase(Locale.ROOT));
-    }
-
     @Override
     public void onGainEffect(Entity entity) {
         if (entity instanceof LivingEntity le) {
             AttributeInstance speedInstance = le.getAttribute(Attribute.MOVEMENT_SPEED);
             if (speedInstance != null) {
-                NamespacedKey key = modifierKey();
+                NamespacedKey key = sourceKey();
                 speedInstance.removeModifier(key);
                 speedInstance.addTransientModifier(new AttributeModifier(key, value, AttributeModifier.Operation.ADD_SCALAR));
             }
@@ -81,7 +75,7 @@ public class SpeedEffect extends SmpEffect {
         if (entity instanceof LivingEntity le) {
             AttributeInstance speedInstance = le.getAttribute(Attribute.MOVEMENT_SPEED);
             if (speedInstance != null) {
-                speedInstance.removeModifier(modifierKey());
+                speedInstance.removeModifier(sourceKey());
             }
         }
     }

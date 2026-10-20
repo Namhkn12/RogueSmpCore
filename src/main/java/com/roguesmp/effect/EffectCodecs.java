@@ -20,6 +20,10 @@ public class EffectCodecs {
     public static final Codec<SilenceEffect> SILENCE = register(SilenceEffect.ID, SilenceEffect.CODEC);
     public static final Codec<EmpoweredStrikeEffect> EMPOWERED_STRIKE = register(EmpoweredStrikeEffect.ID, EmpoweredStrikeEffect.CODEC);
     public static final Codec<StealthEffect> STEALTH = register(StealthEffect.KEY, StealthEffect.CODEC);
+    public static final Codec<RegenerationEffect> REGENERATION = register(RegenerationEffect.ID, RegenerationEffect.CODEC);
+    public static final Codec<AbsorptionEffect> ABSORPTION = register(AbsorptionEffect.ID, AbsorptionEffect.CODEC);
+    public static final Codec<FireResistanceEffect> FIRE_RESISTANCE = register(FireResistanceEffect.ID, FireResistanceEffect.CODEC);
+    public static final Codec<DamageOverTimeEffect> DAMAGE_OVER_TIME = register(DamageOverTimeEffect.ID, DamageOverTimeEffect.CODEC);
     public static final Codec<BrewedPotionEffect> BREWED_POTION = register(BrewedPotionEffect.ID, BrewedPotionEffect.CODEC);
 
     public static void loadClass() {
