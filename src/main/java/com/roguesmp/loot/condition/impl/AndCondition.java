@@ -6,13 +6,7 @@ import com.roguesmp.loot.context.LootContext;
 
 import java.util.List;
 
-/**
- * Passes only if every nested condition passes. An entry/pool's own {@code conditions} list is
- * already implicitly AND-ed, so this mostly exists to be nested inside an {@link OrCondition} —
- * e.g. {@code (A AND B) OR C}. An empty list is vacuously true.
- */
 public class AndCondition implements LootCondition {
-
     public static final String TYPE_KEY = "and";
 
     public static final Codec<AndCondition> CODEC = Codec.listOf(LootCondition.CODEC)

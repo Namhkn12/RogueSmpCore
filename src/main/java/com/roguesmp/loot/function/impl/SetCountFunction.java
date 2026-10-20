@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SetCountFunction implements LootFunction {
-
     public static final String TYPE_KEY = "set_count";
 
     public static final Codec<SetCountFunction> CODEC = Codec.composite(

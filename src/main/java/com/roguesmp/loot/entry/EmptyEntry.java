@@ -8,11 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-/**
- * A pure "miss" - contributes {@code weight} to the pool but produces nothing when picked.
- */
 public final class EmptyEntry extends LootEntry {
-
     public static final String TYPE_KEY = "empty";
 
     public static final Codec<EmptyEntry> CODEC = LootEntry.BASE_CODEC

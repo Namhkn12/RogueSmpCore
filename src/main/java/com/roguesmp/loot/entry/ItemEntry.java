@@ -15,14 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-/**
- * Drops a random amount of a single item in {@code [min, max]} - either a custom
- * {@link BaseItem} (referenced through a {@link Holder}, so a dangling id is reported by
- * {@code Registry#validateAllHolders} right after load) or a plain vanilla {@link Material}
- * ({@code "minecraft:"}-prefixed id, validated at decode time).
- */
 public final class ItemEntry extends LootEntry {
-
     public static final String TYPE_KEY = "item";
 
     public static final Codec<ItemEntry> CODEC = Codec.composite(
@@ -34,7 +27,6 @@ public final class ItemEntry extends LootEntry {
     );
 
     public sealed interface ItemRef {
-
         String VANILLA_PREFIX = "minecraft:";
 
         Codec<ItemRef> CODEC = Codec.STRING.comapFlatMap(ItemRef::parse, ItemRef::id);
@@ -81,10 +73,6 @@ public final class ItemEntry extends LootEntry {
         return result.result();
     }
 
-    /**
-     * Vanilla refs build a plain {@link ItemStack}, custom refs build the stack via the held
-     * {@link BaseItem}. Either way, amount is a random value in [min, max].
-     */
     @Override
     protected @NotNull List<ItemStack> generate(@NotNull LootContext context, int depth) {
         int amount = randomAmount();

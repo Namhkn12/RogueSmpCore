@@ -76,16 +76,16 @@ import java.util.List;
  *         {
  *           "type": "item",      // ItemEntry: rơi ra 1 item trong ItemRegistry
  *           "weight": 70,        // trọng số càng cao → càng dễ trúng
- *           "item_id": "ruby",   // id trong ItemRegistry (BaseItem)
+ *           "item": "ruby",   // id trong ItemRegistry (BaseItem)
  *           "min_amount": 1,     // (tuỳ chọn, mặc định 1)
  *           "max_amount": 3      // (tuỳ chọn, mặc định 1) → số lượng random [min, max]
  *         },
  *         {
- *           // item_id bắt đầu bằng "minecraft:" → build thẳng ItemStack vanilla qua Material,
+ *           // item bắt đầu bằng "minecraft:" → build thẳng ItemStack vanilla qua Material,
  *           // KHÔNG qua BaseItem/SmpItem (không component, không lore riêng gì cả).
  *           "type": "item",
  *           "weight": 15,
- *           "item_id": "minecraft:diamond",
+ *           "item": "minecraft:diamond",
  *           "min_amount": 1,
  *           "max_amount": 2
  *         },
@@ -102,7 +102,7 @@ import java.util.List;
  *           // Xem mục 4 — entry nào cũng có thể thêm "conditions"/"functions".
  *           "type": "item",
  *           "weight": 5,
- *           "item_id": "legendary_sword",
+ *           "item": "legendary_sword",
  *           "conditions": [
  *             { "type": "origin", "origins": ["CHEST"] }
  *           ],
@@ -115,7 +115,7 @@ import java.util.List;
  *     {
  *       "rolls": 1,
  *       "entries": [
- *         { "type": "item", "weight": 1, "item_id": "gold_coin", "min_amount": 5, "max_amount": 20 }
+ *         { "type": "item", "weight": 1, "item": "gold_coin", "min_amount": 5, "max_amount": 20 }
  *       ]
  *     }
  *   ]
@@ -139,7 +139,7 @@ import java.util.List;
  *            conditions? (mảng LootCondition, =[]) — fail 1 cái là bỏ CẢ pool, không roll gì
  *   Entry :  type (item|loot_table|empty)   weight? (int, =1)   quality? (double, =0)
  *            conditions? (mảng LootCondition, =[])   functions? (mảng LootFunction, =[])
- *            ItemEntry       → item_id (bắt buộc, "minecraft:..." = vanilla, ngược lại = BaseItem),
+ *            ItemEntry       → item (bắt buộc, "minecraft:..." = vanilla, ngược lại = BaseItem),
  *                              min_amount? (=1), max_amount? (=1)
  *            NestedTableEntry → name    (bắt buộc, = id bảng lồng)
  *            EmptyEntry      → (không cần field thêm)
@@ -214,7 +214,7 @@ import java.util.List;
  *   "conditions": [
  *     { "type": "origin", "origins": ["CHEST"] }
  *   ],
- *   "entries": [ { "type": "item", "weight": 1, "item_id": "chest_only_relic" } ]
+ *   "entries": [ { "type": "item", "weight": 1, "item": "chest_only_relic" } ]
  * }
  * }</pre>
  *
