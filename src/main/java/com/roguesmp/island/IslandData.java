@@ -23,6 +23,7 @@ public class IslandData {
             Codec.INT.optionalFieldOf("level", 0).forGetter(IslandData::getLevel),
             IslandSettings.VALUES_CODEC.optionalFieldOf("settings", new LinkedHashMap<String, Object>()).forGetter(data -> data.settings),
             Codec.listOf(EnergyNetworkData.CODEC).optionalFieldOf("energyNetworks", List.of()).forGetter(data -> data.energyNetworks),
+            Codec.unboundedMap(Codec.INT).optionalFieldOf("blockCounts", Map.of()).forGetter(data -> data.blockCounts),
             IslandData::new
     );
 
@@ -35,8 +36,9 @@ public class IslandData {
     private WorldPos spawnLocation;
     private final Map<String, Object> settings;
     private final List<EnergyNetworkData> energyNetworks;
+    private final Map<String, Integer> blockCounts;
 
-    private IslandData(UUID islandId, Set<UUID> members, @Nullable WorldPos spawnLocation, boolean archived, int level, Map<String, Object> settings, List<EnergyNetworkData> energyNetworks) {
+    private IslandData(UUID islandId, Set<UUID> members, @Nullable WorldPos spawnLocation, boolean archived, int level, Map<String, Object> settings, List<EnergyNetworkData> energyNetworks, Map<String, Integer> blockCounts) {
         this.islandId = islandId;
         this.members = new HashSet<>(members);
         this.spawnLocation = spawnLocation != null ? spawnLocation : defaultSpawn(islandId);
@@ -44,6 +46,7 @@ public class IslandData {
         this.level = level;
         this.settings = new LinkedHashMap<>(settings);
         this.energyNetworks = new ArrayList<>(energyNetworks);
+        this.blockCounts = new HashMap<>(blockCounts);
         this.dirty = false;
     }
 
@@ -55,6 +58,7 @@ public class IslandData {
         this.archived = false;
         this.settings = new LinkedHashMap<>();
         this.energyNetworks = new ArrayList<>();
+        this.blockCounts = new HashMap<>();
     }
 
     public IslandData(IslandData source) {
@@ -66,6 +70,7 @@ public class IslandData {
         this.dirty = source.dirty;
         this.settings = new LinkedHashMap<>(source.settings);
         this.energyNetworks = new ArrayList<>(source.energyNetworks.stream().map(EnergyNetworkData::copy).toList());
+        this.blockCounts = new HashMap<>(source.blockCounts);
     }
 
     private static WorldPos defaultSpawn(UUID islandId) {
@@ -149,6 +154,17 @@ public class IslandData {
 
     public void setLevel(int level) {
         this.level = level;
+        this.dirty = true;
+    }
+
+    public int getBlockCount(String blockType) {
+        return blockCounts.getOrDefault(blockType, 0);
+    }
+
+    public void changeBlockCount(String blockType, int delta) {
+        int count = getBlockCount(blockType) + delta;
+        if (count > 0) blockCounts.put(blockType, count);
+        else blockCounts.remove(blockType);
         this.dirty = true;
     }
 

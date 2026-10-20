@@ -1,16 +1,19 @@
 package com.roguesmp.island;
 
+import com.roguesmp.gui.island.IslandLevelGui;
 import com.roguesmp.gui.island.IslandMainGui;
 import com.roguesmp.permission.Permissions;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
+import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 public class IslandCommand {
 
@@ -30,6 +33,8 @@ public class IslandCommand {
                 .withSubcommand(acceptSub())
                 .withSubcommand(denySub())
                 .withSubcommand(visitSub())
+                .withSubcommand(levelSub())
+                .withSubcommand(setLevelSub())
                 .withSubcommand(purgeSub())
                 .executesPlayer((player, args) -> {
                     new IslandMainGui(player).showInventory(player);
@@ -100,6 +105,40 @@ public class IslandCommand {
                     }
                     islandManager.getVisitService().visitPlayerIsland(player, owner);
                 });
+    }
+
+    private CommandAPICommand levelSub() {
+        return new CommandAPICommand("level")
+                .executesPlayer((player, args) -> {
+                    IslandData island = getIsland(player);
+                    if (island == null) {
+                        player.sendMessage(Utils.fromString("<red>Bạn chưa có đảo."));
+                        return;
+                    }
+                    new IslandLevelGui(player, island).showInventory(player);
+                });
+    }
+
+    private CommandAPICommand setLevelSub() {
+        return new CommandAPICommand("setlevel")
+                .withPermission(Permissions.ISLAND_ADMIN.node())
+                .withArguments(new EntitySelectorArgument.OnePlayer("target"), new IntegerArgument("level", 0))
+                .executes((sender, args) -> {
+                    Player target = (Player) args.get(0);
+                    int level = (int) args.get(1);
+                    IslandData island = target == null ? null : getIsland(target);
+                    if (island == null) {
+                        sender.sendMessage(Utils.fromString("<red>Người chơi này chưa có đảo."));
+                        return;
+                    }
+                    islandManager.getLevelService().setLevel(island, level);
+                    sender.sendMessage(Utils.fromString("<green>Đã đặt cấp đảo của <yellow>" + target.getName() + " <green>thành <yellow>" + level + "<green>."));
+                });
+    }
+
+    private @Nullable IslandData getIsland(Player player) {
+        PlayerData playerData = islandManager.getPlayerManager().getDataManager().getData(player.getUniqueId());
+        return playerData == null ? null : islandManager.getIslandDataManager().getCachedData(playerData.getIslandId());
     }
 
     private CommandAPICommand purgeSub() {

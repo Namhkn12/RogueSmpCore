@@ -6,6 +6,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.*;
 import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.event.SmpBlockPlaceEvent;
+import com.roguesmp.block.event.SmpBlockRemoveEvent;
 import com.roguesmp.block.mining.MiningManager;
 import com.roguesmp.block.persistence.BlockDataRepository;
 import com.roguesmp.block.storage.ItemStorageHolder;
@@ -238,6 +239,7 @@ public class BlockManager {
         if(block.isStateful()) repository.delete(pos);
 
         if(display != null) display.remove();
+        Bukkit.getPluginManager().callEvent(new SmpBlockRemoveEvent(block));
     }
 
     /**

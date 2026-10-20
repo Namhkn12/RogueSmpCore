@@ -24,6 +24,7 @@ public class SmpBlock {
 
     private final BlockProperties properties;
     private String id;
+    private BlockType<?, ?> type;
     private BlockPos pos;
     private Location location;
     private UUID displayId;
@@ -142,6 +143,14 @@ public class SmpBlock {
 
     void setId(String id) {
         this.id = id;
+    }
+
+    public BlockType<?, ?> getType() {
+        return type;
+    }
+
+    void setType(BlockType<?, ?> type) {
+        this.type = type;
     }
 
     /**
