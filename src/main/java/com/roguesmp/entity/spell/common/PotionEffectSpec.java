@@ -1,5 +1,7 @@
 package com.roguesmp.entity.spell.common;
 
+import com.roguesmp.effect.EffectManager;
+import com.roguesmp.effect.impl.VanillaPotionEffect;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import net.kyori.adventure.key.Key;
@@ -37,6 +39,7 @@ public record PotionEffectSpec(PotionEffectType type, int duration, int amplifie
     }
 
     public static void applyAll(LivingEntity target, List<PotionEffectSpec> effects) {
-        effects.forEach(effect -> target.addPotionEffect(effect.toPotionEffect()));
+        effects.forEach(effect -> EffectManager.getInstance().addEffect(target, VanillaPotionEffect.sourceOf(effect.type()),
+                new VanillaPotionEffect(effect.duration(), effect.type(), effect.amplifier())));
     }
 }

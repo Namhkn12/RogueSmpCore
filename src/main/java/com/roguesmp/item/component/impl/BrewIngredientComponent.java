@@ -11,7 +11,6 @@ import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,17 +49,7 @@ public record BrewIngredientComponent(Map<BrewStat, StatRange> stats, int durati
         List<Component> lore = new ArrayList<>();
         lore.add(Utils.text("Nguyên liệu pha chế:", NamedTextColor.GRAY));
 
-        stats.forEach((stat, range) -> {
-            List<Component> min = stat.display(range.min(), 0);
-            if (range.isFixed()) {
-                min.forEach(line -> lore.add(BrewStat.indent(line)));
-                return;
-            }
-            List<Component> max = stat.display(range.max(), 0);
-            for (int i = 0; i < Math.min(min.size(), max.size()); i++) {
-                lore.add(BrewStat.indent(rangeLine(min.get(i), max.get(i))));
-            }
-        });
+        stats.forEach((stat, range) -> stat.displayRange(range.min(), range.max()).forEach(line -> lore.add(BrewStat.indent(line))));
 
         if (duration != 0) {
             String sign = duration > 0 ? "+" : "";
@@ -70,15 +59,4 @@ public record BrewIngredientComponent(Map<BrewStat, StatRange> stats, int durati
         context.builder().putLines(LORE_PRIORITY, lore);
     }
 
-    private static Component rangeLine(Component min, Component max) {
-        PlainTextComponentSerializer plain = PlainTextComponentSerializer.plainText();
-        String minText = plain.serialize(min);
-        String maxText = plain.serialize(max);
-        int minSplit = minText.indexOf(' ');
-        int maxSplit = maxText.indexOf(' ');
-        if (minSplit < 0 || maxSplit < 0 || !minText.substring(minSplit).equals(maxText.substring(maxSplit))) {
-            return min.append(Utils.text(" ~ ", NamedTextColor.DARK_GRAY)).append(max);
-        }
-        return Component.text(minText.substring(0, minSplit) + " ~ " + maxText.substring(0, maxSplit) + maxText.substring(maxSplit), max.color());
-    }
 }

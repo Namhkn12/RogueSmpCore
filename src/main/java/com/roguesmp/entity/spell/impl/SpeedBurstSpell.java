@@ -1,5 +1,7 @@
 package com.roguesmp.entity.spell.impl;
 
+import com.roguesmp.effect.EffectManager;
+import com.roguesmp.effect.impl.VanillaPotionEffect;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.entity.spell.SpellParams;
@@ -51,7 +53,8 @@ public class SpeedBurstSpell extends Spell {
         if (target == null || target.getLocation().distanceSquared(owner.getLocation()) > params.triggerRange() * params.triggerRange()) return;
 
         cooldownRemaining = params.cooldownTicks();
-        owner.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, params.durationTicks(), params.amplifier()));
+        EffectManager.getInstance().addEffect(owner, VanillaPotionEffect.sourceOf(PotionEffectType.SPEED),
+                new VanillaPotionEffect(params.durationTicks(), PotionEffectType.SPEED, params.amplifier()));
         owner.getWorld().spawnParticle(Particle.CLOUD, owner.getLocation().add(0, 0.2, 0), 10, 0.3, 0.1, 0.3, 0.05);
         owner.getWorld().playSound(owner.getLocation(), Sound.ENTITY_ZOMBIE_AMBIENT, 1f, 1.6f);
     }

@@ -31,7 +31,8 @@ public record BrewResult(Map<BrewStat, Double> stats, int durationTicks, int col
     public List<SmpEffect> effects() {
         List<SmpEffect> effects = new ArrayList<>();
         stats.forEach((stat, value) -> {
-            if (stat instanceof BrewStat.EffectStat effect) effects.add(effect.create(value, durationTicks));
+            SmpEffect effect = stat.createEffect(value, durationTicks);
+            if (effect != null) effects.add(effect);
         });
         return effects;
     }

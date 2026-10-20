@@ -5,7 +5,10 @@ import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.effect.impl.*;
 import org.jetbrains.annotations.Nullable;
 
+import org.bukkit.potion.PotionEffectType;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -26,6 +29,10 @@ public final class BrewStats {
         effect(AbsorptionEffect.ID, (duration, value) -> new AbsorptionEffect(duration, value));
         effect(FireResistanceEffect.ID, FireResistanceEffect::new);
         effect(DamageOverTimeEffect.ID, DamageOverTimeEffect::new);
+        for (PotionEffectType type : List.of(PotionEffectType.NIGHT_VISION, PotionEffectType.INVISIBILITY, PotionEffectType.WATER_BREATHING,
+                PotionEffectType.BLINDNESS, PotionEffectType.DARKNESS, PotionEffectType.NAUSEA, PotionEffectType.GLOWING)) {
+            register(new BrewStat.PotionStat(type, 1));
+        }
         effect(ResistanceEffect.ID, (duration, value) -> new ResistanceEffect(duration, value, SmpEffect.DeathBehavior.REMOVE_ON_DEATH));
     }
 

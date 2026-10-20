@@ -5,6 +5,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.JsonOps;
+import com.roguesmp.effect.impl.VanillaPotionEffect;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
@@ -13,9 +14,12 @@ import org.bukkit.entity.EvokerFangs;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -56,6 +60,7 @@ public class EffectManager {
 
     private final Map<UUID, EntityEffects> allEffects = new ConcurrentHashMap<>();
     private final Map<UUID, EntityEffects> playerCache = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<PotionEffectType, Map<String, Integer>>> vanillaRequests = new ConcurrentHashMap<>();
 
     private final BukkitRunnable runnable;
     private final Connection connection;
@@ -156,8 +161,86 @@ public class EffectManager {
         return entityEffects == null ? Map.of() : entityEffects.activeEffects();
     }
 
+    /**
+     * Asks for a vanilla potion effect on {@code entity} under {@code source} - the entity always
+     * carries the strongest amplifier among all active requests, with infinite duration, since
+     * timing belongs to the requesting {@link SmpEffect}.
+     */
+    public void requestVanilla(Entity entity, String source, PotionEffectType type, int amplifier) {
+        vanillaRequests.computeIfAbsent(entity.getUniqueId(), k -> new ConcurrentHashMap<>())
+                .computeIfAbsent(type, k -> new ConcurrentHashMap<>())
+                .put(source, amplifier);
+        syncVanilla(entity, type);
+    }
+
+    public void releaseVanilla(Entity entity, String source, PotionEffectType type) {
+        Map<PotionEffectType, Map<String, Integer>> byType = vanillaRequests.get(entity.getUniqueId());
+        if (byType != null) {
+            Map<String, Integer> requests = byType.get(type);
+            if (requests != null) {
+                requests.remove(source);
+                if (requests.isEmpty()) byType.remove(type);
+            }
+            if (byType.isEmpty()) vanillaRequests.remove(entity.getUniqueId());
+        }
+        syncVanilla(entity, type);
+    }
+
+    private void syncVanilla(Entity entity, PotionEffectType type) {
+        if (!(entity instanceof LivingEntity living)) return;
+
+        Map<PotionEffectType, Map<String, Integer>> byType = vanillaRequests.get(entity.getUniqueId());
+        Map<String, Integer> requests = byType == null ? null : byType.get(type);
+        PotionEffect current = living.getPotionEffect(type);
+
+        if (requests == null || requests.isEmpty()) {
+            if (current != null) living.removePotionEffect(type);
+            return;
+        }
+
+        int amplifier = Collections.max(requests.values());
+        if (current != null && current.isInfinite() && current.getAmplifier() == amplifier) return;
+        if (current != null) living.removePotionEffect(type);
+        living.addPotionEffect(new PotionEffect(type, PotionEffect.INFINITE_DURATION, amplifier, false, true, true));
+    }
+
+    /**
+     * Every vanilla potion effect change not made by plugin is absorbed into the effect system:
+     * additions become {@link VanillaPotionEffect}s, removals are refused (so milk does nothing),
+     * except {@code /effect clear}, which clears the vanilla-sourced stack instead. Expiry passes
+     * through - managed effects are infinite, so it only ends timed effects other code applied.
+     */
+    public void onPotionEffect(EntityPotionEffectEvent event) {
+        if (event.getCause() == EntityPotionEffectEvent.Cause.PLUGIN || event.getCause() == EntityPotionEffectEvent.Cause.EXPIRATION) return;
+
+        Entity entity = event.getEntity();
+        PotionEffectType type = event.getModifiedType();
+        switch (event.getAction()) {
+            case ADDED, CHANGED -> {
+                PotionEffect added = event.getNewEffect();
+                if (added == null || type.isInstant()) return;
+
+                event.setCancelled(true);
+                int duration = added.isInfinite() ? SmpEffect.INFINITE : added.getDuration();
+                Utils.runLater(() -> {
+                    if (entity.isValid()) addEffect(entity, VanillaPotionEffect.sourceOf(type), new VanillaPotionEffect(duration, type, added.getAmplifier()));
+                });
+            }
+            case REMOVED, CLEARED -> {
+                event.setCancelled(true);
+                if (event.getCause() == EntityPotionEffectEvent.Cause.COMMAND) {
+                    Utils.runLater(() -> clearEffects(entity, VanillaPotionEffect.sourceOf(type)));
+                }
+            }
+        }
+    }
+
     public void onPlayerJoin(PlayerJoinEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
+        vanillaRequests.remove(uuid);
+        for (PotionEffect stale : event.getPlayer().getActivePotionEffects()) {
+            if (stale.isInfinite()) event.getPlayer().removePotionEffect(stale.getType());
+        }
         EntityEffects cached = playerCache.remove(uuid);
         if (cached != null) {
             allEffects.put(uuid, cached);
@@ -178,6 +261,7 @@ public class EffectManager {
     }
 
     public void onPlayerQuit(PlayerQuitEvent event) {
+        vanillaRequests.remove(event.getPlayer().getUniqueId());
         cachePlayerAndScheduleRemoval(event.getPlayer());
     }
 

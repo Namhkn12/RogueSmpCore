@@ -1,5 +1,7 @@
 package com.roguesmp.player.ability.impl.active;
 
+import com.roguesmp.effect.EffectManager;
+import com.roguesmp.effect.impl.VanillaPotionEffect;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.event.DamageEvent;
@@ -15,10 +17,8 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.RayTraceResult;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 public class AetherStance extends Ability {
@@ -156,7 +156,8 @@ public class AetherStance extends Ability {
     }
 
     public void startLevitate(Player player) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 8, 2));
+        EffectManager.getInstance().addEffect(player, VanillaPotionEffect.sourceOf(PotionEffectType.LEVITATION),
+                new VanillaPotionEffect(8, PotionEffectType.LEVITATION, 2));
         AttributeInstance ai = player.getAttribute(Attribute.GRAVITY);
         if (ai != null) {
             ai.removeModifier(Keys.of("aether_stance"));

@@ -5,6 +5,7 @@ import com.roguesmp.event.DamageEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -23,6 +24,11 @@ public class EffectListener implements Listener {
     @EventHandler
     public void onDamage(DamageEvent event) {
         effectManager.handleDamageEvent(event);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPotionEffect(EntityPotionEffectEvent event) {
+        effectManager.onPotionEffect(event);
     }
 
     @EventHandler

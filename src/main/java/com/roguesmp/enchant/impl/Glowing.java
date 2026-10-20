@@ -1,17 +1,18 @@
 package com.roguesmp.enchant.impl;
 
+import com.roguesmp.effect.EffectManager;
+import com.roguesmp.effect.impl.VanillaPotionEffect;
+import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.Enchants;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,6 +28,10 @@ import java.util.Set;
  * reapplying it constantly.
  */
 public class Glowing implements SmpEnchant {
+
+    private static final String SOURCE = "enchant/glowing";
+    private static final SmpEffect.BaseProperties GLOWING = new SmpEffect.BaseProperties(
+            SmpEffect.INFINITE, SmpEffect.DeathBehavior.KEEP_ON_DEATH, SmpEffect.DisplayMode.WITHOUT_TIME, false);
 
     @Override
     public @NotNull String getId() {
@@ -68,10 +73,8 @@ public class Glowing implements SmpEnchant {
         Player bukkitPlayer = player.getBukkitPlayer();
         if (bukkitPlayer == null) return;
 
-        if (level <= 0) {
-            bukkitPlayer.removePotionEffect(PotionEffectType.GLOWING);
-        } else {
-            bukkitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, PotionEffect.INFINITE_DURATION, level - 1, true, false, true));
-        }
+        EffectManager effectManager = EffectManager.getInstance();
+        effectManager.clearEffects(bukkitPlayer, SOURCE);
+        if (level > 0) effectManager.addEffect(bukkitPlayer, SOURCE, new VanillaPotionEffect(GLOWING, PotionEffectType.GLOWING, level - 1));
     }
 }

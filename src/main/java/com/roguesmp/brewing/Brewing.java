@@ -1,7 +1,6 @@
 package com.roguesmp.brewing;
 
 import com.roguesmp.item.component.impl.BrewIngredientComponent;
-import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.format.TextColor;
 
 import java.util.ArrayList;
@@ -36,8 +35,7 @@ public final class Brewing {
             int slot = i;
             ingredient.stats().forEach((stat, range) -> totals.merge(stat, range.at(rollFraction(recipe.seed(), slot, stat)), Double::sum));
         }
-        totals.entrySet().removeIf(entry -> Utils.isEffectiveZero(entry.getValue())
-                || (entry.getKey() instanceof BrewStat.EffectStat && entry.getValue() < 0));
+        totals.entrySet().removeIf(entry -> !entry.getKey().isActive(entry.getValue()));
 
         int durationTicks = Math.max(minSeconds, durationSeconds(ingredients, baseSeconds)) * 20;
         return new BrewResult(totals, durationTicks, mixColor(ingredients));
