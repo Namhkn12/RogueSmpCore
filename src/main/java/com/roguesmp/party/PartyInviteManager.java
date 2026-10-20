@@ -25,17 +25,17 @@ public class PartyInviteManager {
     public boolean sendInvite(Player inviter, Player target) {
 
         if (!partyManager.isOwner(inviter)) {
-            inviter.sendMessage("§cChỉ chủ party mới có thể mời người khác!");
+            inviter.sendMessage(Component.text("Chỉ chủ party mới có thể mời người khác!", NamedTextColor.RED));
             return false;
         }
 
         if (partyManager.isInParty(target)) {
-            inviter.sendMessage("§cNgười chơi này đã ở trong party!");
+            inviter.sendMessage(Component.text("Người chơi này đã ở trong party!", NamedTextColor.RED));
             return false;
         }
 
         if (inviter.getUniqueId().equals(target.getUniqueId())) {
-            inviter.sendMessage("§cBạn không thể tự mời chính mình.");
+            inviter.sendMessage(Component.text("Bạn không thể tự mời chính mình.", NamedTextColor.RED));
             return false;
         }
 
@@ -43,7 +43,7 @@ public class PartyInviteManager {
         Map<UUID, BukkitTask> invites = pendingInvites.get(target.getUniqueId());
 
         if (invites.containsKey(inviter.getUniqueId())) {
-            inviter.sendMessage("§cBạn đã gửi lời mời trước đó.");
+            inviter.sendMessage(Component.text("Bạn đã gửi lời mời trước đó.", NamedTextColor.RED));
             return false;
         }
 
@@ -68,7 +68,7 @@ public class PartyInviteManager {
         );
 
         invites.put(inviter.getUniqueId(), expireTask);
-        inviter.sendMessage("§aĐã gửi lời mời tới " + target.getName() + ".");
+        inviter.sendMessage(Component.text("Đã gửi lời mời tới " + target.getName() + ".", NamedTextColor.GREEN));
         return true;
     }
 
@@ -76,43 +76,40 @@ public class PartyInviteManager {
         Player inviter = Bukkit.getPlayerExact(inviterName);
 
         if (inviter == null) {
-            target.sendMessage("§cNgười mời không online.");
+            target.sendMessage(Component.text("Người mời không online.", NamedTextColor.RED));
             return;
         }
 
         if (!hasInviteFrom(target, inviter)) {
-            target.sendMessage("§cBạn không có lời mời từ người này.");
+            target.sendMessage(Component.text("Bạn không có lời mời từ người này.", NamedTextColor.RED));
             return;
         }
 
-        removeInvite(target.getUniqueId(), inviter.getUniqueId());
+        clearInvites(target.getUniqueId());
         partyManager.joinParty(target, inviter);
-        inviter.sendMessage("§a" + target.getName() + " đã tham gia party!");
+        inviter.sendMessage(Component.text(target.getName() + " đã tham gia party!", NamedTextColor.GREEN));
     }
 
     public void denyInvite(Player target, String inviterName) {
         Player inviter = Bukkit.getPlayerExact(inviterName);
 
         if (inviter == null) {
-            target.sendMessage("§cNgười mời không online.");
+            target.sendMessage(Component.text("Người mời không online.", NamedTextColor.RED));
             return;
         }
 
         if (!hasInviteFrom(target, inviter)) {
-            target.sendMessage("§cBạn không có lời mời từ người này.");
+            target.sendMessage(Component.text("Bạn không có lời mời từ người này.", NamedTextColor.RED));
             return;
         }
 
         removeInvite(target.getUniqueId(), inviter.getUniqueId());
-        target.sendMessage("§cBạn đã từ chối lời mời.");
-        inviter.sendMessage("§c" + target.getName() + " đã từ chối lời mời.");
+        target.sendMessage(Component.text("Bạn đã từ chối lời mời.", NamedTextColor.RED));
+        inviter.sendMessage(Component.text(target.getName() + " đã từ chối lời mời.", NamedTextColor.RED));
     }
 
     public void handlePlayerQuit(Player player) {
-        Map<UUID, BukkitTask> invites = pendingInvites.remove(player.getUniqueId());
-        if (invites != null) {
-            invites.values().forEach(BukkitTask::cancel);
-        }
+        clearInvites(player.getUniqueId());
 
         for (Map<UUID, BukkitTask> map : pendingInvites.values()) {
             BukkitTask task = map.remove(player.getUniqueId());
@@ -125,9 +122,14 @@ public class PartyInviteManager {
         return invites != null && invites.containsKey(inviter.getUniqueId());
     }
 
-    private void removeInvite(UUID targetId, UUID inviterId) {
+    private void clearInvites(UUID targetId) {
+        Map<UUID, BukkitTask> invites = pendingInvites.remove(targetId);
+        if (invites != null) invites.values().forEach(BukkitTask::cancel);
+    }
+
+    private boolean removeInvite(UUID targetId, UUID inviterId) {
         Map<UUID, BukkitTask> invites = pendingInvites.get(targetId);
-        if (invites == null) return;
+        if (invites == null) return false;
 
         BukkitTask task = invites.remove(inviterId);
         if (task != null) task.cancel();
@@ -135,12 +137,14 @@ public class PartyInviteManager {
         if (invites.isEmpty()) {
             pendingInvites.remove(targetId);
         }
+        return task != null;
     }
 
     private void expireInvite(UUID targetId, UUID inviterId, Player target, Player inviter) {
-        removeInvite(targetId, inviterId);
+        if (!removeInvite(targetId, inviterId)) return;
+        if (partyManager.isInParty(target)) return;
 
-        if (target.isOnline()) target.sendMessage("§7Lời mời từ " + inviter.getName() + " đã hết hạn.");
-        if (inviter.isOnline()) inviter.sendMessage("§7Lời mời tới " + target.getName() + " đã hết hạn.");
+        if (target.isOnline()) target.sendMessage(Component.text("Lời mời từ " + inviter.getName() + " đã hết hạn.", NamedTextColor.GRAY));
+        if (inviter.isOnline()) inviter.sendMessage(Component.text("Lời mời tới " + target.getName() + " đã hết hạn.", NamedTextColor.GRAY));
     }
 }

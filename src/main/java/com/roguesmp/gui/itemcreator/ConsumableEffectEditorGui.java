@@ -59,16 +59,14 @@ public class ConsumableEffectEditorGui {
                 .canCloseWithEscape(false)
                 .externalTitle(Component.text(SpeedEffect.EFFECT_ID, present ? NamedTextColor.GREEN : NamedTextColor.GRAY))
                 .addTextInput("duration", Component.text("Thời gian (tick, 0-72000)"), b -> b.initial(String.valueOf(present ? current.getDuration() : 0)).maxLength(16))
-                .addTextInput("percent", Component.text("Tốc chạy (%, -100 đến 500)"), b -> b.initial(present ? Utils.formatDecimal(current.getMagnitude() * 100) : "0").maxLength(16))
-                .addTextInput("modifier_id", Component.text("Modifier ID"), b -> b.initial(present ? current.getModifierId() : "consumable_speed").maxLength(64));
+                .addTextInput("percent", Component.text("Tốc chạy (%, -100 đến 500)"), b -> b.initial(present ? Utils.formatDecimal(current.getMagnitude() * 100) : "0").maxLength(16));
 
         DialogTypeBuilder.MultiAction multi = builder.multiAction();
         multi.addButton(Component.text("Lưu"), null, (response, audience) -> {
             Float duration = DialogInputUtils.parseFloat(response.getText("duration"), 0f, 72000f);
             Float percent = DialogInputUtils.parseFloat(response.getText("percent"), -100f, 500f);
-            String modifierId = response.getText("modifier_id");
             if (duration != null && duration > 0f && percent != null) {
-                effects.put(SpeedEffect.EFFECT_ID, new SpeedEffect(Math.round(duration), percent / 100d, modifierId == null || modifierId.isBlank() ? "consumable_speed" : modifierId.trim()));
+                effects.put(SpeedEffect.EFFECT_ID, new SpeedEffect(Math.round(duration), percent / 100d));
             } else {
                 effects.remove(SpeedEffect.EFFECT_ID);
             }

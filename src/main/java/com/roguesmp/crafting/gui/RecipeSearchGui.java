@@ -24,7 +24,10 @@ import java.util.Locale;
 
 public class RecipeSearchGui extends BaseGui {
 
-    private static final int PAGE_SIZE = 45;
+    private static final int FIRST_RESULT_ROW = 1;
+    private static final int FIRST_RESULT_COL = 1;
+    private static final int RESULT_COLS = 7;
+    private static final int PAGE_SIZE = RESULT_COLS * 4;
     private static final int BOTTOM_ROW = 5;
     private static final int PREV_PAGE_COL = 3;
     private static final int SEARCH_COL = 4;
@@ -64,7 +67,14 @@ public class RecipeSearchGui extends BaseGui {
     @Override
     public void setup() {
         clearUi();
-        for (int col = 0; col < 9; col++) addButton(BOTTOM_ROW, col, FILLER_BLACK, ClickHandler.noAction());
+        for (int col = 0; col < 9; col++) {
+            addButton(0, col, FILLER_BLACK, ClickHandler.noAction());
+            addButton(BOTTOM_ROW, col, FILLER_BLACK, ClickHandler.noAction());
+        }
+        for (int row = 1; row < BOTTOM_ROW; row++) {
+            addButton(row, 0, FILLER_BLACK, ClickHandler.noAction());
+            addButton(row, 8, FILLER_BLACK, ClickHandler.noAction());
+        }
 
         addButton(BOTTOM_ROW, SEARCH_COL, searchButton(), event -> {
             event.setCancelled(true);
@@ -81,7 +91,8 @@ public class RecipeSearchGui extends BaseGui {
         int from = page * PAGE_SIZE;
         for (int i = from; i < Math.min(from + PAGE_SIZE, results.size()); i++) {
             String key = results.get(i);
-            addButton(i - from, resultDisplay(key), event -> {
+            int index = i - from;
+            addButton(FIRST_RESULT_ROW + index / RESULT_COLS, FIRST_RESULT_COL + index % RESULT_COLS, resultDisplay(key), event -> {
                 event.setCancelled(true);
                 RecipeViewerGui.forItem(player, key, this).showInventory(player);
             });

@@ -3,12 +3,12 @@ package com.roguesmp.trade.gui;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.trade.TradeDisplay;
+import com.roguesmp.gate.GateDisplay;
 import com.roguesmp.trade.TradeLayout;
 import com.roguesmp.trade.TradeOffer;
 import com.roguesmp.trade.TradeShop;
-import com.roguesmp.trade.cost.TradeCost;
-import com.roguesmp.trade.requirement.TradeRequirement;
+import com.roguesmp.gate.cost.Cost;
+import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.trade.result.TradeResult;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -99,13 +99,13 @@ public class TradeGui extends BaseGui {
         if (!offer.getCosts().isEmpty()) {
             lore.add(Component.empty());
             lore.add(header("Giá:", NamedTextColor.GOLD));
-            for (TradeCost cost : offer.getCosts()) lore.add(bullet(TradeDisplay.check(cost.getDisplay(smpPlayer), cost.canAfford(smpPlayer))));
+            for (Cost cost : offer.getCosts()) lore.add(bullet(GateDisplay.check(cost.getDisplay(smpPlayer), cost.canAfford(smpPlayer))));
         }
 
         if (!offer.getRequirements().isEmpty()) {
             lore.add(Component.empty());
             lore.add(header("Yêu cầu:", NamedTextColor.AQUA));
-            for (TradeRequirement requirement : offer.getRequirements()) lore.add(bullet(TradeDisplay.check(requirement.getDisplay(smpPlayer), requirement.test(smpPlayer))));
+            for (Requirement requirement : offer.getRequirements()) lore.add(bullet(GateDisplay.check(requirement.getDisplay(smpPlayer), requirement.test(smpPlayer))));
         }
 
         lore.add(Component.empty());

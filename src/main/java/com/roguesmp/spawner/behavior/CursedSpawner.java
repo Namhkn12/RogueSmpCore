@@ -1,12 +1,13 @@
 package com.roguesmp.spawner.behavior;
 
+import com.roguesmp.effect.EffectManager;
+import com.roguesmp.effect.impl.VanillaPotionEffect;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,35 +76,20 @@ public class CursedSpawner extends BaseBehavior {
         switch(effect) {
 
             case NAUSEA:
-                player.addPotionEffect(
-                        new PotionEffect(
-                                PotionEffectType.NAUSEA,
-                                300,
-                                0
-                        )
-                );
+                EffectManager.getInstance().addEffect(player, VanillaPotionEffect.sourceOf(PotionEffectType.NAUSEA),
+                        new VanillaPotionEffect(300, PotionEffectType.NAUSEA, 0));
                 player.sendMessage(Component.text("You are afflicted with nausea!", NamedTextColor.RED));
                 break;
 
             case BLINDNESS:
-                player.addPotionEffect(
-                        new PotionEffect(
-                                PotionEffectType.BLINDNESS,
-                                80,
-                                0
-                        )
-                );
+                EffectManager.getInstance().addEffect(player, VanillaPotionEffect.sourceOf(PotionEffectType.BLINDNESS),
+                        new VanillaPotionEffect(80, PotionEffectType.BLINDNESS, 0));
                 player.sendMessage(Component.text("Darkness consumes your vision!", NamedTextColor.RED));
                 break;
 
             case POISON:
-                player.addPotionEffect(
-                        new PotionEffect(
-                                PotionEffectType.POISON,
-                                300,
-                                0
-                        )
-                );
+                EffectManager.getInstance().addEffect(player, VanillaPotionEffect.sourceOf(PotionEffectType.POISON),
+                        new VanillaPotionEffect(300, PotionEffectType.POISON, 0));
                 player.sendMessage(Component.text("Poison courses through your veins!", NamedTextColor.RED));
                 break;
 

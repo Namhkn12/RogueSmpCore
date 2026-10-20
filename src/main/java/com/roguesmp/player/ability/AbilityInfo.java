@@ -3,7 +3,7 @@ package com.roguesmp.player.ability;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.trigger.AbilityResponse;
 import com.roguesmp.player.ability.trigger.AbilityTrigger;
-import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
+import com.roguesmp.gate.cost.Cost;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -199,7 +199,7 @@ public class AbilityInfo<T extends Ability> {
         return Collections.unmodifiableMap(actionRegistry);
     }
 
-    public @Unmodifiable Map<Integer, List<UpgradeRequirement>> getUpgradeRequirement() {
+    public @Unmodifiable Map<Integer, List<Cost>> getUpgradeCosts() {
         return Collections.unmodifiableMap(config().upgrades());
     }
 }

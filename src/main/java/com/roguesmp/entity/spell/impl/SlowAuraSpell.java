@@ -34,7 +34,7 @@ public class SlowAuraSpell extends Spell {
     public void run(int interval) {
         Collection<Player> players = owner.getLocation().getNearbyPlayers(5);
         players.forEach(player -> {
-            EffectManager.getInstance().addEffect(player, "slow_aura_spell", new SpeedEffect(100, -0.3, "slow_aura_spell"));
+            EffectManager.getInstance().addEffect(player, "slow_aura_spell", new SpeedEffect(100, -0.3));
         });
 
     }

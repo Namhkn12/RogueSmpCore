@@ -1,8 +1,12 @@
 package com.roguesmp.block;
 
+import com.roguesmp.block.data.BrewingData;
 import com.roguesmp.block.data.EnergyGeneratorData;
+import com.roguesmp.block.impl.brewing.BrewingBlock;
 import com.roguesmp.block.data.GeneratorData;
 import com.roguesmp.block.data.NoData;
+import com.roguesmp.block.data.WirelessNodeData;
+import com.roguesmp.block.impl.energy.WirelessNodeBlock;
 import com.roguesmp.block.impl.TallyBlock;
 import com.roguesmp.block.impl.cokeoven.CokeOvenBlock;
 import com.roguesmp.block.impl.energy.EnergyGeneratorBlock;
@@ -20,15 +24,19 @@ public class BlockTypes {
 
     public static final String DEFAULT_TYPE = "block";
 
-    public static final BlockType<NoData, SmpBlock> BASIC = plain(DEFAULT_TYPE, SmpBlock::new);
-    public static final BlockType<NoData, TallyBlock> TALLY = plain("tally", TallyBlock::new);
-    public static final BlockType<NoData, AltarMainBlock> ALTAR_MAIN = plain("altar_main", AltarMainBlock::new);
-    public static final BlockType<NoData, AltarSideBlock> ALTAR_SIDE = plain("altar_side", AltarSideBlock::new);
-    public static final BlockType<NoData, CokeOvenBlock> COKE_OVEN = plain("coke_oven", CokeOvenBlock::new);
+    public static final BlockType<NoData, SmpBlock> BASIC = plain(DEFAULT_TYPE, "Khối", SmpBlock::new);
+    public static final BlockType<NoData, TallyBlock> TALLY = plain("tally", "Bộ đếm", TallyBlock::new);
+    public static final BlockType<NoData, AltarMainBlock> ALTAR_MAIN = plain("altar_main", "Bàn thờ chính", AltarMainBlock::new);
+    public static final BlockType<NoData, AltarSideBlock> ALTAR_SIDE = plain("altar_side", "Bàn thờ phụ", AltarSideBlock::new);
+    public static final BlockType<NoData, CokeOvenBlock> COKE_OVEN = plain("coke_oven", "Lò cốc", CokeOvenBlock::new);
     public static final BlockType<GeneratorData, ResourceGeneratorBlock> GENERATOR =
-            register("generator", GeneratorData.CODEC, GeneratorData.DEFAULT, ResourceGeneratorBlock::new);
+            register("generator", "Máy tạo tài nguyên", GeneratorData.CODEC, GeneratorData.DEFAULT, ResourceGeneratorBlock::new);
     public static final BlockType<EnergyGeneratorData, EnergyGeneratorBlock> ENERGY_GENERATOR =
-            register("energy_generator", EnergyGeneratorData.CODEC, EnergyGeneratorData.DEFAULT, EnergyGeneratorBlock::new);
+            register("energy_generator", "Máy phát điện", EnergyGeneratorData.CODEC, EnergyGeneratorData.DEFAULT, EnergyGeneratorBlock::new);
+    public static final BlockType<WirelessNodeData, WirelessNodeBlock> WIRELESS_NODE =
+            register("wireless_node", "Nút không dây", WirelessNodeData.CODEC, WirelessNodeData.DEFAULT, WirelessNodeBlock::new);
+    public static final BlockType<BrewingData, BrewingBlock> BREWING =
+            register("brewing", "Bàn pha chế", BrewingData.CODEC, BrewingData.DEFAULT, BrewingBlock::new);
 
     /** Create a new SmpBlock instance of {@code id} from its corresponding registered data, or null if there's no such block. */
     public static @Nullable SmpBlock create(String id) {
@@ -37,15 +45,16 @@ public class BlockTypes {
 
         SmpBlock block = data.type().create(data);
         block.setId(id);
+        block.setType(data.type());
         return block;
     }
 
-    private static <B extends SmpBlock> BlockType<NoData, B> plain(String key, Function<BlockProperties, B> factory) {
-        return register(key, NoData.CODEC, NoData.INSTANCE, (properties, none) -> factory.apply(properties));
+    private static <B extends SmpBlock> BlockType<NoData, B> plain(String key, String displayName, Function<BlockProperties, B> factory) {
+        return register(key, displayName, NoData.CODEC, NoData.INSTANCE, (properties, none) -> factory.apply(properties));
     }
 
-    private static <D, B extends SmpBlock> BlockType<D, B> register(String key, Codec<D> dataCodec, D defaults, BiFunction<BlockProperties, D, B> factory) {
-        BlockType<D, B> type = new BlockType<>(key, dataCodec, defaults, factory);
+    private static <D, B extends SmpBlock> BlockType<D, B> register(String key, String displayName, Codec<D> dataCodec, D defaults, BiFunction<BlockProperties, D, B> factory) {
+        BlockType<D, B> type = new BlockType<>(key, displayName, dataCodec, defaults, factory);
         if (Registries.BLOCK_TYPE.get(key) != null) throw new IllegalStateException("Duplicate block type '" + key + "'");
         Registries.BLOCK_TYPE.register(key, type);
         return type;

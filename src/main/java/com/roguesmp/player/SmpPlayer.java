@@ -41,6 +41,8 @@ public class SmpPlayer {
     private final Map<Enchants, Integer> activeEnchantsView;
     private final Map<Attributes, Double> activeAttributesView;
 
+    private final Map<String, Map<Attributes, Double>> attributeBonuses = new HashMap<>();
+
     private final Map<EquipSlot, SmpItem> currentEquipment = new EnumMap<>(EquipSlot.class);
     private final Map<EquipSlot, SmpItem> currentEquipmentView = Collections.unmodifiableMap(currentEquipment);
 
@@ -123,6 +125,46 @@ public class SmpPlayer {
             double res = oldV + d;
             return Utils.isEffectiveZero(res) ? null : res;
         });
+    }
+
+    /**
+     * Replaces the attribute bonus granted under {@code source} (e.g. an effect), keeping a snapshot
+     * so a later replace/remove subtracts exactly what was added - safe to call repeatedly.
+     */
+    public void setAttributeBonus(Player player, String source, Map<Attributes, Double> bonus) {
+        Set<Attributes> affected = EnumSet.noneOf(Attributes.class);
+
+        Map<Attributes, Double> previous = attributeBonuses.remove(source);
+        if (previous != null) {
+            previous.forEach((attr, val) -> {
+                affected.add(attr);
+                mergeAttributeDelta(attr, -val);
+            });
+        }
+
+        if (!bonus.isEmpty()) {
+            Map<Attributes, Double> snapshot = new EnumMap<>(Attributes.class);
+            snapshot.putAll(bonus);
+            attributeBonuses.put(source, snapshot);
+            snapshot.forEach((attr, val) -> {
+                affected.add(attr);
+                mergeAttributeDelta(attr, val);
+            });
+        }
+
+        if (affected.isEmpty()) return;
+        for (Attributes attr : affected) {
+            Double total = activeAttributes.get(attr);
+            if (total == null) attr.getAttribute().removeVanillaAttribute(player);
+            else attr.getAttribute().addVanillaAttribute(player, total);
+        }
+        for (PlayerMechanic mechanic : mechanics) {
+            mechanic.onAttributesChanged(this);
+        }
+    }
+
+    public void removeAttributeBonus(Player player, String source) {
+        setAttributeBonus(player, source, Map.of());
     }
 
     /**

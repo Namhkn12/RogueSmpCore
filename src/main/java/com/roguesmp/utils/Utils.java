@@ -79,18 +79,18 @@ public class Utils {
 
     public static Component fromString(String miniMessage) {
         if (miniMessage == null) return null;
-        return MINI_MESSAGE.deserialize(miniMessage);
+        return MINI_MESSAGE.deserialize(miniMessage).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
     }
 
     public static Component fromString(String miniMessage, TagResolver... resolvers) {
         if (miniMessage == null) return null;
-        return MINI_MESSAGE.deserialize(miniMessage, resolvers);
+        return MINI_MESSAGE.deserialize(miniMessage, resolvers).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
     }
 
     public static List<Component> fromStrings(List<String> miniMessages) {
         List<Component> components = new ArrayList<>();
         for (String miniMessage : miniMessages) {
-            components.add(MINI_MESSAGE.deserialize(miniMessage));
+            components.add(MINI_MESSAGE.deserialize(miniMessage).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         }
         return components;
     }
@@ -98,7 +98,7 @@ public class Utils {
     public static List<Component> fromStrings(List<String> miniMessages, TagResolver... resolvers) {
         List<Component> components = new ArrayList<>();
         for (String miniMessage : miniMessages) {
-            components.add(MINI_MESSAGE.deserialize(miniMessage, resolvers));
+            components.add(MINI_MESSAGE.deserialize(miniMessage, resolvers).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         }
         return components;
     }
@@ -106,7 +106,7 @@ public class Utils {
     public static List<Component> fromStrings(String... miniMessages) {
         List<Component> components = new ArrayList<>();
         for (String miniMessage : miniMessages) {
-            components.add(MINI_MESSAGE.deserialize(miniMessage));
+            components.add(MINI_MESSAGE.deserialize(miniMessage).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         }
         return components;
     }

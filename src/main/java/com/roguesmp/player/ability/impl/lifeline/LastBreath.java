@@ -97,7 +97,7 @@ public class LastBreath extends Ability {
                 new ResistanceEffect(resistTicks, 1, SmpEffect.DeathBehavior.REMOVE_ON_DEATH));
 
         EffectManager.getInstance().addEffect(p, "last_breath_speed",
-                new SpeedEffect(120, speedBoost, "last_breath_speed"));
+                new SpeedEffect(120, speedBoost));
 
         // 3. Shockwave Knockback
         for (LivingEntity victim : EntityUtils.getNearbyMobs(loc, KNOCKBACK_RADIUS, 3, KNOCKBACK_RADIUS, living -> true)) {

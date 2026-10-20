@@ -1,5 +1,7 @@
 package com.roguesmp.dungeon.room;
 
+import com.roguesmp.effect.impl.VanillaPotionEffect;
+import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.impl.DamageIncreaseEffect;
@@ -26,7 +28,9 @@ public class RoomEffects {
         );
 
         private static final int CYCLE_SECONDS = 20;
-        private static final int BLINDNESS_TICKS = 40;
+        private static final String DARKNESS_SOURCE = "room/darkness";
+        private static final SmpEffect.BaseProperties DARKNESS_BLINDNESS = new SmpEffect.BaseProperties(
+                40, SmpEffect.DeathBehavior.REMOVE_ON_DEATH, SmpEffect.DisplayMode.HIDDEN, false);
 
         @Override
         public String getTypeId() {
@@ -48,14 +52,14 @@ public class RoomEffects {
             int phase = context.seconds() % CYCLE_SECONDS;
             boolean blind = !flicker || phase < 10 || phase > 15;
             for (Player player : context.players()) {
-                if (blind) player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, BLINDNESS_TICKS, 0, false, false, false));
-                else player.removePotionEffect(PotionEffectType.BLINDNESS);
+                if (blind) EffectManager.getInstance().addEffect(player, DARKNESS_SOURCE, new VanillaPotionEffect(DARKNESS_BLINDNESS, PotionEffectType.BLINDNESS, 0));
+                else EffectManager.getInstance().clearEffects(player, DARKNESS_SOURCE);
             }
         }
 
         @Override
         public void onEnd(RoomEffectContext<Void> context) {
-            context.players().forEach(player -> player.removePotionEffect(PotionEffectType.BLINDNESS));
+            context.players().forEach(player -> EffectManager.getInstance().clearEffects(player, DARKNESS_SOURCE));
         }
     }
 

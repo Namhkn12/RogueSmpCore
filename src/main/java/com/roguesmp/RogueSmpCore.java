@@ -1,5 +1,6 @@
 package com.roguesmp;
 
+import com.roguesmp.block.impl.energy.network.EnergyNetworkManager;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.command.FishingHotspotCommand;
 import com.roguesmp.command.RegionCommand;
@@ -27,6 +28,9 @@ import com.roguesmp.spawner.SpawnerCommand;
 import com.roguesmp.spawner.SpawnerSystem;
 import com.roguesmp.party.PartyCommand;
 import com.roguesmp.party.PartyListener;
+import com.roguesmp.player.trade.PlayerTradeCommand;
+import com.roguesmp.player.trade.PlayerTradeListener;
+import com.roguesmp.player.trade.PlayerTradeManager;
 import com.roguesmp.party.PartyManager;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.entity.EntityManager;
@@ -113,6 +117,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         EffectManager.init(this);
         BlockManager.init(this);
+        EnergyNetworkManager.init(this);
 
         //Entity
         EntityManager.init(this);
@@ -126,6 +131,7 @@ public final class RogueSmpCore extends JavaPlugin {
         ItemRegistry.init(this);
 
         PartyManager.init(this);
+        PlayerTradeManager.init(this);
 
         //Dungeon spawners
         SpawnerSystem.init(this);
@@ -166,6 +172,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
     //Run on onDisable
     public void saveData() {
+        PlayerTradeManager.getInstance().cancelAll();
         BlockManager.getInstance().shutdown();
 
         PlayerManager.getInstance().onDisable();
@@ -190,6 +197,7 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new PlayerListener(PlayerManager.getInstance(), IslandManager.getInstance()));
         registerListener(new DeathMessageListener(PlayerManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
+        registerListener(new ThrownPotionListener(this));
 
         registerListener(new EntityListener(EntityManager.getInstance()));
         registerListener(new NpcListener(NpcManager.getInstance()));
@@ -198,6 +206,7 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new RegionWandListener(RegionSelections.getInstance(), RegionVisualizer.getInstance()));
         registerListener(new IslandListener(IslandManager.getInstance()));
         registerListener(new PartyListener(PartyManager.getInstance()));
+        registerListener(new PlayerTradeListener(PlayerTradeManager.getInstance()));
         registerListener(new DungeonListener(DungeonManager.getInstance()));
         registerListener(SpawnerSystem.getInstance().listener());
         registerListener(new RewardChestListener());
@@ -226,6 +235,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         new IslandCommand(IslandManager.getInstance()).register();
         new PartyCommand(PartyManager.getInstance()).register();
+        new PlayerTradeCommand(PlayerTradeManager.getInstance()).register();
         new QuestCommand(QuestManager.getInstance()).register();
 
         ReloadCommand.register();

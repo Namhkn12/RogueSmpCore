@@ -39,6 +39,8 @@ public class ItemComponentKeys {
     public static final ComponentKey<DyedColorComponent> DYED_COLOR = register("dyed_color", DyedColorComponent.CODEC);
     public static final ComponentKey<ArmorTrimComponent> ARMOR_TRIM = register("trim", ArmorTrimComponent.CODEC);
     public static final ComponentKey<MageStaffComponent> MAGE_STAFF = register("mage_staff", MageStaffComponent.CODEC);
+    public static final ComponentKey<BrewIngredientComponent> BREW_INGREDIENT = register("brew_ingredient", BrewIngredientComponent.CODEC);
+    public static final ComponentKey<BrewedPotionComponent> BREWED_POTION = register("brewed_potion", BrewedPotionComponent.CODEC);
 
     public static void loadClass() {
 

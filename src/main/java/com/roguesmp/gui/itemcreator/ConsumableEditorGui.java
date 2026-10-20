@@ -31,6 +31,7 @@ public class ConsumableEditorGui {
 
     private final ItemCreatorGui parent;
     private boolean present;
+    private final String stackGroup;
     private int hunger;
     private float saturation;
     private boolean canAlwaysEat;
@@ -44,6 +45,7 @@ public class ConsumableEditorGui {
         this.parent = parent;
         this.present = current != null;
         this.hunger = current == null ? 4 : current.getHunger();
+        this.stackGroup = current == null ? "" : current.getStackGroup();
         this.saturation = current == null ? 0.3f : current.getSaturation();
         this.canAlwaysEat = current != null && current.canAlwaysEat();
         this.consumeSeconds = current == null ? 1.6f : current.getConsumeSeconds();
@@ -141,7 +143,7 @@ public class ConsumableEditorGui {
 
     private void commit() {
         present = true;
-        parent.applyConsumable(new ConsumableComponent(new ArrayList<>(effects.values()), hunger, saturation, canAlwaysEat, consumeSeconds, animation, sound, hasParticles));
+        parent.applyConsumable(new ConsumableComponent(new ArrayList<>(effects.values()), hunger, saturation, canAlwaysEat, consumeSeconds, animation, sound, hasParticles, stackGroup));
     }
 
     private static Key parseSoundKey(String raw) {

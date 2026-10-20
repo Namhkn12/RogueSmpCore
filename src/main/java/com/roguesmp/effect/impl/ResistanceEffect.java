@@ -67,7 +67,7 @@ public class ResistanceEffect extends SmpEffect {
     }
 
     @Override
-    public boolean isPersistent() {
+    protected boolean isPersistentByDefault() {
         return true;
     }
 

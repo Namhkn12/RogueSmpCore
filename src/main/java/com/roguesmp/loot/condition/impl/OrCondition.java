@@ -6,13 +6,7 @@ import com.roguesmp.loot.context.LootContext;
 
 import java.util.List;
 
-/**
- * Passes if any nested condition passes. Use this to express a disjunction that an entry's
- * (implicitly AND-ed) {@code conditions} list can't — e.g. {@code "either CHEST or ENTITY origin"}.
- * An empty list is vacuously false (nothing to satisfy it).
- */
 public class OrCondition implements LootCondition {
-
     public static final String TYPE_KEY = "or";
 
     public static final Codec<OrCondition> CODEC = Codec.listOf(LootCondition.CODEC)

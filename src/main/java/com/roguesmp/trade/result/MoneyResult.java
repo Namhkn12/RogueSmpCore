@@ -2,7 +2,7 @@ package com.roguesmp.trade.result;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.trade.TradeDisplay;
+import com.roguesmp.gate.GateDisplay;
 import net.kyori.adventure.text.Component;
 
 public class MoneyResult implements TradeResult {
@@ -35,6 +35,6 @@ public class MoneyResult implements TradeResult {
 
     @Override
     public Component getDisplay(SmpPlayer player) {
-        return TradeDisplay.money(amount, true);
+        return GateDisplay.money(amount, true);
     }
 }

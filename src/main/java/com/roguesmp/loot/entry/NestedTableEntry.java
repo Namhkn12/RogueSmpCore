@@ -14,13 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Delegates to another {@link LootTable} through a {@link Holder}, so a dangling table id is
- * reported by {@code Registry#validateAllHolders} right after load and survives registry reloads
- * (recursion depth capped in {@link LootTable#rollInto}, to guard against a circular reference).
- */
 public final class NestedTableEntry extends LootEntry {
-
     public static final String TYPE_KEY = "loot_table";
 
     public static final Codec<NestedTableEntry> CODEC = Codec.composite(

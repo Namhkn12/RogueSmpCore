@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class LootingFunction implements LootFunction {
-
     public static final String TYPE_KEY = "looting";
 
     public static final Codec<LootingFunction> CODEC = Codec.composite(

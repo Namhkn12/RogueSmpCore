@@ -15,26 +15,18 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-/**
- * Drops a random amount of a single item in {@code [min, max]} - either a custom
- * {@link BaseItem} (referenced through a {@link Holder}, so a dangling id is reported by
- * {@code Registry#validateAllHolders} right after load) or a plain vanilla {@link Material}
- * ({@code "minecraft:"}-prefixed id, validated at decode time).
- */
 public final class ItemEntry extends LootEntry {
-
     public static final String TYPE_KEY = "item";
 
     public static final Codec<ItemEntry> CODEC = Codec.composite(
             LootEntry.BASE_CODEC.forGetter(LootEntry::getBaseProperties),
-            ItemRef.CODEC.fieldOf("item_id").forGetter(ItemEntry::getItemRef),
+            ItemRef.CODEC.fieldOf("item").forGetter(ItemEntry::getItemRef),
             Codec.INT.optionalFieldOf("min_amount", 1).forGetter(ItemEntry::getMinAmount),
             Codec.INT.optionalFieldOf("max_amount", 1).forGetter(ItemEntry::getMaxAmount),
             ItemEntry::new
     );
 
     public sealed interface ItemRef {
-
         String VANILLA_PREFIX = "minecraft:";
 
         Codec<ItemRef> CODEC = Codec.STRING.comapFlatMap(ItemRef::parse, ItemRef::id);
@@ -48,7 +40,7 @@ public final class ItemEntry extends LootEntry {
             Material material = Material.matchMaterial(id);
             return material != null
                     ? DataResult.success(new Vanilla(id, material))
-                    : DataResult.error("Unknown vanilla item_id: " + id);
+                    : DataResult.error("Unknown vanilla item: " + id);
         }
 
         record Vanilla(String id, Material material) implements ItemRef {}
@@ -81,10 +73,6 @@ public final class ItemEntry extends LootEntry {
         return result.result();
     }
 
-    /**
-     * Vanilla refs build a plain {@link ItemStack}, custom refs build the stack via the held
-     * {@link BaseItem}. Either way, amount is a random value in [min, max].
-     */
     @Override
     protected @NotNull List<ItemStack> generate(@NotNull LootContext context, int depth) {
         int amount = randomAmount();
@@ -93,7 +81,7 @@ public final class ItemEntry extends LootEntry {
             case ItemRef.Vanilla vanilla -> List.of(new ItemStack(vanilla.material(), amount));
             case ItemRef.Custom custom -> {
                 if (!custom.holder().isBound()) {
-                    RogueSmpCore.LOGGER.warn("[LootTable] Unknown item_id '{}' — skipping.", custom.id());
+                    RogueSmpCore.LOGGER.warn("[LootTable] Unknown item '{}' — skipping.", custom.id());
                     yield List.of();
                 }
                 yield List.of(custom.holder().value().generateItemStack(context.getPlayer(), amount));

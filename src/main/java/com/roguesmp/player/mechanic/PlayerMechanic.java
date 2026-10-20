@@ -98,6 +98,12 @@ public interface PlayerMechanic {
     default void onEquipmentChange(EquipSlot slot, @Nullable SmpItem newItem, SmpPlayer player) {}
 
     /**
+     * Called when {@code SmpPlayer.getActiveAttributes()} changed outside of equipment, e.g. an
+     * effect granting a temporary attribute bonus.
+     */
+    default void onAttributesChanged(SmpPlayer player) {}
+
+    /**
      * Called once per {@code SmpPlayer.updateSlotStat} call, for every mechanic, BEFORE
      * {@link #onEquipmentChange} is broadcast to any of them - the one place that actually
      * recomputes what a slot's new item contributes (see {@code EquipmentStatMechanic}), so every

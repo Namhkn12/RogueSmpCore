@@ -11,12 +11,14 @@ import java.util.function.BiFunction;
 public final class BlockType<D, B extends SmpBlock> {
 
     private final String key;
+    private final String displayName;
     private final BiFunction<BlockProperties, D, B> factory;
     private final Codec<BlockData> dataCodec;
 
     @SuppressWarnings("unchecked")
-    BlockType(String key, Codec<D> dataCodec, D defaults, BiFunction<BlockProperties, D, B> factory) {
+    BlockType(String key, String displayName, Codec<D> dataCodec, D defaults, BiFunction<BlockProperties, D, B> factory) {
         this.key = key;
+        this.displayName = displayName;
         this.factory = factory;
         this.dataCodec = Codec.composite(
                 BlockProperties.CODEC.forGetter(BlockData::properties),
@@ -28,6 +30,10 @@ public final class BlockType<D, B extends SmpBlock> {
     /** The value of {@code "type"} in a block's JSON that selects this type. */
     public String key() {
         return key;
+    }
+
+    public String displayName() {
+        return displayName;
     }
 
     Codec<BlockData> dataCodec() {

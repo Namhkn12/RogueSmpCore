@@ -28,6 +28,7 @@ public class IslandManager {
     private final IslandInviteManager inviteManager;
     private final IslandPurgeService purgeService;
     private final IslandVisitService visitService;
+    private final IslandLevelService levelService;
     private final Set<UUID> creating = new HashSet<>();
 
     private IslandManager(RogueSmpCore plugin, PlayerManager playerManager) {
@@ -44,6 +45,7 @@ public class IslandManager {
         this.inviteManager = new IslandInviteManager(playerManager, islandDataManager, membershipService);
         this.purgeService = new IslandPurgeService(islandDataManager, islandWorldManager, islandRegionManager, teleportService);
         this.visitService = new IslandVisitService(playerManager, islandDataManager, islandWorldManager, teleportService);
+        this.levelService = new IslandLevelService(islandDataManager);
     }
 
     public void createIsland(Player creator) {
@@ -163,6 +165,10 @@ public class IslandManager {
 
     public IslandVisitService getVisitService() {
         return visitService;
+    }
+
+    public IslandLevelService getLevelService() {
+        return levelService;
     }
 
     public IslandPurgeService getPurgeService() {

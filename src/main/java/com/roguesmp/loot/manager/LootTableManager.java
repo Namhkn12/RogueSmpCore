@@ -6,14 +6,7 @@ import com.roguesmp.registry.Registries;
 
 import java.util.Map;
 
-/**
- * Thin read-facing wrapper around {@link Registries#LOOT_TABLE}. The initial load happens
- * automatically as part of {@link Registries#loadAllData} (like every other data-driven
- * registry) - {@link #load()} here exists purely for an explicit manual reload (e.g.
- * {@code /template reload loottable}).
- */
 public class LootTableManager {
-
     public void load() {
         Registries.LOOT_TABLE.clear();
         Registries.LOOT_TABLE.loadFrom(RogueSmpCore.getInstance());

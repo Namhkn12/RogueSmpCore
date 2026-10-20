@@ -25,7 +25,7 @@ public final class EntityEffects {
     }
 
     public EffectStack getOrCreateStack(String sourceId) {
-        return stacks.computeIfAbsent(sourceId, k -> new EffectStack());
+        return stacks.computeIfAbsent(sourceId, EffectStack::new);
     }
 
     /**
@@ -42,10 +42,7 @@ public final class EntityEffects {
 
     public @Nullable EffectStack removeEffects(Entity entity, String sourceId) {
         EffectStack stack = stacks.remove(sourceId);
-        if (stack != null) {
-            SmpEffect highest = stack.highest();
-            if (highest != null) highest.onLoseEffect(entity);
-        }
+        if (stack != null) stack.deactivateActive(entity);
         return stack;
     }
 

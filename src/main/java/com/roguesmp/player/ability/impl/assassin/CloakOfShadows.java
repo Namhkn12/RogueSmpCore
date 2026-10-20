@@ -98,7 +98,7 @@ public class CloakOfShadows extends Ability {
                         DamageEvent.Metadata metadata = DamageEvent.Metadata.ability(DamageType.MELEE, null);
                         metadata.setDoKnockback(false);
                         DamageUtils.damage(entity, player, damage, metadata);
-                        EffectManager.getInstance().addEffect(entity, "cos_slowness", new SpeedEffect(slownessDuration, - slownessAmplifier, "cos_slowness"));
+                        EffectManager.getInstance().addEffect(entity, "cos_slowness", new SpeedEffect(slownessDuration, - slownessAmplifier));
                     }
                     explodeEffect(radius / 5, bomb);
                     bomb.remove();

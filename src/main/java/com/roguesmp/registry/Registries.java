@@ -4,8 +4,6 @@ import com.roguesmp.player.death.DeathMessage;
 import com.roguesmp.quest.objective.ObjectiveProgress;
 import com.roguesmp.quest.objective.QuestObjective;
 import com.roguesmp.quest.objective.QuestObjectives;
-import com.roguesmp.quest.requirement.QuestRequirement;
-import com.roguesmp.quest.requirement.QuestRequirements;
 import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.quest.reward.QuestRewards;
 import com.roguesmp.quest.condition.QuestCondition;
@@ -13,6 +11,7 @@ import com.roguesmp.quest.condition.QuestConditions;
 import com.roguesmp.dungeon.feature.DungeonQuestConditions;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.BlockData;
+import com.roguesmp.island.IslandLevel;
 import com.roguesmp.block.BlockType;
 import com.roguesmp.block.BlockTypes;
 import com.roguesmp.codec.Codec;
@@ -50,10 +49,10 @@ import com.roguesmp.npc.BaseNpc;
 import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.npc.action.NpcActions;
 import com.roguesmp.trade.TradeShop;
-import com.roguesmp.trade.cost.TradeCost;
-import com.roguesmp.trade.cost.TradeCosts;
-import com.roguesmp.trade.requirement.TradeRequirement;
-import com.roguesmp.trade.requirement.TradeRequirements;
+import com.roguesmp.gate.cost.Cost;
+import com.roguesmp.gate.cost.Costs;
+import com.roguesmp.gate.requirement.Requirement;
+import com.roguesmp.gate.requirement.Requirements;
 import com.roguesmp.trade.result.TradeResult;
 import com.roguesmp.trade.result.TradeResults;
 import com.roguesmp.player.ability.*;
@@ -70,11 +69,9 @@ import com.roguesmp.dungeon.feature.DungeonFeatures;
 import com.roguesmp.world.PolarTemplateData;
 import com.roguesmp.player.ability.trigger.TriggerOption;
 import com.roguesmp.player.ability.trigger.TriggerOptions;
-import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
 import com.roguesmp.player.classes.PlayerClass;
 import com.roguesmp.quest.*;
 import com.roguesmp.tag.Tags;
-import com.roguesmp.player.ability.upgrade.UpgradeRequirements;
 import com.roguesmp.entity.SpecialEntities;
 import com.roguesmp.entity.spell.EntitySpells;
 import com.roguesmp.npc.action.GuiOpenActions;
@@ -104,7 +101,6 @@ public class Registries {
     public static final Registry<Codec<? extends RoomEffect<?>>> DUNGEON_ROOM_EFFECT_CODEC = register(registry -> RoomEffects.loadClass());
 
     public static final Registry<Codec<? extends QuestObjective>> QUEST_OBJECTIVE_CODEC = register(registry -> QuestObjectives.loadClass());
-    public static final Registry<Codec<? extends QuestRequirement>> QUEST_REQUIREMENT_CODEC = register(registry -> QuestRequirements.loadClass());
     public static final Registry<Codec<? extends QuestReward>> QUEST_REWARD_CODEC = register(registry -> QuestRewards.loadClass());
     public static final Registry<Codec<? extends QuestCondition>> QUEST_CONDITION_CODEC = register(registry -> {
         QuestConditions.loadClass();
@@ -114,12 +110,11 @@ public class Registries {
     // registers its progress codec alongside its own), not independently bootstrapped.
     public static final Registry<Codec<? extends ObjectiveProgress>> OBJECTIVE_PROGRESS_CODEC = new Registry<>();
 
-    public static final Registry<Codec<? extends UpgradeRequirement>> ABILITY_UPGRADE_REQUIREMENT_CODEC = register(registry -> UpgradeRequirements.loadClass());
 
     public static final Registry<Codec<? extends NpcAction>> NPC_ACTION_CODEC = register(registry -> NpcActions.loadClass());
 
-    public static final Registry<Codec<? extends TradeCost>> TRADE_COST_CODEC = register(registry -> TradeCosts.loadClass());
-    public static final Registry<Codec<? extends TradeRequirement>> TRADE_REQUIREMENT_CODEC = register(registry -> TradeRequirements.loadClass());
+    public static final Registry<Codec<? extends Cost>> COST_CODEC = register(registry -> Costs.loadClass());
+    public static final Registry<Codec<? extends Requirement>> REQUIREMENT_CODEC = register(registry -> Requirements.loadClass());
     public static final Registry<Codec<? extends TradeResult>> TRADE_RESULT_CODEC = register(registry -> TradeResults.loadClass());
 
     public static final Registry<Codec<? extends LootCondition>> LOOT_CONDITION_CODEC = register(registry -> LootConditions.loadClass());
@@ -149,6 +144,7 @@ public class Registries {
     public static final Registry<Quest> QUEST = new Registry<>("quests", Quest.CODEC);
     public static final Registry<BlockType<?, ?>> BLOCK_TYPE = register(registry -> BlockTypes.loadClass());
     public static final Registry<BlockData> BLOCK = new Registry<>("blocks", BlockData.CODEC);
+    public static final Registry<IslandLevel> ISLAND_LEVEL = new Registry<>("island_levels", IslandLevel.CODEC);
     public static final Registry<BaseNpc> NPC = new Registry<>("npcs", BaseNpc.CODEC);
     public static final Registry<TradeShop> TRADE_SHOP = new Registry<>("trades", TradeShop.CODEC);
     public static final Registry<BaseEntity> ENTITY = new Registry<>("entities", BaseEntity.CODEC);

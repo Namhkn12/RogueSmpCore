@@ -4,6 +4,7 @@ import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.item.SmpItem;
+import com.roguesmp.item.component.impl.BrewedPotionComponent;
 import com.roguesmp.item.component.impl.ConsumableComponent;
 import com.roguesmp.player.SmpPlayer;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
@@ -24,7 +25,10 @@ public class ItemConsumableMechanic implements PlayerMechanic {
 
         ConsumableComponent consumableComponent = smpItem.getComponent(ItemComponentKeys.CONSUMABLE);
         if (consumableComponent != null) {
-            consumableComponent.applyEffects(player.getBukkitPlayer());
+            consumableComponent.applyEffects(player.getBukkitPlayer(), smpItem.getId());
         }
+
+        BrewedPotionComponent brewedPotion = smpItem.getComponent(ItemComponentKeys.BREWED_POTION);
+        if (brewedPotion != null) brewedPotion.drink(player.getBukkitPlayer());
     }
 }

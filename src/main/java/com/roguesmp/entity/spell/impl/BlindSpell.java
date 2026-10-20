@@ -1,5 +1,7 @@
 package com.roguesmp.entity.spell.impl;
 
+import com.roguesmp.effect.EffectManager;
+import com.roguesmp.effect.impl.VanillaPotionEffect;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.MapCodec;
 import com.roguesmp.entity.spell.Spell;
@@ -7,10 +9,8 @@ import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.event.DamageEvent;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.List;
 
 public class BlindSpell extends Spell {
 
@@ -39,9 +39,8 @@ public class BlindSpell extends Spell {
     @Override
     public void onDamage(DamageEvent event) {
         Player player = (Player) event.getVictim();
-        if(player != null) player.addPotionEffects(List.of(
-                new PotionEffect(PotionEffectType.BLINDNESS, 60, 4)
-        ));
+        if (player != null) EffectManager.getInstance().addEffect(player, VanillaPotionEffect.sourceOf(PotionEffectType.BLINDNESS),
+                new VanillaPotionEffect(60, PotionEffectType.BLINDNESS, 4));
     }
 
     @Override

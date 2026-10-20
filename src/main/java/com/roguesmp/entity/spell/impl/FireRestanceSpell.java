@@ -1,14 +1,14 @@
 package com.roguesmp.entity.spell.impl;
 
+import com.roguesmp.effect.EffectManager;
+import com.roguesmp.effect.impl.VanillaPotionEffect;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.MapCodec;
 import com.roguesmp.entity.spell.Spell;
 import com.roguesmp.entity.spell.SpellParams;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.List;
 
 public class FireRestanceSpell extends Spell {
 
@@ -31,9 +31,8 @@ public class FireRestanceSpell extends Spell {
 
     @Override
     public void run(int interval) {
-        owner.addPotionEffects(List.of(
-                new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 500, 1)
-        ));
+        EffectManager.getInstance().addEffect(owner, VanillaPotionEffect.sourceOf(PotionEffectType.FIRE_RESISTANCE),
+                new VanillaPotionEffect(500, PotionEffectType.FIRE_RESISTANCE, 1));
     }
 
     @Override

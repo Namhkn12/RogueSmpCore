@@ -3,7 +3,7 @@ package com.roguesmp.quest;
 import com.roguesmp.quest.condition.QuestCondition;
 import com.roguesmp.quest.holder.QuestHolder;
 import com.roguesmp.quest.objective.QuestObjective;
-import com.roguesmp.quest.requirement.QuestRequirement;
+import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
@@ -27,7 +27,7 @@ public class Quest {
             Codec.STRING.fieldOf("name").forGetter(Quest::getName),
             Codec.MATERIAL.optionalFieldOf("icon", Material.PAPER).forGetter(Quest::getIcon),
             Codec.listOf(Codec.STRING).optionalFieldOf("description", new ArrayList<>()).forGetter(Quest::getDescription),
-            Codec.listOf(QuestRequirement.CODEC).optionalFieldOf("requirements", new ArrayList<>()).forGetter(Quest::getRequirements),
+            Codec.listOf(Requirement.CODEC).optionalFieldOf("requirements", new ArrayList<>()).forGetter(Quest::getRequirements),
             Codec.unboundedMap(QuestObjective.CODEC).optionalFieldOf("objectives", new HashMap<>()).forGetter(Quest::getObjectives),
             Codec.listOf(QuestReward.CODEC).fieldOf("rewards").forGetter(Quest::getRewards),
             Codec.BOOLEAN.optionalFieldOf("autoClaimRewards", false).forGetter(Quest::isAutoClaimRewards),
@@ -52,13 +52,13 @@ public class Quest {
     private final String name;
     private final Material icon;
     private final List<String> description;
-    private final List<QuestRequirement> requirements;
+    private final List<Requirement> requirements;
     private final Map<String, QuestObjective> objectives;
     private final List<QuestReward> rewards;
     private final boolean autoClaimRewards;
     private final List<QuestCondition> conditions;
 
-    public Quest(String id, String name, Material icon, @NotNull List<String> description, List<QuestRequirement> requirements, @NotNull Map<String, QuestObjective> objectives, @NotNull List<QuestReward> rewards, boolean autoClaimRewards, List<QuestCondition> conditions) {
+    public Quest(String id, String name, Material icon, @NotNull List<String> description, List<Requirement> requirements, @NotNull Map<String, QuestObjective> objectives, @NotNull List<QuestReward> rewards, boolean autoClaimRewards, List<QuestCondition> conditions) {
         this.id = id;
         this.name = name;
         this.icon = icon;
@@ -110,7 +110,7 @@ public class Quest {
         return autoClaimRewards;
     }
 
-    public @Unmodifiable List<QuestRequirement> getRequirements() {
+    public @Unmodifiable List<Requirement> getRequirements() {
         return Collections.unmodifiableList(requirements);
     }
 

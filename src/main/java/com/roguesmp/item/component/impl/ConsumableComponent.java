@@ -15,7 +15,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -37,6 +37,7 @@ public class ConsumableComponent implements ItemComponent {
             Codec.enumOf(ItemUseAnimation.class).fieldOf("animation").forGetter(ConsumableComponent::getAnimation),
             Codec.KEY.fieldOf("sound").forGetter(ConsumableComponent::getSound),
             Codec.BOOLEAN.fieldOf("hasParticles").forGetter(ConsumableComponent::hasParticles),
+            Codec.STRING.optionalFieldOf("stack_group", "").forGetter(ConsumableComponent::getStackGroup),
             ConsumableComponent::new
     );
 
@@ -50,8 +51,18 @@ public class ConsumableComponent implements ItemComponent {
     private final ItemUseAnimation animation;
     private final Key sound;
     private final boolean hasParticles;
+    private final String stackGroup;
 
     public ConsumableComponent(List<SmpEffect> effects, int hunger, float saturation, boolean canAlwaysEat, float consumeSeconds, ItemUseAnimation animation, Key sound, boolean hasParticles) {
+        this(effects, hunger, saturation, canAlwaysEat, consumeSeconds, animation, sound, hasParticles, "");
+    }
+
+    /**
+     * @param stackGroup effects from consumables sharing a group don't stack with each other;
+     *                   empty means the consuming item's own id
+     */
+    public ConsumableComponent(List<SmpEffect> effects, int hunger, float saturation, boolean canAlwaysEat, float consumeSeconds, ItemUseAnimation animation, Key sound, boolean hasParticles, String stackGroup) {
+        this.stackGroup = stackGroup;
         this.hunger = hunger;
         this.saturation = saturation;
         this.canAlwaysEat = canAlwaysEat;
@@ -110,13 +121,24 @@ public class ConsumableComponent implements ItemComponent {
         return Collections.unmodifiableList(effects);
     }
 
-    public void applyEffects(Player player) {
-        List<SmpEffect> effectList = getEffects();
-        for (SmpEffect smpEffect : effectList) {
-            String source = "consumable_" + smpEffect.getEffectID();
-            EffectManager.getInstance().addEffect(player, source, smpEffect.clone());
-        }
+    public String getStackGroup() {
+        return stackGroup;
+    }
 
+    public void applyEffects(Entity entity, String itemId) {
+        applyEffects(entity, itemId, 1.0);
+    }
+
+    public void applyEffects(Entity entity, String itemId, double durationScale) {
+        String group = stackGroup.isEmpty() ? itemId : stackGroup;
+        for (SmpEffect smpEffect : getEffects()) {
+            SmpEffect applied = smpEffect.clone();
+            if (!applied.isInfinite()) {
+                applied.setDuration((int) (applied.getDuration() * durationScale + 0.5));
+                if (applied.getDuration() <= 20) continue;
+            }
+            EffectManager.getInstance().addEffect(entity, group + "/" + applied.getEffectID(), applied);
+        }
     }
 
     public int getHunger() {
