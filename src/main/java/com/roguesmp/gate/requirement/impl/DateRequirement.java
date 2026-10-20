@@ -1,20 +1,17 @@
-package com.roguesmp.quest.requirement;
+package com.roguesmp.gate.requirement.impl;
 
-import com.google.gson.JsonObject;
+import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
-public class DateRequirement implements QuestRequirement {
+public class DateRequirement implements Requirement {
 
     public static final String TYPE_KEY = "date_single";
     public static final Codec<DateRequirement> CODEC = Codec.composite(
@@ -42,19 +39,12 @@ public class DateRequirement implements QuestRequirement {
     }
 
     @Override
-    public List<Component> getDisplay(SmpPlayer smpPlayer) {
-        List<Component> display = new ArrayList<>();
-        boolean isToday = canMeetRequirement(smpPlayer);
-
-        NamedTextColor color = isToday ? NamedTextColor.GREEN : NamedTextColor.RED;
-        String prefix = isToday ? "✔ Nhiệm vụ ngày: " : "❌ Chỉ có thể hoàn thành vào ngày: ";
-
-        display.add(Component.text(prefix + formattedDate, color));
-        return display;
+    public Component getDisplay(SmpPlayer smpPlayer) {
+        return Component.text("Chỉ trong ngày ", NamedTextColor.GRAY).append(Component.text(formattedDate, NamedTextColor.WHITE));
     }
 
     @Override
-    public boolean canMeetRequirement(SmpPlayer smpPlayer) {
+    public boolean test(SmpPlayer smpPlayer) {
         if (targetTimestamp == -1L) return true;
 
         // Tính toán thời gian ĐẦU NGÀY HÔM NAY (00:00) chính xác theo múi giờ Việt Nam tính bằng Mili-giây

@@ -1,5 +1,6 @@
-package com.roguesmp.trade.requirement;
+package com.roguesmp.gate.requirement.impl;
 
+import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.Quest;
@@ -11,7 +12,7 @@ import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
-public class QuestCompletedRequirement implements TradeRequirement {
+public class QuestCompletedRequirement implements Requirement {
 
     public static final String TYPE_KEY = "quest_completed";
     public static final Codec<QuestCompletedRequirement> CODEC = Codec.composite(

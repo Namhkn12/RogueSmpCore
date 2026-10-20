@@ -15,7 +15,7 @@ import java.util.List;
  * <p>New condition types register a {@code Codec} into
  * {@link com.roguesmp.loot.condition.LootConditions} to become usable from loot table JSON
  * under an entry's {@code "conditions"} array, dispatched by the {@code "type"} field —
- * same shape as {@link com.roguesmp.player.ability.upgrade.UpgradeRequirement}.
+ * same shape as {@link com.roguesmp.gate.cost.Cost}.
  */
 public interface LootCondition {
 

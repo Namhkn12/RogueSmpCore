@@ -1,12 +1,13 @@
-package com.roguesmp.trade.requirement;
+package com.roguesmp.gate.requirement.impl;
 
+import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
-public class PermissionRequirement implements TradeRequirement {
+public class PermissionRequirement implements Requirement {
 
     public static final String TYPE_KEY = "permission";
     public static final Codec<PermissionRequirement> CODEC = Codec.composite(

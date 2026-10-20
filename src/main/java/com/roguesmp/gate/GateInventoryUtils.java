@@ -1,4 +1,4 @@
-package com.roguesmp.trade;
+package com.roguesmp.gate;
 
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.SmpPlayer;
@@ -9,9 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public final class TradeInventory {
+public final class GateInventoryUtils {
 
-    private TradeInventory() {
+    private GateInventoryUtils() {
     }
 
     public static int count(SmpPlayer player, Holder<BaseItem> item) {

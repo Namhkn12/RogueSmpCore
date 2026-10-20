@@ -3,7 +3,7 @@ package com.roguesmp.player.ability;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.player.ability.trigger.AbilityTrigger;
-import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
+import com.roguesmp.gate.cost.Cost;
 import org.bukkit.Material;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public record AbilityConfig(
         String displayName,
         Material icon,
         Map<String, AbilityTrigger> triggers, // action key -> trigger, as authored in JSON (inverted by the loader)
-        Map<Integer, List<UpgradeRequirement>> upgrades
+        Map<Integer, List<Cost>> upgrades
 ) {
 
     /** Map keys must encode as strings, but upgrade levels are authored as JSON object keys like "1", "2". */
@@ -41,7 +41,7 @@ public record AbilityConfig(
             Codec.STRING.optionalFieldOf("display_name", "").forGetter(AbilityConfig::displayName),
             Codec.MATERIAL.optionalFieldOf("icon", Material.BARRIER).forGetter(AbilityConfig::icon),
             Codec.unboundedMap(AbilityTrigger.CODEC).optionalFieldOf("trigger", Map.of()).forGetter(AbilityConfig::triggers),
-            Codec.unboundedMap(LEVEL_KEY_CODEC, Codec.lenientListOf(UpgradeRequirement.CODEC)).optionalFieldOf("upgrades", Map.of()).forGetter(AbilityConfig::upgrades),
+            Codec.unboundedMap(LEVEL_KEY_CODEC, Codec.lenientListOf(Cost.CODEC)).optionalFieldOf("upgrades", Map.of()).forGetter(AbilityConfig::upgrades),
             AbilityConfig::new
     );
 

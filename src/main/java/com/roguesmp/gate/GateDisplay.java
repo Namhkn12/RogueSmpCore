@@ -1,4 +1,4 @@
-package com.roguesmp.trade;
+package com.roguesmp.gate;
 
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.component.ItemComponentKeys;
@@ -9,9 +9,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
-public final class TradeDisplay {
+public final class GateDisplay {
 
-    private TradeDisplay() {
+    private GateDisplay() {
     }
 
     public static Component itemName(Holder<BaseItem> item) {

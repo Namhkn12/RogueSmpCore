@@ -6,7 +6,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.Holder;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.registry.Registry;
-import com.roguesmp.trade.TradeDisplay;
+import com.roguesmp.gate.GateDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.inventory.ItemStack;
@@ -51,7 +51,7 @@ public class ItemResult implements TradeResult {
 
     @Override
     public Component getDisplay(SmpPlayer player) {
-        return Component.text(amount + "x ", NamedTextColor.YELLOW).append(TradeDisplay.itemName(item));
+        return Component.text(amount + "x ", NamedTextColor.YELLOW).append(GateDisplay.itemName(item));
     }
 
     @Override

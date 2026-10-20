@@ -1,4 +1,4 @@
-package com.roguesmp.trade.cost;
+package com.roguesmp.gate.cost;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
@@ -6,11 +6,11 @@ import com.roguesmp.registry.Registries;
 import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.Inventory;
 
-public interface TradeCost {
+public interface Cost {
 
-    Codec<TradeCost> CODEC = Codec.dispatch(
-            TradeCost::getTypeId,
-            Registries.TRADE_COST_CODEC::getOrThrow
+    Codec<Cost> CODEC = Codec.dispatch(
+            Cost::getTypeId,
+            Registries.COST_CODEC::getOrThrow
     );
 
     String getTypeId();

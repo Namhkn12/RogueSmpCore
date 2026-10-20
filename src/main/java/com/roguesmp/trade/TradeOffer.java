@@ -2,8 +2,8 @@ package com.roguesmp.trade;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.trade.cost.TradeCost;
-import com.roguesmp.trade.requirement.TradeRequirement;
+import com.roguesmp.gate.cost.Cost;
+import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.trade.result.TradeResult;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -17,18 +17,18 @@ public class TradeOffer {
 
     public static final Codec<TradeOffer> CODEC = Codec.composite(
             Codec.STRING.optionalFieldOf("name", () -> null).forGetter(TradeOffer::getName),
-            Codec.listOf(TradeCost.CODEC).optionalFieldOf("costs", new ArrayList<>()).forGetter(TradeOffer::getCosts),
-            Codec.listOf(TradeRequirement.CODEC).optionalFieldOf("requirements", new ArrayList<>()).forGetter(TradeOffer::getRequirements),
+            Codec.listOf(Cost.CODEC).optionalFieldOf("costs", new ArrayList<>()).forGetter(TradeOffer::getCosts),
+            Codec.listOf(Requirement.CODEC).optionalFieldOf("requirements", new ArrayList<>()).forGetter(TradeOffer::getRequirements),
             Codec.listOf(TradeResult.CODEC).fieldOf("results").forGetter(TradeOffer::getResults),
             TradeOffer::new
     );
 
     private final @Nullable String name;
-    private final List<TradeCost> costs;
-    private final List<TradeRequirement> requirements;
+    private final List<Cost> costs;
+    private final List<Requirement> requirements;
     private final List<TradeResult> results;
 
-    public TradeOffer(@Nullable String name, List<TradeCost> costs, List<TradeRequirement> requirements, List<TradeResult> results) {
+    public TradeOffer(@Nullable String name, List<Cost> costs, List<Requirement> requirements, List<TradeResult> results) {
         this.name = name;
         this.costs = costs;
         this.requirements = requirements;
@@ -67,11 +67,11 @@ public class TradeOffer {
         return name;
     }
 
-    public List<TradeCost> getCosts() {
+    public List<Cost> getCosts() {
         return costs;
     }
 
-    public List<TradeRequirement> getRequirements() {
+    public List<Requirement> getRequirements() {
         return requirements;
     }
 

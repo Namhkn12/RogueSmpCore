@@ -1,12 +1,13 @@
-package com.roguesmp.trade.requirement;
+package com.roguesmp.gate.requirement.impl;
 
+import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.trade.TradeDisplay;
+import com.roguesmp.gate.GateDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public class MoneyBalanceRequirement implements TradeRequirement {
+public class MoneyBalanceRequirement implements Requirement {
 
     public static final String TYPE_KEY = "money";
     public static final Codec<MoneyBalanceRequirement> CODEC = Codec.composite(
@@ -36,6 +37,6 @@ public class MoneyBalanceRequirement implements TradeRequirement {
 
     @Override
     public Component getDisplay(SmpPlayer player) {
-        return Component.text("Sở hữu ", NamedTextColor.GRAY).append(TradeDisplay.money(amount, test(player)));
+        return Component.text("Sở hữu ", NamedTextColor.GRAY).append(GateDisplay.money(amount, test(player)));
     }
 }

@@ -1,11 +1,12 @@
-package com.roguesmp.trade.cost;
+package com.roguesmp.gate.cost.impl;
 
+import com.roguesmp.gate.cost.Cost;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.trade.TradeDisplay;
+import com.roguesmp.gate.GateDisplay;
 import net.kyori.adventure.text.Component;
 
-public class MoneyCost implements TradeCost {
+public class MoneyCost implements Cost {
 
     public static final String TYPE_KEY = "money";
     public static final Codec<MoneyCost> CODEC = Codec.composite(
@@ -40,6 +41,6 @@ public class MoneyCost implements TradeCost {
 
     @Override
     public Component getDisplay(SmpPlayer player) {
-        return TradeDisplay.money(amount, canAfford(player));
+        return GateDisplay.money(amount, canAfford(player));
     }
 }

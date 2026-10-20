@@ -1,5 +1,6 @@
-package com.roguesmp.trade.requirement;
+package com.roguesmp.gate.requirement.impl;
 
+import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandManager;
@@ -7,7 +8,7 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 
-public class LevelRequirement implements TradeRequirement {
+public class LevelRequirement implements Requirement {
 
     public static final String TYPE_KEY = "level";
     public static final Codec<LevelRequirement> CODEC = Codec.composite(

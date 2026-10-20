@@ -1,15 +1,15 @@
-package com.roguesmp.trade.requirement;
+package com.roguesmp.gate.requirement;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.Registries;
 import net.kyori.adventure.text.Component;
 
-public interface TradeRequirement {
+public interface Requirement {
 
-    Codec<TradeRequirement> CODEC = Codec.dispatch(
-            TradeRequirement::getTypeId,
-            Registries.TRADE_REQUIREMENT_CODEC::getOrThrow
+    Codec<Requirement> CODEC = Codec.dispatch(
+            Requirement::getTypeId,
+            Registries.REQUIREMENT_CODEC::getOrThrow
     );
 
     String getTypeId();

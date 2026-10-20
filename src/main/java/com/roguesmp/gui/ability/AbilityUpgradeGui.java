@@ -3,7 +3,7 @@ package com.roguesmp.gui.ability;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.AbilityInfo;
-import com.roguesmp.player.ability.upgrade.UpgradeRequirement;
+import com.roguesmp.gate.cost.Cost;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -15,6 +15,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -37,12 +38,12 @@ public class AbilityUpgradeGui extends BaseGui {
         clearUi();
         fillEmpty(FILLER_BLACK);
         int nextLevel = currentLevel + 1;
-        List<UpgradeRequirement> requirements = info.getUpgradeRequirement().get(nextLevel);
+        List<Cost> costs = info.getUpgradeCosts().get(nextLevel);
 
-        if (requirements == null) {
+        if (costs == null) {
             renderMaxLevel();
         } else {
-            renderUpgradePreview(nextLevel, requirements);
+            renderUpgradePreview(nextLevel, costs);
         }
 
         addButton(4, 0, PREV_PAGE_BUTTON, event -> {
@@ -51,7 +52,7 @@ public class AbilityUpgradeGui extends BaseGui {
         });
     }
 
-    private void renderUpgradePreview(int nextLevel, List<UpgradeRequirement> requirements) {
+    private void renderUpgradePreview(int nextLevel, List<Cost> costs) {
         // Same scaling-tag resolver AbilityInfo#getFormattedDescription uses (old -> new
         // comparison when the value changes between levels) - a new :format kind only needs
         // adding once, in AbilityInfo#formatScalingValue, for both to pick it up.
@@ -75,20 +76,21 @@ public class AbilityUpgradeGui extends BaseGui {
         previewItem.setData(DataComponentTypes.LORE, ItemLore.lore(previewLore));
         addItem(1, 4, previewItem);
 
-        renderRequirementsAndConfirm(requirements, nextLevel);
+        renderCostsAndConfirm(costs, nextLevel);
     }
 
-    private void renderRequirementsAndConfirm(List<UpgradeRequirement> requirements, int nextLevel) {
+    private void renderCostsAndConfirm(List<Cost> costs, int nextLevel) {
         List<Component> costLore = new ArrayList<>();
         costLore.add(Component.empty());
 
         boolean canAfford = true;
-        for (UpgradeRequirement req : requirements) {
-            if (!req.canFulfill(smpPlayer)) canAfford = false;
-            // Uses your UpgradeRequirement#getDisplay(SmpPlayer)
-            costLore.add(req.getDisplay(smpPlayer).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        for (Cost cost : costs) {
+            if (!cost.canAfford(smpPlayer)) canAfford = false;
+            costLore.add(Component.text(" • ", NamedTextColor.DARK_GRAY)
+                    .append(cost.getDisplay(smpPlayer))
+                    .decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         }
-        if (requirements.isEmpty()) costLore.add(Utils.text("Miễn phí", NamedTextColor.GREEN));
+        if (costs.isEmpty()) costLore.add(Utils.text("Miễn phí", NamedTextColor.GREEN));
 
         costLore.add(Component.empty());
         costLore.add(Utils.text("Bấm nút bên dưới để nâng cấp!", NamedTextColor.GRAY));
@@ -105,13 +107,13 @@ public class AbilityUpgradeGui extends BaseGui {
                 Component.text("NÂNG CẤP", NamedTextColor.GREEN, TextDecoration.BOLD) :
                 Component.text("KHÔNG ĐỦ YÊU CẦU", NamedTextColor.RED));
 
-        final boolean finalCanAfford = canAfford;
         addButton(4, 4, confirm, event -> {
             event.setCancelled(true);
-            if (!finalCanAfford) return;
+            if (!costs.stream().allMatch(cost -> cost.canAfford(smpPlayer))) return;
 
-            // Execute Upgrade logic
-            requirements.forEach(req -> req.consume(smpPlayer));
+            Inventory inventory = event.getWhoClicked().getInventory();
+            costs.forEach(cost -> cost.takeFrom(inventory));
+            costs.forEach(cost -> cost.take(smpPlayer));
             smpPlayer.getPlayerData().setAbilityLevel(info.getId(), nextLevel);
 
             event.getWhoClicked().sendMessage(Component.text("Nâng cấp thành công!", NamedTextColor.GREEN));

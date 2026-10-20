@@ -10,7 +10,7 @@ import com.roguesmp.quest.holder.PlayerHolder;
 import com.roguesmp.quest.holder.QuestHolder;
 import com.roguesmp.quest.objective.ObjectiveProgress;
 import com.roguesmp.quest.objective.QuestObjective;
-import com.roguesmp.quest.requirement.QuestRequirement;
+import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.event.QuestCompletedEvent;
 import com.roguesmp.event.QuestProgressEvent;
@@ -360,8 +360,8 @@ public class QuestManager {
             return false;
         }
 
-         for (QuestRequirement requirement : quest.getRequirements()) {
-             if (!requirement.canMeetRequirement(smpPlayer)) return false;
+         for (Requirement requirement : quest.getRequirements()) {
+             if (!requirement.test(smpPlayer)) return false;
          }
 
         return true;

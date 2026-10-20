@@ -1,21 +1,22 @@
-package com.roguesmp.trade.requirement;
+package com.roguesmp.gate.requirement.impl;
 
+import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.Holder;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.registry.Registry;
-import com.roguesmp.trade.TradeDisplay;
-import com.roguesmp.trade.TradeInventory;
+import com.roguesmp.gate.GateDisplay;
+import com.roguesmp.gate.GateInventoryUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public class ItemOwnedRequirement implements TradeRequirement {
+public class ItemOwnedRequirement implements Requirement {
 
     public static final String TYPE_KEY = "item";
     public static final Codec<ItemOwnedRequirement> CODEC = Codec.composite(
-            Registry.referenceCodec(() -> Registries.ITEM).fieldOf("item_id").forGetter(ItemOwnedRequirement::getItem),
+            Registry.referenceCodec(() -> Registries.ITEM).fieldOf("item").forGetter(ItemOwnedRequirement::getItem),
             Codec.INT.optionalFieldOf("amount", 1).forGetter(ItemOwnedRequirement::getAmount),
             ItemOwnedRequirement::new
     );
@@ -43,12 +44,12 @@ public class ItemOwnedRequirement implements TradeRequirement {
 
     @Override
     public boolean test(SmpPlayer player) {
-        return TradeInventory.count(player, item) >= amount;
+        return GateInventoryUtils.count(player, item) >= amount;
     }
 
     @Override
     public Component getDisplay(SmpPlayer player) {
         return Component.text("Sở hữu ", NamedTextColor.GRAY)
-                .append(TradeDisplay.itemProgress(item, amount, TradeInventory.count(player, item)));
+                .append(GateDisplay.itemProgress(item, amount, GateInventoryUtils.count(player, item)));
     }
 }
