@@ -15,7 +15,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -125,13 +125,20 @@ public class ConsumableComponent implements ItemComponent {
         return stackGroup;
     }
 
-    public void applyEffects(Player player, String itemId) {
+    public void applyEffects(Entity entity, String itemId) {
+        applyEffects(entity, itemId, 1.0);
+    }
+
+    public void applyEffects(Entity entity, String itemId, double durationScale) {
         String group = stackGroup.isEmpty() ? itemId : stackGroup;
         for (SmpEffect smpEffect : getEffects()) {
-            String source = group + "/" + smpEffect.getEffectID();
-            EffectManager.getInstance().addEffect(player, source, smpEffect.clone());
+            SmpEffect applied = smpEffect.clone();
+            if (!applied.isInfinite()) {
+                applied.setDuration((int) (applied.getDuration() * durationScale + 0.5));
+                if (applied.getDuration() <= 20) continue;
+            }
+            EffectManager.getInstance().addEffect(entity, group + "/" + applied.getEffectID(), applied);
         }
-
     }
 
     public int getHunger() {

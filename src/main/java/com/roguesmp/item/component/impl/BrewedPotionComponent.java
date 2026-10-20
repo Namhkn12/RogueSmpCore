@@ -22,7 +22,7 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -75,11 +75,18 @@ public class BrewedPotionComponent implements ItemComponent {
         return result;
     }
 
-    public void drink(Player player) {
+    public void drink(Entity entity) {
+        drink(entity, 1.0);
+    }
+
+    public void drink(Entity entity, double durationScale) {
         BrewResult evaluated = getResult();
         if (evaluated == null) return;
 
-        EffectManager.getInstance().addEffect(player, BrewedPotionEffect.ID, BrewedPotionEffect.of(evaluated));
+        BrewedPotionEffect effect = BrewedPotionEffect.of(evaluated);
+        effect.setDuration((int) (effect.getDuration() * durationScale + 0.5));
+        if (effect.getDuration() <= 20) return;
+        EffectManager.getInstance().addEffect(entity, BrewedPotionEffect.ID, effect);
     }
 
     @Override
