@@ -13,6 +13,7 @@ import com.roguesmp.quest.condition.QuestConditions;
 import com.roguesmp.dungeon.feature.DungeonQuestConditions;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.BlockData;
+import com.roguesmp.island.IslandLevel;
 import com.roguesmp.block.BlockType;
 import com.roguesmp.block.BlockTypes;
 import com.roguesmp.codec.Codec;
@@ -149,6 +150,7 @@ public class Registries {
     public static final Registry<Quest> QUEST = new Registry<>("quests", Quest.CODEC);
     public static final Registry<BlockType<?, ?>> BLOCK_TYPE = register(registry -> BlockTypes.loadClass());
     public static final Registry<BlockData> BLOCK = new Registry<>("blocks", BlockData.CODEC);
+    public static final Registry<IslandLevel> ISLAND_LEVEL = new Registry<>("island_levels", IslandLevel.CODEC);
     public static final Registry<BaseNpc> NPC = new Registry<>("npcs", BaseNpc.CODEC);
     public static final Registry<TradeShop> TRADE_SHOP = new Registry<>("trades", TradeShop.CODEC);
     public static final Registry<BaseEntity> ENTITY = new Registry<>("entities", BaseEntity.CODEC);

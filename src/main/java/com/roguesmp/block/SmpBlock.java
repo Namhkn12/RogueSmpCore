@@ -8,6 +8,7 @@ import com.roguesmp.codec.DataResult;
 import com.roguesmp.player.SmpPlayer;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -17,10 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Runtime instance of a placed custom block. Created when its display entity loads and dropped when
- * that entity unloads.
- */
 public class SmpBlock {
 
     private static final List<StateSection<?>> NO_SECTIONS = List.of();
@@ -42,6 +39,10 @@ public class SmpBlock {
         this.pos = pos;
         this.location = pos.toLocation();
         this.displayId = displayId;
+    }
+
+    public boolean canPlace(Player player, Block target) {
+        return true;
     }
 
     /**

@@ -15,7 +15,6 @@ public final class EnergyTransfer {
 
     private EnergyTransfer() {}
 
-    /** Splits up to {@code budget} energy from {@code source} evenly across adjacent receivers, returning how much moved. */
     public static int distribute(EnergyStorage source, Block origin, int budget) {
         int available = Math.min(budget, source.getEnergy());
         if (available <= 0) return 0;
@@ -25,6 +24,13 @@ public final class EnergyTransfer {
             EnergyStorage neighbour = findReceiver(origin.getRelative(face));
             if (neighbour != null && neighbour.getEnergy() < neighbour.getMaxEnergy()) receivers.add(neighbour);
         }
+
+        return split(source, receivers, available);
+    }
+
+    public static int split(EnergyStorage source, List<EnergyStorage> receivers, int budget) {
+        int available = Math.min(budget, source.getEnergy());
+        if (available <= 0) return 0;
 
         int moved = 0;
         for (int i = 0; i < receivers.size(); i++) {
@@ -36,7 +42,7 @@ public final class EnergyTransfer {
         return moved;
     }
 
-    private static @Nullable EnergyStorage findReceiver(Block block) {
+    public static @Nullable EnergyStorage findReceiver(Block block) {
         if (!block.getWorld().isChunkLoaded(block.getX() >> 4, block.getZ() >> 4)) return null;
 
         SmpBlock custom = BlockManager.getInstance().get(BlockPos.of(block));

@@ -86,7 +86,7 @@ public class BlockManager {
         if(!target.isReplaceable() || blocks.containsKey(BlockPos.of(target)) || (player != null && isOccupied(target))) return false;
 
         SmpBlock block = BlockTypes.create(blockId);
-        if(block == null) return false;
+        if(block == null || (player != null && !block.canPlace(player, target))) return false;
 
         ItemStack inHand = player != null ? player.getInventory().getItem(hand) : null;
         BlockState replaced = target.getState(false);

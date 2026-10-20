@@ -1,5 +1,6 @@
 package com.roguesmp;
 
+import com.roguesmp.block.impl.energy.network.EnergyNetworkManager;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.command.FishingHotspotCommand;
 import com.roguesmp.command.RegionCommand;
@@ -113,6 +114,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         EffectManager.init(this);
         BlockManager.init(this);
+        EnergyNetworkManager.init(this);
 
         //Entity
         EntityManager.init(this);

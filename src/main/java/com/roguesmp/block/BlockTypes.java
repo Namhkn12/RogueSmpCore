@@ -5,6 +5,8 @@ import com.roguesmp.block.data.EnergyGeneratorData;
 import com.roguesmp.block.impl.brewing.BrewingBlock;
 import com.roguesmp.block.data.GeneratorData;
 import com.roguesmp.block.data.NoData;
+import com.roguesmp.block.data.WirelessNodeData;
+import com.roguesmp.block.impl.energy.WirelessNodeBlock;
 import com.roguesmp.block.impl.TallyBlock;
 import com.roguesmp.block.impl.cokeoven.CokeOvenBlock;
 import com.roguesmp.block.impl.energy.EnergyGeneratorBlock;
@@ -31,6 +33,8 @@ public class BlockTypes {
             register("generator", GeneratorData.CODEC, GeneratorData.DEFAULT, ResourceGeneratorBlock::new);
     public static final BlockType<EnergyGeneratorData, EnergyGeneratorBlock> ENERGY_GENERATOR =
             register("energy_generator", EnergyGeneratorData.CODEC, EnergyGeneratorData.DEFAULT, EnergyGeneratorBlock::new);
+    public static final BlockType<WirelessNodeData, WirelessNodeBlock> WIRELESS_NODE =
+            register("wireless_node", WirelessNodeData.CODEC, WirelessNodeData.DEFAULT, WirelessNodeBlock::new);
     public static final BlockType<BrewingData, BrewingBlock> BREWING =
             register("brewing", BrewingData.CODEC, BrewingData.DEFAULT, BrewingBlock::new);
 
