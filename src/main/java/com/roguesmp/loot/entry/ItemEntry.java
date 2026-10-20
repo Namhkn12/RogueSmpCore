@@ -27,7 +27,7 @@ public final class ItemEntry extends LootEntry {
 
     public static final Codec<ItemEntry> CODEC = Codec.composite(
             LootEntry.BASE_CODEC.forGetter(LootEntry::getBaseProperties),
-            ItemRef.CODEC.fieldOf("item_id").forGetter(ItemEntry::getItemRef),
+            ItemRef.CODEC.fieldOf("item").forGetter(ItemEntry::getItemRef),
             Codec.INT.optionalFieldOf("min_amount", 1).forGetter(ItemEntry::getMinAmount),
             Codec.INT.optionalFieldOf("max_amount", 1).forGetter(ItemEntry::getMaxAmount),
             ItemEntry::new
@@ -48,7 +48,7 @@ public final class ItemEntry extends LootEntry {
             Material material = Material.matchMaterial(id);
             return material != null
                     ? DataResult.success(new Vanilla(id, material))
-                    : DataResult.error("Unknown vanilla item_id: " + id);
+                    : DataResult.error("Unknown vanilla item: " + id);
         }
 
         record Vanilla(String id, Material material) implements ItemRef {}
@@ -93,7 +93,7 @@ public final class ItemEntry extends LootEntry {
             case ItemRef.Vanilla vanilla -> List.of(new ItemStack(vanilla.material(), amount));
             case ItemRef.Custom custom -> {
                 if (!custom.holder().isBound()) {
-                    RogueSmpCore.LOGGER.warn("[LootTable] Unknown item_id '{}' — skipping.", custom.id());
+                    RogueSmpCore.LOGGER.warn("[LootTable] Unknown item '{}' — skipping.", custom.id());
                     yield List.of();
                 }
                 yield List.of(custom.holder().value().generateItemStack(context.getPlayer(), amount));

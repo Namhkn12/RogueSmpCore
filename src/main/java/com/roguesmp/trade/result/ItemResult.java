@@ -18,7 +18,7 @@ public class ItemResult implements TradeResult {
 
     public static final String TYPE_KEY = "item";
     public static final Codec<ItemResult> CODEC = Codec.composite(
-            Registry.referenceCodec(() -> Registries.ITEM).fieldOf("item_id").forGetter(ItemResult::getItem),
+            Registry.referenceCodec(() -> Registries.ITEM).fieldOf("item").forGetter(ItemResult::getItem),
             Codec.INT.optionalFieldOf("amount", 1).forGetter(ItemResult::getAmount),
             ItemResult::new
     );
