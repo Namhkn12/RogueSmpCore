@@ -28,6 +28,7 @@ public class SmpBlock {
     private BlockPos pos;
     private Location location;
     private UUID displayId;
+    private @Nullable Key displayedModel;
     private boolean hydrated;
     private boolean dirty;
     private List<StateSection<?>> sections;
@@ -155,11 +156,21 @@ public class SmpBlock {
 
     /**
      * The model key this block's display should currently show, override for a block whose appearance depends on its own state
-     * (e.g. an active/idle variant) and call {@link BlockVisual#refreshModel} whenever that state
-     * changes to update to the new model.
+     * (e.g. an active/idle variant) and call {@link #syncDisplayModel} after that state may have changed.
      */
     public Key getDisplayModel() {
         return properties.model();
+    }
+
+    /**
+     * Update the display entity model based on {@link #getDisplayModel()}, will only update if the result actually changed.
+     */
+    public void syncDisplayModel() {
+        Key model = getDisplayModel();
+        if (model.equals(displayedModel)) return;
+
+        displayedModel = model;
+        BlockVisual.refreshModel(this);
     }
 
     public BlockPos getPos() {

@@ -16,6 +16,7 @@ import com.roguesmp.block.storage.SlotAccess;
 import com.roguesmp.block.transfer.EnergyTransfer;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.item.component.impl.EnergySourceComponent;
+import net.kyori.adventure.key.Key;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -46,6 +47,7 @@ public class EnergyGeneratorBlock extends SmpBlock implements Tickable, EnergySt
     public void tick() {
         if (burnTicksLeft <= 0) ignite();
         if (burnTicksLeft > 0) burn();
+        syncDisplayModel();
         EnergyTransfer.distribute(this, getLocation().getBlock(), data.transferRate());
         tickGuiRefresh();
     }
@@ -101,6 +103,11 @@ public class EnergyGeneratorBlock extends SmpBlock implements Tickable, EnergySt
 
     public int transferRate() {
         return data.transferRate();
+    }
+
+    @Override
+    public Key getDisplayModel() {
+        return energy > 0 ? data.modelActive() : super.getDisplayModel();
     }
 
     @Override
