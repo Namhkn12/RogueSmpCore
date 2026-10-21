@@ -2,11 +2,13 @@ package com.roguesmp.listener;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.BlockType;
+import com.roguesmp.block.event.SmpBlockInteractEvent;
 import com.roguesmp.block.event.SmpBlockPlaceEvent;
 import com.roguesmp.block.event.SmpBlockRemoveEvent;
 import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandLevel;
 import com.roguesmp.island.IslandManager;
+import com.roguesmp.permission.Permissions;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.WorldPos;
@@ -171,5 +173,15 @@ public class IslandListener implements Listener {
         World world = event.getBlock().getLocation().getWorld();
         IslandData island = world == null ? null : islandManager.getIslandByWorld(world);
         if (island != null) island.changeBlockCount(event.getBlock().getType().key(), -1);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockInteract(SmpBlockInteractEvent event) {
+        Player player = event.getPlayer();
+        IslandData island = islandManager.getIslandByWorld(player.getWorld());
+        if (island == null || island.isMember(player.getUniqueId()) || player.hasPermission(Permissions.ISLAND_ADMIN.node())) return;
+
+        event.setCancelled(true);
+        player.sendActionBar(Utils.fromString("<red>Chỉ thành viên đảo mới có thể sử dụng khối này"));
     }
 }

@@ -51,6 +51,8 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import com.roguesmp.constant.Keys;
+import com.roguesmp.block.event.SmpBlockPlaceEvent;
+import com.roguesmp.utils.Utils;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -156,6 +158,14 @@ public class DungeonListener implements Listener {
         Block block = event.getClickedBlock();
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() != EquipmentSlot.HAND || block == null) return;
         fire(block.getWorld(), new DungeonEvent.BlockInteracted(event.getPlayer(), block, event));
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onSmpBlockPlace(SmpBlockPlaceEvent event) {
+        if (!manager.worlds().isDungeonWorld(event.getTarget().getWorld())) return;
+
+        event.setCancelled(true);
+        event.getPlayer().sendActionBar(Utils.fromString("<red>Không thể đặt khối này trong hầm ngục"));
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)

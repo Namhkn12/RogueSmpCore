@@ -4,11 +4,13 @@ import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import com.roguesmp.block.BlockPos;
 import com.roguesmp.block.SmpBlock;
+import com.roguesmp.block.event.SmpBlockInteractEvent;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.component.impl.BlockPlaceComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -87,6 +89,13 @@ public class BlockListener implements Listener {
             }
 
             if(!event.getPlayer().isSneaking() || target.interactsWhileSneaking()){
+                SmpBlockInteractEvent interactEvent = new SmpBlockInteractEvent(event.getPlayer(), target, event);
+                Bukkit.getPluginManager().callEvent(interactEvent);
+                if(interactEvent.isCancelled()){
+                    event.setCancelled(true);
+                    return;
+                }
+
                 target.onBlockInteract(event);
                 if(event.useInteractedBlock() == Event.Result.DENY) return;
             }
