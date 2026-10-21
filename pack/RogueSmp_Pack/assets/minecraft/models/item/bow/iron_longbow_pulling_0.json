@@ -1,0 +1,30 @@
+{
+	"format_version": "1.21.6",
+	"credit": "Made with Blockbench",
+	"parent": "minecraft:item/handheld",
+	"textures": {
+		"layer0": "item/bow/iron_longbow_pulling_0"
+	},
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [-80, -100, -40],
+			"translation": [-1, -2.25, 1.9],
+			"scale": [2, 2, 1]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [-80, 80, 40],
+			"translation": [-1, -2.25, 1.9],
+			"scale": [2, 2, 1]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, -90, 25],
+			"translation": [0.88, 3.95, 1.88],
+			"scale": [1.15, 1.15, 0.575]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 90, -25],
+			"translation": [0.88, 3.95, 1.88],
+			"scale": [1.15, 1.15, 0.575]
+		}
+	}
+}

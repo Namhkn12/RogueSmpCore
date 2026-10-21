@@ -1,0 +1,142 @@
+{
+	"format_version": "1.21.6",
+	"credit": "Made with Blockbench",
+	"textures": {
+		"0": "item/wood_shield/wooden_parrying_shield",
+		"particle": "item/wood_shield/wooden_parrying_shield"
+	},
+	"elements": [
+		{
+			"name": "template_parrying_shield_0",
+			"from": [7.5, 0, 0],
+			"to": [8.5, 28, 1],
+			"rotation": {"angle": 0, "axis": "y", "origin": [5.5, -36, 0]},
+			"faces": {
+				"north": {"uv": [0.75, 0, 0.5, 7], "texture": "#0"},
+				"east": {"uv": [0.5, 0, 0.75, 7], "texture": "#0"},
+				"south": {"uv": [1.75, 0, 2, 7], "texture": "#0"},
+				"west": {"uv": [0.5, 0, 0.75, 7], "texture": "#0"},
+				"up": {"uv": [0.5, 0, 0.75, 0.25], "texture": "#0"},
+				"down": {"uv": [0.5, 6.75, 0.75, 7], "texture": "#0"}
+			}
+		},
+		{
+			"name": "template_parrying_shield_1",
+			"from": [7.5, 10.5, 1],
+			"to": [8.5, 17.5, 3],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 14, 2]},
+			"faces": {
+				"north": {"uv": [2.5, 0, 2.75, 1.75], "texture": "#0"},
+				"east": {"uv": [3, 0, 2.5, 1.75], "texture": "#0"},
+				"south": {"uv": [2.75, 0, 3, 1.75], "texture": "#0"},
+				"west": {"uv": [2.5, 0, 3, 1.75], "texture": "#0"},
+				"up": {"uv": [2.5, 0, 3, 0.25], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [2.5, 1.5, 3, 1.75], "rotation": 270, "texture": "#0"}
+			}
+		},
+		{
+			"name": "template_parrying_shield_2",
+			"from": [6.5, 2, 0],
+			"to": [7.5, 26, 1],
+			"rotation": {"angle": 0, "axis": "y", "origin": [5.5, -36, 0]},
+			"faces": {
+				"north": {"uv": [0.5, 0.5, 0.25, 6.5], "texture": "#0"},
+				"east": {"uv": [0.25, 0.5, 0.5, 6.5], "texture": "#0"},
+				"south": {"uv": [1.5, 0.5, 1.75, 6.5], "texture": "#0"},
+				"west": {"uv": [0.25, 0.5, 0.5, 6.5], "texture": "#0"},
+				"up": {"uv": [0.25, 0.5, 0.5, 0.75], "texture": "#0"},
+				"down": {"uv": [0.25, 6.25, 0.5, 6.5], "texture": "#0"}
+			}
+		},
+		{
+			"name": "template_parrying_shield_3",
+			"from": [8.5, 2, 0],
+			"to": [9.5, 26, 1],
+			"rotation": {"angle": 0, "axis": "y", "origin": [5.5, -36, 0]},
+			"faces": {
+				"north": {"uv": [1, 0.5, 0.75, 6.5], "texture": "#0"},
+				"east": {"uv": [0.75, 0.5, 1, 6.5], "texture": "#0"},
+				"south": {"uv": [2, 0.5, 2.25, 6.5], "texture": "#0"},
+				"west": {"uv": [0.75, 0.5, 1, 6.5], "texture": "#0"},
+				"up": {"uv": [0.75, 0.5, 1, 0.75], "texture": "#0"},
+				"down": {"uv": [0.75, 6.25, 1, 6.5], "texture": "#0"}
+			}
+		},
+		{
+			"name": "template_parrying_shield_4",
+			"from": [5.5, 7, 0],
+			"to": [6.5, 21, 1],
+			"rotation": {"angle": 0, "axis": "y", "origin": [5.5, -36, 0]},
+			"faces": {
+				"north": {"uv": [0.25, 1.75, 0, 5.25], "texture": "#0"},
+				"east": {"uv": [0, 1.75, 0.25, 5.25], "texture": "#0"},
+				"south": {"uv": [1.25, 1.75, 1.5, 5.25], "texture": "#0"},
+				"west": {"uv": [0, 1.75, 0.25, 5.25], "texture": "#0"},
+				"up": {"uv": [0, 1.75, 0.25, 2], "texture": "#0"},
+				"down": {"uv": [0, 5, 0.25, 5.25], "texture": "#0"}
+			}
+		},
+		{
+			"name": "template_parrying_shield_5",
+			"from": [9.5, 7, 0],
+			"to": [10.5, 21, 1],
+			"rotation": {"angle": 0, "axis": "y", "origin": [5.5, -36, 0]},
+			"faces": {
+				"north": {"uv": [1.25, 1.75, 1, 5.25], "texture": "#0"},
+				"east": {"uv": [1, 1.75, 1.25, 5.25], "texture": "#0"},
+				"south": {"uv": [2.25, 1.75, 2.5, 5.25], "texture": "#0"},
+				"west": {"uv": [1, 1.75, 1.25, 5.25], "texture": "#0"},
+				"up": {"uv": [1, 1.75, 1.25, 2], "texture": "#0"},
+				"down": {"uv": [1, 5, 1.25, 5.25], "texture": "#0"}
+			}
+		}
+	],
+	"gui_light": "front",
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [44, -22.5, 32],
+			"translation": [0.5, -9.5, 1.75]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [44, -22.5, 32],
+			"translation": [0.5, -9.5, 1.75]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 0, 30],
+			"translation": [-1.35, -9.35, 6.5],
+			"scale": [1.25, 1.25, 1.25]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 0, 30],
+			"translation": [-1.35, -9.35, 6.5],
+			"scale": [1.25, 1.25, 1.25]
+		},
+		"ground": {
+			"rotation": [90, 0, 0],
+			"translation": [0, -1.75, -0.75],
+			"scale": [0.25, 0.25, 0.25]
+		},
+		"gui": {
+			"rotation": [15, 150, 25],
+			"translation": [0.5, -2.25, 0],
+			"scale": [0.65, 0.65, 0.65]
+		},
+		"fixed": {
+			"translation": [-0.125, -3.25, 4.25],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"on_shelf": {
+			"rotation": [0, -180, 0],
+			"translation": [0, 1.25, -10.5],
+			"scale": [1.11, 1.11, 1.11]
+		}
+	},
+	"groups": [
+		{
+			"name": "template_parrying_shield",
+			"origin": [8, 8, 8],
+			"color": 0,
+			"children": [0, 1, 2, 3, 4, 5]
+		}
+	]
+}

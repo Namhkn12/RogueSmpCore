@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "property": "minecraft:using_item",
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/netherite_shield/netherite_kite_shield_blocking"
+    },
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/netherite_shield/netherite_kite_shield"
+    }
+  }
+}

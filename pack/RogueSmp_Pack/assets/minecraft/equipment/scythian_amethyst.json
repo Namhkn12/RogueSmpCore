@@ -1,0 +1,14 @@
+{
+    "layers": {
+        "humanoid": [
+            {
+                "texture": "minecraft:scythian_amethyst"
+            }
+        ],
+        "humanoid_leggings": [
+            {
+                "texture": "minecraft:scythian_amethyst"
+            }
+        ]
+    }
+}

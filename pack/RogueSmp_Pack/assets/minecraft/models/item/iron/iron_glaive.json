@@ -1,0 +1,30 @@
+{
+	"format_version": "1.21.6",
+	"credit": "Made with Blockbench",
+	"parent": "minecraft:item/handheld",
+	"textures": {
+		"layer0": "item/iron/iron_glaive"
+	},
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [0, -90, 60],
+			"translation": [0, 18, -3.75],
+			"scale": [3, 3, 1]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [0, 90, -60],
+			"translation": [0, 18, -3.75],
+			"scale": [3, 3, 1]
+		},
+		"firstperson_righthand": {
+			"rotation": [-15, -90, 25],
+			"translation": [-4.25, 8.25, 7],
+			"scale": [0.68, 0.68, 0.34]
+		},
+		"firstperson_lefthand": {
+			"rotation": [-15, 90, -25],
+			"translation": [-4.25, 8.25, 7],
+			"scale": [0.68, 0.68, 0.34]
+		}
+	}
+}

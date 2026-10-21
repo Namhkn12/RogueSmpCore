@@ -1,0 +1,14 @@
+{
+    "layers": {
+        "humanoid": [
+            {
+                "texture": "minecraft:nether_quartz"
+            }
+        ],
+        "humanoid_leggings": [
+            {
+                "texture": "minecraft:nether_quartz"
+            }
+        ]
+    }
+}

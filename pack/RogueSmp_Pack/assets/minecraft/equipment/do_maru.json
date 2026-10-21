@@ -1,0 +1,14 @@
+{
+    "layers": {
+        "humanoid": [
+            {
+                "texture": "minecraft:do_maru"
+            }
+        ],
+        "humanoid_leggings": [
+            {
+                "texture": "minecraft:do_maru"
+            }
+        ]
+    }
+}

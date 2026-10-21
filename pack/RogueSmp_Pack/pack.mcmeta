@@ -1,0 +1,14 @@
+{
+  "pack": {
+    "description": "A RogueSmp resourcepack by Namhkn",
+    "pack_format": 88,
+    "min_format": [
+      88,
+      0
+    ],
+    "max_format": [
+      97,
+      0
+    ]
+  }
+}
