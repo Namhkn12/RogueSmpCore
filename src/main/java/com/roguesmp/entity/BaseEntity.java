@@ -25,20 +25,23 @@ public class BaseEntity {
     public static final Codec<BaseEntity> CODEC = Codec.composite(
             Codec.STRING.fieldOf("id").forGetter(BaseEntity::getId),
             Codec.enumOf(EntityType.class).fieldOf("entityType").forGetter(BaseEntity::getEntityType),
+            Codec.STRING.optionalFieldOf("factory").forGetter(base -> Optional.ofNullable(base.getFactory())),
             Codec.<EntityComponent>dispatchedMap(Registries.ENTITY_COMPONENT_CODEC::getOrThrow)
                     .optionalFieldOf("components", Map.of())
                     .forGetter(BaseEntity::getComponents),
-            BaseEntity::new
+            (id, entityType, factory, components) -> new BaseEntity(id, entityType, factory.orElse(null), components)
     );
 
     private final String id; // ID should remain final as it's the unique identifier
     private final EntityType entityType; // Changing the physical type of entity usually requires a respawn
+    private final @Nullable String factory;
     private final Map<String, EntityComponent> components;
     private final List<EntityComponent> sortedComponents;
 
-    public BaseEntity(String id, EntityType entityType, Map<String, EntityComponent> components) {
+    public BaseEntity(String id, EntityType entityType, @Nullable String factory, Map<String, EntityComponent> components) {
         this.id = id;
         this.entityType = entityType;
+        this.factory = factory;
         this.components = components;
         List<EntityComponent> toSort = new ArrayList<>(components.values());
         toSort.sort(Comparator.comparingInt(EntityComponent::applyOrder));
@@ -102,6 +105,14 @@ public class BaseEntity {
 
     public String getId() {
         return id;
+    }
+
+    public @Nullable String getFactory() {
+        return factory;
+    }
+
+    public boolean isSpecial() {
+        return factory != null && Registries.ENTITY_FACTORY.get(factory) != null;
     }
 
     public EntityType getEntityType() {

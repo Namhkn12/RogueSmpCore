@@ -36,6 +36,8 @@ public class Keys {
 
     public static final NamespacedKey BLOCK_POS = of("block_pos");
 
+    public static final NamespacedKey FRENZY_MODIFIER = of("frenzy");
+
     public static final String DUNGEON_NAMESPACE = "roguesmpcore";
 
     public static final NamespacedKey SPAWNER_IID = new NamespacedKey(DUNGEON_NAMESPACE, "spawner_iid");
