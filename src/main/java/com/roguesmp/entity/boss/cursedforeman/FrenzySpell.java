@@ -2,6 +2,7 @@ package com.roguesmp.entity.boss.cursedforeman;
 
 import com.roguesmp.constant.Keys;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellContext;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -42,18 +43,8 @@ public class FrenzySpell extends Spell {
     }
 
     @Override
-    public void run(int interval) {
+    public void tick(SpellContext context, int interval) {
         if (!active) return;
         owner.getWorld().spawnParticle(Particle.DUST, owner.getLocation().add(0, owner.getHeight() * 0.5, 0), 4, 0.35, 0.6, 0.35, 0, AURA);
-    }
-
-    @Override
-    public boolean persistOnPhaseChange() {
-        return true;
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return 0;
     }
 }

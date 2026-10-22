@@ -88,7 +88,7 @@ public class EntityCreatorGui {
                 tooltip("Đặt trang bị (vũ khí, giáp) cho từng slot của entity.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildEquipmentDialog(player))));
         multi.addButton(componentLabel(EntityComponentKeys.SPELLS),
-                tooltip("Đặt spell active/passive cho entity.", "Màu trong danh sách chọn spell là gợi ý ACTIVE/PASSIVE/EITHER"),
+                tooltip("Đặt spell cho entity.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSpellsDialog(player))));
         multi.addButton(componentLabel(EntityComponentKeys.BOSS_BAR),
                 tooltip("Hiện thanh máu (boss bar) cho entity.", null),

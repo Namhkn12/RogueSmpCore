@@ -15,8 +15,6 @@ import java.util.UUID;
 
 public class ApplyEffectOnHitSpell extends OnHitSpell {
 
-    public static final String TYPE_KEY = "apply_effect_on_hit_spell";
-
     public record Params(HitCondition condition, List<PotionEffectSpec> effects, boolean firstHitOnly) implements SpellParams {
         public static final Codec<Params> CODEC = Codec.composite(
                 HitCondition.MAP_CODEC.forGetter(Params::condition),
@@ -24,11 +22,6 @@ public class ApplyEffectOnHitSpell extends OnHitSpell {
                 Codec.BOOLEAN.optionalFieldOf("firstHitOnly", false).forGetter(Params::firstHitOnly),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final List<PotionEffectSpec> effects;
@@ -45,9 +38,5 @@ public class ApplyEffectOnHitSpell extends OnHitSpell {
     protected void onHit(LivingEntity victim, DamageEvent event) {
         if (firstHitOnly && !alreadyHit.add(victim.getUniqueId())) return;
         PotionEffectSpec.applyAll(victim, effects);
-    }
-
-    public static ApplyEffectOnHitSpell create(Params params, LivingEntity owner) {
-        return new ApplyEffectOnHitSpell(owner, params);
     }
 }

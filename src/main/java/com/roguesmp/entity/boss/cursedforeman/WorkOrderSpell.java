@@ -3,8 +3,8 @@ package com.roguesmp.entity.boss.cursedforeman;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.entity.SmpEntity;
-import com.roguesmp.entity.spell.common.SpellTargets;
-import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.ActiveSpell;
+import com.roguesmp.entity.spell.SpellContext;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class WorkOrderSpell extends Spell {
+public class WorkOrderSpell extends ActiveSpell {
 
     private record Worker(String id, EntityType fallback) {
     }
@@ -38,31 +38,44 @@ public class WorkOrderSpell extends Spell {
     private static final int MAX_ALIVE = 5;
     private static final double SPAWN_RADIUS = 3.0;
     private static final int COOLDOWN_TICKS = 300;
+    private static final int WINDUP_TICKS = 10;
+    private static final int RECOVERY_TICKS = 15;
+    private static final int CLEANUP_INTERVAL = 20;
 
     private final LivingEntity owner;
     private final List<UUID> summoned = new ArrayList<>();
 
     public WorkOrderSpell(LivingEntity owner) {
+        super(COOLDOWN_TICKS, WINDUP_TICKS, RECOVERY_TICKS);
         this.owner = owner;
     }
 
     @Override
-    public boolean canRun() {
+    public void tick(SpellContext context, int interval) {
+        if (context.tick() % CLEANUP_INTERVAL != 0) return;
         summoned.removeIf(uuid -> {
             Entity entity = owner.getServer().getEntity(uuid);
             return entity == null || !entity.isValid();
         });
-        return SpellTargets.playerTarget(owner) != null && summoned.size() < MAX_ALIVE;
     }
 
     @Override
-    public void run(int interval) {
-        Player target = SpellTargets.playerTarget(owner);
+    public boolean canCast(SpellContext context) {
+        return summoned.size() < MAX_ALIVE;
+    }
+
+    @Override
+    public void onWindupStart(SpellContext context) {
+        owner.getWorld().playSound(owner.getLocation(), Sound.ENTITY_WITHER_SKELETON_AMBIENT, 1.5f, 0.7f);
+    }
+
+    @Override
+    public void onCast(SpellContext context) {
+        Player target = context.target();
         int count = Math.min(MAX_ALIVE - summoned.size(), MIN_SUMMONS + Utils.RANDOM.nextInt(MAX_SUMMONS - MIN_SUMMONS + 1));
 
         owner.swingMainHand();
         owner.getWorld().playSound(owner.getLocation(), Sound.BLOCK_BELL_USE, 2f, 0.5f);
-        owner.getWorld().playSound(owner.getLocation(), Sound.ENTITY_WITHER_SKELETON_AMBIENT, 1.5f, 0.7f);
 
         for (int i = 0; i < count; i++) {
             Location location = randomSpawnLocation();
@@ -90,20 +103,15 @@ public class WorkOrderSpell extends Spell {
 
     @Override
     public void onDeath(EntityDeathEvent event) {
+        onRemoved();
+    }
+
+    @Override
+    public void onRemoved() {
         summoned.forEach(uuid -> {
             Entity entity = owner.getServer().getEntity(uuid);
             if (entity != null && entity.isValid()) entity.getScheduler().run(RogueSmpCore.getInstance(), task -> entity.remove(), null);
         });
         summoned.clear();
-    }
-
-    @Override
-    public boolean persistOnPhaseChange() {
-        return true;
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return COOLDOWN_TICKS;
     }
 }

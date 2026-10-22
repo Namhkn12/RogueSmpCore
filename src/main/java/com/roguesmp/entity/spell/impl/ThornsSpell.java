@@ -3,6 +3,7 @@ package com.roguesmp.entity.spell.impl;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellContext;
 import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.entity.spell.common.HitTrigger;
 import com.roguesmp.event.DamageEvent;
@@ -25,11 +26,6 @@ public class ThornsSpell extends Spell {
                 Codec.enumOf(HitTrigger.class).optionalFieldOf("trigger", HitTrigger.MELEE).forGetter(Params::trigger),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final LivingEntity owner;
@@ -63,15 +59,6 @@ public class ThornsSpell extends Spell {
     }
 
     @Override
-    public void run(int interval) {
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return 0;
-    }
-
-    public static ThornsSpell create(Params params, LivingEntity owner) {
-        return new ThornsSpell(owner, params);
+    public void tick(SpellContext context, int interval) {
     }
 }

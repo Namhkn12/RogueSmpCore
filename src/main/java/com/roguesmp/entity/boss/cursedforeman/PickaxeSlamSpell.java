@@ -1,8 +1,8 @@
 package com.roguesmp.entity.boss.cursedforeman;
 
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.DamageType;
-import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.ActiveSpell;
+import com.roguesmp.entity.spell.SpellContext;
 import com.roguesmp.entity.spell.common.SpellTargets;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.utils.DamageUtils;
@@ -18,73 +18,57 @@ import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-public class PickaxeSlamSpell extends Spell {
+public class PickaxeSlamSpell extends ActiveSpell {
 
     public static final String ID = "pickaxe_slam";
 
     private static final double TRIGGER_RANGE = 4.5;
     private static final double RADIUS = 5.0;
     private static final double DAMAGE_MULTIPLIER = 1.6;
-    private static final int WINDUP_TICKS = 16;
     private static final int COOLDOWN_TICKS = 120;
+    private static final int WINDUP_TICKS = 16;
+    private static final int RECOVERY_TICKS = 20;
 
     private final LivingEntity owner;
 
     public PickaxeSlamSpell(LivingEntity owner) {
+        super(COOLDOWN_TICKS, WINDUP_TICKS, RECOVERY_TICKS);
         this.owner = owner;
     }
 
     @Override
-    public boolean canRun() {
-        Player target = SpellTargets.playerTarget(owner);
-        return target != null && target.getLocation().distanceSquared(owner.getLocation()) <= TRIGGER_RANGE * TRIGGER_RANGE;
+    public boolean canCast(SpellContext context) {
+        return context.target().getLocation().distanceSquared(owner.getLocation()) <= TRIGGER_RANGE * TRIGGER_RANGE;
     }
 
     @Override
-    public void run(int interval) {
+    public void onWindupStart(SpellContext context) {
         owner.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, WINDUP_TICKS, 9, false, false));
         owner.getWorld().playSound(owner.getLocation(), Sound.ENTITY_WITHER_SKELETON_AMBIENT, 1.5f, 0.5f);
-
-        BukkitRunnable windup = new BukkitRunnable() {
-            int elapsed;
-
-            @Override
-            public void run() {
-                if (!owner.isValid()) {
-                    cancel();
-                    activeRunnables.remove(this);
-                    return;
-                }
-                if (elapsed < WINDUP_TICKS) {
-                    showTelegraph(elapsed);
-                    elapsed += 2;
-                    return;
-                }
-                cancel();
-                activeRunnables.remove(this);
-                slam();
-            }
-        };
-        activeRunnables.add(windup);
-        windup.runTaskTimer(RogueSmpCore.getInstance(), 0, 2);
     }
 
-    private void showTelegraph(int elapsed) {
+    @Override
+    public void onWindupTick(SpellContext context, int elapsed) {
         Location center = owner.getLocation();
         double radius = RADIUS * elapsed / WINDUP_TICKS;
         for (int i = 0; i < 24; i++) {
             double angle = Math.PI * 2 * i / 24;
             center.getWorld().spawnParticle(Particle.CRIT, center.clone().add(Math.cos(angle) * radius, 0.1, Math.sin(angle) * radius), 1, 0, 0, 0, 0);
         }
-        if (owner instanceof Mob mob && mob.getTarget() != null) {
-            mob.lookAt(mob.getTarget());
+        if (owner instanceof Mob mob && context.target() != null) {
+            mob.lookAt(context.target());
         }
     }
 
-    private void slam() {
+    @Override
+    public void onInterrupted(SpellContext context) {
+        owner.removePotionEffect(PotionEffectType.SLOWNESS);
+    }
+
+    @Override
+    public void onCast(SpellContext context) {
         Location center = owner.getLocation();
         owner.swingMainHand();
 
@@ -108,15 +92,5 @@ public class PickaxeSlamSpell extends Spell {
             player.setVelocity(player.getVelocity().add(push));
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 1));
         }
-    }
-
-    @Override
-    public int castTicks() {
-        return WINDUP_TICKS;
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return COOLDOWN_TICKS;
     }
 }

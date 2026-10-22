@@ -1,9 +1,9 @@
 package com.roguesmp.entity.spell.impl;
 
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellContext;
 import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.entity.spell.common.SpellTargets;
 import com.roguesmp.event.DamageEvent;
@@ -12,8 +12,8 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Dashes at the target once it's within [{@code minRange}, {@code triggerRange}], and on contact
@@ -38,18 +38,14 @@ public class ChargeSpell extends Spell {
                 Codec.INT.optionalFieldOf("cooldownTicks", 200).forGetter(Params::cooldownTicks),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final LivingEntity owner;
     private final Params params;
     private int uses;
     private int cooldownRemaining;
-    private boolean charging;
+    private @Nullable Player chargeTarget;
+    private int dashTicks;
 
     public ChargeSpell(LivingEntity owner, Params params) {
         this.owner = owner;
@@ -57,53 +53,49 @@ public class ChargeSpell extends Spell {
     }
 
     @Override
-    public void run(int interval) {
+    public void tick(SpellContext context, int interval) {
+        if (chargeTarget != null) {
+            dash(interval);
+            return;
+        }
+
         cooldownRemaining -= interval;
-        if (charging || cooldownRemaining > 0) return;
+        if (cooldownRemaining > 0) return;
         if (params.maxUses() > 0 && uses >= params.maxUses()) return;
 
-        Player target = SpellTargets.playerTarget(owner);
+        Player target = context.target();
         if (target == null || !owner.hasLineOfSight(target)) return;
         double distance = target.getLocation().distance(owner.getLocation());
         if (distance < params.minRange() || distance > params.triggerRange()) return;
 
         uses++;
         cooldownRemaining = params.cooldownTicks();
-        startCharge(target);
+        chargeTarget = target;
+        dashTicks = 0;
+        owner.getWorld().playSound(owner.getLocation(), Sound.ENTITY_HOGLIN_ANGRY, 1.5f, 0.8f);
     }
 
-    private void startCharge(Player target) {
-        charging = true;
-        owner.getWorld().playSound(owner.getLocation(), Sound.ENTITY_HOGLIN_ANGRY, 1.5f, 0.8f);
+    private void dash(int interval) {
+        Player target = chargeTarget;
+        dashTicks += interval;
+        if (!target.isValid() || dashTicks > params.maxDashTicks()) {
+            chargeTarget = null;
+            return;
+        }
 
-        BukkitRunnable runnable = new BukkitRunnable() {
-            private int ticks;
+        Vector direction = SpellTargets.horizontalDirection(owner.getLocation(), target.getLocation());
+        owner.setVelocity(direction.clone().multiply(params.dashSpeed()).setY(owner.getVelocity().getY()));
+        owner.getWorld().spawnParticle(Particle.CLOUD, owner.getLocation(), 3, 0.3, 0.1, 0.3, 0.02);
 
-            @Override
-            public void run() {
-                if (!owner.isValid() || !target.isValid() || ticks++ > params.maxDashTicks()) {
-                    finish();
-                    return;
-                }
+        if (owner.getBoundingBox().expand(0.4).overlaps(target.getBoundingBox())) {
+            impact(target, direction);
+            chargeTarget = null;
+        }
+    }
 
-                Vector direction = SpellTargets.horizontalDirection(owner.getLocation(), target.getLocation());
-                owner.setVelocity(direction.clone().multiply(params.dashSpeed()).setY(owner.getVelocity().getY()));
-                owner.getWorld().spawnParticle(Particle.CLOUD, owner.getLocation(), 3, 0.3, 0.1, 0.3, 0.02);
-
-                if (owner.getBoundingBox().expand(0.4).overlaps(target.getBoundingBox())) {
-                    impact(target, direction);
-                    finish();
-                }
-            }
-
-            private void finish() {
-                charging = false;
-                cancel();
-                activeRunnables.remove(this);
-            }
-        };
-        activeRunnables.add(runnable);
-        runnable.runTaskTimer(RogueSmpCore.getInstance(), 0, 1);
+    @Override
+    public void onRemoved() {
+        chargeTarget = null;
     }
 
     private void impact(Player target, Vector direction) {
@@ -112,20 +104,5 @@ public class ChargeSpell extends Spell {
         DamageUtils.damage(target, owner, params.contactDamage(), metadata);
         target.setVelocity(direction.multiply(params.launchHorizontal()).setY(params.launchVertical()));
         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_RAVAGER_ATTACK, 1.5f, 1f);
-    }
-
-    @Override
-    public void cancel() {
-        super.cancel();
-        charging = false;
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return 0;
-    }
-
-    public static ChargeSpell create(Params params, LivingEntity owner) {
-        return new ChargeSpell(owner, params);
     }
 }

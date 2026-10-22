@@ -1,8 +1,8 @@
 package com.roguesmp.entity.spell.impl;
 
-import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellContext;
 import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.entity.spell.common.SpellTargets;
 import org.bukkit.entity.AbstractArrow;
@@ -10,8 +10,10 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Steers every projectile the owner launches towards its current target. {@code turnStrength}
@@ -19,23 +21,28 @@ import org.bukkit.util.Vector;
  */
 public class HomingProjectileSpell extends Spell {
 
-    public static final String TYPE_KEY = "homing_projectile_spell";
-
     public record Params(double turnStrength, int maxTrackingTicks) implements SpellParams {
         public static final Codec<Params> CODEC = Codec.composite(
                 Codec.DOUBLE.optionalFieldOf("turnStrength", 0.25).forGetter(Params::turnStrength),
                 Codec.INT.optionalFieldOf("maxTrackingTicks", 40).forGetter(Params::maxTrackingTicks),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final LivingEntity owner;
     private final Params params;
+    private final List<Tracked> tracked = new ArrayList<>();
+
+    private static final class Tracked {
+        private final Projectile projectile;
+        private final Player target;
+        private int ticks;
+
+        private Tracked(Projectile projectile, Player target) {
+            this.projectile = projectile;
+            this.target = target;
+        }
+    }
 
     public HomingProjectileSpell(LivingEntity owner, Params params) {
         this.owner = owner;
@@ -45,45 +52,31 @@ public class HomingProjectileSpell extends Spell {
     @Override
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
         Player target = SpellTargets.playerTarget(owner);
-        if (target == null) return;
-        Projectile projectile = event.getEntity();
-
-        BukkitRunnable runnable = new BukkitRunnable() {
-            private int ticks;
-
-            @Override
-            public void run() {
-                boolean landed = projectile instanceof AbstractArrow arrow && arrow.isInBlock();
-                if (!projectile.isValid() || landed || !target.isValid() || ticks++ > params.maxTrackingTicks()) {
-                    cancel();
-                    activeRunnables.remove(this);
-                    return;
-                }
-
-                Vector velocity = projectile.getVelocity();
-                double speed = velocity.length();
-                Vector desired = SpellTargets.centerOf(target).toVector()
-                        .subtract(projectile.getLocation().toVector())
-                        .normalize()
-                        .multiply(speed);
-                Vector steered = velocity.add(desired.subtract(velocity).multiply(params.turnStrength()));
-                projectile.setVelocity(steered.normalize().multiply(speed));
-            }
-        };
-        activeRunnables.add(runnable);
-        runnable.runTaskTimer(RogueSmpCore.getInstance(), 1, 1);
+        if (target != null) tracked.add(new Tracked(event.getEntity(), target));
     }
 
     @Override
-    public void run(int interval) {
+    public void tick(SpellContext context, int interval) {
+        tracked.removeIf(entry -> {
+            entry.ticks += interval;
+            Projectile projectile = entry.projectile;
+            boolean landed = projectile instanceof AbstractArrow arrow && arrow.isInBlock();
+            if (!projectile.isValid() || landed || !entry.target.isValid() || entry.ticks > params.maxTrackingTicks()) return true;
+
+            Vector velocity = projectile.getVelocity();
+            double speed = velocity.length();
+            Vector desired = SpellTargets.centerOf(entry.target).toVector()
+                    .subtract(projectile.getLocation().toVector())
+                    .normalize()
+                    .multiply(speed);
+            Vector steered = velocity.add(desired.subtract(velocity).multiply(params.turnStrength()));
+            projectile.setVelocity(steered.normalize().multiply(speed));
+            return false;
+        });
     }
 
     @Override
-    public int cooldownTicks() {
-        return 0;
-    }
-
-    public static HomingProjectileSpell create(Params params, LivingEntity owner) {
-        return new HomingProjectileSpell(owner, params);
+    public void onRemoved() {
+        tracked.clear();
     }
 }

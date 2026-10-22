@@ -16,8 +16,6 @@ import org.bukkit.util.Vector;
  */
 public class KnockbackOnHitSpell extends OnHitSpell {
 
-    public static final String TYPE_KEY = "knockback_on_hit_spell";
-
     public record Params(HitCondition condition, double horizontal, double vertical) implements SpellParams {
         public static final Codec<Params> CODEC = Codec.composite(
                 HitCondition.MAP_CODEC.forGetter(Params::condition),
@@ -25,11 +23,6 @@ public class KnockbackOnHitSpell extends OnHitSpell {
                 Codec.DOUBLE.optionalFieldOf("vertical", 0.4).forGetter(Params::vertical),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final double horizontal;
@@ -48,9 +41,5 @@ public class KnockbackOnHitSpell extends OnHitSpell {
             Vector direction = SpellTargets.horizontalDirection(owner.getLocation(), victim.getLocation());
             victim.setVelocity(direction.multiply(horizontal).setY(vertical));
         });
-    }
-
-    public static KnockbackOnHitSpell create(Params params, LivingEntity owner) {
-        return new KnockbackOnHitSpell(owner, params);
     }
 }

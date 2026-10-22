@@ -13,8 +13,6 @@ import org.bukkit.entity.Player;
 
 public class HungerDrainOnHitSpell extends OnHitSpell {
 
-    public static final String TYPE_KEY = "hunger_drain_on_hit_spell";
-
     public record Params(HitCondition condition, int foodDrain, float saturationDrain, boolean negateDamage) implements SpellParams {
         public static final Codec<Params> CODEC = Codec.composite(
                 HitCondition.MAP_CODEC.forGetter(Params::condition),
@@ -23,11 +21,6 @@ public class HungerDrainOnHitSpell extends OnHitSpell {
                 Codec.BOOLEAN.optionalFieldOf("negateDamage", true).forGetter(Params::negateDamage),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final int foodDrain;
@@ -50,9 +43,5 @@ public class HungerDrainOnHitSpell extends OnHitSpell {
         player.setFoodLevel(Math.max(0, player.getFoodLevel() - foodDrain));
         player.getWorld().spawnParticle(Particle.ITEM_SLIME, SpellTargets.centerOf(player), 12, 0.3, 0.4, 0.3, 0.05);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EAT, 1f, 0.6f);
-    }
-
-    public static HungerDrainOnHitSpell create(Params params, LivingEntity owner) {
-        return new HungerDrainOnHitSpell(owner, params);
     }
 }

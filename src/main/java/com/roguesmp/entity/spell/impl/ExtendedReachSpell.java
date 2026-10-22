@@ -2,6 +2,7 @@ package com.roguesmp.entity.spell.impl;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellContext;
 import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.entity.spell.common.SpellTargets;
 import org.bukkit.entity.LivingEntity;
@@ -13,19 +14,12 @@ import org.bukkit.entity.Player;
  */
 public class ExtendedReachSpell extends Spell {
 
-    public static final String TYPE_KEY = "extended_reach_spell";
-
     public record Params(double reach, int attackCooldownTicks) implements SpellParams {
         public static final Codec<Params> CODEC = Codec.composite(
                 Codec.DOUBLE.optionalFieldOf("reach", 2.5).forGetter(Params::reach),
                 Codec.INT.optionalFieldOf("attackCooldownTicks", 20).forGetter(Params::attackCooldownTicks),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final LivingEntity owner;
@@ -38,7 +32,7 @@ public class ExtendedReachSpell extends Spell {
     }
 
     @Override
-    public void run(int interval) {
+    public void tick(SpellContext context, int interval) {
         cooldownRemaining -= interval;
         if (cooldownRemaining > 0) return;
 
@@ -50,14 +44,5 @@ public class ExtendedReachSpell extends Spell {
         cooldownRemaining = params.attackCooldownTicks();
         owner.swingMainHand();
         owner.attack(target);
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return 0;
-    }
-
-    public static ExtendedReachSpell create(Params params, LivingEntity owner) {
-        return new ExtendedReachSpell(owner, params);
     }
 }

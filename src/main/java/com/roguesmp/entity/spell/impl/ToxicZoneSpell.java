@@ -3,6 +3,7 @@ package com.roguesmp.entity.spell.impl;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.DamageType;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellContext;
 import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.entity.spell.common.CloudSpec;
 import com.roguesmp.event.DamageEvent;
@@ -16,8 +17,6 @@ import org.bukkit.event.entity.ProjectileHitEvent;
  */
 public class ToxicZoneSpell extends Spell {
 
-    public static final String TYPE_KEY = "toxic_zone_spell";
-
     public record Params(CloudSpec cloud, boolean onMeleeHurt, boolean onProjectileHit, int hurtCooldownTicks) implements SpellParams {
         public static final Codec<Params> CODEC = Codec.composite(
                 CloudSpec.CODEC.fieldOf("cloud").forGetter(Params::cloud),
@@ -26,11 +25,6 @@ public class ToxicZoneSpell extends Spell {
                 Codec.INT.optionalFieldOf("hurtCooldownTicks", 60).forGetter(Params::hurtCooldownTicks),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final LivingEntity owner;
@@ -59,15 +53,6 @@ public class ToxicZoneSpell extends Spell {
     }
 
     @Override
-    public void run(int interval) {
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return 0;
-    }
-
-    public static ToxicZoneSpell create(Params params, LivingEntity owner) {
-        return new ToxicZoneSpell(owner, params);
+    public void tick(SpellContext context, int interval) {
     }
 }

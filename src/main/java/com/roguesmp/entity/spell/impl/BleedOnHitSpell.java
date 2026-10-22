@@ -20,11 +20,6 @@ public class BleedOnHitSpell extends OnHitSpell {
                 Codec.DOUBLE.optionalFieldOf("damagePerSecond", 1.0).forGetter(Params::damagePerSecond),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final int duration;
@@ -39,9 +34,5 @@ public class BleedOnHitSpell extends OnHitSpell {
     @Override
     protected void onHit(LivingEntity victim, DamageEvent event) {
         EffectManager.getInstance().addEffect(victim, TYPE_KEY, new BleedingEffect(duration, damagePerSecond, owner));
-    }
-
-    public static BleedOnHitSpell create(Params params, LivingEntity owner) {
-        return new BleedOnHitSpell(owner, params);
     }
 }

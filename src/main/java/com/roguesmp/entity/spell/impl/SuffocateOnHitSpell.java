@@ -26,11 +26,6 @@ public class SuffocateOnHitSpell extends OnHitSpell {
                 Codec.DOUBLE.optionalFieldOf("drownDamage", 2.0).forGetter(Params::drownDamage),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final int airDrain;
@@ -57,9 +52,5 @@ public class SuffocateOnHitSpell extends OnHitSpell {
                 DamageUtils.damage(victim, owner, drownDamage, metadata);
             });
         }
-    }
-
-    public static SuffocateOnHitSpell create(Params params, LivingEntity owner) {
-        return new SuffocateOnHitSpell(owner, params);
     }
 }

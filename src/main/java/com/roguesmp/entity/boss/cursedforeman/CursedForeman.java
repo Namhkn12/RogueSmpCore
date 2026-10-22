@@ -5,7 +5,6 @@ import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.entity.component.impl.PhaseComponent;
 import com.roguesmp.entity.component.impl.SpellComponent;
-import com.roguesmp.entity.spell.SpellManager;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.List;
@@ -23,17 +22,12 @@ public class CursedForeman extends SmpEntity {
         super(base, entity);
         FrenzySpell frenzy = new FrenzySpell(entity);
 
-        SpellComponent spells = new SpellComponent(this);
-        setComponent(EntityComponentKeys.SPELLS, spells);
-        spells.startSpell(
-                new SpellManager(List.of(new PickaxeSlamSpell(entity), new WorkOrderSpell(entity))),
-                List.of(frenzy),
+        setComponent(EntityComponentKeys.SPELLS, new SpellComponent(
+                List.of(new PickaxeSlamSpell(entity), new WorkOrderSpell(entity), frenzy),
                 DETECTION_RANGE,
                 SPELL_START_DELAY,
-                SmpEntity.PASSIVE_RUN_INTERVAL_DEFAULT,
-                true
-        );
-
+                false
+        ));
         setComponent(EntityComponentKeys.PHASE, new PhaseComponent(Map.of(FRENZY_THRESHOLD_PERCENT, boss -> frenzy.activate()), false));
     }
 }

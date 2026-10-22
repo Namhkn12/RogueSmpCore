@@ -4,6 +4,7 @@ import com.roguesmp.effect.EffectManager;
 import com.roguesmp.effect.impl.VanillaPotionEffect;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellContext;
 import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.entity.spell.common.SpellTargets;
 import org.bukkit.Particle;
@@ -18,8 +19,6 @@ import org.bukkit.potion.PotionEffectType;
  */
 public class SpeedBurstSpell extends Spell {
 
-    public static final String TYPE_KEY = "speed_burst_spell";
-
     public record Params(double triggerRange, int amplifier, int durationTicks, int cooldownTicks) implements SpellParams {
         public static final Codec<Params> CODEC = Codec.composite(
                 Codec.DOUBLE.optionalFieldOf("triggerRange", 5.0).forGetter(Params::triggerRange),
@@ -28,11 +27,6 @@ public class SpeedBurstSpell extends Spell {
                 Codec.INT.optionalFieldOf("cooldownTicks", 160).forGetter(Params::cooldownTicks),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final LivingEntity owner;
@@ -45,7 +39,7 @@ public class SpeedBurstSpell extends Spell {
     }
 
     @Override
-    public void run(int interval) {
+    public void tick(SpellContext context, int interval) {
         cooldownRemaining -= interval;
         if (cooldownRemaining > 0) return;
 
@@ -57,14 +51,5 @@ public class SpeedBurstSpell extends Spell {
                 new VanillaPotionEffect(params.durationTicks(), PotionEffectType.SPEED, params.amplifier()));
         owner.getWorld().spawnParticle(Particle.CLOUD, owner.getLocation().add(0, 0.2, 0), 10, 0.3, 0.1, 0.3, 0.05);
         owner.getWorld().playSound(owner.getLocation(), Sound.ENTITY_ZOMBIE_AMBIENT, 1f, 1.6f);
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return 0;
-    }
-
-    public static SpeedBurstSpell create(Params params, LivingEntity owner) {
-        return new SpeedBurstSpell(owner, params);
     }
 }
