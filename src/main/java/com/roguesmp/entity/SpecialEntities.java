@@ -1,6 +1,8 @@
 package com.roguesmp.entity;
 
+import com.roguesmp.entity.boss.blackveinhorror.BlackveinHorror;
 import com.roguesmp.entity.boss.cursedforeman.CursedForeman;
+import com.roguesmp.entity.boss.veinstalker.VeinStalker;
 import com.roguesmp.registry.Registries;
 
 /**
@@ -21,6 +23,8 @@ public class SpecialEntities {
 //    public static final EntityFactory<HellKnightGolem> HELL_KNIGHT_GOLEM = register("hell_knight_golem", HellKnightGolem::new);
 
     public static final EntityFactory<CursedForeman> CURSED_FOREMAN = register(CursedForeman.ID, CursedForeman::new);
+    public static final EntityFactory<VeinStalker> VEIN_STALKER = register(VeinStalker.ID, VeinStalker::new);
+    public static final EntityFactory<BlackveinHorror> BLACKVEIN_HORROR = register(BlackveinHorror.ID, BlackveinHorror::new);
 
     public static void loadClass() {
 

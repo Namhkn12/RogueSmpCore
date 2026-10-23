@@ -7,6 +7,7 @@ import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.entity.spell.common.PotionEffectSpec;
 import com.roguesmp.utils.PlayerUtils;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.List;
 
@@ -16,10 +17,12 @@ import java.util.List;
  */
 public class EffectAuraSpell extends Spell {
 
+    private static final List<PotionEffectSpec> DEFAULT_EFFECTS = List.of(new PotionEffectSpec(PotionEffectType.SLOWNESS, 40, 0));
+
     public record Params(double radius, List<PotionEffectSpec> effects, boolean requireLineOfSight, int intervalTicks) implements SpellParams {
         public static final Codec<Params> CODEC = Codec.composite(
                 Codec.DOUBLE.optionalFieldOf("radius", 5.0).forGetter(Params::radius),
-                PotionEffectSpec.LIST_CODEC.fieldOf("effects").forGetter(Params::effects),
+                PotionEffectSpec.LIST_CODEC.optionalFieldOf("effects", DEFAULT_EFFECTS).forGetter(Params::effects),
                 Codec.BOOLEAN.optionalFieldOf("requireLineOfSight", true).forGetter(Params::requireLineOfSight),
                 Codec.INT.optionalFieldOf("intervalTicks", 20).forGetter(Params::intervalTicks),
                 Params::new

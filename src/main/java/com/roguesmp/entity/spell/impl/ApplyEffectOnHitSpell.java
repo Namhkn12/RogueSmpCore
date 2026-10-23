@@ -7,6 +7,7 @@ import com.roguesmp.entity.spell.common.OnHitSpell;
 import com.roguesmp.entity.spell.common.PotionEffectSpec;
 import com.roguesmp.event.DamageEvent;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashSet;
 import java.util.List;
@@ -15,10 +16,12 @@ import java.util.UUID;
 
 public class ApplyEffectOnHitSpell extends OnHitSpell {
 
+    private static final List<PotionEffectSpec> DEFAULT_EFFECTS = List.of(new PotionEffectSpec(PotionEffectType.POISON, 60, 0));
+
     public record Params(HitCondition condition, List<PotionEffectSpec> effects, boolean firstHitOnly) implements SpellParams {
         public static final Codec<Params> CODEC = Codec.composite(
                 HitCondition.MAP_CODEC.forGetter(Params::condition),
-                PotionEffectSpec.LIST_CODEC.fieldOf("effects").forGetter(Params::effects),
+                PotionEffectSpec.LIST_CODEC.optionalFieldOf("effects", DEFAULT_EFFECTS).forGetter(Params::effects),
                 Codec.BOOLEAN.optionalFieldOf("firstHitOnly", false).forGetter(Params::firstHitOnly),
                 Params::new
         );

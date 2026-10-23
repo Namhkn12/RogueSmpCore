@@ -1,5 +1,6 @@
 package com.roguesmp.entity.spell.impl;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.spell.ActiveSpell;
 import com.roguesmp.entity.spell.SpellContext;
@@ -92,7 +93,7 @@ public class ThrowTntSpell extends ActiveSpell {
 
     @Override
     public void onRemoved() {
-        inFlight.forEach(thrown -> thrown.tnt().remove());
+        inFlight.forEach(thrown -> thrown.tnt().getScheduler().run(RogueSmpCore.getInstance(), task -> thrown.tnt().remove(), null));
         inFlight.clear();
     }
 }

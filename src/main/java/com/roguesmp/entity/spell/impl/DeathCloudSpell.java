@@ -15,7 +15,7 @@ public class DeathCloudSpell extends Spell {
 
     public record Params(CloudSpec cloud, boolean burstEffect) implements SpellParams {
         public static final Codec<Params> CODEC = Codec.composite(
-                CloudSpec.CODEC.fieldOf("cloud").forGetter(Params::cloud),
+                CloudSpec.CODEC.optionalFieldOf("cloud", CloudSpec.DEFAULT).forGetter(Params::cloud),
                 Codec.BOOLEAN.optionalFieldOf("burstEffect", true).forGetter(Params::burstEffect),
                 Params::new
         );
