@@ -68,7 +68,7 @@ public record TriggersFeature(List<Trigger> triggers) implements DungeonFeature<
             String onceVar = context.featureId() + "." + i;
             if (!trigger.on().matches(event)) continue;
             if (trigger.once() && FIRED.equals(context.instance().variable(onceVar))) continue;
-            if (!DungeonCondition.all(trigger.conditions(), context, event)) continue;
+            if (!DungeonCondition.all(trigger.conditions(), context)) continue;
 
             if (trigger.once()) {
                 context.instance().setVariable(onceVar, FIRED);

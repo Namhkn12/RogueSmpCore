@@ -292,6 +292,7 @@ Trigger được xét **theo thứ tự trong danh sách**; action của trigger
 | `player_left` | Người chơi rời world / thoát game | | |
 | `region_entered`, `region_left` | Vào/rời region WorldGuard | id region | |
 | `mob_killed` | Người chơi giết mob | id mob (tuỳ chỉnh hoặc vanilla) | |
+| `mob_died` | Mob chết vì bất kỳ lý do gì (người chơi, môi trường, ...) | id mob | `tag` (nếu mob được sinh bằng `spawn_mob` có `tag`) |
 | `mob_damaged` | Mob nhận sát thương | id mob | `damage`, `health_percent` (0–100, sau đòn) |
 | `block_interacted` | Chuột phải block | id block (`oak_door`) | |
 | `block_broken` | Phá block | id block | |
@@ -353,6 +354,7 @@ Kiểm tra **trạng thái instance**, không phải sự kiện.
 | `var` | `{ "type": "var", "var": "keys", "value": { "min": 3 } }` | Biến khớp điều kiện. |
 | `room_type` | `{ "type": "room_type", "value": "boss" }` | Loại phòng hiện tại khớp (cần `rooms`). |
 | `members` | `{ "type": "members", "value": { "max": 2 } }` | Số thành viên khớp. |
+| `mob_count` | `{ "type": "mob_count", "tag": "gate_guard", "count": { "max": 1 } }` | Số mob mang `tag` đang có trong world instance (chunk đã nạp) khớp điều kiện. |
 | `time_left` | `{ "type": "time_left", "value": { "min": 600 } }` | Số giây còn lại khớp (cần `expiry`). |
 | `all_of` | `{ "type": "all_of", "conditions": [ ... ] }` | Tất cả đúng. |
 | `any_of` | `{ "type": "any_of", "conditions": [ ... ] }` | Ít nhất 1 đúng. |
@@ -369,26 +371,96 @@ Kiểm tra **trạng thái instance**, không phải sự kiện.
 | `play_sound` | `{ "type": "play_sound", "sound": "minecraft:entity.wither.spawn", "volume": 1, "pitch": 1, "all": true }` | Phát âm thanh tại người nghe. |
 | `teleport` | `{ "type": "teleport", "x": 120.5, "y": 64, "z": -40.5, "yaw": 90, "all": true }` | Dịch chuyển trong world instance. |
 | `give_item` | `{ "type": "give_item", "item": "crypt_relic", "amount": 1 }` | Trao item. Id tuỳ chỉnh trước, rồi tới vật liệu vanilla. Túi đầy thì rơi xuống đất (chỉ người nhận thấy). |
-| `spawn_mob` | `{ "type": "spawn_mob", "mob": "skeleton_guard", "count": 4, "x": 130, "y": 64, "z": -50, "spread": 4 }` | Sinh mob, rải ngẫu nhiên trong bán kính `spread`. Id tuỳ chỉnh trước, rồi vanilla. |
+| `spawn_mob` | `{ "type": "spawn_mob", "mob": "skeleton_guard", "count": 4, "x": 130, "y": 64, "z": -50, "spread": 4 }` | Sinh mob, rải ngẫu nhiên trong bán kính `spread`. Id tuỳ chỉnh trước, rồi vanilla. `tag` (tuỳ chọn) để theo dõi mob, xem [Mob được theo dõi](#mob-được-theo-dõi). |
 | `set_block` | `{ "type": "set_block", "x": 120, "y": 64, "z": -40, "block": "minecraft:oak_door[open=true]" }` | Đặt block, hỗ trợ block state. Sai cú pháp → lỗi khi nạp. |
 | `set_var` | `{ "type": "set_var", "var": "gate_open", "value": true }` | Gán biến. |
 | `add_var` | `{ "type": "add_var", "var": "keys", "amount": 1 }` | Cộng vào biến số (chưa có = 0). Dùng `amount` âm để trừ. |
 | `signal` | `{ "type": "signal", "id": "gate_open", "amount": 1, "data": { "gate": "north" } }` | Bắn sự kiện tự đặt. Trigger khác bắt bằng `"on": { "event": "gate_open" }`; quest nhóm có objective `signal` cùng id cũng tiến `amount`. |
 | `start_quest` | `{ "type": "start_quest", "quest": "crypt_epilogue" }` | Giao quest cho nhóm quest của instance, mọi thành viên được nhận thưởng. Cần feature `quests`. |
 | `sequence` | xem dưới | Chạy action lần lượt, có thể chờ. |
-| `delay` | `{ "type": "delay", "seconds": 3 }` | Chỉ có tác dụng trong `sequence`. |
+| `delay` | `{ "type": "delay", "ticks": 60 }` | Chỉ có tác dụng trong `sequence`. Tính bằng tick (20 tick = 1 giây). |
+| `repeat` | xem dưới | Lặp lại action. |
+| `if` | xem dưới | Rẽ nhánh theo condition. |
 | `end` | `{ "type": "end", "reason": "đã kết thúc" }` | Kết thúc instance, báo `reason` cho thành viên. |
 
 ```json
 { "type": "sequence", "steps": [
   { "type": "message", "text": "<red>Mặt đất rung chuyển...", "all": true },
-  { "type": "delay", "seconds": 3 },
+  { "type": "delay", "ticks": 60 },
   { "type": "set_block", "x": 120, "y": 64, "z": -40, "block": "minecraft:air" },
   { "type": "signal", "id": "gate_open" }
 ] }
 ```
 
 Sau mỗi `delay`, phần còn lại chỉ chạy nếu instance chưa kết thúc. Người gây sự kiện đã thoát thì phần còn lại chạy như không có người.
+
+#### `repeat`
+
+```json
+{ "type": "repeat", "times": 3, "interval": 400, "while": [ ... ], "actions": [ ... ] }
+```
+
+| Key | Mặc định | Ý nghĩa |
+| :--- | :--- | :--- |
+| `times` | *(bắt buộc)* | Số lần lặp tối đa. |
+| `while` | `[]` | [Condition](#condition) kiểm tra trước mỗi lần lặp; sai thì dừng. |
+| `interval` | `0` | Số tick chờ giữa các lần lặp. `0` = chạy hết ngay trong tick hiện tại. Khi chờ, giống `delay`: dừng nếu instance đã kết thúc. |
+| `actions` | *(bắt buộc)* | Action chạy mỗi lần lặp. |
+
+#### `if`
+
+```json
+{ "type": "if", "conditions": [ ... ], "then": [ ... ], "else": [ ... ] }
+```
+
+Tất cả `conditions` đúng → chạy `then`, ngược lại chạy `else`. `then` và `else` đều tuỳ chọn.
+
+#### Mob được theo dõi
+
+`spawn_mob` có `tag` vẫn sinh đủ `count` mob mỗi lần chạy; mob được gắn `tag` và không tự biến mất khi ở xa. Plugin **không lưu** gì thêm: condition `mob_count` đếm số mob mang `tag` đang thực sự có trong world, nên mob bị despawn hoặc mất sau restart tự động không còn được đếm. Mob mang `tag` chết vì bất kỳ lý do gì sẽ bắn `mob_died` kèm `tag` — tự đếm bằng biến nếu cần.
+
+Ví dụ: 2 lính gác, mỗi lính 1 `tag` riêng. Vào lại khu vực thì sinh lại lính bị mất (despawn, restart), nhưng lính đã chết thì không bao giờ quay lại:
+
+```json
+"variables": { "guard_1_dead": false, "guard_2_dead": false },
+"features": {
+  "triggers": { "triggers": [
+    { "on": { "event": "mob_died", "data": { "tag": "gate_guard_1" } },
+      "actions": [ { "type": "set_var", "var": "guard_1_dead", "value": true } ] },
+    { "on": { "event": "mob_died", "data": { "tag": "gate_guard_2" } },
+      "actions": [ { "type": "set_var", "var": "guard_2_dead", "value": true } ] },
+    { "on": { "event": "region_entered", "subject": "gate_room" },
+      "actions": [
+        { "type": "if",
+          "conditions": [
+            { "type": "var", "var": "guard_1_dead", "value": false },
+            { "type": "mob_count", "tag": "gate_guard_1", "count": 0 } ],
+          "then": [ { "type": "spawn_mob", "mob": "vein_stalker", "x": 10, "y": 64, "z": 5, "tag": "gate_guard_1" } ] },
+        { "type": "if",
+          "conditions": [
+            { "type": "var", "var": "guard_2_dead", "value": false },
+            { "type": "mob_count", "tag": "gate_guard_2", "count": 0 } ],
+          "then": [ { "type": "spawn_mob", "mob": "vein_stalker", "x": 14, "y": 64, "z": 5, "tag": "gate_guard_2" } ] }
+      ] }
+  ] }
+}
+```
+
+Trigger vào khu vực **không** dùng `once`, để mỗi lần vào lại đều kiểm tra và bù lính. Khai báo biến ở `variables`: biến chưa tồn tại không khớp `false`.
+
+Objective phòng tính cả khi lính chết không do người chơi:
+
+```json
+{ "on": { "event": "mob_died", "data": { "tag": { "in": ["gate_guard_1", "gate_guard_2"] } } }, "count": 2 }
+```
+
+Muốn giữ 1 nhóm mob với số lượng cố định (không quan tâm từng con), dùng `repeat` + `mob_count`:
+
+```json
+{ "type": "repeat", "times": 5,
+  "while": [ { "type": "mob_count", "tag": "patrol", "count": { "max": 4 } } ],
+  "actions": [ { "type": "spawn_mob", "mob": "minecraft:zombie", "x": 0, "y": 70, "z": 0, "spread": 4, "tag": "patrol" } ] }
+```
 
 Text trong `message` và `title` hỗ trợ:
 - `{player}` — tên người gây sự kiện.

@@ -1,7 +1,6 @@
 package com.roguesmp.dungeon.script;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.dungeon.DungeonEvent;
 import com.roguesmp.dungeon.FeatureContext;
 import com.roguesmp.dungeon.feature.ExpiryFeature;
 import com.roguesmp.dungeon.feature.RoomsFeature;
@@ -9,6 +8,7 @@ import com.roguesmp.dungeon.room.RoomDefinition;
 import com.roguesmp.registry.Registries;
 
 import java.util.List;
+import org.bukkit.World;
 
 public class DungeonConditions {
 
@@ -30,7 +30,7 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, DungeonEvent event) {
+        public boolean test(FeatureContext<?> context) {
             return value.test(context.instance().variable(var));
         }
     }
@@ -47,7 +47,7 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, DungeonEvent event) {
+        public boolean test(FeatureContext<?> context) {
             FeatureContext<RoomsFeature.State> rooms = context.manager().feature(context.instance(), RoomsFeature.class);
             String roomId = rooms == null ? null : rooms.state().room();
             RoomDefinition room = roomId == null ? null : Registries.DUNGEON_ROOM.get(roomId);
@@ -67,7 +67,7 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, DungeonEvent event) {
+        public boolean test(FeatureContext<?> context) {
             return value.test(DataValue.of(context.instance().members().size()));
         }
     }
@@ -85,7 +85,7 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, DungeonEvent event) {
+        public boolean test(FeatureContext<?> context) {
             FeatureContext<ExpiryFeature.State> expiry = context.manager().feature(context.instance(), ExpiryFeature.class);
             if (expiry == null) return value.test(null);
             return value.test(DataValue.of((expiry.state().expiresAt() - System.currentTimeMillis()) / 1000.0));
@@ -109,8 +109,8 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, DungeonEvent event) {
-            return DungeonCondition.all(conditions, context, event);
+        public boolean test(FeatureContext<?> context) {
+            return DungeonCondition.all(conditions, context);
         }
     }
 
@@ -131,8 +131,8 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, DungeonEvent event) {
-            return conditions.stream().anyMatch(condition -> condition.test(context, event));
+        public boolean test(FeatureContext<?> context) {
+            return conditions.stream().anyMatch(condition -> condition.test(context));
         }
     }
 
@@ -153,11 +153,31 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, DungeonEvent event) {
-            return !condition.test(context, event);
+        public boolean test(FeatureContext<?> context) {
+            return !condition.test(context);
         }
     }
 
+    public record MobCount(String tag, ValuePredicate count) implements DungeonCondition {
+        public static final Codec<MobCount> CODEC = Codec.composite(
+                Codec.STRING.fieldOf("tag").forGetter(MobCount::tag),
+                ValuePredicate.CODEC.fieldOf("count").forGetter(MobCount::count),
+                MobCount::new
+        );
+
+        @Override
+        public String getTypeId() {
+            return "mob_count";
+        }
+
+        @Override
+        public boolean test(FeatureContext<?> context) {
+            World world = context.world();
+            return count.test(DataValue.of(world == null ? 0 : context.manager().trackedMobs().aliveCount(world, tag)));
+        }
+    }
+
+    public static final Codec<MobCount> MOB_COUNT = register("mob_count", MobCount.CODEC);
     public static final Codec<Var> VAR = register("var", Var.CODEC);
     public static final Codec<RoomType> ROOM_TYPE = register("room_type", RoomType.CODEC);
     public static final Codec<Members> MEMBERS = register("members", Members.CODEC);

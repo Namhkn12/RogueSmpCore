@@ -37,19 +37,6 @@ public class DurabilityRepairComponent implements ItemComponent {
         return this;
     }
 
-    @Override
-    public void contributeLore(ItemLoreContext context) {
-        if (materials.isEmpty()) return;
-        List<Component> lines = new ArrayList<>();
-        lines.add(Utils.text("Có thể sửa chữa bằng:", NamedTextColor.GRAY));
-        for (RepairMaterial material : materials) {
-            lines.add(Utils.text(" - ", NamedTextColor.DARK_GRAY)
-                    .append(ItemRef.displayName(material.item()))
-                    .append(Utils.text(" (+" + Utils.formatDecimal(material.percent()) + "% độ bền)", NamedTextColor.GRAY)));
-        }
-        context.builder().putLines(900, lines);
-    }
-
     public @Nullable RepairMaterial find(@Nullable String itemId) {
         if (itemId == null) return null;
         for (RepairMaterial material : materials) {

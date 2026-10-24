@@ -1,5 +1,9 @@
 package com.roguesmp.dungeon.listener;
 
+import org.bukkit.event.world.WorldUnloadEvent;
+import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
+import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
+import com.roguesmp.dungeon.TrackedMobs;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.dungeon.DungeonEvent;
 import com.roguesmp.dungeon.DungeonInstance;
@@ -132,12 +136,34 @@ public class DungeonListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
+    public void onEntityAdd(EntityAddToWorldEvent event) {
+        manager.trackedMobs().add(event.getEntity());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onEntityRemove(EntityRemoveFromWorldEvent event) {
+        manager.trackedMobs().remove(event.getEntity());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onWorldUnload(WorldUnloadEvent event) {
+        manager.trackedMobs().clear(event.getWorld());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeath(EntityDeathEvent event) {
-        if (event instanceof PlayerDeathEvent || !(event.getDamageSource().getCausingEntity() instanceof Player killer)) return;
+        if (event instanceof PlayerDeathEvent) return;
         LivingEntity mob = event.getEntity();
+        DungeonInstance instance = manager.getByWorld(mob.getWorld());
+        if (instance == null) return;
+
         BaseEntity base = EntityUtils.getBaseEntity(mob);
         String mobId = base != null ? base.getId() : mob.getType().getKey().getKey();
-        fire(mob.getWorld(), new DungeonEvent.MobKilled(killer, mob, mobId));
+        Player killer = event.getDamageSource().getCausingEntity() instanceof Player player ? player : null;
+        String tag = TrackedMobs.tagOf(mob);
+
+        manager.fire(instance, new DungeonEvent.MobDied(killer, mob, mobId, tag));
+        if (killer != null) manager.fire(instance, new DungeonEvent.MobKilled(killer, mob, mobId));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

@@ -52,6 +52,8 @@ public class Keys {
 
     public static final NamespacedKey END_DOOR = new NamespacedKey(DUNGEON_NAMESPACE, "end_door");
 
+    public static final NamespacedKey DUNGEON_MOB_TAG = new NamespacedKey(DUNGEON_NAMESPACE, "mob_tag");
+
     public static final NamespacedKey REVIVE_POINT = new NamespacedKey(DUNGEON_NAMESPACE, "revive_point");
 
     public static final NamespacedKey PIGZOMBIE_ATTACK = of("pigzombie_attack");
