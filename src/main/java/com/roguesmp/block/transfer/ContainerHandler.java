@@ -5,7 +5,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-/** Exposes a vanilla container. Stacks a {@link StoredItem} can't rebuild exactly (renamed, enchanted, unique) are never moved. */
 public record ContainerHandler(Inventory inventory) implements ItemHandler {
 
     @Override
@@ -16,15 +15,17 @@ public record ContainerHandler(Inventory inventory) implements ItemHandler {
     @Override
     public @Nullable StoredItem get(int slot) {
         ItemStack stack = inventory.getItem(slot);
-        return isPlain(stack) ? StoredItem.of(stack) : null;
+        return StoredItem.of(stack);
     }
 
     @Override
     public @Nullable StoredItem extract(int slot, int amount, boolean simulate) {
         ItemStack stack = inventory.getItem(slot);
-        if (amount <= 0 || !isPlain(stack)) return null;
+        if (amount <= 0) return null;
 
         StoredItem stored = StoredItem.of(stack);
+        if (stored == null) return null;
+
         int taken = Math.min(amount, stored.amount());
         if (!simulate) {
             int left = stack.getAmount() - taken;
@@ -61,13 +62,5 @@ public record ContainerHandler(Inventory inventory) implements ItemHandler {
             }
         }
         return item.amount() - remaining;
-    }
-
-    private static boolean isPlain(@Nullable ItemStack stack) {
-        StoredItem stored = StoredItem.of(stack);
-        if (stored == null) return false;
-
-        ItemStack rebuilt = stored.withAmount(1).toItemStack();
-        return rebuilt != null && rebuilt.isSimilar(stack);
     }
 }

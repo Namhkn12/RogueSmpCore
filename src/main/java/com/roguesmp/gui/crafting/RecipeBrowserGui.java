@@ -272,7 +272,7 @@ public class RecipeBrowserGui extends BaseGui {
     private static ItemStack resolvePreview(@Nullable CraftingIngredient ingredient) {
         if (ingredient != null) {
             ItemStack resolved = ingredient.toItemStack();
-            if (resolved != null) return resolved.clone();
+            if (resolved != null) return resolved;
         }
 
         ItemStack placeholder = ItemStack.of(Material.BARRIER);

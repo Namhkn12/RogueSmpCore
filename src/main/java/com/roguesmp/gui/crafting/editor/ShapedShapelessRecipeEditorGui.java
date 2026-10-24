@@ -341,10 +341,7 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
 
     private static @Nullable ItemStack resolveStack(@Nullable CraftingIngredient ingredient) {
         if (ingredient == null) return null;
-        ItemStack resolved = ingredient.toItemStack();
-        if (resolved == null) return null;
-
-        return resolved.clone();
+        return ingredient.toItemStack();
     }
 
     public void setRefundItem(boolean refundItem) {

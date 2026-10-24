@@ -36,6 +36,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * In-game editor for {@link BaseItem}s, built entirely on the Paper Dialog API
@@ -505,15 +506,29 @@ public class ItemCreatorGui {
 
     private Dialog buildDurabilityRepairDialog(Player player) {
         DurabilityRepairComponent current = (DurabilityRepairComponent) components.get(ItemComponentKeys.DURABILITY_REPAIR.id());
-        int initial = current == null ? 50 : current.getAmount();
-        DialogBuilder builder = DialogBuilder.create(Component.text("Lượng độ bền hồi phục"))
+        String initial = current == null ? "" : current.getMaterials().stream()
+                .map(m -> m.item() + " " + Utils.formatDecimal(m.percent()))
+                .collect(Collectors.joining("\n"));
+        DialogBuilder builder = DialogBuilder.create(Component.text("Nguyên liệu sửa chữa"))
                 .canCloseWithEscape(false)
-                .addTextInput("value", Component.text("Hồi phục (1-5000)"), b -> b.initial(String.valueOf(initial)).maxLength(16));
+                .addTextInput("value", Component.text("Mỗi dòng: <item id> <% độ bền>"), b -> b.initial(initial).maxLength(3000).multiline(TextDialogInput.MultilineOptions.create(10, 100)));
 
         return wrapComponentDialog(player, ItemComponentKeys.DURABILITY_REPAIR, builder,
                 (response, audience) -> {
-                    Float value = DialogInputUtils.parseFloat(response.getText("value"), 1f, 5000f);
-                    if (value != null) components.put(ItemComponentKeys.DURABILITY_REPAIR.id(), new DurabilityRepairComponent(Math.round(value)));
+                    List<DurabilityRepairComponent.RepairMaterial> materials = new ArrayList<>();
+                    String text = response.getText("value");
+                    for (String line : text == null ? new String[0] : text.split("\n")) {
+                        String[] parts = line.trim().split("\\s+");
+                        if (parts.length < 2) continue;
+                        Float percent = DialogInputUtils.parseFloat(parts[1], 0.01f, 100f);
+                        if (percent == null) {
+                            player.sendMessage(Utils.text("Dòng không hợp lệ: " + line, NamedTextColor.RED));
+                            continue;
+                        }
+                        materials.add(new DurabilityRepairComponent.RepairMaterial(parts[0], percent));
+                    }
+                    if (materials.isEmpty()) components.remove(ItemComponentKeys.DURABILITY_REPAIR.id());
+                    else components.put(ItemComponentKeys.DURABILITY_REPAIR.id(), new DurabilityRepairComponent(materials));
                     Utils.runLater(() -> openMainDialog(player));
                 },
                 (response, audience) -> {

@@ -116,7 +116,7 @@ public class RecipeSearchGui extends BaseGui {
 
     private ItemStack resultDisplay(String key) {
         ItemStack display = ItemRef.toItemStack(key, 1);
-        display = display == null ? ItemStack.of(Material.BARRIER) : display.clone();
+        if (display == null) display = ItemStack.of(Material.BARRIER);
 
         int recipeCount = CraftingManager.getInstance().getRecipesProducing(key).size();
         ItemLore existing = display.getData(DataComponentTypes.LORE);
