@@ -1,11 +1,9 @@
 package com.roguesmp.listener;
 
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.event.DailyResetEvent;
+import com.roguesmp.event.QuestCompletedEvent;
 import com.roguesmp.quest.QuestManager;
-import com.roguesmp.utils.Utils;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import com.roguesmp.quest.board.QuestBoardManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -17,9 +15,11 @@ import org.bukkit.event.player.PlayerQuitEvent;
 public class QuestListener implements Listener {
 
     private final QuestManager questManager;
+    private final QuestBoardManager boardManager;
 
-    public QuestListener(QuestManager questManager) {
+    public QuestListener(QuestManager questManager, QuestBoardManager boardManager) {
         this.questManager = questManager;
+        this.boardManager = boardManager;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -34,8 +34,7 @@ public class QuestListener implements Listener {
             RogueSmpCore.LOGGER.error("No quest data was loaded for {} before joining", event.getPlayer().getName());
             return;
         }
-        questManager.getDailyQuestManager().onPlayerJoin(event.getPlayer());
-        questManager.notifyPendingQuestRewards(event.getPlayer());
+        boardManager.refresh(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -44,11 +43,8 @@ public class QuestListener implements Listener {
     }
 
     @EventHandler
-    public void onDailyReset(DailyResetEvent event) {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            questManager.getDailyQuestManager().onPlayerJoin(player); // Resets quests & repopulates active slots
-            player.sendMessage(Utils.fromString("<green><bold>[!]</bold> Nhiệm vụ hàng ngày đã được làm mới!"));
-        }
+    public void onQuestCompleted(QuestCompletedEvent event) {
+        boardManager.onQuestCompleted(event);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

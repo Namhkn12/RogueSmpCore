@@ -47,6 +47,13 @@ public interface QuestObjective {
     ObjectiveProgress createNewProgress();
 
     /**
+     * Sets the progress's in-memory goal. The same seed always gives the same goal, so it is never saved.
+     */
+    default void resolveGoal(ObjectiveProgress progress, long seed) {
+
+    }
+
+    /**
      * Run when this objective is completed
      */
     default void onCompleted(ObjectiveProgress progress) {

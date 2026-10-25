@@ -1,7 +1,6 @@
 package com.roguesmp.quest;
 
 import com.roguesmp.quest.data.GroupQuestData;
-import com.roguesmp.quest.data.PendingQuestReward;
 import com.roguesmp.quest.data.PlayerQuestData;
 import com.roguesmp.quest.data.QuestDataManager;
 import com.roguesmp.quest.data.QuestLog;
@@ -17,13 +16,11 @@ import com.roguesmp.event.QuestProgressEvent;
 import com.roguesmp.event.QuestStartedEvent;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.quest.daily.DailyQuestManager;
-import com.roguesmp.registry.Registries;
-import com.roguesmp.registry.Registry;
-import com.roguesmp.gui.quest.RewardInboxGui;
+import com.roguesmp.player.inbox.InboxEntry;
+import com.roguesmp.player.inbox.InboxManager;
+import com.roguesmp.player.inbox.InboxSource;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -42,18 +39,13 @@ import java.util.function.BiPredicate;
 public class QuestManager {
 
     private static QuestManager INSTANCE;
-    private static final long REWARD_EXPIRY_INTERVAL_TICKS = 20L * 60 * 60;
 
     private final RogueSmpCore plugin;
     private final QuestDataManager questDataManager;
-    private final Registry<Quest> questRegistry;
-    private final DailyQuestManager dailyQuestManager;
 
     public QuestManager(RogueSmpCore plugin) {
         this.plugin = plugin;
         this.questDataManager = new QuestDataManager(plugin);
-        this.questRegistry = Registries.QUEST;
-        this.dailyQuestManager = new DailyQuestManager(this);
     }
 
     public @Nullable PlayerQuestData getPlayerQuestData(UUID uuid) {
@@ -186,8 +178,9 @@ public class QuestManager {
 
     // Quest conditions only apply to progress from a player's own action.
     private void handleProgress(QuestLog log, BiPredicate<QuestObjective, ObjectiveProgress> objectiveConsumer, @Nullable Player player) {
+        long now = System.currentTimeMillis();
         for (QuestProgress questProgress : List.copyOf(log.getQuestProgresses().values())) {
-            if (questProgress.isCompleted()) continue;
+            if (questProgress.isCompleted() || questProgress.isExpired(now)) continue;
 
             Quest quest = questProgress.getQuest();
             if (player != null && !quest.canProgress(log.getHolder(), player)) continue;
@@ -204,91 +197,45 @@ public class QuestManager {
         }
     }
 
+    /**
+     * Completes a quest whose objectives were already all done when it loaded but never went through completion,
+     * for example after its goal range was lowered.
+     */
+    public void completeLoaded(QuestHolder holder, QuestProgress progress) {
+        QuestLog log = getQuestLog(holder);
+        if (log != null && progress.isCompleted() && log.getQuestProgress(progress.getQuest().getId()) == progress) completeQuest(log, progress);
+    }
+
     private void completeQuest(QuestLog log, QuestProgress progress) {
         Quest quest = progress.getQuest();
-        UUID source = log.getHolder().id();
         log.getHolder().audience().forEach(member -> sendQuestDoneNotification(member, quest));
         if (log instanceof GroupQuestData group) {
-            progress.getEligible().forEach(member -> giveOrDeliver(member, source, progress));
+            InboxSource source = new InboxSource("Nhiệm vụ nhóm", displayName(quest), quest.getIcon());
+            progress.getEligible().forEach(member -> giveOrDeliver(member, source, quest));
             questDataManager.saveGroupAsync(group);
         } else {
-            giveOrDeliver(source, source, progress);
+            String origin = quest.getBoard() != null ? "Bảng nhiệm vụ" : "Nhiệm vụ";
+            giveOrDeliver(log.getHolder().id(), new InboxSource(origin, displayName(quest), quest.getIcon()), quest);
         }
         new QuestCompletedEvent(log.getHolder(), progress).callEvent();
+        if (log instanceof PlayerQuestData data) questDataManager.saveAsync(data);
+    }
+
+    private static String displayName(Quest quest) {
+        return quest.getName() != null ? quest.getName() : quest.getId();
     }
 
     /**
      * Gives the rewards right away for an auto-claimed quest when the player is online, otherwise puts them in the inbox.
      */
-    private void giveOrDeliver(UUID playerId, UUID source, QuestProgress progress) {
-        Quest quest = progress.getQuest();
+    private void giveOrDeliver(UUID playerId, InboxSource source, Quest quest) {
         Player player = Bukkit.getPlayer(playerId);
-        PlayerQuestData data = getPlayerQuestData(playerId);
-        if (quest.isAutoClaimRewards() && player != null && data != null && giveRewards(player, quest)) {
-            if (source.equals(playerId)) dailyQuestManager.onRewardClaimed(data, quest);
-            saveQuestDataImmediately(data);
+        SmpPlayer smpPlayer = player == null ? null : PlayerManager.getInstance().getSmpPlayer(player);
+        if (quest.isAutoClaimRewards() && smpPlayer != null) {
+            quest.getRewards().forEach(reward -> reward.giveReward(smpPlayer));
             return;
         }
-        questDataManager.deliver(playerId, PendingQuestReward.of(source, progress));
-        if (player != null) sendClaimPrompt(player, source, quest);
-    }
-
-    /**
-     * Claims a reward from the player's inbox.
-     *
-     * @param source the holder that completed the quest: the player themselves or a group
-     */
-    public boolean claimReward(Player player, UUID source, String questId) {
-        PlayerQuestData data = getPlayerQuestData(player.getUniqueId());
-        Quest quest = questRegistry.get(questId);
-        if (data == null || quest == null || !data.hasPendingQuestReward(source, questId)) {
-            player.sendMessage(Utils.fromString("<red>Không có phần thưởng nào để nhận!"));
-            return false;
-        }
-        if (!giveRewards(player, quest)) return false;
-        data.removePendingQuestReward(source, questId);
-        if (source.equals(player.getUniqueId())) dailyQuestManager.onRewardClaimed(data, quest);
-        saveQuestDataImmediately(data);
-        return true;
-    }
-
-    public boolean hasClaimableReward(Player player, String questId) {
-        PlayerQuestData data = getPlayerQuestData(player.getUniqueId());
-        return data != null && data.hasPendingQuestReward(player.getUniqueId(), questId);
-    }
-
-    public void notifyPendingQuestRewards(Player player) {
-        int pending = getPendingRewards(player).size();
-        if (pending == 0) return;
-        Component openInbox = Utils.fromString("<gold>[Mở hộp thư]</gold>").clickEvent(ClickEvent.callback(audience -> {
-            if (!(audience instanceof Player viewer)) return;
-            PlayerQuestData data = getPlayerQuestData(viewer.getUniqueId());
-            if (data != null) new RewardInboxGui(viewer, data).showInventory(viewer);
-        }));
-        player.sendMessage(Utils.fromString("<yellow>Bạn có <gold>" + pending + "</gold> phần thưởng nhiệm vụ chưa nhận. ").append(openInbox));
-    }
-
-    public List<PendingQuestReward> getPendingRewards(Player player) {
-        PlayerQuestData data = getPlayerQuestData(player.getUniqueId());
-        return data == null ? List.of() : data.getPendingQuestRewards();
-    }
-
-    private boolean giveRewards(Player member, Quest quest) {
-        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(member);
-        if (smpPlayer == null) return false;
-        quest.getRewards().forEach(reward -> reward.giveReward(smpPlayer));
-        return true;
-    }
-
-    public void sendClaimPrompt(Player member, UUID source, Quest quest) {
-        String name = quest.getName() != null ? quest.getName() : quest.getId();
-        String label = source.equals(member.getUniqueId()) ? "Phần thưởng: " : "Phần thưởng nhóm: ";
-        Component claim = Utils.fromString("<green>[Nhận thưởng]</green>").clickEvent(ClickEvent.callback(audience -> {
-            if (audience instanceof Player viewer && claimReward(viewer, source, quest.getId())) {
-                viewer.sendMessage(Utils.fromString("<green>Đã nhận thưởng: </green>" + name));
-            }
-        }));
-        member.sendMessage(Utils.fromString("<gold>" + label + "</gold>" + name + " ").append(claim));
+        InboxManager.getInstance().send(playerId, InboxEntry.of(source, quest.getRewards()));
     }
 
     public void sendQuestDoneNotification(Player player, Quest quest) {
@@ -317,17 +264,8 @@ public class QuestManager {
     }
 
     /**
-     * Persists a player's quest data right away instead of waiting for the periodic
-     * autosave/quit save - used whenever a quest transitions to a completed state, so a
-     * crash shortly after completion doesn't lose it.
-     */
-    private void saveQuestDataImmediately(PlayerQuestData data) {
-        questDataManager.saveAsync(data);
-    }
-
-    /**
-     * Restarts a holder's quest from zero, for seasonal resets or re-taking a repeatable quest. A player's unclaimed
-     * reward from the earlier completion is dropped; group rewards already in members' inboxes are kept.
+     * Restarts a holder's quest from zero, for seasonal resets or re-taking a repeatable quest. Rewards already in
+     * inboxes are kept.
      *
      * @return false if the holder has no such quest
      */
@@ -337,7 +275,6 @@ public class QuestManager {
         if (progress == null) return false;
 
         progress.resetProgresses();
-        if (log instanceof PlayerQuestData data) data.removePendingQuestReward(holder.id(), quest.getId());
         log.setDirty(true);
         return true;
     }
@@ -395,10 +332,6 @@ public class QuestManager {
         return questDataManager;
     }
 
-    public DailyQuestManager getDailyQuestManager() {
-        return dailyQuestManager;
-    }
-
     public void onKillEntity(EntityDeathEvent event) {
         if (!(event.getDamageSource().getCausingEntity() instanceof Player player)) return;
 
@@ -412,7 +345,6 @@ public class QuestManager {
 
     public static void init(RogueSmpCore plugin) {
         INSTANCE = new QuestManager(plugin);
-        Bukkit.getScheduler().runTaskTimer(plugin, () -> INSTANCE.questDataManager.expireRewards(), REWARD_EXPIRY_INTERVAL_TICKS, REWARD_EXPIRY_INTERVAL_TICKS);
     }
 
     public static QuestManager getInstance() {

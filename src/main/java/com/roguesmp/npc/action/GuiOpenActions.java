@@ -2,7 +2,8 @@ package com.roguesmp.npc.action;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.gui.BlacksmithGui;
-import com.roguesmp.gui.quest.DailyQuestGui;
+import com.roguesmp.player.inbox.gui.InboxGui;
+import com.roguesmp.quest.board.gui.QuestBoardGui;
 import com.roguesmp.registry.Registries;
 import io.papermc.paper.registry.keys.SoundEventKeys;
 import net.kyori.adventure.sound.Sound;
@@ -26,9 +27,10 @@ public class GuiOpenActions {
         player.playSound(Sound.sound(SoundEventKeys.ITEM_ARMOR_EQUIP_CHAIN, Sound.Source.PLAYER, 1f, 1.2f));
     });
     public static final OpenAction QUEST = register("quest", player -> {
-        new DailyQuestGui(player).showInventory(player);
+        new QuestBoardGui(player).showInventory(player);
         player.playSound(Sound.sound(SoundEventKeys.ITEM_BOOK_PAGE_TURN, Sound.Source.PLAYER, 1f, 0.9f));
     });
+    public static final OpenAction INBOX = register("inbox", player -> new InboxGui(player, null).showInventory(player));
 
     public static void loadClass() {
 

@@ -24,7 +24,6 @@ public class QuestDataManager {
 
     private final Map<UUID, PlayerQuestData> dataMap = new HashMap<>();
     private final Map<UUID, PlayerQuestData> pendingJoins = new ConcurrentHashMap<>();
-    private final Map<UUID, List<PendingQuestReward>> undeliveredRewards = new HashMap<>();
     private final JsonSqliteStore<PlayerQuestData> store;
     private final Map<UUID, GroupQuestData> groupMap = new HashMap<>();
     private final JsonSqliteStore<GroupQuestData> groupStore;
@@ -135,18 +134,6 @@ public class QuestDataManager {
     }
 
     /**
-     * Drops expired inbox rewards of online players and undelivered ones.
-     */
-    public void expireRewards() {
-        long now = System.currentTimeMillis();
-        for (PlayerQuestData data : dataMap.values()) data.expirePendingQuestRewards(now);
-        undeliveredRewards.values().removeIf(rewards -> {
-            rewards.removeIf(reward -> reward.expiresAt() <= now);
-            return rewards.isEmpty();
-        });
-    }
-
-    /**
      * Ends a live group and deletes it. Rewards were already delivered when each quest completed.
      */
     public void endGroup(UUID groupId) {
@@ -169,22 +156,6 @@ public class QuestDataManager {
             ended++;
         }
         return ended;
-    }
-
-    /**
-     * Puts the reward in the player's inbox and saves it. An offline player's row is changed in place on the store; the
-     * reward is also kept in memory until they join, in case their data was being loaded at the same time and the copy
-     * they join with predates the change.
-     */
-    public void deliver(UUID playerId, PendingQuestReward reward) {
-        PlayerQuestData cached = dataMap.get(playerId);
-        if (cached != null) {
-            cached.addPendingQuestReward(reward);
-            saveAsync(cached);
-            return;
-        }
-        undeliveredRewards.computeIfAbsent(playerId, id -> new ArrayList<>()).add(reward);
-        store.updateAsync(playerId, () -> new PlayerQuestData(playerId), data -> data.addPendingQuestReward(reward));
     }
 
     @Blocking
@@ -219,9 +190,6 @@ public class QuestDataManager {
     public boolean cachePendingJoin(UUID uuid) {
         PlayerQuestData data = pendingJoins.remove(uuid);
         if (data == null) return false;
-        List<PendingQuestReward> undelivered = undeliveredRewards.remove(uuid);
-        if (undelivered != null) undelivered.forEach(data::addPendingQuestReward);
-        data.expirePendingQuestRewards(System.currentTimeMillis());
         dataMap.put(uuid, data);
         return true;
     }

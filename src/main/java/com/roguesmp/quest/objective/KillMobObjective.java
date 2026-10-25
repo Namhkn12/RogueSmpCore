@@ -5,6 +5,7 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.quest.goal.IntRange;
 import com.roguesmp.utils.EntityUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -25,6 +26,7 @@ public class KillMobObjective implements QuestObjective {
         );
 
         private int killed;
+        private int goal;
 
         public Progress(int killed) {
             this.killed = killed;
@@ -36,6 +38,10 @@ public class KillMobObjective implements QuestObjective {
 
         public void setKilled(int killed) {
             this.killed = killed;
+        }
+
+        public int getGoal() {
+            return goal;
         }
 
         @Override
@@ -51,14 +57,14 @@ public class KillMobObjective implements QuestObjective {
 
     public static final Codec<KillMobObjective> CODEC = Codec.composite(
             Codec.STRING.fieldOf("mobId").forGetter(KillMobObjective::getMobId),
-            Codec.INT.fieldOf("amount").forGetter(KillMobObjective::getAmount),
+            IntRange.CODEC.fieldOf("amount").forGetter(KillMobObjective::getAmount),
             KillMobObjective::new
     );
 
     private final String mobId;
-    private final int amount;
+    private final IntRange amount;
 
-    public KillMobObjective(String mobId, int amount) {
+    public KillMobObjective(String mobId, IntRange amount) {
         this.mobId = mobId;
         this.amount = amount;
     }
@@ -72,7 +78,7 @@ public class KillMobObjective implements QuestObjective {
 
         String displayString = String.format(
                 "<gray>Tiêu diệt </gray><green>%s</green> <gray>(</gray>%s%d<gray>/</gray><gold>%d</gold><gray>)</gray>",
-                mobName, countColor, ((Progress) progress).getKilled(), amount
+                mobName, countColor, ((Progress) progress).getKilled(), ((Progress) progress).goal
         );
 
         return List.of(Utils.fromString(displayString));
@@ -86,14 +92,15 @@ public class KillMobObjective implements QuestObjective {
 
         String displayString = String.format(
                 "<gray>Tiêu diệt %s </gray><green>%s</green>",
-                amount, mobName
+                amount.display(), mobName
         );
         return List.of(Utils.fromString(displayString));
     }
 
     @Override
     public boolean isCompleted(ObjectiveProgress progress) {
-        return ((Progress) progress).killed >= amount;
+        Progress mobProgress = (Progress) progress;
+        return mobProgress.killed >= mobProgress.goal;
     }
 
     @Override
@@ -101,7 +108,7 @@ public class KillMobObjective implements QuestObjective {
         return TYPE_KEY;
     }
 
-    public int getAmount() {
+    public IntRange getAmount() {
         return amount;
     }
 
@@ -112,6 +119,11 @@ public class KillMobObjective implements QuestObjective {
     @Override
     public Progress createNewProgress() {
         return new Progress(0);
+    }
+
+    @Override
+    public void resolveGoal(ObjectiveProgress progress, long seed) {
+        ((Progress) progress).goal = amount.roll(seed);
     }
 
     @Override
