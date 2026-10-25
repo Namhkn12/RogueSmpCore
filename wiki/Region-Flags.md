@@ -63,7 +63,7 @@ Giá trị sai cú pháp bị từ chối ngay khi đặt, kèm thông báo lỗ
 
 - Điểm spawn của **cả region logic** (kể cả region nhiều mảnh), dùng world của chính region nên không ghi tên world.
 - `yaw`/`pitch` phải đi cùng nhau; bỏ qua thì = `0 0`.
-- Được dùng bởi `/smpregion tp <region>`, nút teleport trong GUI editor, và target `region:` của [`smp-enter-teleport`](#smp-enter-teleport).
+- Được dùng bởi `/smpregion tp <region>`, nút teleport trong GUI editor, và target `region` của [`smp-enter-teleport`](#smp-enter-teleport).
 - Không đặt → dùng tâm mảnh đầu tiên, Y = block cao nhất tại đó (kẹp trong giới hạn Y của mảnh) + 1.
 
 Khác flag `spawn` của WorldGuard: flag gốc nằm trên từng region WorldGuard, không hiểu region nhóm của plugin.
@@ -73,18 +73,20 @@ Khác flag `spawn` của WorldGuard: flag gốc nằm trên từng region WorldG
 2 dạng target:
 
 ```
-region:[world:]<regionId> [fx|none]
+region <regionId> [world] [fx|none]
 [world] <x> <y> <z> [yaw pitch] [fx|none]
 ```
 
 | Dạng | Ví dụ | Đến |
 | :--- | :--- | :--- |
-| Region, cùng world | `region:boss_arena` | [`smp-spawn`](#smp-spawn) của region đó trong world người chơi đang đứng (không có thì tâm region) |
-| Region, world khác | `region:spawn_world:hub` | Như trên, trong world chỉ định |
+| Region, cùng world | `region boss_arena` | [`smp-spawn`](#smp-spawn) của region đó trong world người chơi đang đứng (không có thì tâm region) |
+| Region, world khác | `region hub minecraft:spawn_world` | Như trên, trong world chỉ định |
 | Toạ độ, cùng world | `0.5 80 0.5 0 0` | Đúng toạ độ trong world hiện tại; bỏ `yaw pitch` thì giữ hướng nhìn hiện tại |
-| Toạ độ, world khác | `spawn_world 0.5 80 0.5` | Đúng toạ độ trong world chỉ định |
+| Toạ độ, world khác | `minecraft:spawn_world 0.5 80 0.5` | Đúng toạ độ trong world chỉ định |
 
-**Bỏ tên world** = world người chơi đang đứng lúc dịch chuyển. Dùng dạng này cho **dungeon**: world instance có tên ngẫu nhiên, nên cổng trong template world phải trỏ `region:<id>` hoặc toạ độ không kèm world — khi template được sao ra instance, cổng tự trỏ đúng world của instance đó.
+`world` là **key đầy đủ có namespace** của world (`minecraft:overworld`, `minecraft:spawn_world`...), không phải tên thư mục; thiếu namespace bị từ chối. Xem key bằng `/execute in` hoặc `World#getKey()`.
+
+**Bỏ world** = world người chơi đang đứng lúc dịch chuyển. Dùng dạng này cho **dungeon**: world instance có tên ngẫu nhiên, nên cổng trong template world phải trỏ `region <id>` hoặc toạ độ không kèm world — khi template được sao ra instance, cổng tự trỏ đúng world của instance đó.
 
 Hậu tố cuối (mặc định `fx`):
 
@@ -92,8 +94,8 @@ Hậu tố cuối (mặc định `fx`):
 - `none` — dịch chuyển ngay tick sau, không hiệu ứng.
 
 ```
-/smpregion flag gate smp-enter-teleport region:boss_arena
-/smpregion flag exit smp-enter-teleport spawn_world 0.5 80 0.5 0 0 none
+/smpregion flag gate smp-enter-teleport region boss_arena
+/smpregion flag exit smp-enter-teleport minecraft:spawn_world 0.5 80 0.5 0 0 none
 ```
 
 - **Đi được sang world khác** (kể cả world Multiverse).
@@ -108,7 +110,7 @@ Hậu tố cuối (mặc định `fx`):
 ```
 /smpregion define gate                     # region nhỏ, vừa khung cổng
 /smpregion flag gate smp-ambient-particles portal 4 0.8 24
-/smpregion flag gate smp-enter-teleport region:boss_arena
+/smpregion flag gate smp-enter-teleport region boss_arena
 /smpregion flag boss_arena smp-spawn 100.5 64 -20.5 90 0
 ```
 

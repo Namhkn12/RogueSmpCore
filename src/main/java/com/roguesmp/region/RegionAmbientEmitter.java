@@ -20,8 +20,6 @@ public final class RegionAmbientEmitter {
     private static final int REFRESH_EVERY = 10;
     private static final int POINT_ATTEMPTS = 8;
 
-    private static RegionAmbientEmitter INSTANCE;
-
     private record Emitter(World world, AmbientParticles particles, List<ProtectedRegion> pieces, long[] cumulativeVolume,
                            ServerRegionManager.Bounds bounds) {
     }
@@ -34,17 +32,14 @@ public final class RegionAmbientEmitter {
     }
 
     public static void init(RogueSmpCore plugin) {
-        INSTANCE = new RegionAmbientEmitter(plugin);
+        new RegionAmbientEmitter(plugin);
     }
 
-    public static RegionAmbientEmitter getInstance() {
-        return INSTANCE;
-    }
-
-    public void refresh() {
+    private void refresh() {
         ServerRegionManager manager = ServerRegionManager.getInstance();
         List<Emitter> found = new ArrayList<>();
         for (World world : Bukkit.getWorlds()) {
+            if (world.getPlayers().isEmpty()) continue;
             for (Map.Entry<String, List<ProtectedRegion>> entry : manager.regions(world).entrySet()) {
                 ProtectedRegion settings = manager.get(world, entry.getKey());
                 AmbientParticles particles = settings == null ? null : settings.getFlag(SmpRegionFlags.AMBIENT_PARTICLES);
@@ -71,11 +66,7 @@ public final class RegionAmbientEmitter {
             List<Player> viewers = viewers(emitter);
             if (viewers.isEmpty()) continue;
 
-            for (int i = 0; i < emitter.particles().count(); i++) {
-                Location point = randomPoint(emitter);
-                if (point == null) continue;
-                for (Player viewer : viewers) viewer.spawnParticle(emitter.particles().particle(), point, 1, 0, 0, 0, 0);
-            }
+            for (int i = 0; i < emitter.particles().count(); i++) emitAtRandomPoint(emitter, viewers);
         }
     }
 
@@ -100,7 +91,7 @@ public final class RegionAmbientEmitter {
         return value < min ? min - value : value > max ? value - max : 0;
     }
 
-    private Location randomPoint(Emitter emitter) {
+    private void emitAtRandomPoint(Emitter emitter, List<Player> viewers) {
         long[] cumulative = emitter.cumulativeVolume();
         long roll = Utils.RANDOM.nextLong(cumulative[cumulative.length - 1]);
         int index = 0;
@@ -113,8 +104,10 @@ public final class RegionAmbientEmitter {
             double x = min.x() + Utils.RANDOM.nextDouble() * (max.x() - min.x() + 1);
             double y = min.y() + Utils.RANDOM.nextDouble() * (max.y() - min.y() + 1);
             double z = min.z() + Utils.RANDOM.nextDouble() * (max.z() - min.z() + 1);
-            if (piece.contains((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z))) return new Location(emitter.world(), x, y, z);
+            if (!piece.contains((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z))) continue;
+
+            for (Player viewer : viewers) viewer.spawnParticle(emitter.particles().particle(), x, y, z, 1, 0, 0, 0, 0);
+            return;
         }
-        return null;
     }
 }

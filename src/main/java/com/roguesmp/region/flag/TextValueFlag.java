@@ -1,5 +1,6 @@
 package com.roguesmp.region.flag;
 
+import com.roguesmp.RogueSmpCore;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.FlagContext;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
@@ -28,6 +29,7 @@ public abstract class TextValueFlag<T> extends Flag<T> {
         try {
             return parse(object.toString().trim().split("\\s+"));
         } catch (InvalidFlagFormat e) {
+            RogueSmpCore.LOGGER.warn("Dropping stored value '{}' of region flag {}: {}", object, getName(), e.getMessage());
             return null;
         }
     }
