@@ -10,6 +10,8 @@ import com.roguesmp.world.PolarTemplateManager;
 import com.roguesmp.command.ReloadCommand;
 import com.roguesmp.fishing.listener.FishingListener;
 import com.roguesmp.region.listener.RegionListener;
+import com.roguesmp.region.listener.RegionTeleportListener;
+import com.roguesmp.region.RegionAmbientEmitter;
 import com.roguesmp.region.SmpRegionFlags;
 import com.roguesmp.region.RegionBoundaryHandler;
 import com.roguesmp.region.ServerRegionManager;
@@ -109,6 +111,7 @@ public final class RogueSmpCore extends JavaPlugin {
         PolarTemplateManager.init(this);
         RegionSelections.init();
         RegionVisualizer.init(this);
+        RegionAmbientEmitter.init(this);
 
         //Island
         IslandManager.init(this, PlayerManager.getInstance());
@@ -198,6 +201,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         RegionBoundaryHandler.register();
         registerListener(new RegionListener(PlayerManager.getInstance()));
+        registerListener(new RegionTeleportListener());
 
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance(), IslandManager.getInstance()));
