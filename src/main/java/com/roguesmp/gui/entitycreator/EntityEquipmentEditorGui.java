@@ -1,5 +1,8 @@
 package com.roguesmp.gui.entitycreator;
 
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.DataResult;
+import com.roguesmp.codec.JsonOps;
 import com.roguesmp.entity.EntityEquipment;
 import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.entity.component.impl.EquipmentComponent;
@@ -11,6 +14,7 @@ import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.registry.data.dialog.input.TextDialogInput;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
@@ -86,8 +90,8 @@ public class EntityEquipmentEditorGui {
                         b -> b.initial(current == null || current.getTrimMaterial() == null ? "" : current.getTrimMaterial()).maxLength(64))
                 .addTextInput("trim_pattern", Component.text("Trim pattern (vd: sentry, để trống nếu không có)"),
                         b -> b.initial(current == null || current.getTrimPattern() == null ? "" : current.getTrimPattern()).maxLength(64))
-                .addTextInput("dye_color", Component.text("Dye color (a,r,g,b - để trống nếu không có)"),
-                        b -> b.initial(current == null || current.getDyeColor() == null ? "" : current.getDyeColor()).maxLength(32))
+                .addTextInput("dye_color", Component.text("Dye color (hex, vd: #9B5DE5 - để trống nếu không có)"),
+                        b -> b.initial(current == null || current.getDyeColor() == null ? "" : String.format("#%06X", current.getDyeColor().asRGB())).maxLength(32))
                 .addTextInput("head_skin", Component.text("Head skin ID (trong SkinRegistry, để trống nếu không có)"),
                         b -> b.initial(current == null || current.getHeadSkin() == null ? "" : current.getHeadSkin()).maxLength(64));
 
@@ -107,7 +111,14 @@ public class EntityEquipmentEditorGui {
             Boolean enchantGlint = response.getBoolean("enchant_glint");
             String trimMaterial = blankToNull(response.getText("trim_material"));
             String trimPattern = blankToNull(response.getText("trim_pattern"));
-            String dyeColor = blankToNull(response.getText("dye_color"));
+            String dyeColorRaw = blankToNull(response.getText("dye_color"));
+            DataResult<Color> dyeResult = dyeColorRaw == null ? null : Codec.HEX_COLOR.decode(JsonOps.INSTANCE.createString(dyeColorRaw), JsonOps.INSTANCE);
+            if (dyeResult != null && !dyeResult.isSuccess()) {
+                player.sendMessage(Utils.text("Màu nhuộm không hợp lệ, dùng dạng #RRGGBB.", NamedTextColor.RED));
+                Utils.runLater(() -> player.showDialog(buildSlotDialog(player, slot)));
+                return;
+            }
+            Color dyeColor = dyeResult == null ? null : dyeResult.result();
             String headSkin = blankToNull(response.getText("head_skin"));
 
             if (headSkin != null && SkinRegistry.getInstance().getSkin(headSkin) == null) {

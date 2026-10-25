@@ -26,13 +26,4 @@ public abstract class OnHitSpell extends Spell {
             onHit((LivingEntity) event.getVictim(), event);
         }
     }
-
-    @Override
-    public void run(int interval) {
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return 0;
-    }
 }

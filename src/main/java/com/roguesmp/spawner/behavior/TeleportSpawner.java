@@ -1,5 +1,6 @@
 package com.roguesmp.spawner.behavior;
 
+import com.roguesmp.spawner.SpawnerSystem;
 import com.roguesmp.utils.LocationUtils;
 import java.util.concurrent.ThreadLocalRandom;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -113,7 +114,7 @@ public class TeleportSpawner extends BaseBehavior {
     private Location findTeleportDestination(Location current, World world) {
         for (int i = 0; i < 15; i++) {
             Location candidate = LocationUtils.randomOffsetXZ(current, 10.0, teleportRadius);
-            if (isSafe(candidate)) return candidate;
+            if (isSafe(candidate) && SpawnerSystem.isActive(candidate)) return candidate;
         }
         return null;
     }
@@ -135,7 +136,7 @@ public class TeleportSpawner extends BaseBehavior {
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             world.spawnParticle(Particle.PORTAL, dest, 40, 0.3, 0.5, 0.3, 0.1);
-            world.spawnParticle(Particle.FLASH, dest, 1, 0, 0, 0, 0);
+            world.spawnParticle(Particle.FLASH, dest, 1, 0, 0, 0, Color.AQUA);
             world.playSound(dest, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.2f);
         }, 1L);
 
@@ -170,6 +171,15 @@ public class TeleportSpawner extends BaseBehavior {
         copiedSpawner.update(true, false);
 
         from.getBlock().setType(Material.AIR);
+        if (instance != null) instance.setLocation(to.getBlock().getLocation());
+    }
+
+    @Override
+    protected void onTick(Location location, int ticks) {
+        if (completed) return;
+        Location center = SpawnerFx.center(location);
+        SpawnerFx.ring(center, 1.0, 12, ticks * -0.3, Particle.REVERSE_PORTAL, null);
+        if (ticks % 20 == 0) SpawnerFx.sound(center, Sound.BLOCK_PORTAL_AMBIENT, 1.5f, 1.4f);
     }
 
     @Override

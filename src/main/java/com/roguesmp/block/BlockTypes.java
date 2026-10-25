@@ -1,11 +1,7 @@
 package com.roguesmp.block;
 
-import com.roguesmp.block.data.BrewingData;
-import com.roguesmp.block.data.EnergyGeneratorData;
+import com.roguesmp.block.data.*;
 import com.roguesmp.block.impl.brewing.BrewingBlock;
-import com.roguesmp.block.data.GeneratorData;
-import com.roguesmp.block.data.NoData;
-import com.roguesmp.block.data.WirelessNodeData;
 import com.roguesmp.block.impl.energy.WirelessNodeBlock;
 import com.roguesmp.block.impl.TallyBlock;
 import com.roguesmp.block.impl.cokeoven.CokeOvenBlock;
@@ -28,7 +24,8 @@ public class BlockTypes {
     public static final BlockType<NoData, TallyBlock> TALLY = plain("tally", "Bộ đếm", TallyBlock::new);
     public static final BlockType<NoData, AltarMainBlock> ALTAR_MAIN = plain("altar_main", "Bàn thờ chính", AltarMainBlock::new);
     public static final BlockType<NoData, AltarSideBlock> ALTAR_SIDE = plain("altar_side", "Bàn thờ phụ", AltarSideBlock::new);
-    public static final BlockType<NoData, CokeOvenBlock> COKE_OVEN = plain("coke_oven", "Lò cốc", CokeOvenBlock::new);
+    public static final BlockType<CokeOvenData, CokeOvenBlock> COKE_OVEN =
+            register("coke_oven", "Lò cốc", CokeOvenData.CODEC, CokeOvenData.DEFAULT, CokeOvenBlock::new);
     public static final BlockType<GeneratorData, ResourceGeneratorBlock> GENERATOR =
             register("generator", "Máy tạo tài nguyên", GeneratorData.CODEC, GeneratorData.DEFAULT, ResourceGeneratorBlock::new);
     public static final BlockType<EnergyGeneratorData, EnergyGeneratorBlock> ENERGY_GENERATOR =

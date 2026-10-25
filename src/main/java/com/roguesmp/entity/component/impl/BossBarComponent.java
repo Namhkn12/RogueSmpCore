@@ -4,8 +4,10 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.component.EntityComponent;
+import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.entity.component.TickingComponent;
 import com.roguesmp.utils.EntityUtils;
+import com.roguesmp.utils.Utils;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -80,7 +82,7 @@ public class BossBarComponent implements TickingComponent {
                              boolean bossFog, Function<LivingEntity, Location> locationFunction) {
         this(range, color, style, bossFog);
         this.locationFunction = locationFunction;
-        build(entity);
+        build(entity, entity.name());
     }
 
     @Override
@@ -90,13 +92,22 @@ public class BossBarComponent implements TickingComponent {
 
     @Override
     public void onSpawn(SmpEntity smpEntity) {
-        if (bar != null) return; // Already built by the code-driven constructor.
-        build(smpEntity.getEntity());
+        Component title = titleOf(smpEntity);
+        if (bar != null) {
+            bar.name(title);
+            return;
+        }
+        build(smpEntity.getEntity(), title);
     }
 
-    private void build(LivingEntity entity) {
+    private static Component titleOf(SmpEntity smpEntity) {
+        DisplayNameComponent displayName = smpEntity.getComponent(EntityComponentKeys.DISPLAY_NAME);
+        return displayName != null ? Utils.fromString(displayName.name()) : smpEntity.getEntity().name();
+    }
+
+    private void build(LivingEntity entity, Component title) {
         this.entity = entity;
-        bar = BossBar.bossBar(Component.text(entity.getName()), 0f, color, style, Set.of(BossBar.Flag.PLAY_BOSS_MUSIC));
+        bar = BossBar.bossBar(title, 0f, color, style, Set.of(BossBar.Flag.PLAY_BOSS_MUSIC));
         if (bossFog) {
             bar.addFlag(BossBar.Flag.CREATE_WORLD_FOG);
             bar.addFlag(BossBar.Flag.DARKEN_SCREEN);

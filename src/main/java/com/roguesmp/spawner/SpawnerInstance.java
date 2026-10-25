@@ -10,7 +10,7 @@ import java.util.List;
 public class SpawnerInstance {
     private final String iid;
     private final String templateId;
-    private final Location location;
+    private Location location;
     private final List<BaseBehavior> behaviors;
 
     public SpawnerInstance(String iid, String templateId, Location location, List<BaseBehavior> behaviors) {
@@ -18,6 +18,7 @@ public class SpawnerInstance {
         this.templateId = templateId;
         this.location = location;
         this.behaviors = List.copyOf(behaviors);
+        this.behaviors.forEach(behavior -> behavior.bind(this));
     }
 
     public boolean runBreak(Player player, Location location) {
@@ -34,6 +35,14 @@ public class SpawnerInstance {
             if (!behavior.onSpawn(entity, players, location)) allow = false;
         }
         return allow;
+    }
+
+    public void tick() {
+        for (BaseBehavior behavior : behaviors) behavior.tick(location);
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public String getId() {

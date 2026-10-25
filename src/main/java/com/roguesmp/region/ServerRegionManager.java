@@ -1,6 +1,7 @@
 package com.roguesmp.region;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.region.flag.SpawnPoint;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
@@ -375,19 +376,28 @@ public final class ServerRegionManager {
     }
 
     public boolean teleport(Player player, String id) {
-        List<ProtectedRegion> shapes = pieces(player.getWorld(), id);
-        if (shapes.isEmpty()) return false;
+        Location target = spawnLocation(player.getWorld(), id);
+        if (target == null) return false;
+
+        player.teleportAsync(target);
+        return true;
+    }
+
+    public @Nullable Location spawnLocation(World world, String id) {
+        ProtectedRegion settings = get(world, id);
+        SpawnPoint spawn = settings == null ? null : settings.getFlag(SmpRegionFlags.SPAWN);
+        if (spawn != null) return spawn.toLocation(world);
+
+        List<ProtectedRegion> shapes = pieces(world, id);
+        if (shapes.isEmpty()) return null;
 
         ProtectedRegion primary = shapes.getFirst();
-
         BlockVector3 min = primary.getMinimumPoint();
         BlockVector3 max = primary.getMaximumPoint();
         double x = (min.x() + max.x() + 1) / 2.0;
         double z = (min.z() + max.z() + 1) / 2.0;
-        World world = player.getWorld();
         int y = Math.max(min.y(), Math.min(max.y(), world.getHighestBlockYAt((int) x, (int) z))) + 1;
-        player.teleportAsync(new Location(world, x, y, z));
-        return true;
+        return new Location(world, x, y, z);
     }
 
     @Blocking

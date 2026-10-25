@@ -4,6 +4,7 @@ import com.roguesmp.block.BlockProperties;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.StoredItem;
 import com.roguesmp.block.Tickable;
+import com.roguesmp.block.data.CokeOvenData;
 import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.gui.CokeOvenGui;
 import com.roguesmp.block.persistence.StateSection;
@@ -17,6 +18,7 @@ import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.crafting.recipe.CokeOvenRecipe;
 import com.roguesmp.crafting.recipe.CraftingRecipes;
 import com.roguesmp.registry.Registries;
+import net.kyori.adventure.key.Key;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -34,6 +36,7 @@ public class CokeOvenBlock extends SmpBlock implements Tickable, ItemStorageHold
     public static final int OUTPUT_COUNT = 2;
     private static final int GUI_REFRESH_INTERVAL = 10;
 
+    private final CokeOvenData data;
     private final ItemStorage storage = new ItemStorage(this);
     private final FixedSlots inputs = storage.add(new FixedSlots("input", "Nguyên liệu", INPUT_COUNT, SlotAccess.INSERT), this::onInputsChanged);
     private final FixedSlots outputs = storage.add(new FixedSlots("output", "Thành phẩm", OUTPUT_COUNT, SlotAccess.EXTRACT), this::refreshGui);
@@ -43,8 +46,9 @@ public class CokeOvenBlock extends SmpBlock implements Tickable, ItemStorageHold
     private @Nullable CokeOvenGui gui;
     private int guiRefreshTicks;
 
-    public CokeOvenBlock(BlockProperties properties) {
+    public CokeOvenBlock(BlockProperties properties, CokeOvenData data) {
         super(properties);
+        this.data = data;
         inputs.withDemand(this::recipeDemand);
     }
 
@@ -57,6 +61,7 @@ public class CokeOvenBlock extends SmpBlock implements Tickable, ItemStorageHold
     @Override
     public void tick() {
         tickProgress();
+        syncDisplayModel();
         tickGuiRefresh();
     }
 
@@ -190,6 +195,11 @@ public class CokeOvenBlock extends SmpBlock implements Tickable, ItemStorageHold
 
     public boolean isStalled() {
         return activeRecipe != null && progress >= activeRecipe.getDuration() && !outputs.canFitAll(results(activeRecipe));
+    }
+
+    @Override
+    public Key getDisplayModel() {
+        return activeRecipe != null && !isStalled() ? data.modelActive() : super.getDisplayModel();
     }
 
     @Override

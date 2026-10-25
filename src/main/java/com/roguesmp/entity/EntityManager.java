@@ -52,13 +52,13 @@ public class EntityManager {
 
         String entityId = entity.getPersistentDataContainer().get(Keys.MOB_ID, PersistentDataType.STRING);
         if (entityId == null) return;
+        BaseEntity base = getBaseEntity(entityId);
+        if (base == null) return;
         // Remove special state entity (boss)
-        if (isSpecialEntity(entityId)) {
+        if (base.isSpecial()) {
             Utils.runLater(entity::remove);
             return;
         }
-        BaseEntity base = getBaseEntity(entityId);
-        if (base == null) return;
 
         // Wrap, Init, and Register for world-loaded entities
         SmpEntity smpEntity = wrap(base, living);
@@ -131,13 +131,11 @@ public class EntityManager {
      * Wrap an Entity within SmpEntity, or its subclasses
      */
     public SmpEntity wrap(BaseEntity base, LivingEntity living) {
-        // Default to standard SmpEntity if no special factory exists
-        EntityFactory<?> factory = Registries.ENTITY_FACTORY.get(base.getId());
+        EntityFactory<?> factory = base.getFactory() != null ? Registries.ENTITY_FACTORY.get(base.getFactory()) : null;
+        if (factory == null && base.getFactory() != null) {
+            RogueSmpCore.LOGGER.warn("Entity '{}' references unknown factory '{}', using default", base.getId(), base.getFactory());
+        }
         return factory != null ? factory.create(base, living) : new SmpEntity(base, living);
-    }
-
-    public boolean isSpecialEntity(String id) {
-        return Registries.ENTITY_FACTORY.get(id) != null;
     }
 
     public BaseEntity getBaseEntity(String id) {

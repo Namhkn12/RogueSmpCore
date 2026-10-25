@@ -30,7 +30,7 @@ public class EntityEquipment {
             Codec.BOOLEAN.optionalFieldOf("enchantGlint", false).forGetter(EntityEquipment::isEnchantGlint),
             Codec.STRING.optionalFieldOf("trimMaterial", (String) null).forGetter(EntityEquipment::getTrimMaterial),
             Codec.STRING.optionalFieldOf("trimPattern", (String) null).forGetter(EntityEquipment::getTrimPattern),
-            Codec.STRING.optionalFieldOf("dyeColor", (String) null).forGetter(EntityEquipment::getDyeColor),
+            Codec.HEX_COLOR.optionalFieldOf("dyeColor", (Color) null).forGetter(EntityEquipment::getDyeColor),
             Codec.STRING.optionalFieldOf("headSkin", (String) null).forGetter(EntityEquipment::getHeadSkin),
             EntityEquipment::new
     );
@@ -42,10 +42,10 @@ public class EntityEquipment {
     private final boolean enchantGlint;
     private final String trimMaterial;
     private final String trimPattern;
-    private final String dyeColor;
+    private final @Nullable Color dyeColor;
     private final String headSkin;
 
-    public EntityEquipment(Material material, String displayName, List<String> lore, boolean enchantGlint, String trimMaterial, String trimPattern, String dyeColor, String headSkin) {
+    public EntityEquipment(Material material, String displayName, List<String> lore, boolean enchantGlint, String trimMaterial, String trimPattern, @Nullable Color dyeColor, String headSkin) {
         this.material = material;
         this.displayName = displayName;
         this.lore = lore;
@@ -74,19 +74,8 @@ public class EntityEquipment {
             itemStack.setData(DataComponentTypes.TRIM, ItemArmorTrim.itemArmorTrim(new ArmorTrim(trimMaterial1, trimPattern1)));
         }
 
-        if (dyeColor != null && !dyeColor.isEmpty()) {
-            String[] parts = dyeColor.split(",");
-
-            itemStack.setData(DataComponentTypes.DYED_COLOR,
-                    DyedItemColor.dyedItemColor(
-                            Color.fromARGB(
-                                    Integer.parseInt(parts[0]),
-                                    Integer.parseInt(parts[1]),
-                                    Integer.parseInt(parts[2]),
-                                    Integer.parseInt(parts[3]))
-                            )
-            );
-
+        if (dyeColor != null) {
+            itemStack.setData(DataComponentTypes.DYED_COLOR, DyedItemColor.dyedItemColor(dyeColor));
         }
 
         if (headSkin != null) {
@@ -124,7 +113,7 @@ public class EntityEquipment {
         return trimPattern;
     }
 
-    public @Nullable String getDyeColor() {
+    public @Nullable Color getDyeColor() {
         return dyeColor;
     }
 

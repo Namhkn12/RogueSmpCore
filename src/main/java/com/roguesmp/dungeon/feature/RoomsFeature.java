@@ -328,7 +328,7 @@ public record RoomsFeature(List<Pool> pools, int minimumRooms, int maxChoices) i
         for (int i = 0; i < objectives.size(); i++) {
             RoomObjective objective = objectives.get(i);
             int done = state.progress(i);
-            if (done >= objective.count() || !objective.on().matches(event) || !DungeonCondition.all(objective.conditions(), context, event)) continue;
+            if (done >= objective.count() || !objective.on().matches(event) || !DungeonCondition.all(objective.conditions(), context)) continue;
 
             int now = Math.min(objective.count(), done + Math.max(1, event.amount()));
             state.progress.put(String.valueOf(i), now);

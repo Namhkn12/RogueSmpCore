@@ -2,8 +2,11 @@ package com.roguesmp.gui.quest;
 
 import com.roguesmp.quest.data.PlayerQuestData;
 import com.roguesmp.quest.objective.ObjectiveProgress;
+import com.roguesmp.quest.objective.SubmitItemObjective;
 import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.gui.BaseGui;
+import com.roguesmp.player.inbox.InboxManager;
+import com.roguesmp.player.inbox.gui.InboxGui;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.*;
@@ -52,7 +55,7 @@ public class QuestGui extends BaseGui {
     private QuestFilter currentFilter = QuestFilter.ALL; // Đặt mặc định là hiển thị Tất cả
 
     public QuestGui(Player player, PlayerQuestData questData) {
-        super(Component.text("Nhiệm vụ"), 6);
+        super(Component.text("Danh sách nhiệm vụ"), 6);
         this.player = player;
         this.questData = questData;
         this.questManager = QuestManager.getInstance();
@@ -95,24 +98,10 @@ public class QuestGui extends BaseGui {
 
                 QuestProgress qp = filteredProgress.get(currentQuestIndex);
                 Quest quest = qp.getQuest();
-                boolean claimable = qp.isCompleted() && questManager.hasClaimableReward(player, quest.getId());
-                boolean claimed = qp.isCompleted() && !claimable;
+                boolean completed = qp.isCompleted();
 
-                Material iconMaterial;
-                String statusPrefix;
-
-                if (claimed) {
-                    iconMaterial = Material.MINECART;
-                    statusPrefix = "<gray><st>";
-                } else if (claimable) {
-                    iconMaterial = Material.CHEST_MINECART;
-                    statusPrefix = "<b><green>";
-                } else {
-                    iconMaterial = quest.getIcon() != null ? quest.getIcon() : Material.BOOK;
-                    statusPrefix = "<gold>";
-                }
-
-                ItemStack questItem = ItemStack.of(iconMaterial);
+                String statusPrefix = completed ? "<gray><st>" : "<gold>";
+                ItemStack questItem = completed ? ItemStack.of(Material.MINECART) : quest.createIcon();
                 questItem.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Set.of(DataComponentTypes.ATTRIBUTE_MODIFIERS)).build());
                 questItem.setData(DataComponentTypes.ITEM_NAME,
                         Utils.fromString(statusPrefix + (quest.getName() != null ? quest.getName() : "Nhiệm vụ không tên")));
@@ -127,11 +116,8 @@ public class QuestGui extends BaseGui {
 
                 loreLines.add(Component.empty());
 
-                if (claimed) {
-                    loreLines.add(Utils.text("✕ Bạn đã nhận phần thưởng của nhiệm vụ này.", NamedTextColor.RED));
-                } else if (claimable) {
+                if (completed) {
                     loreLines.add(Utils.text("✔ Đã hoàn thành", NamedTextColor.GREEN));
-                    loreLines.add(Utils.text("Click chuột để nhận thưởng", NamedTextColor.YELLOW));
                 } else {
                     loreLines.add(Utils.text("✦ Mục tiêu:", NamedTextColor.AQUA));
                     quest.getObjectives().forEach((objectiveId, objective) -> {
@@ -156,18 +142,22 @@ public class QuestGui extends BaseGui {
                     }
                 }
 
+                boolean canSubmit = !completed && quest.hasObjective(SubmitItemObjective.class);
+                if (canSubmit) {
+                    loreLines.add(Component.empty());
+                    loreLines.add(Utils.fromString("<!i><yellow>▶ Click để nộp vật phẩm"));
+                }
+
                 questItem.setData(DataComponentTypes.LORE, ItemLore.lore(loreLines));
 
                 addButton(r, c, questItem, event -> {
                     event.setCancelled(true);
-
-                    if (claimable) {
-                        boolean success = questManager.claimReward(player, player.getUniqueId(), quest.getId());
-
-                        if (success) {
-                            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
-                            setup();
-                        }
+                    if (!canSubmit) return;
+                    if (questManager.submitItems(player, quest)) {
+                        player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+                        setup();
+                    } else {
+                        player.sendMessage(Utils.fromString("<red>Bạn chưa có đủ vật phẩm cần nộp."));
                     }
                 });
 
@@ -203,16 +193,16 @@ public class QuestGui extends BaseGui {
             setup();
         });
 
-        int pending = questData.getPendingQuestRewards().size();
+        int pending = InboxManager.getInstance().count(player.getUniqueId());
         ItemStack inboxItem = ItemStack.of(pending > 0 ? Material.CHEST_MINECART : Material.MINECART);
-        inboxItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Phần thưởng chưa nhận", NamedTextColor.GOLD));
+        inboxItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Hộp thư", NamedTextColor.GOLD));
         inboxItem.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
                 Utils.fromString("<!i><gray>Bạn có <gold>" + pending + "</gold> phần thưởng đang chờ."),
                 Utils.fromString("<!i><yellow>▶ Click để mở"))));
         if (pending > 0) inboxItem.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
         addButton(5, 1, inboxItem, event -> {
             event.setCancelled(true);
-            new RewardInboxGui(player, questData).showInventory(player);
+            new InboxGui(player, this).showInventory(player);
         });
 
         ItemStack closeItem = ItemStack.of(Material.BARRIER);

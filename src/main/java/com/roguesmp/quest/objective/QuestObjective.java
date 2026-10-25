@@ -47,6 +47,13 @@ public interface QuestObjective {
     ObjectiveProgress createNewProgress();
 
     /**
+     * Sets the progress's in-memory goal. The same seed always gives the same goal, so it is never saved.
+     */
+    default void resolveGoal(ObjectiveProgress progress, long seed) {
+
+    }
+
+    /**
      * Run when this objective is completed
      */
     default void onCompleted(ObjectiveProgress progress) {
@@ -64,6 +71,15 @@ public interface QuestObjective {
      * @return whether the progress changed
      */
     default boolean onSignal(String signal, int amount, ObjectiveProgress progress) {
+        return false;
+    }
+
+    /**
+     * Called when the player hands in items to this objective's quest; takes what it needs from their inventory.
+     *
+     * @return whether the progress changed
+     */
+    default boolean onSubmitItems(SmpPlayer smpPlayer, ObjectiveProgress progress) {
         return false;
     }
 

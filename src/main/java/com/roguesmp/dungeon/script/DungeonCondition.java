@@ -1,7 +1,6 @@
 package com.roguesmp.dungeon.script;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.dungeon.DungeonEvent;
 import com.roguesmp.dungeon.FeatureContext;
 import com.roguesmp.registry.Registries;
 
@@ -14,13 +13,13 @@ public interface DungeonCondition {
             Registries.DUNGEON_CONDITION_CODEC::getOrThrow
     );
 
-    static boolean all(List<DungeonCondition> conditions, FeatureContext<?> context, DungeonEvent event) {
-        return conditions.stream().allMatch(condition -> condition.test(context, event));
+    static boolean all(List<DungeonCondition> conditions, FeatureContext<?> context) {
+        return conditions.stream().allMatch(condition -> condition.test(context));
     }
 
     String getTypeId();
 
-    boolean test(FeatureContext<?> context, DungeonEvent event);
+    boolean test(FeatureContext<?> context);
 
     default void validate(DungeonValidation check) {
     }

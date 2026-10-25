@@ -15,6 +15,8 @@ public class QuestObjectives {
             register(KillMobObjective.TYPE_KEY, KillMobObjective.CODEC, KillMobObjective.Progress.CODEC);
     public static final Codec<SignalObjective> SIGNAL =
             register(SignalObjective.TYPE_KEY, SignalObjective.CODEC, SignalObjective.Progress.CODEC);
+    public static final Codec<SubmitItemObjective> SUBMIT_ITEM =
+            register(SubmitItemObjective.TYPE_KEY, SubmitItemObjective.CODEC, SubmitItemObjective.Progress.CODEC);
 
     public static void loadClass() {
 

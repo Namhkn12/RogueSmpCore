@@ -37,10 +37,7 @@ import java.util.*;
  * {@link EntitySpellListEditorGui}), each of which commits straight back into this draft on every
  * leaf edit rather than requiring a separate top-level apply step.
  * <p>
- * Unlike items, {@link Registries#ENTITY} (data-driven entities) and {@link Registries#ENTITY_FACTORY}
- * (hardcoded boss ids) are separate registries with separate id spaces - saving here can never
- * clobber a boss, but {@link #attemptSave} still warns if the chosen id collides with one, since
- * that id would silently never spawn as that boss.
+ * The entity's {@code factory} key (boss logic) isn't editable here; overwriting an existing entity keeps it.
  */
 public class EntityCreatorGui {
 
@@ -91,7 +88,7 @@ public class EntityCreatorGui {
                 tooltip("Đặt trang bị (vũ khí, giáp) cho từng slot của entity.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildEquipmentDialog(player))));
         multi.addButton(componentLabel(EntityComponentKeys.SPELLS),
-                tooltip("Đặt spell active/passive cho entity.", "Màu trong danh sách chọn spell là gợi ý ACTIVE/PASSIVE/EITHER"),
+                tooltip("Đặt spell cho entity.", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSpellsDialog(player))));
         multi.addButton(componentLabel(EntityComponentKeys.BOSS_BAR),
                 tooltip("Hiện thanh máu (boss bar) cho entity.", null),
@@ -221,10 +218,6 @@ public class EntityCreatorGui {
             return;
         }
 
-        if (Registries.ENTITY_FACTORY.get(id) != null) {
-            player.sendMessage(Utils.text("Cảnh báo: ID '" + id + "' trùng với một boss đã đăng ký (registerSpecial) - entity này sẽ không dùng logic boss đó.", NamedTextColor.YELLOW));
-        }
-
         if (Registries.ENTITY.get(id) != null) {
             Dialog dialog = DialogBuilder.create(Component.text("Ghi đè entity?"))
                     .canCloseWithEscape(false)
@@ -246,7 +239,8 @@ public class EntityCreatorGui {
         Map<String, EntityComponent> toSave = new HashMap<>();
         components.forEach((key, value) -> toSave.put(key, value.copy()));
 
-        BaseEntity entity = new BaseEntity(id, entityType, toSave);
+        BaseEntity existing = Registries.ENTITY.get(id);
+        BaseEntity entity = new BaseEntity(id, entityType, existing != null ? existing.getFactory() : null, toSave);
         Registries.ENTITY.registerAndSave(RogueSmpCore.getInstance(), id, entity);
 
         player.sendMessage(Utils.text("Đã lưu entity '" + id + "'.", NamedTextColor.GREEN));

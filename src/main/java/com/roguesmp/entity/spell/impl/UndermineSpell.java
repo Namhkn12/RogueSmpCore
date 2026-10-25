@@ -1,7 +1,8 @@
 package com.roguesmp.entity.spell.impl;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.ActiveSpell;
+import com.roguesmp.entity.spell.SpellContext;
 import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.entity.spell.common.SpellTargets;
 import org.bukkit.Material;
@@ -21,9 +22,7 @@ import java.util.Set;
  * above the owner. Never touches containers, spawners, bedrock & co, or any {@code protectedBlocks};
  * goes through {@link EntityChangeBlockEvent} so region protection can veto it.
  */
-public class UndermineSpell extends Spell {
-
-    public static final String TYPE_KEY = "undermine_spell";
+public class UndermineSpell extends ActiveSpell {
 
     private static final Set<Material> ALWAYS_PROTECTED = Set.of(
             Material.BEDROCK, Material.BARRIER, Material.SPAWNER, Material.TRIAL_SPAWNER, Material.VAULT,
@@ -39,23 +38,19 @@ public class UndermineSpell extends Spell {
                 Codec.listOf(Codec.MATERIAL).optionalFieldOf("protectedBlocks", List.of()).forGetter(Params::protectedBlocks),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final LivingEntity owner;
     private final Params params;
 
     public UndermineSpell(LivingEntity owner, Params params) {
+        super(params.cooldownTicks());
         this.owner = owner;
         this.params = params;
     }
 
     @Override
-    public boolean canRun() {
+    public boolean canCast(SpellContext context) {
         Player target = SpellTargets.playerTarget(owner);
         if (target == null) return false;
         if (target.getY() - owner.getY() < params.minHeightDifference()) return false;
@@ -64,7 +59,7 @@ public class UndermineSpell extends Spell {
     }
 
     @Override
-    public void run(int interval) {
+    public void onCast(SpellContext context) {
         Player target = SpellTargets.playerTarget(owner);
         if (target == null) return;
         Block block = supportingBlock(target);
@@ -89,14 +84,5 @@ public class UndermineSpell extends Spell {
         if (type.isAir() || block.isLiquid() || type.getHardness() < 0) return false;
         if (ALWAYS_PROTECTED.contains(type) || params.protectedBlocks().contains(type)) return false;
         return !(block.getState(false) instanceof Container);
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return params.cooldownTicks();
-    }
-
-    public static UndermineSpell create(Params params, LivingEntity owner) {
-        return new UndermineSpell(owner, params);
     }
 }

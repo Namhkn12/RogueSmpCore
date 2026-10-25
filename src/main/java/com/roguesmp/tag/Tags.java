@@ -2,7 +2,6 @@ package com.roguesmp.tag;
 
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.item.BaseItem;
-import com.roguesmp.quest.Quest;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.registry.Registry;
 
@@ -30,11 +29,6 @@ public final class Tags {
     public static final SmpTag<BaseEntity> BOSS = builtIn("boss", () -> Registries.ENTITY);
     public static final SmpTag<BaseEntity> ANGELIC = builtIn("angelic", () -> Registries.ENTITY);
     public static final SmpTag<BaseEntity> FRIENDLY = builtIn("friendly", () -> Registries.ENTITY);
-
-    // Quests
-    public static final SmpTag<Quest> DAILY_EASY_QUEST = builtIn("daily_easy_quest", () -> Registries.QUEST);
-    public static final SmpTag<Quest> DAILY_MEDIUM_QUEST = builtIn("daily_medium_quest", () -> Registries.QUEST);
-    public static final SmpTag<Quest> DAILY_HARD_QUEST = builtIn("daily_hard_quest", () -> Registries.QUEST);
 
     private Tags() {
     }

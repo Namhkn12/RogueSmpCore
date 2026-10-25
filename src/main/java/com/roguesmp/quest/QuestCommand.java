@@ -1,9 +1,10 @@
 package com.roguesmp.quest;
 
-import com.roguesmp.quest.data.PendingQuestReward;
 import com.roguesmp.quest.data.PlayerQuestData;
 import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.gui.quest.QuestGui;
+import com.roguesmp.player.inbox.gui.InboxGui;
+import com.roguesmp.quest.board.gui.QuestBoardGui;
 import com.roguesmp.permission.Permissions;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
@@ -12,14 +13,12 @@ import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.arguments.TextArgument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
 import java.util.List;
-import java.util.UUID;
 
 public class QuestCommand {
 
@@ -120,35 +119,22 @@ public class QuestCommand {
                     }
                 });
 
-        CommandAPICommand rewardsSubcommand = new CommandAPICommand("rewards")
+        CommandAPICommand boardSubcommand = new CommandAPICommand("board")
                 .executesPlayer((player, args) -> {
-                    List<PendingQuestReward> rewards = questManager.getPendingRewards(player);
-                    for (PendingQuestReward reward : rewards) {
-                        Quest quest = Registries.QUEST.get(reward.questId());
-                        if (quest != null) questManager.sendClaimPrompt(player, reward.source(), quest);
-                    }
-                    if (rewards.isEmpty()) player.sendMessage(Utils.fromString("<gray>Bạn không có phần thưởng nào chưa nhận."));
+                    new QuestBoardGui(player).showInventory(player);
                 });
 
-        CommandAPICommand claimSubcommand = new CommandAPICommand("claim")
-                .withArguments(new StringArgument("source"), new TextArgument("quest_id"))
+        CommandAPICommand inboxSubcommand = new CommandAPICommand("inbox")
                 .executesPlayer((player, args) -> {
-                    UUID source;
-                    try {
-                        source = UUID.fromString((String) args.get("source"));
-                    } catch (IllegalArgumentException e) {
-                        player.sendMessage(Utils.fromString("<red>Mã phần thưởng không hợp lệ!"));
-                        return;
-                    }
-                    questManager.claimReward(player, source, (String) args.get("quest_id"));
+                    new InboxGui(player, null).showInventory(player);
                 });
 
         // /quest
         new CommandAPICommand("quest")
                 .withSubcommand(infoSubcommand)
                 .withSubcommand(assignSubcommand)
-                .withSubcommand(rewardsSubcommand)
-                .withSubcommand(claimSubcommand)
+                .withSubcommand(boardSubcommand)
+                .withSubcommand(inboxSubcommand)
                 // no-args open gui
                 .executesPlayer((player, args) -> {
                     PlayerQuestData questData = questManager.getQuestDataManager().getCachedData(player.getUniqueId());

@@ -1,5 +1,10 @@
 package com.roguesmp.entity;
 
+import com.roguesmp.entity.boss.blackveinhorror.BlackveinHorror;
+import com.roguesmp.entity.boss.cursedforeman.CursedForeman;
+import com.roguesmp.entity.boss.hollowheart.CrystalMinion;
+import com.roguesmp.entity.boss.hollowheart.HollowheartCrystal;
+import com.roguesmp.entity.boss.veinstalker.VeinStalker;
 import com.roguesmp.registry.Registries;
 
 /**
@@ -18,6 +23,14 @@ public class SpecialEntities {
 //    public static final EntityFactory<HellKnightStray> HELL_KNIGHT_STRAY = register("hell_knight_stray", HellKnightStray::new);
 //    public static final EntityFactory<HellKnightBlaze> HELL_KNIGHT_BLAZE = register("hell_knight_blaze", HellKnightBlaze::new);
 //    public static final EntityFactory<HellKnightGolem> HELL_KNIGHT_GOLEM = register("hell_knight_golem", HellKnightGolem::new);
+
+    public static final EntityFactory<CursedForeman> CURSED_FOREMAN = register(CursedForeman.ID, CursedForeman::new);
+    public static final EntityFactory<VeinStalker> VEIN_STALKER = register(VeinStalker.ID, VeinStalker::new);
+    public static final EntityFactory<BlackveinHorror> BLACKVEIN_HORROR = register(BlackveinHorror.ID, BlackveinHorror::new);
+    public static final EntityFactory<HollowheartCrystal> HOLLOWHEART_CRYSTAL = register(HollowheartCrystal.ID, HollowheartCrystal::new);
+    public static final EntityFactory<CrystalMinion> CRYSTAL_SHARD = register(CrystalMinion.SHARD_ID, CrystalMinion::shard);
+    public static final EntityFactory<CrystalMinion> CRYSTAL_ORB = register(CrystalMinion.ORB_ID, CrystalMinion::orb);
+    public static final EntityFactory<CrystalMinion> CRYSTAL_CONDUIT = register(CrystalMinion.CONDUIT_ID, CrystalMinion::conduit);
 
     public static void loadClass() {
 

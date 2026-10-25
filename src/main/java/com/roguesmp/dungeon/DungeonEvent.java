@@ -27,6 +27,7 @@ public sealed interface DungeonEvent {
             Map.entry("region_entered", Set.of()),
             Map.entry("region_left", Set.of()),
             Map.entry("mob_killed", Set.of()),
+            Map.entry("mob_died", Set.of("tag")),
             Map.entry("mob_damaged", Set.of("damage", "health_percent")),
             Map.entry("block_interacted", Set.of()),
             Map.entry("block_broken", Set.of()),
@@ -121,6 +122,33 @@ public sealed interface DungeonEvent {
 
         @Override
         public Player player() {
+            return killer;
+        }
+
+        @Override
+        public Location location() {
+            return mob.getLocation();
+        }
+    }
+
+    record MobDied(@Nullable Player killer, LivingEntity mob, String mobId, @Nullable String tag) implements DungeonEvent {
+        @Override
+        public String id() {
+            return "mob_died";
+        }
+
+        @Override
+        public String subject() {
+            return mobId;
+        }
+
+        @Override
+        public Map<String, DataValue> data() {
+            return tag == null ? Map.of() : Map.of("tag", DataValue.of(tag));
+        }
+
+        @Override
+        public @Nullable Player player() {
             return killer;
         }
 

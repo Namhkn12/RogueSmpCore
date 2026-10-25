@@ -42,6 +42,7 @@ public final class DungeonManager {
     private final Set<UUID> ending = ConcurrentHashMap.newKeySet();
     private final Set<String> creating = ConcurrentHashMap.newKeySet();
     private final Map<UUID, Map<UUID, Invite>> invites = new ConcurrentHashMap<>();
+    private final TrackedMobs trackedMobs = new TrackedMobs();
 
     public record Invite(DungeonInstance instance, UUID inviterId, long expiresAt) {
     }
@@ -105,6 +106,10 @@ public final class DungeonManager {
 
     public @Nullable World worldOf(DungeonInstance instance) {
         return worlds.getLoaded(instance.template(), instance.id());
+    }
+
+    public TrackedMobs trackedMobs() {
+        return trackedMobs;
     }
 
     public DungeonWorldManager worlds() {

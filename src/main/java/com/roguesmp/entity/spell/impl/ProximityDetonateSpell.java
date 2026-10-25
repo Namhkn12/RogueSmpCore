@@ -2,6 +2,7 @@ package com.roguesmp.entity.spell.impl;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellContext;
 import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.entity.spell.common.ExplosionSpec;
 import com.roguesmp.entity.spell.common.PotionEffectSpec;
@@ -31,11 +32,6 @@ public class ProximityDetonateSpell extends Spell {
                 PotionEffectSpec.LIST_CODEC.optionalFieldOf("effects", List.of()).forGetter(Params::effects),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final LivingEntity owner;
@@ -52,7 +48,7 @@ public class ProximityDetonateSpell extends Spell {
     }
 
     @Override
-    public void run(int interval) {
+    public void tick(SpellContext context, int interval) {
         if (detonated || !owner.isValid()) return;
 
         Player target = SpellTargets.playerTarget(owner);
@@ -68,14 +64,5 @@ public class ProximityDetonateSpell extends Spell {
         PlayerUtils.playersInRange(center, params.explosion().radius(), false)
                 .forEach(player -> PotionEffectSpec.applyAll(player, params.effects()));
         owner.setHealth(0);
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return 0;
-    }
-
-    public static ProximityDetonateSpell create(Params params, LivingEntity owner) {
-        return new ProximityDetonateSpell(owner, params);
     }
 }

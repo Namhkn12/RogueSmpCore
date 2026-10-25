@@ -2,6 +2,7 @@ package com.roguesmp.entity.spell.impl;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.SpellContext;
 import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.entity.spell.common.CloudSpec;
 import org.bukkit.Location;
@@ -12,19 +13,12 @@ import org.bukkit.event.entity.EntityDeathEvent;
 
 public class DeathCloudSpell extends Spell {
 
-    public static final String TYPE_KEY = "death_cloud_spell";
-
     public record Params(CloudSpec cloud, boolean burstEffect) implements SpellParams {
         public static final Codec<Params> CODEC = Codec.composite(
-                CloudSpec.CODEC.fieldOf("cloud").forGetter(Params::cloud),
+                CloudSpec.CODEC.optionalFieldOf("cloud", CloudSpec.DEFAULT).forGetter(Params::cloud),
                 Codec.BOOLEAN.optionalFieldOf("burstEffect", true).forGetter(Params::burstEffect),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final LivingEntity owner;
@@ -46,15 +40,6 @@ public class DeathCloudSpell extends Spell {
     }
 
     @Override
-    public void run(int interval) {
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return 0;
-    }
-
-    public static DeathCloudSpell create(Params params, LivingEntity owner) {
-        return new DeathCloudSpell(owner, params);
+    public void tick(SpellContext context, int interval) {
     }
 }

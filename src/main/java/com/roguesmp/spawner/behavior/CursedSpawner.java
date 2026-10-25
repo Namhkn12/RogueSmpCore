@@ -5,6 +5,8 @@ import com.roguesmp.effect.impl.VanillaPotionEffect;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -50,6 +52,10 @@ public class CursedSpawner extends BaseBehavior {
         if (players.isEmpty())
             return true;
 
+        Location center = SpawnerFx.center(location);
+        center.getWorld().spawnParticle(Particle.SCULK_SOUL, center, 30, 0.4, 0.4, 0.4, 0.08, null, true);
+        SpawnerFx.sound(center, Sound.ENTITY_WITHER_AMBIENT, 2.5f, 0.6f);
+
         for (Player player : players) {
 
             List<CurseEffect> effects = new ArrayList<>();
@@ -61,11 +67,20 @@ public class CursedSpawner extends BaseBehavior {
 
             Collections.shuffle(effects);
 
+            player.getWorld().spawnParticle(Particle.WITCH, player.getLocation().add(0, 1, 0), 30, 0.4, 0.8, 0.4, 0, null, true);
+            player.playSound(player, Sound.ENTITY_ELDER_GUARDIAN_CURSE, 0.6f, 1.2f);
             applyCurse(player, effects.get(0));
             applyCurse(player, effects.get(1));
         }
 
         return true;
+    }
+
+    @Override
+    protected void onTick(Location location, int ticks) {
+        Location center = SpawnerFx.center(location);
+        SpawnerFx.column(center, 5, 0.7, Particle.SOUL, null);
+        if (ticks % 8 == 0) SpawnerFx.sound(center, Sound.ENTITY_WARDEN_HEARTBEAT, 2.5f, 0.6f);
     }
 
     private void applyCurse(

@@ -66,4 +66,11 @@ public final class DateUtils {
             return minutes + " phút " + seconds + " giây";
         }
     }
+
+    public static String formatRemaining(long millis) {
+        Duration remaining = Duration.ofMillis(Math.max(0, millis));
+        if (remaining.toDays() > 0) return remaining.toDays() + " ngày " + remaining.toHoursPart() + " giờ";
+        if (remaining.toHours() > 0) return remaining.toHours() + " giờ " + remaining.toMinutesPart() + " phút";
+        return remaining.toMinutes() + " phút";
+    }
 }

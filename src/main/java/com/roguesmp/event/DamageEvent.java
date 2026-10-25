@@ -300,6 +300,10 @@ public class DamageEvent extends Event implements Cancellable {
         return shieldBlockRatio >= 1;
     }
 
+    public double getShieldBlockRatio() {
+        return shieldBlockRatio;
+    }
+
     public void setShieldBlockRatio(double shieldBlockRatio) {
         this.shieldBlockRatio = shieldBlockRatio;
     }

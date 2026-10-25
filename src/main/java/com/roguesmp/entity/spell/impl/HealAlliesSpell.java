@@ -2,7 +2,8 @@ package com.roguesmp.entity.spell.impl;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.EntityManager;
-import com.roguesmp.entity.spell.Spell;
+import com.roguesmp.entity.spell.ActiveSpell;
+import com.roguesmp.entity.spell.SpellContext;
 import com.roguesmp.entity.spell.SpellParams;
 import com.roguesmp.entity.spell.common.SpellTargets;
 import org.bukkit.Color;
@@ -28,9 +29,7 @@ import java.util.UUID;
  * Throws a (cosmetic) splash potion at the most wounded nearby custom mob; on impact it heals every
  * custom mob within {@code splashRadius} directly - vanilla healing potions would hurt undead allies.
  */
-public class HealAlliesSpell extends Spell {
-
-    public static final String TYPE_KEY = "heal_allies_spell";
+public class HealAlliesSpell extends ActiveSpell {
 
     private static final double POTION_GRAVITY = 0.05;
     private static final double POTION_DRAG = 0.99;
@@ -46,11 +45,6 @@ public class HealAlliesSpell extends Spell {
                 Codec.INT.optionalFieldOf("cooldownTicks", 100).forGetter(Params::cooldownTicks),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final LivingEntity owner;
@@ -58,17 +52,18 @@ public class HealAlliesSpell extends Spell {
     private final Set<UUID> thrownPotions = new HashSet<>();
 
     public HealAlliesSpell(LivingEntity owner, Params params) {
+        super(params.cooldownTicks());
         this.owner = owner;
         this.params = params;
     }
 
     @Override
-    public boolean canRun() {
+    public boolean canCast(SpellContext context) {
         return findWoundedAlly() != null;
     }
 
     @Override
-    public void run(int interval) {
+    public void onCast(SpellContext context) {
         LivingEntity ally = findWoundedAlly();
         if (ally == null) return;
 
@@ -114,14 +109,5 @@ public class HealAlliesSpell extends Spell {
     private static double healthRatio(LivingEntity entity) {
         AttributeInstance maxHealth = entity.getAttribute(Attribute.MAX_HEALTH);
         return maxHealth == null ? 1 : entity.getHealth() / maxHealth.getValue();
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return params.cooldownTicks();
-    }
-
-    public static HealAlliesSpell create(Params params, LivingEntity owner) {
-        return new HealAlliesSpell(owner, params);
     }
 }

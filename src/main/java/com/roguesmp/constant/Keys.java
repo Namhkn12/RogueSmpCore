@@ -36,6 +36,8 @@ public class Keys {
 
     public static final NamespacedKey BLOCK_POS = of("block_pos");
 
+    public static final NamespacedKey FRENZY_MODIFIER = of("frenzy");
+
     public static final String DUNGEON_NAMESPACE = "roguesmpcore";
 
     public static final NamespacedKey SPAWNER_IID = new NamespacedKey(DUNGEON_NAMESPACE, "spawner_iid");
@@ -49,6 +51,8 @@ public class Keys {
     public static final NamespacedKey NEXT_DOOR = new NamespacedKey(DUNGEON_NAMESPACE, "next_door");
 
     public static final NamespacedKey END_DOOR = new NamespacedKey(DUNGEON_NAMESPACE, "end_door");
+
+    public static final NamespacedKey DUNGEON_MOB_TAG = new NamespacedKey(DUNGEON_NAMESPACE, "mob_tag");
 
     public static final NamespacedKey REVIVE_POINT = new NamespacedKey(DUNGEON_NAMESPACE, "revive_point");
 

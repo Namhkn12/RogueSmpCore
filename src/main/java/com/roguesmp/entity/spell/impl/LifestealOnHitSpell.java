@@ -13,8 +13,6 @@ import org.bukkit.entity.LivingEntity;
 
 public class LifestealOnHitSpell extends OnHitSpell {
 
-    public static final String TYPE_KEY = "lifesteal_on_hit_spell";
-
     public record Params(HitCondition condition, double missingHealthRatio, double flatHeal) implements SpellParams {
         public static final Codec<Params> CODEC = Codec.composite(
                 HitCondition.MAP_CODEC.forGetter(Params::condition),
@@ -22,11 +20,6 @@ public class LifestealOnHitSpell extends OnHitSpell {
                 Codec.DOUBLE.optionalFieldOf("flatHeal", 0.0).forGetter(Params::flatHeal),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final double missingHealthRatio;
@@ -50,9 +43,5 @@ public class LifestealOnHitSpell extends OnHitSpell {
         double heal = missingHealth * missingHealthRatio + flatHeal;
         owner.setHealth(Math.min(maxHealth, owner.getHealth() + heal));
         owner.getWorld().spawnParticle(Particle.HEART, SpellTargets.centerOf(owner).add(0, owner.getHeight() * 0.6, 0), 3, 0.3, 0.2, 0.3);
-    }
-
-    public static LifestealOnHitSpell create(Params params, LivingEntity owner) {
-        return new LifestealOnHitSpell(owner, params);
     }
 }

@@ -10,6 +10,8 @@ import com.roguesmp.world.PolarTemplateManager;
 import com.roguesmp.command.ReloadCommand;
 import com.roguesmp.fishing.listener.FishingListener;
 import com.roguesmp.region.listener.RegionListener;
+import com.roguesmp.region.listener.RegionTeleportListener;
+import com.roguesmp.region.RegionAmbientEmitter;
 import com.roguesmp.region.SmpRegionFlags;
 import com.roguesmp.region.RegionBoundaryHandler;
 import com.roguesmp.region.ServerRegionManager;
@@ -59,6 +61,9 @@ import com.roguesmp.npc.NpcManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.quest.QuestCommand;
 import com.roguesmp.quest.QuestManager;
+import com.roguesmp.quest.board.QuestBoardManager;
+import com.roguesmp.player.inbox.InboxListener;
+import com.roguesmp.player.inbox.InboxManager;
 import com.roguesmp.registry.*;
 import com.roguesmp.server.DailyResetScheduler;
 import com.roguesmp.server.PlayerDataAutoSaveScheduler;
@@ -106,6 +111,7 @@ public final class RogueSmpCore extends JavaPlugin {
         PolarTemplateManager.init(this);
         RegionSelections.init();
         RegionVisualizer.init(this);
+        RegionAmbientEmitter.init(this);
 
         //Island
         IslandManager.init(this, PlayerManager.getInstance());
@@ -113,7 +119,9 @@ public final class RogueSmpCore extends JavaPlugin {
         LuckPermsIntegration.init(this);
 
         //Quest
+        InboxManager.init(this);
         QuestManager.init(this);
+        QuestBoardManager.init(this, QuestManager.getInstance());
 
         EffectManager.init(this);
         BlockManager.init(this);
@@ -180,6 +188,7 @@ public final class RogueSmpCore extends JavaPlugin {
         IslandManager.getInstance().onDisable();
         DungeonManager.getInstance().onDisable();
         QuestManager.getInstance().onDisable();
+        InboxManager.getInstance().onDisable();
 
         EffectManager.getInstance().close();
     }
@@ -192,6 +201,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         RegionBoundaryHandler.register();
         registerListener(new RegionListener(PlayerManager.getInstance()));
+        registerListener(new RegionTeleportListener());
 
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance(), IslandManager.getInstance()));
@@ -210,7 +220,8 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new DungeonListener(DungeonManager.getInstance()));
         registerListener(SpawnerSystem.getInstance().listener());
         registerListener(new RewardChestListener());
-        registerListener(new QuestListener(QuestManager.getInstance()));
+        registerListener(new QuestListener(QuestManager.getInstance(), QuestBoardManager.getInstance()));
+        registerListener(new InboxListener(InboxManager.getInstance()));
 
         registerListener(new EntityGoalSpawnListener());
     }

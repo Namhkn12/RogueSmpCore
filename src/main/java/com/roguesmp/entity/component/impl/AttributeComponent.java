@@ -24,14 +24,9 @@ public record AttributeComponent(Map<EntityAttribute, Double> values) implements
     @Override
     public void apply(LivingEntity entity) {
         if (entity instanceof AbstractCubeMob abstractCubeMob) {
-            abstractCubeMob.setSize(2);
+            abstractCubeMob.setSize(values.getOrDefault(EntityAttribute.CUBE_SIZE, 2.0).intValue());
         }
         values.forEach((entityAttribute, value) -> {
-            if (entityAttribute == EntityAttribute.CUBE_SIZE) {
-                if (entity instanceof AbstractCubeMob abstractCubeMob) {
-                    abstractCubeMob.setSize(value.intValue());
-                }
-            }
             Attribute bukkitAttribute = entityAttribute.getBukkitAttribute();
             if (bukkitAttribute == null) return;
             AttributeInstance instance = entity.getAttribute(bukkitAttribute);

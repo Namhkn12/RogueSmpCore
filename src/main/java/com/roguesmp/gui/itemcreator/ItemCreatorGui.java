@@ -36,6 +36,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * In-game editor for {@link BaseItem}s, built entirely on the Paper Dialog API
@@ -121,6 +122,9 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.EQUIPPABLE),
                 tooltip("Cho phép item được trang bị vào một slot (minecraft:equippable).", "Để trống các ô key để dùng giá trị mặc định của vanilla"),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildEquippableDialog(player))));
+        multi.addButton(componentLabel(ItemComponentKeys.BLOCKS_ATTACKS),
+                tooltip("Cho phép item đỡ đòn như khiên (minecraft:blocks_attacks).", "Để trống ô âm thanh để dùng âm thanh khiên mặc định"),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(buildBlocksAttacksDialog(player))));
         multi.addButton(componentLabel(ItemComponentKeys.ENCHANT_GLINT),
                 tooltip("Buộc bật/tắt hiệu ứng lấp lánh phù phép.", "Ghi đè bất kể item có phù phép hay không"),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildEnchantGlintDialog(player))));
@@ -502,15 +506,29 @@ public class ItemCreatorGui {
 
     private Dialog buildDurabilityRepairDialog(Player player) {
         DurabilityRepairComponent current = (DurabilityRepairComponent) components.get(ItemComponentKeys.DURABILITY_REPAIR.id());
-        int initial = current == null ? 50 : current.getAmount();
-        DialogBuilder builder = DialogBuilder.create(Component.text("Lượng độ bền hồi phục"))
+        String initial = current == null ? "" : current.getMaterials().stream()
+                .map(m -> m.item() + " " + Utils.formatDecimal(m.percent()))
+                .collect(Collectors.joining("\n"));
+        DialogBuilder builder = DialogBuilder.create(Component.text("Nguyên liệu sửa chữa"))
                 .canCloseWithEscape(false)
-                .addTextInput("value", Component.text("Hồi phục (1-5000)"), b -> b.initial(String.valueOf(initial)).maxLength(16));
+                .addTextInput("value", Component.text("Mỗi dòng: <item id> <% độ bền>"), b -> b.initial(initial).maxLength(3000).multiline(TextDialogInput.MultilineOptions.create(10, 100)));
 
         return wrapComponentDialog(player, ItemComponentKeys.DURABILITY_REPAIR, builder,
                 (response, audience) -> {
-                    Float value = DialogInputUtils.parseFloat(response.getText("value"), 1f, 5000f);
-                    if (value != null) components.put(ItemComponentKeys.DURABILITY_REPAIR.id(), new DurabilityRepairComponent(Math.round(value)));
+                    List<DurabilityRepairComponent.RepairMaterial> materials = new ArrayList<>();
+                    String text = response.getText("value");
+                    for (String line : text == null ? new String[0] : text.split("\n")) {
+                        String[] parts = line.trim().split("\\s+");
+                        if (parts.length < 2) continue;
+                        Float percent = DialogInputUtils.parseFloat(parts[1], 0.01f, 100f);
+                        if (percent == null) {
+                            player.sendMessage(Utils.text("Dòng không hợp lệ: " + line, NamedTextColor.RED));
+                            continue;
+                        }
+                        materials.add(new DurabilityRepairComponent.RepairMaterial(parts[0], percent));
+                    }
+                    if (materials.isEmpty()) components.remove(ItemComponentKeys.DURABILITY_REPAIR.id());
+                    else components.put(ItemComponentKeys.DURABILITY_REPAIR.id(), new DurabilityRepairComponent(materials));
                     Utils.runLater(() -> openMainDialog(player));
                 },
                 (response, audience) -> {
@@ -602,6 +620,38 @@ public class ItemCreatorGui {
                 },
                 (response, audience) -> {
                     components.remove(ItemComponentKeys.EQUIPPABLE.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
+    }
+
+    private Dialog buildBlocksAttacksDialog(Player player) {
+        BlocksAttacksComponent current = (BlocksAttacksComponent) components.get(ItemComponentKeys.BLOCKS_ATTACKS.id());
+        DialogBuilder builder = DialogBuilder.create(Component.text("Đỡ đòn (blocks_attacks)"))
+                .canCloseWithEscape(false)
+                .addTextInput("block_delay_seconds", Component.text("Thời gian giơ khiên trước khi đỡ được (giây, >= 0)"), b -> b.initial(String.valueOf(current == null ? 0f : current.blockDelaySeconds())).maxLength(16))
+                .addTextInput("horizontal_blocking_angle", Component.text("Góc đỡ đòn (độ, > 0)"), b -> b.initial(String.valueOf(current == null ? 90f : current.horizontalBlockingAngle())).maxLength(16))
+                .addTextInput("block_sound", Component.text("Âm thanh khi đỡ đòn (trống = " + BlocksAttacksComponent.DEFAULT_BLOCK_SOUND.asString() + ")"), b -> b.initial(current == null ? "" : current.blockSound().asString()).maxLength(256))
+                .addTextInput("disabled_sound", Component.text("Âm thanh khi bị vô hiệu hóa (trống = " + BlocksAttacksComponent.DEFAULT_DISABLED_SOUND.asString() + ")"), b -> b.initial(current == null ? "" : current.disabledSound().asString()).maxLength(256));
+
+        return wrapComponentDialog(player, ItemComponentKeys.BLOCKS_ATTACKS, builder,
+                (response, audience) -> {
+                    Float delay = DialogInputUtils.parseFloat(response.getText("block_delay_seconds"), 0f, Float.MAX_VALUE);
+                    Float angle = DialogInputUtils.parseFloat(response.getText("horizontal_blocking_angle"), Float.MIN_VALUE, Float.MAX_VALUE);
+                    if (delay != null && angle != null) {
+                        try {
+                            Key blockSound = optionalKey(response.getText("block_sound"));
+                            Key disabledSound = optionalKey(response.getText("disabled_sound"));
+                            components.put(ItemComponentKeys.BLOCKS_ATTACKS.id(), new BlocksAttacksComponent(delay, angle,
+                                    blockSound == null ? BlocksAttacksComponent.DEFAULT_BLOCK_SOUND : blockSound,
+                                    disabledSound == null ? BlocksAttacksComponent.DEFAULT_DISABLED_SOUND : disabledSound));
+                        } catch (Exception e) {
+                            player.sendMessage(Utils.text("Có key không hợp lệ, không lưu được: " + e.getMessage(), NamedTextColor.RED));
+                        }
+                    }
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.BLOCKS_ATTACKS.id());
                     Utils.runLater(() -> openMainDialog(player));
                 });
     }

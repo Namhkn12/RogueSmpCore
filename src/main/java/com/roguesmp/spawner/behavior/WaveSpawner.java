@@ -3,7 +3,10 @@ package com.roguesmp.spawner.behavior;
 import com.roguesmp.utils.LocationUtils;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -26,6 +29,8 @@ import java.util.List;
  * */
 public class WaveSpawner extends BaseBehavior {
 
+    private static final Particle.DustOptions BLOOD = new Particle.DustOptions(Color.fromRGB(200, 20, 20), 1.4f);
+
     private final int waves;
     private int waveCount = 0;
 
@@ -40,6 +45,7 @@ public class WaveSpawner extends BaseBehavior {
 
         if(waveCount < waves){
             player.sendMessage(Component.text("You must survive " + (waves - waveCount) + " more waves.", NamedTextColor.GRAY));
+            SpawnerFx.sound(SpawnerFx.center(location), Sound.BLOCK_CHAIN_HIT, 2f, 0.5f);
             return false;
         }
 
@@ -59,12 +65,26 @@ public class WaveSpawner extends BaseBehavior {
 
         if (world == null) return true;
 
+        Location center = SpawnerFx.center(location);
+        world.spawnParticle(Particle.FLAME, center, 60, 0.4, 0.4, 0.4, 0.25, null, true);
+        world.spawnParticle(Particle.EXPLOSION, center, 1, 0, 0, 0, 0, null, true);
+        SpawnerFx.sound(center, Sound.EVENT_RAID_HORN, 4f, 1f);
+        if (completed) SpawnerFx.sound(center, Sound.UI_TOAST_CHALLENGE_COMPLETE, 3f, 1f);
+
         for (int i = 0; i < extra; i++) {
             Location spawnLoc = LocationUtils.randomStandableNear(location);
             entity.copy(spawnLoc);
         }
 
         return true;
+    }
+
+    @Override
+    protected void onTick(Location location, int ticks) {
+        if (completed) return;
+        Location center = SpawnerFx.center(location);
+        SpawnerFx.helix(center, 3, 0.7, ticks * 0.35, Particle.DUST, BLOOD);
+        if (ticks % 12 == 0) SpawnerFx.sound(center, Sound.BLOCK_RESPAWN_ANCHOR_AMBIENT, 2.5f, 0.6f);
     }
 
     @Override

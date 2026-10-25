@@ -14,7 +14,9 @@ import com.roguesmp.block.persistence.StateSection;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandManager;
+import com.roguesmp.permission.Permissions;
 import com.roguesmp.utils.Utils;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
@@ -51,6 +53,7 @@ public class WirelessNodeBlock extends SmpBlock implements Tickable, EnergyStora
     @Override
     public void tick() {
         if (network == null && !networkId.isEmpty()) tryJoin();
+        syncDisplayModel();
         tickGuiRefresh();
     }
 
@@ -106,6 +109,11 @@ public class WirelessNodeBlock extends SmpBlock implements Tickable, EnergyStora
     }
 
     @Override
+    public Key getDisplayModel() {
+        return network != null ? data.modelActive() : super.getDisplayModel();
+    }
+
+    @Override
     public int getEnergy() {
         return network == null ? 0 : network.getEnergy();
     }
@@ -132,7 +140,7 @@ public class WirelessNodeBlock extends SmpBlock implements Tickable, EnergyStora
         event.setCancelled(true);
         Player player = event.getPlayer();
         IslandData island = island();
-        if (island == null || !island.isMember(player.getUniqueId())) {
+        if ((island == null || !island.isMember(player.getUniqueId())) && !Permissions.ISLAND_ADMIN.has(player)) {
             player.sendActionBar(Utils.text("Chỉ thành viên đảo mới có thể chỉnh nút này", NamedTextColor.RED));
             return;
         }

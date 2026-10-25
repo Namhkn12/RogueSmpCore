@@ -1,5 +1,10 @@
 package com.roguesmp.dungeon.action;
 
+import com.roguesmp.dungeon.script.DungeonCondition;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import com.roguesmp.entity.SmpEntity;
+import com.roguesmp.dungeon.TrackedMobs;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
@@ -179,9 +184,9 @@ public class DungeonActions {
         }
     }
 
-    public record Delay(double seconds) implements DungeonAction {
+    public record Delay(int ticks) implements DungeonAction {
         public static final Codec<Delay> CODEC = Codec.composite(
-                Codec.DOUBLE.fieldOf("seconds").forGetter(Delay::seconds),
+                Codec.INT.fieldOf("ticks").forGetter(Delay::ticks),
                 Delay::new
         );
 
@@ -219,12 +224,12 @@ public class DungeonActions {
 
         private void runFrom(FeatureContext<?> context, @Nullable Player player, int start) {
             for (int i = start; i < steps.size(); i++) {
-                if (steps.get(i) instanceof Delay(double seconds)) {
+                if (steps.get(i) instanceof Delay(int ticks)) {
                     int next = i + 1;
                     Utils.runLater(() -> {
                         if (!context.manager().isLive(context.instance())) return;
                         runFrom(context, player != null && player.isOnline() ? player : null, next);
-                    }, (int) Math.max(1, Math.round(seconds * 20)));
+                    }, Math.max(1, ticks));
                     return;
                 }
                 steps.get(i).run(context, player);
@@ -232,7 +237,76 @@ public class DungeonActions {
         }
     }
 
-    public record SpawnMob(String mob, int count, double x, double y, double z, double spread) implements DungeonAction {
+    public record Repeat(int times, List<DungeonCondition> whileConditions, int interval, List<DungeonAction> actions) implements DungeonAction {
+        public static final Codec<Repeat> CODEC = Codec.composite(
+                Codec.INT.fieldOf("times").forGetter(Repeat::times),
+                Codec.listOf(DungeonCondition.CODEC).optionalFieldOf("while", List.of()).forGetter(Repeat::whileConditions),
+                Codec.INT.optionalFieldOf("interval", 0).forGetter(Repeat::interval),
+                Codec.listOf(DungeonAction.CODEC).fieldOf("actions").forGetter(Repeat::actions),
+                Repeat::new
+        );
+
+        @Override
+        public String getTypeId() {
+            return "repeat";
+        }
+
+        @Override
+        public void validate(DungeonValidation check) {
+            if (times <= 0) check.warn("'times' must be positive");
+            for (int i = 0; i < whileConditions.size(); i++) whileConditions.get(i).validate(check.at("while[" + i + "]"));
+            for (int i = 0; i < actions.size(); i++) actions.get(i).validate(check.at("actions[" + i + "]"));
+        }
+
+        @Override
+        public void run(FeatureContext<?> context, @Nullable Player player) {
+            runFrom(context, player, 0);
+        }
+
+        private void runFrom(FeatureContext<?> context, @Nullable Player player, int iteration) {
+            for (int i = iteration; i < times; i++) {
+                if (!DungeonCondition.all(whileConditions, context)) return;
+                actions.forEach(action -> action.run(context, player));
+                if (interval > 0 && i + 1 < times) {
+                    int next = i + 1;
+                    Utils.runLater(() -> {
+                        if (!context.manager().isLive(context.instance())) return;
+                        runFrom(context, player != null && player.isOnline() ? player : null, next);
+                    }, interval);
+                    return;
+                }
+            }
+        }
+    }
+
+    public record If(List<DungeonCondition> conditions, List<DungeonAction> then, List<DungeonAction> otherwise) implements DungeonAction {
+        public static final Codec<If> CODEC = Codec.composite(
+                Codec.listOf(DungeonCondition.CODEC).fieldOf("conditions").forGetter(If::conditions),
+                Codec.listOf(DungeonAction.CODEC).optionalFieldOf("then", List.of()).forGetter(If::then),
+                Codec.listOf(DungeonAction.CODEC).optionalFieldOf("else", List.of()).forGetter(If::otherwise),
+                If::new
+        );
+
+        @Override
+        public String getTypeId() {
+            return "if";
+        }
+
+        @Override
+        public void validate(DungeonValidation check) {
+            for (int i = 0; i < conditions.size(); i++) conditions.get(i).validate(check.at("conditions[" + i + "]"));
+            for (int i = 0; i < then.size(); i++) then.get(i).validate(check.at("then[" + i + "]"));
+            for (int i = 0; i < otherwise.size(); i++) otherwise.get(i).validate(check.at("else[" + i + "]"));
+        }
+
+        @Override
+        public void run(FeatureContext<?> context, @Nullable Player player) {
+            List<DungeonAction> branch = DungeonCondition.all(conditions, context) ? then : otherwise;
+            branch.forEach(action -> action.run(context, player));
+        }
+    }
+
+    public record SpawnMob(String mob, int count, double x, double y, double z, double spread, String tag) implements DungeonAction {
         public static final Codec<SpawnMob> CODEC = Codec.composite(
                 Codec.STRING.fieldOf("mob").forGetter(SpawnMob::mob),
                 Codec.INT.optionalFieldOf("count", 1).forGetter(SpawnMob::count),
@@ -240,6 +314,7 @@ public class DungeonActions {
                 Codec.DOUBLE.fieldOf("y").forGetter(SpawnMob::y),
                 Codec.DOUBLE.fieldOf("z").forGetter(SpawnMob::z),
                 Codec.DOUBLE.optionalFieldOf("spread", 0.0).forGetter(SpawnMob::spread),
+                Codec.STRING.optionalFieldOf("tag", "").forGetter(SpawnMob::tag),
                 SpawnMob::new
         );
 
@@ -257,22 +332,27 @@ public class DungeonActions {
         public void run(FeatureContext<?> context, @Nullable Player player) {
             World world = context.world();
             if (world == null) return;
+            boolean tracked = !tag.isEmpty();
             ThreadLocalRandom random = ThreadLocalRandom.current();
             for (int i = 0; i < count; i++) {
                 Location location = new Location(world, x + random.nextDouble(-spread, spread + 1e-9), y, z + random.nextDouble(-spread, spread + 1e-9));
-                if (EntityManager.getInstance().spawnEntity(mob, location) != null) continue;
-                NamespacedKey key = NamespacedKey.fromString(mob);
-                if (key == null) {
-                    RogueSmpCore.LOGGER.warn("spawn_mob: unknown vanilla mob type {} in dungeon {}", mob, context.instance().dungeonId());
-                    return;
-                }
-                EntityType type = org.bukkit.Registry.ENTITY_TYPE.get(key);
-                if (type == null || !type.isSpawnable()) {
-                    RogueSmpCore.LOGGER.warn("spawn_mob: unknown mob {} in dungeon {}", mob, context.instance().dungeonId());
-                    return;
-                }
-                world.spawnEntity(location, type);
+                Entity spawned = spawn(context, world, location);
+                if (spawned == null) break;
+                if (tracked && spawned instanceof LivingEntity living) context.manager().trackedMobs().track(tag, living);
             }
+            if (tracked) context.save();
+        }
+
+        private @Nullable Entity spawn(FeatureContext<?> context, World world, Location location) {
+            SmpEntity smpEntity = EntityManager.getInstance().spawnEntity(mob, location);
+            if (smpEntity != null) return smpEntity.getEntity();
+            NamespacedKey key = NamespacedKey.fromString(mob);
+            EntityType type = key == null ? null : org.bukkit.Registry.ENTITY_TYPE.get(key);
+            if (type == null || !type.isSpawnable()) {
+                RogueSmpCore.LOGGER.warn("spawn_mob: unknown mob {} in dungeon {}", mob, context.instance().dungeonId());
+                return null;
+            }
+            return world.spawnEntity(location, type);
         }
     }
 
@@ -419,6 +499,8 @@ public class DungeonActions {
     public static final Codec<End> END = register("end", End.CODEC);
     public static final Codec<Delay> DELAY = register("delay", Delay.CODEC);
     public static final Codec<Sequence> SEQUENCE = register("sequence", Sequence.CODEC);
+    public static final Codec<Repeat> REPEAT = register("repeat", Repeat.CODEC);
+    public static final Codec<If> IF = register("if", If.CODEC);
     public static final Codec<SpawnMob> SPAWN_MOB = register("spawn_mob", SpawnMob.CODEC);
     public static final Codec<GiveItem> GIVE_ITEM = register("give_item", GiveItem.CODEC);
     public static final Codec<SetBlock> SET_BLOCK = register("set_block", SetBlock.CODEC);

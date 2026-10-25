@@ -19,6 +19,7 @@ public class ItemComponentKeys {
     public static final ComponentKey<PlayerHeadSkinComponent> HEAD_SKIN = register("head_skin", PlayerHeadSkinComponent.CODEC);
     public static final ComponentKey<ItemModelComponent> ITEM_MODEL = register("item_model", ItemModelComponent.CODEC);
     public static final ComponentKey<EquippableComponent> EQUIPPABLE = register("equippable", EquippableComponent.CODEC);
+    public static final ComponentKey<BlocksAttacksComponent> BLOCKS_ATTACKS = register("blocks_attacks", BlocksAttacksComponent.CODEC);
     //Transient so it has no CODEC.
     public static final ComponentKey<BrokenComponent> BROKEN = new ComponentKey<>("broken");
     public static final ComponentKey<ItemTypeComponent> ITEM_TYPE = new ComponentKey<>("item_type");

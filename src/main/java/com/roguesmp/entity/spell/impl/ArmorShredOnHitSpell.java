@@ -24,8 +24,6 @@ import java.util.List;
  */
 public class ArmorShredOnHitSpell extends OnHitSpell {
 
-    public static final String TYPE_KEY = "armor_shred_on_hit_spell";
-
     private static final List<EquipSlot> ARMOR_SLOTS = List.of(EquipSlot.HEAD, EquipSlot.CHEST, EquipSlot.LEGS, EquipSlot.FEET);
 
     public record Params(HitCondition condition, int durabilityDamage) implements SpellParams {
@@ -34,11 +32,6 @@ public class ArmorShredOnHitSpell extends OnHitSpell {
                 Codec.INT.optionalFieldOf("durabilityDamage", 3).forGetter(Params::durabilityDamage),
                 Params::new
         );
-
-        @Override
-        public String getTypeId() {
-            return TYPE_KEY;
-        }
     }
 
     private final int durabilityDamage;
@@ -65,9 +58,5 @@ public class ArmorShredOnHitSpell extends OnHitSpell {
 
         victim.getWorld().spawnParticle(Particle.CRIT, SpellTargets.centerOf(victim), 10, 0.3, 0.4, 0.3, 0.1);
         victim.getWorld().playSound(victim.getLocation(), Sound.ITEM_ARMOR_EQUIP_CHAIN, 1f, 0.5f);
-    }
-
-    public static ArmorShredOnHitSpell create(Params params, LivingEntity owner) {
-        return new ArmorShredOnHitSpell(owner, params);
     }
 }

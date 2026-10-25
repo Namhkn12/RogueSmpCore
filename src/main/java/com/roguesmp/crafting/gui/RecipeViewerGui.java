@@ -93,8 +93,8 @@ public class RecipeViewerGui extends BaseGui {
 
     private static Component titleOf(View view) {
         return switch (view.mode()) {
-            case RECIPES -> Component.text("Cách chế tạo: ").append(resolveDisplay(view.focusKey()).effectiveName());
-            case USES -> Component.text("Công thức sử dụng: ").append(resolveDisplay(view.focusKey()).effectiveName());
+            case RECIPES -> Component.text("Cách chế tạo: ").append(ItemRef.displayName(view.focusKey()));
+            case USES -> Component.text("Công thức sử dụng: ").append(ItemRef.displayName(view.focusKey()));
             case CATEGORY -> Component.text(view.category().displayName());
         };
     }
@@ -334,7 +334,7 @@ public class RecipeViewerGui extends BaseGui {
 
     private static ItemStack resolveDisplay(String key) {
         ItemStack resolved = ItemRef.toItemStack(key, 1);
-        if (resolved != null) return resolved.clone();
+        if (resolved != null) return resolved;
         return label(Material.BARRIER, "Không tìm thấy: " + key, NamedTextColor.RED);
     }
 

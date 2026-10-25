@@ -28,6 +28,7 @@ public enum Attributes {
     MAX_HEALTH_FLAT(new MaxHealthFlat()),
     MAX_HEALTH_PERCENT(new MaxHealthPercent()),
     KNOCKBACK_RESISTANCE(new KnockbackResistance()),
+    BLOCK_REFLECT(new BlockReflect()),
 
     // --- LAND MOVEMENT ---
     SPEED_FLAT(new SpeedFlat()),
