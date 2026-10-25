@@ -13,6 +13,9 @@ import org.bukkit.persistence.PersistentDataType;
 
 public final class SpawnerSystem {
 
+    private static final long TICK_PERIOD = 5L;
+    private static final double VIEW_RANGE = 96;
+
     private static SpawnerSystem INSTANCE;
 
     private final SpawnerInstanceManager instances;
@@ -21,6 +24,7 @@ public final class SpawnerSystem {
     private SpawnerSystem(RogueSmpCore plugin) {
         this.instances = new SpawnerInstanceManager();
         this.listener = new SpawnerEventListener(new SpawnerEventController(instances, plugin));
+        plugin.getServer().getScheduler().runTaskTimer(plugin, () -> instances.tickAll(VIEW_RANGE), TICK_PERIOD, TICK_PERIOD);
     }
 
     public static void init(RogueSmpCore plugin) {

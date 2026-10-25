@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Marker;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -43,7 +44,8 @@ public class SpawnerEventListener implements Listener {
     @EventHandler
     public void onSpawnerBreak(BlockBreakEvent event){
         Block block = event.getBlock();
-        if (block.getType() != Material.SPAWNER || !SpawnerSystem.isActive(block.getLocation())) return;
+        if (block.getType() != Material.SPAWNER || !(block.getState() instanceof CreatureSpawner spawner)) return;
+        if (!spawner.getPersistentDataContainer().has(Keys.SPAWNER_IID) && !SpawnerSystem.isActive(block.getLocation())) return;
         boolean allowBreak  = spawnerController.handleSpawnerBreak(event.getBlock(), event.getPlayer());
         event.setCancelled(!allowBreak );
     }

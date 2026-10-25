@@ -1,5 +1,6 @@
 package com.roguesmp.spawner.behavior;
 
+import com.roguesmp.spawner.SpawnerInstance;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -10,6 +11,8 @@ public abstract class BaseBehavior {
 
     protected final BehaviorData data;
     protected boolean completed = false;
+    protected SpawnerInstance instance;
+    protected int ticks = 0;
 
     protected BaseBehavior(BehaviorData data) {
         this.data = data;
@@ -17,7 +20,9 @@ public abstract class BaseBehavior {
 
     public boolean onBreak(Player player, Location location) { return true; }
     public boolean onSpawn(LivingEntity entity, List<Player> players, Location location) { return true; }
-    public void onTick() { }
+    public void bind(SpawnerInstance instance) { this.instance = instance; }
+    public void tick(Location location) { onTick(location, ticks++); }
+    protected void onTick(Location location, int ticks) { }
     public void onPlayerEnter(Player player) { }
 
     public boolean isCompleted() { return completed; }
