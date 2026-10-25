@@ -2,6 +2,7 @@ package com.roguesmp.gui.quest;
 
 import com.roguesmp.quest.data.PlayerQuestData;
 import com.roguesmp.quest.objective.ObjectiveProgress;
+import com.roguesmp.quest.objective.SubmitItemObjective;
 import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.player.inbox.InboxManager;
@@ -141,9 +142,24 @@ public class QuestGui extends BaseGui {
                     }
                 }
 
+                boolean canSubmit = !completed && quest.hasObjective(SubmitItemObjective.class);
+                if (canSubmit) {
+                    loreLines.add(Component.empty());
+                    loreLines.add(Utils.fromString("<!i><yellow>▶ Click để nộp vật phẩm"));
+                }
+
                 questItem.setData(DataComponentTypes.LORE, ItemLore.lore(loreLines));
 
-                addButton(r, c, questItem, ClickHandler.noAction());
+                addButton(r, c, questItem, event -> {
+                    event.setCancelled(true);
+                    if (!canSubmit) return;
+                    if (questManager.submitItems(player, quest)) {
+                        player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+                        setup();
+                    } else {
+                        player.sendMessage(Utils.fromString("<red>Bạn chưa có đủ vật phẩm cần nộp."));
+                    }
+                });
 
                 currentQuestIndex++;
             }

@@ -3,7 +3,9 @@ package com.roguesmp.quest;
 import com.roguesmp.quest.objective.ObjectiveProgress;
 import com.roguesmp.quest.objective.QuestObjective;
 import com.roguesmp.codec.Codec;
+import com.roguesmp.player.SmpPlayer;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
@@ -110,15 +112,15 @@ public class QuestProgress {
         return !this.incompleteObjectives.contains(objectiveId);
     }
 
-    /**
-     * <b> !! USE WITH CAUTION !! </b> <br>
-     * Reset all progress, including timestamp and reward states.
-     */
     public List<Component> getDisplay() {
+        return getDisplay(null);
+    }
+
+    public List<Component> getDisplay(@Nullable SmpPlayer viewer) {
         List<Component> lines = new ArrayList<>();
         quest.getObjectives().forEach((objectiveId, objective) -> {
             ObjectiveProgress objectiveProgress = progress.get(objectiveId);
-            if (objectiveProgress != null) lines.addAll(objective.getDisplay(objectiveProgress));
+            if (objectiveProgress != null) lines.addAll(objective.getDisplay(viewer, objectiveProgress));
         });
         return lines;
     }

@@ -11,12 +11,15 @@ import com.roguesmp.quest.board.BoardEntry;
 import com.roguesmp.quest.board.QuestBoardManager;
 import com.roguesmp.quest.board.QuestLevelCurve;
 import com.roguesmp.quest.data.PlayerQuestData;
+import com.roguesmp.quest.objective.SubmitItemObjective;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.DateUtils;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.utils.dialog.DialogBuilder;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
@@ -91,13 +94,39 @@ public class QuestBoardGui extends BaseGui {
             QuestBoardManager.AcceptResult result = boardManager.accept(player, quest);
             player.sendMessage(Utils.fromString(result.getMessage()));
             if (result == QuestBoardManager.AcceptResult.ACCEPTED) player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.0f, 1.0f);
-        } else if (event.isShiftClick() && event.isRightClick() && boardManager.abandon(player, quest)) {
-            player.sendMessage(Utils.fromString("<yellow>Đã hủy nhiệm vụ. Tiến độ đã được đặt lại."));
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+        } else if (event.isShiftClick() && event.isRightClick()) {
+            openAbandonDialog(quest);
+            return;
+        } else if (event.isLeftClick() && !event.isShiftClick() && quest.hasObjective(SubmitItemObjective.class)) {
+            if (questManager.submitItems(player, quest)) {
+                player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+            } else {
+                player.sendMessage(Utils.fromString("<red>Bạn chưa có đủ vật phẩm cần nộp."));
+            }
         } else {
             return;
         }
         setup();
+    }
+
+    private void openAbandonDialog(Quest quest) {
+        String name = quest.getName() != null ? quest.getName() : quest.getId();
+        DialogBuilder builder = DialogBuilder.create(Utils.fromString("<red>Hủy nhiệm vụ?"))
+                .addTextBody(Utils.fromString(name))
+                .addTextBody(Component.text("Toàn bộ tiến độ của nhiệm vụ này sẽ bị mất.", NamedTextColor.GRAY));
+        Dialog dialog = builder.confirmation()
+                .yesButton(Component.text("Hủy nhiệm vụ", NamedTextColor.RED), null, (response, audience) -> Utils.runLater(() -> {
+                    if (boardManager.abandon(player, quest)) {
+                        player.sendMessage(Utils.fromString("<yellow>Đã hủy nhiệm vụ. Tiến độ đã được đặt lại."));
+                        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                    }
+                    showInventory(player);
+                }))
+                .noButton(Component.text("Giữ lại"), null, (response, audience) -> Utils.runLater(() -> showInventory(player)))
+                .build();
+
+        player.closeInventory();
+        player.showDialog(dialog);
     }
 
     private ItemStack buildQuestItem(Quest quest, @Nullable QuestProgress progress, @Nullable SmpPlayer smpPlayer, long now) {
@@ -114,7 +143,7 @@ public class QuestBoardGui extends BaseGui {
 
         QuestProgress shown = accepted ? progress : new QuestProgress(quest);
         lore.add(Utils.text("✦ Mục tiêu:", NamedTextColor.AQUA));
-        for (Component line : shown.getDisplay()) lore.add(Component.text("  ").append(nonItalic(line)));
+        for (Component line : shown.getDisplay(smpPlayer)) lore.add(Component.text("  ").append(nonItalic(line)));
 
         if (!quest.getRewards().isEmpty() && smpPlayer != null) {
             lore.add(Component.empty());
@@ -129,6 +158,7 @@ public class QuestBoardGui extends BaseGui {
         lore.add(Utils.fromString("<!i><gray>Làm mới sau: <white>" + DateUtils.formatRemaining(resetAt - now)));
         if (accepted) {
             lore.add(Utils.fromString("<!i><green>✔ Đang thực hiện"));
+            if (quest.hasObjective(SubmitItemObjective.class)) lore.add(Utils.fromString("<!i><yellow>▶ Chuột trái để nộp vật phẩm"));
             lore.add(Utils.fromString("<!i><red>Shift + Chuột phải để hủy (mất tiến độ)"));
         } else {
             lore.add(Utils.fromString("<!i><yellow>▶ Click để nhận nhiệm vụ"));
@@ -136,6 +166,7 @@ public class QuestBoardGui extends BaseGui {
         item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
         return item;
     }
+
 
     private static Component nonItalic(Component component) {
         return component.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);

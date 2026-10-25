@@ -74,4 +74,13 @@ public interface QuestObjective {
         return false;
     }
 
+    /**
+     * Called when the player hands in items to this objective's quest; takes what it needs from their inventory.
+     *
+     * @return whether the progress changed
+     */
+    default boolean onSubmitItems(SmpPlayer smpPlayer, ObjectiveProgress progress) {
+        return false;
+    }
+
 }

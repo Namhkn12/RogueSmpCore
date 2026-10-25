@@ -147,6 +147,10 @@ public class Quest {
         return Collections.unmodifiableList(requirements);
     }
 
+    public boolean hasObjective(Class<? extends QuestObjective> type) {
+        return objectives.values().stream().anyMatch(type::isInstance);
+    }
+
     public @Unmodifiable Map<String, QuestObjective> getObjectives() {
         return Collections.unmodifiableMap(objectives);
     }

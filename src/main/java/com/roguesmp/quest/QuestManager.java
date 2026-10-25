@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -176,25 +177,46 @@ public class QuestManager {
         handleProgress(player, (objective, progress) -> objective.onSignal(signal, amount, progress));
     }
 
+    /**
+     * Hands the player's items in to given quest, taking only what its unfinished objectives still need.
+     *
+     * @return whether any item was taken
+     */
+    public boolean submitItems(Player player, Quest quest) {
+        PlayerQuestData data = getPlayerQuestData(player.getUniqueId());
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+        QuestProgress progress = data == null ? null : data.getQuestProgress(quest.getId());
+        if (progress == null || smpPlayer == null) return false;
+        return advance(data, progress, (objective, objectiveProgress) -> objective.onSubmitItems(smpPlayer, objectiveProgress), player, System.currentTimeMillis());
+    }
+
     // Quest conditions only apply to progress from a player's own action.
     private void handleProgress(QuestLog log, BiPredicate<QuestObjective, ObjectiveProgress> objectiveConsumer, @Nullable Player player) {
         long now = System.currentTimeMillis();
         for (QuestProgress questProgress : List.copyOf(log.getQuestProgresses().values())) {
-            if (questProgress.isCompleted() || questProgress.isExpired(now)) continue;
-
-            Quest quest = questProgress.getQuest();
-            if (player != null && !quest.canProgress(log.getHolder(), player)) continue;
-
-            quest.getObjectives().forEach((objectiveId, objective) -> {
-                if (questProgress.isObjectiveCompleted(objectiveId)) return;
-
-                if (!questProgress.updateObjectiveProgress(objectiveId, objectiveProgress -> objectiveConsumer.test(objective, objectiveProgress))) return;
-                log.setDirty(true);
-                new QuestProgressEvent(log.getHolder(), questProgress, objectiveId).callEvent();
-
-                if (questProgress.isCompleted()) completeQuest(log, questProgress);
-            });
+            advance(log, questProgress, objectiveConsumer, player, now);
         }
+    }
+
+    private boolean advance(QuestLog log, QuestProgress questProgress, BiPredicate<QuestObjective, ObjectiveProgress> objectiveConsumer, @Nullable Player player, long now) {
+        if (questProgress.isCompleted() || questProgress.isExpired(now)) return false;
+
+        Quest quest = questProgress.getQuest();
+        if (player != null && !quest.canProgress(log.getHolder(), player)) return false;
+
+        boolean changed = false;
+        for (Map.Entry<String, QuestObjective> entry : quest.getObjectives().entrySet()) {
+            String objectiveId = entry.getKey();
+            if (questProgress.isObjectiveCompleted(objectiveId)) continue;
+
+            if (!questProgress.updateObjectiveProgress(objectiveId, objectiveProgress -> objectiveConsumer.test(entry.getValue(), objectiveProgress))) continue;
+            changed = true;
+            log.setDirty(true);
+            new QuestProgressEvent(log.getHolder(), questProgress, objectiveId).callEvent();
+
+            if (questProgress.isCompleted()) completeQuest(log, questProgress);
+        }
+        return changed;
     }
 
     /**
