@@ -12,7 +12,6 @@ public class NpcActions {
 
     public static final Codec<RunCommandInteractAction> RUN_COMMAND = register(RunCommandInteractAction.TYPE_KEY, RunCommandInteractAction.CODEC);
     public static final Codec<OpenGuiInteractAction> OPEN_GUI = register(OpenGuiInteractAction.TYPE_KEY, OpenGuiInteractAction.CODEC);
-    public static final Codec<OpenTradeInteractAction> OPEN_TRADE = register(OpenTradeInteractAction.TYPE_KEY, OpenTradeInteractAction.CODEC);
     public static final Codec<TeleportInteractAction> TELEPORT = register(TeleportInteractAction.TYPE_KEY, TeleportInteractAction.CODEC);
 
     public static void loadClass() {

@@ -5,6 +5,8 @@ import com.roguesmp.gui.BlacksmithGui;
 import com.roguesmp.player.inbox.gui.InboxGui;
 import com.roguesmp.quest.board.gui.QuestBoardGui;
 import com.roguesmp.registry.Registries;
+import com.roguesmp.trade.TradeShop;
+import com.roguesmp.trade.gui.TradeGui;
 import io.papermc.paper.registry.keys.SoundEventKeys;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -30,6 +32,8 @@ public class GuiOpenActions {
         new QuestBoardGui(player).showInventory(player);
         player.playSound(Sound.sound(SoundEventKeys.ITEM_BOOK_PAGE_TURN, Sound.Source.PLAYER, 1f, 0.9f));
     });
+    private static final String SHOP_PREFIX = "shop:";
+
     public static final OpenAction INBOX = register("inbox", player -> new InboxGui(player, null).showInventory(player));
 
     public static void loadClass() {
@@ -37,13 +41,20 @@ public class GuiOpenActions {
     }
 
     public static void runOpenAction(String id, Player player) {
-        OpenAction openAction = Registries.NPC_GUI_OPEN_ACTION.get(id);
+        OpenAction openAction = id.startsWith(SHOP_PREFIX)
+                ? shopOpenAction(id.substring(SHOP_PREFIX.length()))
+                : Registries.NPC_GUI_OPEN_ACTION.get(id);
         if (openAction == null) {
             player.sendMessage(Component.text("Could not find GUI open action with id: " + id, NamedTextColor.RED));
             RogueSmpCore.LOGGER.warn("Could not find GUI open action with id: {}", id);
             return;
         }
         openAction.run(player);
+    }
+
+    private static OpenAction shopOpenAction(String shopId) {
+        TradeShop shop = Registries.TRADE_SHOP.get(shopId);
+        return shop == null ? null : player -> new TradeGui(player, shop).showInventory(player);
     }
 
     private static OpenAction register(String id, OpenAction action) {

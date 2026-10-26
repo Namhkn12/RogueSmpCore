@@ -1,6 +1,6 @@
 # JSON Reference — Trades (cửa hàng NPC)
 
-Thư mục: `trades/` (đệ quy, id = đường dẫn bỏ `.json`). Quy tắc chung: [JSON-Overview](JSON-Overview.md). Mỗi file là **1 cửa hàng**; NPC mở cửa hàng bằng action `open_trade` (xem [JSON-Npcs](JSON-Npcs.md#action)).
+Thư mục: `trades/` (đệ quy, id = đường dẫn bỏ `.json`). Quy tắc chung: [JSON-Overview](JSON-Overview.md). Mỗi file là **1 cửa hàng**; NPC mở cửa hàng bằng action `open_gui` với `"gui": "shop:<id>"` (xem [JSON-Npcs](JSON-Npcs.md#action)).
 
 ## Cấu trúc file
 
@@ -38,7 +38,7 @@ Thư mục: `trades/` (đệ quy, id = đường dẫn bỏ `.json`). Quy tắc 
 
 | Key | Kiểu | Bắt buộc / mặc định | Ý nghĩa |
 | :--- | :--- | :--- | :--- |
-| `id` | string | tự lấy từ đường dẫn | Id cửa hàng, dùng trong `open_trade`. Không cần viết. |
+| `id` | string | tự lấy từ đường dẫn | Id cửa hàng, dùng trong `open_gui` dạng `shop:<id>`. Không cần viết. |
 | `title` | string MiniMessage | `"<dark_gray>Cửa hàng"` | Tiêu đề GUI. |
 | `layout` | object | bố cục mặc định (xem dưới) | Vị trí các ô trong GUI. |
 | `offers` | mảng offer | **bắt buộc** | Danh sách giao dịch, xếp vào các ô `O` theo thứ tự. |
