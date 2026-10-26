@@ -10,6 +10,10 @@ import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
 import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
+import io.papermc.paper.registry.data.dialog.input.TextDialogInput;
+import org.bukkit.entity.Villager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.EntityType;
@@ -39,6 +43,7 @@ public class NpcCreatorGui {
     private String name = "";
     private @Nullable String skinId;
     private String description = "";
+    private @Nullable Villager.Profession profession;
     private final List<ActionDraft> actions;
     private boolean droppedSkinData;
 
@@ -56,7 +61,8 @@ public class NpcCreatorGui {
         gui.entityType = npc.getEntityType();
         gui.name = npc.getName() == null ? "" : npc.getName();
         gui.skinId = npc.getSkinId();
-        gui.description = npc.getDescription() == null ? "" : npc.getDescription();
+        gui.description = String.join("\n", npc.getDescription());
+        gui.profession = npc.getProfession();
         gui.droppedSkinData = npc.getSkinValue() != null || npc.getSkinSignature() != null;
 
         for (NpcAction action : npc.getActions()) {
@@ -101,8 +107,10 @@ public class NpcCreatorGui {
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildNameDialog(player))));
         multi.addButton(Component.text("skin", skinId == null ? NamedTextColor.GRAY : NamedTextColor.GREEN), Component.text("Chỉ áp dụng khi entity_type = MANNEQUIN.", NamedTextColor.GRAY),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSkinDialog(player))));
-        multi.addButton(Component.text("description", NamedTextColor.AQUA), Component.text("Chỉ áp dụng khi entity_type = MANNEQUIN.", NamedTextColor.GRAY),
+        multi.addButton(Component.text("description", description.isBlank() ? NamedTextColor.GRAY : NamedTextColor.GREEN), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildDescriptionDialog(player))));
+        multi.addButton(Component.text("profession", profession == null ? NamedTextColor.GRAY : NamedTextColor.GREEN), Component.text("Chỉ áp dụng khi entity_type = VILLAGER.", NamedTextColor.GRAY),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(buildProfessionDialog(player))));
 
         for (int i = 0; i < actions.size(); i++) {
             int index = i;
@@ -213,9 +221,9 @@ public class NpcCreatorGui {
     }
 
     private Dialog buildDescriptionDialog(Player player) {
-        return DialogBuilder.create(Component.text("Mô tả (Mannequin)"))
+        return DialogBuilder.create(Component.text("Mô tả"))
                 .canCloseWithEscape(false)
-                .addTextInput("value", Component.text("Mô tả hiển thị"), b -> b.initial(description).maxLength(256))
+                .addTextInput("value", Component.text("Mỗi dòng là một dòng mô tả"), b -> b.initial(description).maxLength(1024).multiline(TextDialogInput.MultilineOptions.create(6, 100)))
                 .confirmation()
                 .yesButton(Component.text("Xác nhận"), null, (response, audience) -> {
                     String text = response.getText("value");
@@ -224,6 +232,24 @@ public class NpcCreatorGui {
                 })
                 .noButton(Component.text("Huỷ"), null, (response, audience) -> Utils.runLater(() -> openMainDialog(player)))
                 .build();
+    }
+
+    private Dialog buildProfessionDialog(Player player) {
+        DialogBuilder builder = DialogBuilder.create(Component.text("Nghề (Villager)")).canCloseWithEscape(false);
+        DialogTypeBuilder.MultiAction multi = builder.multiAction();
+        multi.addButton(Component.text("(không)", profession == null ? NamedTextColor.GREEN : NamedTextColor.GRAY), null, (response, audience) -> {
+            this.profession = null;
+            Utils.runLater(() -> openMainDialog(player));
+        });
+        for (Villager.Profession option : RegistryAccess.registryAccess().getRegistry(RegistryKey.VILLAGER_PROFESSION)) {
+            multi.addButton(Component.text(option.key().value(), option.equals(profession) ? NamedTextColor.GREEN : NamedTextColor.WHITE), null, (response, audience) -> {
+                this.profession = option;
+                Utils.runLater(() -> openMainDialog(player));
+            });
+        }
+        multi.columns(3);
+        multi.exitButton(Component.text("Huỷ"), (response, audience) -> Utils.runLater(() -> openMainDialog(player)));
+        return multi.build();
     }
 
     private static String sanitizeId(@Nullable String raw) {
@@ -351,7 +377,7 @@ public class NpcCreatorGui {
             if (action != null) realActions.add(action);
         }
 
-        BaseNpc npc = new BaseNpc(entityType, name, null, null, skinId, description, id, realActions);
+        BaseNpc npc = new BaseNpc(entityType, name, null, null, skinId, description.isBlank() ? List.of() : List.of(description.split("\n")), profession, id, realActions);
         Registries.NPC.registerAndSave(RogueSmpCore.getInstance(), id, npc);
 
         droppedSkinData = false;
