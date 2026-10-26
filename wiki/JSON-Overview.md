@@ -19,6 +19,7 @@ Phần lớn nội dung game (item, mob/boss, ability, class, quest, NPC, loot, 
 | `quests/` | Quest | [JSON-Quests](JSON-Quests.md) |
 | `npcs/` | NPC | [JSON-Npcs](JSON-Npcs.md) |
 | `trades/` | Cửa hàng NPC | [JSON-Trades](JSON-Trades.md) |
+| `warps/` | Điểm dịch chuyển | [JSON-Warps](JSON-Warps.md) |
 | `loottable/` | Loot table (số ít, không gạch dưới) | [JSON-Loot](JSON-Loot.md) |
 | `crafting_recipes/` | Công thức chế tạo | [JSON-Crafting](JSON-Crafting.md) |
 | `blocks/` | Block tùy chỉnh (generator, altar, ...) | [JSON-Blocks](JSON-Blocks.md) |
