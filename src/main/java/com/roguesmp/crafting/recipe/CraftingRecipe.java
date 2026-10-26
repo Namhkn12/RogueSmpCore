@@ -1,6 +1,5 @@
 package com.roguesmp.crafting.recipe;
 
-import com.roguesmp.utils.ItemRef;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.MapCodec;
@@ -12,6 +11,8 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,6 +55,7 @@ public abstract class CraftingRecipe {
     );
 
     private final BaseProperties base;
+    private @Nullable Map<String, Integer> inputTotals;
 
     protected CraftingRecipe(@NotNull BaseProperties base) {
         this.base = base;
@@ -97,6 +99,17 @@ public abstract class CraftingRecipe {
         return getPrimaryOutput().toItemStack();
     }
 
+    public @NotNull @Unmodifiable Map<String, Integer> getInputTotals() {
+        if (inputTotals == null) {
+            Map<String, Integer> totals = new LinkedHashMap<>();
+            for (CraftingIngredient ingredient : getInputs()) {
+                if (ingredient != null) totals.merge(ingredient.key(), ingredient.count(), Integer::sum);
+            }
+            inputTotals = Collections.unmodifiableMap(totals);
+        }
+        return inputTotals;
+    }
+
     public @NotNull List<ItemStack> getOutputStacks() {
         List<ItemStack> stacks = new ArrayList<>(base.outputs().size());
         for (CraftingIngredient output : base.outputs()) {
@@ -107,10 +120,6 @@ public abstract class CraftingRecipe {
     }
 
     protected @NotNull ItemStack[] applyConsumption(@NotNull ItemStack @NotNull [] stacks, int @NotNull [] amountsToConsume) {
-        return applyConsumption(stacks, amountsToConsume, Map.of());
-    }
-
-    protected @NotNull ItemStack[] applyConsumption(@NotNull ItemStack @NotNull [] stacks, int @NotNull [] amountsToConsume, @NotNull Map<String, String> remainders) {
         ItemStack[] result = new ItemStack[amountsToConsume.length];
 
         for (int i = 0; i < amountsToConsume.length; i++) {
@@ -120,16 +129,11 @@ public abstract class CraftingRecipe {
             ItemStack stack = stacks[i];
 
             int leftover = stack.getAmount() - consumeAmount;
-            if (leftover > 0) {
-                ItemStack copy = stack.clone();
-                copy.setAmount(leftover);
-                result[i] = copy;
-                continue;
-            }
+            if (leftover <= 0) continue;
 
-            String key = ItemRef.idOf(stack);
-            String remainderKey = key == null ? null : remainders.get(key);
-            result[i] = remainderKey == null ? null : ItemRef.toItemStack(remainderKey, 1);
+            ItemStack copy = stack.clone();
+            copy.setAmount(leftover);
+            result[i] = copy;
         }
 
         return result;

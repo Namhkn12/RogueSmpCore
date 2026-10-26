@@ -2,6 +2,10 @@ package com.roguesmp.gui.crafting;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.crafting.CraftingManager;
+import com.roguesmp.crafting.gui.QuickCraftDisplay;
+import com.roguesmp.crafting.gui.QuickCraftListGui;
+import com.roguesmp.crafting.quick.QuickCraftCandidate;
+import com.roguesmp.crafting.quick.QuickCraftService;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
 import com.roguesmp.crafting.recipe.CraftingRecipes;
 import com.roguesmp.gui.BaseGui;
@@ -34,6 +38,8 @@ public class CraftingGui extends BaseGui {
     private static final int[] CRAFT_SLOTS = new int[]{10, 11, 12, 19, 20, 21, 28, 29, 30};
     private static final int TABLE_SHORTCUT_SLOT = 50;
     private static final int RESULT_SLOT = 23;
+    private static final int[] QUICK_CRAFT_SLOTS = new int[]{16, 25, 34};
+    private static final int SEE_MORE_SLOT = 43;
     private static final int GRID_WIDTH = 3;
     private static final int GRID_HEIGHT = 3;
 
@@ -108,6 +114,30 @@ public class CraftingGui extends BaseGui {
             barrier.setData(DataComponentTypes.ITEM_NAME, Component.text("Thành phẩm", NamedTextColor.RED));
             addButton(RESULT_SLOT, barrier, ClickHandler.noAction());
         }
+        setupQuickCraft();
+    }
+
+    private void setupQuickCraft() {
+        List<QuickCraftCandidate> candidates = QuickCraftService.findFirst(player, QUICK_CRAFT_SLOTS.length);
+        for (int i = 0; i < QUICK_CRAFT_SLOTS.length; i++) {
+            if (i >= candidates.size()) {
+                addButton(QUICK_CRAFT_SLOTS[i], FILLER, ClickHandler.noAction());
+                continue;
+            }
+            QuickCraftCandidate candidate = candidates.get(i);
+            addButton(QUICK_CRAFT_SLOTS[i], QuickCraftDisplay.render(candidate), event -> {
+                event.setCancelled(true);
+                QuickCraftService.craft(player, candidate.recipe(), event.isShiftClick());
+                setup();
+            });
+        }
+
+        ItemStack seeMore = ItemStack.of(Material.BOOK);
+        seeMore.setData(DataComponentTypes.ITEM_NAME, Component.text("Xem thêm công thức", NamedTextColor.GREEN));
+        addButton(SEE_MORE_SLOT, seeMore, event -> {
+            event.setCancelled(true);
+            Utils.runLater(() -> new QuickCraftListGui(player).showInventory(player));
+        });
     }
 
     private @Nullable CraftingRecipe matchCustomRecipe(ItemStack[] items) {
@@ -302,8 +332,7 @@ public class CraftingGui extends BaseGui {
 
     /**
      * Repeatedly consumes a scratch copy of {@code items} against {@code recipe} until it no longer
-     * matches, counting how many times that took - correctly accounts for per-cell amounts and
-     * remainders (e.g. a slot that turns into a still-valid ingredient after one craft), unlike a
+     * matches, counting how many times that took - correctly accounts for per-cell amounts, unlike a
      * naive "divide each slot's amount by what one craft needs" estimate.
      */
     private static int simulateMaxCrafts(CraftingRecipe recipe, ItemStack[] items) {

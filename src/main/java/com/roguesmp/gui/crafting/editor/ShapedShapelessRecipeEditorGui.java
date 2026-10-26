@@ -311,7 +311,7 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
         }
 
         CraftingIngredient result = new CraftingIngredient(resultKey, resultStack.getAmount());
-        return new ShapedCraftingRecipe(new CraftingRecipe.BaseProperties(id, result), pattern, keyMap, mirrored, Map.of());
+        return new ShapedCraftingRecipe(new CraftingRecipe.BaseProperties(id, result), pattern, keyMap, mirrored);
     }
 
     /**

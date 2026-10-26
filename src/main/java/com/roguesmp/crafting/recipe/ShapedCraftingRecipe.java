@@ -23,7 +23,6 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
             Codec.listOf(Codec.STRING).fieldOf("pattern").forGetter(ShapedCraftingRecipe::getPattern),
             Codec.unboundedMap(CraftingIngredient.CODEC).fieldOf("key").forGetter(ShapedCraftingRecipe::getKeyMap),
             Codec.BOOLEAN.optionalFieldOf("mirrored", true).forGetter(ShapedCraftingRecipe::isMirrored),
-            Codec.unboundedMap(Codec.STRING).optionalFieldOf("remainders", Map.of()).forGetter(ShapedCraftingRecipe::getRemainders),
             ShapedCraftingRecipe::new
     );
 
@@ -31,18 +30,15 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
     private final Map<String, CraftingIngredient> keyMap;
     private final boolean mirrored;
 
-    private final Map<String, String> remainders;
-
     private final Grid shape;
 
     private final int[] requiredAmounts;
 
-    public ShapedCraftingRecipe(@NotNull BaseProperties base, @NotNull List<String> pattern, @NotNull Map<String, CraftingIngredient> keyMap, boolean mirrored, @NotNull Map<String, String> remainders) {
+    public ShapedCraftingRecipe(@NotNull BaseProperties base, @NotNull List<String> pattern, @NotNull Map<String, CraftingIngredient> keyMap, boolean mirrored) {
         super(base, 1);
         this.pattern = List.copyOf(pattern);
         this.keyMap = Map.copyOf(keyMap);
         this.mirrored = mirrored;
-        this.remainders = Map.copyOf(remainders);
 
         GridData built = buildShape(this.pattern, this.keyMap);
         this.shape = built.grid();
@@ -182,7 +178,7 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
         int[] amountsToConsume = new int[items.length];
 
         TrimmedQuery query = trimQuery(items, width, height);
-        if (query == null) return applyConsumption(items, amountsToConsume, remainders);
+        if (query == null) return applyConsumption(items, amountsToConsume);
 
         int[] cellAmounts;
         if (query.grid().sameShapeAs(shape)) {
@@ -190,7 +186,7 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
         } else if (mirrored && query.grid().sameShapeAs(shape.mirrored())) {
             cellAmounts = mirrorAmounts(requiredAmounts, shape.width(), shape.height());
         } else {
-            return applyConsumption(items, amountsToConsume, remainders);
+            return applyConsumption(items, amountsToConsume);
         }
 
         Grid trimmed = query.grid();
@@ -205,7 +201,7 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
             }
         }
 
-        return applyConsumption(items, amountsToConsume, remainders);
+        return applyConsumption(items, amountsToConsume);
     }
 
     private static void requireGridSize(ItemStack[] items, int width, int height) {
@@ -268,9 +264,5 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
 
     public boolean isMirrored() {
         return mirrored;
-    }
-
-    public @NotNull @Unmodifiable Map<String, String> getRemainders() {
-        return remainders;
     }
 }
