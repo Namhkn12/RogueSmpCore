@@ -52,6 +52,8 @@ Người xem chia 2 nhóm:
 - **Ở ngoài region** (trong tầm `view`): mỗi chu kỳ tung `chance` 1 lần, trúng thì `count` particle xuất hiện tại điểm ngẫu nhiên **khắp hình dạng region** (đúng cả polygon và region nhiều mảnh; mảnh lớn được chọn nhiều hơn theo thể tích), gửi chung cho cả nhóm. Dùng region nhỏ + flag này để đánh dấu cổng dịch chuyển nhìn từ xa.
 - **Ở trong region**: mỗi người tung `chance` riêng, trúng thì `count` particle xuất hiện trong khối cầu bán kính `near` quanh họ, chỉ gửi cho chính họ. Nhờ vậy mật độ quanh người chơi không phụ thuộc kích thước region — region 500 block trông dày như region 10 block. Điểm vẫn phải nằm trong hình dạng region nên particle không tràn ra ngoài mép.
 
+**`__global__`**: đặt flag lên region toàn world thì mọi người chơi trong world đều tính là "ở trong" — particle rải quanh từng người với bán kính **`view`** (`near` bị bỏ qua). Dùng cho bụi/tro bay khắp world, ví dụ `/smpregion flag __global__ smp-ambient-particles white_ash 8 1 16`. Đứng trong region khác cũng có flag này thì nhận particle của cả 2.
+
 Ghi chú:
 
 - Không có ai trong tầm thì không tốn gì; chi phí tăng theo số người chơi đứng trong region có flag.

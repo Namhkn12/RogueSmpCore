@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,19 @@ public final class RegionAmbientEmitter {
     private static final int POINT_ATTEMPTS = 8;
 
     private record Emitter(World world, AmbientParticles particles, List<ProtectedRegion> pieces, long[] cumulativeVolume,
-                           ServerRegionManager.Bounds bounds) {
+                           ServerRegionManager.@Nullable Bounds bounds) {
+
+        static Emitter global(World world, AmbientParticles particles) {
+            return new Emitter(world, particles, List.of(), new long[0], null);
+        }
+
+        boolean isGlobal() {
+            return bounds == null;
+        }
+
+        double nearRadius() {
+            return isGlobal() ? particles.view() : particles.near();
+        }
     }
 
     private List<Emitter> emitters = List.of();
@@ -40,6 +53,11 @@ public final class RegionAmbientEmitter {
         List<Emitter> found = new ArrayList<>();
         for (World world : Bukkit.getWorlds()) {
             if (world.getPlayers().isEmpty()) continue;
+
+            ProtectedRegion global = manager.global(world);
+            AmbientParticles globalParticles = global == null ? null : global.getFlag(SmpRegionFlags.AMBIENT_PARTICLES);
+            if (globalParticles != null) found.add(Emitter.global(world, globalParticles));
+
             for (Map.Entry<String, List<ProtectedRegion>> entry : manager.regions(world).entrySet()) {
                 ProtectedRegion settings = manager.get(world, entry.getKey());
                 AmbientParticles particles = settings == null ? null : settings.getFlag(SmpRegionFlags.AMBIENT_PARTICLES);
@@ -78,6 +96,11 @@ public final class RegionAmbientEmitter {
     }
 
     private void sortViewers(Emitter emitter, List<Player> inside, List<Player> outside) {
+        if (emitter.isGlobal()) {
+            inside.addAll(emitter.world().getPlayers());
+            return;
+        }
+
         double view = emitter.particles().view();
         double viewSquared = view * view;
         BlockVector3 min = emitter.bounds().min();
@@ -97,6 +120,7 @@ public final class RegionAmbientEmitter {
     }
 
     private static boolean contains(Emitter emitter, int x, int y, int z) {
+        if (emitter.isGlobal()) return true;
         for (ProtectedRegion piece : emitter.pieces()) {
             if (piece.contains(x, y, z)) return true;
         }
@@ -104,7 +128,7 @@ public final class RegionAmbientEmitter {
     }
 
     private void emitNear(Emitter emitter, Player player) {
-        double near = emitter.particles().near();
+        double near = emitter.nearRadius();
         Location center = player.getLocation();
         for (int attempt = 0; attempt < POINT_ATTEMPTS; attempt++) {
             double ox = (Utils.RANDOM.nextDouble() * 2 - 1) * near;
