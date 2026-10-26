@@ -1,5 +1,8 @@
 package com.roguesmp.command;
 
+import com.roguesmp.teleport.destination.RegionDestination;
+import com.roguesmp.teleport.TeleportOptions;
+import com.roguesmp.teleport.TeleportService;
 import com.roguesmp.permission.Permissions;
 import com.roguesmp.region.RegionSelection;
 import com.roguesmp.region.ServerRegionManager;
@@ -115,9 +118,12 @@ public final class RegionCommand {
                 .withSubcommand(new CommandAPICommand("tp")
                         .withArguments(regionArgument())
                         .executesPlayer((player, args) -> {
-                            if (!ServerRegionManager.getInstance().teleport(player, (String) args.get("id"))) {
+                            RegionDestination destination = new RegionDestination((String) args.get("id"), null);
+                            if (!destination.isAvailable(player)) {
                                 player.sendMessage(Utils.fromString("<red>No such region in this world."));
+                                return;
                             }
+                            TeleportService.getInstance().teleport(player, destination, TeleportOptions.INSTANT);
                         }))
                 .register();
     }

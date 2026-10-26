@@ -1,6 +1,7 @@
 package com.roguesmp.region.flag;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.utils.Utils;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.FlagContext;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
@@ -40,11 +41,9 @@ public abstract class TextValueFlag<T> extends Flag<T> {
     }
 
     protected static double parseDouble(String text, String field) throws InvalidFlagFormat {
-        try {
-            return Double.parseDouble(text);
-        } catch (NumberFormatException e) {
-            throw new InvalidFlagFormat("'" + text + "' is not a valid " + field + ".");
-        }
+        Double value = Utils.parseDouble(text);
+        if (value == null) throw new InvalidFlagFormat("'" + text + "' is not a valid " + field + ".");
+        return value;
     }
 
     protected static int parseInt(String text, String field) throws InvalidFlagFormat {
@@ -53,9 +52,5 @@ public abstract class TextValueFlag<T> extends Flag<T> {
         } catch (NumberFormatException e) {
             throw new InvalidFlagFormat("'" + text + "' is not a valid " + field + ".");
         }
-    }
-
-    static String number(double value) {
-        return value == Math.rint(value) ? String.valueOf((long) value) : String.valueOf(value);
     }
 }

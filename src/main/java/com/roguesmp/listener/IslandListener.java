@@ -1,5 +1,8 @@
 package com.roguesmp.listener;
 
+import com.roguesmp.teleport.destination.HubDestination;
+import com.roguesmp.teleport.TeleportOptions;
+import com.roguesmp.teleport.TeleportService;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.block.BlockType;
 import com.roguesmp.block.event.SmpBlockInteractEvent;
@@ -143,7 +146,7 @@ public class IslandListener implements Listener {
     private void returnToIslandSpawn(Player player) {
         World world = player.getWorld();
         if (isGuest(player, world)) {
-            islandManager.getTeleportService().sendToHub(player);
+            TeleportService.getInstance().teleport(player, HubDestination.INSTANCE, TeleportOptions.INSTANT);
             return;
         }
         player.teleport(islandSpawn(world));

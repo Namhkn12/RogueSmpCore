@@ -21,9 +21,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.roguesmp.region.editor.RegionGuiItems.displayValue;
-import static com.roguesmp.region.editor.RegionGuiItems.hint;
-import static com.roguesmp.region.editor.RegionGuiItems.item;
-import static com.roguesmp.region.editor.RegionGuiItems.line;
+import static com.roguesmp.gui.GuiItems.hint;
+import static com.roguesmp.gui.GuiItems.item;
+import static com.roguesmp.gui.GuiItems.line;
 import static com.roguesmp.region.editor.RegionGuiItems.visibleFlags;
 
 public class RegionFlagGui extends BaseGui {

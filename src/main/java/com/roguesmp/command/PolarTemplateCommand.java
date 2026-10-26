@@ -1,6 +1,8 @@
 package com.roguesmp.command;
 
 import com.roguesmp.permission.Permissions;
+import com.roguesmp.teleport.TeleportOptions;
+import com.roguesmp.teleport.TeleportService;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.world.PolarTemplateManager;
 import com.roguesmp.world.PolarWorldKey;
@@ -156,7 +158,7 @@ public final class PolarTemplateCommand {
                         player.sendMessage(Utils.fromString("<red>World " + key + " is not loaded. Use /polartemplate load first."));
                         return;
                     }
-                    player.teleportAsync(world.getSpawnLocation());
+                    TeleportService.getInstance().teleport(player, world.getSpawnLocation(), TeleportOptions.INSTANT);
                 });
     }
 

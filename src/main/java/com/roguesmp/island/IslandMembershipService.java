@@ -1,5 +1,8 @@
 package com.roguesmp.island;
 
+import com.roguesmp.teleport.destination.HubDestination;
+import com.roguesmp.teleport.TeleportOptions;
+import com.roguesmp.teleport.TeleportService;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
@@ -79,7 +82,7 @@ public class IslandMembershipService {
         Player onlineTarget = Bukkit.getPlayer(targetId);
         if (onlineTarget != null && worldManager.isIslandWorld(onlineTarget.getWorld())) {
             onlineTarget.sendMessage(Utils.fromString("<yellow>Bạn đã trở thành người vô gia cư nên sẽ được hộ tống về hub."));
-            if (!abandoned) teleportService.sendToHub(onlineTarget);
+            if (!abandoned) TeleportService.getInstance().teleport(onlineTarget, HubDestination.INSTANCE, TeleportOptions.INSTANT);
         }
 
         if (abandoned) {

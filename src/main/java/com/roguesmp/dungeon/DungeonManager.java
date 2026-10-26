@@ -9,7 +9,9 @@ import com.roguesmp.registry.Registries;
 import com.roguesmp.storage.JsonSqliteStore;
 import com.roguesmp.utils.AsyncUtils;
 import com.roguesmp.utils.Utils;
-import com.roguesmp.world.Hub;
+import com.roguesmp.teleport.TeleportOptions;
+import com.roguesmp.teleport.TeleportService;
+import com.roguesmp.teleport.destination.HubDestination;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -259,11 +261,12 @@ public final class DungeonManager {
         }
 
         return worlds.load(instance.template(), instance.id())
-                .thenCompose(world -> AsyncUtils.onMainThread(() -> player.teleportAsync(world.getSpawnLocation()).thenAccept(teleported -> { })));
+                .thenCompose(world -> AsyncUtils.onMainThread(() -> TeleportService.getInstance()
+                        .teleport(player, world.getSpawnLocation(), TeleportOptions.INSTANT).thenAccept(teleported -> { })));
     }
 
     public void leave(Player player) {
-        player.teleportAsync(Hub.spawn());
+        TeleportService.getInstance().teleport(player, HubDestination.INSTANCE, TeleportOptions.INSTANT);
     }
 
     public DataResult<Void> addMember(DungeonInstance instance, UUID playerId) {

@@ -11,7 +11,6 @@ import com.roguesmp.codec.DataResult;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.registry.Registry;
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -27,18 +26,10 @@ import java.util.*;
  */
 public class Quest {
 
-    private static final Codec<Key> ICON_CODEC = Codec.STRING.comapFlatMap(text -> {
-        try {
-            return DataResult.success(Key.key(text.toLowerCase(Locale.ROOT)));
-        } catch (InvalidKeyException e) {
-            return DataResult.error("Invalid icon model: " + text);
-        }
-    }, Key::asString);
-
     public static final Codec<Quest> CODEC = Codec.composite(
             Codec.STRING.fieldOf("id").forGetter(Quest::getId),
             Codec.STRING.fieldOf("name").forGetter(Quest::getName),
-            ICON_CODEC.optionalFieldOf("icon", Material.PAPER.key()).forGetter(Quest::getIcon),
+            Codec.KEY.optionalFieldOf("icon", Material.PAPER.key()).forGetter(Quest::getIcon),
             Codec.listOf(Codec.STRING).optionalFieldOf("description", new ArrayList<>()).forGetter(Quest::getDescription),
             Codec.listOf(Requirement.CODEC).optionalFieldOf("requirements", new ArrayList<>()).forGetter(Quest::getRequirements),
             Codec.unboundedMap(QuestObjective.CODEC).optionalFieldOf("objectives", new HashMap<>()).forGetter(Quest::getObjectives),

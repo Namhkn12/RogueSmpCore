@@ -1,5 +1,6 @@
 package com.roguesmp.region.flag;
 
+import com.roguesmp.utils.Utils;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
@@ -39,6 +40,6 @@ public final class AmbientParticlesFlag extends TextValueFlag<AmbientParticles> 
 
     @Override
     protected String format(AmbientParticles value) {
-        return value.particle().getKey().getKey() + " " + value.count() + " " + number(value.chance()) + " " + number(value.view()) + " " + number(value.near());
+        return value.particle().getKey().getKey() + " " + value.count() + " " + Utils.compactNumber(value.chance()) + " " + Utils.compactNumber(value.view()) + " " + Utils.compactNumber(value.near());
     }
 }

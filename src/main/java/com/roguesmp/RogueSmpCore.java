@@ -11,6 +11,10 @@ import com.roguesmp.command.ReloadCommand;
 import com.roguesmp.fishing.listener.FishingListener;
 import com.roguesmp.region.listener.RegionListener;
 import com.roguesmp.region.listener.RegionTeleportListener;
+import com.roguesmp.teleport.TeleportService;
+import com.roguesmp.teleport.command.TeleportCommand;
+import com.roguesmp.warp.WarpCommand;
+import com.roguesmp.warp.WarpService;
 import com.roguesmp.region.RegionAmbientEmitter;
 import com.roguesmp.region.SmpRegionFlags;
 import com.roguesmp.region.RegionBoundaryHandler;
@@ -107,6 +111,8 @@ public final class RogueSmpCore extends JavaPlugin {
         //Player
         PlayerManager.init(this);
 
+        TeleportService.init();
+        WarpService.init(this);
         ServerRegionManager.init();
         PolarTemplateManager.init(this);
         RegionSelections.init();
@@ -252,6 +258,8 @@ public final class RogueSmpCore extends JavaPlugin {
         ReloadCommand.register();
         FishingHotspotCommand.register();
         RegionCommand.register();
+        WarpCommand.register();
+        TeleportCommand.register();
         PolarTemplateCommand.register();
         new DungeonCommand(DungeonManager.getInstance()).register();
         DungeonBuildCommand.register();
