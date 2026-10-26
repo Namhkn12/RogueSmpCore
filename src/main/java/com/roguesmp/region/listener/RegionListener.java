@@ -3,6 +3,7 @@ package com.roguesmp.region.listener;
 import com.roguesmp.event.AbilityCastEvent;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.region.ServerRegionManager;
 import com.roguesmp.region.SmpRegionFlags;
 import com.roguesmp.region.event.RegionEnterEvent;
 import com.roguesmp.region.event.RegionEvent;
@@ -11,10 +12,12 @@ import com.roguesmp.tab.TabKeys;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 public class RegionListener implements Listener {
 
@@ -44,11 +47,21 @@ public class RegionListener implements Listener {
         if (!allowed) event.setCancelled(true);
     }
 
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        updateTabRegionName(player, ServerRegionManager.getInstance().regionsAt(player.getLocation()));
+    }
+
     private void updateTabRegionName(RegionEvent event) {
-        SmpPlayer smpPlayer = playerManager.getSmpPlayer(event.getPlayer());
+        updateTabRegionName(event.getPlayer(), event.getRegions());
+    }
+
+    private void updateTabRegionName(Player player, ApplicableRegionSet regions) {
+        SmpPlayer smpPlayer = playerManager.getSmpPlayer(player);
         if (smpPlayer == null) return;
 
-        String name = event.getRegions().queryValue(null, SmpRegionFlags.DISPLAY_NAME);
+        String name = regions.queryValue(null, SmpRegionFlags.DISPLAY_NAME);
         smpPlayer.getTabContext().set(TabKeys.REGION_NAME, name == null || name.isBlank() ? null : name);
     }
 }
