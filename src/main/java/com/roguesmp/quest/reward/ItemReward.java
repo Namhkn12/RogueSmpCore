@@ -1,11 +1,9 @@
 package com.roguesmp.quest.reward;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.BaseItem;
-import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.registry.ItemRegistry;
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -39,27 +37,8 @@ public class ItemReward implements QuestReward {
     public List<Component> getDisplay(SmpPlayer smpPlayer) {
         List<Component> displayList = new ArrayList<>();
 
-        items.forEach((itemId, amount) -> {
-            BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(itemId);
-            // Fallback to the raw ID if the item registry returns null
-            String itemName;
-            if (baseItem == null) {
-                itemName = "NOT_FOUND";
-            } else {
-                NameComponent component = baseItem.getComponent(ItemComponentKeys.ITEM_NAME);
-                if (component == null) {
-                    itemName = itemId;
-                } else itemName = component.value();
-            }
-
-            // Format: "• 5x Kim Cương" with distinct colors
-            String displayString = String.format(
-                    "<yellow>%dx</yellow> <aqua>%s</aqua>",
-                    amount, itemName
-            );
-
-            displayList.add(Utils.fromString(displayString));
-        });
+        items.forEach((itemId, amount) -> displayList.add(Utils.fromString("<yellow>" + amount + "x</yellow> <aqua>")
+                .append(ItemRef.displayName(itemId))));
 
         return displayList;
     }
@@ -73,10 +52,9 @@ public class ItemReward implements QuestReward {
     public void giveReward(SmpPlayer smpPlayer) {
         List<ItemStack> rewards = new ArrayList<>();
         items.forEach((s, integer) -> {
-            BaseItem baseItem = ItemRegistry.getInstance().getBaseItem(s);
-            if (baseItem == null) return;
-            ItemStack itemStack = baseItem.generateItemStack(smpPlayer, integer);
-            rewards.add(itemStack);
+            BaseItem baseItem = ItemRef.baseItem(s);
+            ItemStack itemStack = baseItem != null ? baseItem.generateItemStack(smpPlayer, integer) : ItemRef.toItemStack(s, integer);
+            if (itemStack != null) rewards.add(itemStack);
         });
         PlayerUtils.giveItem(smpPlayer.getBukkitPlayer(), rewards);
     }

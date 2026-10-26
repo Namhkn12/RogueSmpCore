@@ -49,10 +49,17 @@ public final class RegionBoundaryHandler extends Handler {
         Player player = Bukkit.getPlayer(localPlayer.getUniqueId());
         if (player == null) return;
 
-        World world = BukkitAdapter.adapt((com.sk89q.worldedit.world.World) current.getExtent());
         Utils.runLater(() -> {
-            if (occupiedWorld == null && player.isOnline()) transition(player, world, set);
+            if (occupiedWorld != null || !player.isOnline()) return;
+            org.bukkit.Location location = player.getLocation();
+            transition(player, location.getWorld(), ServerRegionManager.getInstance().regionsAt(location));
         });
+    }
+
+    @Override
+    public void uninitialize(LocalPlayer localPlayer, Location current, ApplicableRegionSet set) {
+        occupiedWorld = null;
+        occupied = Set.of();
     }
 
     @Override

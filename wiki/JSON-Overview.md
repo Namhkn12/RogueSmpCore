@@ -120,8 +120,8 @@ Mọi registry data-driven có thư mục `tags/`: `<thư mục>/tags/<tên>.jso
 
 - Id tag = **tên file** (không tính thư mục con), được hạ về chữ thường — viết tên tag chữ thường khi tham chiếu.
 - Id trong tag không tồn tại → warning, bỏ qua riêng entry đó.
-- Tag có sẵn (luôn tồn tại, rỗng nếu không có file): item `weapons`; entity `elite`, `boss`, `angelic`, `friendly`; quest `daily_easy_quest`, `daily_medium_quest`, `daily_hard_quest`.
-- Tag được dùng ở: `item_types.tag`, `catalyst_types.tag`, `classes.allowedWeapons`, quest hằng ngày, và các kiểm tra boss/elite/friendly của mob.
+- Tag có sẵn (luôn tồn tại, rỗng nếu không có file): item `weapons`; entity `elite`, `boss`, `angelic`, `friendly`.
+- Tag được dùng ở: `item_types.tag`, `catalyst_types.tag`, `classes.allowedWeapons`, và các kiểm tra boss/elite/friendly của mob.
 
 ## Tham chiếu chéo sang registry khác
 
@@ -139,7 +139,7 @@ Sửa JSON xong có thể nạp lại không cần restart bằng lệnh vận h
 | :--- | :--- | :--- |
 | `mineskinApiKey` | `"mineSkinApiKey"` | API key MineSkin cho lệnh `/skinfetch` |
 | `resourcePackUrl` / `resourcePackHash` | — | Resource pack gửi cho người chơi |
-| `lastDailyReset` | `0` | Mốc reset quest hằng ngày (plugin tự ghi) |
+| `lastDailyReset` | `0` | Ngày reset hằng ngày gần nhất (plugin tự ghi) |
 
 ---
 Về [Trang chủ](Home.md) · Tiếp theo: [JSON-Items](JSON-Items.md)

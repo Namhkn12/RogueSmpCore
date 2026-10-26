@@ -1,9 +1,6 @@
 package com.roguesmp.gate;
 
-import com.roguesmp.item.BaseItem;
-import com.roguesmp.item.component.ItemComponentKeys;
-import com.roguesmp.item.component.impl.NameComponent;
-import com.roguesmp.registry.Holder;
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -14,14 +11,13 @@ public final class GateDisplay {
     private GateDisplay() {
     }
 
-    public static Component itemName(Holder<BaseItem> item) {
-        if (!item.isBound()) return Component.text(item.getId(), NamedTextColor.RED);
-        NameComponent name = item.value().getComponent(ItemComponentKeys.ITEM_NAME);
-        if (name == null) return Component.text(item.getId(), NamedTextColor.WHITE);
-        return Utils.fromString(name.value()).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
+    public static Component itemName(String itemId) {
+        boolean exists = ItemRef.isVanilla(itemId) ? ItemRef.vanillaMaterial(itemId) != null : ItemRef.baseItem(itemId) != null;
+        if (!exists) return Component.text(itemId, NamedTextColor.RED);
+        return ItemRef.displayName(itemId).colorIfAbsent(NamedTextColor.WHITE).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
     }
 
-    public static Component itemProgress(Holder<BaseItem> item, int amount, int current) {
+    public static Component itemProgress(String item, int amount, int current) {
         return Component.text(amount + "x ", NamedTextColor.YELLOW)
                 .append(itemName(item))
                 .append(Component.text(" (", NamedTextColor.GRAY))

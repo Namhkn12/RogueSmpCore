@@ -86,9 +86,7 @@ public class PlayerUtils {
     public static int countItemsInInventory(Player player, String baseItemId) {
         int total = 0;
         for (ItemStack item : player.getInventory().getContents()) {
-            if (!ItemStackUtils.isValidItem(item)) continue;
-            String itemId = ItemStackUtils.getBaseId(item);
-            if (itemId != null && itemId.equals(baseItemId)) {
+            if (baseItemId.equals(ItemRef.idOf(item))) {
                 total += item.getAmount();
             }
         }
@@ -134,10 +132,7 @@ public class PlayerUtils {
         ItemStack[] contents = player.getInventory().getContents();
         for (ItemStack item : contents) {
             if (amountToTake <= 0) break;
-            if (!ItemStackUtils.isValidItem(item)) continue;
-
-            String itemId = ItemStackUtils.getBaseId(item);
-            if (itemId != null && itemId.equals(baseItemId)) {
+            if (baseItemId.equals(ItemRef.idOf(item))) {
                 int currentAmount = item.getAmount();
                 if (currentAmount <= amountToTake) {
                     amountToTake -= currentAmount;

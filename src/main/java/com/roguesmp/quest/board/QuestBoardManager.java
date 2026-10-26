@@ -4,6 +4,10 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.event.QuestCompletedEvent;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.player.inbox.InboxEntry;
+import com.roguesmp.player.inbox.InboxManager;
+import com.roguesmp.player.inbox.InboxSource;
+import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.quest.Quest;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.quest.QuestProgress;
@@ -12,6 +16,7 @@ import com.roguesmp.quest.holder.PlayerHolder;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -156,6 +161,13 @@ public class QuestBoardManager {
         if (after <= before) return;
         player.sendMessage(Utils.fromString("<gold><bold>LÊN CẤP!</bold></gold> <yellow>Cấp Mạo hiểm <gold>" + after + "</gold>. Có thể nhận <gold>" + settings.level().acceptLimit(after) + "</gold> nhiệm vụ cùng lúc."));
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
+        for (int level = before + 1; level <= after; level++) {
+            List<QuestReward> rewards = settings.level().rewardsAt(level);
+            if (rewards.isEmpty()) continue;
+            InboxSource source = new InboxSource("Cấp Mạo hiểm", "Phần thưởng cấp " + level, Material.NETHER_STAR.key());
+            InboxManager.getInstance().send(player.getUniqueId(), InboxEntry.of(source, rewards));
+            player.sendMessage(Utils.fromString("<yellow>Phần thưởng cấp <gold>" + level + "</gold> đã được gửi vào hộp thư."));
+        }
     }
 
     public long getAcceptedCount(PlayerQuestData data) {

@@ -185,10 +185,11 @@ public class QuestBoardGui extends BaseGui {
             infoLore.add(Utils.fromString("<!i><gold>Đã đạt cấp tối đa"));
         }
         infoLore.add(Utils.fromString("<!i><gray>Hoàn thành nhiệm vụ để nhận nhiệm vụ mới."));
+        infoLore.add(Utils.fromString("<!i><yellow>▶ Click để xem phần thưởng cấp"));
         ItemStack infoItem = ItemStack.of(Material.WRITABLE_BOOK);
         infoItem.setData(DataComponentTypes.ITEM_NAME, Utils.fromString("<gold>Cấp Mạo hiểm " + level));
         infoItem.setData(DataComponentTypes.LORE, ItemLore.lore(infoLore));
-        addButton(5, 1, infoItem, ClickHandler.noAction());
+        addButton(5, 1, infoItem, ClickHandler.openGui(new QuestLevelGui(player, this)));
 
         ItemStack closeItem = ItemStack.of(Material.BARRIER);
         closeItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Đóng", NamedTextColor.RED));

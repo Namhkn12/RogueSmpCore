@@ -106,9 +106,6 @@ public static final SmpTag<BaseEntity> ELITE = builtIn("elite", () -> Registries
 public static final SmpTag<BaseEntity> BOSS = builtIn("boss", () -> Registries.ENTITY);
 public static final SmpTag<BaseEntity> ANGELIC = builtIn("angelic", () -> Registries.ENTITY);
 public static final SmpTag<BaseEntity> FRIENDLY = builtIn("friendly", () -> Registries.ENTITY);
-public static final SmpTag<Quest> DAILY_EASY_QUEST = builtIn("daily_easy_quest", () -> Registries.QUEST);
-public static final SmpTag<Quest> DAILY_MEDIUM_QUEST = builtIn("daily_medium_quest", () -> Registries.QUEST);
-public static final SmpTag<Quest> DAILY_HARD_QUEST = builtIn("daily_hard_quest", () -> Registries.QUEST);
 ```
 
 `Tags.bootstrap()` phải chạy **trước** bất kỳ tag nào được load từ đĩa (xem thứ tự trong `Registries.boostrap` bên dưới), nếu không những entry built-in trên sẽ không tồn tại để nhận dữ liệu JSON đè lên. Ứng dụng thực tế đã thấy: [`PlayerClass.allowedWeapons`](JSON-Classes.md) là 1 `Set<String>` id-của-tag-trên-`Registries.ITEM` (vd. `"weapons"`), không phải id item trực tiếp — 1 class được phép dùng "mọi thứ nằm trong tag này."

@@ -1,15 +1,12 @@
 package com.roguesmp.gui.enchant;
 
-import com.roguesmp.item.component.ItemComponentKeys;
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.enchant.Infusion;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.gui.BaseGui;
-import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
-import com.roguesmp.item.component.impl.NameComponent;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
@@ -148,12 +145,7 @@ public class InfusionGui extends BaseGui {
         lore.add(Utils.text("- Kinh Nghiệm: ", NamedTextColor.GRAY).append(Component.text(Utils.formatMoney(expCost), expColor))
                 .append(Utils.fromString(" <gray>(Hiện có: <green>" + Utils.formatMoney(playerExp) + "<gray>)")));
 
-        BaseItem currencyItem = ItemRegistry.getInstance().getBaseItem(infusion.getCostItemId());
-        String currencyName = "UNKNOWN";
-        if (currencyItem != null) {
-            NameComponent nameComponent = currencyItem.getComponent(ItemComponentKeys.ITEM_NAME);
-            currencyName = (nameComponent != null) ? nameComponent.value() : currencyItem.getId();
-        }
+        String currencyName = Utils.toString(ItemRef.displayName(infusion.getCostItemId()));
 
         int playerCurrentMaterials = PlayerUtils.countItemsInInventory(player, infusion.getCostItemId());
         boolean hasEnoughMat = playerCurrentMaterials >= materialCost;

@@ -51,7 +51,7 @@ public abstract class BaseGui implements InventoryHolder {
 
         ItemStack prevPageHead = SkinRegistry.getInstance().getHead("gui_prev_page");
         PREV_PAGE_BUTTON = prevPageHead == null ? new ItemStack(Material.ARROW) : prevPageHead;
-        PREV_PAGE_BUTTON.setData(DataComponentTypes.ITEM_NAME, Utils.text("« Trang trước"));
+        PREV_PAGE_BUTTON.setData(DataComponentTypes.CUSTOM_NAME, Utils.text("« Trang trước"));
     }
 
     @Override

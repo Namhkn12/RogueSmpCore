@@ -1,12 +1,12 @@
 package com.roguesmp.utils.modification;
 
+import com.roguesmp.utils.ItemRef;
+import org.bukkit.inventory.ItemStack;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.enchant.Enchants;
 import com.roguesmp.enchant.Infusion;
-import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.SmpItem;
 import com.roguesmp.item.component.impl.EnchantComponent;
-import com.roguesmp.registry.ItemRegistry;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.SmpItemUtils;
 import org.bukkit.entity.Player;
@@ -121,10 +121,8 @@ public class InfusionUtil {
 
         // Refund
         PlayerUtils.changeExp(player, expRefund);
-        BaseItem currencyItem = ItemRegistry.getInstance().getBaseItem(infusion.getCostItemId());
-        if (currencyItem != null && materialRefund > 0) {
-            PlayerUtils.giveItem(player, currencyItem.generateItemStack(materialRefund));
-        }
+        ItemStack refund = materialRefund > 0 ? ItemRef.toItemStack(infusion.getCostItemId(), materialRefund) : null;
+        if (refund != null) PlayerUtils.giveItem(player, refund);
 
         // Mutate (reduce level by 1)
         Map<Enchants, Integer> modification = Map.of(infusion.getSmpEnchant(), -1);

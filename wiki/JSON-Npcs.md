@@ -70,7 +70,7 @@ Field chọn loại: `"type"`. Mọi action trong mảng chạy **tuần tự** 
 | `open_trade` | `shop` (id trong `trades/`, bắt buộc) | chỉ click phải | Mở cửa hàng. Xem [JSON-Trades](JSON-Trades.md). |
 | `teleport` | `destination` ([điểm đến](JSON-Warps.md#điểm-đến-destination), bắt buộc); `options` ([tuỳ chọn](JSON-Warps.md#tuỳ-chọn-dịch-chuyển-options), mặc định hiệu ứng `enderman`, chờ 30 tick) | chỉ click phải | Dịch chuyển người chơi. Trỏ tới warp bằng `{ "type": "warp", "warp": "<id>" }` để đổi điểm đến ở 1 chỗ. |
 
-`gui` hợp lệ — chỉ 2 id, đăng ký cứng trong code: `blacksmith` (thợ rèn), `quest` (quest hằng ngày). Id khác → người chơi nhận thông báo lỗi đỏ + log cảnh báo.
+`gui` hợp lệ — chỉ 3 id, đăng ký cứng trong code: `blacksmith` (thợ rèn), `quest` ([bảng nhiệm vụ](JSON-Quests.md#bảng-nhiệm-vụ)), `inbox` (hộp thư thưởng). Id khác → người chơi nhận thông báo lỗi đỏ + log cảnh báo.
 
 ⚠️ Đừng dùng `@p_id`: `@p` được thay trước nên `@p_id` bị hỏng.
 
