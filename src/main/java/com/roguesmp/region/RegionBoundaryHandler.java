@@ -56,6 +56,12 @@ public final class RegionBoundaryHandler extends Handler {
     }
 
     @Override
+    public void uninitialize(LocalPlayer localPlayer, Location current, ApplicableRegionSet set) {
+        occupiedWorld = null;
+        occupied = Set.of();
+    }
+
+    @Override
     public boolean onCrossBoundary(LocalPlayer localPlayer, Location from, Location to, ApplicableRegionSet toSet,
                                    Set<ProtectedRegion> entered, Set<ProtectedRegion> exited, MoveType moveType) {
         Player player = Bukkit.getPlayer(localPlayer.getUniqueId());
