@@ -1,5 +1,8 @@
 package com.roguesmp.region.editor;
 
+import com.roguesmp.teleport.destination.RegionDestination;
+import com.roguesmp.teleport.TeleportOptions;
+import com.roguesmp.teleport.TeleportService;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.region.RegionSelection;
 import com.roguesmp.region.ServerRegionManager;
@@ -20,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 
 import static com.roguesmp.region.editor.RegionGuiItems.describeRegion;
-import static com.roguesmp.region.editor.RegionGuiItems.hint;
-import static com.roguesmp.region.editor.RegionGuiItems.item;
-import static com.roguesmp.region.editor.RegionGuiItems.line;
+import static com.roguesmp.gui.GuiItems.hint;
+import static com.roguesmp.gui.GuiItems.item;
+import static com.roguesmp.gui.GuiItems.line;
 import static com.roguesmp.region.editor.RegionGuiItems.visibleFlags;
 
 public class RegionBrowserGui extends BaseGui {
@@ -109,7 +112,7 @@ public class RegionBrowserGui extends BaseGui {
             addButton(slot++, regionButton(id, entry.getValue()), event -> {
                 event.setCancelled(true);
                 if (event.getClick() == ClickType.RIGHT) {
-                    ServerRegionManager.getInstance().teleport(player, id);
+                    TeleportService.getInstance().teleport(player, new RegionDestination(id, null), TeleportOptions.INSTANT);
                     return;
                 }
                 Utils.runLater(() -> new RegionEditorGui(player, id).showInventory(player));

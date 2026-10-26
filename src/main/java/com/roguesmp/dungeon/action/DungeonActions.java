@@ -20,6 +20,9 @@ import com.roguesmp.dungeon.script.DataValue;
 import com.roguesmp.dungeon.script.DungeonValidation;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.teleport.TeleportDestination;
+import com.roguesmp.teleport.TeleportOptions;
+import com.roguesmp.teleport.TeleportService;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.title.Title;
@@ -37,6 +40,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
@@ -93,14 +97,17 @@ public class DungeonActions {
         }
     }
 
-    public record Teleport(double x, double y, double z, float yaw, float pitch, boolean all) implements DungeonAction {
+    public record Teleport(double x, double y, double z, float yaw, float pitch, boolean all,
+                           Optional<TeleportDestination> destination, boolean fx) implements DungeonAction {
         public static final Codec<Teleport> CODEC = Codec.composite(
-                Codec.DOUBLE.fieldOf("x").forGetter(Teleport::x),
-                Codec.DOUBLE.fieldOf("y").forGetter(Teleport::y),
-                Codec.DOUBLE.fieldOf("z").forGetter(Teleport::z),
+                Codec.DOUBLE.optionalFieldOf("x", 0.0).forGetter(Teleport::x),
+                Codec.DOUBLE.optionalFieldOf("y", 0.0).forGetter(Teleport::y),
+                Codec.DOUBLE.optionalFieldOf("z", 0.0).forGetter(Teleport::z),
                 Codec.FLOAT.optionalFieldOf("yaw", 0f).forGetter(Teleport::yaw),
                 Codec.FLOAT.optionalFieldOf("pitch", 0f).forGetter(Teleport::pitch),
                 Codec.BOOLEAN.optionalFieldOf("all", false).forGetter(Teleport::all),
+                TeleportDestination.CODEC.optionalFieldOf("destination").forGetter(Teleport::destination),
+                Codec.BOOLEAN.optionalFieldOf("fx", false).forGetter(Teleport::fx),
                 Teleport::new
         );
 
@@ -111,10 +118,16 @@ public class DungeonActions {
 
         @Override
         public void run(FeatureContext<?> context, @Nullable Player player) {
+            TeleportOptions options = fx ? TeleportOptions.DEFAULT.withSafe(false) : TeleportOptions.EXACT;
+            if (destination.isPresent()) {
+                targets(context, player, all).forEach(target -> TeleportService.getInstance().teleport(target, destination.get(), options));
+                return;
+            }
+
             World world = context.world();
             if (world == null) return;
             Location location = new Location(world, x, y, z, yaw, pitch);
-            targets(context, player, all).forEach(target -> target.teleportAsync(location));
+            targets(context, player, all).forEach(target -> TeleportService.getInstance().teleport(target, location, options));
         }
     }
 

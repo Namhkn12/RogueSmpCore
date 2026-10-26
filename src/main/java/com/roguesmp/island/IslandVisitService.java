@@ -1,5 +1,8 @@
 package com.roguesmp.island;
 
+import com.roguesmp.teleport.destination.HubDestination;
+import com.roguesmp.teleport.TeleportOptions;
+import com.roguesmp.teleport.TeleportService;
 import com.roguesmp.island.setting.IslandSettings;
 import com.roguesmp.permission.Permissions;
 import com.roguesmp.player.PlayerData;
@@ -77,7 +80,7 @@ public class IslandVisitService {
                 if (islandData.isMember(player.getUniqueId()) || Permissions.ISLAND_VISIT_BYPASS.has(player)) continue;
 
                 player.sendMessage(Utils.fromString("<yellow>Chủ đảo đã đóng cửa đảo nên bạn được đưa về hub."));
-                teleportService.sendToHub(player);
+                TeleportService.getInstance().teleport(player, HubDestination.INSTANCE, TeleportOptions.INSTANT);
             }
         }
         return allowed;

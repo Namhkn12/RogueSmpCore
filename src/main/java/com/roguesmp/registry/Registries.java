@@ -80,6 +80,11 @@ import com.roguesmp.text.Glyphs;
 import com.roguesmp.block.impl.generator.catalyst.CatalystType;
 import com.roguesmp.block.impl.generator.behavior.GeneratorBehavior;
 import com.roguesmp.block.impl.generator.behavior.GeneratorBehaviors;
+import com.roguesmp.teleport.TeleportDestination;
+import com.roguesmp.teleport.TeleportDestinations;
+import com.roguesmp.teleport.effect.TeleportEffect;
+import com.roguesmp.teleport.effect.TeleportEffects;
+import com.roguesmp.warp.Warp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -157,6 +162,10 @@ public class Registries {
     public static final Registry<RoomDefinition> DUNGEON_ROOM = new Registry<>("dungeon/rooms", RoomDefinition.CODEC);
     public static final Registry<DungeonDefinition> DUNGEON = new Registry<>("dungeon/definitions", DungeonDefinition.CODEC);
     public static final Registry<CatalystType> CATALYST_TYPE = new Registry<>("catalyst_types", CatalystType.CODEC);
+
+    public static final Registry<Codec<? extends TeleportDestination>> TELEPORT_DESTINATION_CODEC = register(registry -> TeleportDestinations.loadClass());
+    public static final Registry<Codec<? extends TeleportEffect>> TELEPORT_EFFECT_CODEC = register(registry -> TeleportEffects.loadClass());
+    public static final Registry<Warp> WARP = new Registry<>("warps", Warp.CODEC);
 
     public static final Registry<Codec<? extends CraftingRecipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());
     public static final Registry<CraftingRecipe> CRAFTING_RECIPE = new Registry<>("crafting_recipes", CraftingRecipe.CODEC);

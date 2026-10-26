@@ -1,5 +1,7 @@
 package com.roguesmp.world;
 
+import com.roguesmp.teleport.TeleportOptions;
+import com.roguesmp.teleport.TeleportService;
 import com.roguesmp.utils.AsyncUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -30,7 +32,8 @@ public interface WorldEvacuator {
                 return CompletableFuture.failedFuture(new IllegalStateException("The default world cannot be evacuated"));
             }
 
-            List<CompletableFuture<Boolean>> teleports = world.getPlayers().stream().map(player -> player.teleportAsync(hubSpawn)).toList();
+            List<CompletableFuture<Boolean>> teleports = world.getPlayers().stream()
+                    .map(player -> TeleportService.getInstance().teleport(player, hubSpawn, TeleportOptions.INSTANT)).toList();
 
             return CompletableFuture.allOf(teleports.toArray(CompletableFuture[]::new))
                     .thenCompose(v -> AsyncUtils.onMainThread(() -> world.getPlayers().isEmpty()

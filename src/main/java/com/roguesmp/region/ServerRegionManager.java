@@ -23,7 +23,6 @@ import com.sk89q.worldguard.protection.regions.RegionType;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
@@ -373,14 +372,6 @@ public final class ServerRegionManager {
 
     public List<String> sortedRegionIdsAt(Location location) {
         return regionIdsAt(location).stream().sorted().toList();
-    }
-
-    public boolean teleport(Player player, String id) {
-        Location target = spawnLocation(player.getWorld(), id);
-        if (target == null) return false;
-
-        player.teleportAsync(target);
-        return true;
     }
 
     public @Nullable Location spawnLocation(World world, String id) {

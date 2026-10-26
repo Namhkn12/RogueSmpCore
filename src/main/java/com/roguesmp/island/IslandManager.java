@@ -1,5 +1,7 @@
 package com.roguesmp.island;
 
+import com.roguesmp.teleport.TeleportOptions;
+import com.roguesmp.teleport.TeleportService;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
@@ -9,7 +11,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
-import org.mvplugins.multiverse.core.teleportation.PassengerModes;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -84,10 +85,7 @@ public class IslandManager {
         islandDataManager.cache(islandData);
         islandDataManager.saveAsync(islandData);
         creator.sendMessage(Utils.fromString("<green>Tạo đảo thành công! Chuẩn bị dịch chuyển..."));
-        teleportService.getMultiverseApi().getSafetyTeleporter()
-                .to(spawnPoint)
-                .passengerMode(PassengerModes.RETAIN_ALL)
-                .teleportSingle(creator);
+        TeleportService.getInstance().teleport(creator, spawnPoint, TeleportOptions.INSTANT);
     }
 
     public boolean setIslandSpawn(Player player, Location targetLocation) {

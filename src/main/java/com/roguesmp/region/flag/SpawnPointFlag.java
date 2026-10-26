@@ -1,5 +1,6 @@
 package com.roguesmp.region.flag;
 
+import com.roguesmp.utils.Utils;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 
 public final class SpawnPointFlag extends TextValueFlag<SpawnPoint> {
@@ -19,6 +20,6 @@ public final class SpawnPointFlag extends TextValueFlag<SpawnPoint> {
 
     @Override
     protected String format(SpawnPoint value) {
-        return number(value.x()) + " " + number(value.y()) + " " + number(value.z()) + " " + number(value.yaw()) + " " + number(value.pitch());
+        return Utils.compactNumber(value.x()) + " " + Utils.compactNumber(value.y()) + " " + Utils.compactNumber(value.z()) + " " + Utils.compactNumber(value.yaw()) + " " + Utils.compactNumber(value.pitch());
     }
 }

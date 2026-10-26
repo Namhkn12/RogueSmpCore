@@ -14,6 +14,8 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -124,6 +126,22 @@ public class Utils {
 
     public static Component text(String text) {
         return Component.text(text).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
+    }
+
+    public static String compactNumber(double value) {
+        return value == Math.rint(value) ? String.valueOf((long) value) : String.valueOf(value);
+    }
+
+    public static @Nullable Double parseDouble(String text) {
+        try {
+            return Double.parseDouble(text);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    public static boolean isNumber(String text) {
+        return parseDouble(text) != null;
     }
 
     public static String formatDecimal(double value) {

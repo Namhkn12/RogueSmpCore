@@ -31,7 +31,7 @@ Giá trị sai cú pháp bị từ chối ngay khi đặt, kèm thông báo lỗ
 ## `smp-ambient-particles`
 
 ```
-<particle> [count] [chance] [view]
+<particle> [count] [chance] [view] [near]
 ```
 
 | Trường | Mặc định | Ý nghĩa |
@@ -40,14 +40,21 @@ Giá trị sai cú pháp bị từ chối ngay khi đặt, kèm thông báo lỗ
 | `count` | `1` | Số particle mỗi đợt, ≥ 1 |
 | `chance` | `0.25` | Xác suất mỗi chu kỳ (10 tick) phát 1 đợt, trong khoảng `(0, 1]` |
 | `view` | `24` | Người chơi cách region (tính tới mép region) trong khoảng này mới thấy |
+| `near` | `8` | Bán kính quanh người chơi **đang đứng trong** region để rải particle riêng cho họ |
 
 ```
 /smpregion flag gate smp-ambient-particles portal 4 0.8 24
+/smpregion flag cave smp-ambient-particles white_ash 6 0.9 24 10
 ```
 
-- Mỗi particle xuất hiện tại 1 điểm ngẫu nhiên **bên trong hình dạng region** (đúng cả polygon và region nhiều mảnh; mảnh lớn được chọn nhiều hơn theo thể tích).
-- Người chơi **ở ngoài** region vẫn thấy, miễn trong tầm `view` — dùng region nhỏ + flag này để đánh dấu cổng dịch chuyển.
-- Particle chỉ gửi cho từng người chơi trong tầm, không có ai gần thì không tốn gì.
+Người xem chia 2 nhóm:
+
+- **Ở ngoài region** (trong tầm `view`): mỗi chu kỳ tung `chance` 1 lần, trúng thì `count` particle xuất hiện tại điểm ngẫu nhiên **khắp hình dạng region** (đúng cả polygon và region nhiều mảnh; mảnh lớn được chọn nhiều hơn theo thể tích), gửi chung cho cả nhóm. Dùng region nhỏ + flag này để đánh dấu cổng dịch chuyển nhìn từ xa.
+- **Ở trong region**: mỗi người tung `chance` riêng, trúng thì `count` particle xuất hiện trong khối cầu bán kính `near` quanh họ, chỉ gửi cho chính họ. Nhờ vậy mật độ quanh người chơi không phụ thuộc kích thước region — region 500 block trông dày như region 10 block. Điểm vẫn phải nằm trong hình dạng region nên particle không tràn ra ngoài mép.
+
+Ghi chú:
+
+- Không có ai trong tầm thì không tốn gì; chi phí tăng theo số người chơi đứng trong region có flag.
 - Danh sách region có flag được quét lại **mỗi 5 giây**: đặt/sửa/xoá flag cần tối đa 5 giây để có hiệu lực.
 - Region cao hết chiều cao world sẽ rải particle lên cả trên trời — nên giới hạn Y của region sát vùng muốn hiển thị.
 
@@ -70,19 +77,20 @@ Khác flag `spawn` của WorldGuard: flag gốc nằm trên từng region WorldG
 
 ## `smp-enter-teleport`
 
-2 dạng target:
+```
+<điểm đến> [fx|none]
+```
 
-```
-region <regionId> [world] [fx|none]
-[world] <x> <y> <z> [yaw pitch] [fx|none]
-```
+Điểm đến dùng chung dạng chữ với `/warp set` và `/stp` — xem [JSON-Warps](JSON-Warps.md#dạng-chữ-lệnh) cho đầy đủ:
 
 | Dạng | Ví dụ | Đến |
 | :--- | :--- | :--- |
-| Region, cùng world | `region boss_arena` | [`smp-spawn`](#smp-spawn) của region đó trong world người chơi đang đứng (không có thì tâm region) |
-| Region, world khác | `region hub minecraft:spawn_world` | Như trên, trong world chỉ định |
-| Toạ độ, cùng world | `0.5 80 0.5 0 0` | Đúng toạ độ trong world hiện tại; bỏ `yaw pitch` thì giữ hướng nhìn hiện tại |
-| Toạ độ, world khác | `minecraft:spawn_world 0.5 80 0.5` | Đúng toạ độ trong world chỉ định |
+| `region <id> [world]` | `region boss_arena` | [`smp-spawn`](#smp-spawn) của region đó (không có thì tâm region) |
+| `spawn [world]` | `spawn minecraft:spawn_world` | Điểm spawn của world |
+| `hub` | `hub` | Spawn của hub |
+| `warp <id>` | `warp arena` | Điểm đến của [warp](JSON-Warps.md) đó — đổi warp là mọi cổng trỏ tới nó tự cập nhật |
+| `player <tên>` | `player Steve` | Vị trí hiện tại của người chơi đó (phải online) |
+| `[world] <x> <y> <z> [yaw pitch]` | `0.5 80 0.5 0 0` | Đúng toạ độ; bỏ `yaw pitch` thì giữ hướng nhìn hiện tại |
 
 `world` là **key đầy đủ có namespace** của world (`minecraft:overworld`, `minecraft:spawn_world`...), không phải tên thư mục; thiếu namespace bị từ chối. Xem key bằng `/execute in` hoặc `World#getKey()`.
 
@@ -90,18 +98,19 @@ region <regionId> [world] [fx|none]
 
 Hậu tố cuối (mặc định `fx`):
 
-- `fx` — người chơi bị Slowness II + Darkness trong 2 giây, nghe tiếng `entity.enderman.teleport`, rồi được dịch chuyển sau **1 giây**.
+- `fx` — hiệu ứng `enderman` (Slowness + Darkness, tiếng `entity.enderman.teleport`), dịch chuyển sau **1 giây** (20 tick).
 - `none` — dịch chuyển ngay tick sau, không hiệu ứng.
 
 ```
 /smpregion flag gate smp-enter-teleport region boss_arena
+/smpregion flag lobby smp-enter-teleport warp arena
 /smpregion flag exit smp-enter-teleport minecraft:spawn_world 0.5 80 0.5 0 0 none
 ```
 
-- **Đi được sang world khác** (kể cả world Multiverse).
+- **Đi được sang world khác** (kể cả world Multiverse). Dịch chuyển chạy qua `TeleportService` như warp, nên có dịch chuyển an toàn của Multiverse.
 - Chỉ kích hoạt khi bước vào **chính region có đặt flag**; đi giữa 2 region chồng nhau cùng có flag không kích hoạt lại.
-- Target được tra **lúc dịch chuyển**, không phải lúc đặt flag: đổi `smp-spawn` của region đích thì mọi cổng trỏ tới nó tự cập nhật; world chưa nạp lúc đặt flag vẫn hợp lệ.
-- Không tìm thấy world/region đích → ghi cảnh báo vào log, người chơi đứng yên.
+- Điểm đến được tra **lúc dịch chuyển**, không phải lúc đặt flag: đổi `smp-spawn` của region đích hoặc điểm đến của warp thì mọi cổng trỏ tới nó tự cập nhật; world chưa nạp lúc đặt flag vẫn hợp lệ.
+- Không tra được điểm đến → ghi cảnh báo vào log, người chơi đứng yên.
 - Trong lúc chờ 1 giây, đi ra rồi vào lại không kích hoạt lần 2.
 - Đừng để điểm đến nằm trong 1 region có `smp-enter-teleport` khác, nếu không người chơi sẽ bị dịch chuyển tiếp.
 
