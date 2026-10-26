@@ -3,12 +3,8 @@ package com.roguesmp.quest.objective;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.gate.GateDisplay;
 import com.roguesmp.gate.GateInventoryUtils;
-import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.goal.IntRange;
-import com.roguesmp.registry.Holder;
-import com.roguesmp.registry.Registries;
-import com.roguesmp.registry.Registry;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
@@ -56,15 +52,15 @@ public class SubmitItemObjective implements QuestObjective {
     }
 
     public static final Codec<SubmitItemObjective> CODEC = Codec.composite(
-            Registry.referenceCodec(() -> Registries.ITEM).fieldOf("item").forGetter(SubmitItemObjective::getItem),
+            Codec.STRING.fieldOf("item").forGetter(SubmitItemObjective::getItem),
             IntRange.CODEC.optionalFieldOf("amount", IntRange.exactly(1)).forGetter(SubmitItemObjective::getAmount),
             SubmitItemObjective::new
     );
 
-    private final Holder<BaseItem> item;
+    private final String item;
     private final IntRange amount;
 
-    public SubmitItemObjective(Holder<BaseItem> item, IntRange amount) {
+    public SubmitItemObjective(String item, IntRange amount) {
         this.item = item;
         this.amount = amount;
     }
@@ -115,7 +111,7 @@ public class SubmitItemObjective implements QuestObjective {
         return true;
     }
 
-    public Holder<BaseItem> getItem() {
+    public String getItem() {
         return item;
     }
 

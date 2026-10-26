@@ -1,12 +1,10 @@
 package com.roguesmp.trade.result;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.item.BaseItem;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.registry.Holder;
-import com.roguesmp.registry.Registries;
-import com.roguesmp.registry.Registry;
 import com.roguesmp.gate.GateDisplay;
+import com.roguesmp.item.BaseItem;
+import com.roguesmp.utils.ItemRef;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.inventory.ItemStack;
@@ -18,15 +16,15 @@ public class ItemResult implements TradeResult {
 
     public static final String TYPE_KEY = "item";
     public static final Codec<ItemResult> CODEC = Codec.composite(
-            Registry.referenceCodec(() -> Registries.ITEM).fieldOf("item").forGetter(ItemResult::getItem),
+            Codec.STRING.fieldOf("item").forGetter(ItemResult::getItem),
             Codec.INT.optionalFieldOf("amount", 1).forGetter(ItemResult::getAmount),
             ItemResult::new
     );
 
-    private final Holder<BaseItem> item;
+    private final String item;
     private final int amount;
 
-    public ItemResult(Holder<BaseItem> item, int amount) {
+    public ItemResult(String item, int amount) {
         this.item = item;
         this.amount = amount;
     }
@@ -36,7 +34,7 @@ public class ItemResult implements TradeResult {
         return TYPE_KEY;
     }
 
-    public Holder<BaseItem> getItem() {
+    public String getItem() {
         return item;
     }
 
@@ -46,7 +44,8 @@ public class ItemResult implements TradeResult {
 
     @Override
     public List<ItemStack> createItems(SmpPlayer player) {
-        return item.isBound() ? List.of(item.value().generateItemStack(player, amount)) : List.of();
+        ItemStack stack = getIcon(player);
+        return stack == null ? List.of() : List.of(stack);
     }
 
     @Override
@@ -56,6 +55,7 @@ public class ItemResult implements TradeResult {
 
     @Override
     public @Nullable ItemStack getIcon(SmpPlayer player) {
-        return item.isBound() ? item.value().generateItemStack(player, amount) : null;
+        BaseItem baseItem = ItemRef.baseItem(item);
+        return baseItem != null ? baseItem.generateItemStack(player, amount) : ItemRef.toItemStack(item, amount);
     }
 }
