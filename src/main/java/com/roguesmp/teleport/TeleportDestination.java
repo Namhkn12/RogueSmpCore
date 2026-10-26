@@ -10,7 +10,7 @@ public interface TeleportDestination {
 
     Codec<TeleportDestination> CODEC = Codec.dispatch(
             TeleportDestination::getTypeId,
-            Registries.TELEPORT_DESTINATION_CODEC::getOrThrow
+            type -> Registries.TELEPORT_DESTINATION_CODEC.getOrThrow(type)
     );
 
     String getTypeId();

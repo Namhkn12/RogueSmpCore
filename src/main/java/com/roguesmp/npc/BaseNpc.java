@@ -172,6 +172,7 @@ public class BaseNpc {
     private static void spawnLabel(Entity entity, Component content, float yOffset) {
         TextDisplay display = entity.getWorld().spawn(entity.getLocation(), TextDisplay.class, text -> {
             text.text(content);
+            text.setLineWidth(Integer.MAX_VALUE);
             text.setBillboard(Display.Billboard.CENTER);
             text.setPersistent(false);
             text.setTransformation(new Transformation(

@@ -13,6 +13,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Particle;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.jetbrains.annotations.Nullable;
@@ -47,6 +48,7 @@ public class EntityZapper implements ItemAbility {
             MovementUtils.knockAway(player1, event.getPlayer(), 1f);
             return;
         }
+        event.getRightClicked().getPassengers().forEach(Entity::remove);
         event.getRightClicked().remove();
         player.sendMessage(Component.text("Úm ba la xì bùa", NamedTextColor.AQUA));
         player.getBukkitPlayer().spawnParticle(Particle.EXPLOSION, event.getRightClicked().getLocation().add(0, 0.5, 0), 5);

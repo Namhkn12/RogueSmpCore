@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 public interface TeleportEffect {
 
     Codec<TeleportEffect> CODEC = new Codec<>() {
-        private final Codec<TeleportEffect> full = Codec.dispatch(TeleportEffect::getTypeId, Registries.TELEPORT_EFFECT_CODEC::getOrThrow);
+        private final Codec<TeleportEffect> full = Codec.dispatch(TeleportEffect::getTypeId, type -> Registries.TELEPORT_EFFECT_CODEC.getOrThrow(type));
 
         @Override
         public <O> DataResult<O> encode(TeleportEffect input, DynamicOps<O> ops) {
