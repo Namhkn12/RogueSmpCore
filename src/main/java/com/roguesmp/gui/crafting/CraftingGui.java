@@ -39,7 +39,7 @@ public class CraftingGui extends BaseGui {
     private static final int TABLE_SHORTCUT_SLOT = 50;
     private static final int RESULT_SLOT = 23;
     private static final int[] QUICK_CRAFT_SLOTS = new int[]{16, 25, 34};
-    private static final int SEE_MORE_SLOT = 43;
+    private static final int SEE_MORE_SLOT = 35;
     private static final int GRID_WIDTH = 3;
     private static final int GRID_HEIGHT = 3;
 

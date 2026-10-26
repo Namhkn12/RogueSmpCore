@@ -5,6 +5,7 @@ import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
 import com.roguesmp.crafting.recipe.ShapedCraftingRecipe;
 import com.roguesmp.crafting.recipe.ShapelessCraftingRecipe;
+import com.roguesmp.item.BaseItem;
 import com.roguesmp.utils.ItemRef;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
@@ -34,7 +35,7 @@ public final class QuickCraftService {
     }
 
     private static Stream<QuickCraftCandidate> candidates(Player player) {
-        Map<String, Integer> have = countInventory(player);
+        Map<String, Integer> have = CraftingIngredient.aggregateCounts(player.getInventory().getStorageContents());
         Set<String> seen = new HashSet<>();
         return have.keySet().stream()
                 .flatMap(key -> CraftingManager.getInstance().getRecipesUsing(key).stream())
@@ -45,7 +46,7 @@ public final class QuickCraftService {
     }
 
     private static boolean isQuickCraftable(CraftingRecipe recipe) {
-        return recipe instanceof ShapedCraftingRecipe || recipe instanceof ShapelessCraftingRecipe;
+        return recipe.isQuickCraftable() && (recipe instanceof ShapedCraftingRecipe || recipe instanceof ShapelessCraftingRecipe);
     }
 
     private static QuickCraftCandidate evaluate(CraftingRecipe recipe, Map<String, Integer> have) {
@@ -60,12 +61,14 @@ public final class QuickCraftService {
         return new QuickCraftCandidate(recipe, ingredients, crafts);
     }
 
-    private static Map<String, Integer> countInventory(Player player) {
-        return CraftingIngredient.aggregateCounts(player.getInventory().getStorageContents());
-    }
-
     public static void craft(@NotNull Player player, @NotNull CraftingRecipe recipe, boolean craftAll) {
-        int available = evaluate(recipe, countInventory(player)).maxCrafts();
+        if (!isQuickCraftable(recipe)) {
+            deny(player, "Công thức này không hỗ trợ chế tạo nhanh!");
+            return;
+        }
+
+        ItemStack[] contents = player.getInventory().getStorageContents();
+        int available = evaluate(recipe, CraftingIngredient.aggregateCounts(contents)).maxCrafts();
         if (available <= 0) {
             deny(player, "Không đủ nguyên liệu!");
             return;
@@ -77,25 +80,40 @@ public final class QuickCraftService {
             return;
         }
 
-        int times = craftAll ? Math.min(available, craftsThatFit(player, output)) : 1;
+        int times = craftAll && allowsBulkCraft(recipe) ? Math.min(available, craftsThatFit(contents, output)) : 1;
         if (times <= 0) {
             deny(player, "Túi đồ của bạn đã đầy!");
             return;
         }
 
-        ItemStack[] contents = player.getInventory().getStorageContents();
         recipe.getInputTotals().forEach((key, amount) -> take(contents, key, amount * times));
         player.getInventory().setStorageContents(contents);
 
-        for (int i = 0; i < times; i++) {
-            PlayerUtils.giveItem(player, recipe.getOutputStacks());
-        }
+        PlayerUtils.giveItem(player, splitIntoStacks(output, output.getAmount() * times));
     }
 
-    private static int craftsThatFit(Player player, ItemStack output) {
+    private static List<ItemStack> splitIntoStacks(ItemStack template, int total) {
+        int maxStackSize = template.getMaxStackSize();
+        List<ItemStack> stacks = new ArrayList<>();
+        while (total > 0) {
+            int amount = Math.min(total, maxStackSize);
+            stacks.add(template.asQuantity(amount));
+            total -= amount;
+        }
+        return stacks;
+    }
+
+    public static boolean allowsBulkCraft(@NotNull CraftingRecipe recipe) {
+        String key = recipe.getPrimaryOutput().key();
+        BaseItem baseItem = ItemRef.baseItem(key);
+        if (baseItem != null && baseItem.isUnique()) return false;
+        return ItemRef.maxStackSize(key) > 1;
+    }
+
+    private static int craftsThatFit(ItemStack[] contents, ItemStack output) {
         int maxStackSize = output.getMaxStackSize();
         int capacity = 0;
-        for (ItemStack stack : player.getInventory().getStorageContents()) {
+        for (ItemStack stack : contents) {
             if (stack == null || stack.getType().isAir()) capacity += maxStackSize;
             else if (stack.isSimilar(output)) capacity += Math.max(0, maxStackSize - stack.getAmount());
         }

@@ -1,6 +1,7 @@
 package com.roguesmp.crafting.gui;
 
 import com.roguesmp.crafting.quick.QuickCraftCandidate;
+import com.roguesmp.crafting.quick.QuickCraftService;
 import com.roguesmp.utils.ItemRef;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -25,15 +26,18 @@ public final class QuickCraftDisplay {
         ItemLore existing = display.getData(DataComponentTypes.LORE);
         List<Component> lore = existing == null ? new ArrayList<>() : new ArrayList<>(existing.lines());
         lore.add(Utils.text("------------------", NamedTextColor.DARK_GRAY));
-        lore.add(Utils.text("Nguyên liệu:", NamedTextColor.GRAY));
+        lore.add(Utils.text("Nguyên liệu chế tạo:", NamedTextColor.GRAY));
         for (QuickCraftCandidate.IngredientStatus ingredient : candidate.ingredients()) {
             lore.add(Component.text(" - ", NamedTextColor.DARK_GRAY)
                     .append(ItemRef.displayName(ingredient.key()).color(NamedTextColor.WHITE))
                     .append(Component.text(" " + ingredient.have() + "/" + ingredient.need(), NamedTextColor.GREEN))
                     .decoration(TextDecoration.ITALIC, false));
         }
-        lore.add(Utils.text("Click: chế tạo 1 lần", NamedTextColor.YELLOW));
-        lore.add(Utils.text("Shift-click: chế tạo tối đa (" + candidate.maxCrafts() + " lần)", NamedTextColor.YELLOW));
+        lore.add(Component.empty());
+        lore.add(Utils.text("Click: Chế tạo x1", NamedTextColor.DARK_GRAY));
+        if (QuickCraftService.allowsBulkCraft(candidate.recipe())) {
+            lore.add(Utils.text("Shift-Click: Chế tạo x" + candidate.maxCrafts(), NamedTextColor.DARK_GRAY));
+        }
         display.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
         return display;
     }
