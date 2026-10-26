@@ -31,7 +31,7 @@ Giá trị sai cú pháp bị từ chối ngay khi đặt, kèm thông báo lỗ
 ## `smp-ambient-particles`
 
 ```
-<particle> [count] [chance] [view]
+<particle> [count] [chance] [view] [near]
 ```
 
 | Trường | Mặc định | Ý nghĩa |
@@ -40,14 +40,21 @@ Giá trị sai cú pháp bị từ chối ngay khi đặt, kèm thông báo lỗ
 | `count` | `1` | Số particle mỗi đợt, ≥ 1 |
 | `chance` | `0.25` | Xác suất mỗi chu kỳ (10 tick) phát 1 đợt, trong khoảng `(0, 1]` |
 | `view` | `24` | Người chơi cách region (tính tới mép region) trong khoảng này mới thấy |
+| `near` | `8` | Bán kính quanh người chơi **đang đứng trong** region để rải particle riêng cho họ |
 
 ```
 /smpregion flag gate smp-ambient-particles portal 4 0.8 24
+/smpregion flag cave smp-ambient-particles white_ash 6 0.9 24 10
 ```
 
-- Mỗi particle xuất hiện tại 1 điểm ngẫu nhiên **bên trong hình dạng region** (đúng cả polygon và region nhiều mảnh; mảnh lớn được chọn nhiều hơn theo thể tích).
-- Người chơi **ở ngoài** region vẫn thấy, miễn trong tầm `view` — dùng region nhỏ + flag này để đánh dấu cổng dịch chuyển.
-- Particle chỉ gửi cho từng người chơi trong tầm, không có ai gần thì không tốn gì.
+Người xem chia 2 nhóm:
+
+- **Ở ngoài region** (trong tầm `view`): mỗi chu kỳ tung `chance` 1 lần, trúng thì `count` particle xuất hiện tại điểm ngẫu nhiên **khắp hình dạng region** (đúng cả polygon và region nhiều mảnh; mảnh lớn được chọn nhiều hơn theo thể tích), gửi chung cho cả nhóm. Dùng region nhỏ + flag này để đánh dấu cổng dịch chuyển nhìn từ xa.
+- **Ở trong region**: mỗi người tung `chance` riêng, trúng thì `count` particle xuất hiện trong khối cầu bán kính `near` quanh họ, chỉ gửi cho chính họ. Nhờ vậy mật độ quanh người chơi không phụ thuộc kích thước region — region 500 block trông dày như region 10 block. Điểm vẫn phải nằm trong hình dạng region nên particle không tràn ra ngoài mép.
+
+Ghi chú:
+
+- Không có ai trong tầm thì không tốn gì; chi phí tăng theo số người chơi đứng trong region có flag.
 - Danh sách region có flag được quét lại **mỗi 5 giây**: đặt/sửa/xoá flag cần tối đa 5 giây để có hiệu lực.
 - Region cao hết chiều cao world sẽ rải particle lên cả trên trời — nên giới hạn Y của region sát vùng muốn hiển thị.
 

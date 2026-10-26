@@ -61,30 +61,65 @@ public final class RegionAmbientEmitter {
         if (--ticksUntilRefresh <= 0) refresh();
 
         for (Emitter emitter : emitters) {
-            if (Utils.RANDOM.nextDouble() >= emitter.particles().chance()) continue;
+            AmbientParticles particles = emitter.particles();
+            List<Player> outside = new ArrayList<>();
+            List<Player> inside = new ArrayList<>();
+            sortViewers(emitter, inside, outside);
 
-            List<Player> viewers = viewers(emitter);
-            if (viewers.isEmpty()) continue;
+            if (!outside.isEmpty() && Utils.RANDOM.nextDouble() < particles.chance()) {
+                for (int i = 0; i < particles.count(); i++) emitAtRandomPoint(emitter, outside);
+            }
 
-            for (int i = 0; i < emitter.particles().count(); i++) emitAtRandomPoint(emitter, viewers);
+            for (Player player : inside) {
+                if (Utils.RANDOM.nextDouble() >= particles.chance()) continue;
+                for (int i = 0; i < particles.count(); i++) emitNear(emitter, player);
+            }
         }
     }
 
-    private List<Player> viewers(Emitter emitter) {
+    private void sortViewers(Emitter emitter, List<Player> inside, List<Player> outside) {
         double view = emitter.particles().view();
         double viewSquared = view * view;
         BlockVector3 min = emitter.bounds().min();
         BlockVector3 max = emitter.bounds().max();
 
-        List<Player> viewers = new ArrayList<>();
         for (Player player : emitter.world().getPlayers()) {
             Location location = player.getLocation();
             double dx = distanceOutside(location.getX(), min.x(), max.x() + 1);
             double dy = distanceOutside(location.getY(), min.y(), max.y() + 1);
             double dz = distanceOutside(location.getZ(), min.z(), max.z() + 1);
-            if (dx * dx + dy * dy + dz * dz <= viewSquared) viewers.add(player);
+            double distanceSquared = dx * dx + dy * dy + dz * dz;
+            if (distanceSquared > viewSquared) continue;
+
+            boolean within = distanceSquared == 0 && contains(emitter, location.getBlockX(), location.getBlockY(), location.getBlockZ());
+            (within ? inside : outside).add(player);
         }
-        return viewers;
+    }
+
+    private static boolean contains(Emitter emitter, int x, int y, int z) {
+        for (ProtectedRegion piece : emitter.pieces()) {
+            if (piece.contains(x, y, z)) return true;
+        }
+        return false;
+    }
+
+    private void emitNear(Emitter emitter, Player player) {
+        double near = emitter.particles().near();
+        Location center = player.getLocation();
+        for (int attempt = 0; attempt < POINT_ATTEMPTS; attempt++) {
+            double ox = (Utils.RANDOM.nextDouble() * 2 - 1) * near;
+            double oy = (Utils.RANDOM.nextDouble() * 2 - 1) * near;
+            double oz = (Utils.RANDOM.nextDouble() * 2 - 1) * near;
+            if (ox * ox + oy * oy + oz * oz > near * near) continue;
+
+            double x = center.getX() + ox;
+            double y = center.getY() + oy;
+            double z = center.getZ() + oz;
+            if (!contains(emitter, (int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z))) continue;
+
+            player.spawnParticle(emitter.particles().particle(), x, y, z, 1, 0, 0, 0, 0);
+            return;
+        }
     }
 
     private static double distanceOutside(double value, double min, double max) {
