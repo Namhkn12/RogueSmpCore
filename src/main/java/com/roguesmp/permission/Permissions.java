@@ -17,7 +17,8 @@ public enum Permissions {
     SPAWNER_ADMIN("spawner.admin"),
     POLAR_TEMPLATE_ADMIN("polartemplate.admin"),
     WARP_ADMIN("warp.admin"),
-    TELEPORT("teleport");
+    TELEPORT("teleport"),
+    MONEY_ADMIN("money.admin");
 
     private static final String ROOT = "roguesmp.";
 
