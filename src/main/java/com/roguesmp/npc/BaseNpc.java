@@ -5,6 +5,7 @@ import com.destroystokyo.paper.profile.ProfileProperty;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.constant.Keys;
+import com.roguesmp.entity.EntityEquipment;
 import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.registry.SkinRegistry;
 import com.roguesmp.utils.Utils;
@@ -24,6 +25,7 @@ import org.bukkit.entity.Display;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.entity.Villager;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.Unmodifiable;
@@ -32,6 +34,7 @@ import org.joml.Vector3f;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class BaseNpc {
@@ -50,6 +53,9 @@ public class BaseNpc {
             profession -> profession.key().asString()
     );
 
+    private static final Codec<Map<EquipmentSlot, EntityEquipment>> EQUIPMENT_CODEC =
+            Codec.lenientUnboundedMap(Codec.enumOf(EquipmentSlot.class), EntityEquipment.CODEC);
+
     private static final float LABEL_OFFSET = 0.3f;
     private static final float LINE_HEIGHT = 0.27f;
 
@@ -61,6 +67,7 @@ public class BaseNpc {
             Codec.STRING.optionalFieldOf("skinId", () -> null).forGetter(BaseNpc::getSkinId),
             DESCRIPTION_CODEC.optionalFieldOf("description", List::of).forGetter(BaseNpc::getDescription),
             PROFESSION_CODEC.optionalFieldOf("profession", () -> null).forGetter(BaseNpc::getProfession),
+            EQUIPMENT_CODEC.optionalFieldOf("equipment", Map::of).forGetter(BaseNpc::getEquipment),
             Codec.STRING.fieldOf("id").forGetter(BaseNpc::getId),
             Codec.listOf(NpcAction.CODEC).fieldOf("actions").forGetter(BaseNpc::getActions),
             BaseNpc::new
@@ -73,10 +80,11 @@ public class BaseNpc {
     private final String skinId;
     private final List<String> description;
     private final Villager.Profession profession;
+    private final Map<EquipmentSlot, EntityEquipment> equipment;
     private final String id;
     private final List<NpcAction> actions;
 
-    public BaseNpc(EntityType entityType, String name, String skinValue, String skinSignature, String skinId, List<String> description, Villager.Profession profession, String id, List<NpcAction> actions) {
+    public BaseNpc(EntityType entityType, String name, String skinValue, String skinSignature, String skinId, List<String> description, Villager.Profession profession, Map<EquipmentSlot, EntityEquipment> equipment, String id, List<NpcAction> actions) {
         this.entityType = entityType;
         this.name = name;
         this.skinValue = skinValue;
@@ -84,6 +92,7 @@ public class BaseNpc {
         this.skinId = skinId;
         this.description = description;
         this.profession = profession;
+        this.equipment = equipment;
         this.id = id;
         this.actions = actions;
     }
@@ -116,6 +125,10 @@ public class BaseNpc {
         return profession;
     }
 
+    public @Unmodifiable Map<EquipmentSlot, EntityEquipment> getEquipment() {
+        return Collections.unmodifiableMap(equipment);
+    }
+
     public String getSkinId() {
         return skinId;
     }
@@ -138,6 +151,14 @@ public class BaseNpc {
         if (entity instanceof LivingEntity living) {
             living.setAI(false);
             living.setInvulnerable(true);
+            org.bukkit.inventory.EntityEquipment slots = living.getEquipment();
+            if (slots != null) {
+                slots.clear();
+                equipment.forEach((slot, item) -> {
+                    slots.setItem(slot, item.createItemStack());
+                    slots.setDropChance(slot, 0f);
+                });
+            }
             if (entity instanceof Villager villager && profession != null) {
                 villager.setProfession(profession);
             }

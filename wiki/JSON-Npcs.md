@@ -44,9 +44,26 @@ NPC villager mặc đồ theo nghề:
 | `skinId` | string | optional | Id trong `skins/` (xem [JSON-Items](JSON-Items.md#skins--dữ-liệu-skin)). Id không tồn tại bị bỏ qua. |
 | `description` | mảng string MiniMessage | `[]` | Mỗi phần tử 1 dòng mô tả, hiện dưới tên. Áp dụng cho **mọi** loại entity. Viết 1 string (dạng cũ) vẫn được, tính là 1 dòng. |
 | `profession` | key nghề villager | optional | Nghề của villager, quyết định bộ đồ: `minecraft:armorer`, `butcher`, `cartographer`, `cleric`, `farmer`, `fisherman`, `fletcher`, `leatherworker`, `librarian`, `mason`, `nitwit`, `shepherd`, `toolsmith`, `weaponsmith`, `none`. Bỏ namespace thì mặc định `minecraft:`. Key sai → NPC không nạp được. **Chỉ Villager.** |
+| `equipment` | object tên ô → đồ | `{}` | Trang bị NPC mặc/cầm: giáp nhuộm, giáp có trim, đầu người, vũ khí... Cùng định dạng với [`equipment` của entity](JSON-Entities.md#equipment). |
 | `actions` | mảng action | **bắt buộc** (có thể `[]`) | Việc NPC làm khi bị click. |
 
 ⚠️ **Skin chỉ áp dụng khi `entityType` là `MANNEQUIN`, `profession` chỉ khi là `VILLAGER`.** Loại entity khác bỏ qua các key này.
+
+### Trang bị
+
+```json
+"equipment": {
+  "HEAD":  { "material": "PLAYER_HEAD", "headSkin": "knight_head" },
+  "CHEST": { "material": "LEATHER_CHESTPLATE", "dyeColor": "#3B5BA5" },
+  "LEGS":  { "material": "IRON_LEGGINGS", "trimMaterial": "minecraft:gold", "trimPattern": "minecraft:sentry" },
+  "FEET":  { "material": "LEATHER_BOOTS", "dyeColor": "#222222", "trimMaterial": "minecraft:redstone", "trimPattern": "minecraft:rib" },
+  "HAND":  { "material": "IRON_SWORD" }
+}
+```
+
+- Định nghĩa là **nguồn duy nhất**: mỗi lần NPC được nạp, mọi ô bị xoá rồi mặc lại theo JSON. Bỏ 1 ô khỏi JSON rồi reload → ô đó trống.
+- ⚠️ **Villager không hiện giáp** (model không có lớp giáp), chỉ hiện đồ cầm tay. Giáp hiện trên Mannequin và mob hình người (zombie, skeleton, piglin, armor stand...).
+- Trình tạo NPC có nút `equipment` để chỉnh từng ô (dùng chung editor với trình tạo entity); trim được kiểm tra ngay khi lưu.
 
 Hành vi NPC: bất tử, tắt AI, được lưu (persistent), Mannequin bị cố định; tự quay đầu nhìn người chơi gần nhất trong 5 block.
 

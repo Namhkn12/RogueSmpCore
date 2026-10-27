@@ -1,17 +1,19 @@
-package com.roguesmp.gui.entitycreator;
+package com.roguesmp.gui.equipment;
 
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.JsonOps;
 import com.roguesmp.entity.EntityEquipment;
-import com.roguesmp.entity.component.EntityComponentKeys;
-import com.roguesmp.entity.component.impl.EquipmentComponent;
 import com.roguesmp.registry.SkinRegistry;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
 import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.registry.data.dialog.input.TextDialogInput;
+import net.kyori.adventure.key.InvalidKeyException;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
@@ -25,30 +27,28 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
-/**
- * Dialog-based hub for an {@link EquipmentComponent}: one button per {@link EquipmentSlot}, each
- * leading to a per-slot field dialog for {@link EntityEquipment}'s 8 fields. Mirrors
- * {@code gui.itemcreator.ConsumableEditorGui}'s hub-with-leaf-dialogs shape, one level deeper
- * (slot list -> fields) since equipment is keyed per-slot rather than being a single record.
- */
-public class EntityEquipmentEditorGui {
+public class EquipmentEditorGui {
 
-    private final EntityCreatorGui parent;
+    private final String title;
     private final Map<EquipmentSlot, EntityEquipment> slots;
-    private boolean present;
+    private final Consumer<Map<EquipmentSlot, EntityEquipment>> onChange;
+    private final Consumer<Player> onBack;
 
-    public EntityEquipmentEditorGui(EntityCreatorGui parent, Map<EquipmentSlot, EntityEquipment> initialSlots, boolean present) {
-        this.parent = parent;
+    public EquipmentEditorGui(String title, Map<EquipmentSlot, EntityEquipment> initialSlots,
+                              Consumer<Map<EquipmentSlot, EntityEquipment>> onChange, Consumer<Player> onBack) {
+        this.title = title;
         this.slots = new EnumMap<>(EquipmentSlot.class);
         this.slots.putAll(initialSlots);
-        this.present = present;
+        this.onChange = onChange;
+        this.onBack = onBack;
     }
 
     public Dialog buildListDialog(Player player) {
-        DialogBuilder builder = DialogBuilder.create(Component.text("Trang bị entity"))
+        DialogBuilder builder = DialogBuilder.create(Component.text(title))
                 .canCloseWithEscape(false)
-                .externalTitle(Component.text(EntityComponentKeys.EQUIPMENT.id(), present ? NamedTextColor.GREEN : NamedTextColor.GRAY))
+                .externalTitle(Component.text("equipment", slots.isEmpty() ? NamedTextColor.GRAY : NamedTextColor.GREEN))
                 .addTextBody(Component.text(slots.size() + " ô trang bị đã đặt"));
 
         DialogTypeBuilder.MultiAction multi = builder.multiAction();
@@ -58,16 +58,15 @@ public class EntityEquipmentEditorGui {
                     current != null ? Component.text(current.getMaterial().name(), NamedTextColor.GRAY) : null,
                     (response, audience) -> Utils.runLater(() -> player.showDialog(buildSlotDialog(player, slot))));
         }
-        if (present) {
+        if (!slots.isEmpty()) {
             multi.addButton(Component.text("Xoá toàn bộ", NamedTextColor.RED), null, (response, audience) -> {
-                present = false;
                 slots.clear();
-                parent.removeEquipment();
-                Utils.runLater(() -> parent.reopen(player));
+                commit();
+                Utils.runLater(() -> onBack.accept(player));
             });
         }
         multi.columns(3);
-        multi.exitButton(Component.text("« Quay lại"), (response, audience) -> Utils.runLater(() -> parent.reopen(player)));
+        multi.exitButton(Component.text("« Quay lại"), (response, audience) -> Utils.runLater(() -> onBack.accept(player)));
 
         return multi.build();
     }
@@ -86,10 +85,10 @@ public class EntityEquipmentEditorGui {
                         b -> b.initial(current == null || current.getLore() == null ? "" : String.join("\n", current.getLore()))
                                 .maxLength(1000).multiline(TextDialogInput.MultilineOptions.create(5, 100)))
                 .addCheckboxInput("enchant_glint", Component.text("Hiệu ứng phù phép (glint)"), current != null && current.isEnchantGlint(), "true", "false")
-                .addTextInput("trim_material", Component.text("Trim material (vd: redstone, để trống nếu không có)"),
-                        b -> b.initial(current == null || current.getTrimMaterial() == null ? "" : current.getTrimMaterial()).maxLength(64))
-                .addTextInput("trim_pattern", Component.text("Trim pattern (vd: sentry, để trống nếu không có)"),
-                        b -> b.initial(current == null || current.getTrimPattern() == null ? "" : current.getTrimPattern()).maxLength(64))
+                .addTextInput("trim_material", Component.text("Trim material (vd: minecraft:redstone, để trống nếu không có)"),
+                        b -> b.initial(current == null || current.getTrimMaterial() == null ? "" : current.getTrimMaterial().asString()).maxLength(64))
+                .addTextInput("trim_pattern", Component.text("Trim pattern (vd: minecraft:sentry, để trống nếu không có)"),
+                        b -> b.initial(current == null || current.getTrimPattern() == null ? "" : current.getTrimPattern().asString()).maxLength(64))
                 .addTextInput("dye_color", Component.text("Dye color (hex, vd: #9B5DE5 - để trống nếu không có)"),
                         b -> b.initial(current == null || current.getDyeColor() == null ? "" : String.format("#%06X", current.getDyeColor().asRGB())).maxLength(32))
                 .addTextInput("head_skin", Component.text("Head skin ID (trong SkinRegistry, để trống nếu không có)"),
@@ -100,8 +99,7 @@ public class EntityEquipmentEditorGui {
             String materialRaw = response.getText("material");
             Material material = materialRaw == null ? null : Material.matchMaterial(materialRaw.trim());
             if (material == null) {
-                player.sendMessage(Utils.text("Material không hợp lệ.", NamedTextColor.RED));
-                Utils.runLater(() -> player.showDialog(buildSlotDialog(player, slot)));
+                retry(player, slot, "Material không hợp lệ.");
                 return;
             }
 
@@ -109,13 +107,33 @@ public class EntityEquipmentEditorGui {
             String loreRaw = response.getText("lore");
             List<String> lore = (loreRaw == null || loreRaw.isBlank()) ? null : new ArrayList<>(Arrays.asList(loreRaw.split("\n", -1)));
             Boolean enchantGlint = response.getBoolean("enchant_glint");
-            String trimMaterial = blankToNull(response.getText("trim_material"));
-            String trimPattern = blankToNull(response.getText("trim_pattern"));
+
+            Key trimMaterial;
+            Key trimPattern;
+            try {
+                trimMaterial = parseKey(response.getText("trim_material"));
+                trimPattern = parseKey(response.getText("trim_pattern"));
+            } catch (InvalidKeyException e) {
+                retry(player, slot, "Trim key không hợp lệ, dùng dạng namespace:id.");
+                return;
+            }
+            if ((trimMaterial == null) != (trimPattern == null)) {
+                retry(player, slot, "Cần điền cả trim material và trim pattern (hoặc để trống cả hai).");
+                return;
+            }
+            if (trimMaterial != null && RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_MATERIAL).get(trimMaterial) == null) {
+                retry(player, slot, "Không tìm thấy trim material '" + trimMaterial.asString() + "'.");
+                return;
+            }
+            if (trimPattern != null && RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN).get(trimPattern) == null) {
+                retry(player, slot, "Không tìm thấy trim pattern '" + trimPattern.asString() + "'.");
+                return;
+            }
+
             String dyeColorRaw = blankToNull(response.getText("dye_color"));
             DataResult<Color> dyeResult = dyeColorRaw == null ? null : Codec.HEX_COLOR.decode(JsonOps.INSTANCE.createString(dyeColorRaw), JsonOps.INSTANCE);
             if (dyeResult != null && !dyeResult.isSuccess()) {
-                player.sendMessage(Utils.text("Màu nhuộm không hợp lệ, dùng dạng #RRGGBB.", NamedTextColor.RED));
-                Utils.runLater(() -> player.showDialog(buildSlotDialog(player, slot)));
+                retry(player, slot, "Màu nhuộm không hợp lệ, dùng dạng #RRGGBB.");
                 return;
             }
             Color dyeColor = dyeResult == null ? null : dyeResult.result();
@@ -142,9 +160,18 @@ public class EntityEquipmentEditorGui {
         return multi.build();
     }
 
+    private void retry(Player player, EquipmentSlot slot, String message) {
+        player.sendMessage(Utils.text(message, NamedTextColor.RED));
+        Utils.runLater(() -> player.showDialog(buildSlotDialog(player, slot)));
+    }
+
     private void commit() {
-        present = true;
-        parent.applyEquipment(new EquipmentComponent(new EnumMap<>(slots)));
+        onChange.accept(new EnumMap<>(slots));
+    }
+
+    private static @Nullable Key parseKey(@Nullable String raw) {
+        String text = blankToNull(raw);
+        return text == null ? null : Key.key(text.toLowerCase());
     }
 
     private static @Nullable String blankToNull(@Nullable String raw) {

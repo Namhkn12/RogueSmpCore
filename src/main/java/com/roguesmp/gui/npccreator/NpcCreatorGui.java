@@ -1,6 +1,8 @@
 package com.roguesmp.gui.npccreator;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.entity.EntityEquipment;
+import com.roguesmp.gui.equipment.EquipmentEditorGui;
 import com.roguesmp.npc.BaseNpc;
 import com.roguesmp.npc.action.NpcAction;
 import com.roguesmp.npc.action.OpenGuiInteractAction;
@@ -18,11 +20,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * In-game editor for {@link BaseNpc}, built on the same Paper Dialog API pattern as
@@ -44,6 +48,7 @@ public class NpcCreatorGui {
     private @Nullable String skinId;
     private String description = "";
     private @Nullable Villager.Profession profession;
+    private Map<EquipmentSlot, EntityEquipment> equipment = Map.of();
     private final List<ActionDraft> actions;
     private boolean droppedSkinData;
 
@@ -63,6 +68,7 @@ public class NpcCreatorGui {
         gui.skinId = npc.getSkinId();
         gui.description = String.join("\n", npc.getDescription());
         gui.profession = npc.getProfession();
+        gui.equipment = npc.getEquipment();
         gui.droppedSkinData = npc.getSkinValue() != null || npc.getSkinSignature() != null;
 
         for (NpcAction action : npc.getActions()) {
@@ -111,6 +117,10 @@ public class NpcCreatorGui {
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildDescriptionDialog(player))));
         multi.addButton(Component.text("profession", profession == null ? NamedTextColor.GRAY : NamedTextColor.GREEN), Component.text("Chỉ áp dụng khi entity_type = VILLAGER.", NamedTextColor.GRAY),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildProfessionDialog(player))));
+        multi.addButton(Component.text("equipment", equipment.isEmpty() ? NamedTextColor.GRAY : NamedTextColor.GREEN),
+                Component.text(equipment.size() + " ô trang bị", NamedTextColor.GRAY),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(
+                        new EquipmentEditorGui("Trang bị NPC", equipment, slots -> this.equipment = slots, this::openMainDialog).buildListDialog(player))));
 
         for (int i = 0; i < actions.size(); i++) {
             int index = i;
@@ -377,7 +387,7 @@ public class NpcCreatorGui {
             if (action != null) realActions.add(action);
         }
 
-        BaseNpc npc = new BaseNpc(entityType, name, null, null, skinId, description.isBlank() ? List.of() : List.of(description.split("\n")), profession, id, realActions);
+        BaseNpc npc = new BaseNpc(entityType, name, null, null, skinId, description.isBlank() ? List.of() : List.of(description.split("\n")), profession, equipment, id, realActions);
         Registries.NPC.registerAndSave(RogueSmpCore.getInstance(), id, npc);
 
         droppedSkinData = false;

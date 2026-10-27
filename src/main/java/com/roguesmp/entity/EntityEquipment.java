@@ -1,5 +1,6 @@
 package com.roguesmp.entity;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.registry.SkinRegistry;
 import com.roguesmp.utils.Utils;
@@ -7,9 +8,9 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.*;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import net.kyori.adventure.key.Key;
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
@@ -28,8 +29,8 @@ public class EntityEquipment {
             Codec.STRING.optionalFieldOf("displayName", () -> null).forGetter(EntityEquipment::getDisplayName),
             Codec.listOf(Codec.STRING).optionalFieldOf("lore", (List<String>) null).forGetter(EntityEquipment::getLore),
             Codec.BOOLEAN.optionalFieldOf("enchantGlint", false).forGetter(EntityEquipment::isEnchantGlint),
-            Codec.STRING.optionalFieldOf("trimMaterial", (String) null).forGetter(EntityEquipment::getTrimMaterial),
-            Codec.STRING.optionalFieldOf("trimPattern", (String) null).forGetter(EntityEquipment::getTrimPattern),
+            Codec.KEY.optionalFieldOf("trimMaterial", (Key) null).forGetter(EntityEquipment::getTrimMaterial),
+            Codec.KEY.optionalFieldOf("trimPattern", (Key) null).forGetter(EntityEquipment::getTrimPattern),
             Codec.HEX_COLOR.optionalFieldOf("dyeColor", (Color) null).forGetter(EntityEquipment::getDyeColor),
             Codec.STRING.optionalFieldOf("headSkin", (String) null).forGetter(EntityEquipment::getHeadSkin),
             EntityEquipment::new
@@ -40,12 +41,12 @@ public class EntityEquipment {
     private final String displayName;
     private final List<String> lore;
     private final boolean enchantGlint;
-    private final String trimMaterial;
-    private final String trimPattern;
+    private final @Nullable Key trimMaterial;
+    private final @Nullable Key trimPattern;
     private final @Nullable Color dyeColor;
     private final String headSkin;
 
-    public EntityEquipment(Material material, String displayName, List<String> lore, boolean enchantGlint, String trimMaterial, String trimPattern, @Nullable Color dyeColor, String headSkin) {
+    public EntityEquipment(Material material, String displayName, List<String> lore, boolean enchantGlint, @Nullable Key trimMaterial, @Nullable Key trimPattern, @Nullable Color dyeColor, String headSkin) {
         this.material = material;
         this.displayName = displayName;
         this.lore = lore;
@@ -65,13 +66,14 @@ public class EntityEquipment {
         itemStack.setData(DataComponentTypes.UNBREAKABLE);
         // Wipe attribute modifiers, the attribute is handled using the entity base attribute
         itemStack.setData(DataComponentTypes.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.itemAttributes().build());
-        // It's possible to add custom armor trim via datapacks
-        TrimMaterial trimMaterial1 = null;
-        TrimPattern trimPattern1 = null;
-        if (trimMaterial != null) trimMaterial1 = RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_MATERIAL).get(NamespacedKey.minecraft(trimMaterial));
-        if (trimPattern != null) trimPattern1 = RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN).get(NamespacedKey.minecraft(trimPattern));
-        if (trimMaterial1 != null && trimPattern1 != null) {
-            itemStack.setData(DataComponentTypes.TRIM, ItemArmorTrim.itemArmorTrim(new ArmorTrim(trimMaterial1, trimPattern1)));
+        if (trimMaterial != null && trimPattern != null) {
+            TrimMaterial material = RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_MATERIAL).get(trimMaterial);
+            TrimPattern pattern = RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN).get(trimPattern);
+            if (material != null && pattern != null) {
+                itemStack.setData(DataComponentTypes.TRIM, ItemArmorTrim.itemArmorTrim(new ArmorTrim(material, pattern)));
+            } else {
+                RogueSmpCore.LOGGER.warn("Unknown armor trim {} / {} on {}, skipping trim", trimMaterial.asString(), trimPattern.asString(), this.material);
+            }
         }
 
         if (dyeColor != null) {
@@ -105,11 +107,11 @@ public class EntityEquipment {
         return enchantGlint;
     }
 
-    public @Nullable String getTrimMaterial() {
+    public @Nullable Key getTrimMaterial() {
         return trimMaterial;
     }
 
-    public @Nullable String getTrimPattern() {
+    public @Nullable Key getTrimPattern() {
         return trimPattern;
     }
 
