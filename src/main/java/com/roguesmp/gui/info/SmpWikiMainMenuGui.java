@@ -54,7 +54,7 @@ public class SmpWikiMainMenuGui extends BaseGui {
             new SmpEnchantWikiGui((Player) event.getWhoClicked()).showInventory(event.getWhoClicked());
         });
 
-        // Frame and fillers
+        addBackButton(getSlot(2, 0));
         fillEmpty();
     }
 

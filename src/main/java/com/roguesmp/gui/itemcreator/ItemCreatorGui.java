@@ -173,6 +173,9 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.DYED_COLOR),
                 tooltip("Nhuộm màu giáp da (hoặc vật phẩm nhuộm được).", null),
                 (response, audience) -> player.showDialog(buildDyedColorDialog(player)));
+        multi.addButton(componentLabel(ItemComponentKeys.MAIN_MENU),
+                tooltip("Chuột phải để mở menu chính.", null),
+                (response, audience) -> player.showDialog(buildMainMenuDialog(player)));
         multi.addButton(componentLabel(ItemComponentKeys.ARMOR_TRIM),
                 tooltip("Thêm hoa văn giáp (armor trim).", "Cần cả material và pattern, hỗ trợ datapack"),
                 (response, audience) -> player.showDialog(buildArmorTrimDialog(player)));
@@ -667,6 +670,22 @@ public class ItemCreatorGui {
     /** Blank text means "unset" (vanilla default); an invalid key throws. */
     private static @Nullable Key optionalKey(@Nullable String text) {
         return text == null || text.isBlank() ? null : Key.key(text.trim());
+    }
+
+    private Dialog buildMainMenuDialog(Player player) {
+        DialogBuilder builder = DialogBuilder.create(Component.text("Menu chính"))
+                .canCloseWithEscape(false)
+                .addTextBody(Component.text("Chuột phải khi cầm item để mở menu chính. Component này không có tùy chọn."));
+
+        return wrapComponentDialog(player, ItemComponentKeys.MAIN_MENU, builder,
+                (response, audience) -> {
+                    components.put(ItemComponentKeys.MAIN_MENU.id(), new MainMenuComponent());
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(ItemComponentKeys.MAIN_MENU.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
     }
 
     private Dialog buildEnchantGlintDialog(Player player) {

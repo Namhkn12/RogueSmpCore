@@ -50,6 +50,7 @@ public class AbilityLoadoutGui extends BaseGui {
 
         // 3. Navigation/Info Button
         addButton(5, 4, createInfoButton(), event -> event.setCancelled(true));
+        addBackButton(getSlot(5, 0));
     }
 
     private void renderSlot(int row, int col, @Nullable Ability ability, int index) {
