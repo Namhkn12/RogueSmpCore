@@ -1,0 +1,383 @@
+{
+  "title": "<dark_gray>Thợ Giáp Roland",
+  "layout": {
+    "pattern": [
+      "#########",
+      "#OOOOO#OO",
+      "#OOOOO#OO",
+      "#OOOOO#OO",
+      "#OOOOO###",
+      "#########"
+    ],
+    "keys": {
+      "#": "BLACK_STAINED_GLASS_PANE"
+    },
+    "fill": "GRAY_STAINED_GLASS_PANE"
+  },
+  "offers": [
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 10
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "padded_helmet"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 40
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "scale_helmet"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 155
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "ironclad_helmet"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 560
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "sentinel_helmet"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 3100
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "bastion_helmet"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 110
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "leather_lining_fine"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 110
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "chain_lining_fine"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 30
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "padded_chestplate"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 110
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "scale_chestplate"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 450
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "ironclad_chestplate"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 1500
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "sentinel_chestplate"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 8300
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "bastion_chestplate"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 390
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "leather_lining_superior"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 390
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "chain_lining_superior"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 20
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "padded_leggings"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 80
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "scale_leggings"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 340
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "ironclad_leggings"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 1100
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "sentinel_leggings"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 6250
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "bastion_leggings"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 1700
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "leather_lining_masterwork"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 1700
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "chain_lining_masterwork"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 10
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "padded_boots"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 40
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "scale_boots"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 155
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "ironclad_boots"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 560
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "sentinel_boots"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 3100
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "bastion_boots"
+        }
+      ]
+    }
+  ]
+}

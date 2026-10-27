@@ -1,0 +1,19 @@
+{
+  "id": "iron_tekko",
+  "base": "IRON_SWORD",
+  "components": {
+    "name": "<blue>Iron Tekko",
+    "item_model": "minecraft:iron_tekko",
+    "durability": 1470,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.75,
+        "ATTACK_SPEED_BASE": 2.55,
+        "ENTITY_REACH": -0.9,
+        "DEFENSE_FLAT": 1.5,
+        "KNOCKBACK_RESISTANCE": 0.04
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

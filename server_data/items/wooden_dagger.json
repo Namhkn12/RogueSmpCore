@@ -1,0 +1,17 @@
+{
+  "id": "wooden_dagger",
+  "base": "WOODEN_SWORD",
+  "components": {
+    "name": "<white>Wooden Dagger",
+    "item_model": "minecraft:wooden_dagger",
+    "durability": 44,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 2.25,
+        "ATTACK_SPEED_BASE": 3.01,
+        "ENTITY_REACH": -0.29
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

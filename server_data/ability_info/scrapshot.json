@@ -1,0 +1,31 @@
+{
+  "display_name": "Súng Phế Liệu",
+  "icon": "NETHERITE_SCRAP",
+  "type": "ACTIVE",
+  "description": [
+    "<!i><gold>Cách kích hoạt: <yellow>Chuột trái + Shift",
+    "<!i><gray>Bắn một phát súng hỏa mai từ thép vụn.",
+    "<!i><gray>Gây sát thương tối đa ở cự ly gần và tạo mảnh vỡ.",
+    "",
+    "<!i><gray>Sát thương gốc: <red><damage>",
+    "<!i><gray>Tầm bắn: <white><range>m",
+    "<!i><gray>Hồi chiêu: <green><cooldown> ticks"
+  ],
+  "scaling": {
+    "damage": [35.0, 43.0, 52.0, 59.0, 68.0],
+    "range": [8.0, 9.0, 10.0, 11.0, 12.0],
+    "cooldown": [200, 180, 160, 140, 120]
+  },
+  "trigger": {
+    "execute": {
+      "key": "LEFT_CLICK",
+      "options": ["sneaking", "not_holding_pickaxe"]
+    }
+  },
+  "upgrades": {
+    "2": [{ "type": "exp", "level": 10, "cost": 200 }],
+    "3": [{ "type": "item", "item_id": "iron_scrap", "amount": 32 }],
+    "4": [{ "type": "exp", "level": 20, "cost": 600 }],
+    "5": [{ "type": "item", "item_id": "netherite_ingot", "amount": 1 }]
+  }
+}

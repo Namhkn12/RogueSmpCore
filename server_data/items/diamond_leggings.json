@@ -1,0 +1,15 @@
+{
+  "id": "diamond_leggings",
+  "base": "DIAMOND_LEGGINGS",
+  "components": {
+    "name": "<dark_purple>Diamond Leggings",
+    "durability": 1425,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 7.8,
+        "SPEED_PERCENT": -0.015
+      },
+      "slot": "LEGS"
+    }
+  }
+}

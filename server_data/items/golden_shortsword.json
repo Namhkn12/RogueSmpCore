@@ -1,0 +1,18 @@
+{
+  "id": "golden_shortsword",
+  "base": "GOLDEN_SWORD",
+  "components": {
+    "name": "<green>Golden Shortsword",
+    "item_model": "minecraft:golden_shortsword",
+    "durability": 480,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.25,
+        "ATTACK_SPEED_BASE": 1.9625,
+        "ENTITY_REACH": 0.15,
+        "SWEEPING_DAMAGE_RATIO": 0.16
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

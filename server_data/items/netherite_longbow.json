@@ -1,0 +1,19 @@
+{
+  "id": "netherite_longbow",
+  "base": "BOW",
+  "components": {
+    "name": "<gold>Netherite Longbow",
+    "item_model": "minecraft:netherite_longbow",
+    "durability": 1755,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 13.0,
+        "PROJECTILE_SPEED_BASE": 0.968,
+        "SPEED_PERCENT": -0.205,
+        "BURNING_TIME": -0.4,
+        "KNOCKBACK_RESISTANCE": 0.2
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

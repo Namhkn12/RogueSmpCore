@@ -1,0 +1,17 @@
+{
+  "base": "DIAMOND_HELMET",
+  "components": {
+    "name": "<#4DD0E1>Sentinel Helmet",
+    "description": [
+      "<gray>Giáp của đội tuần tra biên giới, đứng vững trước mọi cú húc.",
+      "<dark_gray>Cấp trung · Hàng của Armorer Roland"
+    ],
+    "durability": 363,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.0
+      },
+      "slot": "HEAD"
+    }
+  }
+}

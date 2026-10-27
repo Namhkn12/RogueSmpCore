@@ -1,0 +1,25 @@
+{
+  "id": "spawner_tmd_elite_1",
+  "name": "TMD Elite Spawner",
+  "mobs": {
+    "tmd_ashen_executioner_2": 40,
+    "tmd_ashen_executioner": 60
+  },
+  "delay": 0,
+  "minDelay": 180,
+  "maxDelay": 280,
+  "activeRange": 12,
+  "spawnRange": 4,
+  "maxNearBy": 6,
+  "spawnCount": 3,
+  "behaviors": [
+      {
+        "type": "teleport",
+        "params": {
+          "max_teleports": 5,
+          "teleport_radius": 15.0,
+          "safe_check_radius": 10.0
+        }
+      }
+    ]
+}

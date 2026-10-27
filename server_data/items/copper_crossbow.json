@@ -1,0 +1,19 @@
+{
+  "id": "copper_crossbow",
+  "base": "CROSSBOW",
+  "components": {
+    "name": "<white>Copper Crossbow",
+    "item_model": "minecraft:copper_crossbow",
+    "durability": 234,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 7.4,
+        "PROJECTILE_SPEED_BASE": 1.12,
+        "SPEED_PERCENT": 0.02,
+        "FALL_DAMAGE": -0.2,
+        "SNEAKING_SPEED": 0.05
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "base": "DIAMOND_PICKAXE",
+  "components": {
+    "name": "<#4DD0E1>Deepdelver Pickaxe",
+    "description": [
+      "<gray>Cuốc khai khoáng, đào được cả khối custom.",
+      "<dark_gray>Cấp trung · Hàng của Toolsmith Barrett"
+    ],
+    "durability": 1561,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.0,
+        "ATTACK_SPEED_BASE": 1.2,
+        "BREAK_STRENGTH": 3.0,
+        "MINING_SPEED": 160.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

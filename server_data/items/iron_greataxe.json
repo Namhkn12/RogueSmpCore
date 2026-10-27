@@ -1,0 +1,20 @@
+{
+  "id": "iron_greataxe",
+  "base": "IRON_AXE",
+  "components": {
+    "name": "<blue>Iron Greataxe",
+    "item_model": "minecraft:iron_greataxe",
+    "durability": 1575,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 15.0,
+        "ATTACK_SPEED_BASE": 0.6,
+        "ENTITY_REACH": 0.35,
+        "SPEED_PERCENT": -0.04,
+        "KNOCKBACK_RESISTANCE": 0.04,
+        "SWEEPING_DAMAGE_RATIO": 0.24
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

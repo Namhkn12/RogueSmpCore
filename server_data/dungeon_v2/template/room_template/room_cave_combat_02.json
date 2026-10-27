@@ -1,0 +1,31 @@
+{
+  "id": "cave_combat_02",
+  "type": "NORMAL",
+  "schemetaId": "schemeta_cave_combat_02_2",
+  "objectives": [
+    {
+      "type": "spawner_breaker",
+      "params": {
+        "score": 15,
+        "require": 3
+      }
+    },
+    {
+      "type": "monster_hunter",
+      "params": {
+        "score": 25,
+        "require": 10,
+        "target": "zombie"
+      }
+    }
+  ],
+  "roomEvents": [
+    {
+      "type": "party_strength_buff",
+      "params": {
+        "durationTicks": 3600,
+        "amplifier": 1
+      }
+    }
+  ]
+}

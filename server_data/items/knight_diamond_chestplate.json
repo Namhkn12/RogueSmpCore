@@ -1,0 +1,25 @@
+{
+  "id": "knight_diamond_chestplate",
+  "base": "DIAMOND_CHESTPLATE",
+  "components": {
+    "name": "<dark_purple>Knight Diamond Chestplate",
+    "item_model": "minecraft:knight_diamond_chestplate",
+    "equippable": {
+      "slot": "CHEST",
+      "asset_id": "minecraft:knight_diamond"
+    },
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 1500,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 9.88,
+        "MELEE_DAMAGE_PERCENT": 0.03
+      },
+      "slot": "CHEST"
+    }
+  }
+}

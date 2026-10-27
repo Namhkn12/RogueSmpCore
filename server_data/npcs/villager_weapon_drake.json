@@ -1,0 +1,14 @@
+{
+  "entityType": "VILLAGER",
+  "name": "<gradient:#EF5350:#B71C1C><bold>Weaponsmith Drake</bold></gradient>",
+  "description": [
+    "<red>Cung cấp kiếm và vũ khí cận chiến</red>"
+  ],
+  "profession": "minecraft:weaponsmith",
+  "actions": [
+    {
+      "type": "open_gui",
+      "gui": "shop:weapon_drake"
+    }
+  ]
+}

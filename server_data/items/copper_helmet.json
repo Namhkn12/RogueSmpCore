@@ -1,0 +1,14 @@
+{
+  "id": "copper_helmet",
+  "base": "COPPER_HELMET",
+  "components": {
+    "name": "<white>Copper Helmet",
+    "durability": 137,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.38
+      },
+      "slot": "HEAD"
+    }
+  }
+}

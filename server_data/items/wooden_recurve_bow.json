@@ -1,0 +1,19 @@
+{
+  "id": "wooden_recurve_bow",
+  "base": "BOW",
+  "components": {
+    "name": "<white>Wooden Recurve Bow",
+    "item_model": "minecraft:wooden_recurve_bow",
+    "durability": 59,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 4.2,
+        "PROJECTILE_SPEED_BASE": 1.472,
+        "SPEED_PERCENT": 0.126,
+        "SNEAKING_SPEED": 0.15,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

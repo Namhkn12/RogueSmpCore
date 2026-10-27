@@ -1,0 +1,8 @@
+{
+  "type": "safe",
+  "name": "Điện thờ bị lãng quên",
+  "schematic": "schemeta_cave_combat_01",
+  "effects": [
+    { "type": "strength_buff", "duration_ticks": 3600, "amplifier": 1 }
+  ]
+}

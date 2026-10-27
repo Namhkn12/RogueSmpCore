@@ -1,0 +1,26 @@
+{
+  "id": "knight_netherite_leggings",
+  "base": "NETHERITE_LEGGINGS",
+  "components": {
+    "name": "<gold>Knight Netherite Leggings",
+    "item_model": "minecraft:knight_netherite_leggings",
+    "equippable": {
+      "slot": "LEGS",
+      "asset_id": "minecraft:knight_netherite"
+    },
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 1852,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 9.12,
+        "SPEED_PERCENT": -0.025,
+        "KNOCKBACK_RESISTANCE": 0.05
+      },
+      "slot": "LEGS"
+    }
+  }
+}

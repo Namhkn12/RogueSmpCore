@@ -1,0 +1,15 @@
+{
+  "id": "chainmail_boots",
+  "base": "CHAINMAIL_BOOTS",
+  "components": {
+    "name": "<white>Chainmail Boots",
+    "durability": 120,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.2,
+        "SPEED_PERCENT": 0.011
+      },
+      "slot": "FEET"
+    }
+  }
+}

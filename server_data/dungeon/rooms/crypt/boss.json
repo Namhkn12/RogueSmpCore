@@ -1,0 +1,9 @@
+{
+  "type": "boss",
+  "name": "Ngai Vua Xương",
+  "schematic": "schemeta_cave_combat_01",
+  "boss": "hell_knight",
+  "objectives": [
+    { "on": { "event": "mob_killed", "subject": "hell_knight" }, "ends_dungeon": true, "score": 50, "display": "Hạ Vua Xương" }
+  ]
+}

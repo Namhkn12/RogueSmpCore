@@ -1,0 +1,23 @@
+{
+  "id": "redstone_wand",
+  "base": "STICK",
+  "components": {
+    "name": "<blue>Redstone Wand",
+    "item_model": "minecraft:redstone_wand",
+    "mage_staff": {
+      "color": "#FF2A1E"
+    },
+    "durability": 330,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 1.0,
+        "STAFF_DAMAGE_BASE": 3.75,
+        "STAFF_RANGE_BASE": 16,
+        "ATTACK_SPEED_BASE": 2.7,
+        "SPEED_PERCENT": 0.04,
+        "MAGIC_DAMAGE_PERCENT": 0.037
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

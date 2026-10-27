@@ -1,0 +1,9 @@
+{
+  "entityType": "MANNEQUIN",
+  "name": "<gradient:#FDD835:#F57F17><bold>Guild Master Augustus</bold></gradient>",
+  "skinId": "guild_master",
+  "description": [
+    "<gold>Người đứng đầu Hiệp Hội Mạo Hiểm</gold>"
+  ],
+  "actions": []
+}

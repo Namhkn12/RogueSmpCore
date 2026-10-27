@@ -1,0 +1,19 @@
+{
+  "id": "diamond_recurve_bow",
+  "base": "BOW",
+  "components": {
+    "name": "<dark_purple>Diamond Recurve Bow",
+    "item_model": "minecraft:diamond_recurve_bow",
+    "durability": 1200,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 8.88,
+        "PROJECTILE_SPEED_BASE": 1.222,
+        "SPEED_PERCENT": -0.01,
+        "BURNING_TIME": -0.25,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

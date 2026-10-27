@@ -1,0 +1,14 @@
+{
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:ores/diamond_magic_block",
+    "glint": true,
+    "name": "<light_purple>Khối kim cương ma thuật",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Ma thuật"
+    ],
+    "block_place": {
+      "block": "diamond_magic_block"
+    }
+  }
+}

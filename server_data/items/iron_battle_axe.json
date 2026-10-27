@@ -1,0 +1,18 @@
+{
+  "id": "iron_battle_axe",
+  "base": "IRON_AXE",
+  "components": {
+    "name": "<blue>Iron Battle Axe",
+    "item_model": "minecraft:iron_battle_axe",
+    "durability": 1155,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 10.75,
+        "ATTACK_SPEED_BASE": 0.875,
+        "ENTITY_REACH": 0.1,
+        "SWEEPING_DAMAGE_RATIO": 0.12
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

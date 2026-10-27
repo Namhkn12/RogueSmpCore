@@ -1,0 +1,16 @@
+{
+  "id": "trident",
+  "base": "TRIDENT",
+  "components": {
+    "name": "<blue>Trident",
+    "durability": 1050,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 9.0,
+        "ATTACK_SPEED_BASE": 1.1,
+        "ENTITY_REACH": 0.5
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

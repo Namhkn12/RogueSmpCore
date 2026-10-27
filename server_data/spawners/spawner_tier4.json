@@ -1,0 +1,24 @@
+{
+  "id": "spawner_tmd_tier4",
+  "name": "TMD Tier 4 - Hellforged Elites Spawner",
+  "mobs": {
+    "tmd_obsidian_reaper": 34,
+    "tmd_ashbone_ravager": 33,
+    "tmd_hellforged_brute": 33
+  },
+  "delay": 0,
+  "minDelay": 360,
+  "maxDelay": 600,
+  "activeRange": 12,
+  "spawnRange": 5,
+  "maxNearBy": 3,
+  "spawnCount": 1,
+  "behaviors": [
+      {
+        "type": "wave",
+        "params": {
+          "waves": 3
+        }
+      }
+    ]
+}

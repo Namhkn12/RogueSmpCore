@@ -1,0 +1,18 @@
+{
+  "id": "stone_flanged_mace",
+  "base": "STONE_AXE",
+  "components": {
+    "name": "<white>Stone Flanged Mace",
+    "item_model": "minecraft:stone_flanged_mace",
+    "durability": 180,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.5,
+        "ATTACK_SPEED_BASE": 1.075,
+        "ENTITY_REACH": 0.18,
+        "SWEEPING_DAMAGE_RATIO": 0.092
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

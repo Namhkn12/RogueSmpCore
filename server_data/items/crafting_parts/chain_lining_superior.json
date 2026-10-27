@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<aqua>Superior Chain Lining",
+    "description": [
+      "<dark_gray><!i>Linh kiện · Superior",
+      "<gray><!i>Lớp lót cho giáp nặng",
+      "<gray><!i>Dùng cho đồ bậc <white>B5–B6"
+    ],
+    "item_model": "minecraft:iron_chain"
+  }
+}

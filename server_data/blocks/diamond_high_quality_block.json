@@ -1,0 +1,16 @@
+{
+  "display_name": "Khối kim cương chất lượng cao",
+  "model": "minecraft:ores/diamond_high_quality_block",
+  "hardness": 6,
+  "break_strength": 3,
+  "drops": [
+    {
+      "item": "diamond_high_quality_block",
+      "min_amount": 1,
+      "max_amount": 1,
+      "chance": 1.0
+    }
+  ],
+  "place_sound": "block.metal.place",
+  "break_sound": "block.metal.break"
+}

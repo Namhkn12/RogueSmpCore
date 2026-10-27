@@ -1,0 +1,44 @@
+{
+  "id": "wood/rootclasped",
+  "entityType": "ZOMBIE",
+  "components": {
+    "display_name": "<gradient:#A1887F:#558B2F>Thây ôm cây</gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 24
+    },
+    "attributes": {
+      "max_health": 70.0,
+      "attack_damage": 6.0,
+      "movement_speed": 0.18,
+      "armor": 4.0,
+      "knockback_resistance": 0.1
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "rootclasped"
+      },
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "trimMaterial": "emerald",
+        "trimPattern": "wild",
+        "dyeColor": "255,93,64,55"
+      },
+      "FEET": {
+        "material": "LEATHER_BOOTS",
+        "dyeColor": "255,94,124,22"
+      }
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "lifesteal_on_hit_spell",
+          "trigger": "MELEE",
+          "chance": 0.5,
+          "missingHealthRatio": 0.5
+        }
+      ]
+    }
+  }
+}

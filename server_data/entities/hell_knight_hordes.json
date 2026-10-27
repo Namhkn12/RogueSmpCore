@@ -1,0 +1,26 @@
+{
+  "id": "hell_knight_hordes",
+  "entityType": "WITHER_SKELETON",
+  "displayName": "<dark_red><bold>Linh hồn hỏa ngục</bold></dark_red>",
+  "noAi": false,
+  "persistent": false,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 50,
+
+  "baseStat": {
+    "max_health": 30,
+    "attack_damage": 5,
+    "movement_speed": 0.42,
+    "knockback_resistance": 1
+  },
+
+  "equipments": {
+  },
+
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 1,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

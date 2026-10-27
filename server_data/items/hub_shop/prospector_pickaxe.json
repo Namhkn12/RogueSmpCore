@@ -1,0 +1,20 @@
+{
+  "base": "STONE_PICKAXE",
+  "components": {
+    "name": "<#9E9E9E>Prospector Pickaxe",
+    "description": [
+      "<gray>Cuốc khai khoáng, đào được cả khối custom.",
+      "<dark_gray>Cấp thấp · Hàng của Toolsmith Barrett"
+    ],
+    "durability": 131,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.0,
+        "ATTACK_SPEED_BASE": 1.2,
+        "BREAK_STRENGTH": 1.0,
+        "MINING_SPEED": 120.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

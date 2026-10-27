@@ -1,0 +1,7 @@
+{
+  "id": "tmd_ashbound_zombie",
+  "entityType": "ZOMBIE",
+  "components": {
+    "display_name": "<red>Ashen Zombie"
+  }
+}

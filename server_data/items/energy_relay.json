@@ -1,0 +1,9 @@
+{
+  "id": "energy_relay",
+  "base": "PAPER",
+  "components": {
+    "name": "Trạm chuyển tiếp năng lượng",
+    "item_model": "smp:energy_relay",
+    "block_place": { "block": "energy_relay" }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "base": "BOW",
+  "components": {
+    "name": "<#7E57C2>Stormstring Recurve",
+    "description": [
+      "<gray>Cung cánh cong căng bằng dây sấm, mũi tên bay như gió.",
+      "<dark_gray>Cấp cao · Hàng của Bowyer Hawthorne"
+    ],
+    "durability": 1600,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 11.8,
+        "PROJECTILE_SPEED_BASE": 1.25,
+        "SPEED_PERCENT": 0.03,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

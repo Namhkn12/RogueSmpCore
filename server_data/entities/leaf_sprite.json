@@ -1,0 +1,21 @@
+{
+  "id": "wood/leaf_sprite",
+  "entityType": "VEX",
+  "components": {
+    "display_name": "<#C5E1A5>Tinh linh lá",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 20.0,
+      "attack_damage": 4.5,
+      "armor": 0.0
+    },
+    "equipment": {
+      "HAND": {
+        "material": "WOODEN_SWORD"
+      }
+    }
+  }
+}

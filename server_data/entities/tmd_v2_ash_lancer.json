@@ -1,0 +1,50 @@
+{
+  "id": "tmd_ash_lancer",
+  "entityType": "ZOMBIFIED_PIGLIN",
+  "displayName": "<red>Ash Lancer</red>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 22,
+  "baseStat": {
+    "max_health": 38.0,
+    "attack_damage": 7.0,
+    "movement_speed": 0.31,
+    "armor": 5.0,
+    "knockback_resistance": 0.1
+  },
+  "equipments": {
+    "CHEST": {
+      "material": "IRON_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "flow"
+    },
+    "FEET": {
+      "material": "IRON_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "flow"
+    },
+    "HAND": {
+      "material": "IRON_SWORD",
+      "displayName": "<gray>Cinder Spear</gray>",
+      "lore": [
+        "<dark_gray>Tip still glowing with heat."
+      ],
+      "enchantGlint": false,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

@@ -1,0 +1,8 @@
+{
+  "id": "spawner_tmd_scorch_raider",
+  "name": "TMD Scorch Raider Spawner",
+  "mobs": { "tmd_scorch_raider": 100 },
+  "delay": 0, "minDelay": 130, "maxDelay": 160,
+  "activeRange": 12, "spawnRange": 4, "maxNearBy": 7, "spawnCount": 3,
+  "behaviors": []
+}

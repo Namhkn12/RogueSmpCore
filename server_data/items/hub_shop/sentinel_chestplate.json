@@ -1,0 +1,18 @@
+{
+  "base": "DIAMOND_CHESTPLATE",
+  "components": {
+    "name": "<#4DD0E1>Sentinel Chestplate",
+    "description": [
+      "<gray>Giáp của đội tuần tra biên giới, đứng vững trước mọi cú húc.",
+      "<dark_gray>Cấp trung · Hàng của Armorer Roland"
+    ],
+    "durability": 528,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 7.0,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "CHEST"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<light_purple>Masterwork Mana Core",
+    "description": [
+      "<dark_gray><!i>Linh kiện · Masterwork",
+      "<gray><!i>Lõi của trượng",
+      "<gray><!i>Dùng cho đồ bậc <white>B7–B8"
+    ],
+    "item_model": "minecraft:magma_cream"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "golden_greataxe",
+  "base": "GOLDEN_AXE",
+  "components": {
+    "name": "<green>Golden Greataxe",
+    "item_model": "minecraft:golden_greataxe",
+    "durability": 900,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 12.5,
+        "ATTACK_SPEED_BASE": 0.7,
+        "ENTITY_REACH": 0.4,
+        "SPEED_PERCENT": -0.02,
+        "KNOCKBACK_RESISTANCE": 0.06,
+        "SWEEPING_DAMAGE_RATIO": 0.32
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

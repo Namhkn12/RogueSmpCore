@@ -1,0 +1,16 @@
+{
+  "display_name": "Khối vàng nguyên chất",
+  "model": "minecraft:ores/gold_pure_block",
+  "hardness": 6,
+  "break_strength": 2,
+  "drops": [
+    {
+      "item": "gold_pure_block",
+      "min_amount": 1,
+      "max_amount": 1,
+      "chance": 1.0
+    }
+  ],
+  "place_sound": "block.metal.place",
+  "break_sound": "block.metal.break"
+}

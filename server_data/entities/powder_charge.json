@@ -1,0 +1,50 @@
+{
+  "id": "metal/powder_charge",
+  "entityType": "CREEPER",
+  "components": {
+    "display_name": "<gradient:#FFAB91:#424242>Creeper bột đen</gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 24
+    },
+    "attributes": {
+      "max_health": 38.0,
+      "attack_damage": 6.0,
+      "movement_speed": 0.3,
+      "armor": 4.0,
+      "knockback_resistance": 0.1
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "speed_burst_spell",
+          "triggerRange": 16.0,
+          "amplifier": 1,
+          "durationTicks": 100,
+          "cooldownTicks": 200
+        },
+        {
+          "type": "proximity_detonate_spell",
+          "triggerRange": 2.5,
+          "radius": 3.5,
+          "damageMultiplier": 1.0,
+          "falloff": true,
+          "knockback": 0.8,
+          "playersOnly": true,
+          "effects": [
+            {
+              "type": "mining_fatigue",
+              "duration": 100,
+              "amplifier": 1
+            },
+            {
+              "type": "blindness",
+              "duration": 60,
+              "amplifier": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

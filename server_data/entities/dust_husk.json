@@ -1,0 +1,29 @@
+{
+  "id": "metal/dust_husk",
+  "entityType": "HUSK",
+  "components": {
+    "display_name": "<#D7CCC8>Thây bụi mỏ",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 44.0,
+      "attack_damage": 4.0,
+      "armor": 2.0
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "dust_husk"
+      },
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "dyeColor": "255,165,150,130"
+      },
+      "HAND": {
+        "material": "STONE_SHOVEL"
+      }
+    }
+  }
+}

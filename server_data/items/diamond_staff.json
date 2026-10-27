@@ -1,0 +1,24 @@
+{
+  "id": "diamond_staff",
+  "base": "STICK",
+  "components": {
+    "name": "<dark_purple>Diamond Staff",
+    "item_model": "minecraft:diamond_staff",
+    "mage_staff": {
+      "color": "#5CE8E0"
+    },
+    "durability": 1500,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 2.0,
+        "STAFF_DAMAGE_BASE": 12.375,
+        "STAFF_RANGE_BASE": 28,
+        "ATTACK_SPEED_BASE": 0.75,
+        "SPEED_PERCENT": -0.06,
+        "MAGIC_DAMAGE_PERCENT": 0.1,
+        "KNOCKBACK_RESISTANCE": 0.15
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

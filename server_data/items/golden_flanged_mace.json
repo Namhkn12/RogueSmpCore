@@ -1,0 +1,18 @@
+{
+  "id": "golden_flanged_mace",
+  "base": "GOLDEN_AXE",
+  "components": {
+    "name": "<green>Golden Flanged Mace",
+    "item_model": "minecraft:golden_flanged_mace",
+    "durability": 720,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 7.0,
+        "ATTACK_SPEED_BASE": 1.0375,
+        "ENTITY_REACH": 0.15,
+        "SWEEPING_DAMAGE_RATIO": 0.08
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "base": "NETHERITE_SWORD",
+  "components": {
+    "item_model": "minecraft:netherite_swordstaff",
+    "durability": 1755,
+    "name": "<gold>Netherite Swordstaff",
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 8.5,
+        "ATTACK_SPEED_BASE": 1.25,
+        "SWEEPING_DAMAGE_RATIO": 0.04,
+        "ENTITY_REACH": 0.75
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

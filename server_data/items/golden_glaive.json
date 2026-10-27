@@ -1,0 +1,17 @@
+{
+  "base": "GOLDEN_SWORD",
+  "components": {
+    "item_model": "minecraft:golden_glaive",
+    "durability": 660,
+    "name": "<green>Golden Glaive",
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.375,
+        "ATTACK_SPEED_BASE": 1.225,
+        "SWEEPING_DAMAGE_RATIO": 0.4,
+        "ENTITY_REACH": 1.15
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

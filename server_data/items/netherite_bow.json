@@ -1,0 +1,19 @@
+{
+  "id": "netherite_bow",
+  "base": "BOW",
+  "components": {
+    "name": "<gold>Netherite Bow",
+    "item_model": "minecraft:netherite_bow",
+    "durability": 1950,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 11.0,
+        "PROJECTILE_SPEED_BASE": 0.88,
+        "SPEED_PERCENT": -0.1,
+        "BURNING_TIME": -0.4,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

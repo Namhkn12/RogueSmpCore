@@ -1,0 +1,16 @@
+{
+  "id": "iron_pickaxe",
+  "base": "IRON_PICKAXE",
+  "components": {
+    "durability": 250,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.0,
+        "ATTACK_SPEED_BASE": 1.2000000476837158,
+        "BREAK_STRENGTH": 3.0,
+        "MINING_SPEED": 160.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

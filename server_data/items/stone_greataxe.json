@@ -1,0 +1,20 @@
+{
+  "id": "stone_greataxe",
+  "base": "STONE_AXE",
+  "components": {
+    "name": "<white>Stone Greataxe",
+    "item_model": "minecraft:stone_greataxe",
+    "durability": 225,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 10.0,
+        "ATTACK_SPEED_BASE": 0.76,
+        "ENTITY_REACH": 0.43,
+        "SPEED_PERCENT": -0.008,
+        "KNOCKBACK_RESISTANCE": 0.072,
+        "SWEEPING_DAMAGE_RATIO": 0.368
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

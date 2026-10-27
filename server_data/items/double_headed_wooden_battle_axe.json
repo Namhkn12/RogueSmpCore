@@ -1,0 +1,18 @@
+{
+  "id": "double_headed_wooden_battle_axe",
+  "base": "WOODEN_AXE",
+  "components": {
+    "name": "<white>Double Headed Wooden Battle Axe",
+    "item_model": "minecraft:double_headed_wooden_battle_axe",
+    "durability": 96,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 7.75,
+        "ATTACK_SPEED_BASE": 0.93,
+        "ENTITY_REACH": 0.21,
+        "SWEEPING_DAMAGE_RATIO": 0.416
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

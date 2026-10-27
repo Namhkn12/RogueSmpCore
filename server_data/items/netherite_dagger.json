@@ -1,0 +1,17 @@
+{
+  "id": "netherite_dagger",
+  "base": "NETHERITE_SWORD",
+  "components": {
+    "name": "<gold>Netherite Dagger",
+    "item_model": "minecraft:netherite_dagger",
+    "durability": 1170,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.0,
+        "ATTACK_SPEED_BASE": 2.9,
+        "ENTITY_REACH": -0.5
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

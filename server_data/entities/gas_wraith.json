@@ -1,0 +1,53 @@
+{
+  "id": "metal/gas_wraith",
+  "entityType": "BOGGED",
+  "components": {
+    "display_name": "<gradient:#DCE775:#558B2F>Bóng khí độc</gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 24
+    },
+    "attributes": {
+      "max_health": 38.0,
+      "attack_damage": 5.0,
+      "armor": 4.0,
+      "knockback_resistance": 0.1
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "gas_wraith"
+      },
+      "CHEST": {
+        "material": "CHAINMAIL_CHESTPLATE",
+        "trimMaterial": "emerald",
+        "trimPattern": "vex"
+      },
+      "HAND": {
+        "material": "BOW"
+      }
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "toxic_zone_spell",
+          "onMeleeHurt": true,
+          "onProjectileHit": true,
+          "hurtCooldownTicks": 60,
+          "cloud": {
+            "radius": 2.5,
+            "duration": 80,
+            "color": "#9ACD32",
+            "effects": [
+              {
+                "type": "poison",
+                "duration": 60,
+                "amplifier": 0
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

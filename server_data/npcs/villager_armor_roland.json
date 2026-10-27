@@ -1,0 +1,14 @@
+{
+  "entityType": "VILLAGER",
+  "name": "<gradient:#E0E0E0:#90A4AE><bold>Armorer Roland</bold></gradient>",
+  "description": [
+    "<gray>Cung cấp giáp và trang bị phòng thủ</gray>"
+  ],
+  "profession": "minecraft:armorer",
+  "actions": [
+    {
+      "type": "open_gui",
+      "gui": "shop:armor_roland"
+    }
+  ]
+}

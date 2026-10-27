@@ -1,0 +1,33 @@
+{
+  "id": "legendary_hunter_4",
+  "name": "<gold>Thợ Săn Huyền Thoại IV</gold>",
+  "icon":"NETHERITE_SWORD",
+  "description": [
+    "<gray>Tiêu diệt lũ quái vật đang phá hoại",
+    "<gray>và đem về chiến lợi phẩm quý giá."
+  ],
+  "objectives": {
+    "kill_zombies_task": {
+      "type": "kill_mob",
+      "mobId": "tmd_ashbound_zombie",
+      "amount": 100
+    },
+    "kill_hk_stray_task": {
+      "type": "kill_mob",
+      "mobId": "hell_knight_stray",
+      "amount": 10
+    }
+  },
+  "requirements": [
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": {
+        "copper_block_currency": 10,
+        "copper_ingot_currency": 10,
+        "defense_gem": 10
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "type": "normal",
+  "name": "Sảnh xương",
+  "schematic": "schemeta_cave_combat_01",
+  "objectives": [
+    { "on": { "event": "mob_killed" }, "count": 15, "score": 10, "display": "Tiêu diệt quái" }
+  ],
+  "effects": [
+    { "type": "darkness", "flicker": true }
+  ]
+}

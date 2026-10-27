@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<light_purple>Masterwork Leather Lining",
+    "description": [
+      "<dark_gray><!i>Linh kiện · Masterwork",
+      "<gray><!i>Lớp lót cho giáp nhẹ",
+      "<gray><!i>Dùng cho đồ bậc <white>B7–B8"
+    ],
+    "item_model": "minecraft:leather"
+  }
+}

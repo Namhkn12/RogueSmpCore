@@ -1,0 +1,21 @@
+{
+  "base": "IRON_SWORD",
+  "components": {
+    "name": "<#B0BEC5>Kiếm Vệ Binh",
+    "description": [
+      "<gray>Vũ khí sắt tiêu chuẩn của đội vệ binh thị trấn.",
+      "<gray>Cân bằng, bền bỉ, dễ dùng.",
+      "<dark_gray>Hàng của Thợ rèn Drake · Không thể chế tạo"
+    ],
+    "durability": 840,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.0,
+        "ATTACK_SPEED_BASE": 1.5,
+        "ENTITY_REACH": 0.1,
+        "SWEEPING_DAMAGE_RATIO": 0.18
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

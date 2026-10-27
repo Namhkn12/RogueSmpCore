@@ -1,0 +1,200 @@
+{
+  "title": "<#8D6E63>Thợ Cung Hawthorne",
+  "layout": {
+    "pattern": [
+      "#########",
+      "#O.O.O.O#",
+      "#OOO#OOO#",
+      "#..OOO..#",
+      "#########"
+    ],
+    "keys": {
+      "#": "BLACK_STAINED_GLASS_PANE"
+    },
+    "fill": "BROWN_STAINED_GLASS_PANE"
+  },
+  "offers": [
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 315
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "ashwood_shortbow"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 1300
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "yew_longbow"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 4200
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "ironbound_crossbow"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 21400
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "stormstring_recurve"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 150
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "bow_grip_fine"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 500
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "bow_grip_superior"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 2300
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "bow_grip_masterwork"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 50
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "silk_thread_fine"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 160
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "silk_thread_superior"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 750
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "silk_thread_masterwork"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 200
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "heartwood_shaft_fine"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 650
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "heartwood_shaft_superior"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 3000
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "heartwood_shaft_masterwork"
+        }
+      ]
+    }
+  ]
+}

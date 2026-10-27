@@ -1,0 +1,42 @@
+{
+  "id": "drill_golem",
+  "entityType": "IRON_GOLEM",
+  "components": {
+    "ai": {
+      "presets": [
+        "hostile"
+      ]
+    },
+    "attributes": {
+      "KNOCKBACK_RESISTANCE": 1.0,
+      "ARMOR": 12.0,
+      "ATTACK_DAMAGE": 12.0,
+      "MAX_HEALTH": 90.0
+    },
+    "display_name": "<gradient:#ECEFF1:#546E7A><bold>✦ Golem mỏ ✦</bold></gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 28
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "trigger": "MELEE",
+          "effects": [
+            {
+              "type": "minecraft:weakness",
+              "duration": 100
+            },
+            {
+              "type": "minecraft:slowness",
+              "duration": 60,
+              "amplifier": 1
+            }
+          ],
+          "firstHitOnly": true,
+          "type": "apply_effect_on_hit_spell"
+        }
+      ]
+    }
+  }
+}

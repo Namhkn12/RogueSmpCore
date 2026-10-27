@@ -1,0 +1,58 @@
+{
+  "id": "tmd_cinder_grunt",
+  "entityType": "ZOMBIFIED_PIGLIN",
+  "displayName": "<dark_red>Cinder Grunt</dark_red>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 20,
+  "baseStat": {
+    "max_health": 36.0,
+    "attack_damage": 6.0,
+    "movement_speed": 0.28,
+    "armor": 6.0,
+    "knockback_resistance": 0.1
+  },
+  "equipments": {
+    "CHEST": {
+      "material": "CHAINMAIL_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "sentry"
+    },
+    "LEGS": {
+      "material": "CHAINMAIL_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "sentry"
+    },
+    "FEET": {
+      "material": "CHAINMAIL_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "sentry"
+    },
+    "HAND": {
+      "material": "STONE_SWORD",
+      "displayName": "<gray>Ashen Sword</gray>",
+      "lore": [
+        "<dark_gray>Forged from the ash pits below."
+      ],
+      "enchantGlint": false,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

@@ -1,0 +1,18 @@
+{
+  "base": "STONE_AXE",
+  "components": {
+    "name": "<#9E9E9E>Prospector Felling Axe",
+    "description": [
+      "<gray>Rìu đốn gỗ chuyên dụng.",
+      "<dark_gray>Cấp thấp · Hàng của Toolsmith Barrett"
+    ],
+    "durability": 131,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.5,
+        "ATTACK_SPEED_BASE": 0.9
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

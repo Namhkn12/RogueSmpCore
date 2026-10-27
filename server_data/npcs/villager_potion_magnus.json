@@ -1,0 +1,9 @@
+{
+  "entityType": "VILLAGER",
+  "name": "<gradient:#81C784:#1B5E20><bold>Alchemist Magnus</bold></gradient>",
+  "description": [
+    "<green>Cung cấp thuốc và nguyên liệu giả kim</green>"
+  ],
+  "profession": "minecraft:cleric",
+  "actions": []
+}

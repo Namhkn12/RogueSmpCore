@@ -1,0 +1,22 @@
+{
+  "id": "mage_white_boots",
+  "base": "LEATHER_BOOTS",
+  "components": {
+    "name": "<white>Ivory Mage Boots",
+    "dyed_color": "#F9FFFE",
+    "enchant": {
+      "enchants": {
+        "FEATHER_FALLING": 2
+      }
+    },
+    "durability": 128,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 0.675,
+        "SPEED_PERCENT": 0.03,
+        "FALL_DAMAGE": -0.2
+      },
+      "slot": "FEET"
+    }
+  }
+}

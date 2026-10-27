@@ -1,0 +1,9 @@
+{
+  "entityType": "MANNEQUIN",
+  "name": "<gradient:#CE93D8:#6A1B9A><bold>Quartermaster Vincent</bold></gradient>",
+  "skinId": "guilder_boy",
+  "description": [
+    "<light_purple>Nhận thưởng cấp bậc</light_purple>"
+  ],
+  "actions": []
+}

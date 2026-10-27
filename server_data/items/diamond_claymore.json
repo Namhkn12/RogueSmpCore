@@ -1,0 +1,20 @@
+{
+  "id": "diamond_claymore",
+  "base": "DIAMOND_SWORD",
+  "components": {
+    "name": "<dark_purple>Diamond Claymore",
+    "item_model": "minecraft:diamond_claymore",
+    "durability": 1950,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 13.0,
+        "ATTACK_SPEED_BASE": 0.8375,
+        "ENTITY_REACH": 0.55,
+        "SPEED_PERCENT": -0.0525,
+        "KNOCKBACK_RESISTANCE": 0.02,
+        "SWEEPING_DAMAGE_RATIO": 0.2
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

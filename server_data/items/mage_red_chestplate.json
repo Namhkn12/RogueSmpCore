@@ -1,0 +1,21 @@
+{
+  "id": "mage_red_chestplate",
+  "base": "LEATHER_CHESTPLATE",
+  "components": {
+    "name": "<white>Crimson Mage Robe",
+    "dyed_color": "#B02E26",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 160,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.8,
+        "MAGIC_DAMAGE_PERCENT": 0.015
+      },
+      "slot": "CHEST"
+    }
+  }
+}

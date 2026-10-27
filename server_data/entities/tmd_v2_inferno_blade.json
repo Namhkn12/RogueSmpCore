@@ -1,0 +1,66 @@
+{
+  "id": "tmd_inferno_blade",
+  "entityType": "PIGLIN",
+  "displayName": "<gold>Inferno Blade</gold>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 24,
+  "baseStat": {
+    "max_health": 56.0,
+    "attack_damage": 11.0,
+    "movement_speed": 0.33,
+    "armor": 12.0,
+    "knockback_resistance": 0.2
+  },
+  "equipments": {
+    "HEAD": {
+      "material": "GOLDEN_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "gold",
+      "trimPattern": "snout"
+    },
+    "CHEST": {
+      "material": "GOLDEN_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "bolt"
+    },
+    "LEGS": {
+      "material": "IRON_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "bolt"
+    },
+    "FEET": {
+      "material": "GOLDEN_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "gold",
+      "trimPattern": "snout"
+    },
+    "HAND": {
+      "material": "IRON_SWORD",
+      "displayName": "<gold>Inferno Blade</gold>",
+      "lore": [
+        "<dark_red>Burns with the fury of the nether."
+      ],
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

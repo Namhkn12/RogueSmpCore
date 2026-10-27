@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<light_purple>Masterwork Bow Grip",
+    "description": [
+      "<dark_gray><!i>Linh kiện · Masterwork",
+      "<gray><!i>Tay cầm kim loại của cung và nỏ",
+      "<gray><!i>Dùng cho đồ bậc <white>B7–B8"
+    ],
+    "item_model": "smp:bow_grip"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "metal/flooded_diver",
+  "entityType": "DROWNED",
+  "components": {
+    "equipment": {
+      "LEGS": {
+        "material": "LEATHER_LEGGINGS",
+        "dyeColor": "255,96,110,120"
+      },
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "flooded_diver"
+      },
+      "FEET": {
+        "material": "LEATHER_BOOTS",
+        "dyeColor": "255,54,54,58"
+      }
+    },
+    "attributes": {
+      "MAX_HEALTH": 40.0,
+      "ATTACK_DAMAGE": 3.5,
+      "ARMOR": 2.0,
+      "WATER_MOVEMENT_EFFICIENCY": 0.10000000149011612
+    },
+    "display_name": "<#4FC3F7>Thây hầm ngập",
+    "behavior": {
+      "persistent": true
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "spawner_archer_post",
+  "name": "Archer Post",
+  "mobs": {
+    "dungeon_skeleton": 100
+  },
+  "delay": 0,
+  "minDelay": 120,
+  "maxDelay": 220,
+  "activeRange": 12,
+  "spawnRange": 3,
+  "maxNearBy": 5,
+  "spawnCount": 3,
+  "behaviors": [
+    {
+      "type": "protector",
+      "params": {
+        "requireBreak": 4
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "diamond_greataxe",
+  "base": "DIAMOND_AXE",
+  "components": {
+    "name": "<dark_purple>Diamond Greataxe",
+    "item_model": "minecraft:diamond_greataxe",
+    "durability": 2250,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 17.5,
+        "ATTACK_SPEED_BASE": 0.5,
+        "ENTITY_REACH": 0.3,
+        "SPEED_PERCENT": -0.06,
+        "KNOCKBACK_RESISTANCE": 0.02,
+        "SWEEPING_DAMAGE_RATIO": 0.16
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

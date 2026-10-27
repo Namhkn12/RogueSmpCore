@@ -1,0 +1,16 @@
+{
+  "id": "archer",
+  "display_name": "Archer",
+  "icon": "minecraft:bow",
+  "description": [
+    "An archer specialize in precision attack to deal devastating damage"
+  ],
+  "default_abilities": {
+    "gravity_bomb": 1,
+    "scrap_shot": 1,
+    "sharpshooter": 1,
+    "sidearm": 1,
+    "split_arrow": 1
+  },
+  "allowedWeapons": ["projectile_weapons"]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "ores/iron_pure_ingot",
+  "base": "PAPER",
+  "components": {
+    "name": "<aqua>Thỏi sắt nguyên chất",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Nguyên chất"
+    ],
+    "item_model": "minecraft:ores/iron_pure_ingot"
+  }
+}

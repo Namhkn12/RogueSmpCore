@@ -1,0 +1,18 @@
+{
+  "id": "golden_swordbreaker",
+  "base": "GOLDEN_SWORD",
+  "components": {
+    "name": "<green>Golden Swordbreaker",
+    "item_model": "minecraft:golden_swordbreaker",
+    "durability": 720,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.875,
+        "ATTACK_SPEED_BASE": 1.6625,
+        "ENTITY_REACH": -0.1,
+        "DEFENSE_FLAT": 1.2
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

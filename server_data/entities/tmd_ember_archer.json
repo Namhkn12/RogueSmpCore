@@ -1,0 +1,78 @@
+{
+  "id": "tmd_ember_archer",
+  "entityType": "SKELETON",
+  "displayName": "<dark_red><bold>Ember Archer</bold></dark_red>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 30,
+
+  "baseStat": {
+    "max_health": 25.0,
+    "attack_damage": 7.0,
+    "movement_speed": 0.30,
+    "armor": 7.0,
+    "knockback_resistance": 0.05
+  },
+
+  "equipments": {
+
+    "HEAD": {
+      "material": "CHAINMAIL_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "spire"
+    },
+
+    "CHEST": {
+      "material": "IRON_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "bolt"
+    },
+
+    "LEGS": {
+      "material": "CHAINMAIL_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "flow"
+    },
+
+    "FEET": {
+      "material": "IRON_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "vex"
+    },
+
+    "HAND": {
+      "material": "BOW",
+      "displayName": "<dark_red>Ember Bow</dark_red>",
+      "lore": [
+        "<gray>Its string hums with heat."
+      ],
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+
+  "activeSpell": [
+    "fire_aspect_spell"
+  ],
+  "passiveSpell": [
+    "fire_resistance_spell"
+  ],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

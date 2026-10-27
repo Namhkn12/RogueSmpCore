@@ -1,0 +1,23 @@
+{
+  "id": "netherite_kite_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<gold>Netherite Kite Shield",
+    "item_model": "minecraft:netherite_kite_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 2,
+        "BLAST_PROTECTION": 1
+      }
+    },
+    "durability": 2535,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 6.0,
+        "SPEED_PERCENT": -0.1125,
+        "KNOCKBACK_RESISTANCE": 0.25
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

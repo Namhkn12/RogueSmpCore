@@ -1,0 +1,76 @@
+{
+  "id": "tmd_ember_piglin",
+  "entityType": "PIGLIN",
+  "displayName": "<gold><bold>Ember Piglin</bold></gold>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 26,
+
+  "baseStat": {
+    "max_health": 32.0,
+    "attack_damage": 7.0,
+    "movement_speed": 0.36,
+    "armor": 9.0,
+    "knockback_resistance": 0.12
+  },
+
+  "equipments": {
+
+    "HEAD": {
+      "material": "IRON_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "spire"
+    },
+
+    "CHEST": {
+      "material": "IRON_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "bolt"
+    },
+
+    "LEGS": {
+      "material": "CHAINMAIL_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "flow"
+    },
+
+    "FEET": {
+      "material": "IRON_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "snout"
+    },
+
+    "HAND": {
+      "material": "GOLDEN_SWORD",
+      "displayName": "<gold>Ember Fang</gold>",
+      "lore": [
+        "<gray>Favored by raiders of the molten pits."
+      ],
+      "enchantGlint": false,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+
+  "activeSpell": ["shadow_step_spell"],
+  "passiveSpell": [
+    "fire_resistance_spell"
+  ],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

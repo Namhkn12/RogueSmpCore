@@ -1,0 +1,24 @@
+{
+  "id": "spawner_tmd_tier2",
+  "name": "TMD Tier 2 - Flame Legion Spawner",
+  "mobs": {
+    "tmd_inferno_blade": 34,
+    "tmd_ember_crossbow": 33,
+    "tmd_blaze_boar": 33
+  },
+  "delay": 0,
+  "minDelay": 160,
+  "maxDelay": 280,
+  "activeRange": 12,
+  "spawnRange": 4,
+  "maxNearBy": 6,
+  "spawnCount": 3,
+  "behaviors": [
+      {
+        "type": "wave",
+        "params": {
+          "waves": 3
+        }
+      }
+    ]
+}

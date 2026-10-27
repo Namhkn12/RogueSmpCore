@@ -1,0 +1,21 @@
+{
+  "id": "stone_round_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<white>Stone Round Shield",
+    "item_model": "minecraft:stone_round_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 120,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.0,
+        "SPEED_PERCENT": 0.0465
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "id": "coke_oven",
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:dropper",
+    "name": "Coke Oven",
+    "block_place": {
+      "block": "coke_oven"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "tmd_basalt_beast",
+  "entityType": "HOGLIN",
+  "components": {
+    "display_name": "<red>Hog Rider",
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "slow_aura_spell"
+        }
+      ],
+      "passiveInterval": 10
+    }
+  }
+}

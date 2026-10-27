@@ -1,0 +1,17 @@
+{
+  "id": "copper_round_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<white>Copper Round Shield",
+    "item_model": "minecraft:copper_round_shield",
+    "durability": 156,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.1,
+        "SPEED_PERCENT": 0.0525,
+        "FALL_DAMAGE": -0.15
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

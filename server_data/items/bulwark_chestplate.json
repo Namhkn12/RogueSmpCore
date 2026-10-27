@@ -1,0 +1,25 @@
+{
+  "base": "NETHERITE_CHESTPLATE",
+  "components": {
+    "name": "<#8D3B2E><b>Giáp Ngực Thành Lũy Hắc Thiết",
+    "description": [
+      "<gray>Chiếc áo hắc thiết duy nhất Roland chịu đem bán.",
+      "<gray>Nặng như một bức tường thành, lửa khó lòng xuyên qua.",
+      "<dark_gray>Hàng của Thợ giáp Roland · Không thể chế tạo"
+    ],
+    "durability": 1560,
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 10.9,
+        "KNOCKBACK_RESISTANCE": 0.05,
+        "SPEED_PERCENT": -0.01
+      },
+      "slot": "CHEST"
+    }
+  }
+}

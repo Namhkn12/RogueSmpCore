@@ -1,0 +1,14 @@
+{
+  "id": "tmd_nether_cave_combat_01",
+  "type": "NORMAL",
+  "schemetaId": "schemeta_tmd_nether_cave_combat_01",
+  "objectives": [
+    {
+      "type": "spawner_breaker",
+      "params": {
+        "score": 35,
+        "require": 4
+      }
+    }
+  ]
+}

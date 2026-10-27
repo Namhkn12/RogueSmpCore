@@ -1,0 +1,17 @@
+{
+  "base": "LEATHER_LEGGINGS",
+  "components": {
+    "name": "<#C8A27A>Padded Leggings",
+    "description": [
+      "<gray>Áo vải độn nhiều lớp, nhẹ và dễ cử động.",
+      "<dark_gray>Cấp thấp · Hàng của Armorer Roland"
+    ],
+    "durability": 75,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.1
+      },
+      "slot": "LEGS"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "iron_helmet",
+  "base": "IRON_HELMET",
+  "components": {
+    "name": "<blue>Iron Helmet",
+    "durability": 735,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.0
+      },
+      "slot": "HEAD"
+    }
+  }
+}

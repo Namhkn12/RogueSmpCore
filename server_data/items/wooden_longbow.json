@@ -1,0 +1,19 @@
+{
+  "id": "wooden_longbow",
+  "base": "BOW",
+  "components": {
+    "name": "<white>Wooden Longbow",
+    "item_model": "minecraft:wooden_longbow",
+    "durability": 66,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 5.3,
+        "PROJECTILE_SPEED_BASE": 1.245,
+        "SPEED_PERCENT": 0.015,
+        "SNEAKING_SPEED": 0.15,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

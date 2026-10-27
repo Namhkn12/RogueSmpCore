@@ -1,0 +1,27 @@
+{
+  "id": "hell_knight_blaze",
+  "entityType": "BLAZE",
+  "displayName": "<dark_red><bold>Ảo ảnh hỏa ngục</bold></dark_red>",
+  "noAi": false,
+  "persistent": false,
+  "isBoss": false,
+  "isElite": true,
+  "detectionRange": 50,
+
+  "baseStat": {
+    "max_health": 220,
+    "attack_damage": 10,
+    "movement_speed": 0.3,
+    "armor": 18.0,
+    "knockback_resistance": 1
+  },
+
+  "equipments": {
+  },
+
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 1,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

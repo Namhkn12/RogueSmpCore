@@ -1,0 +1,18 @@
+{
+  "id": "diamond_cutlass",
+  "base": "DIAMOND_SWORD",
+  "components": {
+    "name": "<dark_purple>Diamond Cutlass",
+    "item_model": "minecraft:diamond_cutlass",
+    "durability": 1500,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 7.75,
+        "ATTACK_SPEED_BASE": 1.45,
+        "ENTITY_REACH": 0.05,
+        "SWEEPING_DAMAGE_RATIO": 0.12
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

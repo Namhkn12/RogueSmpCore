@@ -1,0 +1,18 @@
+{
+  "base": "DIAMOND_LEGGINGS",
+  "components": {
+    "name": "<#4DD0E1>Sentinel Leggings",
+    "description": [
+      "<gray>Giáp của đội tuần tra biên giới, đứng vững trước mọi cú húc.",
+      "<dark_gray>Cấp trung · Hàng của Armorer Roland"
+    ],
+    "durability": 495,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 5.5,
+        "KNOCKBACK_RESISTANCE": 0.05
+      },
+      "slot": "LEGS"
+    }
+  }
+}

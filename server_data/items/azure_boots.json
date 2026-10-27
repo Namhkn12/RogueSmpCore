@@ -1,0 +1,19 @@
+{
+  "base": "DIAMOND_BOOTS",
+  "components": {
+    "name": "<#4FC3F7>Giày Hộ Vệ Lam Ngọc",
+    "description": [
+      "<gray>Giáp kim cương do chính tay Roland gia công.",
+      "<gray>Mỏng hơn hàng thợ rèn, nhưng vẫn sáng loáng.",
+      "<dark_gray>Hàng của Thợ giáp Roland · Không thể chế tạo"
+    ],
+    "durability": 960,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.3,
+        "SPEED_PERCENT": -0.01
+      },
+      "slot": "FEET"
+    }
+  }
+}

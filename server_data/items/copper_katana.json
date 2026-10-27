@@ -1,0 +1,18 @@
+{
+  "id": "copper_katana",
+  "base": "COPPER_SWORD",
+  "components": {
+    "name": "<white>Copper Katana",
+    "item_model": "minecraft:copper_katana",
+    "durability": 176,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.7,
+        "ATTACK_SPEED_BASE": 1.9,
+        "ENTITY_REACH": 0.45,
+        "SWEEPING_DAMAGE_RATIO": 0.2
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

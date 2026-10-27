@@ -1,0 +1,15 @@
+{
+  "id": "spawner_tmd_soulwail",
+  "name": "TMD Soulwail Spawner",
+  "mobs": {
+    "tmd_soulwail": 100
+  },
+  "delay": 0,
+  "minDelay": 400,
+  "maxDelay": 700,
+  "activeRange": 24,
+  "spawnRange": 8,
+  "maxNearBy": 2,
+  "spawnCount": 1,
+  "behaviors": []
+}

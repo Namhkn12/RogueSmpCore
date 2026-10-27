@@ -1,0 +1,17 @@
+{
+  "id": "copper_tomahawk",
+  "base": "COPPER_AXE",
+  "components": {
+    "name": "<white>Copper Tomahawk",
+    "item_model": "minecraft:copper_tomahawk",
+    "durability": 137,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.725,
+        "ATTACK_SPEED_BASE": 1.5,
+        "ENTITY_REACH": -0.05
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

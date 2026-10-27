@@ -1,0 +1,17 @@
+{
+  "id": "stone_dagger",
+  "base": "STONE_SWORD",
+  "components": {
+    "name": "<white>Stone Dagger",
+    "item_model": "minecraft:stone_dagger",
+    "durability": 90,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 2.5,
+        "ATTACK_SPEED_BASE": 2.99,
+        "ENTITY_REACH": -0.32
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

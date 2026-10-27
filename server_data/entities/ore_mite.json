@@ -1,0 +1,31 @@
+{
+  "id": "metal/ore_mite",
+  "entityType": "SILVERFISH",
+  "components": {
+    "display_name": "<#90A4AE>Mọt quặng",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 24.0,
+      "attack_damage": 2.0,
+      "armor": 0.0
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "apply_effect_on_hit_spell",
+          "trigger": "MELEE",
+          "effects": [
+            {
+              "type": "mining_fatigue",
+              "duration": 100,
+              "amplifier": 1
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "base": "WOODEN_SWORD",
+  "components": {
+    "item_model": "minecraft:wooden_swordstaff",
+    "durability": 66,
+    "name": "<white>Wooden Swordstaff",
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.55,
+        "ATTACK_SPEED_BASE": 1.525,
+        "SWEEPING_DAMAGE_RATIO": 0.208,
+        "ENTITY_REACH": 0.96
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

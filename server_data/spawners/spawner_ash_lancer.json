@@ -1,0 +1,8 @@
+{
+  "id": "spawner_tmd_ash_lancer",
+  "name": "TMD Ash Lancer Spawner",
+  "mobs": { "tmd_ash_lancer": 100 },
+  "delay": 0, "minDelay": 120, "maxDelay": 155,
+  "activeRange": 12, "spawnRange": 4, "maxNearBy": 7, "spawnCount": 4,
+  "behaviors": []
+}

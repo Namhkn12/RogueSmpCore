@@ -1,0 +1,18 @@
+{
+  "id": "golden_pike",
+  "base": "GOLDEN_SPEAR",
+  "components": {
+    "name": "<green>Golden Pike",
+    "item_model": "minecraft:golden_pike",
+    "durability": 600,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 7.625,
+        "ATTACK_SPEED_BASE": 0.8125,
+        "ENTITY_REACH": 1.65,
+        "KNOCKBACK_RESISTANCE": 0.06
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

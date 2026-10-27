@@ -1,0 +1,18 @@
+{
+  "base": "NETHERITE_LEGGINGS",
+  "components": {
+    "name": "<#8D3B2E>Bastion Leggings",
+    "description": [
+      "<gray>Bộ giáp hắc thiết hiếm hoi Roland chịu đem bán.",
+      "<dark_gray>Cấp cao · Hàng của Armorer Roland"
+    ],
+    "durability": 555,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 6.8,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "LEGS"
+    }
+  }
+}

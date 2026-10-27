@@ -1,0 +1,16 @@
+{
+  "id": "diamond_spear",
+  "base": "DIAMOND_SPEAR",
+  "components": {
+    "name": "<dark_purple>Diamond Spear",
+    "durability": 1500,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.0,
+        "ATTACK_SPEED_BASE": 1.2125,
+        "ENTITY_REACH": 0.55
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

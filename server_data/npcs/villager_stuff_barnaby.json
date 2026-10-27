@@ -1,0 +1,9 @@
+{
+  "entityType": "VILLAGER",
+  "name": "<gold><bold>Barnaby</bold></gold>",
+  "description": [
+    "<light_purple>Vật phẩm và hàng hóa nông trại</light_purple>"
+  ],
+  "profession": "minecraft:farmer",
+  "actions": []
+}

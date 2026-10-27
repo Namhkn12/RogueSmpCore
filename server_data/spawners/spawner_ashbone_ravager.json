@@ -1,0 +1,15 @@
+{
+  "id": "spawner_tmd_ashbone_ravager",
+  "name": "TMD Ashbone Ravager Spawner",
+  "mobs": { "tmd_ashbone_ravager": 100 },
+  "delay": 0, "minDelay": 380, "maxDelay": 600,
+  "activeRange": 12, "spawnRange": 5, "maxNearBy": 3, "spawnCount": 1,
+  "behaviors": [
+    {
+      "type": "protector",
+      "params": {
+        "requireBreak": 2
+      }
+    }
+  ]
+}

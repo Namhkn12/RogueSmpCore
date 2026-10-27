@@ -1,0 +1,22 @@
+{
+  "id": "golden_spiked_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<green>Golden Spiked Shield",
+    "item_model": "minecraft:golden_spiked_shield",
+    "enchant": {
+      "enchants": {
+        "THORNS": 1
+      }
+    },
+    "durability": 660,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.25,
+        "SPEED_PERCENT": -0.01,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

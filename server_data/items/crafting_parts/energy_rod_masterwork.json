@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<light_purple>Masterwork Energy Rod",
+    "description": [
+      "<dark_gray><!i>Linh kiện · Masterwork",
+      "<gray><!i>Lõi của kiếm và vũ khí cận chiến",
+      "<gray><!i>Dùng cho đồ bậc <white>B7–B8"
+    ],
+    "item_model": "minecraft:breeze_rod"
+  }
+}

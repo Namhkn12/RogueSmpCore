@@ -1,0 +1,19 @@
+{
+  "id": "primordial_slime",
+  "entityType": "MAGMA_CUBE",
+  "displayName": "<red><b>Ma chất nguyên thủy",
+  "persistent": false,
+  "isBoss": true,
+  "isElite": false,
+  "detectionRange": 32,
+
+  "baseStat": {
+    "max_health": 1000,
+    "attack_damage": 12.0,
+    "armor": 8.0,
+    "movement_speed": 0.9,
+    "knockback_resistance": 1
+  },
+  "passiveInterval": 1,
+  "canCastSameSpellTwice": false
+}

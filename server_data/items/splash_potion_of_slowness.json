@@ -1,0 +1,21 @@
+{
+  "base": "SPLASH_POTION",
+  "components": {
+    "consumable": {
+      "effects": [
+        {
+          "duration": 40,
+          "value": -1.0,
+          "id": "speed"
+        }
+      ],
+      "hunger": 4,
+      "saturation": 0.3,
+      "canAlwaysEat": false,
+      "consumeSeconds": 1.6,
+      "animation": "EAT",
+      "sound": "minecraft:entity.generic.eat",
+      "hasParticles": true
+    }
+  }
+}

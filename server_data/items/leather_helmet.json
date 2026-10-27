@@ -1,0 +1,14 @@
+{
+  "id": "leather_helmet",
+  "base": "LEATHER_HELMET",
+  "components": {
+    "name": "<white>Leather Helmet",
+    "durability": 51,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 0.84
+      },
+      "slot": "HEAD"
+    }
+  }
+}

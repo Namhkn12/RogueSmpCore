@@ -1,0 +1,18 @@
+{
+  "id": "wooden_shortsword",
+  "base": "WOODEN_SWORD",
+  "components": {
+    "name": "<white>Wooden Shortsword",
+    "item_model": "minecraft:wooden_shortsword",
+    "durability": 59,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.2,
+        "ATTACK_SPEED_BASE": 2.015,
+        "ENTITY_REACH": 0.21,
+        "SWEEPING_DAMAGE_RATIO": 0.208
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

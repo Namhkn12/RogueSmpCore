@@ -1,0 +1,21 @@
+{
+  "id": "diamond_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<dark_purple>Diamond Shield",
+    "item_model": "minecraft:diamond_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 1500,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.75,
+        "SPEED_PERCENT": -0.03
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "id": "wood/vinebound",
+  "entityType": "ZOMBIE",
+  "components": {
+    "display_name": "<gradient:#81C784:#1B5E20>Xác dây leo</gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 24
+    },
+    "attributes": {
+      "max_health": 53.0,
+      "attack_damage": 2.5,
+      "armor": 4.0,
+      "knockback_resistance": 0.1
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "vinebound"
+      },
+      "CHEST": {
+        "material": "CHAINMAIL_CHESTPLATE",
+        "trimMaterial": "emerald",
+        "trimPattern": "wild"
+      },
+      "LEGS": {
+        "material": "LEATHER_LEGGINGS",
+        "dyeColor": "255,46,79,36"
+      }
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "apply_effect_on_hit_spell",
+          "trigger": "MELEE",
+          "effects": [
+            {
+              "type": "slowness",
+              "duration": 60,
+              "amplifier": 2
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

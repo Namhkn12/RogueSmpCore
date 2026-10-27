@@ -1,0 +1,16 @@
+{
+  "id": "mage_white_chestplate",
+  "base": "LEATHER_CHESTPLATE",
+  "components": {
+    "name": "<white>Ivory Mage Robe",
+    "dyed_color": "#F9FFFE",
+    "durability": 160,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.8,
+        "MAGIC_DAMAGE_PERCENT": 0.015
+      },
+      "slot": "CHEST"
+    }
+  }
+}

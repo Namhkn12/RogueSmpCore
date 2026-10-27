@@ -1,0 +1,18 @@
+{
+  "id": "stone_pike",
+  "base": "STONE_SPEAR",
+  "components": {
+    "name": "<white>Stone Pike",
+    "item_model": "minecraft:stone_pike",
+    "durability": 150,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.0,
+        "ATTACK_SPEED_BASE": 0.865,
+        "ENTITY_REACH": 1.68,
+        "KNOCKBACK_RESISTANCE": 0.072
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

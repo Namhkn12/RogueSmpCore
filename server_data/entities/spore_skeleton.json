@@ -1,0 +1,25 @@
+{
+  "id": "wood/spore_skeleton",
+  "entityType": "BOGGED",
+  "components": {
+    "display_name": "<#7CB342>Xương nấm",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 40.0,
+      "attack_damage": 3.0,
+      "armor": 2.0
+    },
+    "equipment": {
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "dyeColor": "255,154,205,50"
+      },
+      "HAND": {
+        "material": "BOW"
+      }
+    }
+  }
+}

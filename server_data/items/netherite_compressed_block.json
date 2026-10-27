@@ -1,0 +1,13 @@
+{
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:ores/netherite_compressed_block",
+    "name": "<white>Khối Netherite nén",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Nén"
+    ],
+    "block_place": {
+      "block": "netherite_compressed_block"
+    }
+  }
+}

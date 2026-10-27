@@ -1,0 +1,23 @@
+{
+  "id": "netherite_spiked_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<gold>Netherite Spiked Shield",
+    "item_model": "minecraft:netherite_spiked_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 2,
+        "THORNS": 3
+      }
+    },
+    "durability": 2145,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 4.5,
+        "SPEED_PERCENT": -0.07,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

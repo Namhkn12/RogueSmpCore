@@ -1,0 +1,14 @@
+{
+  "id": "cave_boss_01",
+  "type": "BOSS",
+  "schemetaId": "schemeta_cave_boss_01_2",
+  "objectives": [
+    {
+      "type": "demon_slayer",
+      "params": {
+        "target": "test_boss",
+        "score": 100
+      }
+    }
+  ]
+}

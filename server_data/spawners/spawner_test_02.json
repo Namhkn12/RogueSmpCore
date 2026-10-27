@@ -1,0 +1,15 @@
+{
+  "id": "spawner_test_01",
+  "name": "Test Spawner",
+  "mobs": {
+    "test_boss": 60
+  },
+  "delay": 0,
+  "minDelay": 100,
+  "maxDelay": 200,
+  "activeRange": 20,
+  "spawnRange": 4,
+  "maxNearBy": 6,
+  "spawnCount": 7,
+  "behaviors": []
+}

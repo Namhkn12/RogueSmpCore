@@ -1,0 +1,13 @@
+{
+    "type": "block",
+    "model": "smp:advanced_furnace_blackstone",
+    "display_name": "Lò nung đá đen",
+    "hardness": 3,
+    "drops": [
+        {
+            "item": "advanced_furnace_blackstone"
+        }
+    ],
+    "place_sound": "block.stone.place",
+    "break_sound": "block.stone.break"
+}

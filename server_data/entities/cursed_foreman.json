@@ -1,0 +1,17 @@
+{
+  "id": "dummy",
+  "factory": "cursed_foreman",
+  "entityType": "HUSK",
+  "components": {
+    "attributes": {
+      "MAX_HEALTH": 500.0
+    },
+    "behavior": {
+      "persistent": true
+    },
+    "display_name": "<red>Cursed Foreman",
+    "nameplate": {
+      "heightOffset": 0.30000001192092896
+    }
+  }
+}

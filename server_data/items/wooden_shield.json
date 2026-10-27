@@ -1,0 +1,17 @@
+{
+  "id": "wooden_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<white>Wooden Shield",
+    "item_model": "minecraft:wooden_shield",
+    "durability": 73,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.2,
+        "SPEED_PERCENT": 0.038,
+        "SNEAKING_SPEED": 0.1
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

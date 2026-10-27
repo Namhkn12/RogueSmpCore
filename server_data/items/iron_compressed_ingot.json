@@ -1,0 +1,11 @@
+{
+  "id": "ores/iron_compressed_ingot",
+  "base": "PAPER",
+  "components": {
+    "name": "<white>Thỏi sắt nén",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Nén"
+    ],
+    "item_model": "minecraft:ores/iron_compressed_ingot"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "dummy",
+  "entityType": "HUSK",
+  "components": {
+    "attributes": {
+      "MAX_HEALTH": 1000.0
+    },
+    "display_name": "<red>Dummy Pro Max",
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "dummy_entity_spell"
+        }
+      ],
+      "passiveInterval": 20
+    },
+    "behavior": {
+      "noAi": true,
+      "persistent": true
+    }
+  }
+}

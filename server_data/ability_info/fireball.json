@@ -1,0 +1,41 @@
+{
+  "display_name": "Quả Cầu Lửa",
+  "icon": "FIRE_CHARGE",
+  "type": "ACTIVE",
+  "description": [
+    "<!i><gold>Cách kích hoạt: <yellow>Chuột Phải (RIGHT_CLICK)",
+    "<!i><gray>Ném một khối dung nham nổ tung khi va chạm.",
+    "",
+    "<!i><gray>Sát thương: <red><damage>",
+    "<!i><gray>Bán kính nổ: <yellow><radius>m",
+    "<!i><gray>Tốc độ bay: <white><velocity>x",
+    "<!i><gray>Hồi chiêu: <green><cooldown>s"
+  ],
+  "scaling": {
+    "damage": [10.0, 14.0, 18.0, 22.0, 28.0],
+    "radius": [3.0, 3.5, 4.0, 4.5, 5.5],
+    "velocity": [1.1, 1.3, 1.5, 1.7, 2.0],
+    "cooldown": [60, 50, 40, 35, 30]
+  },
+  "trigger": {
+    "execute": {
+      "key": "RIGHT_CLICK",
+      "options": ["not_holding_projectile", "not_holding_consumable"]
+    }
+  },
+  "upgrades": {
+    "2": [
+      { "type": "exp", "level": 5, "cost": 100 }
+    ],
+    "3": [
+      { "type": "exp", "level": 40 },
+      { "type": "item", "item_id": "defense_gem", "amount": 10 },
+      { "type": "item", "item_id": "speed_gem", "amount": 15 }
+    ],
+    "4": [
+      { "type": "exp", "level": 12, "cost": 500 }
+    ],
+    "5": [
+    ]
+  }
+}

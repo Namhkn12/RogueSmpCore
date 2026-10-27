@@ -1,0 +1,18 @@
+{
+  "id": "stone_hatchet",
+  "base": "STONE_AXE",
+  "components": {
+    "name": "<white>Stone Hatchet",
+    "item_model": "minecraft:stone_hatchet",
+    "durability": 120,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.0,
+        "ATTACK_SPEED_BASE": 1.285,
+        "ENTITY_REACH": 0.18,
+        "SWEEPING_DAMAGE_RATIO": 0.092
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

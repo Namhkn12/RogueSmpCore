@@ -1,0 +1,26 @@
+{
+  "id": "mage_quartz_boots",
+  "base": "IRON_BOOTS",
+  "components": {
+    "name": "<green>Quartz Mage Boots",
+    "item_model": "minecraft:quartz_boots",
+    "equippable": {
+      "slot": "FEET",
+      "asset_id": "minecraft:quartz"
+    },
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 560,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.8,
+        "SPEED_PERCENT": 0.0125,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "FEET"
+    }
+  }
+}

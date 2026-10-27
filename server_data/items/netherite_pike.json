@@ -1,0 +1,17 @@
+{
+  "id": "netherite_pike",
+  "base": "NETHERITE_SPEAR",
+  "components": {
+    "name": "<gold>Netherite Pike",
+    "item_model": "minecraft:netherite_pike",
+    "durability": 1950,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 12.5,
+        "ATTACK_SPEED_BASE": 0.55,
+        "ENTITY_REACH": 1.5
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

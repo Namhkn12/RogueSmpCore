@@ -1,0 +1,18 @@
+{
+  "base": "DIAMOND_CHESTPLATE",
+  "components": {
+    "name": "<#4FC3F7>Giáp Ngực Hộ Vệ Lam Ngọc",
+    "description": [
+      "<gray>Giáp kim cương do chính tay Roland gia công.",
+      "<gray>Mỏng hơn hàng thợ rèn, nhưng vẫn sáng loáng.",
+      "<dark_gray>Hàng của Thợ giáp Roland · Không thể chế tạo"
+    ],
+    "durability": 1200,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 8.8
+      },
+      "slot": "CHEST"
+    }
+  }
+}

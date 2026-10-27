@@ -1,0 +1,17 @@
+{
+  "id": "diamond_tomahawk",
+  "base": "DIAMOND_AXE",
+  "components": {
+    "name": "<dark_purple>Diamond Tomahawk",
+    "item_model": "minecraft:diamond_tomahawk",
+    "durability": 1050,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 7.875,
+        "ATTACK_SPEED_BASE": 1.3875,
+        "ENTITY_REACH": -0.2
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

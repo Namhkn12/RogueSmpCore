@@ -1,0 +1,21 @@
+{
+  "id": "mage_emerald_helmet",
+  "base": "IRON_HELMET",
+  "components": {
+    "name": "<green>Emerald Mage Hood",
+    "item_model": "minecraft:emerald_helmet",
+    "equippable": {
+      "slot": "HEAD",
+      "asset_id": "minecraft:emerald"
+    },
+    "durability": 420,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.5,
+        "MAGIC_DAMAGE_PERCENT": 0.0375,
+        "LUCK": 1.0
+      },
+      "slot": "HEAD"
+    }
+  }
+}

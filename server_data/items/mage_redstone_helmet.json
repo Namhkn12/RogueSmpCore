@@ -1,0 +1,20 @@
+{
+  "id": "mage_redstone_helmet",
+  "base": "IRON_HELMET",
+  "components": {
+    "name": "<blue>Redstone Mage Hood",
+    "item_model": "minecraft:redstone_helmet",
+    "equippable": {
+      "slot": "HEAD",
+      "asset_id": "minecraft:redstone"
+    },
+    "durability": 315,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.275,
+        "MAGIC_DAMAGE_PERCENT": 0.0325
+      },
+      "slot": "HEAD"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "netherite_glaive",
+  "base": "NETHERITE_SPEAR",
+  "components": {
+    "name": "<gold>Netherite Glaive",
+    "item_model": "minecraft:netherite_glaive",
+    "durability": 2145,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 10.5,
+        "ATTACK_SPEED_BASE": 1.0,
+        "ENTITY_REACH": 1.0,
+        "SWEEPING_DAMAGE_RATIO": 0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

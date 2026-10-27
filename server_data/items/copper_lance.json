@@ -1,0 +1,18 @@
+{
+  "id": "copper_lance",
+  "base": "COPPER_SPEAR",
+  "components": {
+    "name": "<white>Copper Lance",
+    "item_model": "minecraft:copper_lance",
+    "durability": 195,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.3,
+        "ATTACK_SPEED_BASE": 1.0,
+        "ENTITY_REACH": 1.45,
+        "KNOCKBACK_RESISTANCE": 0.08
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

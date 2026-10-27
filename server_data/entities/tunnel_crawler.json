@@ -1,0 +1,37 @@
+{
+  "id": "metal/tunnel_crawler",
+  "entityType": "CAVE_SPIDER",
+  "components": {
+    "display_name": "<gradient:#A1887F:#3E2723>Bọ đường hầm</gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 24
+    },
+    "attributes": {
+      "max_health": 36.0,
+      "attack_damage": 4.0,
+      "armor": 4.0,
+      "knockback_resistance": 0.1
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "apply_effect_on_hit_spell",
+          "trigger": "MELEE",
+          "effects": [
+            {
+              "type": "poison",
+              "duration": 80,
+              "amplifier": 0
+            },
+            {
+              "type": "nausea",
+              "duration": 80,
+              "amplifier": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

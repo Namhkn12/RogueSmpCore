@@ -1,0 +1,9 @@
+{
+  "entityType": "VILLAGER",
+  "name": "<gradient:#55CDFC:#3F51B5><bold>Enchanter Aldric</bold></gradient>",
+  "description": [
+    "<aqua>Mua vật phẩm ma thuật tại đây</aqua>"
+  ],
+  "profession": "minecraft:librarian",
+  "actions": []
+}

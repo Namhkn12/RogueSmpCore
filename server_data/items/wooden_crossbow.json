@@ -1,0 +1,18 @@
+{
+  "id": "wooden_crossbow",
+  "base": "CROSSBOW",
+  "components": {
+    "name": "<white>Wooden Crossbow",
+    "item_model": "minecraft:wooden_crossbow",
+    "durability": 88,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 6.2,
+        "PROJECTILE_SPEED_BASE": 1.132,
+        "SPEED_PERCENT": 0.036,
+        "SNEAKING_SPEED": 0.2
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

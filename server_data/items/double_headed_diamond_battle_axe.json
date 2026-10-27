@@ -1,0 +1,18 @@
+{
+  "id": "double_headed_diamond_battle_axe",
+  "base": "DIAMOND_AXE",
+  "components": {
+    "name": "<dark_purple>Double Headed Diamond Battle Axe",
+    "item_model": "minecraft:double_headed_diamond_battle_axe",
+    "durability": 1950,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 14.125,
+        "ATTACK_SPEED_BASE": 0.675,
+        "ENTITY_REACH": 0.05,
+        "SWEEPING_DAMAGE_RATIO": 0.16
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

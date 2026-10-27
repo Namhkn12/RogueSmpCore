@@ -1,0 +1,12 @@
+{
+  "id": "heavy_chestplate",
+  "base": "IRON_CHESTPLATE",
+  "components": {
+    "name": "<gray>Heavy Chestplate",
+    "item_model": "minecraft:heavy_chestplate",
+    "equippable": {
+      "slot": "CHEST",
+      "asset_id": "minecraft:heavy"
+    }
+  }
+}

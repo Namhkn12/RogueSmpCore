@@ -1,0 +1,82 @@
+{
+  "id": "metal/deep_ember_miner",
+  "entityType": "WITHER_SKELETON",
+  "components": {
+    "display_name": "<gradient:#FF5722:#212121><bold>✦ Thây ma than tầng sâu ✦</bold></gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 28
+    },
+    "attributes": {
+      "max_health": 88.0,
+      "attack_damage": 9.0,
+      "armor": 10.0,
+      "knockback_resistance": 0.5
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "deep_ember_miner"
+      },
+      "CHEST": {
+        "material": "NETHERITE_CHESTPLATE",
+        "enchantGlint": true,
+        "trimMaterial": "redstone",
+        "trimPattern": "rib"
+      },
+      "LEGS": {
+        "material": "DIAMOND_LEGGINGS",
+        "trimMaterial": "netherite",
+        "trimPattern": "rib"
+      },
+      "FEET": {
+        "material": "NETHERITE_BOOTS",
+        "trimMaterial": "redstone",
+        "trimPattern": "rib"
+      },
+      "HAND": {
+        "material": "NETHERITE_PICKAXE",
+        "displayName": "<#FF5722>Cuốc Vực Sâu",
+        "lore": [
+          "<gray>Rèn từ than cháy dưới tầng đá gốc.",
+          "<dark_red>Ánh lửa của nó nuốt cả ánh sáng."
+        ],
+        "enchantGlint": true
+      }
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "effect_aura_spell",
+          "radius": 6.0,
+          "requireLineOfSight": true,
+          "intervalTicks": 160,
+          "effects": [
+            {
+              "type": "blindness",
+              "duration": 60,
+              "amplifier": 0
+            },
+            {
+              "type": "slowness",
+              "duration": 60,
+              "amplifier": 1
+            }
+          ]
+        },
+        {
+          "type": "apply_effect_on_hit_spell",
+          "trigger": "MELEE",
+          "chance": 0.4,
+          "effects": [
+            {
+              "type": "weakness",
+              "duration": 100,
+              "amplifier": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

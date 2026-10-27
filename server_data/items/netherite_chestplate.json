@@ -1,0 +1,20 @@
+{
+  "id": "netherite_chestplate",
+  "base": "NETHERITE_CHESTPLATE",
+  "components": {
+    "name": "<gold>Netherite Chestplate",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 1950,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 12.8,
+        "KNOCKBACK_RESISTANCE": 0.05
+      },
+      "slot": "CHEST"
+    }
+  }
+}

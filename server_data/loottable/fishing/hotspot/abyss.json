@@ -1,0 +1,38 @@
+{
+  "pools": [
+    {
+      "rolls": 2,
+      "entries": [
+        {
+          "type": "item",
+          "item": "minecraft:prismarine_shard",
+          "weight": 30,
+          "min_amount": 2,
+          "max_amount": 5
+        },
+        {
+          "type": "item",
+          "item": "minecraft:glow_ink_sac",
+          "weight": 25,
+          "min_amount": 1,
+          "max_amount": 3
+        },
+        {
+          "type": "item",
+          "item": "minecraft:sea_lantern",
+          "weight": 20
+        },
+        {
+          "type": "item",
+          "item": "minecraft:heart_of_the_sea",
+          "weight": 15
+        },
+        {
+          "type": "item",
+          "item": "minecraft:nautilus_shell",
+          "weight": 10
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "display_name": "<aqua>hub",
+  "destination": {
+    "world": "minecraft:hub",
+    "x": 210.48164904103868,
+    "y": 113.0,
+    "z": 150.50772983695086,
+    "yaw": 91.66931,
+    "pitch": 2.2499838,
+    "type": "location"
+  }
+}

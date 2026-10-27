@@ -1,0 +1,15 @@
+{
+  "id": "spawner_tmd_ember_crossbow",
+  "name": "TMD Ember Crossbow Spawner",
+  "mobs": { "tmd_ember_crossbow": 100 },
+  "delay": 0, "minDelay": 170, "maxDelay": 290,
+  "activeRange": 12, "spawnRange": 5, "maxNearBy": 5, "spawnCount": 2,
+  "behaviors": [
+    {
+      "type": "protector",
+      "params": {
+        "requireBreak": 2
+      }
+    }
+  ]
+}

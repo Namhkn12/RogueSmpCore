@@ -1,0 +1,16 @@
+{
+  "id": "copper_boots",
+  "base": "COPPER_BOOTS",
+  "components": {
+    "name": "<white>Copper Boots",
+    "durability": 156,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.38,
+        "SPEED_PERCENT": 0.015,
+        "FALL_DAMAGE": -0.15
+      },
+      "slot": "FEET"
+    }
+  }
+}

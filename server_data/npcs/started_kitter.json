@@ -1,0 +1,7 @@
+{
+  "entityType": "MANNEQUIN",
+  "name": "Nhận started kit",
+  "skinId": "list_commander",
+  "description": "Click để nhận started kit sau khi có class",
+  "actions": []
+}

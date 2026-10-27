@@ -1,0 +1,19 @@
+{
+  "id": "netherite_claymore",
+  "base": "NETHERITE_SWORD",
+  "components": {
+    "name": "<gold>Netherite Claymore",
+    "item_model": "minecraft:netherite_claymore",
+    "durability": 2535,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 15.0,
+        "ATTACK_SPEED_BASE": 0.75,
+        "ENTITY_REACH": 0.5,
+        "SPEED_PERCENT": -0.07,
+        "SWEEPING_DAMAGE_RATIO": 0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

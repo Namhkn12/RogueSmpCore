@@ -1,0 +1,13 @@
+{
+  "entityType": "MANNEQUIN",
+  "name": "<red><bold>Item Master",
+  "skinId": "quest_master",
+  "description": "<green>Xem vật phẩm dev",
+  "id": "item_master",
+  "actions": [
+    {
+      "command": "smpbrowser item",
+      "type": "run_command"
+    }
+  ]
+}

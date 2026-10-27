@@ -1,0 +1,215 @@
+{
+  "title": "<dark_red>Thợ Rèn Drake",
+  "layout": {
+    "pattern": [
+      "#########",
+      "#.O.O.O.#",
+      "#..O.O..#",
+      "#OOO#OOO#",
+      "#..OOO..#",
+      "#########"
+    ],
+    "keys": {
+      "#": "BLACK_STAINED_GLASS_PANE"
+    },
+    "fill": "GRAY_STAINED_GLASS_PANE"
+  },
+  "offers": [
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 310
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "militia_sword"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 300
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "hunters_knife"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 1350
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "knights_longsword"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 4300
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "ravager_axe"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 21550
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "sovereign_blade"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 300
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "energy_rod_fine"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 1000
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "energy_rod_superior"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 4600
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "energy_rod_masterwork"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 300
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "mana_core_fine"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 1000
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "mana_core_superior"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 4600
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "mana_core_masterwork"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 200
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "heartwood_shaft_fine"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 650
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "heartwood_shaft_superior"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 3000
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "heartwood_shaft_masterwork"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,229 @@
+{
+  "title": "<gold>Thợ Công Cụ Barrett",
+  "layout": {
+    "pattern": [
+      "#########",
+      "#O.O.O.O#",
+      "#O.O.O.O#",
+      "#O.O.O.O#",
+      "#..OOO..#",
+      "#########"
+    ],
+    "keys": {
+      "#": "BLACK_STAINED_GLASS_PANE"
+    },
+    "fill": "GRAY_STAINED_GLASS_PANE"
+  },
+  "offers": [
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 270
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "prospector_pickaxe"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 1300
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "ironforge_pickaxe"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 4450
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "deepdelver_pickaxe"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 22250
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "earthsplitter_pickaxe"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 140
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "prospector_felling_axe"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 705
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "ironforge_felling_axe"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 2450
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "deepdelver_felling_axe"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 12000
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "earthsplitter_felling_axe"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 95
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "prospector_shovel"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 470
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "ironforge_shovel"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 1650
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "deepdelver_shovel"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 8000
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "earthsplitter_shovel"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 200
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "heartwood_shaft_fine"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 650
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "heartwood_shaft_superior"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 3000
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "heartwood_shaft_masterwork"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "iron_spear",
+  "base": "IRON_SPEAR",
+  "components": {
+    "name": "<blue>Iron Spear",
+    "durability": 1050,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.0,
+        "ATTACK_SPEED_BASE": 1.275,
+        "ENTITY_REACH": 0.6
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "diamond_chestplate",
+  "base": "DIAMOND_CHESTPLATE",
+  "components": {
+    "name": "<dark_purple>Diamond Chestplate",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 1500,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 10.4
+      },
+      "slot": "CHEST"
+    }
+  }
+}

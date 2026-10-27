@@ -1,0 +1,12 @@
+{
+  "id": "heavy_boots",
+  "base": "IRON_BOOTS",
+  "components": {
+    "name": "<gray>Heavy Boots",
+    "item_model": "minecraft:heavy_boots",
+    "equippable": {
+      "slot": "FEET",
+      "asset_id": "minecraft:heavy"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "iron_crossbow",
+  "base": "CROSSBOW",
+  "components": {
+    "name": "<blue>Iron Crossbow",
+    "item_model": "minecraft:iron_crossbow",
+    "durability": 1260,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 11.0,
+        "PROJECTILE_SPEED_BASE": 1.0,
+        "SPEED_PERCENT": -0.06,
+        "KNOCKBACK_RESISTANCE": 0.1,
+        "SNEAKING_SPEED": 0.05
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

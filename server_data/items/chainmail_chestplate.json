@@ -1,0 +1,15 @@
+{
+  "id": "chainmail_chestplate",
+  "base": "CHAINMAIL_CHESTPLATE",
+  "components": {
+    "name": "<white>Chainmail Chestplate",
+    "durability": 150,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.2,
+        "KNOCKBACK_RESISTANCE": 0.05
+      },
+      "slot": "CHEST"
+    }
+  }
+}

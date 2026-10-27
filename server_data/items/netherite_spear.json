@@ -1,0 +1,16 @@
+{
+  "id": "netherite_spear",
+  "base": "NETHERITE_SPEAR",
+  "components": {
+    "name": "<gold>Netherite Spear",
+    "durability": 1950,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 7.0,
+        "ATTACK_SPEED_BASE": 1.15,
+        "ENTITY_REACH": 0.5
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

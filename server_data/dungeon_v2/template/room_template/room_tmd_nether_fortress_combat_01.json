@@ -1,0 +1,14 @@
+{
+  "id": "tmd_nether_fortress_combat_01",
+  "type": "NORMAL",
+  "schemetaId": "schemeta_tmd_nether_fortress_combat_01",
+  "objectives": [
+    {
+      "type": "spawner_breaker",
+      "params": {
+        "score": 30,
+        "require": 5
+      }
+    }
+  ]
+}

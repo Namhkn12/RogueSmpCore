@@ -1,0 +1,16 @@
+{
+  "id": "golden_spear",
+  "base": "GOLDEN_SPEAR",
+  "components": {
+    "name": "<green>Golden Spear",
+    "durability": 600,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.0,
+        "ATTACK_SPEED_BASE": 1.3375,
+        "ENTITY_REACH": 0.65
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

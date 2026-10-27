@@ -1,0 +1,21 @@
+{
+  "id": "knight_iron_helmet",
+  "base": "IRON_HELMET",
+  "components": {
+    "name": "<blue>Knight Iron Helmet",
+    "item_model": "minecraft:knight_iron_helmet",
+    "equippable": {
+      "slot": "HEAD",
+      "asset_id": "minecraft:knight_iron"
+    },
+    "durability": 735,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.85,
+        "MELEE_DAMAGE_PERCENT": 0.0225,
+        "CRIT_DAMAGE_FLAT": 1.5
+      },
+      "slot": "HEAD"
+    }
+  }
+}

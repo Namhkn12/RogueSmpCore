@@ -1,0 +1,30 @@
+{
+  "id": "fire_dance",
+  "result": {
+    "item": "wea_fire_dance"
+  },
+  "pattern": [
+    "ABC",
+    "ADC",
+    "   "
+  ],
+  "key": {
+    "D": {
+      "item": "mat_ingot_adamantite",
+      "count": 64
+    },
+    "C": {
+      "item": "mat_ingot_orichalcum",
+      "count": 32
+    },
+    "B": {
+      "item": "mat_ingot_adamantite",
+      "count": 32
+    },
+    "A": {
+      "item": "mat_ingot_mythril",
+      "count": 32
+    }
+  },
+  "type": "shaped"
+}

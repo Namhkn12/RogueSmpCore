@@ -1,0 +1,9 @@
+{
+  "type": "elite",
+  "name": "Trạm gác hầm mộ",
+  "schematic": "schemeta_cave_combat_01",
+  "objectives": [
+    { "on": { "event": "mob_killed", "subject": "hell_knight" }, "count": 6, "score": 15, "display": "Hạ lính gác" },
+    { "on": { "event": "block_broken", "subject": "spawner" }, "count": 3, "score": 10, "display": "Phá ổ lính gác" }
+  ]
+}

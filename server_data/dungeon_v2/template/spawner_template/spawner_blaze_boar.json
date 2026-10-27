@@ -1,0 +1,8 @@
+{
+  "id": "spawner_tmd_blaze_boar",
+  "name": "TMD Blaze Boar Spawner",
+  "mobs": { "tmd_blaze_boar": 100 },
+  "delay": 0, "minDelay": 150, "maxDelay": 260,
+  "activeRange": 12, "spawnRange": 4, "maxNearBy": 6, "spawnCount": 3,
+  "behaviors": []
+}

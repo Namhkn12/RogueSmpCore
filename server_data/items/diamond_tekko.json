@@ -1,0 +1,19 @@
+{
+  "id": "diamond_tekko",
+  "base": "DIAMOND_SWORD",
+  "components": {
+    "name": "<dark_purple>Diamond Tekko",
+    "item_model": "minecraft:diamond_tekko",
+    "durability": 2100,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.375,
+        "ATTACK_SPEED_BASE": 2.525,
+        "ENTITY_REACH": -0.95,
+        "DEFENSE_FLAT": 2.0,
+        "KNOCKBACK_RESISTANCE": 0.02
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

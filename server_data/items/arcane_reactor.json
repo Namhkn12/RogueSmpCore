@@ -1,0 +1,9 @@
+{
+  "id": "arcane_reactor",
+  "base": "PAPER",
+  "components": {
+    "name": "Lò phản ứng bí thuật",
+    "item_model": "smp:arcane_reactor",
+    "block_place": { "block": "arcane_reactor" }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "knight_diamond_boots",
+  "base": "DIAMOND_BOOTS",
+  "components": {
+    "name": "<dark_purple>Knight Diamond Boots",
+    "item_model": "minecraft:knight_diamond_boots",
+    "equippable": {
+      "slot": "FEET",
+      "asset_id": "minecraft:knight_diamond"
+    },
+    "durability": 1200,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.7,
+        "SPEED_PERCENT": -0.015,
+        "SNEAKING_SPEED": 0.05
+      },
+      "slot": "FEET"
+    }
+  }
+}

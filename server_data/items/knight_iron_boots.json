@@ -1,0 +1,21 @@
+{
+  "id": "knight_iron_boots",
+  "base": "IRON_BOOTS",
+  "components": {
+    "name": "<blue>Knight Iron Boots",
+    "item_model": "minecraft:knight_iron_boots",
+    "equippable": {
+      "slot": "FEET",
+      "asset_id": "minecraft:knight_iron"
+    },
+    "durability": 840,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.85,
+        "SPEED_PERCENT": -0.005,
+        "SNEAKING_SPEED": 0.05
+      },
+      "slot": "FEET"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "golden_tomahawk",
+  "base": "GOLDEN_AXE",
+  "components": {
+    "name": "<green>Golden Tomahawk",
+    "item_model": "minecraft:golden_tomahawk",
+    "durability": 420,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.625,
+        "ATTACK_SPEED_BASE": 1.4625,
+        "ENTITY_REACH": -0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

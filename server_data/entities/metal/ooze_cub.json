@@ -1,0 +1,35 @@
+{
+  "id": "metal/ooze_cub",
+  "entityType": "SLIME",
+  "components": {
+    "attributes": {
+      "MAX_HEALTH": 44.0,
+      "ATTACK_DAMAGE": 3.0,
+      "ARMOR": 0.0
+    },
+    "display_name": "<#80CBC4>Nhầy khoáng",
+    "behavior": {
+      "persistent": true
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "trigger": "MELEE",
+          "effects": [
+            {
+              "type": "minecraft:slowness",
+              "duration": 60,
+              "amplifier": 2
+            },
+            {
+              "type": "minecraft:mining_fatigue",
+              "duration": 60,
+              "amplifier": 1
+            }
+          ],
+          "type": "apply_effect_on_hit_spell"
+        }
+      ]
+    }
+  }
+}

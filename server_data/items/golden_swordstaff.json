@@ -1,0 +1,17 @@
+{
+  "base": "GOLDEN_SWORD",
+  "components": {
+    "item_model": "minecraft:golden_swordstaff",
+    "durability": 540,
+    "name": "<green>Golden Swordstaff",
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.125,
+        "ATTACK_SPEED_BASE": 1.4375,
+        "SWEEPING_DAMAGE_RATIO": 0.16,
+        "ENTITY_REACH": 0.9
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

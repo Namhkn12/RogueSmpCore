@@ -1,0 +1,18 @@
+{
+  "base": "COPPER_LEGGINGS",
+  "components": {
+    "name": "<#D9895B>Scale Leggings",
+    "description": [
+      "<gray>Vảy đồng xếp chồng, chắc hơn vải mà vẫn nhanh nhẹn.",
+      "<dark_gray>Cấp thấp · Hàng của Armorer Roland"
+    ],
+    "durability": 165,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.0,
+        "SPEED_PERCENT": 0.01
+      },
+      "slot": "LEGS"
+    }
+  }
+}

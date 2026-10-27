@@ -1,0 +1,16 @@
+{
+  "display_name": "Khối Netherite nguyên chất",
+  "model": "minecraft:ores/netherite_pure_block",
+  "hardness": 10,
+  "break_strength": 4,
+  "drops": [
+    {
+      "item": "netherite_pure_block",
+      "min_amount": 1,
+      "max_amount": 1,
+      "chance": 1.0
+    }
+  ],
+  "place_sound": "block.netherite_block.place",
+  "break_sound": "block.netherite_block.break"
+}

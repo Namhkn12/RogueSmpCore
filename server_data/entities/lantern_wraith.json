@@ -1,0 +1,37 @@
+{
+  "id": "metal/lantern_wraith",
+  "entityType": "ZOMBIE",
+  "components": {
+    "display_name": "<#FFD54F>Bóng đèn lồng",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 56.0,
+      "attack_damage": 5.5,
+      "movement_speed": 0.19,
+      "armor": 2.0
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "lantern_wraith"
+      },
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "dyeColor": "255,54,54,58"
+      },
+      "HAND": {
+        "material": "LANTERN"
+      }
+    },
+    "spells": {
+      "activeSpell": [
+        {
+          "type": "death_grip_spell"
+        }
+      ]
+    }
+  }
+}

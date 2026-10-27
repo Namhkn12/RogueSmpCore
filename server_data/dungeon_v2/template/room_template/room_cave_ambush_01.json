@@ -1,0 +1,14 @@
+{
+  "id": "cave_ambush_01",
+  "type": "ELITE",
+  "schemetaId": "schemeta_cave_ambush_01",
+  "roomEvents": [
+    {
+      "type": "party_strength_buff",
+      "params": {
+        "durationTicks": 3600,
+        "amplifier": 1
+      }
+    }
+  ]
+}

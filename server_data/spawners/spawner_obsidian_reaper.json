@@ -1,0 +1,8 @@
+{
+  "id": "spawner_tmd_obsidian_reaper",
+  "name": "TMD Obsidian Reaper Spawner",
+  "mobs": { "tmd_obsidian_reaper": 100 },
+  "delay": 0, "minDelay": 360, "maxDelay": 580,
+  "activeRange": 12, "spawnRange": 5, "maxNearBy": 3, "spawnCount": 1,
+  "behaviors": []
+}

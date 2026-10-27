@@ -1,0 +1,11 @@
+{
+  "id": "ores/gold_compressed_ingot",
+  "base": "PAPER",
+  "components": {
+    "name": "<white>Thỏi vàng nén",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Nén"
+    ],
+    "item_model": "minecraft:ores/gold_compressed_ingot"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "id": "tmd_blaze_boar",
+  "entityType": "PIGLIN",
+  "displayName": "<gold>Blaze Boar</gold>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 20,
+
+  "baseStat": {
+    "max_health": 52.0,
+    "attack_damage": 10.0,
+    "movement_speed": 0.35,
+    "armor": 4.0,
+    "knockback_resistance": 0.3
+  },
+
+  "equipments": {
+
+    "CHEST": {
+      "material": "GOLDEN_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "rib"
+    },
+
+    "LEGS": {
+      "material": "GOLDEN_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "flow"
+    },
+
+    "FEET": {
+      "material": "NETHERITE_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "vex"
+    },
+    "HAND": {
+      "material": "GOLDEN_SWORD",
+      "displayName": "<gold>Blazefang Blade</gold>",
+      "lore": [
+        "<gray>Still burning from the Nether."
+      ],
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+
+  },
+
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

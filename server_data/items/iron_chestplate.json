@@ -1,0 +1,15 @@
+{
+  "id": "iron_chestplate",
+  "base": "IRON_CHESTPLATE",
+  "components": {
+    "name": "<blue>Iron Chestplate",
+    "durability": 1050,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 8.0,
+        "KNOCKBACK_RESISTANCE": 0.05
+      },
+      "slot": "CHEST"
+    }
+  }
+}

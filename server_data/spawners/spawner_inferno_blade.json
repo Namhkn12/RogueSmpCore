@@ -1,0 +1,15 @@
+{
+  "id": "spawner_tmd_inferno_blade",
+  "name": "TMD Inferno Blade Spawner",
+  "mobs": { "tmd_inferno_blade": 100 },
+  "delay": 0, "minDelay": 160, "maxDelay": 280,
+  "activeRange": 12, "spawnRange": 4, "maxNearBy": 6, "spawnCount": 3,
+  "behaviors": [
+    {
+      "type": "protector",
+      "params": {
+        "requireBreak": 3
+      }
+    }
+  ]
+}

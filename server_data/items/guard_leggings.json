@@ -1,0 +1,19 @@
+{
+  "base": "IRON_LEGGINGS",
+  "components": {
+    "name": "<#B0BEC5>Quần Giáp Vệ Binh",
+    "description": [
+      "<gray>Giáp sắt tiêu chuẩn của đội vệ binh thị trấn.",
+      "<gray>Bền chắc, đáng tin cậy trên những chuyến đi xa.",
+      "<dark_gray>Hàng của Thợ giáp Roland · Không thể chế tạo"
+    ],
+    "durability": 800,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 5.1,
+        "KNOCKBACK_RESISTANCE": 0.03
+      },
+      "slot": "LEGS"
+    }
+  }
+}

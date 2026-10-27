@@ -1,0 +1,31 @@
+{
+  "id": "legendary_hunter_1",
+  "name": "<gold>Thợ Săn Huyền Thoại I</gold>",
+  "icon":"GOLDEN_SWORD",
+  "description": [
+    "<gray>Tiêu diệt lũ quái vật đang phá hoại",
+    "<gray>và đem về chiến lợi phẩm quý giá."
+  ],
+  "objectives": {
+    "kill_zombies_task": {
+      "type": "kill_mob",
+      "mobId": "tmd_ashbound_zombie",
+      "amount": 5
+    }
+  },
+  "requirements": [
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": {
+        "copper_block_currency": 1,
+        "copper_ingot_currency": 10
+      }
+    },
+    {
+      "type": "money",
+      "amount": 1000
+    }
+  ]
+}

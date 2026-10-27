@@ -1,0 +1,21 @@
+{
+  "id": "mage_lapis_boots",
+  "base": "IRON_BOOTS",
+  "components": {
+    "name": "<blue>Lapis Mage Boots",
+    "item_model": "minecraft:lapis_boots",
+    "equippable": {
+      "slot": "FEET",
+      "asset_id": "minecraft:lapis"
+    },
+    "durability": 320,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.05,
+        "SPEED_PERCENT": 0.0175,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "FEET"
+    }
+  }
+}

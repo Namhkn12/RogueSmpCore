@@ -1,0 +1,28 @@
+{
+  "id": "tmd_core_magma",
+  "entityType": "MAGMA_CUBE",
+  "displayName": "<dark_red><bold>Core Magma</bold></dark_red>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 22,
+
+  "baseStat": {
+    "max_health": 55.0,
+    "attack_damage": 10.0,
+    "movement_speed": 0.32,
+    "armor": 12.0,
+    "knockback_resistance": 0.60
+  },
+
+  "equipments": {},
+
+  "activeSpell": [
+    "fire_aspect_spell"
+  ],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

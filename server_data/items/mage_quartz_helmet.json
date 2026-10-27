@@ -1,0 +1,25 @@
+{
+  "id": "mage_quartz_helmet",
+  "base": "IRON_HELMET",
+  "components": {
+    "name": "<green>Quartz Mage Hood",
+    "item_model": "minecraft:quartz_helmet",
+    "equippable": {
+      "slot": "HEAD",
+      "asset_id": "minecraft:quartz"
+    },
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 489,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.8,
+        "MAGIC_DAMAGE_PERCENT": 0.0425
+      },
+      "slot": "HEAD"
+    }
+  }
+}

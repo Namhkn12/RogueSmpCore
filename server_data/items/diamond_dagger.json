@@ -1,0 +1,17 @@
+{
+  "id": "diamond_dagger",
+  "base": "DIAMOND_SWORD",
+  "components": {
+    "name": "<dark_purple>Diamond Dagger",
+    "item_model": "minecraft:diamond_dagger",
+    "durability": 900,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.375,
+        "ATTACK_SPEED_BASE": 2.925,
+        "ENTITY_REACH": -0.45
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

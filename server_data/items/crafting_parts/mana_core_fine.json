@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<green>Fine Mana Core",
+    "description": [
+      "<dark_gray><!i>Linh kiện · Fine",
+      "<gray><!i>Lõi của trượng",
+      "<gray><!i>Dùng cho đồ bậc <white>B4"
+    ],
+    "item_model": "minecraft:magma_cream"
+  }
+}

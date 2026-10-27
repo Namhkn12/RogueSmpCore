@@ -1,0 +1,19 @@
+{
+  "base": "BOW",
+  "components": {
+    "name": "<#8D6E63>Yew Longbow",
+    "description": [
+      "<gray>Trường cung gỗ thủy tùng, bắn mạnh nhưng hơi cồng kềnh.",
+      "<dark_gray>Cấp trung · Hàng của Bowyer Hawthorne"
+    ],
+    "durability": 650,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 9.8,
+        "PROJECTILE_SPEED_BASE": 1.1,
+        "SPEED_PERCENT": -0.05
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "copper_spear",
+  "base": "COPPER_SPEAR",
+  "components": {
+    "name": "<white>Copper Spear",
+    "durability": 195,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.2,
+        "ATTACK_SPEED_BASE": 1.4,
+        "ENTITY_REACH": 0.7
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "iron_longbow",
+  "base": "BOW",
+  "components": {
+    "name": "<blue>Iron Longbow",
+    "item_model": "minecraft:iron_longbow",
+    "durability": 945,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 9.5,
+        "PROJECTILE_SPEED_BASE": 1.1,
+        "SPEED_PERCENT": -0.105,
+        "KNOCKBACK_RESISTANCE": 0.2
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

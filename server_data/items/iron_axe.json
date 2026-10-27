@@ -1,0 +1,16 @@
+{
+  "id": "iron_axe",
+  "base": "IRON_AXE",
+  "components": {
+    "name": "<blue>Iron Axe",
+    "durability": 1050,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 9.5,
+        "ATTACK_SPEED_BASE": 0.875,
+        "ENTITY_REACH": 0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

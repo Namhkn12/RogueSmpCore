@@ -1,0 +1,18 @@
+{
+  "id": "golden_heater_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<green>Golden Heater Shield",
+    "item_model": "minecraft:golden_heater_shield",
+    "durability": 660,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.62,
+        "SPEED_PERCENT": -0.01,
+        "FALL_DAMAGE": -0.1,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

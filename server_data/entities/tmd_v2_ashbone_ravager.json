@@ -1,0 +1,67 @@
+{
+  "id": "tmd_ashbone_ravager",
+  "entityType": "WITHER_SKELETON",
+  "displayName": "<gray>Ashbone Ravager</gray>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": true,
+  "detectionRange": 28,
+  "baseStat": {
+    "max_health": 100.0,
+    "attack_damage": 22.0,
+    "movement_speed": 0.30,
+    "armor": 14.0,
+    "knockback_resistance": 0.5
+  },
+  "equipments": {
+    "HEAD": {
+      "material": "NETHERITE_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "rib"
+    },
+    "CHEST": {
+      "material": "NETHERITE_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "rib"
+    },
+    "LEGS": {
+      "material": "IRON_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "rib"
+    },
+    "FEET": {
+      "material": "IRON_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "rib"
+    },
+    "HAND": {
+      "material": "NETHERITE_AXE",
+      "displayName": "<gray>Ravager's Cleave</gray>",
+      "lore": [
+        "<dark_gray>Each swing scatters ash and bone.",
+        "<dark_red>Nothing survives the second blow."
+      ],
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

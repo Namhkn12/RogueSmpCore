@@ -1,0 +1,29 @@
+{
+  "id": "metal/skeleton_miner",
+  "entityType": "SKELETON",
+  "components": {
+    "display_name": "<#CFD8DC>Xương khô mỏ",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 38.0,
+      "attack_damage": 4.0,
+      "armor": 2.0
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "skeleton_miner"
+      },
+      "LEGS": {
+        "material": "LEATHER_LEGGINGS",
+        "dyeColor": "255,92,64,45"
+      },
+      "HAND": {
+        "material": "STONE_PICKAXE"
+      }
+    }
+  }
+}

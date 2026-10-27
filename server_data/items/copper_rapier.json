@@ -1,0 +1,18 @@
+{
+  "id": "copper_rapier",
+  "base": "COPPER_SWORD",
+  "components": {
+    "name": "<white>Copper Rapier",
+    "item_model": "minecraft:copper_rapier",
+    "durability": 117,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.675,
+        "ATTACK_SPEED_BASE": 1.8,
+        "ENTITY_REACH": 0.95,
+        "DEFENSE_FLAT": 0.6
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

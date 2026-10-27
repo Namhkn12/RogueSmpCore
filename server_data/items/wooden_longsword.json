@@ -1,0 +1,18 @@
+{
+  "id": "wooden_longsword",
+  "base": "WOODEN_SWORD",
+  "components": {
+    "name": "<white>Wooden Longsword",
+    "item_model": "minecraft:wooden_longsword",
+    "durability": 73,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.0,
+        "ATTACK_SPEED_BASE": 1.525,
+        "ENTITY_REACH": 0.71,
+        "SWEEPING_DAMAGE_RATIO": 0.312
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

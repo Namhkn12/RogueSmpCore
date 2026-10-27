@@ -1,0 +1,16 @@
+{
+  "id": "mage_white_helmet",
+  "base": "LEATHER_HELMET",
+  "components": {
+    "name": "<white>Ivory Mage Hood",
+    "dyed_color": "#F9FFFE",
+    "durability": 112,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 0.675,
+        "MAGIC_DAMAGE_PERCENT": 0.015
+      },
+      "slot": "HEAD"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "netherite_leggings",
+  "base": "NETHERITE_LEGGINGS",
+  "components": {
+    "name": "<gold>Netherite Leggings",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 1852,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 9.6,
+        "SPEED_PERCENT": -0.025,
+        "KNOCKBACK_RESISTANCE": 0.05
+      },
+      "slot": "LEGS"
+    }
+  }
+}

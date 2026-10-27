@@ -1,0 +1,44 @@
+{
+  "id": "wood/lost_hiker",
+  "entityType": "ZOMBIE",
+  "components": {
+    "display_name": "<#A5D6A7>Kẻ lạc đường",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 48.0,
+      "attack_damage": 5.0,
+      "armor": 2.0
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "lost_hiker"
+      },
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "dyeColor": "255,107,142,35"
+      },
+      "LEGS": {
+        "material": "LEATHER_LEGGINGS",
+        "dyeColor": "255,124,152,88"
+      },
+      "HAND": {
+        "material": "COMPASS"
+      }
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "speed_burst_spell",
+          "triggerRange": 5.0,
+          "amplifier": 2,
+          "durationTicks": 40,
+          "cooldownTicks": 160
+        }
+      ]
+    }
+  }
+}

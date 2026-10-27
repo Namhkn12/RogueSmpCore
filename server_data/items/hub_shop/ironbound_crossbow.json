@@ -1,0 +1,20 @@
+{
+  "base": "CROSSBOW",
+  "components": {
+    "name": "<#B0BEC5>Ironbound Crossbow",
+    "description": [
+      "<gray>Nỏ bọc sắt, mỗi phát như một cú búa.",
+      "<dark_gray>Cấp trung · Hàng của Bowyer Hawthorne"
+    ],
+    "durability": 900,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 14.4,
+        "PROJECTILE_SPEED_BASE": 1.0,
+        "KNOCKBACK_RESISTANCE": 0.1,
+        "SPEED_PERCENT": -0.08
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

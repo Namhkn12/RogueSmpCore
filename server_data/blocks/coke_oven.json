@@ -1,0 +1,8 @@
+{
+  "type": "coke_oven",
+  "display_name": "Coke Oven",
+  "drops": [
+    {"item": "coke_oven"}
+  ],
+  "model": "minecraft:dropper"
+}

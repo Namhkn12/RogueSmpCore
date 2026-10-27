@@ -1,0 +1,7 @@
+{
+  "id": "hell_knight",
+  "entityType": "WITHER_SKELETON",
+  "components": {
+    "display_name": "<dark_red><b>Hell Knight"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "base": "DIAMOND_AXE",
+  "components": {
+    "name": "<#4FC3F7>Rìu Đốn Gỗ Lam Ngọc",
+    "description": [
+      "<gray>Đồ nghề kim cương do Barrett tự tay mài sắc.",
+      "<gray>Nhanh và bền hơn hẳn hàng sắt.",
+      "<dark_gray>Hàng của Thợ công cụ Barrett · Không thể chế tạo"
+    ],
+    "durability": 1250,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.0,
+        "ATTACK_SPEED_BASE": 0.9,
+        "MINING_EFFICIENCY": 2.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

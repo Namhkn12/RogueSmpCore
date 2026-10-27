@@ -1,0 +1,20 @@
+{
+  "id": "mage_emerald_chestplate",
+  "base": "IRON_CHESTPLATE",
+  "components": {
+    "name": "<green>Emerald Mage Robe",
+    "item_model": "minecraft:emerald_chestplate",
+    "equippable": {
+      "slot": "CHEST",
+      "asset_id": "minecraft:emerald"
+    },
+    "durability": 600,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 4.0,
+        "MAGIC_DAMAGE_PERCENT": 0.0375
+      },
+      "slot": "CHEST"
+    }
+  }
+}

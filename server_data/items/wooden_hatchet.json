@@ -1,0 +1,18 @@
+{
+  "id": "wooden_hatchet",
+  "base": "WOODEN_AXE",
+  "components": {
+    "name": "<white>Wooden Hatchet",
+    "item_model": "minecraft:wooden_hatchet",
+    "durability": 59,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.55,
+        "ATTACK_SPEED_BASE": 1.315,
+        "ENTITY_REACH": 0.21,
+        "SWEEPING_DAMAGE_RATIO": 0.104
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

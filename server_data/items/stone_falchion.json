@@ -1,0 +1,18 @@
+{
+  "id": "stone_falchion",
+  "base": "STONE_SWORD",
+  "components": {
+    "name": "<white>Stone Falchion",
+    "item_model": "minecraft:stone_falchion",
+    "durability": 150,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.5,
+        "ATTACK_SPEED_BASE": 1.48,
+        "ENTITY_REACH": 0.18,
+        "SWEEPING_DAMAGE_RATIO": 0.368
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

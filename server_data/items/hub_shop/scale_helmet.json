@@ -1,0 +1,17 @@
+{
+  "base": "COPPER_HELMET",
+  "components": {
+    "name": "<#D9895B>Scale Helmet",
+    "description": [
+      "<gray>Vảy đồng xếp chồng, chắc hơn vải mà vẫn nhanh nhẹn.",
+      "<dark_gray>Cấp thấp · Hàng của Armorer Roland"
+    ],
+    "durability": 121,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.6
+      },
+      "slot": "HEAD"
+    }
+  }
+}

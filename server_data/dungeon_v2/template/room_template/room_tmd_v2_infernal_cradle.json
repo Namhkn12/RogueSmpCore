@@ -1,0 +1,25 @@
+{
+  "id": "tmd_v2_infernal_cradle",
+  "type": "NORMAL",
+  "schemetaId": "schemeta_tmd_v2_infernal_cradle",
+  "objectives": [
+    {
+      "type": "spawner_breaker",
+      "params": {
+        "score": 35,
+        "require": 6
+      }
+    }
+  ],
+  "roomEvents": [
+    {
+      "type": "creeping_dread",
+      "params": {
+        "maxTriggers": 3,
+        "spawnChance": 25,
+        "minInterval": 60,
+        "maxInterval": 200
+      }
+    }
+  ]
+}

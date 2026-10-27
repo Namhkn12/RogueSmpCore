@@ -1,0 +1,13 @@
+{
+  "entityType": "MANNEQUIN",
+  "name": "<red><bold>Item Create Master",
+  "skinId": "speed_gem_head",
+  "description": "<green>Tạo vật phẩm dev",
+  "id": "item_creation_master",
+  "actions": [
+    {
+      "command": "smpbrowser item",
+      "type": "run_command"
+    }
+  ]
+}

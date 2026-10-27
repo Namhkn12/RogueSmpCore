@@ -1,0 +1,19 @@
+{
+  "base": "BOW",
+  "components": {
+    "name": "<#C8A27A>Ashwood Shortbow",
+    "description": [
+      "<gray>Cung ngắn gỗ tần bì, nhẹ tay và dễ di chuyển.",
+      "<dark_gray>Cấp thấp · Hàng của Bowyer Hawthorne"
+    ],
+    "durability": 384,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 7.85,
+        "PROJECTILE_SPEED_BASE": 1.0,
+        "SPEED_PERCENT": 0.02
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

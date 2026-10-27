@@ -1,0 +1,17 @@
+{
+  "id": "copper_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<white>Copper Shield",
+    "item_model": "minecraft:copper_shield",
+    "durability": 195,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.65,
+        "SPEED_PERCENT": 0.03,
+        "FALL_DAMAGE": -0.15
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

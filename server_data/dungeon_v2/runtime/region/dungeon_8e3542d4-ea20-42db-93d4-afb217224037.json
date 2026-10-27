@@ -1,0 +1,53 @@
+{
+  "worldName": "dungeon_8e3542d4-ea20-42db-93d4-afb217224037",
+  "regions": {
+    "90cb3266-fd22-4ace-a331-489722778bb5": {
+      "id": "90cb3266-fd22-4ace-a331-489722778bb5",
+      "worldName": "dungeon_8e3542d4-ea20-42db-93d4-afb217224037",
+      "x": 0.0,
+      "y": 64.0,
+      "z": 0.0,
+      "status": "OCCUPIED"
+    },
+    "b488d1a5-ff26-4405-8e04-5a7bc9fe4942": {
+      "id": "b488d1a5-ff26-4405-8e04-5a7bc9fe4942",
+      "worldName": "dungeon_8e3542d4-ea20-42db-93d4-afb217224037",
+      "x": 1000.0,
+      "y": 64.0,
+      "z": 0.0,
+      "status": "OCCUPIED"
+    },
+    "826afa3b-3bd5-4cae-a665-c9acd4964030": {
+      "id": "826afa3b-3bd5-4cae-a665-c9acd4964030",
+      "worldName": "dungeon_8e3542d4-ea20-42db-93d4-afb217224037",
+      "x": 2000.0,
+      "y": 64.0,
+      "z": 0.0,
+      "status": "OCCUPIED"
+    },
+    "f9a45d12-1f92-4681-9942-5d63625631fa": {
+      "id": "f9a45d12-1f92-4681-9942-5d63625631fa",
+      "worldName": "dungeon_8e3542d4-ea20-42db-93d4-afb217224037",
+      "x": 3000.0,
+      "y": 64.0,
+      "z": 0.0,
+      "status": "OCCUPIED"
+    },
+    "a9ba8939-353b-4025-839b-ce7b7927f43c": {
+      "id": "a9ba8939-353b-4025-839b-ce7b7927f43c",
+      "worldName": "dungeon_8e3542d4-ea20-42db-93d4-afb217224037",
+      "x": 4000.0,
+      "y": 64.0,
+      "z": 0.0,
+      "status": "OCCUPIED"
+    },
+    "179c5af1-9b1d-4d4d-863f-b981635ef1c6": {
+      "id": "179c5af1-9b1d-4d4d-863f-b981635ef1c6",
+      "worldName": "dungeon_8e3542d4-ea20-42db-93d4-afb217224037",
+      "x": 0.0,
+      "y": 64.0,
+      "z": 1000.0,
+      "status": "OCCUPIED"
+    }
+  }
+}

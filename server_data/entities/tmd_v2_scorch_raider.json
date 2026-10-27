@@ -1,0 +1,50 @@
+{
+  "id": "tmd_scorch_raider",
+  "entityType": "ZOMBIFIED_PIGLIN",
+  "displayName": "<red>Scorch Raider</red>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 22,
+  "baseStat": {
+    "max_health": 42.0,
+    "attack_damage": 9.0,
+    "movement_speed": 0.30,
+    "armor": 4.0,
+    "knockback_resistance": 0.2
+  },
+  "equipments": {
+    "HEAD": {
+      "material": "IRON_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "snout"
+    },
+    "LEGS": {
+      "material": "IRON_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "snout"
+    },
+    "HAND": {
+      "material": "IRON_AXE",
+      "displayName": "<red>Scorch Axe</red>",
+      "lore": [
+        "<dark_gray>Leaves burn marks on every strike."
+      ],
+      "enchantGlint": false,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

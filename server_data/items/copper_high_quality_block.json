@@ -1,0 +1,13 @@
+{
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:ores/copper_high_quality_block",
+    "name": "<green>Khối đồng chất lượng cao",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Chất lượng cao"
+    ],
+    "block_place": {
+      "block": "copper_high_quality_block"
+    }
+  }
+}

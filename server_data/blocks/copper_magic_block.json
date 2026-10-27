@@ -1,0 +1,16 @@
+{
+  "display_name": "Khối đồng ma thuật",
+  "model": "minecraft:ores/copper_magic_block",
+  "hardness": 6,
+  "break_strength": 1,
+  "drops": [
+    {
+      "item": "copper_magic_block",
+      "min_amount": 1,
+      "max_amount": 1,
+      "chance": 1.0
+    }
+  ],
+  "place_sound": "block.copper.place",
+  "break_sound": "block.copper.break"
+}

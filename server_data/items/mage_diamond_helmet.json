@@ -1,0 +1,20 @@
+{
+  "id": "mage_diamond_helmet",
+  "base": "DIAMOND_HELMET",
+  "components": {
+    "name": "<dark_purple>Diamond Mage Hood",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 770,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.25,
+        "MAGIC_DAMAGE_PERCENT": 0.05
+      },
+      "slot": "HEAD"
+    }
+  }
+}

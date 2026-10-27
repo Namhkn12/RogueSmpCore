@@ -1,0 +1,14 @@
+{
+  "id": "chainmail_helmet",
+  "base": "CHAINMAIL_HELMET",
+  "components": {
+    "name": "<white>Chainmail Helmet",
+    "durability": 105,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.2
+      },
+      "slot": "HEAD"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "wooden_rapier",
+  "base": "WOODEN_SWORD",
+  "components": {
+    "name": "<white>Wooden Rapier",
+    "item_model": "minecraft:wooden_rapier",
+    "durability": 44,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.15,
+        "ATTACK_SPEED_BASE": 1.81,
+        "ENTITY_REACH": 0.96,
+        "DEFENSE_FLAT": 0.3
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

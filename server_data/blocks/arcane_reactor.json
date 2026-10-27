@@ -1,0 +1,16 @@
+{
+  "type": "energy_generator",
+  "model": "smp:arcane_reactor",
+  "display_name": "Lò phản ứng bí thuật",
+  "hardness": 3,
+  "drops": [
+    { "item": "arcane_reactor" }
+  ],
+  "place_sound": "block.metal.place",
+  "break_sound": "block.metal.break",
+  "data": {
+    "max_energy": 10000,
+    "transfer_rate": 20,
+    "model_active": "smp:arcane_reactor_on"
+  }
+}

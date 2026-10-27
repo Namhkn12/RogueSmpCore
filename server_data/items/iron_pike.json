@@ -1,0 +1,18 @@
+{
+  "id": "iron_pike",
+  "base": "IRON_SPEAR",
+  "components": {
+    "name": "<blue>Iron Pike",
+    "item_model": "minecraft:iron_pike",
+    "durability": 1050,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 9.25,
+        "ATTACK_SPEED_BASE": 0.725,
+        "ENTITY_REACH": 1.6,
+        "KNOCKBACK_RESISTANCE": 0.04
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "hell_knight_evoker",
+  "entityType": "EVOKER",
+  "displayName": "<dark_red><bold>Ảo ảnh hỏa ngục</bold></dark_red>",
+  "noAi": false,
+  "persistent": false,
+  "isBoss": false,
+  "isElite": true,
+  "detectionRange": 50,
+
+  "baseStat": {
+    "max_health": 300,
+    "attack_damage": 10,
+    "movement_speed": 0.38,
+    "armor": 18.0
+  },
+
+  "equipments": {
+  },
+
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 1,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

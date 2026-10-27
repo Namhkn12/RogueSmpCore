@@ -1,0 +1,14 @@
+{
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:ores/gold_magic_block",
+    "glint": true,
+    "name": "<light_purple>Khối vàng ma thuật",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Ma thuật"
+    ],
+    "block_place": {
+      "block": "gold_magic_block"
+    }
+  }
+}

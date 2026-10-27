@@ -1,0 +1,18 @@
+{
+  "display_name": "Brute Force",
+  "icon": "IRON_AXE",
+  "type": "PASSIVE",
+  "description": [
+    "<gray>Your critical melee hits send a shockwave through the target,",
+    "<gray>damaging every other enemy nearby.",
+    "",
+    "<white>Shockwave Damage: <yellow><damage>",
+    "<white>Radius: <yellow><radius> blocks"
+  ],
+  "scaling": {
+    "radius": [2.5, 2.75, 3.0, 3.25, 3.5],
+    "damage": [3.0, 4.0, 5.0, 6.0, 7.0]
+  },
+  "trigger": {},
+  "upgrades": {}
+}

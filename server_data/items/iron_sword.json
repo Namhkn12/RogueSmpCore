@@ -1,0 +1,17 @@
+{
+  "id": "iron_sword",
+  "base": "IRON_SWORD",
+  "components": {
+    "name": "<blue>Iron Sword",
+    "durability": 1050,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 7.0,
+        "ATTACK_SPEED_BASE": 1.5,
+        "ENTITY_REACH": 0.1,
+        "SWEEPING_DAMAGE_RATIO": 0.18
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

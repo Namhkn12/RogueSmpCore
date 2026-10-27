@@ -1,0 +1,18 @@
+{
+  "id": "golden_falchion",
+  "base": "GOLDEN_SWORD",
+  "components": {
+    "name": "<green>Golden Falchion",
+    "item_model": "minecraft:golden_falchion",
+    "durability": 600,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.75,
+        "ATTACK_SPEED_BASE": 1.45,
+        "ENTITY_REACH": 0.15,
+        "SWEEPING_DAMAGE_RATIO": 0.32
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

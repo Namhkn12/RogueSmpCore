@@ -1,0 +1,30 @@
+{
+  "id": "wood/rotboar",
+  "entityType": "ZOGLIN",
+  "components": {
+    "attributes": {
+      "ATTACK_DAMAGE": 5.5,
+      "MAX_HEALTH": 100.0,
+      "KNOCKBACK_RESISTANCE": 0.8,
+      "ARMOR": 8.0
+    },
+    "display_name": "<gradient:#C0CA33:#4E342E><bold>✦ Lợn rừng ✦</bold></gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 28
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "triggerRange": 14.0,
+          "contactDamage": 8.0,
+          "launchVertical": 1.3,
+          "type": "charge_spell"
+        }
+      ]
+    },
+    "loot_table": [
+      "fishing/common"
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "display_name": "Bodkin Blitz",
+  "icon": "ENDER_PEARL",
+  "type": "ACTIVE",
+  "description": [
+    "<gray>Lao thẳng về phía trước <yellow><distance></yellow> khối, xuyên qua khoảng trống cho đến khi bị chặn.",
+    "<gray>Sau khi dịch chuyển, trở nên tàng hình trong <yellow><stealth_duration:second></yellow>s.",
+    "<gray>Đòn đánh tiếp theo gây thêm <yellow><bonus_damage:percent></yellow>% sát thương."
+  ],
+  "scaling": {
+    "charges": [2],
+    "cooldown": [40],
+    "distance": [6.0, 8.0, 10.0],
+    "stealth_duration": [40, 60, 80],
+    "bonus_damage": [5, 7.5, 10],
+    "bonus_damage_duration": [40]
+  },
+  "trigger": {
+    "cast": { "key": "SWAP" }
+  }
+}

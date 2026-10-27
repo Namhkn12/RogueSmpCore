@@ -1,0 +1,21 @@
+{
+  "id": "mage_red_helmet",
+  "base": "LEATHER_HELMET",
+  "components": {
+    "name": "<white>Crimson Mage Hood",
+    "dyed_color": "#B02E26",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 112,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 0.675,
+        "MAGIC_DAMAGE_PERCENT": 0.015
+      },
+      "slot": "HEAD"
+    }
+  }
+}

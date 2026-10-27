@@ -1,0 +1,60 @@
+{
+  "id": "hell_knight_minion_ranged",
+  "entityType": "WITHER_SKELETON",
+  "displayName": "<dark_red><bold>Linh hồn thiện xạ</bold></dark_red>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 28,
+
+  "baseStat": {
+    "max_health": 40,
+    "attack_damage": 13.0,
+    "movement_speed": 0.35,
+    "armor": 18.0
+  },
+
+  "equipments": {
+    "CHEST": {
+      "material": "NETHERITE_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "rib"
+    },
+
+    "LEGS": {
+      "material": "NETHERITE_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "flow"
+    },
+
+    "FEET": {
+      "material": "NETHERITE_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "snout"
+    },
+
+    "HAND": {
+      "material": "BOW",
+      "displayName": "<dark_red>Cung hỏa ngục</dark_red>",
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

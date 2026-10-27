@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<aqua>Superior Bow Grip",
+    "description": [
+      "<dark_gray><!i>Linh kiện · Superior",
+      "<gray><!i>Tay cầm kim loại của cung và nỏ",
+      "<gray><!i>Dùng cho đồ bậc <white>B5–B6"
+    ],
+    "item_model": "smp:bow_grip"
+  }
+}

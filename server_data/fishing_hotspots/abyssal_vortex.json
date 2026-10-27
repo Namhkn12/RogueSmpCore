@@ -1,0 +1,32 @@
+{
+  "display_name": "<dark_purple>Abyssal Vortex",
+  "weight": 2,
+  "lifetime_seconds": 240,
+  "radius": 5,
+  "tier_weight_multipliers": {
+    "common": 0.3,
+    "epic": 4.0,
+    "legendary": 8.0
+  },
+  "bar_segments_bonus": -1,
+  "bar_turn_chance_multiplier": 1.4,
+  "luck_bonus": 0.2,
+  "loot_mode": "REPLACE",
+  "loot_tables": [
+    "fishing/hotspot/abyss"
+  ],
+  "regions":[
+    {
+      "world":"minecraft:fishingarea",
+      "region":"hotspot_1"
+    },
+    {
+      "world":"minecraft:fishingarea",
+      "region":"hotspot_2"
+    },
+    {
+      "world":"minecraft:fishingarea",
+      "region":"hotspot_3"
+    }
+  ]
+}

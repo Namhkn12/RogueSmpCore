@@ -1,0 +1,19 @@
+{
+  "id": "copper_morning_star",
+  "base": "COPPER_AXE",
+  "components": {
+    "name": "<white>Copper Morning Star",
+    "item_model": "minecraft:copper_morning_star",
+    "durability": 234,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.325,
+        "ATTACK_SPEED_BASE": 1.0,
+        "ENTITY_REACH": 0.2,
+        "SWEEPING_DAMAGE_RATIO": 0.1,
+        "SAFE_FALL_DISTANCE": 1.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

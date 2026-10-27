@@ -1,0 +1,33 @@
+{
+  "id": "metal/kobold",
+  "entityType": "ZOMBIE",
+  "components": {
+    "display_name": "<gradient:#FFD54F:#8D6E63>Quỷ nhỏ hầm sâu</gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 24
+    },
+    "attributes": {
+      "max_health": 34.0,
+      "attack_damage": 3.0,
+      "scale": 0.55,
+      "movement_speed": 0.3,
+      "armor": 4.0,
+      "knockback_resistance": 0.1
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "LEATHER_HELMET",
+        "trimMaterial": "copper",
+        "trimPattern": "eye",
+        "dyeColor": "255,184,115,51"
+      },
+      "HAND": {
+        "material": "GOLDEN_PICKAXE"
+      },
+      "OFF_HAND": {
+        "material": "TORCH"
+      }
+    }
+  }
+}

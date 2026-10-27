@@ -1,0 +1,18 @@
+{
+  "id": "wooden_swordbreaker",
+  "base": "WOODEN_SWORD",
+  "components": {
+    "name": "<white>Wooden Swordbreaker",
+    "item_model": "minecraft:wooden_swordbreaker",
+    "durability": 88,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 2.65,
+        "ATTACK_SPEED_BASE": 1.715,
+        "ENTITY_REACH": -0.04,
+        "DEFENSE_FLAT": 0.36
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

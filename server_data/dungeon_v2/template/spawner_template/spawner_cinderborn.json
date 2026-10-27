@@ -1,0 +1,15 @@
+{
+  "id": "spawner_tmd_cinderborn",
+  "name": "TMD Cinderborn Spawner",
+  "mobs": { "tmd_cinderborn": 100 },
+  "delay": 0, "minDelay": 260, "maxDelay": 420,
+  "activeRange": 12, "spawnRange": 5, "maxNearBy": 4, "spawnCount": 2,
+  "behaviors": [
+    {
+      "type": "protector",
+      "params": {
+        "requireBreak": 4
+      }
+    }
+  ]
+}

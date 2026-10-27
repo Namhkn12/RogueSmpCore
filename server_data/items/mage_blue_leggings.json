@@ -1,0 +1,21 @@
+{
+  "id": "mage_blue_leggings",
+  "base": "LEATHER_LEGGINGS",
+  "components": {
+    "name": "<white>Azure Mage Leggings",
+    "dyed_color": "#3C44AA",
+    "enchant": {
+      "enchants": {
+        "PROJECTILE_PROTECTION": 1
+      }
+    },
+    "durability": 152,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.35,
+        "SPEED_PERCENT": 0.02
+      },
+      "slot": "LEGS"
+    }
+  }
+}

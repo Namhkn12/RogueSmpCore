@@ -1,0 +1,25 @@
+{
+  "id": "spawner_tmd_skeleton_1",
+  "name": "TMD Skeleton Spawner Basic",
+  "mobs": {
+    "tmd_scorched_bones": 50,
+    "tmd_ember_archer": 50
+  },
+  "delay": 0,
+  "minDelay": 180,
+  "maxDelay": 240,
+  "activeRange": 17,
+  "spawnRange": 7,
+  "maxNearBy": 6,
+  "spawnCount": 4,
+  "behaviors": [
+      {
+        "type": "teleport",
+        "params": {
+          "max_teleports": 5,
+          "teleport_radius": 15.0,
+          "safe_check_radius": 7.0
+        }
+      }
+    ]
+}

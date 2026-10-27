@@ -1,0 +1,14 @@
+{
+  "id": "golden_chestplate",
+  "base": "GOLDEN_CHESTPLATE",
+  "components": {
+    "name": "<green>Golden Chestplate",
+    "durability": 600,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 5.6
+      },
+      "slot": "CHEST"
+    }
+  }
+}

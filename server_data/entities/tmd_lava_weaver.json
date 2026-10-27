@@ -1,0 +1,31 @@
+{
+  "id": "tmd_lava_weaver",
+  "entityType": "SPIDER",
+  "displayName": "<dark_red><bold>Lava Weaver</bold></dark_red>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 24,
+
+  "baseStat": {
+    "max_health": 34.0,
+    "attack_damage": 7.0,
+    "movement_speed": 0.38,
+    "armor": 4.0,
+    "knockback_resistance": 0.08
+  },
+
+  "equipments": {},
+
+  "activeSpell": [
+    "slow_aura_spell"
+  ],
+  "passiveSpell": [
+    "fire_resistance_spell",
+    "fire_aspect_spell"
+  ],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

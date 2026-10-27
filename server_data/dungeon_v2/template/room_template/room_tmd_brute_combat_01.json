@@ -1,0 +1,14 @@
+{
+  "id": "tmd_brute_combat_01",
+  "type": "ELITE",
+  "schemetaId": "schemeta_tmd_brute_combat_01",
+  "objectives": [
+    {
+      "type": "spawner_breaker",
+      "params": {
+        "score": 30,
+        "require": 4
+      }
+    }
+  ]
+}

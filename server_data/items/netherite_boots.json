@@ -1,0 +1,15 @@
+{
+  "id": "netherite_boots",
+  "base": "NETHERITE_BOOTS",
+  "components": {
+    "name": "<gold>Netherite Boots",
+    "durability": 1560,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 4.8,
+        "SPEED_PERCENT": -0.025
+      },
+      "slot": "FEET"
+    }
+  }
+}

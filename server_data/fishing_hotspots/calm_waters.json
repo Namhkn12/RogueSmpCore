@@ -1,0 +1,22 @@
+{
+  "display_name": "<aqua>Calm Waters",
+  "weight": 6,
+  "lifetime_seconds": 420,
+  "radius": 8,
+  "bar_segments_bonus": 3,
+  "bar_turn_chance_multiplier": 0.6,
+  "regions":[
+    {
+      "world":"minecraft:fishingarea",
+      "region":"hotspot_1"
+    },
+    {
+      "world":"minecraft:fishingarea",
+      "region":"hotspot_2"
+    },
+    {
+      "world":"minecraft:fishingarea",
+      "region":"hotspot_3"
+    }
+  ]
+}

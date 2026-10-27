@@ -1,0 +1,17 @@
+{
+  "id": "golden_round_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<green>Golden Round Shield",
+    "item_model": "minecraft:golden_round_shield",
+    "durability": 480,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.5,
+        "SPEED_PERCENT": 0.0375,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

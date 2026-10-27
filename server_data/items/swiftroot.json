@@ -1,0 +1,17 @@
+{
+  "id": "swiftroot",
+  "base": "SUGAR",
+  "components": {
+    "name": "<white>Swiftroot",
+    "brew_ingredient": {
+      "stats": {
+        "speed_percent": {
+          "min": 0.05,
+          "max": 0.1
+        }
+      },
+      "duration": 60,
+      "color": "#E0FFE0"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "golden_tekko",
+  "base": "GOLDEN_SWORD",
+  "components": {
+    "name": "<green>Golden Tekko",
+    "item_model": "minecraft:golden_tekko",
+    "durability": 840,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.125,
+        "ATTACK_SPEED_BASE": 2.575,
+        "ENTITY_REACH": -0.85,
+        "DEFENSE_FLAT": 1.0,
+        "KNOCKBACK_RESISTANCE": 0.06
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

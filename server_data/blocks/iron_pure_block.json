@@ -1,0 +1,16 @@
+{
+  "display_name": "Khối sắt nguyên chất",
+  "model": "minecraft:ores/iron_pure_block",
+  "hardness": 6,
+  "break_strength": 1,
+  "drops": [
+    {
+      "item": "iron_pure_block",
+      "min_amount": 1,
+      "max_amount": 1,
+      "chance": 1.0
+    }
+  ],
+  "place_sound": "block.metal.place",
+  "break_sound": "block.metal.break"
+}

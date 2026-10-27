@@ -1,0 +1,15 @@
+{
+  "id": "diamond_boots",
+  "base": "DIAMOND_BOOTS",
+  "components": {
+    "name": "<dark_purple>Diamond Boots",
+    "durability": 1200,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.9,
+        "SPEED_PERCENT": -0.015
+      },
+      "slot": "FEET"
+    }
+  }
+}

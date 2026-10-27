@@ -1,0 +1,96 @@
+{
+  "id": "dungeon_cave_01",
+  "name": "Forgotten Cave",
+  "description": "An ancient cave system filled with monsters and forgotten treasures.",
+  "lootTableId": "rogue:dungeons/dungeon_a_reward",
+  "playTime": 30,
+  "active": true,
+  "minimumRooms": 3,
+  "pools": [
+    {
+      "id": "pool_entrance",
+      "icon": "IRON_DOOR",
+      "name": "Entrance Rooms",
+      "weight": 1.0,
+      "min": 1,
+      "max": 1,
+      "rooms": [
+        {
+          "roomId": "cave_entrance_01",
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "id": "pool_combat",
+      "icon": "IRON_SWORD",
+      "name": "Combat Rooms",
+      "weight": 3.0,
+      "min": 2,
+      "max": 5,
+      "rooms": [
+        {
+          "roomId": "cave_combat_01",
+          "weight": 3.0
+        },
+        {
+          "roomId": "cave_combat_02",
+          "weight": 2.0
+        },
+        {
+          "roomId": "cave_ambush_01",
+          "weight": 1.5
+        }
+      ]
+    },
+    {
+      "id": "pool_trap",
+      "icon": "TRIPWIRE_HOOK",
+      "name": "Trap Rooms",
+      "weight": 1.5,
+      "min": 1,
+      "max": 2,
+      "rooms": [
+        {
+          "roomId": "cave_trap_01",
+          "weight": 2.0
+        }
+      ]
+    },
+    {
+      "id": "pool_treasure",
+      "icon": "CHEST",
+      "name": "Treasure Rooms",
+      "weight": 1.0,
+      "min": 1,
+      "max": 2,
+      "rooms": [
+        {
+          "roomId": "cave_treasure_01",
+          "weight": 2.0
+        },
+        {
+          "roomId": "cave_treasure_rare_01",
+          "weight": 0.5
+        }
+      ]
+    },
+    {
+      "id": "pool_boss",
+      "icon": "WITHER_SKELETON_SKULL",
+      "name": "Boss Room",
+      "weight": 1.0,
+      "min": 1,
+      "max": 1,
+      "rooms": [
+        {
+          "roomId": "cave_boss_01",
+          "weight": 1.0
+        }
+      ]
+    }
+  ],
+  "treasureRooms": [
+    "cave_final_treasure_01"
+  ]
+}

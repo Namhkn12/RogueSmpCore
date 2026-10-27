@@ -1,0 +1,19 @@
+{
+  "display_name": "Split Arrow",
+  "icon": "SPECTRAL_ARROW",
+  "type": "PASSIVE",
+  "description": [
+    "<gray>Your arrows split on impact, chaining to the nearest enemy and bouncing onward.",
+    "",
+    "<white>Chain Damage: <yellow><multiplier:percent>%<white> of the arrow's damage",
+    "<white>Bounces: <yellow><bounce>",
+    "<white>Chain Range: <yellow><range> blocks"
+  ],
+  "scaling": {
+    "range": [5.0, 5.5, 6.0, 6.5, 7.0],
+    "bounce": [1.0, 1.0, 2.0, 2.0, 3.0],
+    "multiplier": [0.4, 0.5, 0.6, 0.7, 0.8]
+  },
+  "trigger": {},
+  "upgrades": {}
+}

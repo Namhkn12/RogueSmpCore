@@ -1,0 +1,16 @@
+{
+  "id": "mage",
+  "display_name": "Mage",
+  "icon": "minecraft:ender_pearl",
+  "description": [
+    "Mage do stuff and boom boom shakalaka"
+  ],
+  "default_abilities": {
+    "fireball": 1,
+    "flamestrike": 1,
+    "igneous_rune": 1,
+    "pyroblast": 1,
+    "volcanic_meteor": 1
+  },
+  "allowedWeapons": ["wands"]
+}

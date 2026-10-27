@@ -1,0 +1,17 @@
+{
+  "id": "iron_round_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<blue>Iron Round Shield",
+    "item_model": "minecraft:iron_round_shield",
+    "durability": 840,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.0,
+        "SPEED_PERCENT": 0.0225,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

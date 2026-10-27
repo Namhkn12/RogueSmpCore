@@ -1,0 +1,18 @@
+{
+  "id": "wooden_lance",
+  "base": "WOODEN_SPEAR",
+  "components": {
+    "name": "<white>Wooden Lance",
+    "item_model": "minecraft:wooden_lance",
+    "durability": 73,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.4,
+        "ATTACK_SPEED_BASE": 1.03,
+        "ENTITY_REACH": 1.46,
+        "KNOCKBACK_RESISTANCE": 0.084
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

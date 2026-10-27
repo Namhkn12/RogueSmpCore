@@ -1,0 +1,28 @@
+{
+  "display_name": "Xạ Thủ Tài Ba",
+  "icon": "TARGET",
+  "type": "PASSIVE",
+  "description": [
+    "<!i><gray>Tăng sát thương tầm xa cơ bản và theo cộng dồn.",
+    "<!i><gray>Mỗi phát bắn trúng địch tăng sát thương tạm thời.",
+    "",
+    "<!i><gray>Tăng cơ bản: <green><passive_dmg_display>%",
+    "<!i><gray>Tăng mỗi stack: <yellow><stack_dmg_display>%",
+    "<!i><gray>Thời gian duy trì: <gray><cooldown_decay> ticks"
+  ],
+  "scaling": {
+    "passive_dmg": [0.10, 0.15, 0.20, 0.25, 0.40],
+    "passive_dmg_display": [10, 15, 20, 25, 40],
+    "stack_dmg": [0.03, 0.04, 0.05, 0.06, 0.10],
+    "stack_dmg_display": [3, 4, 5, 6, 10],
+    "cooldown_decay": [80, 80, 80, 80, 120]
+  },
+  "trigger": {
+  },
+  "upgrades": {
+    "2": [{ "type": "exp", "level": 10, "cost": 200 }],
+    "3": [{ "type": "item", "item_id": "sharp_eye", "amount": 1 }],
+    "4": [{ "type": "exp", "level": 25, "cost": 750 }],
+    "5": [{ "type": "item", "item_id": "void_eye", "amount": 1 }]
+  }
+}

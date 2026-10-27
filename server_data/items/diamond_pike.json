@@ -1,0 +1,18 @@
+{
+  "id": "diamond_pike",
+  "base": "DIAMOND_SPEAR",
+  "components": {
+    "name": "<dark_purple>Diamond Pike",
+    "item_model": "minecraft:diamond_pike",
+    "durability": 1500,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 10.875,
+        "ATTACK_SPEED_BASE": 0.6375,
+        "ENTITY_REACH": 1.55,
+        "KNOCKBACK_RESISTANCE": 0.02
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

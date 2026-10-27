@@ -1,0 +1,77 @@
+{
+  "id": "tmd_ashen_executioner_2",
+  "entityType": "WITHER_SKELETON",
+  "displayName": "<gold>Ashen Executioner</gold>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": true,
+  "detectionRange": 28,
+
+  "baseStat": {
+    "max_health": 50.0,
+    "attack_damage": 8.0,
+    "movement_speed": 0.36,
+    "armor": 16.0,
+    "knockback_resistance": 0.30
+  },
+
+  "equipments": {
+
+    "HEAD": {
+      "material": "NETHERITE_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "spire"
+    },
+
+    "CHEST": {
+      "material": "NETHERITE_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "bolt"
+    },
+
+    "LEGS": {
+      "material": "NETHERITE_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "flow"
+    },
+
+    "FEET": {
+      "material": "NETHERITE_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "vex"
+    },
+
+    "HAND": {
+      "material": "NETHERITE_SWORD",
+      "displayName": "<gold>Molten Edge</gold>",
+      "lore": [
+        "<gray>Its blade drips with ember light."
+      ],
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+
+  "activeSpell": [],
+  "passiveSpell": [
+    "fire_resistance_spell",
+    "blind_spell"
+  ],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

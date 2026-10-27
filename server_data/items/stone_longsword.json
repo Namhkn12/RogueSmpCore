@@ -1,0 +1,18 @@
+{
+  "id": "stone_longsword",
+  "base": "STONE_SWORD",
+  "components": {
+    "name": "<white>Stone Longsword",
+    "item_model": "minecraft:stone_longsword",
+    "durability": 150,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.5,
+        "ATTACK_SPEED_BASE": 1.475,
+        "ENTITY_REACH": 0.68,
+        "SWEEPING_DAMAGE_RATIO": 0.276
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

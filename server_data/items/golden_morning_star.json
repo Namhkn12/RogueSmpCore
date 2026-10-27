@@ -1,0 +1,19 @@
+{
+  "id": "golden_morning_star",
+  "base": "GOLDEN_AXE",
+  "components": {
+    "name": "<green>Golden Morning Star",
+    "item_model": "minecraft:golden_morning_star",
+    "durability": 720,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 7.625,
+        "ATTACK_SPEED_BASE": 0.925,
+        "ENTITY_REACH": 0.15,
+        "SWEEPING_DAMAGE_RATIO": 0.08,
+        "SAFE_FALL_DISTANCE": 0.75
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

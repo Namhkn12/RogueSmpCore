@@ -1,0 +1,18 @@
+{
+  "id": "double_headed_copper_battle_axe",
+  "base": "COPPER_AXE",
+  "components": {
+    "name": "<white>Double Headed Copper Battle Axe",
+    "item_model": "minecraft:double_headed_copper_battle_axe",
+    "durability": 254,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 8.875,
+        "ATTACK_SPEED_BASE": 0.9,
+        "ENTITY_REACH": 0.2,
+        "SWEEPING_DAMAGE_RATIO": 0.4
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

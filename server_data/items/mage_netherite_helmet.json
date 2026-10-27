@@ -1,0 +1,20 @@
+{
+  "id": "mage_netherite_helmet",
+  "base": "NETHERITE_HELMET",
+  "components": {
+    "name": "<gold>Netherite Mage Hood",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 1014,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.85,
+        "MAGIC_DAMAGE_PERCENT": 0.06
+      },
+      "slot": "HEAD"
+    }
+  }
+}

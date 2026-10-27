@@ -1,0 +1,18 @@
+{
+  "id": "copper_pike",
+  "base": "COPPER_SPEAR",
+  "components": {
+    "name": "<white>Copper Pike",
+    "item_model": "minecraft:copper_pike",
+    "durability": 195,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.325,
+        "ATTACK_SPEED_BASE": 0.9,
+        "ENTITY_REACH": 1.7,
+        "KNOCKBACK_RESISTANCE": 0.08
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

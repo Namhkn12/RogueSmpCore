@@ -1,0 +1,13 @@
+{
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:ores/gold_pure_block",
+    "name": "<aqua>Khối vàng nguyên chất",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Nguyên chất"
+    ],
+    "block_place": {
+      "block": "gold_pure_block"
+    }
+  }
+}

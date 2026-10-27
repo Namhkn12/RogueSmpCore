@@ -1,0 +1,18 @@
+{
+  "id": "stone_bastard",
+  "base": "STONE_SWORD",
+  "components": {
+    "name": "<white>Stone Bastard",
+    "item_model": "minecraft:stone_bastard",
+    "durability": 165,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.5,
+        "ATTACK_SPEED_BASE": 1.275,
+        "ENTITY_REACH": 0.43,
+        "SWEEPING_DAMAGE_RATIO": 0.276
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

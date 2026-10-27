@@ -1,0 +1,21 @@
+{
+  "id": "mage_red_leggings",
+  "base": "LEATHER_LEGGINGS",
+  "components": {
+    "name": "<white>Crimson Mage Leggings",
+    "dyed_color": "#B02E26",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 152,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.35,
+        "SPEED_PERCENT": 0.02
+      },
+      "slot": "LEGS"
+    }
+  }
+}

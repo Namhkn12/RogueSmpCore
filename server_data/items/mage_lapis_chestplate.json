@@ -1,0 +1,25 @@
+{
+  "id": "mage_lapis_chestplate",
+  "base": "IRON_CHESTPLATE",
+  "components": {
+    "name": "<blue>Lapis Mage Robe",
+    "item_model": "minecraft:lapis_chestplate",
+    "equippable": {
+      "slot": "CHEST",
+      "asset_id": "minecraft:lapis"
+    },
+    "enchant": {
+      "enchants": {
+        "PROJECTILE_PROTECTION": 1
+      }
+    },
+    "durability": 400,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.8,
+        "MAGIC_DAMAGE_PERCENT": 0.04
+      },
+      "slot": "CHEST"
+    }
+  }
+}

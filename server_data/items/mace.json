@@ -1,0 +1,17 @@
+{
+  "id": "mace",
+  "base": "MACE",
+  "components": {
+    "name": "<gold>Mace",
+    "durability": 1950,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 8.0,
+        "ATTACK_SPEED_BASE": 0.7,
+        "SPEED_PERCENT": -0.05,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

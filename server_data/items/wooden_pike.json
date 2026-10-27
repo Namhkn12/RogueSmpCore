@@ -1,0 +1,18 @@
+{
+  "id": "wooden_pike",
+  "base": "WOODEN_SPEAR",
+  "components": {
+    "name": "<white>Wooden Pike",
+    "item_model": "minecraft:wooden_pike",
+    "durability": 73,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.35,
+        "ATTACK_SPEED_BASE": 0.935,
+        "ENTITY_REACH": 1.71,
+        "KNOCKBACK_RESISTANCE": 0.084
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

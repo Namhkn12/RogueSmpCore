@@ -1,0 +1,18 @@
+{
+  "base": "NETHERITE_CHESTPLATE",
+  "components": {
+    "name": "<#8D3B2E>Bastion Chestplate",
+    "description": [
+      "<gray>Bộ giáp hắc thiết hiếm hoi Roland chịu đem bán.",
+      "<dark_gray>Cấp cao · Hàng của Armorer Roland"
+    ],
+    "durability": 592,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 9.4,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "CHEST"
+    }
+  }
+}

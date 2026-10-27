@@ -1,0 +1,13 @@
+{
+  "id": "quest_master",
+  "name": "<red><bold>Quest Master",
+  "entityType": "MANNEQUIN",
+  "description": "<green>Nhận quest",
+  "skinId":"quest_master",
+  "actions": [
+    {
+      "type": "open_gui",
+      "gui": "quest"
+    }
+  ]
+}

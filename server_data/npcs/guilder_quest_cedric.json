@@ -1,0 +1,9 @@
+{
+  "entityType": "MANNEQUIN",
+  "name": "<gradient:#90CAF9:#1565C0><bold>Quest Manager Cedric</bold></gradient>",
+  "skinId": "guilder_girl_pink",
+  "description": [
+    "<aqua>Xem và nhận nhiệm vụ tại đây</aqua>"
+  ],
+  "actions": []
+}

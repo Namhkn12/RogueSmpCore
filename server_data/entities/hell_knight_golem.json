@@ -1,0 +1,27 @@
+{
+  "id": "hell_knight_golem",
+  "entityType": "IRON_GOLEM",
+  "displayName": "<dark_red><bold>Ảo ảnh hỏa ngục</bold></dark_red>",
+  "noAi": false,
+  "persistent": false,
+  "isBoss": false,
+  "isElite": true,
+  "detectionRange": 50,
+
+  "baseStat": {
+    "max_health": 350,
+    "attack_damage": 12,
+    "movement_speed": 0.36,
+    "armor": 18.0,
+    "knockback_resistance": 1
+  },
+
+  "equipments": {
+  },
+
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 1,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

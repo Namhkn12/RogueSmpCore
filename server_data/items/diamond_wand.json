@@ -1,0 +1,24 @@
+{
+  "id": "diamond_wand",
+  "base": "STICK",
+  "components": {
+    "name": "<dark_purple>Diamond Wand",
+    "item_model": "minecraft:diamond_wand",
+    "mage_staff": {
+      "color": "#5CE8E0"
+    },
+    "durability": 900,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 1.0,
+        "STAFF_DAMAGE_BASE": 4.95,
+        "STAFF_RANGE_BASE": 16,
+        "ATTACK_SPEED_BASE": 2.4,
+        "SPEED_PERCENT": 0.02,
+        "MAGIC_DAMAGE_PERCENT": 0.06,
+        "KNOCKBACK_RESISTANCE": 0.05
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

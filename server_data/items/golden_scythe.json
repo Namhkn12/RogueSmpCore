@@ -1,0 +1,18 @@
+{
+  "id": "golden_scythe",
+  "base": "GOLDEN_HOE",
+  "components": {
+    "name": "<green>Golden Scythe",
+    "item_model": "minecraft:golden_scythe",
+    "durability": 540,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.125,
+        "ATTACK_SPEED_BASE": 1.1375,
+        "ENTITY_REACH": 0.65,
+        "SWEEPING_DAMAGE_RATIO": 0.64
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

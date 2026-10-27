@@ -1,0 +1,23 @@
+{
+  "id": "lapis_wand",
+  "base": "STICK",
+  "components": {
+    "name": "<blue>Lapis Wand",
+    "item_model": "minecraft:lapis_wand",
+    "mage_staff": {
+      "color": "#2F5FE0"
+    },
+    "durability": 270,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 1.0,
+        "STAFF_DAMAGE_BASE": 3.45,
+        "STAFF_RANGE_BASE": 16,
+        "ATTACK_SPEED_BASE": 2.4,
+        "SPEED_PERCENT": 0.02,
+        "MAGIC_DAMAGE_PERCENT": 0.05
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

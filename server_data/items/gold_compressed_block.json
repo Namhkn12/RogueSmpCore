@@ -1,0 +1,13 @@
+{
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:ores/gold_compressed_block",
+    "name": "<white>Khối vàng nén",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Nén"
+    ],
+    "block_place": {
+      "block": "gold_compressed_block"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "base": "STONE_SHOVEL",
+  "components": {
+    "name": "<#9E9E9E>Prospector Shovel",
+    "description": [
+      "<gray>Xẻng xúc đất cát nhanh gọn.",
+      "<dark_gray>Cấp thấp · Hàng của Toolsmith Barrett"
+    ],
+    "durability": 131,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 2.5,
+        "ATTACK_SPEED_BASE": 1.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

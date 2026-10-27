@@ -1,0 +1,15 @@
+{
+  "id": "iron_boots",
+  "base": "IRON_BOOTS",
+  "components": {
+    "name": "<blue>Iron Boots",
+    "durability": 840,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.0,
+        "SPEED_PERCENT": -0.005
+      },
+      "slot": "FEET"
+    }
+  }
+}

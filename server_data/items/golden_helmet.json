@@ -1,0 +1,14 @@
+{
+  "id": "golden_helmet",
+  "base": "GOLDEN_HELMET",
+  "components": {
+    "name": "<green>Golden Helmet",
+    "durability": 420,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.1
+      },
+      "slot": "HEAD"
+    }
+  }
+}

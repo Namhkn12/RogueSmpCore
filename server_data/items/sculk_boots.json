@@ -1,0 +1,12 @@
+{
+  "id": "sculk_boots",
+  "base": "IRON_BOOTS",
+  "components": {
+    "name": "<gray>Sculk Boots",
+    "item_model": "minecraft:sculk_boots",
+    "equippable": {
+      "slot": "FEET",
+      "asset_id": "minecraft:sculk"
+    }
+  }
+}

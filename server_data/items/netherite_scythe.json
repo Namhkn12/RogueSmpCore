@@ -1,0 +1,18 @@
+{
+  "id": "netherite_scythe",
+  "base": "NETHERITE_HOE",
+  "components": {
+    "name": "<gold>Netherite Scythe",
+    "item_model": "minecraft:netherite_scythe",
+    "durability": 1755,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 8.5,
+        "ATTACK_SPEED_BASE": 0.95,
+        "ENTITY_REACH": 0.5,
+        "SWEEPING_DAMAGE_RATIO": 0.16
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

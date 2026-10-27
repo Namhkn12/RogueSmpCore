@@ -1,0 +1,30 @@
+{
+  "display_name": "<gold>Treasure School",
+  "weight": 4,
+  "lifetime_seconds": 300,
+  "radius": 6,
+  "tier_weight_multipliers": {
+    "rare": 2.0,
+    "epic": 3.0,
+    "legendary": 4.0
+  },
+  "luck_bonus": 0.1,
+  "loot_mode": "EXTRA",
+  "loot_tables": [
+    "fishing/hotspot/treasure"
+  ],
+  "regions":[
+    {
+      "world":"minecraft:fishingarea",
+      "region":"hotspot_1"
+    },
+    {
+      "world":"minecraft:fishingarea",
+      "region":"hotspot_2"
+    },
+    {
+      "world":"minecraft:fishingarea",
+      "region":"hotspot_3"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "mage_blue_chestplate",
+  "base": "LEATHER_CHESTPLATE",
+  "components": {
+    "name": "<white>Azure Mage Robe",
+    "dyed_color": "#3C44AA",
+    "enchant": {
+      "enchants": {
+        "PROJECTILE_PROTECTION": 1
+      }
+    },
+    "durability": 160,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.8,
+        "MAGIC_DAMAGE_PERCENT": 0.015
+      },
+      "slot": "CHEST"
+    }
+  }
+}

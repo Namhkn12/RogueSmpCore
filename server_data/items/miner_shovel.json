@@ -1,0 +1,19 @@
+{
+  "base": "IRON_SHOVEL",
+  "components": {
+    "name": "<#B0BEC5>Xẻng Thợ Mỏ",
+    "description": [
+      "<gray>Bộ đồ nghề sắt quen tay của thợ mỏ thị trấn.",
+      "<gray>Bền, rẻ, đủ dùng cho những ngày đầu.",
+      "<dark_gray>Hàng của Thợ công cụ Barrett · Không thể chế tạo"
+    ],
+    "durability": 220,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.0,
+        "ATTACK_SPEED_BASE": 1.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

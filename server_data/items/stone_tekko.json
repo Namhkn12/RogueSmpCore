@@ -1,0 +1,19 @@
+{
+  "id": "stone_tekko",
+  "base": "STONE_SWORD",
+  "components": {
+    "name": "<white>Stone Tekko",
+    "item_model": "minecraft:stone_tekko",
+    "durability": 210,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 2.5,
+        "ATTACK_SPEED_BASE": 2.59,
+        "ENTITY_REACH": -0.82,
+        "DEFENSE_FLAT": 0.5,
+        "KNOCKBACK_RESISTANCE": 0.072
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

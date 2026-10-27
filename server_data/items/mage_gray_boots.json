@@ -1,0 +1,17 @@
+{
+  "id": "mage_gray_boots",
+  "base": "LEATHER_BOOTS",
+  "components": {
+    "name": "<white>Ashen Mage Boots",
+    "dyed_color": "#474F52",
+    "durability": 128,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 0.675,
+        "SPEED_PERCENT": 0.02,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "FEET"
+    }
+  }
+}

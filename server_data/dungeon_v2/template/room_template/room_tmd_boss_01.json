@@ -1,0 +1,14 @@
+{
+  "id": "tmd_boss_01",
+  "type": "BOSS",
+  "schemetaId": "schemeta_tmd_boss_01",
+  "objectives": [
+    {
+      "type": "demon_slayer",
+      "params": {
+        "target": "primordial_slime",
+        "score": 100
+      }
+    }
+  ]
+}

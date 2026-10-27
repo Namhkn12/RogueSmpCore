@@ -1,0 +1,18 @@
+{
+  "id": "stone_rapier",
+  "base": "STONE_SWORD",
+  "components": {
+    "name": "<white>Stone Rapier",
+    "item_model": "minecraft:stone_rapier",
+    "durability": 90,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.5,
+        "ATTACK_SPEED_BASE": 1.79,
+        "ENTITY_REACH": 0.93,
+        "DEFENSE_FLAT": 0.5
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "result": {
+    "item": "copper_claymore"
+  },
+  "pattern": [
+    "AAA",
+    "AAA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "item": "iron_compressed_block"
+    }
+  },
+  "type": "shaped"
+}

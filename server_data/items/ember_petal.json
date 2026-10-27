@@ -1,0 +1,17 @@
+{
+  "id": "ember_petal",
+  "base": "BLAZE_POWDER",
+  "components": {
+    "name": "<gold>Ember Petal",
+    "brew_ingredient": {
+      "stats": {
+        "melee_damage_percent": {
+          "min": 0.02,
+          "max": 0.04
+        }
+      },
+      "duration": -160,
+      "color": "#FF6020"
+    }
+  }
+}

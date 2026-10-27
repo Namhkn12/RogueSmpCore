@@ -1,0 +1,21 @@
+{
+  "id": "diamond_round_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<dark_purple>Diamond Round Shield",
+    "item_model": "minecraft:diamond_round_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 1200,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.5,
+        "SPEED_PERCENT": 0.0075
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

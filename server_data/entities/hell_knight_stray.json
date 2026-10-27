@@ -1,0 +1,7 @@
+{
+  "id": "hell_knight_stray",
+  "entityType": "STRAY",
+  "components": {
+    "display_name": "<gray>Hell Knight Deadeye"
+  }
+}

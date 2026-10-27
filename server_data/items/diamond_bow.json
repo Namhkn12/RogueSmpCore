@@ -1,0 +1,18 @@
+{
+  "id": "diamond_bow",
+  "base": "BOW",
+  "components": {
+    "name": "<dark_purple>Diamond Bow",
+    "item_model": "minecraft:diamond_bow",
+    "durability": 1500,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 9.5,
+        "PROJECTILE_SPEED_BASE": 0.94,
+        "SPEED_PERCENT": -0.06,
+        "BURNING_TIME": -0.25
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

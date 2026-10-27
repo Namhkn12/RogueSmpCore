@@ -1,0 +1,18 @@
+{
+  "id": "copper_scythe",
+  "base": "COPPER_HOE",
+  "components": {
+    "name": "<white>Copper Scythe",
+    "item_model": "minecraft:copper_scythe",
+    "durability": 176,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.225,
+        "ATTACK_SPEED_BASE": 1.2,
+        "ENTITY_REACH": 0.7,
+        "SWEEPING_DAMAGE_RATIO": 0.8
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

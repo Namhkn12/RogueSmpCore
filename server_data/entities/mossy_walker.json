@@ -1,0 +1,30 @@
+{
+  "id": "wood/mossy_walker",
+  "entityType": "ZOMBIE",
+  "components": {
+    "display_name": "<#8BC34A>Xác rêu",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 40.0,
+      "attack_damage": 4.5,
+      "armor": 2.0
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "mossy_walker"
+      },
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "dyeColor": "255,128,199,31"
+      },
+      "FEET": {
+        "material": "LEATHER_BOOTS",
+        "dyeColor": "255,94,124,22"
+      }
+    }
+  }
+}

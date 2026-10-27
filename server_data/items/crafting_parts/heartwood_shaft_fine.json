@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<green>Fine Heartwood Shaft",
+    "description": [
+      "<dark_gray><!i>Linh kiện · Fine",
+      "<gray><!i>Cán kiếm, cánh cung, cán trượng, cán công cụ",
+      "<gray><!i>Dùng cho đồ bậc <white>B4"
+    ],
+    "item_model": "minecraft:stick"
+  }
+}

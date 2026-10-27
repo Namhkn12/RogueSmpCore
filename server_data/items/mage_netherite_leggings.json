@@ -1,0 +1,20 @@
+{
+  "id": "mage_netherite_leggings",
+  "base": "NETHERITE_LEGGINGS",
+  "components": {
+    "name": "<gold>Netherite Mage Leggings",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 1377,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 5.7,
+        "SPEED_PERCENT": 0.005
+      },
+      "slot": "LEGS"
+    }
+  }
+}

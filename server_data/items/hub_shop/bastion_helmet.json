@@ -1,0 +1,17 @@
+{
+  "base": "NETHERITE_HELMET",
+  "components": {
+    "name": "<#8D3B2E>Bastion Helmet",
+    "description": [
+      "<gray>Bộ giáp hắc thiết hiếm hoi Roland chịu đem bán.",
+      "<dark_gray>Cấp cao · Hàng của Armorer Roland"
+    ],
+    "durability": 407,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.9
+      },
+      "slot": "HEAD"
+    }
+  }
+}

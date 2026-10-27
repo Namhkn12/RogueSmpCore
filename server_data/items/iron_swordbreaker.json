@@ -1,0 +1,18 @@
+{
+  "id": "iron_swordbreaker",
+  "base": "IRON_SWORD",
+  "components": {
+    "name": "<blue>Iron Swordbreaker",
+    "item_model": "minecraft:iron_swordbreaker",
+    "durability": 1260,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.75,
+        "ATTACK_SPEED_BASE": 1.625,
+        "ENTITY_REACH": -0.15,
+        "DEFENSE_FLAT": 1.8
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

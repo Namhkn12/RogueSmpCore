@@ -1,0 +1,18 @@
+{
+  "id": "abandoned_mine/foreman",
+  "name": "<red>Đốc công bị nguyền",
+  "icon": "IRON_PICKAXE",
+  "description": [
+    "<gray>Hạ gục tên đốc công bị nguyền",
+    "<gray>dưới đáy Mỏ bỏ hoang."
+  ],
+  "conditions": [ { "type": "in_dungeon", "dungeon": "abandoned_mine" } ],
+  "objectives": {
+    "foreman": { "type": "signal", "signal": "kill:hell_knight", "amount": 1, "display": "Hạ đốc công" }
+  },
+  "rewards": [
+    { "type": "item", "item": { "demolition_chestplate": 1 } },
+    { "type": "money", "amount": 1000 }
+  ],
+  "autoClaimRewards": false
+}

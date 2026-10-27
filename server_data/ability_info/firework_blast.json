@@ -1,0 +1,39 @@
+{
+  "display_name": "Pháo Hoa Bùng Nổ",
+  "icon": "FIREWORK_ROCKET",
+  "type": "ACTIVE",
+  "description": [
+    "<!i><gold>Cách kích hoạt: <yellow>Chuột Phải + Shift (RIGHT_CLICK)",
+    "<!i><gray>Bắn một quả pháo hoa tầm nhiệt về phía trước.",
+    "<!i><gray>Gây sát thương diện rộng dựa trên khoảng cách bay.",
+    "",
+    "<!i><gray>Sát thương cơ bản: <red><base_damage>",
+    "<!i><gray>Sát thương tối đa: <dark_red><damage_cap>",
+    "<!i><gray>Hồi chiêu: <green><cooldown>s"
+  ],
+  "scaling": {
+    "base_damage": [12.0, 15.0, 18.0, 22.0, 26.0],
+    "damage_cap": [25.0, 30.0, 35.0, 42.0, 55.0],
+    "cooldown": [160, 140, 120, 100, 80]
+  },
+  "trigger": {
+    "execute": {
+      "key": "RIGHT_CLICK",
+      "options": ["sneaking", "not_holding_projectile", "not_holding_consumable"]
+    }
+  },
+  "upgrades": {
+    "2": [
+      { "type": "exp", "level": 5, "cost": 120 }
+    ],
+    "3": [
+      { "type": "item", "item_id": "gunpowder", "amount": 32 }
+    ],
+    "4": [
+      { "type": "exp", "level": 15, "cost": 450 }
+    ],
+    "5": [
+      { "type": "item", "item_id": "firework_star", "amount": 1 }
+    ]
+  }
+}

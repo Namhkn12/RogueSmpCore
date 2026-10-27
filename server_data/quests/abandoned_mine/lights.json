@@ -1,0 +1,17 @@
+{
+  "id": "abandoned_mine/lights",
+  "name": "<yellow>Thắp sáng khu mỏ",
+  "icon": "LANTERN",
+  "description": [
+    "<gray>Thắp lại 3 ngọn đèn dầu trong Mỏ bỏ hoang",
+    "<gray>để mở cổng xuống hầm sâu."
+  ],
+  "conditions": [ { "type": "in_dungeon", "dungeon": "abandoned_mine" } ],
+  "objectives": {
+    "lanterns": { "type": "signal", "signal": "lantern_lit", "amount": 3, "display": "Thắp đèn" }
+  },
+  "rewards": [
+    { "type": "money", "amount": 200 }
+  ],
+  "autoClaimRewards": true
+}

@@ -1,0 +1,8 @@
+{
+  "id": "spawner_tmd_smoldering_hog",
+  "name": "TMD Smoldering Hog Spawner",
+  "mobs": { "tmd_smoldering_hog": 100 },
+  "delay": 0, "minDelay": 120, "maxDelay": 160,
+  "activeRange": 12, "spawnRange": 4, "maxNearBy": 10, "spawnCount": 5,
+  "behaviors": []
+}

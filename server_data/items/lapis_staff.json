@@ -1,0 +1,24 @@
+{
+  "id": "lapis_staff",
+  "base": "STICK",
+  "components": {
+    "name": "<blue>Lapis Staff",
+    "item_model": "minecraft:lapis_staff",
+    "mage_staff": {
+      "color": "#2F5FE0"
+    },
+    "durability": 450,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 2.0,
+        "STAFF_DAMAGE_BASE": 8.625,
+        "STAFF_RANGE_BASE": 28,
+        "ATTACK_SPEED_BASE": 0.75,
+        "SPEED_PERCENT": -0.06,
+        "MAGIC_DAMAGE_PERCENT": 0.1,
+        "KNOCKBACK_RESISTANCE": 0.05
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

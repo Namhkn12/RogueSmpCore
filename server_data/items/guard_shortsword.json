@@ -1,0 +1,22 @@
+{
+  "base": "IRON_SWORD",
+  "components": {
+    "name": "<#B0BEC5>Đoản Kiếm Vệ Binh",
+    "item_model": "minecraft:iron_shortsword",
+    "description": [
+      "<gray>Vũ khí sắt tiêu chuẩn của đội vệ binh thị trấn.",
+      "<gray>Cân bằng, bền bỉ, dễ dùng.",
+      "<dark_gray>Hàng của Thợ rèn Drake · Không thể chế tạo"
+    ],
+    "durability": 670,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.25,
+        "ATTACK_SPEED_BASE": 1.925,
+        "ENTITY_REACH": 0.1,
+        "SWEEPING_DAMAGE_RATIO": 0.12
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

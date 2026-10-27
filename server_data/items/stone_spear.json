@@ -1,0 +1,16 @@
+{
+  "id": "stone_spear",
+  "base": "STONE_SPEAR",
+  "components": {
+    "name": "<white>Stone Spear",
+    "durability": 150,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.0,
+        "ATTACK_SPEED_BASE": 1.375,
+        "ENTITY_REACH": 0.68
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}
