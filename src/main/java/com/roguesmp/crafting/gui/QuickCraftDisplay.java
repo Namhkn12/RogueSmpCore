@@ -30,13 +30,13 @@ public final class QuickCraftDisplay {
         for (QuickCraftCandidate.IngredientStatus ingredient : candidate.ingredients()) {
             lore.add(Component.text(" - ", NamedTextColor.DARK_GRAY)
                     .append(ItemRef.displayName(ingredient.key()).color(NamedTextColor.WHITE))
-                    .append(Component.text(" " + ingredient.have() + "/" + ingredient.need(), NamedTextColor.GREEN))
+                    .append(Component.text(" x" + ingredient.need(), NamedTextColor.GREEN))
                     .decoration(TextDecoration.ITALIC, false));
         }
         lore.add(Component.empty());
         lore.add(Utils.text("Click: Chế tạo x1", NamedTextColor.DARK_GRAY));
         if (QuickCraftService.allowsBulkCraft(candidate.recipe())) {
-            lore.add(Utils.text("Shift-Click: Chế tạo x" + candidate.maxCrafts(), NamedTextColor.DARK_GRAY));
+            lore.add(Utils.text("Shift-Click: Chế tạo x" + Math.min(candidate.maxCrafts(), QuickCraftService.maxBulkCrafts(candidate.recipe())), NamedTextColor.DARK_GRAY));
         }
         display.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
         return display;

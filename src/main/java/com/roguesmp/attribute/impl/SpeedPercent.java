@@ -26,7 +26,7 @@ public class SpeedPercent implements SmpAttribute {
 
     @Override
     public @NotNull Attributes getEnumConstant() {
-        return Attributes.SPEED_FLAT;
+        return Attributes.SPEED_PERCENT;
     }
 
     @Override

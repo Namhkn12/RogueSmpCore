@@ -80,7 +80,7 @@ public final class QuickCraftService {
             return;
         }
 
-        int times = craftAll && allowsBulkCraft(recipe) ? Math.min(available, craftsThatFit(contents, output)) : 1;
+        int times = craftAll && allowsBulkCraft(recipe) ? Math.min(Math.min(available, maxBulkCrafts(recipe)), craftsThatFit(contents, output)) : 1;
         if (times <= 0) {
             deny(player, "Túi đồ của bạn đã đầy!");
             return;
@@ -108,6 +108,11 @@ public final class QuickCraftService {
         BaseItem baseItem = ItemRef.baseItem(key);
         if (baseItem != null && baseItem.isUnique()) return false;
         return ItemRef.maxStackSize(key) > 1;
+    }
+
+    public static int maxBulkCrafts(@NotNull CraftingRecipe recipe) {
+        CraftingIngredient output = recipe.getPrimaryOutput();
+        return Math.max(1, ItemRef.maxStackSize(output.key()) / output.count());
     }
 
     private static int craftsThatFit(ItemStack[] contents, ItemStack output) {
