@@ -47,7 +47,8 @@ Thư mục: `trades/` (đệ quy, id = đường dẫn bỏ `.json`). Quy tắc 
 
 | Key | Kiểu | Bắt buộc / mặc định | Ý nghĩa |
 | :--- | :--- | :--- | :--- |
-| `name` | string MiniMessage | optional | Tên hiển thị của ô. Không có → dùng tên item nhận được đầu tiên. |
+| `name` | string MiniMessage | optional | Tên hiển thị của ô, ghi đè tên item. Không có → dùng tên item nhận được đầu tiên. |
+| `description` | list string MiniMessage | optional | Lore của ô, ghi đè lore gốc của item (mặc định màu xám). Không có → dùng lore của item nhận được (ô có nhiều phần thưởng thì không hiện lore gốc). `[]` → ẩn lore gốc. |
 | `costs` | mảng cost | `[]` | Giá — **bị lấy đi** khi giao dịch. |
 | `requirements` | mảng requirement | `[]` | Điều kiện — **chỉ kiểm tra, không lấy đi**. |
 | `results` | mảng result | **bắt buộc** | Thứ người chơi nhận được. |

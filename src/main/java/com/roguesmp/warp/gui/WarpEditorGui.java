@@ -72,7 +72,7 @@ public class WarpEditorGui extends BaseGui {
 
         addButton(BACK_SLOT, item(Material.ARROW, "Back", NamedTextColor.GRAY), event -> {
             event.setCancelled(true);
-            Utils.runLater(() -> new WarpGui(player).showInventory(player));
+            Utils.runLater(() -> new WarpAdminGui(player).showInventory(player));
         });
 
         addButton(PREVIEW_SLOT, item(warp.createIcon(), Utils.fromString(warp.displayName()), Utils.fromStrings(warp.lore())), ClickHandler.noAction());
@@ -174,7 +174,7 @@ public class WarpEditorGui extends BaseGui {
             if (event.getClick() != ClickType.SHIFT_RIGHT) return;
             WarpService.getInstance().delete(warpId);
             player.sendMessage(Utils.fromString("<yellow>Warp '" + warpId + "' deleted."));
-            Utils.runLater(() -> new WarpGui(player).showInventory(player));
+            Utils.runLater(() -> new WarpAdminGui(player).showInventory(player));
         });
 
         fillEmpty(FILLER);

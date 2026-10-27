@@ -9,6 +9,7 @@ import com.roguesmp.teleport.TeleportDestinationParser;
 import com.roguesmp.teleport.TeleportDestinationSuggestions;
 import com.roguesmp.teleport.destination.LocationDestination;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.warp.gui.WarpAdminGui;
 import com.roguesmp.warp.gui.WarpEditorGui;
 import com.roguesmp.warp.gui.WarpGui;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -38,6 +39,11 @@ public final class WarpCommand {
                     if (id == null) new WarpGui(player).showInventory(player);
                     else WarpService.getInstance().teleport(player, id);
                 })
+                .withSubcommand(new CommandAPICommand("admin")
+                        .withPermission(Permissions.WARP_ADMIN.node())
+                        .executesPlayer((player, args) -> {
+                            new WarpAdminGui(player).showInventory(player);
+                        }))
                 .withSubcommand(new CommandAPICommand("create")
                         .withPermission(Permissions.WARP_ADMIN.node())
                         .withArguments(new StringArgument("name"))
