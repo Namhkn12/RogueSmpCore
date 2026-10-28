@@ -1,0 +1,21 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#136B40>Jade",
+    "description": [
+      "<dark_gray><!i>Ngọc Hoàn Mỹ",
+      "<gray><i>Núi đá cũng phải",
+      "<gray><i>mở đường cho nó."
+    ],
+    "head_skin": "gem_jade",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "MINING_EFFICIENCY": 1.4,
+          "SPEED_PERCENT": -0.03
+        }
+      },
+      "success_chance": 0.3
+    }
+  }
+}

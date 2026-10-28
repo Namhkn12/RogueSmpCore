@@ -1,0 +1,20 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#FF9AA2>Ruby",
+    "description": [
+      "<dark_gray><!i>Ngọc Thô",
+      "<gray><i>Mảnh đỏ còn bám đất,",
+      "<gray><i>ấm như than vừa tắt."
+    ],
+    "head_skin": "gem_ruby",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "MELEE_DAMAGE_BASE": 0.3
+        }
+      },
+      "success_chance": 0.95
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#A6EDF5>Aquamarine",
+    "description": [
+      "<dark_gray><!i>Ngọc Rạn",
+      "<gray><i>Vết rạn như gợn sóng,",
+      "<gray><i>bước chân nhẹ hẳn đi."
+    ],
+    "head_skin": "aquamarine",
+    "gem_data": {
+      "attributes": {
+        "LEGS": {
+          "SPEED_PERCENT": 0.03
+        },
+        "FEET": {
+          "SPEED_PERCENT": 0.03
+        }
+      },
+      "success_chance": 0.86
+    }
+  }
+}

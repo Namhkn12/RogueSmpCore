@@ -1,0 +1,20 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#FFF3A6>Citrine",
+    "description": [
+      "<dark_gray><!i>Ngọc Thô",
+      "<gray><i>Mảnh đá vàng đục,",
+      "<gray><i>phải soi nắng mới thấy màu."
+    ],
+    "head_skin": "gem_citrine",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "PROJECTILE_DAMAGE_PERCENT": 0.06
+        }
+      },
+      "success_chance": 0.95
+    }
+  }
+}

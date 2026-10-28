@@ -1,0 +1,20 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#F3EEE6>Pearl",
+    "description": [
+      "<dark_gray><!i>Ngọc Rạn",
+      "<gray><i>Lớp xà cừ sứt mẻ,",
+      "<gray><i>vẫn ánh lên dưới trăng."
+    ],
+    "head_skin": "gem_pearl",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "ENTITY_REACH": 0.2
+        }
+      },
+      "success_chance": 0.72
+    }
+  }
+}

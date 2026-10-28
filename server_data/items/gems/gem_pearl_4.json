@@ -1,0 +1,21 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#D4C4A8>Pearl",
+    "description": [
+      "<dark_gray><!i>Ngọc Vô Khuyết",
+      "<gray><i>Đòn đánh vươn xa hơn,",
+      "<gray><i>nhưng bước chân chậm lại."
+    ],
+    "head_skin": "gem_pearl",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "ENTITY_REACH": 0.3,
+          "SPEED_PERCENT": -0.02
+        }
+      },
+      "success_chance": 0.32
+    }
+  }
+}

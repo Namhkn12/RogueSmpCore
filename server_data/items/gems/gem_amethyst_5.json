@@ -1,0 +1,21 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#56238A>Amethyst",
+    "description": [
+      "<dark_gray><!i>Ngọc Hoàn Mỹ",
+      "<gray><i>Nó lắng nghe từng câu thần chú,",
+      "<gray><i>và đòi trả giá bằng máu."
+    ],
+    "head_skin": "gem_amethyst",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "MAGIC_DAMAGE_PERCENT": 0.11,
+          "MAX_HEALTH_FLAT": -1.0
+        }
+      },
+      "success_chance": 0.2
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#E3A857>Amber",
+    "description": [
+      "<dark_gray><!i>Ngọc Rạn",
+      "<gray><i>Hổ phách rạn, giữ lại",
+      "<gray><i>một chiếc lá khô từ thuở nào."
+    ],
+    "head_skin": "gem_amber",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "MELEE_DAMAGE_PERCENT": 0.07
+        }
+      },
+      "success_chance": 0.78
+    }
+  }
+}

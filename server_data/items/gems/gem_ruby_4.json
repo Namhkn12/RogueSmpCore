@@ -1,0 +1,21 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#B3121F>Ruby",
+    "description": [
+      "<dark_gray><!i>Ngọc Vô Khuyết",
+      "<gray><i>Không một tì vết.",
+      "<gray><i>Đòn càng nhanh, nó càng nóng."
+    ],
+    "head_skin": "gem_ruby",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "MELEE_DAMAGE_BASE": 0.9,
+          "ATTACK_SPEED_BASE": -0.05
+        }
+      },
+      "success_chance": 0.42
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#A35E1A>Amber",
+    "description": [
+      "<dark_gray><!i>Ngọc Vô Khuyết",
+      "<gray><i>Mỗi nhát bổ mang theo",
+      "<gray><i>sức nặng của cả cánh rừng."
+    ],
+    "head_skin": "gem_amber",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "MELEE_DAMAGE_PERCENT": 0.095,
+          "SPEED_PERCENT": -0.02
+        }
+      },
+      "success_chance": 0.4
+    }
+  }
+}

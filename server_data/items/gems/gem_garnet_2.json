@@ -1,0 +1,20 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#B85570>Garnet",
+    "description": [
+      "<dark_gray><!i>Ngọc Rạn",
+      "<gray><i>Rạn như mạch máu khô,",
+      "<gray><i>chờ một đòn trúng chỗ hiểm."
+    ],
+    "head_skin": "gem_garnet",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "CRIT_DAMAGE_FLAT": 1.4
+        }
+      },
+      "success_chance": 0.76
+    }
+  }
+}

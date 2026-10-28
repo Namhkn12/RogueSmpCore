@@ -1,0 +1,20 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#E3C8FA>Amethyst",
+    "description": [
+      "<dark_gray><!i>Ngọc Thô",
+      "<gray><i>Tinh thể tím đục,",
+      "<gray><i>thoang thoảng mùi sấm sét."
+    ],
+    "head_skin": "gem_amethyst",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "MAGIC_DAMAGE_PERCENT": 0.06
+        }
+      },
+      "success_chance": 0.93
+    }
+  }
+}

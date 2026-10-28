@@ -1,0 +1,25 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#232326>Onyx",
+    "description": [
+      "<dark_gray><!i>Ngọc Hoàn Mỹ",
+      "<gray><i>Vững như tường thành,",
+      "<gray><i>và chậm như nó."
+    ],
+    "head_skin": "gem_onyx",
+    "gem_data": {
+      "attributes": {
+        "CHEST": {
+          "DEFENSE_FLAT": 3.2,
+          "SPEED_PERCENT": -0.04
+        },
+        "LEGS": {
+          "DEFENSE_FLAT": 3.2,
+          "SPEED_PERCENT": -0.04
+        }
+      },
+      "success_chance": 0.25
+    }
+  }
+}

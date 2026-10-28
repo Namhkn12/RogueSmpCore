@@ -1,0 +1,25 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#B03D6A>Rose Quartz",
+    "description": [
+      "<dark_gray><!i>Ngọc Hoàn Mỹ",
+      "<gray><i>Một trái tim thứ hai,",
+      "<gray><i>ấm áp và mong manh."
+    ],
+    "head_skin": "gem_quartz",
+    "gem_data": {
+      "attributes": {
+        "HEAD": {
+          "MAX_HEALTH_FLAT": 1.5,
+          "DEFENSE_FLAT": -0.5
+        },
+        "CHEST": {
+          "MAX_HEALTH_FLAT": 1.5,
+          "DEFENSE_FLAT": -0.5
+        }
+      },
+      "success_chance": 0.24
+    }
+  }
+}
