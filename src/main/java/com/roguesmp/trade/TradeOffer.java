@@ -17,6 +17,7 @@ public class TradeOffer {
 
     public static final Codec<TradeOffer> CODEC = Codec.composite(
             Codec.STRING.optionalFieldOf("name", () -> null).forGetter(TradeOffer::getName),
+            Codec.listOf(Codec.STRING).optionalFieldOf("description", () -> null).forGetter(TradeOffer::getDescription),
             Codec.listOf(Cost.CODEC).optionalFieldOf("costs", new ArrayList<>()).forGetter(TradeOffer::getCosts),
             Codec.listOf(Requirement.CODEC).optionalFieldOf("requirements", new ArrayList<>()).forGetter(TradeOffer::getRequirements),
             Codec.listOf(TradeResult.CODEC).fieldOf("results").forGetter(TradeOffer::getResults),
@@ -24,12 +25,14 @@ public class TradeOffer {
     );
 
     private final @Nullable String name;
+    private final @Nullable List<String> description;
     private final List<Cost> costs;
     private final List<Requirement> requirements;
     private final List<TradeResult> results;
 
-    public TradeOffer(@Nullable String name, List<Cost> costs, List<Requirement> requirements, List<TradeResult> results) {
+    public TradeOffer(@Nullable String name, @Nullable List<String> description, List<Cost> costs, List<Requirement> requirements, List<TradeResult> results) {
         this.name = name;
+        this.description = description;
         this.costs = costs;
         this.requirements = requirements;
         this.results = results;
@@ -65,6 +68,10 @@ public class TradeOffer {
 
     public @Nullable String getName() {
         return name;
+    }
+
+    public @Nullable List<String> getDescription() {
+        return description;
     }
 
     public List<Cost> getCosts() {

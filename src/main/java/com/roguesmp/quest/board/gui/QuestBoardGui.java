@@ -59,6 +59,7 @@ public class QuestBoardGui extends BaseGui {
                 if (r == 0 || r == 5 || c == 0 || c == 8) addButton(r, c, FILLER_BLACK, ClickHandler.noAction());
             }
         }
+        addBackButton(getSlot(5, 0));
 
         boardManager.refresh(player);
         PlayerQuestData data = questManager.getPlayerQuestData(player.getUniqueId());

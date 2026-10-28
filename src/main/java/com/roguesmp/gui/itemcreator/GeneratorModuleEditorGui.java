@@ -1,13 +1,14 @@
 package com.roguesmp.gui.itemcreator;
 
 import com.roguesmp.block.impl.generator.catalyst.CatalystSynergy;
-import com.roguesmp.block.impl.generator.catalyst.CatalystType;
+import com.roguesmp.block.impl.generator.stat.GeneratorEffect;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.component.impl.GeneratorModuleComponent;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
+import com.roguesmp.utils.dialog.JsonEntryDialog;
 import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -27,7 +28,7 @@ public class GeneratorModuleEditorGui {
     private List<String> incompatible;
     private int maxPerMachine;
     private final GeneratorEffectEditorGui effect;
-    private final List<SynergyEntry> synergies = new ArrayList<>();
+    private final List<CatalystSynergy> synergies = new ArrayList<>();
 
     public GeneratorModuleEditorGui(ItemCreatorGui parent, @Nullable GeneratorModuleComponent current) {
         this.parent = parent;
@@ -35,7 +36,7 @@ public class GeneratorModuleEditorGui {
         this.incompatible = current == null ? List.of() : current.incompatible();
         this.maxPerMachine = current == null ? 0 : current.maxPerMachine();
         this.effect = new GeneratorEffectEditorGui(current == null ? GeneratorEffectEditorGui.empty() : current.effect(), value -> commit());
-        if (current != null) current.synergies().forEach(synergy -> synergies.add(new SynergyEntry(synergy.type().getId(), synergy)));
+        if (current != null) synergies.addAll(current.synergies());
     }
 
     public Dialog buildHubDialog(Player player) {
@@ -45,20 +46,21 @@ public class GeneratorModuleEditorGui {
                 .addTextBody(Component.text("Tối đa mỗi máy: " + (maxPerMachine <= 0 ? "(không giới hạn)" : maxPerMachine)))
                 .addTextBody(Component.text("Xung khắc: " + (incompatible.isEmpty() ? "(không)" : String.join(", ", incompatible))))
                 .addTextBody(Component.text("Hiệu ứng: " + effect.size() + "  |  Synergy: " + synergies.size()))
-                .addTextBody(Component.text("Vàng = modifier chỉ số, xanh = behavior, tím = synergy.", NamedTextColor.DARK_GRAY))
+                .addTextBody(Component.text("Vàng = hiệu ứng (modifier + behavior), tím = synergy.", NamedTextColor.DARK_GRAY))
                 .multiAction();
 
         multi.addButton(Component.text("settings", NamedTextColor.GREEN), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSettingsDialog(player))));
         multi.addButton(Component.text("+ Thêm synergy", NamedTextColor.GREEN), null,
-                (response, audience) -> Utils.runLater(() -> player.showDialog(buildAddSynergyDialog(player))));
+                (response, audience) -> Utils.runLater(() -> player.showDialog(synergyDialog(player, -1).buildWithText(player, "type: "))));
         effect.addButtons(multi, player, this::buildHubDialog);
         for (int i = 0; i < synergies.size(); i++) {
             int index = i;
-            SynergyEntry synergy = synergies.get(i);
-            multi.addButton(Component.text("synergy: " + synergy.typeId, NamedTextColor.LIGHT_PURPLE),
-                    Component.text("Hiệu ứng: " + synergy.effect.size(), NamedTextColor.GRAY),
-                    (response, audience) -> Utils.runLater(() -> player.showDialog(buildSynergyDialog(player, index))));
+            CatalystSynergy synergy = synergies.get(i);
+            GeneratorEffect synergyEffect = synergy.effect();
+            multi.addButton(Component.text("synergy: " + synergy.type().getId(), NamedTextColor.LIGHT_PURPLE),
+                    Component.text("Hiệu ứng: " + (synergyEffect.modifiers().size() + synergyEffect.behaviors().size()), NamedTextColor.GRAY),
+                    (response, audience) -> Utils.runLater(() -> player.showDialog(synergyDialog(player, index).build(player, synergy))));
         }
         if (present) {
             multi.addButton(Component.text("Xoá toàn bộ", NamedTextColor.RED), null, (response, audience) -> {
@@ -97,58 +99,28 @@ public class GeneratorModuleEditorGui {
                 .build();
     }
 
-    private Dialog buildAddSynergyDialog(Player player) {
-        DialogTypeBuilder.MultiAction multi = DialogBuilder.create(Component.text("Chọn loại chất xúc tác"))
-                .canCloseWithEscape(false)
-                .addTextBody(Component.text("Hiệu ứng synergy chỉ áp dụng khi máy đang chạy chất xúc tác thuộc loại này.", NamedTextColor.GRAY))
-                .multiAction();
-
-        for (String typeId : new TreeSet<>(Registries.CATALYST_TYPE.getAll().keySet())) {
-            CatalystType type = Registries.CATALYST_TYPE.get(typeId);
-            multi.addButton(Component.text(typeId), Utils.fromString(type.displayText()), (response, audience) -> {
-                synergies.add(new SynergyEntry(typeId, null));
-                commit();
-                Utils.runLater(() -> player.showDialog(buildSynergyDialog(player, synergies.size() - 1)));
-            });
-        }
-        multi.columns(3);
-        multi.exitButton(Component.text("Huỷ"), (response, audience) -> Utils.runLater(() -> player.showDialog(buildHubDialog(player))));
-        return multi.build();
-    }
-
-    private Dialog buildSynergyDialog(Player player, int index) {
-        SynergyEntry synergy = synergies.get(index);
-        DialogTypeBuilder.MultiAction multi = DialogBuilder.create(Component.text("Synergy: " + synergy.typeId))
-                .canCloseWithEscape(false)
-                .addTextBody(Component.text("Hiệu ứng: " + synergy.effect.size()))
-                .multiAction();
-
-        synergy.effect.addButtons(multi, player, p -> buildSynergyDialog(p, index));
-        multi.addButton(Component.text("Xoá synergy", NamedTextColor.RED), null, (response, audience) -> {
-            synergies.remove(index);
-            commit();
-            Utils.runLater(() -> player.showDialog(buildHubDialog(player)));
-        });
-        multi.columns(2);
-        multi.exitButton(Component.text("« Quay lại"), (response, audience) -> Utils.runLater(() -> player.showDialog(buildHubDialog(player))));
-        return multi.build();
+    private JsonEntryDialog<CatalystSynergy> synergyDialog(Player player, int index) {
+        boolean editing = index >= 0;
+        return JsonEntryDialog.of(editing ? "Synergy: " + synergies.get(index).type().getId() : "Synergy mới", CatalystSynergy.CODEC,
+                synergy -> {
+                    if (editing) synergies.set(index, synergy);
+                    else synergies.add(synergy);
+                    commit();
+                    player.showDialog(buildHubDialog(player));
+                },
+                editing ? () -> {
+                    synergies.remove(index);
+                    commit();
+                    player.showDialog(buildHubDialog(player));
+                } : null,
+                () -> player.showDialog(buildHubDialog(player)))
+                .withHelp(List.of(
+                        Component.text("type (chất xúc tác): ", NamedTextColor.YELLOW)
+                                .append(Component.text(String.join(", ", new TreeSet<>(Registries.CATALYST_TYPE.getAll().keySet())), NamedTextColor.GRAY))));
     }
 
     private void commit() {
         present = true;
-        List<CatalystSynergy> built = synergies.stream()
-                .map(entry -> new CatalystSynergy(Registries.CATALYST_TYPE.getHolder(entry.typeId), entry.effect.effect()))
-                .toList();
-        parent.applyComponent(ItemComponentKeys.GENERATOR_MODULE, new GeneratorModuleComponent(effect.effect(), incompatible, maxPerMachine, built));
-    }
-
-    private final class SynergyEntry {
-        private final String typeId;
-        private final GeneratorEffectEditorGui effect;
-
-        private SynergyEntry(String typeId, @Nullable CatalystSynergy initial) {
-            this.typeId = typeId;
-            this.effect = new GeneratorEffectEditorGui(initial == null ? GeneratorEffectEditorGui.empty() : initial.effect(), value -> commit());
-        }
+        parent.applyComponent(ItemComponentKeys.GENERATOR_MODULE, new GeneratorModuleComponent(effect.effect(), incompatible, maxPerMachine, List.copyOf(synergies)));
     }
 }

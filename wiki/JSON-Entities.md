@@ -77,16 +77,17 @@ Mỗi đồ:
 | `displayName` | string MiniMessage | optional | Tên item. |
 | `lore` | mảng string MiniMessage | optional | Lore. |
 | `enchantGlint` | boolean | optional, `false` | Luôn áp dụng: `true` bật lấp lánh, `false` ép tắt. |
-| `trimMaterial` | string | optional | Vật liệu trim vanilla, không namespace (`gold`, `redstone`, `netherite`, ...). |
-| `trimPattern` | string | optional | Mẫu trim vanilla, không namespace (`sentry`, `silence`, ...). **Chỉ áp dụng khi có cả `trimMaterial` lẫn `trimPattern`.** |
-| `dyeColor` | màu `"A,R,G,B"` | optional | Nhuộm màu (giáp da...). Sai định dạng → **lỗi lúc spawn** (không phải lúc load). |
+| `trimMaterial` | key | optional | Vật liệu trim (`minecraft:gold`, `minecraft:redstone`, ...). Bỏ namespace thì mặc định `minecraft:`; trim của datapack viết kèm namespace (`mypack:ruby`). |
+| `trimPattern` | key | optional | Mẫu trim (`minecraft:sentry`, `minecraft:silence`, ...), cùng quy tắc namespace. **Chỉ áp dụng khi có cả `trimMaterial` lẫn `trimPattern`.** Key không có trong registry → bỏ trim, log cảnh báo lúc spawn. |
+| `dyeColor` | màu hex `"#RRGGBB"` | optional | Nhuộm màu (giáp da, ngựa...). Sai định dạng → ô đó bị bỏ + log lúc load. |
 | `headSkin` | string | optional | Id trong `skins/` (cho đầu người). Id lạ bị bỏ qua. |
 
 Luôn áp dụng: item bất hủy (unbreakable), xóa attribute modifier vanilla.
 ```json
 "equipment": {
   "HAND": { "material": "NETHERITE_SWORD", "displayName": "<red>Hellfire Blade", "enchantGlint": true },
-  "HEAD": { "material": "NETHERITE_HELMET", "trimMaterial": "redstone", "trimPattern": "silence" }
+  "HEAD": { "material": "NETHERITE_HELMET", "trimMaterial": "minecraft:redstone", "trimPattern": "minecraft:silence" },
+  "CHEST": { "material": "LEATHER_CHESTPLATE", "dyeColor": "#3B5BA5" }
 }
 ```
 

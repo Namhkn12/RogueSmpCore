@@ -49,6 +49,7 @@ Tên component **không có trong bảng** làm fail cả file item. Item có co
 | [`passive_ability`](#passive_ability) | mảng object | Năng lực thụ động của item |
 | [`usage_timer`](#usage_timer) | int | Item tự biến mất sau khoảng thời gian trang bị |
 | [`command_executor`](#command_executor) | string | Chạy lệnh khi click |
+| [`actions`](#actions) | object | Chạy [action](JSON-Actions.md) khi click (mở GUI, chạy lệnh, dịch chuyển, ...) |
 | `generator_module` | object | Module cho máy phát — xem [JSON-Blocks](JSON-Blocks.md#generator_module--item-module) |
 | `generator_catalyst` | object | Chất xúc tác cho máy phát — xem [JSON-Blocks](JSON-Blocks.md#generator_catalyst--item-chất-xúc-tác) |
 | `energy_source` | object | Nhiên liệu cho máy phát năng lượng — xem [JSON-Blocks](JSON-Blocks.md#energy_source--item-nhiên-liệu) |
@@ -258,6 +259,16 @@ String trần = lệnh mặc định (không có `/` đầu). Click phải chạ
 "command_executor": "spawn"
 ```
 
+### `actions`
+Chạy [action](JSON-Actions.md) khi người cầm click. `actions` (mảng action, mặc định `[]`) — mỗi phần tử có thể giới hạn `click` trái/phải; `hint` (string MiniMessage, mặc định `""`) — 1 dòng lore, để trống thì không hiện.
+```json
+"actions": {
+  "hint": "<yellow>Chuột phải để mở menu",
+  "actions": [ { "type": "open_gui", "gui": "main_menu" } ]
+}
+```
+Click chỉ bị huỷ khi có action thực sự chạy, nên item vẫn đánh/dùng bình thường với kiểu click không có action. Chi tiết: [JSON-Actions](JSON-Actions.md#click-chạy-ở-đâu).
+
 <a id="danh-sách-attribute"></a>
 ## Danh sách attribute
 
@@ -323,20 +334,20 @@ Các class `stun`, `armor_breaker`, `kb_resist_increase` tồn tại trong code 
 
 ## Item ability
 
-Phần tử của `passive_ability`; field chọn loại là `"type"`. Có 3 loại:
+Phần tử của `passive_ability`; field chọn loại là `"type"`. Có 2 loại:
 
 | `type` | Key | Tác dụng |
 | :--- | :--- | :--- |
 | `unyielding_edge` | `dmgPerUnitLoss` (double, `5.0`), `amountLossPerUnit` (int, `200`) | Mỗi `amountLossPerUnit` độ bền **đã mất**, người cầm được cộng `dmgPerUnitLoss` vào `MELEE_DAMAGE_BASE`. Cần component `durability`; không có thì vô tác dụng. Key viết camelCase. |
 | `barking` | `interval` (int tick, `200`, tối thiểu 1), `sounds` (mảng, `[]`) | Mỗi `interval` tick phát 1 âm thanh ngẫu nhiên trong `sounds`, chỉ người cầm nghe. `sounds` rỗng = không làm gì. |
-| `entity_zapper` | — | Click phải vào entity → xóa entity khỏi thế giới; click vào người chơi thì chỉ đẩy lùi + báo "NO!". |
+
+`entity_zapper` không còn là item ability — giờ là [action](JSON-Actions.md#loại-action), dùng qua component [`actions`](#actions).
 
 Phần tử của `sounds`: `key` (Key, bắt buộc), `volume` (float, `1.0`), `pitch` (float, `1.0`).
 ```json
 "passive_ability": [
   { "type": "unyielding_edge", "dmgPerUnitLoss": 2.5, "amountLossPerUnit": 100 },
-  { "type": "barking", "interval": 400, "sounds": [ { "key": "entity.wolf.growl", "volume": 0.6, "pitch": 0.8 } ] },
-  { "type": "entity_zapper" }
+  { "type": "barking", "interval": 400, "sounds": [ { "key": "entity.wolf.growl", "volume": 0.6, "pitch": 0.8 } ] }
 ]
 ```
 

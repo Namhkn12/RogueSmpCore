@@ -9,6 +9,7 @@ Thư mục: `crafting_recipes/` (đệ quy, id = đường dẫn bỏ `.json`). 
 | `type` | string | bắt buộc | `shaped`, `shapeless`, `fusion`. |
 | `id` | string | bắt buộc | Id công thức. Nên bằng đường dẫn file. |
 | `result` | [ingredient](#ingredient--nguyên-liệu--kết-quả) | gần như bắt buộc | Kết quả. Codec cho phép thiếu, nhưng thiếu thì công thức không cho ra gì (shaped/shapeless hiện ô chắn; fusion báo "không có công thức"). `count` của nó = số lượng item ra. |
+| `quick_craft` | boolean | optional, `true` | `false` = công thức không hiện và không dùng được trong chế tạo nhanh của bàn chế tạo. Chỉ có tác dụng với `shaped`/`shapeless`. |
 
 `type: "scrapping"` có class trong code nhưng **chưa đăng ký** → fail cả file; không dùng.
 
@@ -31,7 +32,6 @@ Có 2 cách viết:
 | `pattern` | mảng string | bắt buộc | Các hàng của khuôn. |
 | `key` | object: **ký tự → ingredient** | bắt buộc | Mỗi ký tự trong `pattern` → nguyên liệu. |
 | `mirrored` | boolean | optional, `true` | Cũng khớp khi lật gương ngang. |
-| `remainders` | object: **key ingredient → key để lại** | optional, `{}` | Vật để lại khi ô bị dùng hết, vd. `"minecraft:water_bucket": "minecraft:bucket"`. |
 
 Quy tắc khuôn:
 - Bàn chế tạo là **3×3** → khuôn lớn hơn 3×3 **không bao giờ khớp**. Codec không kiểm tra kích thước.

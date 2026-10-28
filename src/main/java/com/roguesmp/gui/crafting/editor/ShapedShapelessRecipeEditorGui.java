@@ -43,6 +43,7 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
     private static final int SAVE_SLOT_SHAPED = 49;
     private static final int SAVE_SLOT_SHAPELESS = 50;
     private static final int SHAPED_MIRRORED = 51;
+    private static final int QUICK_CRAFT_TOGGLE = 52;
     private static final int DELETE_SLOT = 53;
 
     private static final String SYMBOL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -51,6 +52,7 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
 
     private String recipeId;
     private boolean mirrored = true;
+    private boolean quickCraft = true;
     private boolean refundItem = true;
 
     public ShapedShapelessRecipeEditorGui(Player player) {
@@ -67,6 +69,7 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
 
     private void prefill(CraftingRecipe recipe) {
         this.recipeId = recipe.getId();
+        this.quickCraft = recipe.isQuickCraftable();
 
         Inventory inv = getInventory();
         if (recipe instanceof ShapedCraftingRecipe shaped) {
@@ -133,6 +136,14 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
         addButton(SHAPED_MIRRORED, mirroredItem, event -> {
             event.setCancelled(true);
             mirrored = !mirrored;
+            setup();
+        });
+
+        ItemStack quickCraftItem = ItemStack.of(quickCraft ? Material.LIME_DYE : Material.GRAY_DYE);
+        quickCraftItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Quick Craft: " + (quickCraft ? "True" : "False"), quickCraft ? NamedTextColor.GREEN : NamedTextColor.RED));
+        addButton(QUICK_CRAFT_TOGGLE, quickCraftItem, event -> {
+            event.setCancelled(true);
+            quickCraft = !quickCraft;
             setup();
         });
 
@@ -311,7 +322,7 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
         }
 
         CraftingIngredient result = new CraftingIngredient(resultKey, resultStack.getAmount());
-        return new ShapedCraftingRecipe(new CraftingRecipe.BaseProperties(id, result), pattern, keyMap, mirrored);
+        return new ShapedCraftingRecipe(new CraftingRecipe.BaseProperties(id, result, quickCraft), pattern, keyMap, mirrored);
     }
 
     /**
@@ -336,7 +347,7 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
         if (ingredients.isEmpty()) return null;
 
         CraftingIngredient result = new CraftingIngredient(resultKey, resultStack.getAmount());
-        return new ShapelessCraftingRecipe(new CraftingRecipe.BaseProperties(id, result), ingredients);
+        return new ShapelessCraftingRecipe(new CraftingRecipe.BaseProperties(id, result, quickCraft), ingredients);
     }
 
     private static @Nullable ItemStack resolveStack(@Nullable CraftingIngredient ingredient) {

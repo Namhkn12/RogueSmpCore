@@ -1,32 +1,30 @@
 package com.roguesmp.gui.itemcreator;
 
 import com.roguesmp.effect.SmpEffect;
-import com.roguesmp.effect.impl.DamageIncreaseEffect;
-import com.roguesmp.effect.impl.ResistanceEffect;
-import com.roguesmp.effect.impl.SpeedEffect;
 import com.roguesmp.item.component.impl.ConsumableComponent;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
+import com.roguesmp.utils.dialog.JsonEntryDialog;
 import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
- * Dialog-based editor for a {@link ConsumableComponent}'s effect list. Only three
- * {@link SmpEffect} subclasses exist in this codebase ({@link SpeedEffect},
- * {@link DamageIncreaseEffect}, {@link ResistanceEffect}), so unlike
- * {@link AttributeEditorGui}/{@link EnchantEditorGui} this is a fixed 3-entry list rather than an
- * enum sweep, and each entry packs that effect's own fields into one dialog instead of a single
- * slider. {@link ResistanceEffect}'s damage-type allowlist is left at its default
- * ({@link ResistanceEffect#DEFAULT_DAMAGE_TYPE}) - exposing a multi-select for it wasn't worth
- * the added complexity here.
+ * Dialog-based editor for a {@link ConsumableComponent}'s effect list. Each effect is edited as
+ * lenient JSON through {@link SmpEffect#CODEC}, so every registered effect type is available.
  */
 public class ConsumableEffectEditorGui {
+
+    private static final String TYPE_KEY = "id";
 
     private final ConsumableEditorGui parent;
     private final Map<String, SmpEffect> effects;
@@ -37,122 +35,37 @@ public class ConsumableEffectEditorGui {
     }
 
     public Dialog buildListDialog(Player player) {
-        DialogTypeBuilder.DialogList listBuilder = DialogBuilder.create(Component.text("Hiệu ứng khi sử dụng"))
-                .canCloseWithEscape(false)
-                .dialogList()
-                .columns(1)
-                .buttonWidth(150)
-                .exitButton(Component.text("« Quay lại"), (response, audience) -> Utils.runLater(() -> parent.reopen(player)));
-
-        listBuilder.addDialog(buildSpeedDialog(player));
-        listBuilder.addDialog(buildDamageIncreaseDialog(player));
-        listBuilder.addDialog(buildResistanceDialog(player));
-
-        return listBuilder.build();
-    }
-
-    private Dialog buildSpeedDialog(Player player) {
-        SpeedEffect current = (SpeedEffect) effects.get(SpeedEffect.EFFECT_ID);
-        boolean present = current != null;
-
-        DialogBuilder builder = DialogBuilder.create(Component.text("Hiệu ứng: speed"))
-                .canCloseWithEscape(false)
-                .externalTitle(Component.text(SpeedEffect.EFFECT_ID, present ? NamedTextColor.GREEN : NamedTextColor.GRAY))
-                .addTextInput("duration", Component.text("Thời gian (tick, 0-72000)"), b -> b.initial(String.valueOf(present ? current.getDuration() : 0)).maxLength(16))
-                .addTextInput("percent", Component.text("Tốc chạy (%, -100 đến 500)"), b -> b.initial(present ? Utils.formatDecimal(current.getMagnitude() * 100) : "0").maxLength(16));
+        DialogBuilder builder = DialogBuilder.create(Component.text("Hiệu ứng khi sử dụng")).canCloseWithEscape(false);
+        if (effects.isEmpty()) builder.addTextBody(Component.text("Chưa có hiệu ứng nào.", NamedTextColor.GRAY));
 
         DialogTypeBuilder.MultiAction multi = builder.multiAction();
-        multi.addButton(Component.text("Lưu"), null, (response, audience) -> {
-            Float duration = DialogInputUtils.parseFloat(response.getText("duration"), 0f, 72000f);
-            Float percent = DialogInputUtils.parseFloat(response.getText("percent"), -100f, 500f);
-            if (duration != null && duration > 0f && percent != null) {
-                effects.put(SpeedEffect.EFFECT_ID, new SpeedEffect(Math.round(duration), percent / 100d));
-            } else {
-                effects.remove(SpeedEffect.EFFECT_ID);
-            }
-            parent.commitEffects(effects);
-            Utils.runLater(() -> player.showDialog(buildListDialog(player)));
-        });
-        if (present) {
-            multi.addButton(Component.text("Xoá"), null, (response, audience) -> {
-                effects.remove(SpeedEffect.EFFECT_ID);
-                parent.commitEffects(effects);
-                Utils.runLater(() -> player.showDialog(buildListDialog(player)));
-            });
+        for (Map.Entry<String, SmpEffect> entry : effects.entrySet()) {
+            String id = entry.getKey();
+            multi.addButton(Component.text(id, NamedTextColor.GREEN), null,
+                    (response, audience) -> Utils.runLater(() -> player.showDialog(entryDialog(player, id).build(player, entry.getValue()))));
         }
-        multi.columns(present ? 3 : 2);
-        multi.exitButton(Component.text("Huỷ"), (response, audience) -> Utils.runLater(() -> player.showDialog(buildListDialog(player))));
-
+        multi.addButton(Component.text("+ Thêm hiệu ứng", NamedTextColor.GREEN), null,
+                (response, audience) -> Utils.runLater(() -> player.showDialog(entryDialog(player, null).buildWithText(player, TYPE_KEY + ": "))));
+        multi.columns(2);
+        multi.exitButton(Component.text("« Quay lại"), (response, audience) -> Utils.runLater(() -> parent.reopen(player)));
         return multi.build();
     }
 
-    private Dialog buildDamageIncreaseDialog(Player player) {
-        DamageIncreaseEffect current = (DamageIncreaseEffect) effects.get(DamageIncreaseEffect.ID);
-        boolean present = current != null;
-
-        DialogBuilder builder = DialogBuilder.create(Component.text("Hiệu ứng: damage_increase"))
-                .canCloseWithEscape(false)
-                .externalTitle(Component.text(DamageIncreaseEffect.ID, present ? NamedTextColor.GREEN : NamedTextColor.GRAY))
-                .addTextInput("duration", Component.text("Thời gian (tick, 0-72000)"), b -> b.initial(String.valueOf(present ? current.getDuration() : 0)).maxLength(16))
-                .addTextInput("value", Component.text("Sát thương cộng thêm (-100 đến 100)"), b -> b.initial(present ? Utils.formatDecimal(current.getMagnitude()) : "0").maxLength(16));
-
-        DialogTypeBuilder.MultiAction multi = builder.multiAction();
-        multi.addButton(Component.text("Lưu"), null, (response, audience) -> {
-            Float duration = DialogInputUtils.parseFloat(response.getText("duration"), 0f, 72000f);
-            Float value = DialogInputUtils.parseFloat(response.getText("value"), -100f, 100f);
-            if (duration != null && duration > 0f && value != null) {
-                effects.put(DamageIncreaseEffect.ID, new DamageIncreaseEffect(Math.round(duration), value));
-            } else {
-                effects.remove(DamageIncreaseEffect.ID);
-            }
-            parent.commitEffects(effects);
-            Utils.runLater(() -> player.showDialog(buildListDialog(player)));
-        });
-        if (present) {
-            multi.addButton(Component.text("Xoá"), null, (response, audience) -> {
-                effects.remove(DamageIncreaseEffect.ID);
-                parent.commitEffects(effects);
-                Utils.runLater(() -> player.showDialog(buildListDialog(player)));
-            });
-        }
-        multi.columns(present ? 3 : 2);
-        multi.exitButton(Component.text("Huỷ"), (response, audience) -> Utils.runLater(() -> player.showDialog(buildListDialog(player))));
-
-        return multi.build();
-    }
-
-    private Dialog buildResistanceDialog(Player player) {
-        ResistanceEffect current = (ResistanceEffect) effects.get(ResistanceEffect.ID);
-        boolean present = current != null;
-
-        DialogBuilder builder = DialogBuilder.create(Component.text("Hiệu ứng: resistance"))
-                .canCloseWithEscape(false)
-                .externalTitle(Component.text(ResistanceEffect.ID, present ? NamedTextColor.GREEN : NamedTextColor.GRAY))
-                .addTextInput("duration", Component.text("Thời gian (tick, 0-72000)"), b -> b.initial(String.valueOf(present ? current.getDuration() : 0)).maxLength(16))
-                .addTextInput("percent", Component.text("Miễn thương (%, 0-100)"), b -> b.initial(present ? Utils.formatDecimal(current.getMagnitude() * 100) : "0").maxLength(16));
-
-        DialogTypeBuilder.MultiAction multi = builder.multiAction();
-        multi.addButton(Component.text("Lưu"), null, (response, audience) -> {
-            Float duration = DialogInputUtils.parseFloat(response.getText("duration"), 0f, 72000f);
-            Float percent = DialogInputUtils.parseFloat(response.getText("percent"), 0f, 100f);
-            if (duration != null && duration > 0f && percent != null) {
-                effects.put(ResistanceEffect.ID, new ResistanceEffect(Math.round(duration), percent / 100d, SmpEffect.DeathBehavior.HALVES_ON_DEATH));
-            } else {
-                effects.remove(ResistanceEffect.ID);
-            }
-            parent.commitEffects(effects);
-            Utils.runLater(() -> player.showDialog(buildListDialog(player)));
-        });
-        if (present) {
-            multi.addButton(Component.text("Xoá"), null, (response, audience) -> {
-                effects.remove(ResistanceEffect.ID);
-                parent.commitEffects(effects);
-                Utils.runLater(() -> player.showDialog(buildListDialog(player)));
-            });
-        }
-        multi.columns(present ? 3 : 2);
-        multi.exitButton(Component.text("Huỷ"), (response, audience) -> Utils.runLater(() -> player.showDialog(buildListDialog(player))));
-
-        return multi.build();
+    private JsonEntryDialog<SmpEffect> entryDialog(Player player, @Nullable String editingId) {
+        return JsonEntryDialog.of(editingId == null ? "Hiệu ứng mới" : "Hiệu ứng: " + editingId, SmpEffect.CODEC,
+                effect -> {
+                    if (editingId != null) effects.remove(editingId);
+                    effects.put(effect.getEffectID(), effect);
+                    parent.commitEffects(effects);
+                    player.showDialog(buildListDialog(player));
+                },
+                editingId != null ? () -> {
+                    effects.remove(editingId);
+                    parent.commitEffects(effects);
+                    player.showDialog(buildListDialog(player));
+                } : null,
+                () -> player.showDialog(buildListDialog(player)))
+                .withHelp(List.of(Component.text(TYPE_KEY + ": ", NamedTextColor.YELLOW)
+                        .append(Component.text(String.join(", ", new TreeSet<>(Registries.EFFECT_CODEC.getAll().keySet())), NamedTextColor.GRAY))));
     }
 }

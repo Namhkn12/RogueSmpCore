@@ -6,6 +6,7 @@ import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -22,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public abstract class BaseGui implements InventoryHolder {
 
@@ -29,11 +31,14 @@ public abstract class BaseGui implements InventoryHolder {
     protected final ItemStack FILLER_BLACK;
     protected final ItemStack NEXT_PAGE_BUTTON;
     protected final ItemStack PREV_PAGE_BUTTON;
+    protected final ItemStack BACK_BUTTON;
 
     private final Map<Integer, ClickHandler> handlerMap = new HashMap<>();
     private final Inventory inventory;
     private final Component name;
     private boolean refreshQueued;
+    private @Nullable Consumer<HumanEntity> backAction;
+    private Component backTitle = Component.empty();
 
     public BaseGui(Component name, int row) {
         this.name = name;
@@ -52,6 +57,38 @@ public abstract class BaseGui implements InventoryHolder {
         ItemStack prevPageHead = SkinRegistry.getInstance().getHead("gui_prev_page");
         PREV_PAGE_BUTTON = prevPageHead == null ? new ItemStack(Material.ARROW) : prevPageHead;
         PREV_PAGE_BUTTON.setData(DataComponentTypes.CUSTOM_NAME, Utils.text("« Trang trước"));
+
+        BACK_BUTTON = ItemStack.of(Material.ARROW);
+        BACK_BUTTON.setData(DataComponentTypes.ITEM_NAME, Component.text("« Quay lại", NamedTextColor.YELLOW));
+    }
+
+    public BaseGui withBackAction(Component backTitle, @Nullable Consumer<HumanEntity> backAction) {
+        this.backTitle = backTitle;
+        this.backAction = backAction;
+        return this;
+    }
+
+    public Component getName() {
+        return name;
+    }
+
+    public Component getBackTitle() {
+        return backTitle;
+    }
+
+    public @Nullable Consumer<HumanEntity> getBackAction() {
+        return backAction;
+    }
+
+    protected void addBackButton(int slot) {
+        if (backAction == null) return;
+        Consumer<HumanEntity> action = backAction;
+        ItemStack button = BACK_BUTTON.clone();
+        button.setData(DataComponentTypes.ITEM_NAME, Component.text("« Quay lại: ", NamedTextColor.YELLOW).append(backTitle));
+        addButton(slot, button, event -> {
+            event.setCancelled(true);
+            Utils.runLater(() -> action.accept(event.getWhoClicked()));
+        });
     }
 
     @Override

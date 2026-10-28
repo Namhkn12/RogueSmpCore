@@ -1,10 +1,11 @@
 package com.roguesmp.gui.npccreator;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.entity.EntityEquipment;
+import com.roguesmp.gui.equipment.EquipmentEditorGui;
 import com.roguesmp.npc.BaseNpc;
-import com.roguesmp.npc.action.NpcAction;
-import com.roguesmp.npc.action.OpenGuiInteractAction;
-import com.roguesmp.npc.action.RunCommandInteractAction;
+import com.roguesmp.action.ActionEntry;
+import com.roguesmp.action.editor.ActionListEditor;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
@@ -18,11 +19,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * In-game editor for {@link BaseNpc}, built on the same Paper Dialog API pattern as
@@ -44,14 +47,15 @@ public class NpcCreatorGui {
     private @Nullable String skinId;
     private String description = "";
     private @Nullable Villager.Profession profession;
-    private final List<ActionDraft> actions;
+    private Map<EquipmentSlot, EntityEquipment> equipment = Map.of();
+    private final List<ActionEntry> actions;
     private boolean droppedSkinData;
 
     public NpcCreatorGui() {
         this(null, new ArrayList<>());
     }
 
-    private NpcCreatorGui(@Nullable String id, List<ActionDraft> actions) {
+    private NpcCreatorGui(@Nullable String id, List<ActionEntry> actions) {
         this.id = id;
         this.actions = actions;
     }
@@ -63,21 +67,10 @@ public class NpcCreatorGui {
         gui.skinId = npc.getSkinId();
         gui.description = String.join("\n", npc.getDescription());
         gui.profession = npc.getProfession();
+        gui.equipment = npc.getEquipment();
         gui.droppedSkinData = npc.getSkinValue() != null || npc.getSkinSignature() != null;
 
-        for (NpcAction action : npc.getActions()) {
-            ActionDraft draft = new ActionDraft();
-            if (action instanceof RunCommandInteractAction runCommand) {
-                draft.kind = ActionKind.RUN_COMMAND;
-                draft.command = runCommand.getCommand();
-            } else if (action instanceof OpenGuiInteractAction openGui) {
-                draft.kind = ActionKind.OPEN_GUI;
-                draft.guiId = openGui.getId();
-            } else {
-                continue; // unknown/future action type - not editable here
-            }
-            gui.actions.add(draft);
-        }
+        gui.actions.addAll(npc.getActions());
 
         return gui;
     }
@@ -111,14 +104,17 @@ public class NpcCreatorGui {
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildDescriptionDialog(player))));
         multi.addButton(Component.text("profession", profession == null ? NamedTextColor.GRAY : NamedTextColor.GREEN), Component.text("Chỉ áp dụng khi entity_type = VILLAGER.", NamedTextColor.GRAY),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildProfessionDialog(player))));
+        multi.addButton(Component.text("equipment", equipment.isEmpty() ? NamedTextColor.GRAY : NamedTextColor.GREEN),
+                Component.text(equipment.size() + " ô trang bị", NamedTextColor.GRAY),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(
+                        new EquipmentEditorGui("Trang bị NPC", equipment, slots -> this.equipment = slots, this::openMainDialog).buildListDialog(player))));
 
-        for (int i = 0; i < actions.size(); i++) {
-            int index = i;
-            multi.addButton(Component.text((index + 1) + ". " + describeAction(actions.get(index))), null,
-                    (response, audience) -> Utils.runLater(() -> player.showDialog(buildActionDialog(player, index))));
-        }
-        multi.addButton(Component.text("+ Thêm action", NamedTextColor.GREEN), null,
-                (response, audience) -> Utils.runLater(() -> player.showDialog(buildActionTypeDialog(player))));
+        multi.addButton(Component.text("actions", actions.isEmpty() ? NamedTextColor.GRAY : NamedTextColor.GREEN),
+                Component.text(actions.size() + " action", NamedTextColor.GRAY),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(new ActionListEditor("Action NPC", actions, updated -> {
+                    actions.clear();
+                    actions.addAll(updated);
+                }, this::openMainDialog).buildListDialog(player))));
 
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
@@ -258,71 +254,6 @@ public class NpcCreatorGui {
     }
 
     // ==========================================
-    // ACTIONS
-    // ==========================================
-
-    private Dialog buildActionTypeDialog(Player player) {
-        DialogBuilder builder = DialogBuilder.create(Component.text("Chọn loại action")).canCloseWithEscape(false);
-
-        DialogTypeBuilder.MultiAction multi = builder.multiAction();
-        for (ActionKind kind : ActionKind.values()) {
-            multi.addButton(Component.text(kind.label), null, (response, audience) -> {
-                ActionDraft draft = new ActionDraft();
-                draft.kind = kind;
-                actions.add(draft);
-                int newIndex = actions.size() - 1;
-                Utils.runLater(() -> player.showDialog(buildActionDialog(player, newIndex)));
-            });
-        }
-        multi.columns(2);
-        multi.exitButton(Component.text("Huỷ"), (response, audience) -> Utils.runLater(() -> openMainDialog(player)));
-
-        return multi.build();
-    }
-
-    private Dialog buildActionDialog(Player player, int index) {
-        ActionDraft draft = actions.get(index);
-
-        DialogBuilder builder = DialogBuilder.create(Component.text("Action: " + draft.kind.label))
-                .canCloseWithEscape(false);
-
-        switch (draft.kind) {
-            case RUN_COMMAND -> builder.addTextInput("command", Component.text("command (không cần dấu /, hỗ trợ @p, @p_id)"), b -> b.initial(draft.command).maxLength(256));
-            case OPEN_GUI -> builder.addTextInput("gui", Component.text("gui id"), b -> b.initial(draft.guiId).maxLength(128));
-        }
-
-        DialogTypeBuilder.MultiAction multi = builder.multiAction();
-        multi.addButton(Component.text("Lưu"), null, (response, audience) -> {
-            switch (draft.kind) {
-                case RUN_COMMAND -> {
-                    String command = response.getText("command");
-                    if (command != null) draft.command = command.trim();
-                }
-                case OPEN_GUI -> {
-                    String gui = response.getText("gui");
-                    if (gui != null) draft.guiId = gui.trim();
-                }
-            }
-            Utils.runLater(() -> openMainDialog(player));
-        });
-        multi.addButton(Component.text("Xoá", NamedTextColor.RED), null, (response, audience) -> {
-            actions.remove(index);
-            Utils.runLater(() -> openMainDialog(player));
-        });
-        multi.columns(2);
-        multi.exitButton(Component.text("« Quay lại"), (response, audience) -> Utils.runLater(() -> openMainDialog(player)));
-
-        return multi.build();
-    }
-
-    private static String describeAction(ActionDraft draft) {
-        return switch (draft.kind) {
-            case RUN_COMMAND -> "run_command(" + draft.command + ")";
-            case OPEN_GUI -> "open_gui(" + draft.guiId + ")";
-        };
-    }
-
-    // ==========================================
     // SAVE
     // ==========================================
 
@@ -368,41 +299,12 @@ public class NpcCreatorGui {
     }
 
     private void doSave(Player player) {
-        List<NpcAction> realActions = new ArrayList<>();
-        for (ActionDraft draft : actions) {
-            NpcAction action = switch (draft.kind) {
-                case RUN_COMMAND -> draft.command.isBlank() ? null : new RunCommandInteractAction(draft.command);
-                case OPEN_GUI -> draft.guiId.isBlank() ? null : new OpenGuiInteractAction(draft.guiId);
-            };
-            if (action != null) realActions.add(action);
-        }
-
-        BaseNpc npc = new BaseNpc(entityType, name, null, null, skinId, description.isBlank() ? List.of() : List.of(description.split("\n")), profession, id, realActions);
+        BaseNpc npc = new BaseNpc(entityType, name, null, null, skinId, description.isBlank() ? List.of() : List.of(description.split("\n")), profession, equipment, id, List.copyOf(actions));
         Registries.NPC.registerAndSave(RogueSmpCore.getInstance(), id, npc);
 
         droppedSkinData = false;
         player.sendMessage(Utils.text("Đã lưu NPC '" + id + "'.", NamedTextColor.GREEN));
         Utils.runLater(() -> openMainDialog(player));
-    }
-
-    // ==========================================
-    // DRAFT STATE
-    // ==========================================
-
-    private static class ActionDraft {
-        ActionKind kind = ActionKind.RUN_COMMAND;
-        String command = "";
-        String guiId = "";
-    }
-
-    private enum ActionKind {
-        RUN_COMMAND("run_command"), OPEN_GUI("open_gui");
-
-        final String label;
-
-        ActionKind(String label) {
-            this.label = label;
-        }
     }
 
     // ==========================================

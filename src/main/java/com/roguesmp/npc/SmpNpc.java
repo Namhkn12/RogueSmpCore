@@ -1,13 +1,13 @@
 package com.roguesmp.npc;
 
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.npc.action.NpcAction;
+import com.roguesmp.action.ActionContext;
+import com.roguesmp.action.ActionEntry;
 import io.papermc.paper.entity.LookAnchor;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -20,7 +20,7 @@ import java.util.UUID;
 public class SmpNpc {
     private final BaseNpc baseNpc;
     private final Entity entity; //Entity's uuid
-    private final List<NpcAction> npcActions = new ArrayList<>();
+    private final List<ActionEntry> npcActions = new ArrayList<>();
 
     private final float defaultYaw;
     private final float defaultPitch = 0;
@@ -64,20 +64,16 @@ public class SmpNpc {
         return entity.getUniqueId();
     }
 
-    public List<NpcAction> getNpcActions() {
+    public List<ActionEntry> getNpcActions() {
         return npcActions;
     }
 
     public void onRightClick(PlayerInteractEntityEvent event) {
-        for (NpcAction npcAction : npcActions) {
-            npcAction.onRightClick(event);
-        }
+        ActionEntry.runAll(npcActions, ActionContext.ofEntity(event.getPlayer(), true, null, entity, event));
     }
 
     public void onLeftClick(PrePlayerAttackEntityEvent event) {
-        for (NpcAction npcAction : npcActions) {
-            npcAction.onLeftClick(event);
-        }
+        ActionEntry.runAll(npcActions, ActionContext.ofEntity(event.getPlayer(), false, null, entity, event));
     }
 
     public void onDamage(EntityDamageEvent event) {

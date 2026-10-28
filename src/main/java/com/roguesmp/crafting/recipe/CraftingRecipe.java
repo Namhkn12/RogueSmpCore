@@ -20,14 +20,14 @@ import java.util.Optional;
 public abstract class CraftingRecipe {
     public static final Codec<CraftingRecipe> CODEC = Codec.dispatch(CraftingRecipe::getTypeId, Registries.CRAFTING_RECIPE_CODEC::getOrThrow);
 
-    public record BaseProperties(String id, List<CraftingIngredient> outputs) {
+    public record BaseProperties(String id, List<CraftingIngredient> outputs, boolean quickCraft) {
         public BaseProperties {
             outputs = List.copyOf(outputs);
             if (outputs.isEmpty()) throw new IllegalArgumentException("Recipe '" + id + "' declares no outputs");
         }
 
-        public BaseProperties(String id, CraftingIngredient output) {
-            this(id, List.of(output));
+        public BaseProperties(String id, CraftingIngredient output, boolean quickCraft) {
+            this(id, List.of(output), quickCraft);
         }
     }
 
@@ -51,6 +51,7 @@ public abstract class CraftingRecipe {
     public static final MapCodec<BaseProperties> BASE_CODEC = Codec.composite(
             Codec.STRING.fieldOf("id").forGetter(BaseProperties::id),
             OUTPUTS_CODEC.forGetter(BaseProperties::outputs),
+            Codec.BOOLEAN.optionalFieldOf("quick_craft", true).forGetter(BaseProperties::quickCraft),
             BaseProperties::new
     );
 
@@ -85,6 +86,10 @@ public abstract class CraftingRecipe {
 
     public @NotNull String getId() {
         return base.id();
+    }
+
+    public boolean isQuickCraftable() {
+        return base.quickCraft();
     }
 
     public @NotNull @Unmodifiable List<CraftingIngredient> getOutputs() {

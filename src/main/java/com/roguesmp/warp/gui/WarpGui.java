@@ -1,135 +1,113 @@
 package com.roguesmp.warp.gui;
 
-import com.roguesmp.command.CommandFeedback;
-import com.roguesmp.codec.DataResult;
 import com.roguesmp.gui.BaseGui;
-import com.roguesmp.permission.Permissions;
-import com.roguesmp.teleport.destination.LocationDestination;
 import com.roguesmp.utils.Utils;
-import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.warp.Warp;
 import com.roguesmp.warp.WarpService;
-import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.registry.keys.SoundEventKeys;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.roguesmp.gui.GuiItems.hint;
-import static com.roguesmp.gui.GuiItems.item;
-import static com.roguesmp.gui.GuiItems.line;
-
 public class WarpGui extends BaseGui {
 
-    private static final int PAGE_SIZE = 36;
-    private static final int CREATE_SLOT = 4;
-    private static final int EMPTY_SLOT = 22;
+    private static final int[] CARD_COLUMNS = {1, 3, 5, 7};
+    private static final int BORDER_TOP_ROW = 1;
+    private static final int ICON_ROW = 2;
+    private static final int BORDER_BOTTOM_ROW = 3;
+    private static final int NAV_ROW = 4;
 
     private final Player player;
-    private final boolean admin;
     private int currentPage = 0;
 
     public WarpGui(Player player) {
-        super(Component.text("Điểm dịch chuyển"), 6);
+        super(Component.text("Dịch Chuyển", NamedTextColor.DARK_PURPLE).decoration(TextDecoration.BOLD, true), 5);
         this.player = player;
-        this.admin = Permissions.WARP_ADMIN.has(player);
     }
 
     @Override
     public void setup() {
         clearUi();
-        for (int i = 0; i < 9; i++) {
-            addButton(i, FILLER_BLACK, ClickHandler.noAction());
-            addButton(45 + i, FILLER_BLACK, ClickHandler.noAction());
-        }
-
-        if (admin) {
-            addButton(CREATE_SLOT, item(Material.EMERALD, "Create warp here", NamedTextColor.GREEN,
-                    line("Creates a warp at your position"), hint("Click")), event -> {
-                event.setCancelled(true);
-                openCreateDialog();
-            });
-        }
 
         List<Map.Entry<String, Warp>> warps = WarpService.getInstance().usableWarps(player);
-        int totalPages = Math.max(1, (int) Math.ceil(warps.size() / (double) PAGE_SIZE));
+        int totalPages = Math.max(1, (int) Math.ceil(warps.size() / (double) CARD_COLUMNS.length));
         currentPage = Math.min(currentPage, totalPages - 1);
 
-        if (currentPage > 0) {
-            addButton(5, 3, PREV_PAGE_BUTTON, event -> {
+        int from = currentPage * CARD_COLUMNS.length;
+        List<Map.Entry<String, Warp>> pageWarps = warps.subList(from, Math.min(from + CARD_COLUMNS.length, warps.size()));
+        ItemStack border = createDecoration(Material.PURPLE_STAINED_GLASS_PANE);
+        for (int i = 0; i < pageWarps.size(); i++) {
+            String id = pageWarps.get(i).getKey();
+            int col = CARD_COLUMNS[i];
+            addButton(BORDER_TOP_ROW, col, border, ClickHandler.noAction());
+            addButton(BORDER_BOTTOM_ROW, col, border, ClickHandler.noAction());
+            addButton(ICON_ROW, col, createWarpIcon(pageWarps.get(i).getValue()), event -> {
                 event.setCancelled(true);
-                currentPage--;
-                setup();
-            });
-        }
-        if (currentPage < totalPages - 1) {
-            addButton(5, 5, NEXT_PAGE_BUTTON, event -> {
-                event.setCancelled(true);
-                currentPage++;
-                setup();
+                player.closeInventory();
+                player.playSound(Sound.sound(SoundEventKeys.ENTITY_ENDERMAN_TELEPORT, Sound.Source.PLAYER, 0.8f, 1.2f));
+                WarpService.getInstance().teleport(player, id);
             });
         }
 
         if (warps.isEmpty()) {
-            addButton(EMPTY_SLOT, item(Material.BARRIER, "Chưa có điểm dịch chuyển nào", NamedTextColor.GRAY), ClickHandler.noAction());
+            ItemStack empty = ItemStack.of(Material.STRUCTURE_VOID);
+            empty.setData(DataComponentTypes.ITEM_NAME, Component.text("Chưa có điểm dịch chuyển nào", NamedTextColor.GRAY));
+            addButton(ICON_ROW, 4, empty, ClickHandler.noAction());
         }
 
-        int from = currentPage * PAGE_SIZE;
-        int slot = 9;
-        for (Map.Entry<String, Warp> entry : warps.subList(from, Math.min(from + PAGE_SIZE, warps.size()))) {
-            String id = entry.getKey();
-            addButton(slot++, warpButton(id, entry.getValue()), event -> {
+        if (currentPage > 0) {
+            addButton(NAV_ROW, 3, PREV_PAGE_BUTTON, event -> {
                 event.setCancelled(true);
-                if (admin && event.getClick().isShiftClick()) {
-                    Utils.runLater(() -> new WarpEditorGui(player, id).showInventory(player));
-                    return;
-                }
-                player.closeInventory();
-                WarpService.getInstance().teleport(player, id);
+                changePage(-1);
             });
         }
-        fillEmpty(FILLER);
+        if (currentPage < totalPages - 1) {
+            addButton(NAV_ROW, 5, NEXT_PAGE_BUTTON, event -> {
+                event.setCancelled(true);
+                changePage(1);
+            });
+        }
+        ItemStack pageIcon = ItemStack.of(Material.PAPER);
+        pageIcon.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang " + (currentPage + 1) + "/" + totalPages, NamedTextColor.YELLOW));
+        addButton(NAV_ROW, 4, pageIcon, ClickHandler.noAction());
+        addBackButton(getSlot(NAV_ROW, 0));
+        fillEmpty(FILLER_BLACK);
     }
 
-    private org.bukkit.inventory.ItemStack warpButton(String id, Warp warp) {
-        List<Component> lore = new ArrayList<>(Utils.fromStrings(warp.lore()));
+    private void changePage(int delta) {
+        currentPage += delta;
+        player.playSound(Sound.sound(SoundEventKeys.ITEM_BOOK_PAGE_TURN, Sound.Source.PLAYER, 1f, 1f));
+        setup();
+    }
+
+    private ItemStack createWarpIcon(Warp warp) {
+        ItemStack item = warp.createIcon();
+        item.setData(DataComponentTypes.ITEM_NAME, Utils.fromString(warp.displayName()).decoration(TextDecoration.BOLD, true));
+
+        List<Component> lore = new ArrayList<>();
+        for (Component line : Utils.fromStrings(warp.lore())) {
+            lore.add(line.colorIfAbsent(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        }
         if (!lore.isEmpty()) lore.add(Component.empty());
-        lore.add(hint("Click để dịch chuyển"));
-        if (admin) {
-            lore.add(line("Id: " + id + "  Order: " + warp.order()));
-            lore.add(line(warp.destination().format()));
-            if (!warp.destination().isAvailable(player)) lore.add(Utils.text("⚠ Destination can't be resolved", NamedTextColor.RED));
-            lore.add(hint("Shift + click: edit"));
-        }
-        return item(warp.createIcon(), Utils.fromString(warp.displayName()), lore);
+        lore.add(Utils.text("Click để dịch chuyển", NamedTextColor.YELLOW));
+
+        item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+        return item;
     }
 
-    private void openCreateDialog() {
-        Dialog dialog = DialogBuilder.create(Component.text("Create warp"))
-                .addTextInput("warp_id", Component.text("Warp name"))
-                .confirmation()
-                .yesButton(Component.text("Create"), null, (response, audience) -> {
-                    String id = response.getText("warp_id") == null ? "" : response.getText("warp_id").trim().toLowerCase();
-                    Utils.runLater(() -> create(id));
-                })
-                .noButton(Component.text("Cancel"), null, (response, audience) -> Utils.runLater(() -> showInventory(player)))
-                .build();
-
-        player.closeInventory();
-        player.showDialog(dialog);
-    }
-
-    private void create(String id) {
-        DataResult<Warp> result = WarpService.getInstance().create(id, LocationDestination.of(player.getLocation()));
-        if (CommandFeedback.failed(player, result)) {
-            showInventory(player);
-            return;
-        }
-        player.sendMessage(Utils.fromString("<green>Warp '" + id + "' created."));
-        new WarpEditorGui(player, id).showInventory(player);
+    @Override
+    public void onClickBottomInventory(InventoryClickEvent event) {
+        event.setCancelled(true);
     }
 }

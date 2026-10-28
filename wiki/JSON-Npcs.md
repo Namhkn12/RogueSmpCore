@@ -44,9 +44,26 @@ NPC villager mặc đồ theo nghề:
 | `skinId` | string | optional | Id trong `skins/` (xem [JSON-Items](JSON-Items.md#skins--dữ-liệu-skin)). Id không tồn tại bị bỏ qua. |
 | `description` | mảng string MiniMessage | `[]` | Mỗi phần tử 1 dòng mô tả, hiện dưới tên. Áp dụng cho **mọi** loại entity. Viết 1 string (dạng cũ) vẫn được, tính là 1 dòng. |
 | `profession` | key nghề villager | optional | Nghề của villager, quyết định bộ đồ: `minecraft:armorer`, `butcher`, `cartographer`, `cleric`, `farmer`, `fisherman`, `fletcher`, `leatherworker`, `librarian`, `mason`, `nitwit`, `shepherd`, `toolsmith`, `weaponsmith`, `none`. Bỏ namespace thì mặc định `minecraft:`. Key sai → NPC không nạp được. **Chỉ Villager.** |
-| `actions` | mảng action | **bắt buộc** (có thể `[]`) | Việc NPC làm khi bị click. |
+| `equipment` | object tên ô → đồ | `{}` | Trang bị NPC mặc/cầm: giáp nhuộm, giáp có trim, đầu người, vũ khí... Cùng định dạng với [`equipment` của entity](JSON-Entities.md#equipment). |
+| `actions` | mảng [action](JSON-Actions.md) | **bắt buộc** (có thể `[]`) | Việc NPC làm khi bị click. |
 
 ⚠️ **Skin chỉ áp dụng khi `entityType` là `MANNEQUIN`, `profession` chỉ khi là `VILLAGER`.** Loại entity khác bỏ qua các key này.
+
+### Trang bị
+
+```json
+"equipment": {
+  "HEAD":  { "material": "PLAYER_HEAD", "headSkin": "knight_head" },
+  "CHEST": { "material": "LEATHER_CHESTPLATE", "dyeColor": "#3B5BA5" },
+  "LEGS":  { "material": "IRON_LEGGINGS", "trimMaterial": "minecraft:gold", "trimPattern": "minecraft:sentry" },
+  "FEET":  { "material": "LEATHER_BOOTS", "dyeColor": "#222222", "trimMaterial": "minecraft:redstone", "trimPattern": "minecraft:rib" },
+  "HAND":  { "material": "IRON_SWORD" }
+}
+```
+
+- Định nghĩa là **nguồn duy nhất**: mỗi lần NPC được nạp, mọi ô bị xoá rồi mặc lại theo JSON. Bỏ 1 ô khỏi JSON rồi reload → ô đó trống.
+- ⚠️ **Villager không hiện giáp** (model không có lớp giáp), chỉ hiện đồ cầm tay. Giáp hiện trên Mannequin và mob hình người (zombie, skeleton, piglin, armor stand...).
+- Trình tạo NPC có nút `equipment` để chỉnh từng ô (dùng chung editor với trình tạo entity); trim được kiểm tra ngay khi lưu.
 
 Hành vi NPC: bất tử, tắt AI, được lưu (persistent), Mannequin bị cố định; tự quay đầu nhìn người chơi gần nhất trong 5 block.
 
@@ -61,23 +78,13 @@ Text display không được lưu vào world: mỗi lần NPC được nạp (sp
 
 ## Action
 
-Field chọn loại: `"type"`. Mọi action trong mảng chạy **tuần tự** khi click (không phải chọn 1 trong nhiều).
-
-| `type` | Key | Khi nào chạy | Ý nghĩa |
-| :--- | :--- | :--- | :--- |
-| `run_command` | `command` (string, bắt buộc) | click phải **và** trái | Người chơi chạy lệnh bằng quyền của chính họ (`performCommand`). **Viết không có `/` đầu.** `@p` được thay bằng tên người chơi. |
-| `open_gui` | `gui` (string, bắt buộc) | chỉ click phải | Mở GUI theo id. Dùng `shop:<shop_id>` để mở cửa hàng (id trong `trades/`, xem [JSON-Trades](JSON-Trades.md)). |
-| `teleport` | `destination` ([điểm đến](JSON-Warps.md#điểm-đến-destination), bắt buộc); `options` ([tuỳ chọn](JSON-Warps.md#tuỳ-chọn-dịch-chuyển-options), mặc định hiệu ứng `enderman`, chờ 30 tick) | chỉ click phải | Dịch chuyển người chơi. Trỏ tới warp bằng `{ "type": "warp", "warp": "<id>" }` để đổi điểm đến ở 1 chỗ. |
-
-`gui` hợp lệ — chỉ 3 id, đăng ký cứng trong code: `blacksmith` (thợ rèn), `quest` ([bảng nhiệm vụ](JSON-Quests.md#bảng-nhiệm-vụ)), `inbox` (hộp thư thưởng). Id khác → người chơi nhận thông báo lỗi đỏ + log cảnh báo.
-
-⚠️ Đừng dùng `@p_id`: `@p` được thay trước nên `@p_id` bị hỏng.
+`actions` dùng định dạng action chung — xem [JSON-Actions](JSON-Actions.md) (loại action, id GUI, `click` trái/phải). Click phải vào NPC = `right`, đánh NPC = `left`; không ghi `click` thì action chạy với cả hai.
 
 ## Dành cho dev
 
-Action đa hình: đăng ký trong [`NpcActions`](../src/main/java/com/roguesmp/npc/action/NpcActions.java). GUI mở được từ NPC: thêm `GuiOpenActions.OpenAction` mới trong [`GuiOpenActions`](../src/main/java/com/roguesmp/npc/action/GuiOpenActions.java). Lưu ý có 2 tầng dispatch khác nhau: `type` chọn loại action (`run_command`/`open_gui`/...), `gui` chọn GUI cụ thể trong 1 bảng tra riêng.
+Action dùng chung với item, code nằm ở package `action` — xem [JSON-Actions](JSON-Actions.md#dành-cho-dev).
 
 Chữ trên đầu NPC và nghề villager nằm trong `BaseNpc.processEntity` ([`BaseNpc`](../src/main/java/com/roguesmp/npc/BaseNpc.java)); text display được tạo trễ 1 tick qua scheduler của entity. Trình tạo NPC trong game (`NpcCreatorGui`) chỉnh được mô tả nhiều dòng và chọn nghề từ danh sách.
 
 ---
-◀ [JSON-Quests](JSON-Quests.md) · Về [Trang chủ](Home.md) · Tiếp theo: [JSON-Trades](JSON-Trades.md)
+◀ [JSON-Quests](JSON-Quests.md) · Về [Trang chủ](Home.md) · Tiếp theo: [JSON-Actions](JSON-Actions.md)
