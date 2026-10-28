@@ -25,8 +25,9 @@ public class MainMenuGui extends BaseGui {
         for (MenuEntry entry : MenuEntries.ENTRIES) {
             addButton(entry.slot(), entry.icon().get(), event -> {
                 event.setCancelled(true);
-                BaseGui target = entry.factory().apply(player)
-                        .withBackAction(getName(), viewer -> new MainMenuGui(player).showInventory(viewer));
+                BaseGui target = entry.factory().apply(player);
+                if (target == null) return;
+                target.withBackAction(getName(), viewer -> new MainMenuGui(player).showInventory(viewer));
                 Utils.runLater(() -> target.showInventory(player));
             });
         }

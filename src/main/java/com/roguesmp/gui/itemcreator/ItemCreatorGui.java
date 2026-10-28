@@ -11,6 +11,8 @@ import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.enchant.Enchants;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.item.BaseItem;
+import com.roguesmp.action.ActionEntry;
+import com.roguesmp.action.editor.ActionListEditor;
 import com.roguesmp.item.component.ComponentKey;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.item.component.ItemComponentKeys;
@@ -173,9 +175,9 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.DYED_COLOR),
                 tooltip("Nhuộm màu giáp da (hoặc vật phẩm nhuộm được).", null),
                 (response, audience) -> player.showDialog(buildDyedColorDialog(player)));
-        multi.addButton(componentLabel(ItemComponentKeys.MAIN_MENU),
-                tooltip("Chuột phải để mở menu chính.", null),
-                (response, audience) -> player.showDialog(buildMainMenuDialog(player)));
+        multi.addButton(componentLabel(ItemComponentKeys.ACTIONS),
+                tooltip("Chạy action khi click (mở GUI, chạy lệnh, dịch chuyển...).", "Mỗi action có thể chọn click trái/phải/cả hai"),
+                (response, audience) -> player.showDialog(buildActionsDialog(player)));
         multi.addButton(componentLabel(ItemComponentKeys.ARMOR_TRIM),
                 tooltip("Thêm hoa văn giáp (armor trim).", "Cần cả material và pattern, hỗ trợ datapack"),
                 (response, audience) -> player.showDialog(buildArmorTrimDialog(player)));
@@ -672,20 +674,40 @@ public class ItemCreatorGui {
         return text == null || text.isBlank() ? null : Key.key(text.trim());
     }
 
-    private Dialog buildMainMenuDialog(Player player) {
-        DialogBuilder builder = DialogBuilder.create(Component.text("Menu chính"))
+    private Dialog buildActionsDialog(Player player) {
+        InteractActionComponent current = (InteractActionComponent) components.get(ItemComponentKeys.ACTIONS.id());
+        String hint = current == null ? "" : current.hint();
+        List<ActionEntry> entries = current == null ? List.of() : current.actions();
+        DialogBuilder builder = DialogBuilder.create(Component.text("Action khi click"))
                 .canCloseWithEscape(false)
-                .addTextBody(Component.text("Chuột phải khi cầm item để mở menu chính. Component này không có tùy chọn."));
+                .externalTitle(Component.text(ItemComponentKeys.ACTIONS.id(), current != null ? NamedTextColor.GREEN : NamedTextColor.GRAY))
+                .addTextInput("hint", Component.text("hint (lore, MiniMessage)"), b -> b.initial(hint).maxLength(256));
 
-        return wrapComponentDialog(player, ItemComponentKeys.MAIN_MENU, builder,
-                (response, audience) -> {
-                    components.put(ItemComponentKeys.MAIN_MENU.id(), new MainMenuComponent());
-                    Utils.runLater(() -> openMainDialog(player));
-                },
-                (response, audience) -> {
-                    components.remove(ItemComponentKeys.MAIN_MENU.id());
-                    Utils.runLater(() -> openMainDialog(player));
-                });
+        DialogTypeBuilder.MultiAction multi = builder.multiAction();
+        multi.addButton(Component.text("Sửa action (" + entries.size() + ")", NamedTextColor.AQUA), null, (response, audience) -> {
+            String newHint = readHint(response.getText("hint"));
+            components.put(ItemComponentKeys.ACTIONS.id(), new InteractActionComponent(entries, newHint));
+            Utils.runLater(() -> player.showDialog(new ActionListEditor("Action khi click", entries,
+                    updated -> components.put(ItemComponentKeys.ACTIONS.id(), new InteractActionComponent(updated, newHint)),
+                    p -> p.showDialog(buildActionsDialog(p))).buildListDialog(player)));
+        });
+        multi.addButton(Component.text("Lưu"), null, (response, audience) -> {
+            components.put(ItemComponentKeys.ACTIONS.id(), new InteractActionComponent(entries, readHint(response.getText("hint"))));
+            Utils.runLater(() -> openMainDialog(player));
+        });
+        if (current != null) {
+            multi.addButton(Component.text("Xoá", NamedTextColor.RED), null, (response, audience) -> {
+                components.remove(ItemComponentKeys.ACTIONS.id());
+                Utils.runLater(() -> openMainDialog(player));
+            });
+        }
+        multi.columns(3);
+        multi.exitButton(Component.text("Huỷ"), (response, audience) -> Utils.runLater(() -> openMainDialog(player)));
+        return multi.build();
+    }
+
+    private static String readHint(String raw) {
+        return raw == null ? "" : raw.trim();
     }
 
     private Dialog buildEnchantGlintDialog(Player player) {

@@ -39,7 +39,6 @@ public class GeneratorCatalystEditorGui {
                 .externalTitle(Component.text(ItemComponentKeys.GENERATOR_CATALYST.id(), present ? NamedTextColor.GREEN : NamedTextColor.GRAY))
                 .addTextBody(Component.text("Kéo dài: " + unit.format(duration)))
                 .addTextBody(Component.text("Hiệu ứng: " + effect.size()))
-                .addTextBody(Component.text("Vàng = modifier chỉ số, xanh = behavior.", NamedTextColor.DARK_GRAY))
                 .multiAction();
 
         multi.addButton(Component.text("duration", NamedTextColor.GREEN), null,

@@ -6,7 +6,7 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.entity.EntityEquipment;
-import com.roguesmp.npc.action.NpcAction;
+import com.roguesmp.action.ActionEntry;
 import com.roguesmp.registry.SkinRegistry;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.RogueSmpCore;
@@ -69,7 +69,7 @@ public class BaseNpc {
             PROFESSION_CODEC.optionalFieldOf("profession", () -> null).forGetter(BaseNpc::getProfession),
             EQUIPMENT_CODEC.optionalFieldOf("equipment", Map::of).forGetter(BaseNpc::getEquipment),
             Codec.STRING.fieldOf("id").forGetter(BaseNpc::getId),
-            Codec.listOf(NpcAction.CODEC).fieldOf("actions").forGetter(BaseNpc::getActions),
+            Codec.listOf(ActionEntry.CODEC).fieldOf("actions").forGetter(BaseNpc::getActions),
             BaseNpc::new
     );
 
@@ -82,9 +82,9 @@ public class BaseNpc {
     private final Villager.Profession profession;
     private final Map<EquipmentSlot, EntityEquipment> equipment;
     private final String id;
-    private final List<NpcAction> actions;
+    private final List<ActionEntry> actions;
 
-    public BaseNpc(EntityType entityType, String name, String skinValue, String skinSignature, String skinId, List<String> description, Villager.Profession profession, Map<EquipmentSlot, EntityEquipment> equipment, String id, List<NpcAction> actions) {
+    public BaseNpc(EntityType entityType, String name, String skinValue, String skinSignature, String skinId, List<String> description, Villager.Profession profession, Map<EquipmentSlot, EntityEquipment> equipment, String id, List<ActionEntry> actions) {
         this.entityType = entityType;
         this.name = name;
         this.skinValue = skinValue;
@@ -133,7 +133,7 @@ public class BaseNpc {
         return skinId;
     }
 
-    public List<NpcAction> getActions() {
+    public List<ActionEntry> getActions() {
         return Collections.unmodifiableList(actions);
     }
 

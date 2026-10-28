@@ -6,6 +6,7 @@ import com.roguesmp.gui.ability.AbilityLoadoutGui;
 import com.roguesmp.gui.classes.ClassSelectionGui;
 import com.roguesmp.player.SmpPlayer;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import com.roguesmp.gui.info.SmpWikiMainMenuGui;
 import com.roguesmp.gui.island.IslandMainGui;
 import com.roguesmp.menu.gui.MainMenuGui;
@@ -39,8 +40,9 @@ public final class MenuEntries {
     private MenuEntries() {
     }
 
-    private static BaseGui openSkillMenu(Player player) {
+    public static @Nullable BaseGui openSkillMenu(Player player) {
         SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+        if (smpPlayer == null) return null;
         if (smpPlayer.getPlayerClass() != null) return new AbilityLoadoutGui(smpPlayer);
         player.sendMessage(Component.text("Bạn cần chọn một lớp nhân vật trước khi sử dụng kĩ năng!", NamedTextColor.YELLOW));
         return new ClassSelectionGui(smpPlayer);

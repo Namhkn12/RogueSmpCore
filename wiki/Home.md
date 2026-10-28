@@ -11,12 +11,13 @@ Mỗi trang = 1 thư mục dữ liệu: **mỗi key làm gì, kiểu gì, bắt 
 | Trang | Thư mục | Nội dung |
 | :--- | :--- | :--- |
 | **[JSON-Overview](JSON-Overview.md)** | (tất cả) | Bản đồ thư mục, quy tắc chung: id = đường dẫn, kiểu giá trị, MiniMessage, tag, tham chiếu chéo, lỗi, reload. **Đọc trước.** |
-| [JSON-Items](JSON-Items.md) | `items/`, `item_types/`, `skins/` | 24 component, attribute, enchant, effect, item ability |
+| [JSON-Items](JSON-Items.md) | `items/`, `item_types/`, `skins/` | 25 component, attribute, enchant, effect, item ability |
 | [JSON-Entities](JSON-Entities.md) | `entities/` | Mob/boss: component, spell, boss bar, loot |
 | [JSON-Abilities](JSON-Abilities.md) | `ability_info/` | Chỉ số theo level, phím kích hoạt, chi phí nâng cấp, bảng ability có sẵn |
 | [JSON-Classes](JSON-Classes.md) | `classes/` | Lớp nhân vật: roster ability, giới hạn vũ khí |
 | [JSON-Quests](JSON-Quests.md) | `quests/` | Quest, objective, reward, hộp thư thưởng, quest hằng ngày, quest nhóm |
 | [JSON-Npcs](JSON-Npcs.md) | `npcs/` | NPC và action khi click |
+| [JSON-Actions](JSON-Actions.md) | (dùng chung) | Action khi click cho NPC và item: chạy lệnh, mở GUI, dịch chuyển, xoá entity |
 | [JSON-Trades](JSON-Trades.md) | `trades/` | Cửa hàng NPC: giá, điều kiện, phần thưởng, bố cục GUI |
 | [JSON-Warps](JSON-Warps.md) | `warps/` | Điểm dịch chuyển `/warp`, điểm đến, hiệu ứng dịch chuyển |
 | [JSON-Loot](JSON-Loot.md) | `loottable/` | Pool, entry, condition, thuật toán roll |

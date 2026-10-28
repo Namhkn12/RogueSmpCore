@@ -4,6 +4,7 @@ import com.roguesmp.command.CommandFeedback;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.permission.Permissions;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.teleport.destination.LocationDestination;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
@@ -20,6 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +73,9 @@ public class WarpAdminGui extends BaseGui {
         addButton(1, createDecoration(Material.PURPLE_STAINED_GLASS_PANE), ClickHandler.noAction());
         addButton(7, createDecoration(Material.PURPLE_STAINED_GLASS_PANE), ClickHandler.noAction());
 
-        List<Map.Entry<String, Warp>> warps = WarpService.getInstance().usableWarps(player);
+        List<Map.Entry<String, Warp>> warps = Registries.WARP.getAll().entrySet().stream()
+                .sorted(Comparator.comparingInt((Map.Entry<String, Warp> entry) -> entry.getValue().order()).thenComparing(Map.Entry::getKey))
+                .toList();
         int totalPages = Math.max(1, (int) Math.ceil(warps.size() / (double) CONTENT_SLOTS.length));
         currentPage = Math.min(currentPage, totalPages - 1);
 

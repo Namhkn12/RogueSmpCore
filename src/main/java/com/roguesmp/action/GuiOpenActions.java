@@ -1,7 +1,11 @@
-package com.roguesmp.npc.action;
+package com.roguesmp.action;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.gui.BaseGui;
 import com.roguesmp.gui.BlacksmithGui;
+import com.roguesmp.menu.MenuEntries;
+import com.roguesmp.menu.gui.MainMenuGui;
+import com.roguesmp.warp.gui.WarpGui;
 import com.roguesmp.player.inbox.gui.InboxGui;
 import com.roguesmp.quest.board.gui.QuestBoardGui;
 import com.roguesmp.registry.Registries;
@@ -14,7 +18,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
 /**
- * NPC GUI-open actions. Each constant registers itself into {@link Registries#NPC_GUI_OPEN_ACTION}
+ * GUI-open actions, referenced by id from {@link com.roguesmp.action.impl.OpenGuiAction}. Each constant registers itself into {@link Registries#GUI_OPEN_ACTION}
  * as it's initialized - call {@link #loadClass()} to force that to happen.
  */
 public class GuiOpenActions {
@@ -35,21 +39,28 @@ public class GuiOpenActions {
     private static final String SHOP_PREFIX = "shop:";
 
     public static final OpenAction INBOX = register("inbox", player -> new InboxGui(player, null).showInventory(player));
+    public static final OpenAction MAIN_MENU = register("main_menu", player -> new MainMenuGui(player).showInventory(player));
+    public static final OpenAction WARP = register("warp", player -> new WarpGui(player).showInventory(player));
+    public static final OpenAction SKILL = register("skill", player -> {
+        BaseGui gui = MenuEntries.openSkillMenu(player);
+        if (gui != null) gui.showInventory(player);
+    });
 
     public static void loadClass() {
 
     }
 
-    public static void runOpenAction(String id, Player player) {
+    public static boolean runOpenAction(String id, Player player) {
         OpenAction openAction = id.startsWith(SHOP_PREFIX)
                 ? shopOpenAction(id.substring(SHOP_PREFIX.length()))
-                : Registries.NPC_GUI_OPEN_ACTION.get(id);
+                : Registries.GUI_OPEN_ACTION.get(id);
         if (openAction == null) {
             player.sendMessage(Component.text("Could not find GUI open action with id: " + id, NamedTextColor.RED));
             RogueSmpCore.LOGGER.warn("Could not find GUI open action with id: {}", id);
-            return;
+            return false;
         }
         openAction.run(player);
+        return true;
     }
 
     private static OpenAction shopOpenAction(String shopId) {
@@ -58,7 +69,7 @@ public class GuiOpenActions {
     }
 
     private static OpenAction register(String id, OpenAction action) {
-        Registries.NPC_GUI_OPEN_ACTION.register(id, action);
+        Registries.GUI_OPEN_ACTION.register(id, action);
         return action;
     }
 }

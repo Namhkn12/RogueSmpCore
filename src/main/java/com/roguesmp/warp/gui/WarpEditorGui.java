@@ -10,11 +10,13 @@ import com.roguesmp.gui.BaseGui;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.teleport.TeleportDestination;
 import com.roguesmp.teleport.TeleportDestinationParser;
+import com.roguesmp.teleport.TeleportOptions;
 import com.roguesmp.teleport.TeleportService;
 import com.roguesmp.teleport.destination.LocationDestination;
 import com.roguesmp.teleport.effect.TeleportEffects;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
+import com.roguesmp.utils.dialog.JsonEntryDialog;
 import com.roguesmp.warp.Warp;
 import com.roguesmp.warp.WarpService;
 import io.papermc.paper.dialog.Dialog;
@@ -146,9 +148,13 @@ public class WarpEditorGui extends BaseGui {
         addButton(EFFECT_SLOT, item(hasEffect ? Material.LIME_DYE : Material.GRAY_DYE, "Effect: " + warp.options().effect().getTypeId(),
                 hasEffect ? NamedTextColor.GREEN : NamedTextColor.GRAY,
                 line("Presets: " + String.join(", ", TeleportEffects.PRESETS.keySet())),
-                line("Tune effect values in the warp's JSON"),
-                hint("Click to cycle")), event -> {
+                hint("Left click: cycle preset"),
+                hint("Right click: edit options as JSON")), event -> {
             event.setCancelled(true);
+            if (event.getClick().isRightClick()) {
+                openOptionsDialog(warp.options());
+                return;
+            }
             apply(current -> current.withOptions(current.options().withEffect(TeleportEffects.next(current.options().effect()))));
         });
 
@@ -204,6 +210,17 @@ public class WarpEditorGui extends BaseGui {
     private void apply(UnaryOperator<Warp> change) {
         CommandFeedback.failed(player, WarpService.getInstance().update(warpId, change));
         showInventory(player);
+    }
+
+    private void openOptionsDialog(TeleportOptions options) {
+        Dialog dialog = JsonEntryDialog.of("Warp options: " + warpId, TeleportOptions.CODEC,
+                updated -> apply(current -> current.withOptions(updated)),
+                null,
+                () -> showInventory(player))
+                .build(player, options);
+
+        player.closeInventory();
+        player.showDialog(dialog);
     }
 
     private void openTextDialog(String label, String initial, Consumer<String> onSave) {

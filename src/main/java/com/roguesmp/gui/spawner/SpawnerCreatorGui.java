@@ -1,6 +1,8 @@
 package com.roguesmp.gui.spawner;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.codec.Codec;
+import com.roguesmp.codec.DataResult;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.spawner.Spawner;
 import com.roguesmp.registry.Registries;
@@ -9,20 +11,21 @@ import com.roguesmp.spawner.behavior.BehaviorFactory;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
-import io.papermc.paper.registry.data.dialog.input.TextDialogInput;
+import com.roguesmp.utils.dialog.LenientJson;
 import io.papermc.paper.dialog.DialogResponseView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
 public class SpawnerCreatorGui {
+
+    private static final Codec<List<BehaviorData>> BEHAVIOR_LIST_CODEC = Codec.listOf(BehaviorData.CODEC);
 
     private static final String ID = "spawner_id";
     private static final String NAME = "spawner_name";
@@ -96,9 +99,9 @@ public class SpawnerCreatorGui {
                 .addTextInput(SPAWN_RANGE, Component.text("Spawn range (block)"), 300, true, form.get(SPAWN_RANGE), 8, null)
                 .addTextInput(MAX_NEARBY, Component.text("Max nearby"), 300, true, form.get(MAX_NEARBY), 8, null)
                 .addTextInput(SPAWN_COUNT, Component.text("Spawn count"), 300, true, form.get(SPAWN_COUNT), 8, null)
-                .addTextInput(BEHAVIORS, Component.text("Behaviors (mỗi dòng: type key=value ...)"), 300, true, form.get(BEHAVIORS), 2048,
-                        TextDialogInput.MultilineOptions.create(8, 100))
-                .addTextBody(Component.text("Behavior: protector, wave, teleport, cursed", NamedTextColor.DARK_GRAY));
+                .addTextBody(Component.text(LenientJson.HELP, NamedTextColor.DARK_GRAY))
+                .addTextBody(Component.text("type: protector, wave, teleport, cursed", NamedTextColor.DARK_GRAY));
+        LenientJson.addInput(builder, BEHAVIORS, Component.text("Behaviors"), form.get(BEHAVIORS));
 
         DialogTypeBuilder.MultiAction multi = builder.multiAction();
         multi.addButton(Component.text("Mobs (" + mobs.size() + ")", mobs.isEmpty() ? NamedTextColor.RED : NamedTextColor.GREEN), describeMobs(),
@@ -190,46 +193,27 @@ public class SpawnerCreatorGui {
     }
 
     private static List<BehaviorData> parseBehaviors(String text) {
-        List<BehaviorData> behaviors = new ArrayList<>();
-        for (String line : text.split("\n")) {
-            if (line.isBlank()) continue;
-            String[] tokens = line.trim().split("\\s+");
-            Map<String, Object> params = new LinkedHashMap<>();
-            for (int i = 1; i < tokens.length; i++) {
-                int separator = tokens[i].indexOf('=');
-                if (separator <= 0) throw new IllegalArgumentException("Tham số '" + tokens[i] + "' phải có dạng key=value.");
-                params.put(tokens[i].substring(0, separator), parseValue(tokens[i].substring(separator + 1)));
-            }
-
-            BehaviorData behavior = new BehaviorData(tokens[0], params);
+        if (text.isBlank()) return List.of();
+        DataResult<List<BehaviorData>> result = LenientJson.decode(BEHAVIOR_LIST_CODEC, text);
+        if (!result.isSuccess()) throw new IllegalArgumentException("Behaviors không hợp lệ: " + result.error());
+        for (BehaviorData behavior : result.result()) {
             try {
                 BehaviorFactory.create(behavior);
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Behavior không tồn tại: '" + tokens[0] + "'.");
+                throw new IllegalArgumentException("Behavior không tồn tại: '" + behavior.getType() + "'.");
             }
-            behaviors.add(behavior);
         }
-        return behaviors;
+        return result.result();
     }
 
-    private static Object parseValue(String value) {
-        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) return Boolean.parseBoolean(value);
-        try {
-            return Double.parseDouble(value);
-        } catch (NumberFormatException e) {
-            return value;
-        }
+    private static String formatBehaviors(List<BehaviorData> behaviors) {
+        if (behaviors.isEmpty()) return "[]";
+        StringJoiner lines = new StringJoiner(",\n", "[\n", "\n]");
+        behaviors.forEach(behavior -> lines.add("{" + formatBehavior(behavior) + "}"));
+        return lines.toString();
     }
 
     static String formatBehavior(BehaviorData behavior) {
-        StringJoiner line = new StringJoiner(" ");
-        line.add(behavior.getType());
-        behavior.getParams().forEach((key, value) -> line.add(key + "=" + formatValue(value)));
-        return line.toString();
-    }
-
-    private static String formatValue(Object value) {
-        if (value instanceof Double number && number == Math.rint(number)) return String.valueOf(number.longValue());
-        return String.valueOf(value);
+        return LenientJson.format(BehaviorData.CODEC, behavior);
     }
 }

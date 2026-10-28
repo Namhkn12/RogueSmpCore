@@ -146,4 +146,4 @@ Code nằm trong [`trade/`](../src/main/java/com/roguesmp/trade); cost và requi
 Luồng giao dịch: `TradeOffer.trade` (snapshot túi đồ → `takeFrom` → `addItem` → hoàn tác nếu dư → `take`/`give`). GUI: [`TradeGui`](../src/main/java/com/roguesmp/trade/gui/TradeGui.java); bố cục: [`TradeLayout`](../src/main/java/com/roguesmp/trade/TradeLayout.java).
 
 ---
-◀ [JSON-Npcs](JSON-Npcs.md) · Về [Trang chủ](Home.md) · Tiếp theo: [JSON-Loot](JSON-Loot.md)
+◀ [JSON-Actions](JSON-Actions.md) · Về [Trang chủ](Home.md) · Tiếp theo: [JSON-Loot](JSON-Loot.md)

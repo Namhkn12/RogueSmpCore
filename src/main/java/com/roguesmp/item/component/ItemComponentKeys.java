@@ -42,7 +42,7 @@ public class ItemComponentKeys {
     public static final ComponentKey<MageStaffComponent> MAGE_STAFF = register("mage_staff", MageStaffComponent.CODEC);
     public static final ComponentKey<BrewIngredientComponent> BREW_INGREDIENT = register("brew_ingredient", BrewIngredientComponent.CODEC);
     public static final ComponentKey<BrewedPotionComponent> BREWED_POTION = register("brewed_potion", BrewedPotionComponent.CODEC);
-    public static final ComponentKey<MainMenuComponent> MAIN_MENU = register("main_menu", MainMenuComponent.CODEC);
+    public static final ComponentKey<InteractActionComponent> ACTIONS = register("actions", InteractActionComponent.CODEC);
 
     public static void loadClass() {
 
