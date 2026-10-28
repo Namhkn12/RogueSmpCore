@@ -46,8 +46,8 @@ import com.roguesmp.loot.entry.LootEntries;
 import com.roguesmp.loot.function.LootFunction;
 import com.roguesmp.loot.function.LootFunctions;
 import com.roguesmp.npc.BaseNpc;
-import com.roguesmp.npc.action.NpcAction;
-import com.roguesmp.npc.action.NpcActions;
+import com.roguesmp.action.PlayerAction;
+import com.roguesmp.action.PlayerActions;
 import com.roguesmp.trade.TradeShop;
 import com.roguesmp.gate.cost.Cost;
 import com.roguesmp.gate.cost.Costs;
@@ -74,7 +74,7 @@ import com.roguesmp.quest.*;
 import com.roguesmp.tag.Tags;
 import com.roguesmp.entity.SpecialEntities;
 import com.roguesmp.entity.spell.EntitySpells;
-import com.roguesmp.npc.action.GuiOpenActions;
+import com.roguesmp.action.GuiOpenActions;
 import com.roguesmp.text.Glyph;
 import com.roguesmp.text.Glyphs;
 import com.roguesmp.block.impl.generator.catalyst.CatalystType;
@@ -116,7 +116,7 @@ public class Registries {
     public static final Registry<Codec<? extends ObjectiveProgress>> OBJECTIVE_PROGRESS_CODEC = new Registry<>();
 
 
-    public static final Registry<Codec<? extends NpcAction>> NPC_ACTION_CODEC = register(registry -> NpcActions.loadClass());
+    public static final Registry<Codec<? extends PlayerAction>> PLAYER_ACTION_CODEC = register(registry -> PlayerActions.loadClass());
 
     public static final Registry<Codec<? extends Cost>> COST_CODEC = register(registry -> Costs.loadClass());
     public static final Registry<Codec<? extends Requirement>> REQUIREMENT_CODEC = register(registry -> Requirements.loadClass());
@@ -139,7 +139,7 @@ public class Registries {
     public static final Registry<PlayerClass> PLAYER_CLASS = new Registry<>("classes", PlayerClass.CODEC);
     public static final Registry<TriggerOption> TRIGGER_OPTION =register(registry -> TriggerOptions.loadClass());
 
-    public static final Registry<GuiOpenActions.OpenAction> NPC_GUI_OPEN_ACTION = register(registry -> GuiOpenActions.loadClass());
+    public static final Registry<GuiOpenActions.OpenAction> GUI_OPEN_ACTION = register(registry -> GuiOpenActions.loadClass());
 
     public static final Registry<DeathMessage> DEATH_MESSAGE = new Registry<>("death_messages", DeathMessage.CODEC);
 

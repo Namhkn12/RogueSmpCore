@@ -9,6 +9,7 @@ import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -49,7 +50,8 @@ public class GemDataComponent implements ItemComponent {
             statMap.forEach((attribute, value) -> {
                 String sign = value >= 0 ? "+" : "";
                 TextColor textColor = value >= 0 ? NamedTextColor.GREEN : NamedTextColor.RED;
-                lores.add(Utils.text(" " + sign + Utils.formatDecimal(value) + " " + attribute.getAttribute().getSimpleName(), textColor));
+                List<Component> display = attribute.getAttribute().getDisplayText(value, context.player(), Utils.EMPTY_PDC);
+                if (display != null) lores.addAll(display);
             });
 
             lores.add(Component.empty());

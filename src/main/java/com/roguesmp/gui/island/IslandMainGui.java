@@ -45,6 +45,7 @@ public class IslandMainGui extends BaseGui {
             addItem(row, 0, FILLER_BLACK);
             addItem(row, 8, FILLER_BLACK);
         }
+        addBackButton(getSlot(4, 0));
 
         IslandManager islandManager = IslandManager.getInstance();
 

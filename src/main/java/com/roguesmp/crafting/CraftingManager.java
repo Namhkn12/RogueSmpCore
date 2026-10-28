@@ -59,11 +59,11 @@ public class CraftingManager {
     }
 
     public @NotNull @Unmodifiable List<CraftingRecipe> getRecipesProducing(@NotNull String itemKey) {
-        return List.copyOf(byOutput.getOrDefault(itemKey, List.of()));
+        return Collections.unmodifiableList(byOutput.getOrDefault(itemKey, List.of()));
     }
 
     public @NotNull @Unmodifiable List<CraftingRecipe> getRecipesUsing(@NotNull String itemKey) {
-        return List.copyOf(byInput.getOrDefault(itemKey, List.of()));
+        return Collections.unmodifiableList(byInput.getOrDefault(itemKey, List.of()));
     }
 
     private void insert(CraftingRecipe recipe, List<String> path) {

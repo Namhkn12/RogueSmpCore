@@ -4,6 +4,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityAttribute;
 import com.roguesmp.entity.EntityEquipment;
+import com.roguesmp.gui.equipment.EquipmentEditorGui;
 import com.roguesmp.entity.component.EntityComponent;
 import com.roguesmp.entity.component.EntityComponentKey;
 import com.roguesmp.entity.component.EntityComponentKeys;
@@ -33,7 +34,7 @@ import java.util.*;
  * field/component (the id doubling as its label, colored green/gray by presence), a preview icon,
  * and a save flow that writes to {@link Registries#ENTITY}. {@code attributes}, {@code equipment}
  * and {@code spells} have too many entries for a single dialog and hand off to their own
- * sub-editor ({@link EntityAttributeEditorGui}, {@link EntityEquipmentEditorGui},
+ * sub-editor ({@link EntityAttributeEditorGui}, {@link EquipmentEditorGui},
  * {@link EntitySpellListEditorGui}), each of which commits straight back into this draft on every
  * leaf edit rather than requiring a separate top-level apply step.
  * <p>
@@ -445,7 +446,10 @@ public class EntityCreatorGui {
     private Dialog buildEquipmentDialog(Player player) {
         EquipmentComponent current = (EquipmentComponent) components.get(EntityComponentKeys.EQUIPMENT.id());
         Map<EquipmentSlot, EntityEquipment> initialSlots = current == null ? Map.of() : current.slots();
-        return new EntityEquipmentEditorGui(this, initialSlots, current != null).buildListDialog(player);
+        return new EquipmentEditorGui("Trang bị entity", initialSlots, slots -> {
+            if (slots.isEmpty()) removeEquipment();
+            else applyEquipment(new EquipmentComponent(slots));
+        }, this::reopen).buildListDialog(player);
     }
 
     private Dialog buildSpellsDialog(Player player) {

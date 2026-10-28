@@ -3,12 +3,12 @@ package com.roguesmp.gui.entitycreator;
 import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.entity.component.impl.SpellComponent;
 import com.roguesmp.entity.spell.SpellConfig;
-import com.roguesmp.entity.spell.SpellParams;
-import com.roguesmp.entity.spell.SpellType;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
+import com.roguesmp.utils.dialog.JsonEntryDialog;
+import com.roguesmp.utils.dialog.LenientJson;
 import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -17,8 +17,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class EntitySpellListEditorGui {
 
@@ -85,12 +83,12 @@ public class EntitySpellListEditorGui {
 
         DialogTypeBuilder.MultiAction multi = builder.multiAction();
         multi.addButton(Component.text("+ Thêm spell", NamedTextColor.GREEN), null,
-                (response, audience) -> Utils.runLater(() -> player.showDialog(buildAddDialog(player))));
+                (response, audience) -> Utils.runLater(() -> player.showDialog(entryDialog(player, -1).buildWithText(player, "type: "))));
         for (int i = 0; i < spells.size(); i++) {
             int index = i;
             SpellConfig config = spells.get(i);
             multi.addButton(Component.text((index + 1) + ". " + config.type().id()), null,
-                    (response, audience) -> Utils.runLater(() -> player.showDialog(buildEntryDialog(player, index))));
+                    (response, audience) -> Utils.runLater(() -> player.showDialog(entryDialog(player, index).build(player, spells.get(index)))));
         }
         multi.columns(2);
         multi.exitButton(Component.text("« Quay lại"), (response, audience) -> Utils.runLater(() -> player.showDialog(buildHubDialog(player))));
@@ -98,40 +96,22 @@ public class EntitySpellListEditorGui {
         return multi.build();
     }
 
-    private Dialog buildAddDialog(Player player) {
-        Map<String, SpellType<? extends SpellParams>> types = new TreeMap<>(Registries.ENTITY_SPELL.getAll());
-
-        DialogBuilder builder = DialogBuilder.create(Component.text("Chọn loại spell"))
-                .canCloseWithEscape(false);
-
-        DialogTypeBuilder.MultiAction multi = builder.multiAction();
-        for (Map.Entry<String, SpellType<? extends SpellParams>> entry : types.entrySet()) {
-            multi.addButton(Component.text(entry.getKey()), null, (response, audience) -> {
-                spells.add(entry.getValue().defaultConfig());
-                commit();
-                Utils.runLater(() -> player.showDialog(buildListDialog(player)));
-            });
-        }
-        multi.columns(3);
-        multi.exitButton(Component.text("Huỷ"), (response, audience) -> Utils.runLater(() -> player.showDialog(buildListDialog(player))));
-
-        return multi.build();
-    }
-
-    private Dialog buildEntryDialog(Player player, int index) {
-        DialogBuilder builder = DialogBuilder.create(Component.text("Spell: " + spells.get(index).type().id()))
-                .canCloseWithEscape(false);
-
-        DialogTypeBuilder.MultiAction multi = builder.multiAction();
-        multi.addButton(Component.text("Xoá", NamedTextColor.RED), null, (response, audience) -> {
-            spells.remove(index);
-            commit();
-            Utils.runLater(() -> player.showDialog(buildListDialog(player)));
-        });
-        multi.columns(2);
-        multi.exitButton(Component.text("« Quay lại"), (response, audience) -> Utils.runLater(() -> player.showDialog(buildListDialog(player))));
-
-        return multi.build();
+    private JsonEntryDialog<SpellConfig> entryDialog(Player player, int index) {
+        boolean editing = index >= 0;
+        return JsonEntryDialog.of(editing ? "Spell: " + spells.get(index).type().id() : "Spell mới", SpellConfig.CODEC,
+                value -> {
+                    if (editing) spells.set(index, value);
+                    else spells.add(value);
+                    commit();
+                    player.showDialog(buildListDialog(player));
+                },
+                editing ? () -> {
+                    spells.remove(index);
+                    commit();
+                    player.showDialog(buildListDialog(player));
+                } : null,
+                () -> player.showDialog(buildListDialog(player)))
+                .withHelp(List.of(LenientJson.typesHelp(Registries.ENTITY_SPELL.getAll().keySet())));
     }
 
     private void commit() {

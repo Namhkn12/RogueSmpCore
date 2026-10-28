@@ -8,6 +8,7 @@ import com.roguesmp.command.PolarTemplateCommand;
 import com.roguesmp.server.goal.EntityGoalSpawnListener;
 import com.roguesmp.world.PolarTemplateManager;
 import com.roguesmp.command.ReloadCommand;
+import com.roguesmp.command.MoneyCommand;
 import com.roguesmp.fishing.listener.FishingListener;
 import com.roguesmp.region.listener.RegionListener;
 import com.roguesmp.region.listener.RegionTeleportListener;
@@ -256,6 +257,7 @@ public final class RogueSmpCore extends JavaPlugin {
         new QuestCommand(QuestManager.getInstance()).register();
 
         ReloadCommand.register();
+        MoneyCommand.register();
         FishingHotspotCommand.register();
         RegionCommand.register();
         WarpCommand.register();

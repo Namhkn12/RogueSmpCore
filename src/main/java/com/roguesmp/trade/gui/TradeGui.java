@@ -9,6 +9,7 @@ import com.roguesmp.trade.TradeOffer;
 import com.roguesmp.trade.TradeShop;
 import com.roguesmp.gate.cost.Cost;
 import com.roguesmp.gate.requirement.Requirement;
+import com.roguesmp.trade.result.ItemResult;
 import com.roguesmp.trade.result.TradeResult;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -27,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TradeGui extends BaseGui {
+
+    private static final Component SEPARATOR = Utils.fromString("<!i><dark_gray><st>                    ");
 
     private final Player player;
     private final TradeShop shop;
@@ -57,6 +60,10 @@ public class TradeGui extends BaseGui {
             TradeOffer offer = offers.get(start + i);
             addButton(offerSlots.get(i), buildOfferItem(offer, smpPlayer), event -> {
                 event.setCancelled(true);
+                if (event.isRightClick() && offer.getResults().size() > 1) {
+                    openPreview(offer, smpPlayer);
+                    return;
+                }
                 switch (offer.trade(smpPlayer)) {
                     case SUCCESS -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 2f);
                     case NOT_ELIGIBLE -> deny("Bạn không đủ điều kiện để giao dịch!");
@@ -93,28 +100,57 @@ public class TradeGui extends BaseGui {
         if (offer.getName() != null) icon.setData(DataComponentTypes.CUSTOM_NAME, Utils.fromString(offer.getName()).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(header("Mua:", NamedTextColor.GREEN));
-        for (TradeResult result : offer.getResults()) lore.add(bullet(result.getDisplay(smpPlayer)));
+        List<Component> baseLore = baseLore(offer, icon);
+        if (!baseLore.isEmpty()) {
+            lore.addAll(baseLore);
+            lore.add(SEPARATOR);
+        }
+        lore.addAll(tradeSection(offer, smpPlayer));
+        icon.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+        return icon;
+    }
+
+    private static List<Component> baseLore(TradeOffer offer, ItemStack icon) {
+        if (offer.getDescription() != null) return offer.getDescription().stream().map(line -> Utils.fromString("<!i><gray>" + line)).toList();
+        if (offer.getResults().size() > 1) return List.of();
+        ItemLore itemLore = icon.getData(DataComponentTypes.LORE);
+        return itemLore == null ? List.of() : itemLore.lines();
+    }
+
+    private List<Component> tradeSection(TradeOffer offer, SmpPlayer smpPlayer) {
+        List<Component> lore = new ArrayList<>();
+        boolean bundle = offer.getResults().size() > 1;
+        if (bundle || (!offer.getResults().isEmpty() && !(offer.getResults().getFirst() instanceof ItemResult))) {
+            lore.add(header("Mua:", NamedTextColor.GREEN));
+            for (TradeResult result : offer.getResults()) lore.add(bullet(result.getDisplay(smpPlayer)));
+        }
 
         if (!offer.getCosts().isEmpty()) {
-            lore.add(Component.empty());
+            if (!lore.isEmpty()) lore.add(Component.empty());
             lore.add(header("Giá:", NamedTextColor.GOLD));
             for (Cost cost : offer.getCosts()) lore.add(bullet(GateDisplay.check(cost.getDisplay(smpPlayer), cost.canAfford(smpPlayer))));
         }
 
         if (!offer.getRequirements().isEmpty()) {
-            lore.add(Component.empty());
+            if (!lore.isEmpty()) lore.add(Component.empty());
             lore.add(header("Yêu cầu:", NamedTextColor.AQUA));
             for (Requirement requirement : offer.getRequirements()) lore.add(bullet(GateDisplay.check(requirement.getDisplay(smpPlayer), requirement.test(smpPlayer))));
         }
 
-        lore.add(Component.empty());
+        if (!lore.isEmpty()) lore.add(Component.empty());
         boolean available = offer.meetsRequirements(smpPlayer) && offer.canAfford(smpPlayer);
         lore.add(available
                 ? Utils.fromString("<!i><yellow>▶ Click để giao dịch!")
                 : Utils.fromString("<!i><red>✘ Không đủ điều kiện"));
-        icon.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
-        return icon;
+        if (bundle) lore.add(Utils.fromString("<!i><gray>Chuột phải để xem chi tiết"));
+        return lore;
+    }
+
+    private void openPreview(TradeOffer offer, SmpPlayer smpPlayer) {
+        Component title = offer.getName() != null ? Utils.fromString(offer.getName()) : getName();
+        TradeOfferPreviewGui preview = new TradeOfferPreviewGui(smpPlayer, offer, title);
+        preview.withBackAction(getName(), viewer -> showInventory(viewer));
+        Utils.runLater(() -> preview.showInventory(player));
     }
 
     @Override

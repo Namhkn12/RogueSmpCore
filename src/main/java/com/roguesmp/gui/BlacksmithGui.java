@@ -29,6 +29,7 @@ public class BlacksmithGui extends BaseGui {
     @Override
     public void setup() {
         fillEmpty(FILLER_BLACK);
+        addBackButton(getSlot(2, 0));
 
         ItemStack repairIcon = ItemStack.of(Material.ANVIL);
         repairIcon.setData(DataComponentTypes.ITEM_NAME, Component.text("Sửa chữa trang bị", NamedTextColor.GREEN));

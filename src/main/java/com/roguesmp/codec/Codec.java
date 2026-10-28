@@ -2,6 +2,7 @@ package com.roguesmp.codec;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.utils.WorldPos;
+import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -168,7 +169,16 @@ public interface Codec<A> {
     );
 
     /** Codec for Kyori Key identifiers (e.g. "minecraft:stone"). */
-    Codec<Key> KEY = Codec.STRING.xmap(Key::key, Key::asString);
+    Codec<Key> KEY = Codec.STRING.comapFlatMap(
+            raw -> {
+                try {
+                    return DataResult.success(Key.key(raw));
+                } catch (InvalidKeyException e) {
+                    return DataResult.error("Invalid key: " + raw);
+                }
+            },
+            Key::asString
+    );
 
     /** Codec for an RGB {@link Color} written as a hex string (e.g. "#A06540"). */
     Codec<Color> HEX_COLOR = Codec.STRING.comapFlatMap(

@@ -1,12 +1,6 @@
 package com.roguesmp.gui.entitycreator;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.roguesmp.codec.Codec;
-import com.roguesmp.codec.DataResult;
-import com.roguesmp.codec.JsonOps;
 import com.roguesmp.entity.ai.AiGoal;
-import com.roguesmp.entity.ai.AiGoals;
 import com.roguesmp.entity.ai.AiPreset;
 import com.roguesmp.entity.ai.RemovableGoal;
 import com.roguesmp.entity.component.EntityComponentKeys;
@@ -15,7 +9,8 @@ import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.dialog.DialogBuilder;
 import com.roguesmp.utils.dialog.DialogTypeBuilder;
-import com.roguesmp.utils.dialog.KeyValueParams;
+import com.roguesmp.utils.dialog.JsonEntryDialog;
+import com.roguesmp.utils.dialog.LenientJson;
 import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -26,11 +21,9 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 public class AiComponentEditorGui {
 
-    private static final String PARAMS_INPUT = "ai_goal_params";
 
     private final EntityCreatorGui parent;
     private boolean present;
@@ -64,13 +57,13 @@ public class AiComponentEditorGui {
         multi.addButton(Component.text("remove", remove.isEmpty() ? NamedTextColor.GRAY : NamedTextColor.GREEN), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildRemoveDialog(player))));
         multi.addButton(Component.text("+ Thêm goal", NamedTextColor.GREEN), null,
-                (response, audience) -> Utils.runLater(() -> player.showDialog(buildAddDialog(player))));
+                (response, audience) -> Utils.runLater(() -> player.showDialog(entryDialog(player, -1).buildWithText(player, "type: "))));
         for (int i = 0; i < goals.size(); i++) {
             int index = i;
             AiGoal goal = goals.get(i);
             multi.addButton(Component.text((index + 1) + ". " + goal.getTypeId(), goal.isTarget() ? NamedTextColor.GOLD : NamedTextColor.AQUA),
                     Component.text("Priority: " + goal.priority() + (goal.isTarget() ? " (target)" : ""), NamedTextColor.GRAY),
-                    (response, audience) -> Utils.runLater(() -> player.showDialog(buildEntryDialog(player, index, null))));
+                    (response, audience) -> Utils.runLater(() -> player.showDialog(entryDialog(player, index).build(player, goals.get(index)))));
         }
         if (present) {
             multi.addButton(Component.text("Xoá toàn bộ", NamedTextColor.RED), null, (response, audience) -> {
@@ -135,87 +128,22 @@ public class AiComponentEditorGui {
         return multi.build();
     }
 
-    private Dialog buildAddDialog(Player player) {
-        DialogBuilder builder = DialogBuilder.create(Component.text("Chọn loại goal"))
-                .canCloseWithEscape(false);
-
-        DialogTypeBuilder.MultiAction multi = builder.multiAction();
-        for (String type : new TreeSet<>(Registries.AI_GOAL_CODEC.getAll().keySet())) {
-            multi.addButton(Component.text(type), null, (response, audience) -> {
-                AiGoal goal = createDefault(type);
-                if (goal == null) {
-                    player.sendMessage(Utils.text("Không thể tạo goal mặc định '" + type + "'.", NamedTextColor.RED));
-                    Utils.runLater(() -> player.showDialog(buildHubDialog(player)));
-                    return;
-                }
-                goals.add(goal);
-                commit();
-                Utils.runLater(() -> player.showDialog(buildEntryDialog(player, goals.size() - 1, null)));
-            });
-        }
-        multi.columns(3);
-        multi.exitButton(Component.text("Huỷ"), (response, audience) -> Utils.runLater(() -> player.showDialog(buildHubDialog(player))));
-
-        return multi.build();
-    }
-
-    private Dialog buildEntryDialog(Player player, int index, @Nullable String error) {
-        AiGoal goal = goals.get(index);
-        DialogBuilder builder = DialogBuilder.create(Component.text("Goal: " + goal.getTypeId()))
-                .canCloseWithEscape(false);
-        if (error != null) builder.addTextBody(Component.text(error, NamedTextColor.RED));
-        for (AiGoals.Param param : AiGoals.params(goal.getTypeId())) {
-            builder.addTextBody(Component.text(param.name(), NamedTextColor.YELLOW)
-                    .append(Component.text(": " + param.description(), NamedTextColor.GRAY)));
-        }
-        builder.addTextInput(PARAMS_INPUT, Component.text("Tham số (key=value key=value ...)"), 300, true, formatParams(goal), 512, null);
-
-        DialogTypeBuilder.MultiAction multi = builder.multiAction();
-        multi.addButton(Component.text("Lưu"), null, (response, audience) -> {
-            String parseError = updateGoal(index, response.getText(PARAMS_INPUT));
-            Utils.runLater(() -> {
-                if (parseError != null) player.showDialog(buildEntryDialog(player, index, parseError));
-                else player.showDialog(buildHubDialog(player));
-            });
-        });
-        multi.addButton(Component.text("Xoá", NamedTextColor.RED), null, (response, audience) -> {
-            goals.remove(index);
-            commit();
-            Utils.runLater(() -> player.showDialog(buildHubDialog(player)));
-        });
-        multi.columns(2);
-        multi.exitButton(Component.text("« Quay lại"), (response, audience) -> Utils.runLater(() -> player.showDialog(buildHubDialog(player))));
-
-        return multi.build();
-    }
-
-    private @Nullable String updateGoal(int index, @Nullable String text) {
-        JsonObject params;
-        try {
-            params = KeyValueParams.parse(text);
-        } catch (IllegalArgumentException e) {
-            return e.getMessage();
-        }
-
-        params.addProperty("type", goals.get(index).getTypeId());
-        DataResult<AiGoal> result = AiGoal.CODEC.decode(params, JsonOps.INSTANCE);
-        if (!result.isSuccess()) return "Tham số không hợp lệ: " + result.error();
-
-        goals.set(index, result.result());
-        commit();
-        return null;
-    }
-
-    private static String formatParams(AiGoal goal) {
-        DataResult<JsonElement> result = AiGoal.CODEC.encode(goal, JsonOps.INSTANCE);
-        return result.isSuccess() ? KeyValueParams.format(result.result(), Set.of("type")) : "";
-    }
-
-    private static @Nullable AiGoal createDefault(String type) {
-        Codec<? extends AiGoal> codec = Registries.AI_GOAL_CODEC.get(type);
-        if (codec == null) return null;
-        DataResult<? extends AiGoal> result = codec.decode(new JsonObject(), JsonOps.INSTANCE);
-        return result.isSuccess() ? result.result() : null;
+    private JsonEntryDialog<AiGoal> entryDialog(Player player, int index) {
+        boolean editing = index >= 0;
+        return JsonEntryDialog.of(editing ? "Goal: " + goals.get(index).getTypeId() : "Goal mới", AiGoal.CODEC,
+                goal -> {
+                    if (editing) goals.set(index, goal);
+                    else goals.add(goal);
+                    commit();
+                    player.showDialog(buildHubDialog(player));
+                },
+                editing ? () -> {
+                    goals.remove(index);
+                    commit();
+                    player.showDialog(buildHubDialog(player));
+                } : null,
+                () -> player.showDialog(buildHubDialog(player)))
+                .withHelp(List.of(LenientJson.typesHelp(Registries.AI_GOAL_CODEC.getAll().keySet())));
     }
 
     private void commit() {
