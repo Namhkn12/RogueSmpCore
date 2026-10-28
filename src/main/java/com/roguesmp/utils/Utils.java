@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.annotation.GsonIgnore;
 import com.roguesmp.text.GlyphTagResolver;
+import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -11,7 +12,9 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import org.jetbrains.annotations.Nullable;
@@ -25,6 +28,7 @@ public class Utils {
 
     public static final Random RANDOM = Random.from(new SplittableRandom());
     public static final MiniMessage MINI_MESSAGE = MiniMessage.builder().editTags(builder -> builder.resolver(new GlyphTagResolver())).build();
+    public static final PersistentDataContainerView EMPTY_PDC = ItemStack.of(Material.PAPER).getPersistentDataContainer().getAdapterContext().newPersistentDataContainer();
 
     public static final Gson GSON = new GsonBuilder()
             .addSerializationExclusionStrategy(new ExclusionStrategy() {
