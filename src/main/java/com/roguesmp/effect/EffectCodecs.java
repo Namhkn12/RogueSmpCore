@@ -26,6 +26,7 @@ public class EffectCodecs {
     public static final Codec<DamageOverTimeEffect> DAMAGE_OVER_TIME = register(DamageOverTimeEffect.ID, DamageOverTimeEffect.CODEC);
     public static final Codec<VanillaPotionEffect> VANILLA_POTION = register(VanillaPotionEffect.ID, VanillaPotionEffect.CODEC);
     public static final Codec<BrewedPotionEffect> BREWED_POTION = register(BrewedPotionEffect.ID, BrewedPotionEffect.CODEC);
+    public static final Codec<CurseOfDeathEffect> CURSE_OF_DEATH = register(CurseOfDeathEffect.ID, CurseOfDeathEffect.CODEC);
 
     public static void loadClass() {
 

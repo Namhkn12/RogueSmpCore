@@ -21,12 +21,43 @@ Giá trị sai cú pháp bị từ chối ngay khi đặt, kèm thông báo lỗ
 | :--- | :--- | :--- | :--- |
 | `smp-abilities` | `allow` / `deny` | `allow` | Cho phép người chơi dùng ability |
 | `smp-spawners` | `allow` / `deny` | `deny` | Bật spawner tuỳ chỉnh — xem [JSON-Spawners](JSON-Spawners.md#bật-spawner-bằng-worldguard) |
+| `smp-death-curse` | `allow` / `deny` | `deny` | Chết trong vùng này bị cộng 1 tầng [Lời Nguyền Tử Thần](#smp-death-curse). World instance dungeon luôn đặt `allow` trên `__global__` |
 | `smp-display-name` | chuỗi MiniMessage | `<gray>Unknown` | Tên khu vực hiển thị trên scoreboard (`Khu vực: ...`) |
 | `smp-ambient-particles` | xem [bên dưới](#smp-ambient-particles) | — | Particle ngẫu nhiên bên trong region |
 | `smp-spawn` | xem [bên dưới](#smp-spawn) | tâm region | Điểm spawn của region |
 | `smp-enter-teleport` | xem [bên dưới](#smp-enter-teleport) | — | Dịch chuyển người chơi khi đi vào region |
 
 `smp-grouped` là flag nội bộ đánh dấu region nhóm — không tự đặt tay.
+
+## `smp-death-curse`
+
+Người chơi chết ở nơi flag = `allow` sẽ nhận thêm 1 tầng effect `curse_of_death` (Lời Nguyền Tử Thần) khi hồi sinh:
+
+| | |
+| :--- | :--- |
+| Mỗi tầng | +20% sát thương phải nhận, −20% sát thương gây ra (nhân cuối, nhân với các nguồn khác) |
+| Tối đa | 3 tầng (+60% nhận / −60% gây ra) |
+| Thời lượng | 10 phút; mỗi lần thêm tầng thì **đặt lại** về 10 phút |
+| Khi chết | Giữ nguyên (không mất, không giảm thời gian) |
+| Đăng xuất | Giữ qua đăng xuất |
+| Hóa giải | Action [`clear_death_curse`](JSON-Actions.md#loại-action) (thường gắn vào NPC) |
+
+Danh sách hiệu ứng hiện tên + số tầng + thời gian, bên dưới liệt kê từng chỉ số đang bị trừ.
+
+Hai cách dùng:
+
+```
+# chỉ một số vùng
+/smpregion flag wasteland smp-death-curse allow
+
+# toàn world, trừ vài vùng
+/smpregion flag __global__ smp-death-curse allow
+/smpregion flag town smp-death-curse deny
+```
+
+- Flag được kiểm tra tại **vị trí chết**, lúc người chơi bấm hồi sinh. Đăng xuất ở màn hình chết rồi vào lại vẫn bị tính.
+- Nếu world nơi chết đã bị unload trước khi hồi sinh (vd. instance dungeon đóng sau khi cả party chết) thì **không** cộng tầng.
+- World instance dungeon tự đặt `allow` trên `__global__` khi tạo; region bên trong dungeon vẫn có thể đặt `deny` để loại trừ.
 
 ## `smp-ambient-particles`
 
@@ -134,6 +165,7 @@ Particle cho người chơi thấy cổng từ xa; bước vào → hiệu ứng
 | [`SmpRegionFlags`](../src/main/java/com/roguesmp/region/SmpRegionFlags.java) | Khai báo + đăng ký flag (trong `onLoad`) |
 | [`region/flag/`](../src/main/java/com/roguesmp/region/flag/) | Kiểu giá trị (`AmbientParticles`, `SpawnPoint`, `EnterTeleport`) và parser; `TextValueFlag<T>` là base cho flag 1 dòng chữ |
 | [`RegionAmbientEmitter`](../src/main/java/com/roguesmp/region/RegionAmbientEmitter.java) | Task phát particle |
+| [`DeathCurseListener`](../src/main/java/com/roguesmp/region/listener/DeathCurseListener.java) | Cộng tầng `curse_of_death` khi hồi sinh nếu vị trí chết có `smp-death-curse` |
 | [`RegionTeleportListener`](../src/main/java/com/roguesmp/region/listener/RegionTeleportListener.java) | Nghe `RegionEnterEvent`, chạy hiệu ứng + dịch chuyển |
 | [`ServerRegionManager.spawnLocation`](../src/main/java/com/roguesmp/region/ServerRegionManager.java) | Tra điểm spawn của region |
 

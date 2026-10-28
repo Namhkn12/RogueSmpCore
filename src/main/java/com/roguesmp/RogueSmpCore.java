@@ -11,6 +11,7 @@ import com.roguesmp.command.ReloadCommand;
 import com.roguesmp.command.MoneyCommand;
 import com.roguesmp.fishing.listener.FishingListener;
 import com.roguesmp.region.listener.RegionListener;
+import com.roguesmp.region.listener.DeathCurseListener;
 import com.roguesmp.region.listener.RegionTeleportListener;
 import com.roguesmp.teleport.TeleportService;
 import com.roguesmp.teleport.command.TeleportCommand;
@@ -208,6 +209,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         RegionBoundaryHandler.register();
         registerListener(new RegionListener(PlayerManager.getInstance()));
+        registerListener(new DeathCurseListener());
         registerListener(new RegionTeleportListener());
 
         registerListener(new DamageListener());

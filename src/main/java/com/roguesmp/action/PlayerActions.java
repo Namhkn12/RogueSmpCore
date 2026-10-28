@@ -1,5 +1,6 @@
 package com.roguesmp.action;
 
+import com.roguesmp.action.impl.ClearDeathCurseAction;
 import com.roguesmp.action.impl.EntityZapperAction;
 import com.roguesmp.action.impl.OpenGuiAction;
 import com.roguesmp.action.impl.RunCommandAction;
@@ -13,6 +14,7 @@ public class PlayerActions {
     public static final Codec<OpenGuiAction> OPEN_GUI = register(OpenGuiAction.TYPE_KEY, OpenGuiAction.CODEC);
     public static final Codec<TeleportAction> TELEPORT = register(TeleportAction.TYPE_KEY, TeleportAction.CODEC);
     public static final Codec<EntityZapperAction> ENTITY_ZAPPER = register(EntityZapperAction.TYPE_KEY, EntityZapperAction.CODEC);
+    public static final Codec<ClearDeathCurseAction> CLEAR_DEATH_CURSE = register(ClearDeathCurseAction.TYPE_KEY, ClearDeathCurseAction.CODEC);
 
     public static void loadClass() {
 

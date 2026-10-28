@@ -35,6 +35,7 @@ Field chọn loại: `"type"`.
 | `open_gui` | `gui` (string, bắt buộc) | Mở GUI theo id — xem [Id GUI](#id-gui). |
 | `teleport` | `destination` ([điểm đến](JSON-Warps.md#điểm-đến-destination), bắt buộc); `options` ([tuỳ chọn](JSON-Warps.md#tuỳ-chọn-dịch-chuyển-options), mặc định hiệu ứng `enderman`, chờ 30 tick, `safe: true`) | Dịch chuyển người chơi. Trỏ tới warp bằng `{ "type": "warp", "warp": "<id>" }` để đổi điểm đến ở 1 chỗ. |
 | `entity_zapper` | — | Xoá entity bị click (kèm entity đang cưỡi lên nó). Click vào người chơi thì chỉ đẩy lùi + báo "NO!". Chỉ có tác dụng khi click **vào entity** — click không khí/block thì không làm gì. |
+| `clear_death_curse` | — | Xoá toàn bộ cộng dồn Lời Nguyền Tử Thần của người chơi và báo "đã được hóa giải". Không mang lời nguyền thì chỉ báo xám, không làm gì (không huỷ click). |
 
 ### Id GUI
 
@@ -89,6 +90,14 @@ NPC dịch chuyển khi click phải, chào khi bị đánh:
 "actions": [
   { "click": "right", "action": { "type": "teleport", "destination": { "type": "warp", "warp": "spawn" } } },
   { "click": "left", "action": { "type": "run_command", "command": "tell @p Đừng đánh tôi!" } }
+]
+```
+
+NPC hóa giải Lời Nguyền Tử Thần khi click phải:
+
+```json
+"actions": [
+  { "click": "right", "action": { "type": "clear_death_curse" } }
 ]
 ```
 
