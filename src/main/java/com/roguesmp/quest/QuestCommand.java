@@ -1,10 +1,15 @@
 package com.roguesmp.quest;
 
 import com.roguesmp.quest.data.PlayerQuestData;
+import org.bukkit.command.CommandSender;
+import dev.jorel.commandapi.arguments.LongArgument;
+import dev.jorel.commandapi.arguments.IntegerArgument;
+import com.roguesmp.quest.board.QuestBoardManager;
 import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.gui.quest.QuestGui;
 import com.roguesmp.player.inbox.gui.InboxGui;
 import com.roguesmp.quest.board.gui.QuestBoardGui;
+import com.roguesmp.quest.board.gui.QuestLevelGui;
 import com.roguesmp.permission.Permissions;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
@@ -124,6 +129,58 @@ public class QuestCommand {
                     new QuestBoardGui(player).showInventory(player);
                 });
 
+        CommandAPICommand expSubcommand = new CommandAPICommand("exp")
+                .withPermission(Permissions.QUEST_EXP.node())
+                .withSubcommand(new CommandAPICommand("give")
+                        .withArguments(new EntitySelectorArgument.OnePlayer("target"), new LongArgument("amount", 1))
+                        .executes((sender, args) -> {
+                            Player target = (Player) args.get("target");
+                            long amount = (long) args.get("amount");
+                            if (questData(sender, target) == null) return;
+                            QuestBoardManager.getInstance().giveExp(target, amount);
+                            sendExpStatus(sender, target);
+                        }))
+                .withSubcommand(new CommandAPICommand("take")
+                        .withArguments(new EntitySelectorArgument.OnePlayer("target"), new LongArgument("amount", 1))
+                        .executes((sender, args) -> {
+                            Player target = (Player) args.get("target");
+                            PlayerQuestData data = questData(sender, target);
+                            if (data == null) return;
+                            updateExp(data, data.getExp() - (long) args.get("amount"));
+                            sendExpStatus(sender, target);
+                        }))
+                .withSubcommand(new CommandAPICommand("set")
+                        .withArguments(new EntitySelectorArgument.OnePlayer("target"), new LongArgument("amount", 0))
+                        .executes((sender, args) -> {
+                            Player target = (Player) args.get("target");
+                            PlayerQuestData data = questData(sender, target);
+                            if (data == null) return;
+                            updateExp(data, (long) args.get("amount"));
+                            sendExpStatus(sender, target);
+                        }))
+                .withSubcommand(new CommandAPICommand("setlevel")
+                        .withArguments(new EntitySelectorArgument.OnePlayer("target"), new IntegerArgument("level", 1))
+                        .executes((sender, args) -> {
+                            Player target = (Player) args.get("target");
+                            PlayerQuestData data = questData(sender, target);
+                            if (data == null) return;
+                            int level = (int) args.get("level");
+                            updateExp(data, QuestBoardManager.getInstance().getSettings().level().totalExpFor(level));
+                            sendExpStatus(sender, target);
+                        }))
+                .withSubcommand(new CommandAPICommand("check")
+                        .withArguments(new EntitySelectorArgument.OnePlayer("target"))
+                        .executes((sender, args) -> {
+                            Player target = (Player) args.get("target");
+                            if (questData(sender, target) == null) return;
+                            sendExpStatus(sender, target);
+                        }));
+
+        CommandAPICommand levelSubcommand = new CommandAPICommand("level")
+                .executesPlayer((player, args) -> {
+                    new QuestLevelGui(player, null).showInventory(player);
+                });
+
         CommandAPICommand inboxSubcommand = new CommandAPICommand("inbox")
                 .executesPlayer((player, args) -> {
                     new InboxGui(player, null).showInventory(player);
@@ -135,6 +192,8 @@ public class QuestCommand {
                 .withSubcommand(assignSubcommand)
                 .withSubcommand(boardSubcommand)
                 .withSubcommand(inboxSubcommand)
+                .withSubcommand(levelSubcommand)
+                .withSubcommand(expSubcommand)
                 // no-args open gui
                 .executesPlayer((player, args) -> {
                     PlayerQuestData questData = questManager.getQuestDataManager().getCachedData(player.getUniqueId());
@@ -149,5 +208,23 @@ public class QuestCommand {
                     gui.showInventory(player);
                 })
                 .register();
+    }
+
+    private PlayerQuestData questData(CommandSender sender, Player target) {
+        PlayerQuestData data = target == null ? null : questManager.getPlayerQuestData(target.getUniqueId());
+        if (data == null) sender.sendMessage(Utils.fromString("<red>Không thể tải dữ liệu nhiệm vụ của người chơi này."));
+        return data;
+    }
+
+    private void updateExp(PlayerQuestData data, long exp) {
+        data.setExp(exp);
+        questManager.getQuestDataManager().saveAsync(data);
+    }
+
+    private void sendExpStatus(CommandSender sender, Player target) {
+        PlayerQuestData data = questManager.getPlayerQuestData(target.getUniqueId());
+        QuestBoardManager board = QuestBoardManager.getInstance();
+        sender.sendMessage(Utils.fromString("<gray>" + target.getName() + ": <aqua>" + data.getExp() + "</aqua> kinh nghiệm, cấp <gold>" + board.getLevel(data) + "</gold>, hạng ")
+                .append(Utils.fromString(board.getRank(data).name())));
     }
 }

@@ -4,10 +4,6 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.event.QuestCompletedEvent;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.player.inbox.InboxEntry;
-import com.roguesmp.player.inbox.InboxManager;
-import com.roguesmp.player.inbox.InboxSource;
-import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.quest.Quest;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.quest.QuestProgress;
@@ -23,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class QuestBoardManager {
 
@@ -146,6 +143,36 @@ public class QuestBoardManager {
         return settings.level().levelOf(data.getExp());
     }
 
+    public boolean isRewardClaimed(PlayerQuestData data, int level) {
+        return claimedRewards(data).contains(level);
+    }
+
+    public boolean canClaimReward(PlayerQuestData data, int level) {
+        return level <= getLevel(data) && !settings.level().rewardsAt(level).isEmpty() && !isRewardClaimed(data, level);
+    }
+
+    public boolean claimReward(Player player, int level) {
+        PlayerQuestData data = questManager.getPlayerQuestData(player.getUniqueId());
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+        if (data == null || smpPlayer == null || !canClaimReward(data, level)) return false;
+        data.markRewardClaimed(level);
+        questManager.getQuestDataManager().saveAsync(data);
+        settings.level().rewardsAt(level).forEach(reward -> reward.giveReward(smpPlayer));
+        return true;
+    }
+
+    private Set<Integer> claimedRewards(PlayerQuestData data) {
+        if (data.getClaimedRewards() == null) {
+            int level = getLevel(data);
+            data.setClaimedRewards(settings.level().rewards().headMap(level, true).keySet());
+        }
+        return data.getClaimedRewards();
+    }
+
+    public AdventureRank getRank(PlayerQuestData data) {
+        return settings.level().rankAt(getLevel(data));
+    }
+
     public int getAcceptLimit(PlayerQuestData data) {
         return settings.level().acceptLimit(getLevel(data));
     }
@@ -153,6 +180,7 @@ public class QuestBoardManager {
     public void giveExp(Player player, long amount) {
         PlayerQuestData data = questManager.getPlayerQuestData(player.getUniqueId());
         if (data == null || amount <= 0) return;
+        claimedRewards(data);
         int before = getLevel(data);
         data.addExp(amount);
         questManager.getQuestDataManager().saveAsync(data);
@@ -161,13 +189,12 @@ public class QuestBoardManager {
         if (after <= before) return;
         player.sendMessage(Utils.fromString("<gold><bold>LÊN CẤP!</bold></gold> <yellow>Cấp Mạo hiểm <gold>" + after + "</gold>. Có thể nhận <gold>" + settings.level().acceptLimit(after) + "</gold> nhiệm vụ cùng lúc."));
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
-        for (int level = before + 1; level <= after; level++) {
-            List<QuestReward> rewards = settings.level().rewardsAt(level);
-            if (rewards.isEmpty()) continue;
-            InboxSource source = new InboxSource("Cấp Mạo hiểm", "Phần thưởng cấp " + level, Material.NETHER_STAR.key());
-            InboxManager.getInstance().send(player.getUniqueId(), InboxEntry.of(source, rewards));
-            player.sendMessage(Utils.fromString("<yellow>Phần thưởng cấp <gold>" + level + "</gold> đã được gửi vào hộp thư."));
+        AdventureRank rank = settings.level().rankAt(after);
+        if (!rank.equals(settings.level().rankAt(before))) {
+            player.sendMessage(Utils.fromString("<gold><bold>THĂNG HẠNG!</bold></gold> <yellow>Hạng Mạo hiểm mới: </yellow>" + rank.name()).append(rank.getDisplayIcon()));
         }
+        boolean hasReward = settings.level().rewards().subMap(before, false, after, true).values().stream().anyMatch(rewards -> !rewards.isEmpty());
+        if (hasReward) player.sendMessage(Utils.fromString("<yellow>Có phần thưởng cấp mới! Dùng <gold>/quest level</gold> để nhận."));
     }
 
     public long getAcceptedCount(PlayerQuestData data) {

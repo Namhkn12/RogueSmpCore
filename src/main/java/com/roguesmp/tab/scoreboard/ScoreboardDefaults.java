@@ -2,6 +2,10 @@ package com.roguesmp.tab.scoreboard;
 
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.quest.QuestManager;
+import com.roguesmp.quest.board.AdventureRank;
+import com.roguesmp.quest.board.QuestBoardManager;
+import com.roguesmp.quest.data.PlayerQuestData;
 import com.roguesmp.region.SmpRegionFlags;
 import com.roguesmp.tab.TabKeys;
 import com.roguesmp.tab.element.TabElement;
@@ -37,11 +41,19 @@ public final class ScoreboardDefaults {
         return TabElement.of(c -> "<gold>Khu vực: <white>" + c.get(TabKeys.REGION_NAME, SmpRegionFlags.DISPLAY_NAME.getDefault()), TabKeys.REGION_NAME);
     }
 
+    private static String adventureRankLine(Player player) {
+        PlayerQuestData data = QuestManager.getInstance().getPlayerQuestData(player.getUniqueId());
+        if (data == null) return "<gold>Hạng: <gray>Chưa có";
+        AdventureRank rank = QuestBoardManager.getInstance().getRank(data);
+        return "<gold>Hạng: <white>" + rank.name() + Utils.toString(rank.getDisplayIcon());
+    }
+
     public static List<TabElement> playerInfo(Player player) {
         SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
         return List.of(
                 SPACER,
                 TabElement.ticking(20, c -> "<gold>Class: " + (smpPlayer.getPlayerClass() == null ? "<gray>Chưa có" : smpPlayer.getPlayerClass().getDisplayName())),
+                TabElement.ticking(20, c -> adventureRankLine(player)),
                 TabElement.ticking(10, c -> "<gold>Xu: " + Utils.formatMoney(smpPlayer.getPlayerData().getMoney()) + Utils.toString(Glyphs.COIN_ICON.create().color(NamedTextColor.WHITE))));
     }
 }

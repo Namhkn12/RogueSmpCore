@@ -87,10 +87,17 @@ public class PlaceholderAPIIntegration extends PlaceholderExpansion {
             };
         }
 
-        if (params.equals("adventure_level")) {
+        if (params.startsWith("adventure_")) {
             if (player == null) return null;
             PlayerQuestData data = QuestManager.getInstance().getPlayerQuestData(player.getUniqueId());
-            return data == null ? "" : String.valueOf(QuestBoardManager.getInstance().getLevel(data));
+            if (data == null) return "";
+            QuestBoardManager board = QuestBoardManager.getInstance();
+            return switch (params) {
+                case "adventure_level" -> String.valueOf(board.getLevel(data));
+                case "adventure_rank" -> board.getRank(data).name();
+                case "adventure_rank_suffix" -> Utils.toString(board.getRank(data).getDisplayIcon());
+                default -> null;
+            };
         }
 
         if (params.startsWith("player_")) {

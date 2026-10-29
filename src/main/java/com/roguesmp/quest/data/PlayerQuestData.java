@@ -9,7 +9,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -22,6 +25,7 @@ public class PlayerQuestData extends QuestLog {
             Codec.lenientUnboundedMap(QuestProgress.CODEC).optionalFieldOf("questProgress", new HashMap<>()).forGetter(PlayerQuestData::getQuestProgresses),
             PlayerBoard.CODEC.optionalFieldOf("board", PlayerBoard::new).forGetter(PlayerQuestData::getBoard),
             Codec.LONG.optionalFieldOf("exp", 0L).forGetter(PlayerQuestData::getExp),
+            Codec.listOf(Codec.INT).optionalFieldOf("claimedRewards", () -> null).forGetter(data -> data.claimedRewards == null ? null : List.copyOf(data.claimedRewards)),
             PlayerQuestData::new
     );
 
@@ -29,16 +33,18 @@ public class PlayerQuestData extends QuestLog {
     private final PlayerHolder holder;
     private final PlayerBoard board;
     private long exp;
+    private @Nullable Set<Integer> claimedRewards = new HashSet<>();
 
     /**
      * Reconstruction constructor used when decoding from storage (see {@link #CODEC}).
      */
-    public PlayerQuestData(UUID uuid, Map<String, QuestProgress> progresses, PlayerBoard board, long exp) {
+    public PlayerQuestData(UUID uuid, Map<String, QuestProgress> progresses, PlayerBoard board, long exp, @Nullable List<Integer> claimedRewards) {
         this.uuid = uuid;
         this.holder = new PlayerHolder(uuid);
         this.progresses.putAll(progresses);
         this.board = board;
         this.exp = exp;
+        this.claimedRewards = claimedRewards == null ? null : new HashSet<>(claimedRewards);
         this.dirty = false;
     }
 
@@ -48,6 +54,7 @@ public class PlayerQuestData extends QuestLog {
         this.progresses.putAll(toClone.getQuestProgresses());
         this.board = new PlayerBoard(toClone.board);
         this.exp = toClone.exp;
+        this.claimedRewards = toClone.claimedRewards == null ? null : new HashSet<>(toClone.claimedRewards);
     }
 
     /**
@@ -60,6 +67,29 @@ public class PlayerQuestData extends QuestLog {
     public void addExp(long amount) {
         if (amount <= 0) return;
         exp += amount;
+        dirty = true;
+    }
+
+    public void setExp(long exp) {
+        this.exp = Math.max(0, exp);
+        dirty = true;
+    }
+
+    /**
+     * Null for saves made before level rewards became claimable, whose earlier rewards were already mailed out.
+     */
+    public @Nullable Set<Integer> getClaimedRewards() {
+        return claimedRewards;
+    }
+
+    public void setClaimedRewards(Set<Integer> claimedRewards) {
+        this.claimedRewards = new HashSet<>(claimedRewards);
+        dirty = true;
+    }
+
+    public void markRewardClaimed(int level) {
+        if (claimedRewards == null) claimedRewards = new HashSet<>();
+        claimedRewards.add(level);
         dirty = true;
     }
 

@@ -19,6 +19,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,7 @@ public class QuestLevelGui extends BaseGui {
     private final QuestBoardManager boardManager;
     private int page = -1;
 
-    public QuestLevelGui(Player player, BaseGui parent) {
+    public QuestLevelGui(Player player, @Nullable BaseGui parent) {
         super(Component.text("Cấp Mạo hiểm"), 6);
         this.player = player;
         this.parent = parent;
@@ -43,11 +44,11 @@ public class QuestLevelGui extends BaseGui {
     private static int[] buildPath() {
         List<Integer> slots = new ArrayList<>();
         for (int col = 0; col < 9; col++) {
-            if (col % 2 == 1) {
-                slots.add((col % 4 == 1 ? 0 : PATH_ROWS - 1) * 9 + col);
+            if (col % 2 == 0) {
+                slots.add((col % 4 == 0 ? PATH_ROWS - 1 : 0) * 9 + col);
                 continue;
             }
-            boolean upward = col % 4 == 0;
+            boolean upward = col % 4 == 1;
             for (int i = 0; i < PATH_ROWS; i++) slots.add((upward ? PATH_ROWS - 1 - i : i) * 9 + col);
         }
         return slots.stream().mapToInt(Integer::intValue).toArray();
@@ -66,16 +67,26 @@ public class QuestLevelGui extends BaseGui {
         for (int i = 0; i < PATH.length; i++) {
             int shownLevel = page * PATH.length + i + 1;
             if (shownLevel > curve.maxLevel()) break;
-            addButton(PATH[i], buildLevelItem(curve, shownLevel, level, smpPlayer), ClickHandler.noAction());
+            boolean claimable = data != null && boardManager.canClaimReward(data, shownLevel);
+            addButton(PATH[i], buildLevelItem(curve, shownLevel, level, data, smpPlayer), claimable ? event -> claim(event, shownLevel) : ClickHandler.noAction());
         }
 
         for (int c = 0; c < 9; c++) addButton(5, c, FILLER_BLACK, ClickHandler.noAction());
         if (page > 0) addButton(5, 0, PREV_PAGE_BUTTON, event -> turnPage(event, -1));
         if (page < pageCount - 1) addButton(5, 8, NEXT_PAGE_BUTTON, event -> turnPage(event, 1));
 
-        ItemStack back = ItemStack.of(Material.ARROW);
-        back.setData(DataComponentTypes.ITEM_NAME, Component.text("Quay lại", NamedTextColor.YELLOW));
-        addButton(5, 4, back, ClickHandler.openGui(parent));
+        if (parent != null) {
+            ItemStack back = ItemStack.of(Material.ARROW);
+            back.setData(DataComponentTypes.ITEM_NAME, Component.text("Quay lại", NamedTextColor.YELLOW));
+            addButton(5, 4, back, ClickHandler.openGui(parent));
+        } else {
+            ItemStack close = ItemStack.of(Material.BARRIER);
+            close.setData(DataComponentTypes.ITEM_NAME, Component.text("Đóng", NamedTextColor.RED));
+            addButton(5, 4, close, event -> {
+                event.setCancelled(true);
+                event.getWhoClicked().closeInventory();
+            });
+        }
 
         fillEmpty(createDecoration(Material.GRAY_STAINED_GLASS_PANE));
     }
@@ -87,19 +98,31 @@ public class QuestLevelGui extends BaseGui {
         setup();
     }
 
-    private ItemStack buildLevelItem(QuestLevelCurve curve, int shownLevel, int level, SmpPlayer smpPlayer) {
+    private void claim(InventoryClickEvent event, int shownLevel) {
+        event.setCancelled(true);
+        if (boardManager.claimReward(player, shownLevel)) {
+            player.sendMessage(Utils.fromString("<green>Đã nhận phần thưởng cấp <gold>" + shownLevel + "</gold>!"));
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.5f);
+        }
+        setup();
+    }
+
+    private ItemStack buildLevelItem(QuestLevelCurve curve, int shownLevel, int level, PlayerQuestData data, SmpPlayer smpPlayer) {
         List<QuestReward> rewards = curve.rewardsAt(shownLevel);
         boolean reached = shownLevel <= level;
         boolean next = shownLevel == level + 1;
 
+        boolean unclaimed = data != null && boardManager.canClaimReward(data, shownLevel);
+        boolean claimed = reached && !rewards.isEmpty() && !unclaimed;
+
         Material material;
-        if (!rewards.isEmpty()) material = reached ? Material.CHEST_MINECART : Material.CHEST;
+        if (unclaimed) material = Material.CHEST;
         else material = reached ? Material.LIME_STAINED_GLASS_PANE : next ? Material.YELLOW_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
 
         ItemStack item = ItemStack.of(material);
         String color = reached ? "<green>" : next ? "<yellow>" : "<red>";
         item.setData(DataComponentTypes.ITEM_NAME, Utils.fromString(color + "Cấp " + shownLevel));
-        if (shownLevel == level) item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+        if (shownLevel == level && !claimed) item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
 
         List<Component> lore = new ArrayList<>();
         int limit = curve.acceptLimit(shownLevel);
@@ -116,7 +139,9 @@ public class QuestLevelGui extends BaseGui {
             }
         }
         if (!lore.isEmpty()) lore.add(Component.empty());
-        if (reached) lore.add(Utils.fromString("<!i><green>✔ Đã đạt"));
+        if (unclaimed) lore.add(Utils.fromString("<!i><yellow>▶ Click để nhận phần thưởng"));
+        else if (claimed) lore.add(Utils.fromString("<!i><green>✔ Đã nhận phần thưởng"));
+        else if (reached) lore.add(Utils.fromString("<!i><green>✔ Đã đạt"));
         else if (shownLevel > 1) lore.add(Utils.fromString("<!i><gray>Cần <aqua>" + curve.expToNext(shownLevel - 1) + "</aqua> kinh nghiệm từ cấp " + (shownLevel - 1)));
         item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
         return item;
