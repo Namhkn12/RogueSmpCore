@@ -2,3 +2,8 @@
 /.gradle/
 /build/
 /out/
+
+# Runtime databases (written by the server, not synced)
+*.db
+*.db-shm
+*.db-wal

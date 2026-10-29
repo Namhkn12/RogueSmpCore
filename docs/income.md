@@ -34,6 +34,8 @@ Server không có NPC thu mua đồ. Chế tạo, enchant và khảm gem không 
 
 ### 3.1 Giá thành quặng neo theo bản vị chỉ số
 
+> Đề xuất chia lại 70% giá thành thành quặng 40% + linh kiện 30%: xem [production-chain.md](production-chain.md) §12.
+
 Món đồ bậc b có giá trị ĐSM (stat-standard mục 5.2). Một bộ "kit + cuốc" tốn khoảng **29 thỏi** (24 giáp + 2 kiếm + 3 cuốc), giống vanilla.
 
 ```

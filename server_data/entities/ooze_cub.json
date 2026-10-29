@@ -1,5 +1,5 @@
 {
-  "id": "metal/ooze_cub",
+  "id": "ooze_cub",
   "entityType": "SLIME",
   "components": {
     "attributes": {

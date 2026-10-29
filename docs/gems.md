@@ -6,7 +6,7 @@
 
 - Ngọc là item có component **`gem_data`**: chỉ số khai báo **theo từng slot**, ngọc chỉ khảm được vào món có slot nằm trong danh sách, kèm `success_chance` (thất bại thì ngọc vỡ).
 - Chỉ số của nhiều ngọc trên cùng món được cộng dồn. Món phải có `"socket": n`.
-- Hình: base `PLAYER_HEAD` + `head_skin`. Một texture cho cả 5 phẩm chất. **Tên không có số cấp**, phẩm chất thể hiện bằng **màu tên đậm dần**.
+- Hình: base `PLAYER_HEAD` + `head_skin`. Một texture cho cả 5 phẩm chất. Tên có **tiền tố phẩm chất tiếng Anh** (`Rough Ruby`, `Flawed Ruby`, `Fine Ruby`, `Flawless Ruby`, `Perfect Ruby`) và **màu tên đậm dần** theo phẩm chất.
 - Lore viết tay gồm 1 dòng phẩm chất (`<dark_gray><!i>Ngọc Thô`) và 2 dòng mô tả in nghiêng, riêng cho từng loại ngọc ở từng phẩm chất. Lore không gợi ý chỗ khảm. Chỉ số và tỷ lệ khảm do `gem_data` tự in.
 - Tên phẩm chất tiếng Việt: Rough = **Thô**, Flawed = **Rạn**, Fine = **Tinh**, Flawless = **Vô Khuyết**, Perfect = **Hoàn Mỹ**.
 
@@ -230,6 +230,7 @@ Tinh bán ở NPC nhân ×1.25 (số in đậm). Vô Khuyết và Hoàn Mỹ kh�
 
 | Ngày | Thay đổi |
 |---|---|
+| 2026-10-28 | Thêm tiền tố phẩm chất vào tên ngọc (Rough / Flawed / Fine / Flawless / Perfect) để phân biệt nhanh, không chỉ dựa vào màu. |
 | 2026-10-28 | Lore mới: dòng phẩm chất tiếng Việt (Thô, Rạn, Tinh, Vô Khuyết, Hoàn Mỹ) + 2 dòng mô tả cho từng ngọc ở từng phẩm, bỏ dòng "Khảm vào". Tỷ lệ khảm riêng cho từng ngọc, Hoàn Mỹ chỉ 15–32%. Tính lại giá. |
 | 2026-10-28 | Tạo 55 item JSON. Xoá 5 file `gem_tigers_eye_*` (thay bằng `gem_amber_*`). |
 | 2026-10-28 | Làm lại theo hướng Hypixel SkyBlock: 11 ngọc, mỗi ngọc 1 chỉ số, 5 phẩm chất Rough → Perfect. Flawless và Perfect có 1 dòng trừ. Ruby (cố định) và Amber (%) thành cặp lựa chọn. Sapphire đổi chỉ số theo slot. Bỏ khoá loại đồ và `allowed_tags`. Thêm Garnet (chí mạng). |
