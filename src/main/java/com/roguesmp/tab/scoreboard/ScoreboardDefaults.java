@@ -2,10 +2,8 @@ package com.roguesmp.tab.scoreboard;
 
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.quest.QuestManager;
 import com.roguesmp.quest.board.AdventureRank;
 import com.roguesmp.quest.board.QuestBoardManager;
-import com.roguesmp.quest.data.PlayerQuestData;
 import com.roguesmp.region.SmpRegionFlags;
 import com.roguesmp.tab.TabKeys;
 import com.roguesmp.tab.element.TabElement;
@@ -42,9 +40,8 @@ public final class ScoreboardDefaults {
     }
 
     private static String adventureRankLine(Player player) {
-        PlayerQuestData data = QuestManager.getInstance().getPlayerQuestData(player.getUniqueId());
-        if (data == null) return "<gold>Hạng: <gray>Chưa có";
-        AdventureRank rank = QuestBoardManager.getInstance().getRank(data);
+        AdventureRank rank = QuestBoardManager.getInstance().getStatus(player.getUniqueId()).rank();
+        if (rank.name().isEmpty()) return "<gold>Hạng: <gray>Chưa có";
         return "<gold>Hạng: <white>" + rank.name() + Utils.toString(rank.getDisplayIcon());
     }
 

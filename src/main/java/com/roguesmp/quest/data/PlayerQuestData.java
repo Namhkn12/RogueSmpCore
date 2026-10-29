@@ -25,6 +25,7 @@ public class PlayerQuestData extends QuestLog {
             Codec.lenientUnboundedMap(QuestProgress.CODEC).optionalFieldOf("questProgress", new HashMap<>()).forGetter(PlayerQuestData::getQuestProgresses),
             PlayerBoard.CODEC.optionalFieldOf("board", PlayerBoard::new).forGetter(PlayerQuestData::getBoard),
             Codec.LONG.optionalFieldOf("exp", 0L).forGetter(PlayerQuestData::getExp),
+            Codec.LONG.optionalFieldOf("expUpdatedAt", 0L).forGetter(PlayerQuestData::getExpUpdatedAt),
             Codec.listOf(Codec.INT).optionalFieldOf("claimedRewards", () -> null).forGetter(data -> data.claimedRewards == null ? null : List.copyOf(data.claimedRewards)),
             PlayerQuestData::new
     );
@@ -33,17 +34,19 @@ public class PlayerQuestData extends QuestLog {
     private final PlayerHolder holder;
     private final PlayerBoard board;
     private long exp;
+    private long expUpdatedAt;
     private @Nullable Set<Integer> claimedRewards = new HashSet<>();
 
     /**
      * Reconstruction constructor used when decoding from storage (see {@link #CODEC}).
      */
-    public PlayerQuestData(UUID uuid, Map<String, QuestProgress> progresses, PlayerBoard board, long exp, @Nullable List<Integer> claimedRewards) {
+    public PlayerQuestData(UUID uuid, Map<String, QuestProgress> progresses, PlayerBoard board, long exp, long expUpdatedAt, @Nullable List<Integer> claimedRewards) {
         this.uuid = uuid;
         this.holder = new PlayerHolder(uuid);
         this.progresses.putAll(progresses);
         this.board = board;
         this.exp = exp;
+        this.expUpdatedAt = expUpdatedAt;
         this.claimedRewards = claimedRewards == null ? null : new HashSet<>(claimedRewards);
         this.dirty = false;
     }
@@ -54,6 +57,7 @@ public class PlayerQuestData extends QuestLog {
         this.progresses.putAll(toClone.getQuestProgresses());
         this.board = new PlayerBoard(toClone.board);
         this.exp = toClone.exp;
+        this.expUpdatedAt = toClone.expUpdatedAt;
         this.claimedRewards = toClone.claimedRewards == null ? null : new HashSet<>(toClone.claimedRewards);
     }
 
@@ -64,14 +68,23 @@ public class PlayerQuestData extends QuestLog {
         return exp;
     }
 
+    /**
+     * Timestamp of when the current exp was reached
+     */
+    public long getExpUpdatedAt() {
+        return expUpdatedAt;
+    }
+
     public void addExp(long amount) {
         if (amount <= 0) return;
         exp += amount;
+        expUpdatedAt = System.currentTimeMillis();
         dirty = true;
     }
 
     public void setExp(long exp) {
         this.exp = Math.max(0, exp);
+        expUpdatedAt = System.currentTimeMillis();
         dirty = true;
     }
 

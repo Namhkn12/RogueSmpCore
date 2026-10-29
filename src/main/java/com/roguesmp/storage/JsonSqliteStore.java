@@ -18,8 +18,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -222,6 +224,86 @@ public class JsonSqliteStore<V> {
             }
             return all;
         }, executor).join();
+    }
+
+    @FunctionalInterface
+    public interface StatementBinder {
+        void bind(PreparedStatement statement) throws SQLException;
+    }
+
+    @FunctionalInterface
+    public interface RowMapper<R> {
+        R map(ResultSet row) throws SQLException;
+    }
+
+    public record SqlStatement(String sql, StatementBinder binder) {
+        public static SqlStatement of(String sql) {
+            return new SqlStatement(sql, statement -> {
+            });
+        }
+    }
+
+    /**
+     * Runs the statements in one transaction on the store's thread, in order with every other operation. Placeholders are
+     * resolved as in {@link #queryAsync}.
+     *
+     * @return a future that completes with whether every statement succeeded
+     */
+    public CompletableFuture<Boolean> executeAsync(List<SqlStatement> statements) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                connection.setAutoCommit(false);
+                for (SqlStatement sql : statements) {
+                    try (PreparedStatement statement = connection.prepareStatement(resolve(sql.sql()))) {
+                        sql.binder().bind(statement);
+                        statement.executeUpdate();
+                    }
+                }
+                connection.commit();
+                return true;
+            } catch (SQLException | RuntimeException e) {
+                RogueSmpCore.LOGGER.error("Failed to execute {} statement(s) on {}", statements.size(), table, e);
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackError) {
+                    RogueSmpCore.LOGGER.error("Failed to roll back {} statements", table, rollbackError);
+                }
+                return false;
+            } finally {
+                try {
+                    connection.setAutoCommit(true);
+                } catch (SQLException e) {
+                    RogueSmpCore.LOGGER.error("Failed to restore autocommit on {}", table, e);
+                }
+            }
+        }, executor);
+    }
+
+    private String resolve(String sql) {
+        return sql.replace("{table}", table).replace("{key}", keyColumn);
+    }
+
+    /**
+     * Runs a read query on the store's thread, queued behind every write already submitted. {@code {table}} and
+     * {@code {key}} in the SQL are replaced with this store's table and key column; documents are in the {@code data} column.
+     *
+     * @return the mapped rows, or an empty list if the query failed
+     */
+    public <R> CompletableFuture<List<R>> queryAsync(String sql, StatementBinder binder, RowMapper<R> mapper) {
+        String resolved = resolve(sql);
+        return CompletableFuture.supplyAsync(() -> {
+            List<R> rows = new ArrayList<>();
+            try (PreparedStatement statement = connection.prepareStatement(resolved)) {
+                binder.bind(statement);
+                try (ResultSet result = statement.executeQuery()) {
+                    while (result.next()) rows.add(mapper.map(result));
+                }
+            } catch (SQLException | RuntimeException e) {
+                RogueSmpCore.LOGGER.error("Failed to query {}: {}", table, resolved, e);
+                rows.clear();
+            }
+            return rows;
+        }, executor);
     }
 
     public @Blocking void delete(UUID key) {

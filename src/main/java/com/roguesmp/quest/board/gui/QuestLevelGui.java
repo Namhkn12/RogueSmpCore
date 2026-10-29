@@ -4,13 +4,17 @@ import com.roguesmp.gui.BaseGui;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.QuestManager;
+import com.roguesmp.quest.board.AdventureLeaderboard;
+import com.roguesmp.quest.board.AdventureRank;
 import com.roguesmp.quest.board.QuestBoardManager;
 import com.roguesmp.quest.board.QuestLevelCurve;
+import com.roguesmp.quest.board.TopRankSettings;
 import com.roguesmp.quest.data.PlayerQuestData;
 import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -23,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class QuestLevelGui extends BaseGui {
 
@@ -74,6 +79,7 @@ public class QuestLevelGui extends BaseGui {
         for (int c = 0; c < 9; c++) addButton(5, c, FILLER_BLACK, ClickHandler.noAction());
         if (page > 0) addButton(5, 0, PREV_PAGE_BUTTON, event -> turnPage(event, -1));
         if (page < pageCount - 1) addButton(5, 8, NEXT_PAGE_BUTTON, event -> turnPage(event, 1));
+        if (data != null) addButton(5, 2, buildRankItem(curve, data, level), ClickHandler.noAction());
 
         if (parent != null) {
             ItemStack back = ItemStack.of(Material.ARROW);
@@ -89,6 +95,40 @@ public class QuestLevelGui extends BaseGui {
         }
 
         fillEmpty(createDecoration(Material.GRAY_STAINED_GLASS_PANE));
+    }
+
+    private ItemStack buildRankItem(QuestLevelCurve curve, PlayerQuestData data, int level) {
+        AdventureRank rank = boardManager.getRank(data);
+        ItemStack item = ItemStack.of(Material.NAME_TAG);
+        if (!rank.model().isEmpty()) item.setData(DataComponentTypes.ITEM_MODEL, Key.key(rank.model()));
+        item.setData(DataComponentTypes.ITEM_NAME, Utils.fromString("<gold>Hạng hiện tại: </gold>" + (rank.name().isEmpty() ? "<gray>Chưa có" : rank.name())).append(rank.getDisplayIcon()));
+
+        List<Component> lore = new ArrayList<>();
+        lore.add(Utils.fromString("<!i><gray>Cấp Mạo hiểm: <gold>" + level));
+        if (level < curve.maxLevel()) {
+            lore.add(Utils.fromString("<!i><gray>Kinh nghiệm: <aqua>" + curve.expIntoLevel(data.getExp()) + "<gray>/<aqua>" + curve.expToNext(level)));
+        }
+        Map.Entry<Integer, AdventureRank> nextRank = curve.ranks().higherEntry(level);
+        if (nextRank != null) {
+            lore.add(Component.empty());
+            lore.add(Utils.fromString("<!i><gray>Hạng tiếp theo: </gray>" + nextRank.getValue().name() + " <gray>(cấp <gold>" + nextRank.getKey() + "</gold>)"));
+        }
+        AdventureLeaderboard leaderboard = boardManager.getLeaderboard();
+        QuestBoardManager.AdventureStatus status = boardManager.getStatus(player.getUniqueId());
+        lore.add(Component.empty());
+        lore.add(Utils.fromString(status.position() > 0
+                ? "<!i><gray>Xếp hạng toàn server: <gold>#" + status.position()
+                : "<!i><gray>Xếp hạng toàn server: <gray>Chưa có (" + (status.level() < AdventureLeaderboard.minRankedLevel() ? "cần cấp " + AdventureLeaderboard.minRankedLevel() : "cập nhật ở lần xếp hạng tới") + ")"));
+        TopRankSettings topRank = leaderboard.getSettings();
+        if (topRank != null) {
+            lore.add(Component.empty());
+            lore.add(Utils.fromString("<!i><gray>Hạng đặc biệt: </gray>" + topRank.rank().name()));
+            lore.add(Utils.fromString("<!i><gray>Dành cho <gold>" + topRank.slots() + "</gold> người nhiều kinh nghiệm nhất từ cấp <gold>" + topRank.minLevel() + "</gold>."));
+            if (rank.equals(topRank.rank())) lore.add(Utils.fromString("<!i><green>✔ Bạn đang giữ hạng này"));
+        }
+        lore.add(Utils.fromString("<!i><dark_gray>Bảng xếp hạng cập nhật mỗi ngày."));
+        item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+        return item;
     }
 
     private void turnPage(InventoryClickEvent event, int delta) {
@@ -125,6 +165,8 @@ public class QuestLevelGui extends BaseGui {
         if (shownLevel == level && !claimed) item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
 
         List<Component> lore = new ArrayList<>();
+        AdventureRank unlockedRank = curve.ranks().get(shownLevel);
+        if (unlockedRank != null) lore.add(Utils.fromString("<!i><gray>Mở khóa hạng: </gray>" + unlockedRank.name()).append(unlockedRank.getDisplayIcon()));
         int limit = curve.acceptLimit(shownLevel);
         if (shownLevel == 1 || curve.acceptLimit(shownLevel - 1) != limit) {
             lore.add(Utils.fromString("<!i><gray>Nhận được <gold>" + limit + "</gold> nhiệm vụ cùng lúc"));

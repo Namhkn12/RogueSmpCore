@@ -152,9 +152,6 @@ public final class RogueSmpCore extends JavaPlugin {
         //Dungeon spawners
         SpawnerSystem.init(this);
 
-        this.resetScheduler = new DailyResetScheduler(this);
-        this.resetScheduler.start();
-
         this.autoSaveScheduler = new PlayerDataAutoSaveScheduler(this);
         this.autoSaveScheduler.start();
 
@@ -286,6 +283,9 @@ public final class RogueSmpCore extends JavaPlugin {
         loadData();
         initListeners();
         initCommands();
+
+        this.resetScheduler = new DailyResetScheduler(this);
+        this.resetScheduler.start();
 
         BlockManager.getInstance().sweepLoadedChunks();
     }

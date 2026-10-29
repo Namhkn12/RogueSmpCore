@@ -1,6 +1,11 @@
 package com.roguesmp.quest;
 
+import com.roguesmp.RogueSmpCore;
 import com.roguesmp.quest.data.PlayerQuestData;
+import com.roguesmp.quest.data.QuestDataManager.RankEntry;
+import org.bukkit.Bukkit;
+import com.roguesmp.quest.board.TopRankSettings;
+import com.roguesmp.quest.board.AdventureLeaderboard;
 import org.bukkit.command.CommandSender;
 import dev.jorel.commandapi.arguments.LongArgument;
 import dev.jorel.commandapi.arguments.IntegerArgument;
@@ -26,6 +31,8 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 public class QuestCommand {
+
+    private static final int TOP_LINES = 10;
 
     private final QuestManager questManager;
 
@@ -146,7 +153,7 @@ public class QuestCommand {
                             Player target = (Player) args.get("target");
                             PlayerQuestData data = questData(sender, target);
                             if (data == null) return;
-                            updateExp(data, data.getExp() - (long) args.get("amount"));
+                            QuestBoardManager.getInstance().setExp(target, data.getExp() - (long) args.get("amount"));
                             sendExpStatus(sender, target);
                         }))
                 .withSubcommand(new CommandAPICommand("set")
@@ -155,7 +162,7 @@ public class QuestCommand {
                             Player target = (Player) args.get("target");
                             PlayerQuestData data = questData(sender, target);
                             if (data == null) return;
-                            updateExp(data, (long) args.get("amount"));
+                            QuestBoardManager.getInstance().setExp(target, (long) args.get("amount"));
                             sendExpStatus(sender, target);
                         }))
                 .withSubcommand(new CommandAPICommand("setlevel")
@@ -165,7 +172,7 @@ public class QuestCommand {
                             PlayerQuestData data = questData(sender, target);
                             if (data == null) return;
                             int level = (int) args.get("level");
-                            updateExp(data, QuestBoardManager.getInstance().getSettings().level().totalExpFor(level));
+                            QuestBoardManager.getInstance().setExp(target, QuestBoardManager.getInstance().getSettings().level().totalExpFor(level));
                             sendExpStatus(sender, target);
                         }))
                 .withSubcommand(new CommandAPICommand("check")
@@ -175,6 +182,17 @@ public class QuestCommand {
                             if (questData(sender, target) == null) return;
                             sendExpStatus(sender, target);
                         }));
+
+        CommandAPICommand topSubcommand = new CommandAPICommand("top")
+                .withSubcommand(new CommandAPICommand("refresh")
+                        .withPermission(Permissions.QUEST_TOP_REFRESH.node())
+                        .executes((sender, args) -> {
+                            sender.sendMessage(Utils.fromString("<gray>Đang xếp hạng lại..."));
+                            QuestBoardManager.getInstance().refreshTopRank().thenRun(() -> sendTop(sender));
+                        }))
+                .executes((sender, args) -> {
+                    sendTop(sender);
+                });
 
         CommandAPICommand levelSubcommand = new CommandAPICommand("level")
                 .executesPlayer((player, args) -> {
@@ -194,6 +212,7 @@ public class QuestCommand {
                 .withSubcommand(inboxSubcommand)
                 .withSubcommand(levelSubcommand)
                 .withSubcommand(expSubcommand)
+                .withSubcommand(topSubcommand)
                 // no-args open gui
                 .executesPlayer((player, args) -> {
                     PlayerQuestData questData = questManager.getQuestDataManager().getCachedData(player.getUniqueId());
@@ -216,15 +235,34 @@ public class QuestCommand {
         return data;
     }
 
-    private void updateExp(PlayerQuestData data, long exp) {
-        data.setExp(exp);
-        questManager.getQuestDataManager().saveAsync(data);
-    }
-
     private void sendExpStatus(CommandSender sender, Player target) {
         PlayerQuestData data = questManager.getPlayerQuestData(target.getUniqueId());
         QuestBoardManager board = QuestBoardManager.getInstance();
         sender.sendMessage(Utils.fromString("<gray>" + target.getName() + ": <aqua>" + data.getExp() + "</aqua> kinh nghiệm, cấp <gold>" + board.getLevel(data) + "</gold>, hạng ")
                 .append(Utils.fromString(board.getRank(data).name())));
+    }
+
+    private void sendTop(CommandSender sender) {
+        QuestBoardManager board = QuestBoardManager.getInstance();
+        AdventureLeaderboard leaderboard = board.getLeaderboard();
+        leaderboard.top(TOP_LINES).thenAcceptAsync(entries -> {
+            sender.sendMessage(Utils.fromString("<gold><bold>Bảng xếp hạng Mạo hiểm</bold> <gray>(cập nhật mỗi ngày)"));
+            if (entries.isEmpty()) sender.sendMessage(Utils.fromString("<gray>Chưa có ai trên bảng xếp hạng."));
+            TopRankSettings settings = leaderboard.getSettings();
+            for (RankEntry entry : entries) {
+                Component line = Utils.fromString("<yellow>" + entry.position() + ". <white>" + AdventureLeaderboard.nameOf(entry.uuid()) + " <gray>- <aqua>" + entry.exp() + "</aqua> kinh nghiệm");
+                if (settings != null && leaderboard.holdsTopRank(entry)) line = line.append(settings.rank().getDisplayIcon());
+                sender.sendMessage(line);
+            }
+            if (sender instanceof Player player) {
+                QuestBoardManager.AdventureStatus status = board.getStatus(player.getUniqueId());
+                sender.sendMessage(Utils.fromString(status.position() > 0
+                        ? "<gray>Hạng của bạn: <gold>#" + status.position()
+                        : "<gray>Bạn chưa có trên bảng xếp hạng (" + (status.level() < AdventureLeaderboard.minRankedLevel() ? "cần cấp " + AdventureLeaderboard.minRankedLevel() : "cập nhật ở lần xếp hạng tới") + ")."));
+            }
+            if (settings != null) {
+                sender.sendMessage(Utils.fromString("<gray>Top <gold>" + settings.slots() + "</gold> từ cấp <gold>" + settings.minLevel() + "</gold> nhận hạng ").append(Utils.fromString(settings.rank().name())));
+            }
+        }, Bukkit.getScheduler().getMainThreadExecutor(RogueSmpCore.getInstance()));
     }
 }

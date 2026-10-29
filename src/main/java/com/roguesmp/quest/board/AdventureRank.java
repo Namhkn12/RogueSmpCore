@@ -10,7 +10,7 @@ public record AdventureRank(String name, String icon, String model) {
 
     public static final Codec<AdventureRank> CODEC = Codec.composite(
             Codec.STRING.optionalFieldOf("name", "Unranked").forGetter(AdventureRank::name),
-            Codec.STRING.optionalFieldOf("icon", "No Icon").forGetter(AdventureRank::icon),
+            Codec.STRING.optionalFieldOf("icon", "").forGetter(AdventureRank::icon),
             Codec.STRING.optionalFieldOf("model", "").forGetter(AdventureRank::model),
             AdventureRank::new
     );

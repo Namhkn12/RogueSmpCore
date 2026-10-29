@@ -188,12 +188,15 @@ public class QuestBoardGui extends BaseGui {
             infoLore.add(Utils.fromString("<!i><gold>Đã đạt cấp tối đa"));
         }
         infoLore.add(Utils.fromString("<!i><gray>Hoàn thành nhiệm vụ để nhận nhiệm vụ mới."));
+        int claimable = boardManager.countClaimableRewards(data);
+        if (claimable > 0) infoLore.add(Utils.fromString("<!i><gold>🎁 " + claimable + " phần thưởng chưa nhận"));
         infoLore.add(Utils.fromString("<!i><yellow>▶ Click để xem phần thưởng cấp"));
         AdventureRank rank = boardManager.getRank(data);
         ItemStack infoItem = ItemStack.of(Material.WRITABLE_BOOK);
         if (!rank.model().isEmpty()) infoItem.setData(DataComponentTypes.ITEM_MODEL, Key.key(rank.model()));
         infoItem.setData(DataComponentTypes.ITEM_NAME, Utils.fromString(rank.name() + " <dark_gray>- <gold>Cấp Mạo hiểm " + level));
         infoItem.setData(DataComponentTypes.LORE, ItemLore.lore(infoLore));
+        if (claimable > 0) infoItem.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
         addButton(5, 1, infoItem, ClickHandler.openGui(new QuestLevelGui(player, this)));
 
         ItemStack closeItem = ItemStack.of(Material.BARRIER);
