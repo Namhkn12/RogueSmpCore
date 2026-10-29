@@ -9,6 +9,7 @@ import com.roguesmp.quest.board.AdventureRank;
 import com.roguesmp.quest.board.QuestBoardManager;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Sound;
+import com.destroystokyo.paper.event.player.PlayerConnectionCloseEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -30,13 +31,13 @@ public class QuestListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerPreJoin(AsyncPlayerPreLoginEvent event) {
         if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) return;
-        questManager.getQuestDataManager().stagePendingJoin(questManager.getQuestDataManager().loadData(event.getUniqueId()));
+        questManager.getQuestDataManager().cache(questManager.getQuestDataManager().loadData(event.getUniqueId()));
         boardManager.loadRanking(event.getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!questManager.getQuestDataManager().cachePendingJoin(event.getPlayer().getUniqueId())) {
+        if (questManager.getQuestDataManager().getCachedData(event.getPlayer().getUniqueId()) == null) {
             RogueSmpCore.LOGGER.error("No quest data was loaded for {} before joining", event.getPlayer().getName());
             return;
         }
@@ -48,6 +49,12 @@ public class QuestListener implements Listener {
     public void onPlayerLeave(PlayerQuitEvent event) {
         questManager.getQuestDataManager().saveAndUncache(event.getPlayer().getUniqueId());
         boardManager.clearStatus(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onConnectionClose(PlayerConnectionCloseEvent event) {
+        questManager.getQuestDataManager().uncache(event.getPlayerUniqueId());
+        boardManager.clearStatus(event.getPlayerUniqueId());
     }
 
     @EventHandler

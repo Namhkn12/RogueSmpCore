@@ -25,8 +25,7 @@ import java.util.concurrent.Executor;
 
 public class QuestDataManager {
 
-    private final Map<UUID, PlayerQuestData> dataMap = new HashMap<>();
-    private final Map<UUID, PlayerQuestData> pendingJoins = new ConcurrentHashMap<>();
+    private final Map<UUID, PlayerQuestData> dataMap = new ConcurrentHashMap<>();
     private final JsonSqliteStore<PlayerQuestData> store;
     private final Map<UUID, GroupQuestData> groupMap = new HashMap<>();
     private final JsonSqliteStore<GroupQuestData> groupStore;
@@ -180,25 +179,12 @@ public class QuestDataManager {
         return Collections.unmodifiableCollection(dataMap.values());
     }
 
-    /**
-     * Holds data loaded during pre-login until the player actually joins, so refused logins never reach the cache.
-     */
-    public void stagePendingJoin(PlayerQuestData playerQuestData) {
-        pendingJoins.put(playerQuestData.getUuid(), playerQuestData);
+    public void cache(PlayerQuestData playerQuestData) {
+        dataMap.put(playerQuestData.getUuid(), playerQuestData);
     }
 
-    public void discardPendingJoin(UUID uuid) {
-        pendingJoins.remove(uuid);
-    }
-
-    /**
-     * @return false if nothing was staged for the player
-     */
-    public boolean cachePendingJoin(UUID uuid) {
-        PlayerQuestData data = pendingJoins.remove(uuid);
-        if (data == null) return false;
-        dataMap.put(uuid, data);
-        return true;
+    public void uncache(UUID uuid) {
+        dataMap.remove(uuid);
     }
 
     /**

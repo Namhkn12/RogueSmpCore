@@ -25,8 +25,7 @@ public class InboxManager {
     private static final long EXPIRY_INTERVAL_TICKS = 20L * 60 * 60;
     private static InboxManager INSTANCE;
 
-    private final Map<UUID, Inbox> inboxes = new HashMap<>();
-    private final Map<UUID, Inbox> pendingJoins = new ConcurrentHashMap<>();
+    private final Map<UUID, Inbox> inboxes = new ConcurrentHashMap<>();
     private final Map<UUID, List<InboxEntry>> undelivered = new HashMap<>();
     private final JsonSqliteStore<Inbox> store;
 
@@ -34,22 +33,27 @@ public class InboxManager {
         this.store = new JsonSqliteStore<>(plugin, "player_inbox.db", "player_inbox", "uuid", Inbox.CODEC);
     }
 
-    public @Blocking void stagePendingJoin(UUID uuid) {
+    public @Blocking void load(UUID uuid) {
         Inbox loaded = store.load(uuid);
-        pendingJoins.put(uuid, loaded != null ? loaded : new Inbox(uuid));
+        inboxes.put(uuid, loaded != null ? loaded : new Inbox(uuid));
     }
 
     /**
-     * @return false if nothing was staged for the player
+     * Merges entries sent while the inbox was being loaded and drops expired ones.
+     *
+     * @return false if no inbox was loaded for the player
      */
-    public boolean cachePendingJoin(UUID uuid) {
-        Inbox inbox = pendingJoins.remove(uuid);
+    public boolean onJoin(UUID uuid) {
+        Inbox inbox = inboxes.get(uuid);
         if (inbox == null) return false;
         List<InboxEntry> waiting = undelivered.remove(uuid);
         if (waiting != null) waiting.forEach(inbox::add);
         inbox.expire(System.currentTimeMillis());
-        inboxes.put(uuid, inbox);
         return true;
+    }
+
+    public void uncache(UUID uuid) {
+        inboxes.remove(uuid);
     }
 
     public void saveAndUncache(UUID uuid) {

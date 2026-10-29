@@ -13,11 +13,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CompletableFuture;
 
 public class PlayerDataManager {
 
-    private final Map<UUID, PlayerData> playerDataCache = new HashMap<>();
+    private final Map<UUID, PlayerData> playerDataCache = new ConcurrentHashMap<>();
     private final JsonSqliteStore<PlayerData> store = new JsonSqliteStore<>(RogueSmpCore.getInstance(), "player_data.db", "player_data", "uuid", PlayerData.CODEC);
 
     public void cacheData(PlayerData data) {

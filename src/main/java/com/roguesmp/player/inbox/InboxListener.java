@@ -1,5 +1,6 @@
 package com.roguesmp.player.inbox;
 
+import com.destroystokyo.paper.event.player.PlayerConnectionCloseEvent;
 import com.roguesmp.RogueSmpCore;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -19,12 +20,12 @@ public class InboxListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerPreJoin(AsyncPlayerPreLoginEvent event) {
         if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) return;
-        inboxManager.stagePendingJoin(event.getUniqueId());
+        inboxManager.load(event.getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!inboxManager.cachePendingJoin(event.getPlayer().getUniqueId())) {
+        if (!inboxManager.onJoin(event.getPlayer().getUniqueId())) {
             RogueSmpCore.LOGGER.error("No inbox was loaded for {} before joining", event.getPlayer().getName());
             return;
         }
@@ -34,5 +35,10 @@ public class InboxListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerLeave(PlayerQuitEvent event) {
         inboxManager.saveAndUncache(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onConnectionClose(PlayerConnectionCloseEvent event) {
+        inboxManager.uncache(event.getPlayerUniqueId());
     }
 }
