@@ -15,7 +15,7 @@ import java.util.List;
 public final class ScoreboardDefaults {
 
     private static final String TITLE = "<aqua>✦ RogueSMP ✦";
-    private static final TabElement DIVIDER = TabElement.constant("<dark_gray>――――――――――――</dark_gray>");
+    private static final TabElement DIVIDER = TabElement.constant("<dark_gray>―――――――――――――――</dark_gray>");
     private static final TabElement SPACER = TabElement.constant("");
 
     private ScoreboardDefaults() {

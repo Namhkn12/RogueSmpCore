@@ -97,15 +97,37 @@ public class PartyManager {
             player.sendMessage(Utils.fromString("<yellow>Bạn không ở trong nhóm nào"));
             return;
         }
-        if (isOwner(player)) {
-            player.sendMessage(Utils.fromString("<yellow>Hãy dùng lệnh /party disband để giải tán"));
-            return;
-        }
         Party party = getPartyByPlayer(player);
         if (party == null) return;
 
-        removeMember(party, player.getUniqueId().toString());
+        if (!removeAndPromote(party, player)) {
+            player.sendMessage(Utils.fromString("<yellow>Nhóm đã bị giải tán"));
+            return;
+        }
         player.sendMessage(Utils.fromString("<green>Bạn đã rời nhóm"));
+    }
+
+    private boolean removeAndPromote(Party party, Player player) {
+        String playerId = player.getUniqueId().toString();
+        if (party.isOwner(playerId)) {
+            String newOwnerId = party.getMembers().stream()
+                    .filter(id -> !id.equals(playerId))
+                    .min(Comparator.comparing(id -> getPlayer(id) == null))
+                    .orElse(null);
+
+            if (newOwnerId == null) {
+                remove(party);
+                return false;
+            }
+
+            party.setOwner(newOwnerId);
+            String message = "<yellow>" + player.getName() + " đã rời nhóm, " + displayName(newOwnerId) + " trở thành chủ nhóm";
+            getOnlineMembers(party).stream()
+                    .filter(member -> !member.equals(player))
+                    .forEach(member -> member.sendMessage(Utils.fromString(message)));
+        }
+        removeMember(party, playerId);
+        return true;
     }
 
     public void kickMember(Player owner, Player target) {
@@ -134,25 +156,7 @@ public class PartyManager {
         Party party = getPartyByPlayer(player);
         if (party == null) return;
 
-        String playerId = player.getUniqueId().toString();
-        if (party.isOwner(playerId)) {
-            String newOwnerId = party.getMembers().stream()
-                    .filter(id -> !id.equals(playerId))
-                    .findFirst()
-                    .orElse(null);
-
-            if (newOwnerId == null) {
-                disbandParty(player);
-                return;
-            }
-
-            party.setOwner(newOwnerId);
-            Player newOwner = getPlayer(newOwnerId);
-            if (newOwner != null) {
-                newOwner.sendMessage(Utils.fromString("<green>Bạn đã trở thành chủ nhóm"));
-            }
-        }
-        removeMember(party, playerId);
+        removeAndPromote(party, player);
         player.sendMessage(Utils.fromString("<yellow>Bạn đã rời khỏi party (force)"));
     }
 
