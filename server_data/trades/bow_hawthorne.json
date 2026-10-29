@@ -3,28 +3,27 @@
   "layout": {
     "pattern": [
       "#########",
-      "#O.O.O.O#",
-      "#OOO#OOO#",
-      "#..OOO..#",
+      "#OOOOOOO#",
+      "#OOOOOOO#",
       "#########"
     ],
     "keys": {
       "#": "BLACK_STAINED_GLASS_PANE"
     },
-    "fill": "BROWN_STAINED_GLASS_PANE"
+    "fill": "GRAY_STAINED_GLASS_PANE"
   },
   "offers": [
     {
       "costs": [
         {
           "type": "money",
-          "amount": 315
+          "amount": 320
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "ashwood_shortbow"
+          "item": "hawthornes_bow"
         }
       ]
     },
@@ -32,13 +31,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 1300
+          "amount": 460
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "yew_longbow"
+          "item": "hawthornes_longbow"
         }
       ]
     },
@@ -46,13 +45,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 4200
+          "amount": 520
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "ironbound_crossbow"
+          "item": "hawthornes_crossbow"
         }
       ]
     },
@@ -60,13 +59,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 21400
+          "amount": 85
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "stormstring_recurve"
+          "item": "gem_citrine_1"
         }
       ]
     },
@@ -74,13 +73,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 150
+          "amount": 60
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "bow_grip_fine"
+          "item": "gem_aquamarine_1"
         }
       ]
     },
@@ -88,13 +87,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 500
+          "amount": 230
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "bow_grip_superior"
+          "item": "gem_citrine_2"
         }
       ]
     },
@@ -102,13 +101,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 2300
+          "amount": 10
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "bow_grip_masterwork"
+          "item": "flax_bowstring"
         }
       ]
     },
@@ -116,13 +115,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 50
+          "amount": 15
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "silk_thread_fine"
+          "item": "sinew_bowstring"
         }
       ]
     },
@@ -130,13 +129,14 @@
       "costs": [
         {
           "type": "money",
-          "amount": 160
+          "amount": 16
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "silk_thread_superior"
+          "item": "minecraft:arrow",
+          "amount": 16
         }
       ]
     },
@@ -144,13 +144,14 @@
       "costs": [
         {
           "type": "money",
-          "amount": 750
+          "amount": 24
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "silk_thread_masterwork"
+          "item": "hawthornes_poison_arrow",
+          "amount": 8
         }
       ]
     },
@@ -158,13 +159,14 @@
       "costs": [
         {
           "type": "money",
-          "amount": 200
+          "amount": 40
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "heartwood_shaft_fine"
+          "item": "hawthornes_harming_arrow",
+          "amount": 8
         }
       ]
     },
@@ -172,13 +174,14 @@
       "costs": [
         {
           "type": "money",
-          "amount": 650
+          "amount": 24
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "heartwood_shaft_superior"
+          "item": "hawthornes_weakness_arrow",
+          "amount": 8
         }
       ]
     },
@@ -186,13 +189,14 @@
       "costs": [
         {
           "type": "money",
-          "amount": 3000
+          "amount": 24
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "heartwood_shaft_masterwork"
+          "item": "hawthornes_slowness_arrow",
+          "amount": 8
         }
       ]
     }

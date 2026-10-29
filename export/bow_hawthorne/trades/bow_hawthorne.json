@@ -1,0 +1,204 @@
+{
+  "title": "<#8D6E63>Thợ Cung Hawthorne",
+  "layout": {
+    "pattern": [
+      "#########",
+      "#OOOOOOO#",
+      "#OOOOOOO#",
+      "#########"
+    ],
+    "keys": {
+      "#": "BLACK_STAINED_GLASS_PANE"
+    },
+    "fill": "GRAY_STAINED_GLASS_PANE"
+  },
+  "offers": [
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 320
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "hawthornes_bow"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 460
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "hawthornes_longbow"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 520
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "hawthornes_crossbow"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 85
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_citrine_1"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 60
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_aquamarine_1"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 230
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_citrine_2"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 10
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "flax_bowstring"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 15
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "sinew_bowstring"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 16
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:arrow",
+          "amount": 16
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 24
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "hawthornes_poison_arrow",
+          "amount": 8
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 40
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "hawthornes_harming_arrow",
+          "amount": 8
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 24
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "hawthornes_weakness_arrow",
+          "amount": 8
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 24
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "hawthornes_slowness_arrow",
+          "amount": 8
+        }
+      ]
+    }
+  ]
+}

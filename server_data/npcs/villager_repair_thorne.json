@@ -5,5 +5,12 @@
     "<green>Hỗ trợ sửa chữa và bảo dưỡng trang bị</green>"
   ],
   "profession": "minecraft:toolsmith",
-  "actions": []
+  "actions": [
+    {
+      "action": {
+        "command": "blacksmith",
+        "type": "run_command"
+      }
+    }
+  ]
 }

@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<gray>Hardwood Stick",
+    "description": [
+      "<dark_gray><!i>Low Tier Material",
+      "<gray><!i>Cán ngắn cho kiếm, cuốc, rìu và xẻng",
+      "<gray><!i>Nguyên liệu đồ Nén và Chất lượng cao"
+    ],
+    "item_model": "minecraft:stick"
+  }
+}

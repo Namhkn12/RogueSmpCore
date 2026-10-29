@@ -1,0 +1,19 @@
+{
+  "base": "IRON_CHESTPLATE",
+  "components": {
+    "name": "<#C9D1D9>Roland's Chestplate",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Giáp ngực rèn vội, nhẹ hơn giáp sắt thật.",
+      "<dark_gray><!i>Hàng của Armorer Roland"
+    ],
+    "durability": 600,
+    "socket": 1,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 5.2
+      },
+      "slot": "CHEST"
+    }
+  }
+}

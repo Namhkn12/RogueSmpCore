@@ -7,8 +7,10 @@
   "profession": "minecraft:weaponsmith",
   "actions": [
     {
-      "type": "open_gui",
-      "gui": "shop:weapon_drake"
+      "action": {
+        "gui": "shop:weapon_drake",
+        "type": "open_gui"
+      }
     }
   ]
 }

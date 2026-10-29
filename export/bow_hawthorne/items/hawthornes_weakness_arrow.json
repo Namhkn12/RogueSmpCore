@@ -1,0 +1,21 @@
+{
+  "base": "TIPPED_ARROW",
+  "components": {
+    "name": "<#6E7A6E>Weakness Arrow",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Trúng đích gây Suy Yếu I trong 10 giây.",
+      "<dark_gray><!i>Hàng của Bowyer Hawthorne"
+    ],
+    "potion_content": {
+      "color": "255,72,77,72",
+      "effects": [
+        {
+          "type": "weakness",
+          "duration": 200,
+          "amplifier": 0
+        }
+      ]
+    }
+  }
+}

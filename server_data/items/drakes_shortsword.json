@@ -1,0 +1,23 @@
+{
+  "base": "COPPER_SWORD",
+  "components": {
+    "name": "<#E3A27A>Drake's Shortsword",
+    "item_model": "minecraft:copper_shortsword",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Kiếm ngắn bằng đồng, ra đòn nhanh.",
+      "<dark_gray><!i>Hàng của Weaponsmith Drake"
+    ],
+    "durability": 160,
+    "socket": 1,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.7,
+        "ATTACK_SPEED_BASE": 2.0,
+        "ENTITY_REACH": 0.2,
+        "SWEEPING_DAMAGE_RATIO": 0.2
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

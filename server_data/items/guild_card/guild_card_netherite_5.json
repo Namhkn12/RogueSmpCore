@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<#A89BA9>Netherite Guild Card V",
+    "description": [
+      "<dark_gray><!i>Hạng A · Netherite V",
+      "<gray><!i>Thẻ mạo hiểm giả của Guild",
+      "<gray><!i>Cấp mạo hiểm: 49 - 50"
+    ],
+    "item_model": "smp:guild_card_netherite_5"
+  }
+}

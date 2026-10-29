@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<#A89BA9>Netherite Guild Card I",
+    "description": [
+      "<dark_gray><!i>Hạng A · Netherite I",
+      "<gray><!i>Thẻ mạo hiểm giả của Guild",
+      "<gray><!i>Cấp mạo hiểm: 41 - 42"
+    ],
+    "item_model": "smp:guild_card_netherite_1"
+  }
+}

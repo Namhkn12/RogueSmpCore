@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<#A89BA9>Netherite Guild Card IV",
+    "description": [
+      "<dark_gray><!i>Hạng A · Netherite IV",
+      "<gray><!i>Thẻ mạo hiểm giả của Guild",
+      "<gray><!i>Cấp mạo hiểm: 47 - 48"
+    ],
+    "item_model": "smp:guild_card_netherite_4"
+  }
+}

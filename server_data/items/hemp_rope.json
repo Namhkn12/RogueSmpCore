@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<gray>Hemp Rope",
+    "description": [
+      "<dark_gray><!i>Low Tier Material",
+      "<gray><!i>Buộc đầu rìu, giáo và quấn cán",
+      "<gray><!i>Nguyên liệu công cụ Nén và Chất lượng cao"
+    ],
+    "item_model": "minecraft:lead"
+  }
+}

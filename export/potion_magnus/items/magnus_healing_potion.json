@@ -1,0 +1,21 @@
+{
+  "base": "POTION",
+  "components": {
+    "name": "<#F82423>Potion of Healing",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Uống vào hồi máu tức thời (Hồi Máu Tức Thời I).",
+      "<dark_gray><!i>Hàng của Alchemist Magnus"
+    ],
+    "potion_content": {
+      "color": "255,248,36,35",
+      "effects": [
+        {
+          "type": "instant_health",
+          "duration": 1,
+          "amplifier": 0
+        }
+      ]
+    }
+  }
+}

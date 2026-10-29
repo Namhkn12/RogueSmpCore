@@ -1,0 +1,16 @@
+{
+  "entityType": "VILLAGER",
+  "name": "<gradient:#8D6E63:#4E342E><bold>Bowyer Hawthorne</bold></gradient>",
+  "description": [
+    "<green>Cung tên và trang bị xạ thủ</green>"
+  ],
+  "profession": "minecraft:fletcher",
+  "actions": [
+    {
+      "action": {
+        "gui": "shop:bow_hawthorne",
+        "type": "open_gui"
+      }
+    }
+  ]
+}

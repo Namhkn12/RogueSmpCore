@@ -3,10 +3,9 @@
   "layout": {
     "pattern": [
       "#########",
-      "#OOOOO#OO",
-      "#OOOOO#OO",
-      "#OOOOO#OO",
-      "#OOOOO###",
+      "#OOOOOOO#",
+      "#OOOOOOO#",
+      "#OOOOOOO#",
       "#########"
     ],
     "keys": {
@@ -19,13 +18,111 @@
       "costs": [
         {
           "type": "money",
+          "amount": 130
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "rolands_helmet"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 250
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "rolands_chestplate"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 180
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "rolands_leggings"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 130
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "rolands_boots"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 70
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_onyx_1"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 65
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_rose_quartz_1"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 170
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_onyx_2"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
           "amount": 10
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "padded_helmet"
+          "item": "raw_leather_cap"
         }
       ]
     },
@@ -33,181 +130,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 40
+          "amount": 25
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "scale_helmet"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 155
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "ironclad_helmet"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 560
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "sentinel_helmet"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 3100
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "bastion_helmet"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 110
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "leather_lining_fine"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 110
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "chain_lining_fine"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 30
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "padded_chestplate"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 110
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "scale_chestplate"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 450
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "ironclad_chestplate"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 1500
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "sentinel_chestplate"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 8300
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "bastion_chestplate"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 390
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "leather_lining_superior"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 390
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "chain_lining_superior"
+          "item": "raw_leather_tunic"
         }
       ]
     },
@@ -221,91 +150,7 @@
       "results": [
         {
           "type": "item",
-          "item": "padded_leggings"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 80
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "scale_leggings"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 340
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "ironclad_leggings"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 1100
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "sentinel_leggings"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 6250
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "bastion_leggings"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 1700
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "leather_lining_masterwork"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 1700
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "chain_lining_masterwork"
+          "item": "raw_leather_pants"
         }
       ]
     },
@@ -319,7 +164,35 @@
       "results": [
         {
           "type": "item",
-          "item": "padded_boots"
+          "item": "raw_leather_boots"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 20
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "loose_chain_coif"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 50
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "loose_chain_hauberk"
         }
       ]
     },
@@ -333,7 +206,7 @@
       "results": [
         {
           "type": "item",
-          "item": "scale_boots"
+          "item": "loose_chain_leggings"
         }
       ]
     },
@@ -341,41 +214,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 155
+          "amount": 20
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "ironclad_boots"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 560
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "sentinel_boots"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 3100
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "bastion_boots"
+          "item": "loose_chain_boots"
         }
       ]
     }

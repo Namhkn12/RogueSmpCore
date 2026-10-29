@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<gray>Sinew Bowstring",
+    "description": [
+      "<dark_gray><!i>Low Tier Material",
+      "<gray><!i>Dây cung se từ gân thú, chịu lực kéo lớn",
+      "<gray><!i>Nguyên liệu trường cung và nỏ Nén và Chất lượng cao"
+    ],
+    "item_model": "minecraft:string"
+  }
+}

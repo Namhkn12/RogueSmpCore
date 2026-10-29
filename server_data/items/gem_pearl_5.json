@@ -1,0 +1,21 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#BFA982>Perfect Pearl",
+    "description": [
+      "<dark_gray><!i>Ngọc Hoàn Mỹ",
+      "<gray><i>Kẻ thù cứ ngỡ",
+      "<gray><i>mình đã đứng đủ xa."
+    ],
+    "head_skin": "gem_pearl",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "ENTITY_REACH": 0.4,
+          "SPEED_PERCENT": -0.04
+        }
+      },
+      "success_chance": 0.15
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "base": "BOW",
+  "components": {
+    "name": "<#A1887F>Hawthorne's Longbow",
+    "item_model": "minecraft:wooden_longbow",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Trường cung gỗ thủy tùng, bắn mạnh và xa nhưng hơi cồng kềnh.",
+      "<dark_gray><!i>Hàng của Bowyer Hawthorne"
+    ],
+    "durability": 140,
+    "socket": 1,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 5.8,
+        "PROJECTILE_SPEED_BASE": 1.27,
+        "SPEED_PERCENT": 0.015,
+        "SNEAKING_SPEED": 0.15,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

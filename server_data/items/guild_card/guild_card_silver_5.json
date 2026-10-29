@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<#C9CED6>Silver Guild Card V",
+    "description": [
+      "<dark_gray><!i>Hạng D · Bạc V",
+      "<gray><!i>Thẻ mạo hiểm giả của Guild",
+      "<gray><!i>Cấp mạo hiểm: 19 - 20"
+    ],
+    "item_model": "smp:guild_card_silver_5"
+  }
+}

@@ -5,5 +5,12 @@
     "<green>Cung cấp thuốc và nguyên liệu giả kim</green>"
   ],
   "profession": "minecraft:cleric",
-  "actions": []
+  "actions": [
+    {
+      "action": {
+        "gui": "shop:potion_magnus",
+        "type": "open_gui"
+      }
+    }
+  ]
 }

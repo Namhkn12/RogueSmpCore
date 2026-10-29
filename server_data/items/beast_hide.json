@@ -1,0 +1,10 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<gray>Beast Hide",
+    "description": [
+      "<dark_gray><!i>Low Tier Material",
+      "<gray><!i>Lớp lót giáp và bọc tay cầm"    ],
+    "item_model": "minecraft:leather"
+  }
+}

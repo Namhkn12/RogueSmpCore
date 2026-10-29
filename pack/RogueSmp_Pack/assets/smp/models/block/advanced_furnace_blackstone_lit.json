@@ -1,6 +1,0 @@
-{
-  "parent": "smp:block/advanced_furnace_blackstone",
-  "textures": {
-    "front": "smp:block/advanced_furnace_blackstone_front_on"
-  }
-}

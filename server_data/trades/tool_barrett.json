@@ -3,10 +3,8 @@
   "layout": {
     "pattern": [
       "#########",
-      "#O.O.O.O#",
-      "#O.O.O.O#",
-      "#O.O.O.O#",
-      "#..OOO..#",
+      "#OOOOOOO#",
+      "#OOOOOOO#",
       "#########"
     ],
     "keys": {
@@ -19,13 +17,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 270
+          "amount": 1350
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "prospector_pickaxe"
+          "item": "barretts_pickaxe"
         }
       ]
     },
@@ -33,13 +31,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 1300
+          "amount": 780
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "ironforge_pickaxe"
+          "item": "barretts_axe"
         }
       ]
     },
@@ -47,13 +45,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 4450
+          "amount": 545
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "deepdelver_pickaxe"
+          "item": "barretts_shovel"
         }
       ]
     },
@@ -61,125 +59,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 22250
+          "amount": 75
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "earthsplitter_pickaxe"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 140
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "prospector_felling_axe"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 705
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "ironforge_felling_axe"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 2450
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "deepdelver_felling_axe"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 12000
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "earthsplitter_felling_axe"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 95
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "prospector_shovel"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 470
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "ironforge_shovel"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 1650
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "deepdelver_shovel"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 8000
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "earthsplitter_shovel"
+          "item": "gem_jade_1"
         }
       ]
     },
@@ -193,7 +79,7 @@
       "results": [
         {
           "type": "item",
-          "item": "heartwood_shaft_fine"
+          "item": "gem_jade_2"
         }
       ]
     },
@@ -201,13 +87,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 650
+          "amount": 10
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "heartwood_shaft_superior"
+          "item": "hemp_rope"
         }
       ]
     },
@@ -215,13 +101,27 @@
       "costs": [
         {
           "type": "money",
-          "amount": 3000
+          "amount": 5
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "heartwood_shaft_masterwork"
+          "item": "hardwood_stick"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 8
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "bamboo_pole"
         }
       ]
     }

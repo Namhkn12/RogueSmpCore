@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<#F7D34B>Gold Guild Card II",
+    "description": [
+      "<dark_gray><!i>Hạng C · Vàng II",
+      "<gray><!i>Thẻ mạo hiểm giả của Guild",
+      "<gray><!i>Cấp mạo hiểm: 23 - 24"
+    ],
+    "item_model": "smp:guild_card_gold_2"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#12358F>Perfect Sapphire",
+    "description": [
+      "<dark_gray><!i>Ngọc Hoàn Mỹ",
+      "<gray><i>Biển sâu hay vực thẳm,",
+      "<gray><i>đâu cũng như nhà."
+    ],
+    "head_skin": "gem_sapphire",
+    "gem_data": {
+      "attributes": {
+        "HEAD": {
+          "OXYGEN_BONUS": 6.0,
+          "DEFENSE_FLAT": -0.5
+        },
+        "FEET": {
+          "FALL_DAMAGE": -0.5,
+          "DEFENSE_FLAT": -0.5
+        }
+      },
+      "success_chance": 0.32
+    }
+  }
+}

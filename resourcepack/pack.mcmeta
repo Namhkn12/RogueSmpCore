@@ -1,7 +1,14 @@
 {
   "pack": {
-    "description": "RogueSmp custom assets",
-    "min_format": 69,
-    "max_format": 999
+    "description": "A RogueSmp resourcepack by Namhkn",
+    "pack_format": 88,
+    "min_format": [
+      88,
+      0
+    ],
+    "max_format": [
+      97,
+      0
+    ]
   }
 }
