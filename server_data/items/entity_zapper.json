@@ -1,0 +1,18 @@
+{
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:barrier",
+    "name": "<red>Entity Zapper",
+    "actions": {
+      "actions": [
+        {
+          "click": "RIGHT",
+          "action": {
+            "type": "entity_zapper"
+          }
+        }
+      ],
+      "hint": "<red>Right click to delete entity and its passengers"
+    }
+  }
+}

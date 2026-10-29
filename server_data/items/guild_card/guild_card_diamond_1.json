@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<#4FD1C5>Diamond Guild Card I",
+    "description": [
+      "<dark_gray><!i>Hạng B · Kim Cương I",
+      "<gray><!i>Thẻ mạo hiểm giả của Guild",
+      "<gray><!i>Cấp mạo hiểm: 31 - 32"
+    ],
+    "item_model": "smp:guild_card_diamond_1"
+  }
+}

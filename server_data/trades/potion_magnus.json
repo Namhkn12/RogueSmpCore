@@ -1,0 +1,174 @@
+{
+  "title": "<dark_green>Nhà Giả Kim Magnus",
+  "layout": {
+    "pattern": [
+      "#########",
+      "#OOOOOOO#",
+      "#OOOOOOO#",
+      "#########"
+    ],
+    "keys": {
+      "#": "BLACK_STAINED_GLASS_PANE"
+    },
+    "fill": "GRAY_STAINED_GLASS_PANE"
+  },
+  "offers": [
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 60
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "magnus_swiftness_potion"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 60
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "magnus_fire_resistance_potion"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 50
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "magnus_night_vision_potion"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 45
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "magnus_healing_potion"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 80
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "magnus_strength_potion"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 70
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "magnus_regeneration_potion"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 85
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_amethyst_1"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 220
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_amethyst_2"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 16
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:glowstone_dust",
+          "amount": 16
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 16
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:gunpowder",
+          "amount": 16
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 24
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:nether_wart",
+          "amount": 16
+        }
+      ]
+    }
+  ]
+}

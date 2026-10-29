@@ -1,0 +1,15 @@
+{
+  "entityType": "MANNEQUIN",
+  "name": "<b><yellow>Tra sứ",
+  "skinId": "priest",
+  "description": [
+    "<yellow>Thanh tẩy lời nguyền"
+  ],
+  "actions": [
+    {
+      "action": {
+        "type": "clear_death_curse"
+      }
+    }
+  ]
+}

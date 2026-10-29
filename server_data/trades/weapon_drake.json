@@ -3,10 +3,8 @@
   "layout": {
     "pattern": [
       "#########",
-      "#.O.O.O.#",
-      "#..O.O..#",
-      "#OOO#OOO#",
-      "#..OOO..#",
+      "#OOOOOOO#",
+      "#OOOOOOO#",
       "#########"
     ],
     "keys": {
@@ -25,7 +23,7 @@
       "results": [
         {
           "type": "item",
-          "item": "militia_sword"
+          "item": "drakes_shortsword"
         }
       ]
     },
@@ -33,13 +31,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 300
+          "amount": 450
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "hunters_knife"
+          "item": "drakes_longsword"
         }
       ]
     },
@@ -47,13 +45,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 1350
+          "amount": 85
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "knights_longsword"
+          "item": "gem_ruby_1"
         }
       ]
     },
@@ -61,13 +59,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 4300
+          "amount": 85
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "ravager_axe"
+          "item": "gem_amber_1"
         }
       ]
     },
@@ -75,13 +73,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 21550
+          "amount": 85
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "sovereign_blade"
+          "item": "gem_garnet_1"
         }
       ]
     },
@@ -89,13 +87,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 300
+          "amount": 220
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "energy_rod_fine"
+          "item": "gem_ruby_2"
         }
       ]
     },
@@ -103,13 +101,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 1000
+          "amount": 40
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "energy_rod_superior"
+          "item": "sword_core"
         }
       ]
     },
@@ -117,97 +115,13 @@
       "costs": [
         {
           "type": "money",
-          "amount": 4600
+          "amount": 15
         }
       ],
       "results": [
         {
           "type": "item",
-          "item": "energy_rod_masterwork"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 300
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "mana_core_fine"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 1000
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "mana_core_superior"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 4600
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "mana_core_masterwork"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 200
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "heartwood_shaft_fine"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 650
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "heartwood_shaft_superior"
-        }
-      ]
-    },
-    {
-      "costs": [
-        {
-          "type": "money",
-          "amount": 3000
-        }
-      ],
-      "results": [
-        {
-          "type": "item",
-          "item": "heartwood_shaft_masterwork"
+          "item": "bow_grip_crude"
         }
       ]
     }

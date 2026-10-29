@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<#FF6A2B>S-Rank Guild Card",
+    "description": [
+      "<dark_gray><!i>Hạng S",
+      "<gray><!i>Thẻ mạo hiểm giả của Guild",
+      "<gray><!i>Dành riêng cho mạo hiểm giả đứng đầu"
+    ],
+    "item_model": "smp:guild_card_s"
+  }
+}

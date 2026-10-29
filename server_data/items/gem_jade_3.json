@@ -1,0 +1,20 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#45C281>Fine Jade",
+    "description": [
+      "<dark_gray><!i>Ngọc Tinh",
+      "<gray><i>Xanh trong như lá non,",
+      "<gray><i>đá mềm đi dưới mũi cuốc."
+    ],
+    "head_skin": "gem_jade",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "MINING_EFFICIENCY": 0.8
+        }
+      },
+      "success_chance": 0.7
+    }
+  }
+}

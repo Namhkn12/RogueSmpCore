@@ -1,0 +1,10 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<gray>Coarse Thread",
+    "description": [
+      "<dark_gray><!i>Low Tier Material",
+      "<gray><!i>Dây cung và chỉ khâu giáp"    ],
+    "item_model": "minecraft:string"
+  }
+}

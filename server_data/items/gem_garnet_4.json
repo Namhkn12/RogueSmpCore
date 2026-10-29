@@ -1,0 +1,21 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#741A35>Flawless Garnet",
+    "description": [
+      "<dark_gray><!i>Ngọc Vô Khuyết",
+      "<gray><i>Kẻ mang nó lao vào trước,",
+      "<gray><i>rồi mới nghĩ tới phòng thủ."
+    ],
+    "head_skin": "gem_garnet",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "CRIT_DAMAGE_FLAT": 2.5,
+          "DEFENSE_FLAT": -0.5
+        }
+      },
+      "success_chance": 0.38
+    }
+  }
+}

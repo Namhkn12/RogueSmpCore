@@ -1,0 +1,23 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#6FDCE8>Fine Aquamarine",
+    "description": [
+      "<dark_gray><!i>Ngọc Tinh",
+      "<gray><i>Xanh trong như biển cạn,",
+      "<gray><i>gió như đẩy sau lưng."
+    ],
+    "head_skin": "aquamarine",
+    "gem_data": {
+      "attributes": {
+        "LEGS": {
+          "SPEED_PERCENT": 0.04
+        },
+        "FEET": {
+          "SPEED_PERCENT": 0.04
+        }
+      },
+      "success_chance": 0.68
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "base": "TIPPED_ARROW",
+  "components": {
+    "name": "<#8BAFE0>Slowness Arrow",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Trúng đích gây Chậm Chạp I trong 10 giây.",
+      "<dark_gray><!i>Hàng của Bowyer Hawthorne"
+    ],
+    "potion_content": {
+      "color": "255,139,175,224",
+      "effects": [
+        {
+          "type": "slowness",
+          "duration": 200,
+          "amplifier": 0
+        }
+      ]
+    }
+  }
+}

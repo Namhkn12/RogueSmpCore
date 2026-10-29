@@ -7,8 +7,10 @@
   "profession": "minecraft:fletcher",
   "actions": [
     {
-      "type": "open_gui",
-      "gui": "shop:bow_hawthorne"
+      "action": {
+        "gui": "shop:bow_hawthorne",
+        "type": "open_gui"
+      }
     }
   ]
 }

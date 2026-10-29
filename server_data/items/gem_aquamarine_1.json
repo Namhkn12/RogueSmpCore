@@ -1,0 +1,23 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#D4F7FB>Rough Aquamarine",
+    "description": [
+      "<dark_gray><!i>Ngọc Thô",
+      "<gray><i>Mảnh đá xanh nhạt,",
+      "<gray><i>mát như nước suối."
+    ],
+    "head_skin": "aquamarine",
+    "gem_data": {
+      "attributes": {
+        "LEGS": {
+          "SPEED_PERCENT": 0.02
+        },
+        "FEET": {
+          "SPEED_PERCENT": 0.02
+        }
+      },
+      "success_chance": 1.0
+    }
+  }
+}

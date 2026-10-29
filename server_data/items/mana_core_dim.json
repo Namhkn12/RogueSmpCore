@@ -1,0 +1,10 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<gray>Dim Mana Core",
+    "description": [
+      "<dark_gray><!i>Low Tier Material",
+      "<gray><!i>Lõi phép của trượng và đũa"    ],
+    "item_model": "minecraft:amethyst_shard"
+  }
+}

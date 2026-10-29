@@ -1,0 +1,25 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#2557C9>Flawless Sapphire",
+    "description": [
+      "<dark_gray><!i>Ngọc Vô Khuyết",
+      "<gray><i>Thích nghi với mọi nơi,",
+      "<gray><i>trừ những đòn đánh thẳng mặt."
+    ],
+    "head_skin": "gem_sapphire",
+    "gem_data": {
+      "attributes": {
+        "HEAD": {
+          "OXYGEN_BONUS": 5.0,
+          "DEFENSE_FLAT": -0.3
+        },
+        "FEET": {
+          "FALL_DAMAGE": -0.4,
+          "DEFENSE_FLAT": -0.3
+        }
+      },
+      "success_chance": 0.52
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#E6DCCB>Fine Pearl",
+    "description": [
+      "<dark_gray><!i>Ngọc Tinh",
+      "<gray><i>Tròn trịa, trắng sữa,",
+      "<gray><i>khiến cánh tay như dài thêm."
+    ],
+    "head_skin": "gem_pearl",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "ENTITY_REACH": 0.25
+        }
+      },
+      "success_chance": 0.52
+    }
+  }
+}

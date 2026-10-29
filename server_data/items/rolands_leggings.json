@@ -1,0 +1,19 @@
+{
+  "base": "IRON_LEGGINGS",
+  "components": {
+    "name": "<#C9D1D9>Roland's Leggings",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Ống chân sắt ghép, đủ cho chuyến đi đầu.",
+      "<dark_gray><!i>Hàng của Armorer Roland"
+    ],
+    "durability": 570,
+    "socket": 1,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.8
+      },
+      "slot": "LEGS"
+    }
+  }
+}

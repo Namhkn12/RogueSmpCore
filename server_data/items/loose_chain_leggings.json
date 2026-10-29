@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<gray>Loose Chain Leggings",
+    "description": [
+      "<dark_gray><!i>Low Tier Material",
+      "<gray><!i>Khung giáp xích, chưa thể mặc",
+      "<gray><!i>Nguyên liệu giáp Nén và Chất lượng cao"
+    ],
+    "item_model": "minecraft:chainmail_leggings"
+  }
+}

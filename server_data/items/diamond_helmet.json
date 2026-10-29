@@ -1,14 +1,14 @@
 {
-  "id": "diamond_helmet",
   "base": "DIAMOND_HELMET",
   "components": {
-    "name": "<dark_purple>Diamond Helmet",
     "durability": 1050,
+    "name": "<dark_purple>Diamond Helmet",
     "attribute": {
       "attributes": {
         "DEFENSE_FLAT": 3.9
       },
       "slot": "HEAD"
-    }
+    },
+    "socket": 2
   }
 }

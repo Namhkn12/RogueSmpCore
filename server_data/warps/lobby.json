@@ -1,0 +1,12 @@
+{
+  "display_name": "<aqua>Lobby",
+  "destination": {
+    "world": "minecraft:lobby",
+    "x": -30.5,
+    "y": 62.0,
+    "z": 0.5,
+    "yaw": -89.69992,
+    "pitch": 3.7499802,
+    "type": "location"
+  }
+}
