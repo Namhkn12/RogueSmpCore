@@ -1,5 +1,7 @@
 package com.roguesmp.tab.scoreboard;
 
+import com.roguesmp.island.IslandManager;
+import com.roguesmp.island.IslandRegionManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.quest.board.AdventureRank;

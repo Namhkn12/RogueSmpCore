@@ -41,6 +41,7 @@ public class ThrowRateBase implements SmpAttribute {
     @Override
     public void onProjectileLaunch(PlayerLaunchProjectileEvent event, double value, @NotNull SmpPlayer player) {
         Projectile projectile = event.getProjectile();
+        if (projectile instanceof Trident trident) trident.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
         Player bukkitPlayer = player.getBukkitPlayer();
         event.setShouldConsume(false);
         PlayerProjectile playerProjectile = player.getProjectile(projectile.getUniqueId());

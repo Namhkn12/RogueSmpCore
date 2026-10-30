@@ -1,16 +1,7 @@
 package com.roguesmp.entity.component;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.entity.component.impl.AiComponent;
-import com.roguesmp.entity.component.impl.AttributeComponent;
-import com.roguesmp.entity.component.impl.BehaviorComponent;
-import com.roguesmp.entity.component.impl.BossBarComponent;
-import com.roguesmp.entity.component.impl.DisplayNameComponent;
-import com.roguesmp.entity.component.impl.EquipmentComponent;
-import com.roguesmp.entity.component.impl.LootTableComponent;
-import com.roguesmp.entity.component.impl.NameplateComponent;
-import com.roguesmp.entity.component.impl.PhaseComponent;
-import com.roguesmp.entity.component.impl.SpellComponent;
+import com.roguesmp.entity.component.impl.*;
 import com.roguesmp.registry.Registries;
 
 public class EntityComponentKeys {
@@ -25,6 +16,7 @@ public class EntityComponentKeys {
     public static final EntityComponentKey<PhaseComponent> PHASE;
     public static final EntityComponentKey<LootTableComponent> LOOT_TABLE;
     public static final EntityComponentKey<AiComponent> AI;
+    public static final EntityComponentKey<BabyComponent> BABY = register("baby", BabyComponent.CODEC);
 
     static {
         DISPLAY_NAME = register("display_name", DisplayNameComponent.CODEC);

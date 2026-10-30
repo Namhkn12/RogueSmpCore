@@ -1,6 +1,8 @@
 package com.roguesmp.region.listener;
 
 import com.roguesmp.event.AbilityCastEvent;
+import com.roguesmp.island.IslandData;
+import com.roguesmp.island.IslandManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.region.ServerRegionManager;
@@ -18,6 +20,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.jetbrains.annotations.Nullable;
 
 public class RegionListener implements Listener {
 
@@ -61,7 +64,14 @@ public class RegionListener implements Listener {
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(player);
         if (smpPlayer == null) return;
 
-        String name = regions.queryValue(null, SmpRegionFlags.DISPLAY_NAME);
+        String name = islandRegionName(player);
+        if (name == null) name = regions.queryValue(null, SmpRegionFlags.DISPLAY_NAME);
         smpPlayer.getTabContext().set(TabKeys.REGION_NAME, name == null || name.isBlank() ? null : name);
+    }
+
+    private @Nullable String islandRegionName(Player player) {
+        IslandData island = IslandManager.getInstance().getIslandByWorld(player.getWorld());
+        if (island == null) return null;
+        return island.isMember(player.getUniqueId()) ? "<green>Đảo cá nhân" : "<green>Đảo cá nhân <gray>(Khách)";
     }
 }

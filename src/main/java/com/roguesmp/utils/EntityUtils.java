@@ -5,12 +5,15 @@ import com.roguesmp.entity.BaseEntity;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.tag.SmpTag;
 import com.roguesmp.tag.Tags;
+import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.entity.*;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.RayTraceResult;
@@ -19,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 public class EntityUtils {
@@ -134,6 +138,24 @@ public class EntityUtils {
 
     public static boolean isInStealth(Entity entity) {
         return EntityManager.getInstance().hasMetadata(entity, Keys.IN_STEALTH_META_KEY);
+    }
+
+    public static void forgetTarget(Mob mob, Entity target) {
+        Brain<?> brain = ((CraftMob) mob).getHandle().getBrain();
+        UUID targetId = target.getUniqueId();
+        if (brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
+                && brain.getMemory(MemoryModuleType.ATTACK_TARGET).get().getUUID().equals(targetId)) {
+            brain.eraseMemory(MemoryModuleType.ATTACK_TARGET);
+        }
+        if (brain.hasMemoryValue(MemoryModuleType.ANGRY_AT)
+                && brain.getMemory(MemoryModuleType.ANGRY_AT).get().equals(targetId)) {
+            brain.eraseMemory(MemoryModuleType.ANGRY_AT);
+            brain.eraseMemory(MemoryModuleType.UNIVERSAL_ANGER);
+        }
+        if (target.equals(mob.getTarget())) {
+            mob.setTarget(null);
+            mob.getPathfinder().stopPathfinding();
+        }
     }
 
     public static void clearAllMetadata(Entity entity) {

@@ -48,7 +48,7 @@ public record MageStaffComponent(Color color) implements InteractableComponent {
     private void fire(SmpPlayer smpPlayer, Player player, boolean resetCooldown) {
         SmpItem staff = smpPlayer.getItemAtEquipSlot(EquipSlot.MAINHAND);
         if (staff == null || staff.hasComponent(ItemComponentKeys.BROKEN)) return;
-        if (player.getAttackCooldown() < 1f) return;
+        if (player.getAttackCooldown() < 0.95f) return;
         if (resetCooldown) player.resetCooldown();
         DurabilityLossMechanic.damageItem(smpPlayer, staff, 1, EquipSlot.MAINHAND);
 
