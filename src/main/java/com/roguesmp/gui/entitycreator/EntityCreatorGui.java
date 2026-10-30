@@ -103,6 +103,9 @@ public class EntityCreatorGui {
         multi.addButton(componentLabel(EntityComponentKeys.LOOT_TABLE),
                 tooltip("Danh sách loot table roll khi entity chết (mỗi table roll độc lập).", null),
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildLootTableDialog(player))));
+        multi.addButton(componentLabel(EntityComponentKeys.BABY),
+                tooltip("Đặt entity là baby hoặc adult (age lock).", "Chỉ áp dụng cho entity có thể lớn (Ageable)"),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(buildBabyDialog(player))));
 
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
@@ -406,6 +409,24 @@ public class EntityCreatorGui {
                 },
                 (response, audience) -> {
                     components.remove(EntityComponentKeys.BOSS_BAR.id());
+                    Utils.runLater(() -> openMainDialog(player));
+                });
+    }
+
+    private Dialog buildBabyDialog(Player player) {
+        BabyComponent current = (BabyComponent) components.get(EntityComponentKeys.BABY.id());
+        DialogBuilder builder = DialogBuilder.create(Component.text("Con non"))
+                .canCloseWithEscape(false)
+                .addCheckboxInput("baby", Component.text("Là con non"), current == null || current.baby(), "true", "false");
+
+        return wrapComponentDialog(player, EntityComponentKeys.BABY, builder,
+                (response, audience) -> {
+                    Boolean baby = response.getBoolean("baby");
+                    components.put(EntityComponentKeys.BABY.id(), new BabyComponent(baby == null || baby));
+                    Utils.runLater(() -> openMainDialog(player));
+                },
+                (response, audience) -> {
+                    components.remove(EntityComponentKeys.BABY.id());
                     Utils.runLater(() -> openMainDialog(player));
                 });
     }
