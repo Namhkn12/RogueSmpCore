@@ -1,5 +1,6 @@
 package com.roguesmp.command;
 
+import com.roguesmp.block.gui.BlockBrowserGui;
 import com.roguesmp.gui.ItemBrowser;
 import com.roguesmp.gui.crafting.RecipeBrowserGui;
 import com.roguesmp.gui.entitycreator.EntityBrowserGui;
@@ -48,6 +49,11 @@ public class SmpBrowserCommand {
                     TagEditorGui.open(player);
                 });
 
+        CommandAPICommand blockCommand = new CommandAPICommand("block")
+                .executesPlayer((player, args) -> {
+                    new BlockBrowserGui(player).showInventory(player);
+                });
+
         new CommandAPICommand("smpbrowser")
                 .withPermission(Permissions.CONTENT.node())
                 .withSubcommand(itemCommand)
@@ -57,6 +63,7 @@ public class SmpBrowserCommand {
                 .withSubcommand(npcCommand)
                 .withSubcommand(spawnerCommand)
                 .withSubcommand(tagCommand)
+                .withSubcommand(blockCommand)
                 .register();
     }
 }
