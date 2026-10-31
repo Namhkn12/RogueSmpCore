@@ -150,8 +150,9 @@ public class BlockManager {
      * caller is responsible for those. Either way the underlying block is always cleared to air.
      *
      * @param playEffect Whether the particle and sound effect is played (only in-effect when player = null).
+     * @param applyPhysics Whether clearing to air updates neighbours (attached blocks pop, gravity blocks fall).
      */
-    public boolean breakBlock(Block target, @Nullable Player player, boolean playEffect){
+    public boolean breakBlock(Block target, @Nullable Player player, boolean playEffect, boolean applyPhysics){
         if(player != null){
             BlockBreakEvent event = new BlockBreakEvent(target, player);
             Bukkit.getPluginManager().callEvent(event);
@@ -173,8 +174,12 @@ public class BlockManager {
             }
         }
 
-        target.setType(Material.AIR, true);
+        target.setType(Material.AIR, applyPhysics);
         return true;
+    }
+
+    public boolean breakBlock(Block target, @Nullable Player player, boolean playEffect){
+        return breakBlock(target, player, playEffect, true);
     }
 
     public boolean breakBlock(Block target, @Nullable Player player) {
@@ -344,6 +349,7 @@ public class BlockManager {
         else {
             block.markHydrated();
             registerIfTickable(block);
+            block.onHydrated();
         }
     }
 
@@ -495,6 +501,10 @@ public class BlockManager {
 
     public @Nullable SmpBlock get(BlockPos pos){
         return blocks.get(pos);
+    }
+
+    public List<SmpBlock> blocksIn(NamespacedKey world){
+        return blocks.values().stream().filter(block -> block.getPos().world().equals(world)).toList();
     }
 
     public boolean isSmpBlock(Location loc){

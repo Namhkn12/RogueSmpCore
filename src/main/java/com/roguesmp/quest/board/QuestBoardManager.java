@@ -1,28 +1,32 @@
 package com.roguesmp.quest.board;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.event.AdventureRankChangeEvent;
 import com.roguesmp.event.QuestCompletedEvent;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.player.inbox.InboxEntry;
-import com.roguesmp.player.inbox.InboxManager;
-import com.roguesmp.player.inbox.InboxSource;
-import com.roguesmp.quest.reward.QuestReward;
 import com.roguesmp.quest.Quest;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.quest.QuestProgress;
 import com.roguesmp.quest.data.PlayerQuestData;
+import com.roguesmp.quest.data.QuestDataManager.RankEntry;
 import com.roguesmp.quest.holder.PlayerHolder;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.CompletableFuture;
+import java.util.UUID;
+import java.util.Map;
 
 public class QuestBoardManager {
 
@@ -50,10 +54,27 @@ public class QuestBoardManager {
 
     private final QuestManager questManager;
     private final QuestBoardSettings settings;
+    private final AdventureLeaderboard leaderboard;
+    private final Executor mainThread;
+    private final Map<UUID, AdventureStatus> statuses = new ConcurrentHashMap<>();
+    private final Map<UUID, RankEntry> rankings = new ConcurrentHashMap<>();
+
+    /**
+     * @param position 1-based position in the daily ranking, or -1 if unranked
+     */
+    public record AdventureStatus(int level, AdventureRank rank, int position) {
+        public static final AdventureStatus NONE = new AdventureStatus(1, AdventureRank.NONE, -1);
+    }
 
     private QuestBoardManager(RogueSmpCore plugin, QuestManager questManager) {
         this.questManager = questManager;
         this.settings = QuestBoardSettings.load(plugin.getDataFolder().toPath().resolve("quest_board.json"));
+        this.leaderboard = new AdventureLeaderboard(plugin, questManager.getQuestDataManager(), settings);
+        this.mainThread = Bukkit.getScheduler().getMainThreadExecutor(plugin);
+    }
+
+    public AdventureLeaderboard getLeaderboard() {
+        return leaderboard;
     }
 
     public QuestBoardSettings getSettings() {
@@ -142,8 +163,102 @@ public class QuestBoardManager {
         return Math.max(1, quest.getBoard().weight());
     }
 
+    public int countClaimableRewards(PlayerQuestData data) {
+        int level = getLevel(data);
+        return (int) settings.level().rewards().headMap(level, true).keySet().stream().filter(reward -> canClaimReward(data, reward)).count();
+    }
+
     public int getLevel(PlayerQuestData data) {
         return settings.level().levelOf(data.getExp());
+    }
+
+    public boolean isRewardClaimed(PlayerQuestData data, int level) {
+        return claimedRewards(data).contains(level);
+    }
+
+    public boolean canClaimReward(PlayerQuestData data, int level) {
+        return level <= getLevel(data) && !settings.level().rewardsAt(level).isEmpty() && !isRewardClaimed(data, level);
+    }
+
+    public boolean claimReward(Player player, int level) {
+        PlayerQuestData data = questManager.getPlayerQuestData(player.getUniqueId());
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+        if (data == null || smpPlayer == null || !canClaimReward(data, level)) return false;
+        data.markRewardClaimed(level);
+        questManager.getQuestDataManager().saveAsync(data);
+        settings.level().rewardsAt(level).forEach(reward -> reward.giveReward(smpPlayer));
+        return true;
+    }
+
+    private Set<Integer> claimedRewards(PlayerQuestData data) {
+        if (data.getClaimedRewards() == null) {
+            int level = getLevel(data);
+            data.setClaimedRewards(settings.level().rewards().headMap(level, true).keySet());
+        }
+        return data.getClaimedRewards();
+    }
+
+    public AdventureRank getRank(PlayerQuestData data) {
+        int level = getLevel(data);
+        TopRankSettings topRank = settings.topRank();
+        if (topRank != null && level >= topRank.minLevel() && leaderboard.holdsTopRank(rankings.get(data.getUuid()))) return topRank.rank();
+        return settings.level().rankAt(level);
+    }
+
+    public AdventureStatus getStatus(UUID uuid) {
+        return statuses.getOrDefault(uuid, AdventureStatus.NONE);
+    }
+
+    public void syncStatus(Player player) {
+        PlayerQuestData data = questManager.getPlayerQuestData(player.getUniqueId());
+        if (data == null) return;
+        RankEntry ranking = rankings.get(player.getUniqueId());
+        AdventureStatus next = new AdventureStatus(getLevel(data), getRank(data), ranking == null ? -1 : ranking.position());
+        AdventureStatus previous = statuses.put(player.getUniqueId(), next);
+        if (previous != null && !previous.rank().equals(next.rank())) {
+            Bukkit.getPluginManager().callEvent(new AdventureRankChangeEvent(player, previous.rank(), next.rank()));
+        }
+    }
+
+    /**
+     * Pre-login thread: loads the player's daily ranking ahead of {@link #syncStatus} on join.
+     */
+    @Blocking
+    public void loadRanking(UUID uuid) {
+        RankEntry entry = leaderboard.rankingOf(uuid).join();
+        if (entry != null) rankings.put(uuid, entry);
+        else rankings.remove(uuid);
+    }
+
+    public void clearStatus(UUID uuid) {
+        statuses.remove(uuid);
+        rankings.remove(uuid);
+    }
+
+    /**
+     * Re-ranks, then reloads the ranking of every online player and syncs their status. Completes on the main thread.
+     */
+    public CompletableFuture<Void> refreshTopRank() {
+        return leaderboard.refresh().thenCompose(ignored -> CompletableFuture.allOf(Bukkit.getOnlinePlayers().stream()
+                .map(player -> leaderboard.rankingOf(player.getUniqueId()).thenAcceptAsync(entry -> {
+                    if (!player.isOnline()) return;
+                    if (entry != null) rankings.put(player.getUniqueId(), entry);
+                    else rankings.remove(player.getUniqueId());
+                    syncStatus(player);
+                }, mainThread))
+                .toArray(CompletableFuture[]::new)));
+    }
+
+    /**
+     * Admin override: no level rewards are granted, already reached levels just become claimable.
+     */
+    public void setExp(Player player, long exp) {
+        PlayerQuestData data = questManager.getPlayerQuestData(player.getUniqueId());
+        if (data == null) return;
+        claimedRewards(data);
+        data.setExp(exp);
+        questManager.getQuestDataManager().saveAsync(data);
+        syncStatus(player);
     }
 
     public int getAcceptLimit(PlayerQuestData data) {
@@ -153,21 +268,18 @@ public class QuestBoardManager {
     public void giveExp(Player player, long amount) {
         PlayerQuestData data = questManager.getPlayerQuestData(player.getUniqueId());
         if (data == null || amount <= 0) return;
+        claimedRewards(data);
         int before = getLevel(data);
         data.addExp(amount);
         questManager.getQuestDataManager().saveAsync(data);
         int after = getLevel(data);
         player.sendMessage(Utils.fromString("<aqua>+" + amount + " kinh nghiệm Mạo hiểm"));
+        syncStatus(player);
         if (after <= before) return;
         player.sendMessage(Utils.fromString("<gold><bold>LÊN CẤP!</bold></gold> <yellow>Cấp Mạo hiểm <gold>" + after + "</gold>. Có thể nhận <gold>" + settings.level().acceptLimit(after) + "</gold> nhiệm vụ cùng lúc."));
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
-        for (int level = before + 1; level <= after; level++) {
-            List<QuestReward> rewards = settings.level().rewardsAt(level);
-            if (rewards.isEmpty()) continue;
-            InboxSource source = new InboxSource("Cấp Mạo hiểm", "Phần thưởng cấp " + level, Material.NETHER_STAR.key());
-            InboxManager.getInstance().send(player.getUniqueId(), InboxEntry.of(source, rewards));
-            player.sendMessage(Utils.fromString("<yellow>Phần thưởng cấp <gold>" + level + "</gold> đã được gửi vào hộp thư."));
-        }
+        boolean hasReward = settings.level().rewards().subMap(before, false, after, true).values().stream().anyMatch(rewards -> !rewards.isEmpty());
+        if (hasReward) player.sendMessage(Utils.fromString("<yellow>Có phần thưởng cấp mới! Dùng <gold>/quest level</gold> để nhận."));
     }
 
     public long getAcceptedCount(PlayerQuestData data) {
@@ -217,6 +329,7 @@ public class QuestBoardManager {
 
     public static void init(RogueSmpCore plugin, QuestManager questManager) {
         INSTANCE = new QuestBoardManager(plugin, questManager);
+        INSTANCE.leaderboard.refreshIfEmpty();
         Bukkit.getScheduler().runTaskTimer(plugin, INSTANCE::refreshOnline, REFRESH_INTERVAL_TICKS, REFRESH_INTERVAL_TICKS);
     }
 

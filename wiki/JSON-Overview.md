@@ -22,7 +22,7 @@ Phần lớn nội dung game (item, mob/boss, ability, class, quest, NPC, loot, 
 | `warps/` | Điểm dịch chuyển | [JSON-Warps](JSON-Warps.md) |
 | `loottable/` | Loot table (số ít, không gạch dưới) | [JSON-Loot](JSON-Loot.md) |
 | `crafting_recipes/` | Công thức chế tạo | [JSON-Crafting](JSON-Crafting.md) |
-| `blocks/` | Block tùy chỉnh (generator, altar, ...) | [JSON-Blocks](JSON-Blocks.md) |
+| `blocks/` | Block tùy chỉnh (generator, altar, palette, ...) | [JSON-Blocks](JSON-Blocks.md) |
 | `catalyst_types/` | Loại chất xúc tác cho máy phát | [JSON-Blocks](JSON-Blocks.md#catalyst_types--loại-chất-xúc-tác) |
 | `<thư mục trên>/tags/` | Tag — nhóm id lại | [Tag](#tag) bên dưới |
 | `enchants/tags/` | Chỉ có tag (enchant là enum cứng, không có file entry) | [JSON-Items](JSON-Items.md#enchant--không-có-json-riêng) |

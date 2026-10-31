@@ -2,6 +2,7 @@ package com.roguesmp.entity;
 
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.entity.ai.sensor.CombatPiglinSensor;
 import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.entity.component.impl.SpellComponent;
@@ -9,10 +10,7 @@ import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Evoker;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
@@ -49,6 +47,7 @@ public class EntityManager {
         if (entity instanceof Evoker evoker) {
             Bukkit.getMobGoals().removeGoal(evoker, VanillaGoal.EVOKER_SUMMON_SPELL); // Evoker won't summon vexes.
         }
+        if (entity instanceof PiglinAbstract piglinAbstract) CombatPiglinSensor.applyTo(piglinAbstract);
 
         String entityId = entity.getPersistentDataContainer().get(Keys.MOB_ID, PersistentDataType.STRING);
         if (entityId == null) return;

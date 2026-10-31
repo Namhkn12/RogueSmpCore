@@ -321,6 +321,7 @@ Các loại hợp lệ (mọi `value` là **phân số**, `0.25` = 25%):
 | `silence` | — | Câm lặng (hệ spell của mob kiểm tra effect này). |
 | `empowered_strike` | `value` (double, bắt buộc) | Đòn cận chiến **kế tiếp** mạnh thêm `value`, rồi effect mất. |
 | `stealth_effect` | — | Tàng hình: mob/piglin gần đó bỏ mục tiêu. (id là `stealth_effect`, không phải `stealth`.) Giữ qua đăng xuất. |
+| `curse_of_death` | `stacks` (int, bắt buộc, ép về 1–3) | Lời Nguyền Tử Thần: mỗi tầng +20% sát thương phải nhận, −20% sát thương gây ra (nhân cuối). Thay thế hoàn toàn effect cũ cùng loại thay vì chọn mạnh nhất. Thường do chết trong vùng [`smp-death-curse`](Region-Flags.md#smp-death-curse) gây ra, không phải consumable. Giữ qua đăng xuất. |
 
 `DamageType` (cho `allowed_damage_types`): `MELEE, MELEE_ABILITY, PROJECTILE, PROJECTILE_ABILITY, UNSCALEABLE, UNSCALABLE_ABILITY, UNSCALABLE_ENCHANT, MAGIC, THORNS, BLAST, FIRE, FALL, AILMENT, TRUE, OTHER` (chú ý chính tả `UNSCALEABLE` vs `UNSCALABLE_*`).
 

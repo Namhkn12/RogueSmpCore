@@ -3,6 +3,7 @@ package com.roguesmp.block;
 import com.roguesmp.block.data.*;
 import com.roguesmp.block.impl.brewing.BrewingBlock;
 import com.roguesmp.block.impl.energy.WirelessNodeBlock;
+import com.roguesmp.block.impl.PaletteMarkerBlock;
 import com.roguesmp.block.impl.TallyBlock;
 import com.roguesmp.block.impl.cokeoven.CokeOvenBlock;
 import com.roguesmp.block.impl.energy.EnergyGeneratorBlock;
@@ -34,6 +35,8 @@ public class BlockTypes {
             register("wireless_node", "Nút không dây", WirelessNodeData.CODEC, WirelessNodeData.DEFAULT, WirelessNodeBlock::new);
     public static final BlockType<BrewingData, BrewingBlock> BREWING =
             register("brewing", "Bàn pha chế", BrewingData.CODEC, BrewingData.DEFAULT, BrewingBlock::new);
+    public static final BlockType<PaletteMarkerData, PaletteMarkerBlock> PALETTE =
+            register("palette", "Khối ngẫu nhiên", PaletteMarkerData.CODEC, PaletteMarkerData.DEFAULT, PaletteMarkerBlock::new);
 
     /** Create a new SmpBlock instance of {@code id} from its corresponding registered data, or null if there's no such block. */
     public static @Nullable SmpBlock create(String id) {

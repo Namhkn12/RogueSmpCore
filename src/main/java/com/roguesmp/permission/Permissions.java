@@ -10,6 +10,8 @@ public enum Permissions {
     CONTENT("content"),
     RELOAD("reload"),
     QUEST_ASSIGN("quest.assign"),
+    QUEST_EXP("quest.exp"),
+    QUEST_TOP_REFRESH("quest.top.refresh"),
     ABILITY_UNLOCK("ability.unlock"),
     FISHING_ADMIN("fishing.admin"),
     REGION_ADMIN("region.admin"),

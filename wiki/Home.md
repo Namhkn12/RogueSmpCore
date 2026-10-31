@@ -22,7 +22,7 @@ Mỗi trang = 1 thư mục dữ liệu: **mỗi key làm gì, kiểu gì, bắt 
 | [JSON-Warps](JSON-Warps.md) | `warps/` | Điểm dịch chuyển `/warp`, điểm đến, hiệu ứng dịch chuyển |
 | [JSON-Loot](JSON-Loot.md) | `loottable/` | Pool, entry, condition, thuật toán roll |
 | [JSON-Crafting](JSON-Crafting.md) | `crafting_recipes/` | `shaped`, `shapeless`, `fusion` |
-| [JSON-Blocks](JSON-Blocks.md) | `blocks/`, `catalyst_types/` | Block, máy phát (generator), module, chất xúc tác, altar |
+| [JSON-Blocks](JSON-Blocks.md) | `blocks/`, `catalyst_types/` | Block, máy phát (generator), module, chất xúc tác, altar, khối ngẫu nhiên `palette`, trình duyệt block |
 | [JSON-Dungeons](JSON-Dungeons.md) | `dungeon/` | Dungeon, feature, phòng, script (sự kiện, condition, action, biến) |
 | [JSON-Spawners](JSON-Spawners.md) | `spawners/` | Spawner tuỳ chỉnh, behavior, flag `smp-spawners` |
 | [Region-Flags](Region-Flags.md) | (WorldGuard) | Flag `smp-*`: ability, tên khu vực, particle, điểm spawn, cổng dịch chuyển |

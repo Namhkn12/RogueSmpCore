@@ -13,9 +13,10 @@ import java.util.stream.Collectors;
 /**
  * Exp needed to go from level {@code n} to {@code n + 1} is {@code baseExp + increment * (n - 1)}. {@code acceptLimits}
  * maps a level to the board quests that can be accepted at once from that level on. {@code rewards} are sent to the
- * player's inbox when they reach that level.
+ * player's inbox when they reach that level. {@code ranks} maps a level to the cosmetic adventure rank held from that
+ * level on.
  */
-public record QuestLevelCurve(long baseExp, long increment, int maxLevel, NavigableMap<Integer, Integer> acceptLimits, NavigableMap<Integer, List<QuestReward>> rewards) {
+public record QuestLevelCurve(long baseExp, long increment, int maxLevel, NavigableMap<Integer, Integer> acceptLimits, NavigableMap<Integer, List<QuestReward>> rewards, NavigableMap<Integer, AdventureRank> ranks) {
 
     private static final Codec<NavigableMap<Integer, Integer>> LIMITS_CODEC = Codec.unboundedMap(Codec.INT).comapFlatMap(raw -> {
         NavigableMap<Integer, Integer> limits = new TreeMap<>();
@@ -41,7 +42,19 @@ public record QuestLevelCurve(long baseExp, long increment, int maxLevel, Naviga
         return DataResult.success(rewards);
     }, rewards -> rewards.entrySet().stream().collect(Collectors.toMap(entry -> String.valueOf(entry.getKey()), Map.Entry::getValue)));
 
-    public static final QuestLevelCurve DEFAULT = new QuestLevelCurve(100, 50, 50, new TreeMap<>(Map.of(1, 2, 5, 3, 10, 4, 20, 5)), new TreeMap<>());
+    private static final Codec<NavigableMap<Integer, AdventureRank>> RANKS_CODEC = Codec.unboundedMap(AdventureRank.CODEC).comapFlatMap(raw -> {
+        NavigableMap<Integer, AdventureRank> ranks = new TreeMap<>();
+        for (Map.Entry<String, AdventureRank> entry : raw.entrySet()) {
+            try {
+                ranks.put(Integer.parseInt(entry.getKey()), entry.getValue());
+            } catch (NumberFormatException e) {
+                return DataResult.error("Rank key must be a level number: " + entry.getKey());
+            }
+        }
+        return DataResult.success(ranks);
+    }, ranks -> ranks.entrySet().stream().collect(Collectors.toMap(entry -> String.valueOf(entry.getKey()), Map.Entry::getValue)));
+
+    public static final QuestLevelCurve DEFAULT = new QuestLevelCurve(100, 50, 50, new TreeMap<>(Map.of(1, 2, 5, 3, 10, 4, 20, 5)), new TreeMap<>(), new TreeMap<>());
 
     public static final Codec<QuestLevelCurve> CODEC = Codec.composite(
             Codec.LONG.optionalFieldOf("baseExp", DEFAULT.baseExp).forGetter(QuestLevelCurve::baseExp),
@@ -49,7 +62,8 @@ public record QuestLevelCurve(long baseExp, long increment, int maxLevel, Naviga
             Codec.INT.optionalFieldOf("maxLevel", DEFAULT.maxLevel).forGetter(QuestLevelCurve::maxLevel),
             LIMITS_CODEC.optionalFieldOf("acceptLimits", DEFAULT.acceptLimits).forGetter(QuestLevelCurve::acceptLimits),
             REWARDS_CODEC.optionalFieldOf("rewards", DEFAULT.rewards).forGetter(QuestLevelCurve::rewards),
-            (baseExp, increment, maxLevel, limits, rewards) -> new QuestLevelCurve(Math.max(1, baseExp), Math.max(0, increment), Math.max(1, maxLevel), limits.isEmpty() ? DEFAULT.acceptLimits : limits, rewards)
+            RANKS_CODEC.optionalFieldOf("ranks", DEFAULT.ranks).forGetter(QuestLevelCurve::ranks),
+            (baseExp, increment, maxLevel, limits, rewards, ranks) -> new QuestLevelCurve(Math.max(1, baseExp), Math.max(0, increment), Math.max(1, maxLevel), limits.isEmpty() ? DEFAULT.acceptLimits : limits, rewards, ranks)
     );
 
     public long expToNext(int level) {
@@ -66,6 +80,12 @@ public record QuestLevelCurve(long baseExp, long increment, int maxLevel, Naviga
         return level;
     }
 
+    public long totalExpFor(int level) {
+        long total = 0;
+        for (int current = 1; current < Math.min(level, maxLevel); current++) total += expToNext(current);
+        return total;
+    }
+
     public long expIntoLevel(long totalExp) {
         int reached = levelOf(totalExp);
         long remaining = totalExp;
@@ -80,5 +100,10 @@ public record QuestLevelCurve(long baseExp, long increment, int maxLevel, Naviga
 
     public List<QuestReward> rewardsAt(int level) {
         return rewards.getOrDefault(level, List.of());
+    }
+
+    public AdventureRank rankAt(int level) {
+        Map.Entry<Integer, AdventureRank> entry = ranks.floorEntry(level);
+        return entry == null ? AdventureRank.NONE : entry.getValue();
     }
 }

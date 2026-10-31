@@ -8,7 +8,6 @@ import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.SpellCastEvent;
 import com.roguesmp.utils.EntityUtils;
 import org.bukkit.entity.*;
-import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
@@ -112,10 +111,7 @@ public class EntityListener implements Listener {
     @EventHandler
     public void onTargetEntity(EntityTargetLivingEntityEvent event) {
         if (event.getTarget() != null && EntityUtils.isInStealth(event.getTarget())) {
-            if (event.getEntity() instanceof PiglinAbstract piglinAbstract) {
-                piglinAbstract.setMemory(MemoryKey.UNIVERSAL_ANGER, false);
-                piglinAbstract.setMemory(MemoryKey.ANGRY_AT, null);
-            }
+            if (event.getEntity() instanceof Mob mob) EntityUtils.forgetTarget(mob, event.getTarget());
             event.setCancelled(true);
         }
         if (!(event.getEntity() instanceof LivingEntity living)) return;

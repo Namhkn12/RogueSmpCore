@@ -18,6 +18,7 @@ public final class SmpRegionFlags {
     public static final StateFlag ABILITIES = new StateFlag("smp-abilities", true);
     public static final StateFlag SPAWNERS = new StateFlag("smp-spawners", false);
     public static final StateFlag GROUPED = new StateFlag("smp-grouped", false);
+    public static final StateFlag DEATH_CURSE = new StateFlag("smp-death-curse", false);
     public static final StringFlag DISPLAY_NAME = new StringFlag("smp-display-name", "<gray>Unknown");
     public static final AmbientParticlesFlag AMBIENT_PARTICLES = new AmbientParticlesFlag("smp-ambient-particles");
     public static final SpawnPointFlag SPAWN = new SpawnPointFlag("smp-spawn");
@@ -28,7 +29,7 @@ public final class SmpRegionFlags {
 
     public static void register() {
         FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
-        for (Flag<?> flag : List.of(ABILITIES, GROUPED, SPAWNERS, DISPLAY_NAME, AMBIENT_PARTICLES, SPAWN, ENTER_TELEPORT)) {
+        for (Flag<?> flag : List.of(ABILITIES, GROUPED, SPAWNERS, DEATH_CURSE, DISPLAY_NAME, AMBIENT_PARTICLES, SPAWN, ENTER_TELEPORT)) {
             try {
                 registry.register(flag);
             } catch (FlagConflictException e) {

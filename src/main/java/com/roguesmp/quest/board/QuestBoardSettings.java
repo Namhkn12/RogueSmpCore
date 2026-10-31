@@ -7,6 +7,7 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.JsonOps;
 import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -14,17 +15,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Read from {@code quest_board.json}: how many quests a board shows, and the quest level curve.
+ * Read from {@code quest_board.json}: how many quests a board shows, the quest level curve, and the optional
+ * leaderboard-only top rank.
  */
-public record QuestBoardSettings(int size, QuestLevelCurve level) {
+public record QuestBoardSettings(int size, QuestLevelCurve level, @Nullable TopRankSettings topRank) {
 
     public static final int MAX_SIZE = 28;
-    public static final QuestBoardSettings DEFAULT = new QuestBoardSettings(7, QuestLevelCurve.DEFAULT);
+    public static final QuestBoardSettings DEFAULT = new QuestBoardSettings(7, QuestLevelCurve.DEFAULT, null);
 
     public static final Codec<QuestBoardSettings> CODEC = Codec.composite(
             Codec.INT.optionalFieldOf("size", DEFAULT.size).forGetter(QuestBoardSettings::size),
             QuestLevelCurve.CODEC.optionalFieldOf("level", DEFAULT.level).forGetter(QuestBoardSettings::level),
-            (size, level) -> new QuestBoardSettings(Math.clamp(size, 1, MAX_SIZE), level)
+            TopRankSettings.CODEC.optionalFieldOf("topRank", () -> null).forGetter(QuestBoardSettings::topRank),
+            (size, level, topRank) -> new QuestBoardSettings(Math.clamp(size, 1, MAX_SIZE), level, topRank)
     );
 
     @Blocking

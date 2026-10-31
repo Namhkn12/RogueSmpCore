@@ -1,6 +1,11 @@
 package com.roguesmp.tab;
 
 import com.roguesmp.effect.SmpEffect;
+import com.roguesmp.party.Party;
+import com.roguesmp.party.PartyManager;
+import org.bukkit.Bukkit;
+import org.bukkit.attribute.Attribute;
+import java.util.UUID;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.Ability;
@@ -28,13 +33,11 @@ import java.util.List;
 public class GlobalTabLayout {
 
     private static final int MAX_EFFECT_LINES = 10;
+    private static final int MAX_PARTY_LINES = 5;
 
     public static final TabClaim CLAIM = new TabClaim("global", 0, GlobalTabLayout::scoreboardView, GlobalTabLayout::tabListView);
 
     public static TabListView tabListView(Player player, TabContext context) {
-        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
-        AbilityLoadout loadout = smpPlayer == null ? null : smpPlayer.getAbilityLoadout();
-
         List<TabElement> effectRows = new ArrayList<>();
         for (int i = 0; i < MAX_EFFECT_LINES; i++) {
             int index = i;
@@ -42,26 +45,39 @@ public class GlobalTabLayout {
         }
         effectRows.add(TabElement.ticking(20, c -> effectOverflow(player)));
 
-        List<TabElement> abilityRows = new ArrayList<>();
-        for (int i = 0; i < AbilityLoadout.SLOT_COUNT; i++) {
+        List<TabElement> partyRows = new ArrayList<>();
+        for (int i = 0; i < MAX_PARTY_LINES; i++) {
             int index = i;
-            abilityRows.add(TabElement.ticking(20, c -> abilityLine(loadout, index)));
+            partyRows.add(TabElement.ticking(20, c -> partyLine(player, index)));
         }
+        partyRows.add(TabElement.ticking(20, c -> partyOverflow(player)));
 
         TabListView view = TabListView.create(player, "global_info_tab", context)
                 .header(TabListDefaults.header())
                 .footer(TabListDefaults.footer(player));
         TabListDefaults.column(view, 1, "<bold><yellow>Hiệu ứng            </yellow></bold>", effectRows);
-        TabListDefaults.column(view, 2, "<bold><yellow>Kỹ năng</yellow></bold>", abilityRows);
+        TabListDefaults.column(view, 2, "<bold><yellow>Nhóm</yellow></bold>", partyRows);
         return TabListDefaults.playerList(view);
     }
 
     public static TabScoreboardView scoreboardView(Player player, TabContext context) {
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+        AbilityLoadout loadout = smpPlayer == null ? null : smpPlayer.getAbilityLoadout();
+
+        List<TabElement> abilityLines = new ArrayList<>();
+        for (int i = 0; i < AbilityLoadout.SLOT_COUNT; i++) {
+            int index = i;
+            abilityLines.add(TabElement.ticking(10, c -> abilityLine(loadout, index)));
+        }
+
         return TabScoreboardView.builder(player, "global_scoreboard_tab")
                 .title(ScoreboardDefaults.title())
                 .line(ScoreboardDefaults.divider())
                 .line(ScoreboardDefaults.regionLine())
                 .lines(ScoreboardDefaults.playerInfo(player))
+                .line(ScoreboardDefaults.spacer())
+                .line("<gold>Kỹ năng:")
+                .lines(abilityLines)
                 .line(ScoreboardDefaults.spacer())
                 .build(context);
     }
@@ -83,24 +99,50 @@ public class GlobalTabLayout {
         return "";
     }
 
+    private static List<String> partyMembers(Player player) {
+        Party party = PartyManager.getInstance().getPartyByPlayer(player);
+        return party == null ? List.of() : party.getMembers();
+    }
+
+    private static String partyLine(Player viewer, int index) {
+        List<String> members = partyMembers(viewer);
+        if (index >= members.size()) return "";
+        Player member = Bukkit.getPlayer(UUID.fromString(members.get(index)));
+        if (member == null) return "<gray>(Offline)</gray>";
+
+
+        double health = member.getHealth();
+        double maxHealth = member.getAttribute(Attribute.MAX_HEALTH).getValue();
+        double ratio = health / maxHealth;
+        String color = ratio > 0.5 ? "green" : ratio > 0.25 ? "yellow" : "red";
+        Party party = PartyManager.getInstance().getPartyByPlayer(viewer);
+        String name = party != null && party.isOwner(member.getUniqueId().toString()) ? "<bold>" + member.getName() + "</bold>" : member.getName();
+        return "<white>" + name + "</white> <gray>-</gray> <" + color + ">" + Utils.formatDecimal(health) + "❤</" + color + ">";
+    }
+
+    private static String partyOverflow(Player viewer) {
+        int extra = partyMembers(viewer).size() - MAX_PARTY_LINES;
+        return extra > 0 ? "<gray>(và " + extra + " người khác...)</gray>" : "";
+    }
+
     private static String abilityLine(AbilityLoadout loadout, int index) {
         if (loadout == null) return "";
         Ability[] abilities = loadout.getAbilities();
         if (index >= abilities.length || abilities[index] == null) {
-            return "<gray>- Trống -</gray>";
+            return "<gray> - Trống -</gray>";
         }
         Ability ability = abilities[index];
-        String name = Utils.toString(ability.getAbilityInfo().getFormattedDisplayName());
+        String name = " " + Utils.toString(ability.getAbilityInfo().getFormattedDisplayName());
         if (ability instanceof AbilityWithCharge charged) {
             String color = charged.getCharges() > 0 ? "green" : "red";
             String text = "<" + color + ">" + charged.getCharges() + "/" + charged.getMaxCharges() + "</" + color + ">";
             if (charged.getCharges() < charged.getMaxCharges()) {
-                text += " <gray>(" + Utils.formatDecimal(ability.getCooldownTick() / 20.0) + "s)</gray>";
+                text += " <gray>(" + (int) Math.ceil(ability.getCooldownTick() / 20.0) + "s)</gray>";
             }
             return name + " " + text;
         } else if (ability.isOnCooldown()) {
-            return name + " <red>" + Utils.formatDecimal(ability.getCooldownTick() / 20.0) + "s</red>";
+            return name + " <red>" + (int) Math.ceil(ability.getCooldownTick() / 20.0) + "s</red>";
         }
-        return name + " <green>Sẵn sàng</green>";
+        return name + " <green>R</green>";
     }
 }

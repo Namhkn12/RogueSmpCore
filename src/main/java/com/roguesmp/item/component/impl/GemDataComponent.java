@@ -48,10 +48,15 @@ public class GemDataComponent implements ItemComponent {
             lores.add(Utils.text("Khi khảm trang bị " + slot.getSimpleName() + ":", NamedTextColor.GRAY));
 
             statMap.forEach((attribute, value) -> {
-                String sign = value >= 0 ? "+" : "";
-                TextColor textColor = value >= 0 ? NamedTextColor.GREEN : NamedTextColor.RED;
-                List<Component> display = attribute.getAttribute().getDisplayText(value, context.player(), Utils.EMPTY_PDC);
-                if (display != null) lores.addAll(display);
+                List<Component> display = new ArrayList<>();
+
+                List<Component> displaySingle = attribute.getAttribute().getDisplayText(value, context.player(), Utils.EMPTY_PDC);
+                if (displaySingle != null) {
+                    for (Component component : displaySingle) {
+                        display.add(Component.text(" ").append(component));
+                    }
+                    lores.addAll(display);
+                }
             });
 
             lores.add(Component.empty());

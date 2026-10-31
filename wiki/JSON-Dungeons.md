@@ -184,6 +184,48 @@ Cần feature `rooms`. Khi instance bắt đầu, chọn ngẫu nhiên 1 phòng 
 - Bước vào cổng → mỗi người được dán **1 bản phòng kho báu riêng** phía trên spawn (cách nhau `spacing` block).
 - Đi vào cổng nether trong phòng kho báu → về hub. Người cuối cùng ra → instance kết thúc ("đã được chinh phục").
 
+### `block_palettes` — khối ngẫu nhiên
+
+Định nghĩa các palette mà khối đánh dấu [`palette`](JSON-Blocks.md#palette--khối-ngẫu-nhiên-cho-dungeon) dùng. Mỗi khối đánh dấu trong world của instance được thay bằng 1 block rút từ palette cùng tên.
+
+```json
+"block_palettes": {
+  "palettes": {
+    "cracked_wall": {
+      "chance": 0.8,
+      "fallback": "minecraft:stone_bricks",
+      "entries": [
+        { "block": "minecraft:cracked_stone_bricks", "weight": 3 },
+        { "block": "minecraft:mossy_stone_bricks", "weight": 1 }
+      ]
+    },
+    "floor": {
+      "entries": [
+        { "block": "minecraft:polished_andesite", "weight": 4 },
+        { "block": "minecraft:oak_slab[type=bottom]" },
+        { "block": "dungeon_loot_urn" }
+      ]
+    }
+  }
+}
+```
+
+| Key | Mặc định | Ý nghĩa |
+| :--- | :--- | :--- |
+| `palettes` | bắt buộc | Map tên palette → palette. |
+| `palettes.<tên>.entries` | bắt buộc | Danh sách block có thể ra. |
+| `entries[].block` | bắt buộc | Có tiền tố `minecraft:` = block vanilla (ghi được block state, vd `minecraft:oak_stairs[facing=north]`). Không tiền tố = id block tuỳ chỉnh trong `blocks/`. |
+| `entries[].weight` | `1` | Trọng số rút. |
+| `palettes.<tên>.chance` | `1` | Xác suất được thay bằng 1 entry. Trượt → dùng `fallback`. |
+| `palettes.<tên>.fallback` | không có | Block dùng khi trượt `chance` (cùng cú pháp `block`). Không có → không khí. |
+
+Khi nào thay:
+- **Khối trong template**: ngay khi instance bắt đầu (và khi khôi phục sau restart, để dọn những khối còn sót).
+- **Khối trong schematic phòng**: ngay khi phòng được dán.
+- Kết quả cố định theo instance + vị trí: cùng 1 lượt chơi, cùng 1 ô luôn ra cùng block.
+
+Kiểm tra khi nạp: báo block tuỳ chỉnh không tồn tại, hoặc entry/fallback lại là 1 khối `palette`. Block vanilla viết sai thì dungeon báo lỗi ngay khi đọc. Palette mà khối đánh dấu cần nhưng dungeon không có **không** được kiểm tra trước (không biết trước khối nào nằm trong world) — chỉ log khi gặp.
+
 ## Phòng
 
 File trong `dungeon/rooms/`, ví dụ `dungeon/rooms/crypt_boss.json`:

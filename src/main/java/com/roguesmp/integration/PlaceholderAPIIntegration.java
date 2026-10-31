@@ -6,9 +6,7 @@ import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.quest.QuestManager;
 import com.roguesmp.quest.board.QuestBoardManager;
-import com.roguesmp.quest.data.PlayerQuestData;
 import com.roguesmp.utils.Utils;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.kyori.adventure.text.Component;
@@ -87,10 +85,15 @@ public class PlaceholderAPIIntegration extends PlaceholderExpansion {
             };
         }
 
-        if (params.equals("adventure_level")) {
+        if (params.startsWith("adventure_")) {
             if (player == null) return null;
-            PlayerQuestData data = QuestManager.getInstance().getPlayerQuestData(player.getUniqueId());
-            return data == null ? "" : String.valueOf(QuestBoardManager.getInstance().getLevel(data));
+            QuestBoardManager.AdventureStatus status = QuestBoardManager.getInstance().getStatus(player.getUniqueId());
+            return switch (params) {
+                case "adventure_level" -> String.valueOf(status.level());
+                case "adventure_rank" -> status.rank().name();
+                case "adventure_rank_suffix" -> Utils.toString(status.rank().getDisplayIcon());
+                default -> null;
+            };
         }
 
         if (params.startsWith("player_")) {

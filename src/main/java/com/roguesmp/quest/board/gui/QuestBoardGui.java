@@ -8,6 +8,7 @@ import com.roguesmp.player.inbox.gui.InboxGui;
 import com.roguesmp.quest.Quest;
 import com.roguesmp.quest.QuestProgress;
 import com.roguesmp.quest.board.BoardEntry;
+import com.roguesmp.quest.board.AdventureRank;
 import com.roguesmp.quest.board.QuestBoardManager;
 import com.roguesmp.quest.board.QuestLevelCurve;
 import com.roguesmp.quest.data.PlayerQuestData;
@@ -22,6 +23,7 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -186,10 +188,15 @@ public class QuestBoardGui extends BaseGui {
             infoLore.add(Utils.fromString("<!i><gold>Đã đạt cấp tối đa"));
         }
         infoLore.add(Utils.fromString("<!i><gray>Hoàn thành nhiệm vụ để nhận nhiệm vụ mới."));
+        int claimable = boardManager.countClaimableRewards(data);
+        if (claimable > 0) infoLore.add(Utils.fromString("<!i><gold>🎁 " + claimable + " phần thưởng chưa nhận"));
         infoLore.add(Utils.fromString("<!i><yellow>▶ Click để xem phần thưởng cấp"));
+        AdventureRank rank = boardManager.getRank(data);
         ItemStack infoItem = ItemStack.of(Material.WRITABLE_BOOK);
-        infoItem.setData(DataComponentTypes.ITEM_NAME, Utils.fromString("<gold>Cấp Mạo hiểm " + level));
+        if (!rank.model().isEmpty()) infoItem.setData(DataComponentTypes.ITEM_MODEL, Key.key(rank.model()));
+        infoItem.setData(DataComponentTypes.ITEM_NAME, Utils.fromString(rank.name() + " <dark_gray>- <gold>Cấp Mạo hiểm " + level));
         infoItem.setData(DataComponentTypes.LORE, ItemLore.lore(infoLore));
+        if (claimable > 0) infoItem.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
         addButton(5, 1, infoItem, ClickHandler.openGui(new QuestLevelGui(player, this)));
 
         ItemStack closeItem = ItemStack.of(Material.BARRIER);

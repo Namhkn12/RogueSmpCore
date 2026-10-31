@@ -3,11 +3,14 @@ package com.roguesmp.quest.data;
 import com.roguesmp.quest.holder.GroupHolder;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.storage.JsonSqliteStore;
+import com.roguesmp.storage.JsonSqliteStore.SqlStatement;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,8 +25,7 @@ import java.util.concurrent.Executor;
 
 public class QuestDataManager {
 
-    private final Map<UUID, PlayerQuestData> dataMap = new HashMap<>();
-    private final Map<UUID, PlayerQuestData> pendingJoins = new ConcurrentHashMap<>();
+    private final Map<UUID, PlayerQuestData> dataMap = new ConcurrentHashMap<>();
     private final JsonSqliteStore<PlayerQuestData> store;
     private final Map<UUID, GroupQuestData> groupMap = new HashMap<>();
     private final JsonSqliteStore<GroupQuestData> groupStore;
@@ -33,6 +35,10 @@ public class QuestDataManager {
         this.store = new JsonSqliteStore<>(plugin, "player_quest_data.db", "player_quest_data", "uuid", PlayerQuestData.CODEC);
         this.groupStore = new JsonSqliteStore<>(plugin, "group_quest_data.db", "group_quest_data", "group_id", GroupQuestData.CODEC);
         this.mainThread = Bukkit.getScheduler().getMainThreadExecutor(plugin);
+        store.executeAsync(List.of(
+                SqlStatement.of("CREATE TABLE IF NOT EXISTS " + RANKING_TABLE + " (uuid TEXT PRIMARY KEY NOT NULL, position INTEGER NOT NULL, exp INTEGER NOT NULL)"),
+                SqlStatement.of("CREATE INDEX IF NOT EXISTS " + RANKING_TABLE + "_position ON " + RANKING_TABLE + " (position)")
+        ));
     }
 
     public @Blocking PlayerQuestData loadData(UUID uuid) {
@@ -173,25 +179,12 @@ public class QuestDataManager {
         return Collections.unmodifiableCollection(dataMap.values());
     }
 
-    /**
-     * Holds data loaded during pre-login until the player actually joins, so refused logins never reach the cache.
-     */
-    public void stagePendingJoin(PlayerQuestData playerQuestData) {
-        pendingJoins.put(playerQuestData.getUuid(), playerQuestData);
+    public void cache(PlayerQuestData playerQuestData) {
+        dataMap.put(playerQuestData.getUuid(), playerQuestData);
     }
 
-    public void discardPendingJoin(UUID uuid) {
-        pendingJoins.remove(uuid);
-    }
-
-    /**
-     * @return false if nothing was staged for the player
-     */
-    public boolean cachePendingJoin(UUID uuid) {
-        PlayerQuestData data = pendingJoins.remove(uuid);
-        if (data == null) return false;
-        dataMap.put(uuid, data);
-        return true;
+    public void uncache(UUID uuid) {
+        dataMap.remove(uuid);
     }
 
     /**
@@ -201,6 +194,45 @@ public class QuestDataManager {
     public void saveAndUncache(UUID uuid) {
         PlayerQuestData data = dataMap.remove(uuid);
         if (data != null) saveAsync(data);
+    }
+
+    public record RankEntry(UUID uuid, int position, long exp) {
+    }
+
+    private static final String RANKING_TABLE = "adventure_ranking";
+
+    private RankEntry rankEntry(ResultSet row) throws SQLException {
+        return new RankEntry(UUID.fromString(row.getString("uuid")), row.getInt("position"), row.getLong("exp"));
+    }
+
+    /**
+     * Rebuilds the frozen ranking of every player with at least {@code minExp} quest exp, highest first; ties go to
+     * whoever reached their total first.
+     */
+    public CompletableFuture<Boolean> rebuildRanking(long minExp) {
+        return store.executeAsync(List.of(
+                SqlStatement.of("DELETE FROM " + RANKING_TABLE),
+                new SqlStatement("INSERT INTO " + RANKING_TABLE + " (uuid, position, exp) "
+                        + "SELECT {key}, ROW_NUMBER() OVER (ORDER BY exp DESC, updated_at ASC), exp FROM ("
+                        + "SELECT {key}, json_extract(data, '$.exp') AS exp, COALESCE(json_extract(data, '$.expUpdatedAt'), 0) AS updated_at "
+                        + "FROM {table} WHERE json_extract(data, '$.exp') >= ?)",
+                        statement -> statement.setLong(1, Math.max(1, minExp)))
+        ));
+    }
+
+    public CompletableFuture<Boolean> isRankingEmpty() {
+        return store.queryAsync("SELECT 1 FROM " + RANKING_TABLE + " LIMIT 1", statement -> {
+        }, row -> true).thenApply(List::isEmpty);
+    }
+
+    public CompletableFuture<List<RankEntry>> topRanked(int limit) {
+        return store.queryAsync("SELECT uuid, position, exp FROM " + RANKING_TABLE + " WHERE position <= ? ORDER BY position",
+                statement -> statement.setInt(1, limit), this::rankEntry);
+    }
+
+    public CompletableFuture<@Nullable RankEntry> rankingOf(UUID uuid) {
+        return store.queryAsync("SELECT uuid, position, exp FROM " + RANKING_TABLE + " WHERE uuid = ?",
+                statement -> statement.setString(1, uuid.toString()), this::rankEntry).thenApply(rows -> rows.isEmpty() ? null : rows.getFirst());
     }
 
     public void close() {

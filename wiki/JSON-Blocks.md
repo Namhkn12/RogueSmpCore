@@ -47,6 +47,7 @@ Mẹo âm thanh: âm thanh cũng phát phía client, nên nếu item/model của
 | `energy_generator` | [EnergyGeneratorData](#energy_generator--máy-phát-năng-lượng) | Đốt nhiên liệu để tạo năng lượng, truyền sang máy kề bên. |
 | `altar_main` | — | Bàn thờ chính (giữa) của hợp nhất — xem [JSON-Crafting](JSON-Crafting.md#fusion--bàn-thờ-hợp-nhất-altar). |
 | `altar_side` | — | Bàn thờ phụ (1 trong 8 bàn xung quanh). |
+| `palette` | [PaletteMarkerData](#palette--khối-ngẫu-nhiên-cho-dungeon) | Khối đánh dấu trong dungeon, tự thay bằng block ngẫu nhiên khi instance chạy. |
 
 Trạng thái runtime của block (bộ đếm tally, vật đặt trên altar, kho/năng lượng generator) lưu trong SQLite `blocks.db` — **không** phải JSON designer viết.
 
@@ -294,6 +295,39 @@ Cấu trúc hợp nhất: 1 `altar_main` + 8 `altar_side` đặt ở bán kính 
   "display_name": "<light_purple>Fusion Altar", "drops": [ { "item": "fusion_altar" } ] }
 ```
 Cách chơi: click phải với item để đặt cả stack lên altar (đồ cũ trả lại); tay không trên altar phụ lấy lại; trên altar chính mở GUI hợp nhất (Shift + tay không để lấy lại item). Phá altar rơi item đang đặt. Công thức: [JSON-Crafting → fusion](JSON-Crafting.md#fusion--bàn-thờ-hợp-nhất-altar).
+
+## `palette` — khối ngẫu nhiên cho dungeon
+
+Khối đánh dấu để xây dungeon. Trong **template world** nó chỉ là 1 block bình thường (không làm gì). Trong **world của instance** (clone từ template, hoặc nằm trong schematic phòng được dán), nó tự thay bằng 1 block rút ngẫu nhiên từ **palette** cùng tên trong feature [`block_palettes`](JSON-Dungeons.md#block_palettes--khối-ngẫu-nhiên) của dungeon đó.
+
+```json
+// blocks/palette_cracked_wall.json
+{
+  "type": "palette",
+  "display_name": "Palette: Cracked Wall",
+  "model": "minecraft:pink_wool",
+  "hardness": 0,
+  "data": { "palette": "cracked_wall" }
+}
+```
+
+| Key `data` | Kiểu | Mặc định | Ý nghĩa |
+| :--- | :--- | :--- | :--- |
+| `palette` | String | `default` | Tên palette cần tra trong `block_palettes.palettes` của dungeon. |
+
+- Mỗi palette = 1 file block riêng (`palette_cracked_wall`, `palette_floor`, ...). Dùng `model` khác nhau để dễ phân biệt khi xây.
+- Cùng 1 khối đánh dấu có thể ra block khác nhau ở các dungeon khác nhau — dungeon quyết định kết quả, khối chỉ nói "đây là ô loại gì".
+- Để đặt được, tạo item có component `block_place` trỏ tới block id: `"components": { "block_place": { "block": "palette_cracked_wall" } }`.
+- Thay thế không cập nhật vật lý xung quanh: đuốc, nút... gắn vào khối đánh dấu không bị rơi.
+- Dungeon không có palette cần tìm → khối đánh dấu biến thành không khí và log cảnh báo.
+
+## Trình duyệt block
+
+`/smpbrowser block` (quyền content) mở danh sách mọi block tuỳ chỉnh, xếp theo id. Click 1 block → dialog hiện **toàn bộ JSON** của block đó, sửa trực tiếp rồi bấm **Lưu**:
+- JSON được kiểm tra bằng đúng codec của block; sai thì dialog mở lại kèm lỗi, giữ nguyên nội dung đang sửa.
+- Đúng thì đăng ký lại và ghi đè `blocks/<id>.json`.
+- Block **đã đặt** giữ thuộc tính cũ cho tới khi chunk của nó được load lại; block đặt mới dùng ngay bản sửa.
+- Đổi `type` của block có state (lò, máy phát...) có thể làm state đã lưu không đọc được nữa.
 
 ## Dành cho dev
 

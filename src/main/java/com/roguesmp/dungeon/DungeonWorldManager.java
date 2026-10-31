@@ -56,7 +56,10 @@ public class DungeonWorldManager {
     }
 
     private World applyInstanceFlags(World world) {
-        ServerRegionManager.getInstance().editGlobal(world, region -> region.setFlag(SmpRegionFlags.SPAWNERS, StateFlag.State.ALLOW));
+        ServerRegionManager.getInstance().editGlobal(world, region -> {
+            region.setFlag(SmpRegionFlags.SPAWNERS, StateFlag.State.ALLOW);
+            region.setFlag(SmpRegionFlags.DEATH_CURSE, StateFlag.State.ALLOW);
+        });
         return world;
     }
 

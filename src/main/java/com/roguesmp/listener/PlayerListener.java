@@ -1,5 +1,6 @@
 package com.roguesmp.listener;
 
+import com.destroystokyo.paper.event.player.PlayerConnectionCloseEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import com.roguesmp.constant.EquipSlot;
@@ -48,6 +49,11 @@ public class PlayerListener implements Listener {
     public void onPlayerPreJoin(AsyncPlayerPreLoginEvent event) {
         if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) return;
         playerDataManager.cacheData(playerDataManager.loadPlayerData(event.getUniqueId()));
+    }
+
+    @EventHandler
+    public void onConnectionClose(PlayerConnectionCloseEvent event) {
+        playerDataManager.removeCachedData(event.getPlayerUniqueId());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
