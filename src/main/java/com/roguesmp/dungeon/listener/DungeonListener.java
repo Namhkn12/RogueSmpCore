@@ -47,6 +47,7 @@ import java.util.Set;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
@@ -198,6 +199,12 @@ public class DungeonListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
         fire(block.getWorld(), new DungeonEvent.BlockBroken(event.getPlayer(), block, event));
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockPlace(BlockPlaceEvent event) {
+        Block block = event.getBlockPlaced();
+        fire(block.getWorld(), new DungeonEvent.BlockPlaced(event.getPlayer(), block, event));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

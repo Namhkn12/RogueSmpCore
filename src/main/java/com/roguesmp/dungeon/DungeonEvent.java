@@ -9,6 +9,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -29,8 +30,9 @@ public sealed interface DungeonEvent {
             Map.entry("mob_killed", Set.of()),
             Map.entry("mob_died", Set.of("tag")),
             Map.entry("mob_damaged", Set.of("damage", "health_percent")),
-            Map.entry("block_interacted", Set.of()),
-            Map.entry("block_broken", Set.of()),
+            Map.entry("block_interacted", Set.of("x", "y", "z")),
+            Map.entry("block_broken", Set.of("x", "y", "z")),
+            Map.entry("block_placed", Set.of("x", "y", "z")),
             Map.entry("item_picked_up", Set.of("amount")),
             Map.entry("portal_entered", Set.of()),
             Map.entry("player_died", Set.of()),
@@ -61,6 +63,10 @@ public sealed interface DungeonEvent {
 
     default @Nullable Location location() {
         return null;
+    }
+
+    static Map<String, DataValue> blockPosition(Block block) {
+        return Map.of("x", DataValue.of(block.getX()), "y", DataValue.of(block.getY()), "z", DataValue.of(block.getZ()));
     }
 
     record Started() implements DungeonEvent {
@@ -203,6 +209,11 @@ public sealed interface DungeonEvent {
         }
 
         @Override
+        public Map<String, DataValue> data() {
+            return blockPosition(block);
+        }
+
+        @Override
         public Location location() {
             return block.getLocation();
         }
@@ -223,6 +234,39 @@ public sealed interface DungeonEvent {
         @Override
         public boolean cancelled() {
             return event.isCancelled();
+        }
+
+        @Override
+        public Map<String, DataValue> data() {
+            return blockPosition(block);
+        }
+
+        @Override
+        public Location location() {
+            return block.getLocation();
+        }
+    }
+
+    // Features may cancel the event.
+    record BlockPlaced(Player player, Block block, BlockPlaceEvent event) implements DungeonEvent {
+        @Override
+        public String id() {
+            return "block_placed";
+        }
+
+        @Override
+        public String subject() {
+            return block.getType().getKey().getKey();
+        }
+
+        @Override
+        public boolean cancelled() {
+            return event.isCancelled();
+        }
+
+        @Override
+        public Map<String, DataValue> data() {
+            return blockPosition(block);
         }
 
         @Override

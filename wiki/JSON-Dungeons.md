@@ -336,8 +336,9 @@ Trigger được xét **theo thứ tự trong danh sách**; action của trigger
 | `mob_killed` | Người chơi giết mob | id mob (tuỳ chỉnh hoặc vanilla) | |
 | `mob_died` | Mob chết vì bất kỳ lý do gì (người chơi, môi trường, ...) | id mob | `tag` (nếu mob được sinh bằng `spawn_mob` có `tag`) |
 | `mob_damaged` | Mob nhận sát thương | id mob | `damage`, `health_percent` (0–100, sau đòn) |
-| `block_interacted` | Chuột phải block | id block (`oak_door`) | |
-| `block_broken` | Phá block | id block | |
+| `block_interacted` | Chuột phải block | id block (`oak_door`) | `x`, `y`, `z` (toạ độ block) |
+| `block_broken` | Phá block | id block | `x`, `y`, `z` (toạ độ block) |
+| `block_placed` | Đặt block | id block | `x`, `y`, `z` (toạ độ block) |
 | `item_picked_up` | Nhặt item | id item (tuỳ chỉnh hoặc vanilla) | `amount` |
 | `portal_entered` | Bước vào block cổng | id block cổng | |
 | `player_died` | Người chơi chết (kể cả khi `revive` giữ lại) | | |
