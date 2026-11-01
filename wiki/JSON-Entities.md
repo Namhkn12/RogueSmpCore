@@ -96,20 +96,24 @@ Tất cả optional.
 
 | Key | Kiểu | Mặc định | Ý nghĩa |
 | :--- | :--- | :--- | :--- |
-| `activeSpell` | mảng [spell](#danh-sách-spell) | `[]` | Vòng xoay spell cast lần lượt từng cái (tự chọn ngẫu nhiên spell sẵn sàng). |
-| `passiveSpell` | mảng [spell](#danh-sách-spell) | `[]` | Spell chạy mỗi chu kỳ thụ động, hoặc phản ứng theo sự kiện. |
-| `passiveInterval` | int (tick) | `0` | Chu kỳ chạy spell thụ động. ≤ 0 → 2 tick. |
-| `canCastSameSpellTwice` | boolean | `false` | ⚠️ Tên key gây nhầm: giá trị này được truyền thẳng vào cờ "chặn cast cùng 1 spell liên tiếp". Thực tế `true` = **cấm** cast lặp, `false` = cho phép (có vẻ là lỗi đặt tên trong code). Hãy thử trong game nếu cần chắc. |
+| `spells` | mảng [spell](#danh-sách-spell) | `[]` | Mọi spell của mob, chủ động lẫn bị động, trong cùng 1 mảng. Loại spell tự quyết định nó là active hay passive (xem cột "Loại" ở [danh sách](#danh-sách-spell)). |
+| `canCastSameSpellTwice` | boolean | `false` | `true` = cho phép cast cùng 1 spell chủ động 2 lần liên tiếp. `false` = spell vừa cast bị bỏ qua ở lượt chọn kế tiếp (trừ khi mob chỉ có 1 spell chủ động). |
 
-Cách vòng chủ động chạy: bắt đầu sau 1 tick, kiểm tra mỗi 2 tick; sau khi cast, đợi `cooldownTicks` của spell đó; mỗi lần chọn 1 spell sẵn sàng ngẫu nhiên (spell vừa cast phải nghỉ khoảng `floor((số spell − 1)/2)` lượt chọn); không có spell nào chạy được → đợi 20 tick. **Liệt kê cùng 1 loại spell 2 lần trong `activeSpell` chỉ còn 1.** Mỗi lần cast bắn sự kiện `SpellCastEvent`. Spell phản ứng sự kiện (`self_destruct_spell`, `dummy_entity_spell`, aspect...) hoạt động bất kể `detectionRange`.
+Cách chạy (mỗi 2 tick):
+- **Passive**: chạy mỗi chu kỳ; spell phản ứng sự kiện (khi đánh, khi bị đánh, khi chết...) luôn hoạt động.
+- **Active**: bắt đầu sau 1 tick. Khi rảnh và có người chơi làm mục tiêu, chọn ngẫu nhiên 1 spell đã hết hồi chiêu và thỏa điều kiện cast. Mỗi lần cast đi qua 3 giai đoạn: **niệm** (windup) → **cast** → **hồi phục** (recovery, mặc định 20 tick) rồi mới chọn spell kế. Hồi chiêu tính từ lúc bắt đầu niệm. Mất mục tiêu khi đang niệm → hủy spell (vẫn tính hồi chiêu). Mỗi lần bắt đầu cast bắn sự kiện `SpellCastEvent`.
+- Không có người chơi (không phải spectator) trong `detectionRange` của [`behavior`](#behavior) → spell chạy theo chu kỳ dừng và spell đang niệm bị hủy; spell phản ứng sự kiện vẫn chạy.
 
-1 `type` spell lạ hoặc 1 phần tử sai làm **fail cả file entity**.
+1 `type` spell lạ hoặc 1 phần tử sai làm **fail cả file entity**. Spell có tham số khai key ngay cạnh `type`.
 
 ```json
 "spells": {
-  "activeSpell": [ { "type": "self_heal_spell" }, { "type": "shadow_step_spell" } ],
-  "passiveSpell": [ { "type": "fire_aspect_spell" }, { "type": "self_destruct_spell", "particleCount": 20 } ],
-  "passiveInterval": 4
+  "spells": [
+    { "type": "self_heal_spell" },
+    { "type": "shadow_step_spell" },
+    { "type": "fire_aspect_spell" },
+    { "type": "self_destruct_spell", "particleCount": 20 }
+  ]
 }
 ```
 
@@ -153,9 +157,9 @@ Mảng string trần = id các loot table trong `loottable/` (xem [JSON-Loot](JS
 <a id="danh-sách-spell"></a>
 ## Danh sách spell
 
-Phần tử của `activeSpell`/`passiveSpell`. Field chọn loại: **`"type"`**. Spell không tham số viết gọn `{ "type": "..." }`. "Dùng trong" là gợi ý, không được kiểm tra.
+Phần tử của mảng `spells`. Field chọn loại: **`"type"`**. Spell không tham số viết gọn `{ "type": "..." }`. Cột "Loại" cho biết spell chạy kiểu active (vòng cast) hay passive (chu kỳ/sự kiện) — do code quyết định, không khai trong JSON.
 
-| `type` | Key riêng | Dùng trong | Tác dụng |
+| `type` | Key riêng | Loại | Tác dụng |
 | :--- | :--- | :--- | :--- |
 | `self_destruct_spell` | `particleCount` (int, `10`) | passive | Khi mob chết: đổi âm thanh chết thành tiếng nổ + tạo `particleCount` particle nổ. Không gây sát thương. |
 | `slow_aura_spell` | — | passive | Mỗi chu kỳ, người chơi trong 5 block bị làm chậm 30% (100 tick, làm mới liên tục). Bán kính/mức cố định. |
@@ -167,6 +171,7 @@ Phần tử của `activeSpell`/`passiveSpell`. Field chọn loại: **`"type"`*
 | `self_heal_spell` | — | active | Hồi 20% lượng máu đã mất. Hồi chiêu 60 tick. |
 | `shadow_step_spell` | — | active | Nếu đang nhìn 1 người chơi trong 20 block: dịch chuyển ra sau lưng họ 1.5 block. Hồi chiêu 50 tick. Nhìn mục tiêu không phải người chơi → không làm gì. |
 | `death_grip_spell` | — | active | Nếu đang nhìn 1 người chơi trong 20 block: kéo họ tới 1 điểm ngẫu nhiên cách mob 3 block. Hồi chiêu 60 tick. |
+| `summon_spell` | `entityIds` (mảng id entity, `[]`), `count` (int, `3`), `spawnRadius` (double, `2.5`), `castRange` (double, `16`), `maxAlive` (int, `6`), `spawnIntervalTicks` (int, `5`), `windupTicks` (int, `40`), `cooldownTicks` (int, `400`) | active | Triệu hồi mob tại vị trí người chơi mục tiêu. Chỉ cast khi mục tiêu trong `castRange` và số mob đã triệu hồi còn sống < `maxAlive`. Lúc bắt đầu niệm: chốt vị trí mục tiêu, mob phát sáng tím (GlowUtils), có vòng particle + âm thanh tăng dần tại điểm triệu hồi trong `windupTicks`. Sau đó sinh từng con cách nhau `spawnIntervalTicks`, mỗi con chọn ngẫu nhiên từ `entityIds`, vị trí ngẫu nhiên trong `spawnRadius`, tự nhắm vào mục tiêu, kèm khói/lửa linh hồn + âm thanh. Tổng số con = min(`count`, `maxAlive` − số đang sống). Mất mục tiêu khi đang niệm → hủy. Hết phát sáng khi sinh xong/bị hủy/mob chết. `entityIds` rỗng → không bao giờ cast; id không tồn tại → bỏ qua con đó. Hồi phục 20 tick sau khi cast. |
 
 ## Ví dụ hoàn chỉnh — `entities/bosses/goblin_chief.json`
 
@@ -181,9 +186,7 @@ Phần tử của `activeSpell`/`passiveSpell`. Field chọn loại: **`"type"`*
     "equipment": { "HAND": { "material": "IRON_SWORD", "enchantGlint": true } },
     "boss_bar": { "range": 40, "color": "RED", "style": "NOTCHED_10" },
     "spells": {
-      "activeSpell": [ { "type": "self_heal_spell" }, { "type": "shadow_step_spell" } ],
-      "passiveSpell": [ { "type": "fire_aspect_spell" } ],
-      "passiveInterval": 4
+      "spells": [ { "type": "self_heal_spell" }, { "type": "shadow_step_spell" }, { "type": "fire_aspect_spell" } ]
     },
     "loot_table": ["mobs/goblin_chief"]
   }
