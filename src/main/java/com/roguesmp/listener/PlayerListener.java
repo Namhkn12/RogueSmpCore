@@ -398,4 +398,12 @@ public class PlayerListener implements Listener {
         if (smpPlayer == null) return;
         smpPlayer.onStartBlocking(event);
     }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        event.setKeepInventory(true);
+        event.setKeepLevel(true);
+        event.getDrops().clear();
+        event.setDroppedExp(0);
+    }
 }
