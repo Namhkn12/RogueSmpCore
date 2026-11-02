@@ -1,0 +1,27 @@
+{
+  "id": "machine_guneer",
+  "entityType": "SKELETON",
+  "components": {
+    "ai": {
+      "goals": [
+        {
+          "priority": 1,
+          "yVelocity": 0.5,
+          "type": "leap_at_target"
+        },
+        {
+          "interval": 1,
+          "pullTime": 1,
+          "radius": 16.0,
+          "type": "bow_attack"
+        }
+      ]
+    },
+    "equipment": {
+      "HAND": {
+        "material": "BOW"
+      }
+    },
+    "display_name": "Machine gun blow"
+  }
+}

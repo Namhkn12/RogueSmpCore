@@ -1,0 +1,22 @@
+{
+  "id": "netherite_heater_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<gold>Netherite Heater Shield",
+    "item_model": "minecraft:netherite_heater_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 2
+      }
+    },
+    "durability": 2145,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 5.25,
+        "SPEED_PERCENT": -0.07,
+        "KNOCKBACK_RESISTANCE": 0.2
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

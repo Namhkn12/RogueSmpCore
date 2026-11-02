@@ -1,0 +1,19 @@
+{
+  "id": "iron_recurve_bow",
+  "base": "BOW",
+  "components": {
+    "name": "<blue>Iron Recurve Bow",
+    "item_model": "minecraft:iron_recurve_bow",
+    "durability": 840,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 7.5,
+        "PROJECTILE_SPEED_BASE": 1.3,
+        "SPEED_PERCENT": 0.03,
+        "KNOCKBACK_RESISTANCE": 0.1,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

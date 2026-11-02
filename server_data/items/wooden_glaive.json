@@ -1,0 +1,18 @@
+{
+  "id": "wooden_glaive",
+  "base": "WOODEN_SPEAR",
+  "components": {
+    "name": "<white>Wooden Glaive",
+    "item_model": "minecraft:wooden_glaive",
+    "durability": 81,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.45,
+        "ATTACK_SPEED_BASE": 1.33,
+        "ENTITY_REACH": 1.21,
+        "SWEEPING_DAMAGE_RATIO": 0.52
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

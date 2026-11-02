@@ -1,0 +1,15 @@
+{
+  "id": "netherite_axe",
+  "base": "NETHERITE_AXE",
+  "components": {
+    "name": "<gold>Netherite Axe",
+    "durability": 1950,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 12.5,
+        "ATTACK_SPEED_BASE": 0.75
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "base": "IRON_SWORD",
+  "components": {
+    "name": "<#C9D1D9>Drake's Longsword",
+    "item_model": "minecraft:iron_longsword",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Kiếm dài lưỡi mỏng, với xa hơn kiếm thường.",
+      "<dark_gray><!i>Hàng của Weaponsmith Drake"
+    ],
+    "durability": 210,
+    "socket": 1,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.9,
+        "ATTACK_SPEED_BASE": 1.5,
+        "ENTITY_REACH": 0.7,
+        "SWEEPING_DAMAGE_RATIO": 0.25
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

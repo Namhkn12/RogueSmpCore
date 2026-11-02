@@ -1,0 +1,16 @@
+{
+  "display_name": "Khối đồng chất lượng cao",
+  "model": "minecraft:ores/copper_high_quality_block",
+  "hardness": 4,
+  "break_strength": 1,
+  "drops": [
+    {
+      "item": "copper_high_quality_block",
+      "min_amount": 1,
+      "max_amount": 1,
+      "chance": 1.0
+    }
+  ],
+  "place_sound": "block.copper.place",
+  "break_sound": "block.copper.break"
+}

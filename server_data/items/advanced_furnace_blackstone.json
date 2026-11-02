@@ -1,0 +1,9 @@
+{
+  "id": "advanced_furnace_blackstone",
+  "base": "PAPER",
+  "components": {
+    "name": "Lò nung đá đen",
+    "item_model": "smp:advanced_furnace_blackstone",
+    "block_place": { "block": "advanced_furnace_blackstone" }
+  }
+}

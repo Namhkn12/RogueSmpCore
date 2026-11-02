@@ -1,0 +1,12 @@
+{
+  "entityType": "MANNEQUIN",
+  "name": "<b><gradient:#FFF6C2:#FFD86B:#FFF6C2>✦ Seraphiel ✦</gradient></b>",
+  "skinId": "angle",
+  "description": "<#E8E0C8>Hãy lựa chọn <b>Class</b> trước khi bước vào <b>Cánh Cổng</b>",
+  "actions": [
+    {
+      "command": "class",
+      "type": "run_command"
+    }
+  ]
+}

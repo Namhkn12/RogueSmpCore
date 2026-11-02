@@ -1,0 +1,16 @@
+{
+  "type": "generator",
+  "display_name": "Máy đào quặng sắt",
+  "drops": [
+    {"item": "raw_iron_generator"}
+  ],
+  "model": "smp:tally_block",
+  "data": {
+    "module_slots":2,
+    "place": "minecraft:iron_ore",
+    "drops": [
+      {"item": "minecraft:cobblestone", "min_amount": 1, "max_amount": 2, "chance": 0.75},
+      {"item": "minecraft:raw_iron", "min_amount": 1, "max_amount": 1, "chance": 0.45}
+    ]
+  }
+}

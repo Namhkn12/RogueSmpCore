@@ -1,0 +1,17 @@
+{
+  "base": "COPPER_SWORD",
+  "components": {
+    "item_model": "minecraft:copper_halberd",
+    "durability": 254,
+    "name": "<white>Copper Halberd",
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.85,
+        "ATTACK_SPEED_BASE": 1.0,
+        "SWEEPING_DAMAGE_RATIO": 0.3,
+        "ENTITY_REACH": 0.95
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "diamond_kite_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<dark_purple>Diamond Kite Shield",
+    "item_model": "minecraft:diamond_kite_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1,
+        "BLAST_PROTECTION": 1
+      }
+    },
+    "durability": 1950,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 5.0,
+        "SPEED_PERCENT": -0.0875,
+        "KNOCKBACK_RESISTANCE": 0.15
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

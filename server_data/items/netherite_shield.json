@@ -1,0 +1,22 @@
+{
+  "id": "netherite_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<gold>Netherite Shield",
+    "item_model": "minecraft:netherite_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 2
+      }
+    },
+    "durability": 1950,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 4.5,
+        "SPEED_PERCENT": -0.05,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

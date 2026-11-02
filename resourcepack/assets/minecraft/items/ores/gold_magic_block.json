@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "minecraft:block/ores/gold/gold_magic_block"
+  }
+}

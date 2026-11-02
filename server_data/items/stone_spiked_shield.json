@@ -1,0 +1,22 @@
+{
+  "id": "stone_spiked_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<white>Stone Spiked Shield",
+    "item_model": "minecraft:stone_spiked_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1,
+        "THORNS": 1
+      }
+    },
+    "durability": 165,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.5,
+        "SPEED_PERCENT": 0.002
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

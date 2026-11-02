@@ -1,0 +1,21 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#A67C00>Perfect Citrine",
+    "description": [
+      "<dark_gray><!i>Ngọc Hoàn Mỹ",
+      "<gray><i>Mũi tên đã trúng đích",
+      "<gray><i>trước khi kịp rời dây cung."
+    ],
+    "head_skin": "gem_citrine",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "PROJECTILE_DAMAGE_PERCENT": 0.11,
+          "DEFENSE_FLAT": -1.0
+        }
+      },
+      "success_chance": 0.22
+    }
+  }
+}

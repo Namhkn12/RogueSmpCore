@@ -1,0 +1,7 @@
+{
+  "id": "dungeon_skeleton",
+  "entityType": "SKELETON",
+  "components": {
+    "display_name": "<red>Skeleton"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "wood/hexroot",
+  "entityType": "WITCH",
+  "components": {
+    "display_name": "<gradient:#BA68C8:#33691E>Phù thủy rễ</gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 24
+    },
+    "attributes": {
+      "max_health": 24.0,
+      "attack_damage": 4.0,
+      "armor": 4.0,
+      "knockback_resistance": 0.1
+    },
+    "spells": {
+      "activeSpell": [
+        {
+          "type": "heal_allies_spell",
+          "searchRadius": 12.0,
+          "healthThreshold": 0.6,
+          "healAmount": 8.0,
+          "splashRadius": 3.0,
+          "cooldownTicks": 100
+        }
+      ]
+    }
+  }
+}

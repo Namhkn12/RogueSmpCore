@@ -1,0 +1,15 @@
+{
+  "id": "spawner_tmd_magma_lurker",
+  "name": "TMD Magma Lurker Spawner",
+  "mobs": { "tmd_magma_lurker": 100 },
+  "delay": 0, "minDelay": 240, "maxDelay": 400,
+  "activeRange": 12, "spawnRange": 4, "maxNearBy": 5, "spawnCount": 4,
+  "behaviors": [
+    {
+      "type": "protector",
+      "params": {
+        "requireBreak": 4
+      }
+    }
+  ]
+}

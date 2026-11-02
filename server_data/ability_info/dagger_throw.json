@@ -1,0 +1,26 @@
+{
+  "display_name": "Phi Đao",
+  "icon": "IRON_SWORD",
+  "type": "ACTIVE",
+  "description": [
+    "<gray>Ném một chùm 3 con dao găm về phía trước, gây <yellow><damage></yellow> sát thương và <dark_gray>câm lặng</dark_gray> mục tiêu đầu tiên trúng đòn trong <yellow><silence_duration:s></yellow>s.",
+    "<gray>Mỗi con dao trúng mục tiêu sẽ tăng <yellow><damage_boost:percent></yellow>% sát thương cận chiến cho đòn đánh tiếp theo của bạn (trong <yellow><damage_boost_duration:s></yellow>s).",
+    "<gray>Bấm lại trong lúc hồi chiêu để thu hồi dao sớm, hoặc dao tự động bay về sau <yellow><recast_duration:s></yellow>s, gây <yellow><recast_multiplier:percent></yellow>% sát thương gốc trên đường về.",
+    "<dark_gray>Tầm ném: <range> | Hồi chiêu: <cooldown:s>s"
+  ],
+  "scaling": {
+    "damage": [4.0, 6.0, 8.0],
+    "range": [12.0, 14.0, 16.0],
+    "cooldown": [100, 100, 100],
+    "damage_boost": [0.25, 0.35, 0.45],
+    "damage_boost_duration": [60, 80, 100],
+    "silence_duration": [20, 30, 40],
+    "recast_duration": [30, 30, 30],
+    "recast_multiplier": [0.5, 0.5, 0.6]
+  },
+  "trigger": {
+    "cast": {
+      "key": "LEFT_CLICK"
+    }
+  }
+}

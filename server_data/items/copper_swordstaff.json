@@ -1,0 +1,17 @@
+{
+  "base": "COPPER_SWORD",
+  "components": {
+    "item_model": "minecraft:copper_swordstaff",
+    "durability": 176,
+    "name": "<white>Copper Swordstaff",
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.225,
+        "ATTACK_SPEED_BASE": 1.5,
+        "SWEEPING_DAMAGE_RATIO": 0.2,
+        "ENTITY_REACH": 0.95
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

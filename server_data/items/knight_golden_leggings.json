@@ -1,0 +1,20 @@
+{
+  "id": "knight_golden_leggings",
+  "base": "GOLDEN_LEGGINGS",
+  "components": {
+    "name": "<green>Knight Golden Leggings",
+    "item_model": "minecraft:knight_golden_leggings",
+    "equippable": {
+      "slot": "LEGS",
+      "asset_id": "minecraft:knight_gold"
+    },
+    "durability": 570,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.99,
+        "SPEED_PERCENT": 0.005
+      },
+      "slot": "LEGS"
+    }
+  }
+}

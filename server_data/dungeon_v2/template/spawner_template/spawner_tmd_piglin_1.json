@@ -1,0 +1,22 @@
+{
+  "id": "spawner_tmd_piglin_1",
+  "name": "TMD Piglin Spawner",
+  "mobs": {
+    "tmd_forge_brute": 100
+  },
+  "delay": 0,
+  "minDelay": 150,
+  "maxDelay": 240,
+  "activeRange": 28,
+  "spawnRange": 7,
+  "maxNearBy": 6,
+  "spawnCount": 1,
+  "behaviors": [
+      {
+        "type": "wave",
+        "params": {
+          "waves": 3
+        }
+      }
+    ]
+}

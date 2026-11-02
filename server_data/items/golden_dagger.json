@@ -1,0 +1,17 @@
+{
+  "id": "golden_dagger",
+  "base": "GOLDEN_SWORD",
+  "components": {
+    "name": "<green>Golden Dagger",
+    "item_model": "minecraft:golden_dagger",
+    "durability": 360,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.125,
+        "ATTACK_SPEED_BASE": 2.975,
+        "ENTITY_REACH": -0.35
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

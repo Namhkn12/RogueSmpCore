@@ -1,0 +1,21 @@
+{
+  "base": "POTION",
+  "components": {
+    "name": "<#FF9900>Potion of Fire Resistance",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Uống vào nhận Kháng Lửa trong 3 phút.",
+      "<dark_gray><!i>Hàng của Alchemist Magnus"
+    ],
+    "potion_content": {
+      "color": "255,255,153,0",
+      "effects": [
+        {
+          "type": "fire_resistance",
+          "duration": 3600,
+          "amplifier": 0
+        }
+      ]
+    }
+  }
+}

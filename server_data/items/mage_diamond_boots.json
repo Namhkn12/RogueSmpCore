@@ -1,0 +1,16 @@
+{
+  "id": "mage_diamond_boots",
+  "base": "DIAMOND_BOOTS",
+  "components": {
+    "name": "<dark_purple>Diamond Mage Boots",
+    "durability": 880,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.25,
+        "SPEED_PERCENT": 0.01,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "FEET"
+    }
+  }
+}

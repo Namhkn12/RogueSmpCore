@@ -1,0 +1,16 @@
+{
+  "id": "stone_pickaxe",
+  "base": "STONE_PICKAXE",
+  "components": {
+    "durability": 131,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.0,
+        "ATTACK_SPEED_BASE": 1.2000000476837158,
+        "BREAK_STRENGTH": 2.0,
+        "MINING_SPEED": 120.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

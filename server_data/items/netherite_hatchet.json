@@ -1,0 +1,17 @@
+{
+  "id": "netherite_hatchet",
+  "base": "NETHERITE_AXE",
+  "components": {
+    "name": "<gold>Netherite Hatchet",
+    "item_model": "minecraft:netherite_hatchet",
+    "durability": 1560,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 9.5,
+        "ATTACK_SPEED_BASE": 1.15,
+        "SWEEPING_DAMAGE_RATIO": 0.02
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "id": "wood/poacher",
+  "entityType": "PILLAGER",
+  "components": {
+    "display_name": "<#8D9F5B>Kẻ săn trộm",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 46.0,
+      "attack_damage": 4.5,
+      "armor": 2.0
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "poacher"
+      },
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "dyeColor": "255,46,79,36"
+      },
+      "LEGS": {
+        "material": "LEATHER_LEGGINGS",
+        "dyeColor": "255,107,142,35"
+      },
+      "HAND": {
+        "material": "CROSSBOW"
+      }
+    }
+  }
+}

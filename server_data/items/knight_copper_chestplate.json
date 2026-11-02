@@ -1,0 +1,20 @@
+{
+  "id": "knight_copper_chestplate",
+  "base": "COPPER_CHESTPLATE",
+  "components": {
+    "name": "<white>Knight Copper Chestplate",
+    "item_model": "minecraft:knight_copper_chestplate",
+    "equippable": {
+      "slot": "CHEST",
+      "asset_id": "minecraft:knight_copper"
+    },
+    "durability": 195,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.5,
+        "MELEE_DAMAGE_PERCENT": 0.009
+      },
+      "slot": "CHEST"
+    }
+  }
+}

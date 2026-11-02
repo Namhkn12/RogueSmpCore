@@ -1,0 +1,24 @@
+{
+  "id": "tmd_smoldering_hog",
+  "entityType": "ZOMBIFIED_PIGLIN",
+  "displayName": "<gold>Smoldering Hog</gold>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 18,
+  "baseStat": {
+    "max_health": 30.0,
+    "attack_damage": 5.0,
+    "movement_speed": 0.26,
+    "armor": 2.0,
+    "knockback_resistance": 0.05
+  },
+  "equipments": {
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

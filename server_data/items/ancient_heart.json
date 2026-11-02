@@ -1,0 +1,21 @@
+{
+  "id": "ancient_heart",
+  "base": "HEART_OF_THE_SEA",
+  "components": {
+    "name": "<dark_red>Ancient Heart",
+    "brew_ingredient": {
+      "stats": {
+        "melee_damage_percent": {
+          "min": -0.06,
+          "max": -0.04
+        },
+        "magic_damage_percent": {
+          "min": -0.08,
+          "max": -0.06
+        }
+      },
+      "duration": 370,
+      "color": "#C02040"
+    }
+  }
+}

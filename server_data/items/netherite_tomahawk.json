@@ -1,0 +1,17 @@
+{
+  "id": "netherite_tomahawk",
+  "base": "NETHERITE_AXE",
+  "components": {
+    "name": "<gold>Netherite Tomahawk",
+    "item_model": "minecraft:netherite_tomahawk",
+    "durability": 1365,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 9.0,
+        "ATTACK_SPEED_BASE": 1.35,
+        "ENTITY_REACH": -0.25
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

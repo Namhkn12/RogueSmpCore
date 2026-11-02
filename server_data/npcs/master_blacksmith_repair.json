@@ -1,0 +1,14 @@
+{
+  "id": "master_blacksmith_repair",
+  "name": "<red><bold>Master Blacksmith",
+  "entityType": "MANNEQUIN",
+  "description": "<red>Expert Repair Smith",
+  "skinValue": "ewogICJ0aW1lc3RhbXAiIDogMTc3ODA3OTgxNjI3MSwKICAicHJvZmlsZUlkIiA6ICJmYjZkM2E5Zjk3MWY0ZTdlYmQ0MjE2Yjk0MjE5NDA3NCIsCiAgInByb2ZpbGVOYW1lIiA6ICJHb2xkZW5BcHBsZUdIRyIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS9iODhhY2JlZDFjNTJlMDNiMDkwYzk5OGVhMGFiMDRkZjVjYmI1ZDI5YjMwYjYxMzkxNTI1ZGU5OTFjZTY2YzIwIgogICAgfQogIH0KfQ==",
+  "skinSignature": "xlBhrZtl6l7iiqM/e/Hh7PinZqZpmqCA+jzlRWQf+E5gBvO5pEfMXcPyoZgi3sUSTnH/IwDPy2HxkzuRtmSIZ8luaqQXT+xpOzwuj21FVP0gH+qkVbaIPhgoi7GJ0vWs9Iu8OqZHnBJL311qZNb9o7g80SAN8qqwX/e9Jq7QxdyDMNyMyVVs/OKwryIcdDVO+E5sIyy8q6kELl9zas6+NB83NLwTIMnYH4i8QoH5B139z3yYpTeD0aIOSp6YL2JcaN3uo6DITU7ORg8IaijRkdu8IBzXczdFkem697geZ2qS1CAwLh0BD+yoSCpZt+rvQBxFgoeLC4aloiTa485gRQ1UAKFKGkbW4y+6De9gwQ3hQ7+F7bjS2j2nJT+HuntkCP0yDYMdJhI0j+rsb1jg79n25CFUOMf8wMKURR1ZviopM83PaHRBVfL58cnwc0ZFJ55raw1IsZ4Q67/mLBLVtr1zIL1m1TW58An1IshvzaMJ4tRc19OafF5JbOj5mRMmXWOHelah6If9BpJBtwXU9FXvdsCQrfjU/haTSBwN+JLxRLAIy3R8vxMf22nH7YVCRB3PPFt4kCFTPUW1025hFMdY1qowmBLRVnV2aM9R4juDS4GkMosIbA1njet8FULf1uVSwG4cudKWKxLAfRUZJ/78IKKGIiqUi0sVWd6v4z0=",
+  "actions": [
+    {
+      "type": "open_gui",
+      "gui": "blacksmith"
+    }
+  ]
+}

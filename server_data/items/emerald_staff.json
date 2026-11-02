@@ -1,0 +1,25 @@
+{
+  "id": "emerald_staff",
+  "base": "STICK",
+  "components": {
+    "name": "<green>Emerald Staff",
+    "item_model": "minecraft:emerald_staff",
+    "mage_staff": {
+      "color": "#3FE06A"
+    },
+    "durability": 1000,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 2.0,
+        "STAFF_DAMAGE_BASE": 11.25,
+        "STAFF_RANGE_BASE": 28,
+        "ATTACK_SPEED_BASE": 0.75,
+        "SPEED_PERCENT": -0.06,
+        "MAGIC_DAMAGE_PERCENT": 0.09,
+        "KNOCKBACK_RESISTANCE": 0.05,
+        "LUCK": 1.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

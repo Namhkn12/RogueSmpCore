@@ -1,0 +1,12 @@
+{
+  "id": "sculk_chestplate",
+  "base": "IRON_CHESTPLATE",
+  "components": {
+    "name": "<gray>Sculk Chestplate",
+    "item_model": "minecraft:sculk_chestplate",
+    "equippable": {
+      "slot": "CHEST",
+      "asset_id": "minecraft:sculk"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "warrior",
+  "display_name": "Warrior",
+  "icon": "minecraft:shield",
+  "description": [
+    "A frontline fighter built for",
+    "melee combat and survival."
+  ],
+  "default_abilities": {
+    "shield_bash": 1,
+    "glorious_battle": 1,
+    "indomitable": 1,
+    "brute_force": 1
+  },
+  "allowedWeapons": ["swords", "axes"]
+}

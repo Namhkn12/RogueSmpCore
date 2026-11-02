@@ -1,0 +1,34 @@
+{
+  "id": "elder_treant",
+  "entityType": "IRON_GOLEM",
+  "components": {
+    "ai": {
+      "presets": [
+        "hostile"
+      ]
+    },
+    "attributes": {
+      "KNOCKBACK_RESISTANCE": 1.0,
+      "MOVEMENT_SPEED": 0.22,
+      "MAX_HEALTH": 150.0,
+      "SCALE": 1.15,
+      "ARMOR": 12.0,
+      "ATTACK_DAMAGE": 9.5
+    },
+    "display_name": "<gradient:#A5D6A7:#1B5E20><bold>✦ Cổ thụ ngàn năm ✦</bold></gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 28
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "trigger": "MELEE",
+          "horizontal": 0.6,
+          "vertical": 1.1,
+          "type": "knockback_on_hit_spell"
+        }
+      ]
+    }
+  }
+}

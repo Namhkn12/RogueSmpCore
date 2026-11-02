@@ -1,0 +1,21 @@
+{
+  "id": "mage_redstone_boots",
+  "base": "IRON_BOOTS",
+  "components": {
+    "name": "<blue>Redstone Mage Boots",
+    "item_model": "minecraft:redstone_boots",
+    "equippable": {
+      "slot": "FEET",
+      "asset_id": "minecraft:redstone"
+    },
+    "durability": 360,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.275,
+        "SPEED_PERCENT": 0.0275,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "FEET"
+    }
+  }
+}

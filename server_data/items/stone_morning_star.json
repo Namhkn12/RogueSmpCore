@@ -1,0 +1,19 @@
+{
+  "id": "stone_morning_star",
+  "base": "STONE_AXE",
+  "components": {
+    "name": "<white>Stone Morning Star",
+    "item_model": "minecraft:stone_morning_star",
+    "durability": 180,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.0,
+        "ATTACK_SPEED_BASE": 0.97,
+        "ENTITY_REACH": 0.18,
+        "SWEEPING_DAMAGE_RATIO": 0.092,
+        "SAFE_FALL_DISTANCE": 0.9
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

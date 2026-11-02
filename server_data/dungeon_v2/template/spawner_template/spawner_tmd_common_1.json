@@ -1,0 +1,24 @@
+{
+  "id": "spawner_tmd_common_1",
+  "name": "TMD Common Spawner",
+  "mobs": {
+    "tmd_lava_weaver": 33,
+    "tmd_core_magma": 33,
+    "tmd_cinderwalker": 34
+  },
+  "delay": 0,
+  "minDelay": 150,
+  "maxDelay": 280,
+  "activeRange": 16,
+  "spawnRange": 4,
+  "maxNearBy": 6,
+  "spawnCount": 4,
+  "behaviors": [
+    {
+      "type": "protector",
+      "params": {
+        "requireBreak": 3
+      }
+    }
+  ]
+}

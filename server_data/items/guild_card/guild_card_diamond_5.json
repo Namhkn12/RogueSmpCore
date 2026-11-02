@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<#4FD1C5>Diamond Guild Card V",
+    "description": [
+      "<dark_gray><!i>Hạng B · Kim Cương V",
+      "<gray><!i>Thẻ mạo hiểm giả của Guild",
+      "<gray><!i>Cấp mạo hiểm: 39 - 40"
+    ],
+    "item_model": "smp:guild_card_diamond_5"
+  }
+}

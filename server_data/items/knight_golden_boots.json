@@ -1,0 +1,22 @@
+{
+  "id": "knight_golden_boots",
+  "base": "GOLDEN_BOOTS",
+  "components": {
+    "name": "<green>Knight Golden Boots",
+    "item_model": "minecraft:knight_golden_boots",
+    "equippable": {
+      "slot": "FEET",
+      "asset_id": "minecraft:knight_gold"
+    },
+    "durability": 480,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.99,
+        "SPEED_PERCENT": 0.005,
+        "SNEAKING_SPEED": 0.05,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "FEET"
+    }
+  }
+}

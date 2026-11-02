@@ -1,0 +1,36 @@
+{
+  "id": "wood/thornfang",
+  "entityType": "CAVE_SPIDER",
+  "components": {
+    "display_name": "<#7CB342>Nhện răng gai",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 36.0,
+      "attack_damage": 3.0,
+      "armor": 0.0
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "apply_effect_on_hit_spell",
+          "trigger": "MELEE",
+          "effects": [
+            {
+              "type": "poison",
+              "duration": 60,
+              "amplifier": 0
+            }
+          ]
+        },
+        {
+          "type": "armor_shred_on_hit_spell",
+          "trigger": "MELEE",
+          "durabilityDamage": 6
+        }
+      ]
+    }
+  }
+}

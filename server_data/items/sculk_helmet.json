@@ -1,0 +1,12 @@
+{
+  "id": "sculk_helmet",
+  "base": "IRON_HELMET",
+  "components": {
+    "name": "<gray>Sculk Helmet",
+    "item_model": "minecraft:sculk_helmet",
+    "equippable": {
+      "slot": "HEAD",
+      "asset_id": "minecraft:sculk"
+    }
+  }
+}

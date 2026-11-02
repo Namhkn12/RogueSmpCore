@@ -1,0 +1,21 @@
+{
+  "id": "knight_netherite_boots",
+  "base": "NETHERITE_BOOTS",
+  "components": {
+    "name": "<gold>Knight Netherite Boots",
+    "item_model": "minecraft:knight_netherite_boots",
+    "equippable": {
+      "slot": "FEET",
+      "asset_id": "minecraft:knight_netherite"
+    },
+    "durability": 1560,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 4.56,
+        "SPEED_PERCENT": -0.025,
+        "SNEAKING_SPEED": 0.05
+      },
+      "slot": "FEET"
+    }
+  }
+}

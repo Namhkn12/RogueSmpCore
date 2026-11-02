@@ -1,0 +1,18 @@
+{
+  "id": "double_headed_golden_battle_axe",
+  "base": "GOLDEN_AXE",
+  "components": {
+    "name": "<green>Double Headed Golden Battle Axe",
+    "item_model": "minecraft:double_headed_golden_battle_axe",
+    "durability": 780,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 10.375,
+        "ATTACK_SPEED_BASE": 0.825,
+        "ENTITY_REACH": 0.15,
+        "SWEEPING_DAMAGE_RATIO": 0.32
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

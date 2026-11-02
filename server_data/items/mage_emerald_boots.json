@@ -1,0 +1,26 @@
+{
+  "id": "mage_emerald_boots",
+  "base": "IRON_BOOTS",
+  "components": {
+    "name": "<green>Emerald Mage Boots",
+    "item_model": "minecraft:emerald_boots",
+    "equippable": {
+      "slot": "FEET",
+      "asset_id": "minecraft:emerald"
+    },
+    "enchant": {
+      "enchants": {
+        "FEATHER_FALLING": 1
+      }
+    },
+    "durability": 480,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.5,
+        "SPEED_PERCENT": 0.015,
+        "FALL_DAMAGE": -0.2
+      },
+      "slot": "FEET"
+    }
+  }
+}

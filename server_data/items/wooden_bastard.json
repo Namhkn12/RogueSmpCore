@@ -1,0 +1,18 @@
+{
+  "id": "wooden_bastard",
+  "base": "WOODEN_SWORD",
+  "components": {
+    "name": "<white>Wooden Bastard",
+    "item_model": "minecraft:wooden_bastard",
+    "durability": 81,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.9,
+        "ATTACK_SPEED_BASE": 1.325,
+        "ENTITY_REACH": 0.46,
+        "SWEEPING_DAMAGE_RATIO": 0.312
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

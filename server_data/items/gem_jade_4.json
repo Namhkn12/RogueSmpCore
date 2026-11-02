@@ -1,0 +1,21 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#249960>Flawless Jade",
+    "description": [
+      "<dark_gray><!i>Ngọc Vô Khuyết",
+      "<gray><i>Mỗi nhát cuốc ăn sâu hơn,",
+      "<gray><i>nhưng tay cầm nặng trĩu."
+    ],
+    "head_skin": "gem_jade",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "MINING_EFFICIENCY": 1.15,
+          "SPEED_PERCENT": -0.02
+        }
+      },
+      "success_chance": 0.5
+    }
+  }
+}

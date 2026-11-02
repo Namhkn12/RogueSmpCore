@@ -1,0 +1,67 @@
+{
+  "id": "tmd_obsidian_reaper",
+  "entityType": "WITHER_SKELETON",
+  "displayName": "<dark_gray>Obsidian Reaper</dark_gray>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": true,
+  "detectionRange": 30,
+  "baseStat": {
+    "max_health": 90.0,
+    "attack_damage": 18.0,
+    "movement_speed": 0.34,
+    "armor": 16.0,
+    "knockback_resistance": 0.35
+  },
+  "equipments": {
+    "HEAD": {
+      "material": "NETHERITE_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "silence"
+    },
+    "CHEST": {
+      "material": "NETHERITE_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "silence"
+    },
+    "LEGS": {
+      "material": "NETHERITE_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "silence"
+    },
+    "FEET": {
+      "material": "NETHERITE_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "silence"
+    },
+    "HAND": {
+      "material": "NETHERITE_SWORD",
+      "displayName": "<dark_gray>Reaper's Edge</dark_gray>",
+      "lore": [
+        "<dark_red>Forged from obsidian and bound by darkness.",
+        "<gray>It has never missed its mark."
+      ],
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

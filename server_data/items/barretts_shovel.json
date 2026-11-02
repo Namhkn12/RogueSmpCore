@@ -1,0 +1,20 @@
+{
+  "base": "IRON_SHOVEL",
+  "components": {
+    "name": "<#C9D1D9>Barrett's Shovel",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Xẻng sắt xúc đất cát nhanh gọn.",
+      "<dark_gray><!i>Hàng của Toolsmith Barrett"
+    ],
+    "durability": 220,
+    "socket": 1,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.0,
+        "ATTACK_SPEED_BASE": 1.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

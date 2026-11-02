@@ -1,0 +1,16 @@
+{
+  "display_name": "Khối kim cương ma thuật",
+  "model": "minecraft:ores/diamond_magic_block",
+  "hardness": 8,
+  "break_strength": 3,
+  "drops": [
+    {
+      "item": "diamond_magic_block",
+      "min_amount": 1,
+      "max_amount": 1,
+      "chance": 1.0
+    }
+  ],
+  "place_sound": "block.metal.place",
+  "break_sound": "block.metal.break"
+}

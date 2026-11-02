@@ -1,0 +1,22 @@
+{
+  "id": "knight_copper_boots",
+  "base": "COPPER_BOOTS",
+  "components": {
+    "name": "<white>Knight Copper Boots",
+    "item_model": "minecraft:knight_copper_boots",
+    "equippable": {
+      "slot": "FEET",
+      "asset_id": "minecraft:knight_copper"
+    },
+    "durability": 156,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.31,
+        "SPEED_PERCENT": 0.015,
+        "SNEAKING_SPEED": 0.05,
+        "FALL_DAMAGE": -0.15
+      },
+      "slot": "FEET"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "spawner_tmd_cinder_grunt",
+  "name": "TMD Cinder Grunt Spawner",
+  "mobs": { "tmd_cinder_grunt": 100 },
+  "delay": 0, "minDelay": 80, "maxDelay": 150,
+  "activeRange": 12, "spawnRange": 4, "maxNearBy": 8, "spawnCount": 4,
+  "behaviors": [
+    {
+      "type": "protector",
+      "params": {
+        "requireBreak": 4
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "ores/gold_high_quality_ingot",
+  "base": "PAPER",
+  "components": {
+    "name": "<green>Thỏi vàng chất lượng cao",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Chất lượng cao"
+    ],
+    "item_model": "minecraft:ores/gold_high_quality_ingot"
+  }
+}

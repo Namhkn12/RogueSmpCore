@@ -1,0 +1,23 @@
+{
+  "id": "copper_kite_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<white>Copper Kite Shield",
+    "item_model": "minecraft:copper_kite_shield",
+    "enchant": {
+      "enchants": {
+        "BLAST_PROTECTION": 1
+      }
+    },
+    "durability": 254,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.2,
+        "SPEED_PERCENT": -0.0125,
+        "FALL_DAMAGE": -0.15,
+        "KNOCKBACK_RESISTANCE": 0.15
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

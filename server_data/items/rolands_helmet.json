@@ -1,0 +1,19 @@
+{
+  "base": "IRON_HELMET",
+  "components": {
+    "name": "<#C9D1D9>Roland's Helmet",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Mũ sắt mỏng, che được đầu là đủ.",
+      "<dark_gray><!i>Hàng của Armorer Roland"
+    ],
+    "durability": 420,
+    "socket": 1,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.0
+      },
+      "slot": "HEAD"
+    }
+  }
+}

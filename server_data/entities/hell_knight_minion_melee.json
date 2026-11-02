@@ -1,0 +1,74 @@
+{
+  "id": "hell_knight_minion_melee",
+  "entityType": "WITHER_SKELETON",
+  "displayName": "<dark_red><bold>Linh hồn kị binh</bold></dark_red>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 28,
+
+  "baseStat": {
+    "max_health": 50,
+    "attack_damage": 10.0,
+    "movement_speed": 0.33,
+    "armor": 18.0,
+    "knockback_resistance": 0.35
+  },
+
+  "equipments": {
+
+    "HEAD": {
+      "material": "NETHERITE_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "silence"
+    },
+
+    "CHEST": {
+      "material": "NETHERITE_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "rib"
+    },
+
+    "LEGS": {
+      "material": "NETHERITE_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "flow"
+    },
+
+    "FEET": {
+      "material": "NETHERITE_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "snout"
+    },
+
+    "HAND": {
+      "material": "NETHERITE_SWORD",
+      "displayName": "<dark_red>Basalt Cleaver</dark_red>",
+      "lore": [
+        "<gray>Forged to sever the living."
+      ],
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

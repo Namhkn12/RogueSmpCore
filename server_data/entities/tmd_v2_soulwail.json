@@ -1,0 +1,24 @@
+{
+  "id": "tmd_soulwail",
+  "entityType": "GHAST",
+  "displayName": "<white>Soulwail</white>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 40,
+  "baseStat": {
+    "max_health": 60.0,
+    "attack_damage": 14.0,
+    "movement_speed": 0.22,
+    "armor": 0.0,
+    "knockback_resistance": 0.0
+  },
+  "equipments": {
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

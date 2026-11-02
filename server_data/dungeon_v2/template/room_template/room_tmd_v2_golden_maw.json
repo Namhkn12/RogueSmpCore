@@ -1,0 +1,26 @@
+{
+  "id": "tmd_v2_golden_maw",
+  "type": "NORMAL",
+  "schemetaId": "schemeta_tmd_v2_dark_golden_maw",
+  "objectives": [
+    {
+      "type": "spawner_breaker",
+      "params": {
+        "score": 35,
+        "require": 15
+      }
+    }
+  ],
+  "roomEvents": [
+    {
+      "type": "dark_eyes"
+    },
+    {
+      "type": "party_strength_buff",
+      "params": {
+        "durationTicks": 6000,
+        "amplifier": 2
+      }
+    }
+  ]
+}

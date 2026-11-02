@@ -1,0 +1,35 @@
+{
+  "display_name": "Glorious Battle",
+  "icon": "IRON_SWORD",
+  "type": "ACTIVE",
+  "description": [
+    "<gray>Lunge forward, piercing through enemies in your path for damage, knockback, and a stun,",
+    "<gray>gaining knockback resistance mid-air and damage resistance throughout.",
+    "",
+    "<white>Collision Damage: <yellow><collision_damage>",
+    "<white>Radius: <yellow><radius> blocks",
+    "<white>Resistance: <yellow><resistance_amplifier:percent>%<white> for <yellow><resistance_duration:second>s",
+    "<white>Stun Duration: <yellow><stun_duration:second>s",
+    "<white>Cooldown: <yellow><cooldown:second>s"
+  ],
+  "scaling": {
+    "cooldown": [100],
+    "velocity": [1.6, 1.7, 1.8, 1.9, 2.0],
+    "collision_radius": [2.0, 2.2, 2.4, 2.6, 2.8],
+    "collision_damage": [4.0, 5.0, 6.0, 7.0, 8.0],
+    "collision_knockback": [0.6, 0.65, 0.7, 0.75, 0.8],
+    "landing_radius": [4.0, 4.2, 4.4, 4.6, 4.8],
+    "landing_damage": [4.0, 5.0, 6.0, 7.0, 8.0],
+    "landing_knockback": [0.6, 0.65, 0.7, 0.75, 0.8],
+    "resistance_amplifier": [0.15, 0.2, 0.25, 0.3, 0.35],
+    "resistance_duration": [40.0, 45.0, 50.0, 55.0, 60.0],
+    "stun_duration": [20.0, 25.0, 30.0, 35.0, 40.0]
+  },
+  "trigger": {
+    "cast": {
+      "key": "SWAP",
+      "options": []
+    }
+  },
+  "upgrades": {}
+}

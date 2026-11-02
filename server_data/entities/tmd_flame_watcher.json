@@ -1,0 +1,26 @@
+{
+  "id": "tmd_flame_watcher",
+  "entityType": "BLAZE",
+  "displayName": "<gold><bold>Flame Watcher</bold></gold>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 30,
+
+  "baseStat": {
+    "max_health": 50.0,
+    "attack_damage": 9.0,
+    "movement_speed": 0.30,
+    "armor": 6.0,
+    "knockback_resistance": 0.25
+  },
+
+  "equipments": {},
+
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

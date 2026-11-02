@@ -1,0 +1,20 @@
+{
+  "id": "spawner_tmd_elite_2",
+  "name": "TMD Elite Spawner",
+  "mobs": {
+    "tmd_ashen_executioner_2": 70,
+    "tmd_ashen_executioner": 30
+  },
+  "delay": 0,
+  "minDelay": 200,
+  "maxDelay": 280,
+  "activeRange": 28,
+  "spawnRange": 4,
+  "maxNearBy": 6,
+  "spawnCount": 2,
+  "behaviors": [
+    {
+      "type": "cursed"
+    }
+  ]
+}

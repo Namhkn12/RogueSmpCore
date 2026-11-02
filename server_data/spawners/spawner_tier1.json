@@ -1,0 +1,25 @@
+{
+  "id": "spawner_tmd_tier1",
+  "name": "TMD Tier 1 - Ash Fodder Spawner",
+  "mobs": {
+    "tmd_cinder_grunt": 25,
+    "tmd_scorch_raider": 25,
+    "tmd_ash_lancer": 25,
+    "tmd_smoldering_hog": 25
+  },
+  "delay": 0,
+  "minDelay": 120,
+  "maxDelay": 180,
+  "activeRange": 12,
+  "spawnRange": 4,
+  "maxNearBy": 8,
+  "spawnCount": 4,
+  "behaviors": [
+      {
+        "type": "wave",
+        "params": {
+          "waves": 3
+        }
+      }
+    ]
+}

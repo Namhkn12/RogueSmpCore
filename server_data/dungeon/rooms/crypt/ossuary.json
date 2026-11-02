@@ -1,0 +1,12 @@
+{
+  "type": "normal",
+  "name": "Hầm hài cốt",
+  "schematic": "schemeta_cave_combat_01",
+  "objectives": [
+    { "on": { "event": "mob_killed" }, "count": 20, "score": 12, "display": "Tiêu diệt quái" },
+    { "on": { "event": "block_broken", "subject": "spawner" }, "count": 2, "score": 5, "display": "Phá ổ quái" }
+  ],
+  "effects": [
+    { "type": "creeping_dread", "max_triggers": 3, "spawn_chance": 0.2, "min_interval": 30, "max_interval": 60 }
+  ]
+}

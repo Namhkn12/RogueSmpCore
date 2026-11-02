@@ -1,0 +1,11 @@
+{
+  "id": "brewed_potion",
+  "base": "POTION",
+  "components": {
+    "name": "<light_purple>Brewed Potion",
+    "brewed_potion": {
+      "base_duration": 180,
+      "min_duration": 30
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "ores/gold_magic_ingot",
+  "base": "PAPER",
+  "components": {
+    "name": "<light_purple>Thỏi vàng ma thuật",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Ma thuật"
+    ],
+    "item_model": "minecraft:ores/gold_magic_ingot",
+    "glint": true
+  }
+}

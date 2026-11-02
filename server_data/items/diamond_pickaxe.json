@@ -1,0 +1,16 @@
+{
+  "id": "diamond_pickaxe",
+  "base": "DIAMOND_PICKAXE",
+  "components": {
+    "durability": 1561,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.0,
+        "ATTACK_SPEED_BASE": 1.2000000476837158,
+        "BREAK_STRENGTH": 4.0,
+        "MINING_SPEED": 180.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

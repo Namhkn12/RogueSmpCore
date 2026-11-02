@@ -1,0 +1,16 @@
+{
+  "id": "stone_axe",
+  "base": "STONE_AXE",
+  "components": {
+    "name": "<white>Stone Axe",
+    "durability": 150,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.5,
+        "ATTACK_SPEED_BASE": 0.975,
+        "ENTITY_REACH": 0.18
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "golden_hatchet",
+  "base": "GOLDEN_AXE",
+  "components": {
+    "name": "<green>Golden Hatchet",
+    "item_model": "minecraft:golden_hatchet",
+    "durability": 480,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.125,
+        "ATTACK_SPEED_BASE": 1.2625,
+        "ENTITY_REACH": 0.15,
+        "SWEEPING_DAMAGE_RATIO": 0.08
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

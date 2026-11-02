@@ -1,0 +1,21 @@
+{
+  "id": "knight_diamond_helmet",
+  "base": "DIAMOND_HELMET",
+  "components": {
+    "name": "<dark_purple>Knight Diamond Helmet",
+    "item_model": "minecraft:knight_diamond_helmet",
+    "equippable": {
+      "slot": "HEAD",
+      "asset_id": "minecraft:knight_diamond"
+    },
+    "durability": 1050,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.7,
+        "MELEE_DAMAGE_PERCENT": 0.03,
+        "CRIT_DAMAGE_FLAT": 2.0
+      },
+      "slot": "HEAD"
+    }
+  }
+}

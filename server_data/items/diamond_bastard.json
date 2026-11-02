@@ -1,0 +1,18 @@
+{
+  "id": "diamond_bastard",
+  "base": "DIAMOND_SWORD",
+  "components": {
+    "name": "<dark_purple>Diamond Bastard",
+    "item_model": "minecraft:diamond_bastard",
+    "durability": 1650,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 10.0,
+        "ATTACK_SPEED_BASE": 1.1125,
+        "ENTITY_REACH": 0.3,
+        "SWEEPING_DAMAGE_RATIO": 0.12
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

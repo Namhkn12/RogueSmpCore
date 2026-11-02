@@ -1,0 +1,14 @@
+{
+  "entityType": "VILLAGER",
+  "name": "<gradient:#FF8A80:#D32F2F><bold>Chef Gordon</bold></gradient>",
+  "description": [
+    "<red>Bán thịt và đồ ăn giúp no nhanh</red>"
+  ],
+  "profession": "minecraft:butcher",
+  "actions": [
+    {
+      "gui": "shop:food_meat",
+      "type": "open_gui"
+    }
+  ]
+}

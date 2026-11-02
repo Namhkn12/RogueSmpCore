@@ -1,0 +1,17 @@
+{
+  "id": "wooden_sword",
+  "base": "WOODEN_SWORD",
+  "components": {
+    "name": "<white>Wooden Sword",
+    "durability": 73,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.0,
+        "ATTACK_SPEED_BASE": 1.62,
+        "ENTITY_REACH": 0.21,
+        "SWEEPING_DAMAGE_RATIO": 0.312
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

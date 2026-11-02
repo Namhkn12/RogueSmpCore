@@ -1,0 +1,18 @@
+{
+  "id": "copper_swordbreaker",
+  "base": "COPPER_SWORD",
+  "components": {
+    "name": "<white>Copper Swordbreaker",
+    "item_model": "minecraft:copper_swordbreaker",
+    "durability": 234,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.175,
+        "ATTACK_SPEED_BASE": 1.7,
+        "ENTITY_REACH": -0.05,
+        "DEFENSE_FLAT": 0.72
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "id": "op_base_cmd_exec",
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:nether_star",
+    "command_executor": "/smpbrowser item",
+    "glint": true,
+    "name": "<red>Command Executor"
+  }
+}

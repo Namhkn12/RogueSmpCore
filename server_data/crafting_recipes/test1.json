@@ -1,0 +1,16 @@
+{
+  "result": {
+    "item": "iron_pure_block"
+  },
+  "ingredients": [
+    {
+      "item": "minecraft:iron_block",
+      "count": 64
+    },
+    {
+      "item": "minecraft:nether_star"
+    }
+  ],
+  "duration": 100,
+  "type": "coke_oven"
+}

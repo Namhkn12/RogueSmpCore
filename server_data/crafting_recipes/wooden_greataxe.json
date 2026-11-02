@@ -1,0 +1,19 @@
+{
+  "result": {
+    "item": "wooden_greataxe"
+  },
+  "pattern": [
+    "AA ",
+    "AB ",
+    " B "
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:stick"
+    },
+    "A": {
+      "item": "minecraft:oak_wood"
+    }
+  },
+  "type": "shaped"
+}

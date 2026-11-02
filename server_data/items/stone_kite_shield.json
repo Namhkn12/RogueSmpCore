@@ -1,0 +1,23 @@
+{
+  "id": "stone_kite_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<white>Stone Kite Shield",
+    "item_model": "minecraft:stone_kite_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1,
+        "BLAST_PROTECTION": 1
+      }
+    },
+    "durability": 195,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.0,
+        "SPEED_PERCENT": -0.0225,
+        "KNOCKBACK_RESISTANCE": 0.15
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

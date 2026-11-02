@@ -1,0 +1,20 @@
+{
+  "id": "netherite_recurve_bow",
+  "base": "BOW",
+  "components": {
+    "name": "<gold>Netherite Recurve Bow",
+    "item_model": "minecraft:netherite_recurve_bow",
+    "durability": 1560,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 10.25,
+        "PROJECTILE_SPEED_BASE": 1.144,
+        "SPEED_PERCENT": -0.05,
+        "BURNING_TIME": -0.4,
+        "KNOCKBACK_RESISTANCE": 0.1,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

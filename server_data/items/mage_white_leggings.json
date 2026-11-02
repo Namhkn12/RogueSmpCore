@@ -1,0 +1,16 @@
+{
+  "id": "mage_white_leggings",
+  "base": "LEATHER_LEGGINGS",
+  "components": {
+    "name": "<white>Ivory Mage Leggings",
+    "dyed_color": "#F9FFFE",
+    "durability": 152,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.35,
+        "SPEED_PERCENT": 0.03
+      },
+      "slot": "LEGS"
+    }
+  }
+}

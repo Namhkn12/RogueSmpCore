@@ -1,0 +1,25 @@
+{
+  "id": "mage_redstone_leggings",
+  "base": "IRON_LEGGINGS",
+  "components": {
+    "name": "<blue>Redstone Mage Leggings",
+    "item_model": "minecraft:redstone_leggings",
+    "equippable": {
+      "slot": "LEGS",
+      "asset_id": "minecraft:redstone"
+    },
+    "enchant": {
+      "enchants": {
+        "BLAST_PROTECTION": 1
+      }
+    },
+    "durability": 427,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.55,
+        "SPEED_PERCENT": 0.0275
+      },
+      "slot": "LEGS"
+    }
+  }
+}

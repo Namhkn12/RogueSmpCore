@@ -1,0 +1,18 @@
+{
+  "id": "wooden_bow",
+  "base": "BOW",
+  "components": {
+    "name": "<white>Wooden Bow",
+    "item_model": "minecraft:wooden_bow",
+    "durability": 73,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 4.4,
+        "PROJECTILE_SPEED_BASE": 1.132,
+        "SPEED_PERCENT": 0.076,
+        "SNEAKING_SPEED": 0.15
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

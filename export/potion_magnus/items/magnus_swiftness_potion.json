@@ -1,0 +1,21 @@
+{
+  "base": "POTION",
+  "components": {
+    "name": "<#33EBFF>Potion of Swiftness",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Uống vào nhận Tốc Độ I trong 3 phút.",
+      "<dark_gray><!i>Hàng của Alchemist Magnus"
+    ],
+    "potion_content": {
+      "color": "255,51,235,255",
+      "effects": [
+        {
+          "type": "speed",
+          "duration": 3600,
+          "amplifier": 0
+        }
+      ]
+    }
+  }
+}

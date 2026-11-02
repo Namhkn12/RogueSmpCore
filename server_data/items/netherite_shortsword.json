@@ -1,0 +1,17 @@
+{
+  "id": "netherite_shortsword",
+  "base": "NETHERITE_SWORD",
+  "components": {
+    "name": "<gold>Netherite Shortsword",
+    "item_model": "minecraft:netherite_shortsword",
+    "durability": 1560,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.5,
+        "ATTACK_SPEED_BASE": 1.85,
+        "SWEEPING_DAMAGE_RATIO": 0.04
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

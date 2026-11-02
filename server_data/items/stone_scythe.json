@@ -1,0 +1,18 @@
+{
+  "id": "stone_scythe",
+  "base": "STONE_HOE",
+  "components": {
+    "name": "<white>Stone Scythe",
+    "item_model": "minecraft:stone_scythe",
+    "durability": 135,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.0,
+        "ATTACK_SPEED_BASE": 1.175,
+        "ENTITY_REACH": 0.68,
+        "SWEEPING_DAMAGE_RATIO": 0.736
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "spawner_brute_patrol",
+  "name": "Brute Patrol",
+  "mobs": {
+    "dungeon_pillager_brute": 70,
+    "dungeon_skeleton": 30
+  },
+  "delay": 0,
+  "minDelay": 150,
+  "maxDelay": 280,
+  "activeRange": 12,
+  "spawnRange": 4,
+  "maxNearBy": 6,
+  "spawnCount": 4,
+  "behaviors": [
+    {
+      "type": "protector",
+      "params": {
+        "requireBreak": 4
+      }
+    }
+  ]
+}

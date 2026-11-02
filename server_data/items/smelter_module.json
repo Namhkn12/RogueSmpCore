@@ -1,0 +1,24 @@
+{
+  "id": "smelter_module",
+  "base": "BLAST_FURNACE",
+  "components": {
+    "name": "<gold>Smelter Module",
+    "generator_module": {
+      "modifiers": [
+        {"stat": "energy_per_tick", "amount": 0.15}
+      ],
+      "max_per_machine": 1,
+      "behaviors": [
+        {
+          "type": "convert_drops",
+          "conversions": {
+            "minecraft:raw_iron": "minecraft:iron_ingot",
+            "minecraft:raw_gold": "minecraft:gold_ingot",
+            "minecraft:raw_copper": "minecraft:copper_ingot",
+            "minecraft:cobblestone": "minecraft:stone"
+          }
+        }
+      ]
+    }
+  }
+}

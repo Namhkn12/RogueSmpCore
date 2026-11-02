@@ -1,0 +1,20 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#F0C987>Rough Amber",
+    "description": [
+      "<dark_gray><!i>Ngọc Thô",
+      "<gray><i>Cục nhựa cây đục,",
+      "<gray><i>bên trong lẫn vụn gỗ."
+    ],
+    "head_skin": "gem_amber",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "MELEE_DAMAGE_PERCENT": 0.06
+        }
+      },
+      "success_chance": 0.95
+    }
+  }
+}

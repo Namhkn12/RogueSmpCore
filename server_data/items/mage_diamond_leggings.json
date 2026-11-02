@@ -1,0 +1,20 @@
+{
+  "id": "mage_diamond_leggings",
+  "base": "DIAMOND_LEGGINGS",
+  "components": {
+    "name": "<dark_purple>Diamond Mage Leggings",
+    "enchant": {
+      "enchants": {
+        "PROJECTILE_PROTECTION": 1
+      }
+    },
+    "durability": 1045,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 4.5,
+        "SPEED_PERCENT": 0.01
+      },
+      "slot": "LEGS"
+    }
+  }
+}

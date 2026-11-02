@@ -1,0 +1,23 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#A9C8FF>Rough Sapphire",
+    "description": [
+      "<dark_gray><!i>Ngọc Thô",
+      "<gray><i>Mảnh đá xanh thẫm,",
+      "<gray><i>nhặt được dưới đáy hồ."
+    ],
+    "head_skin": "gem_sapphire",
+    "gem_data": {
+      "attributes": {
+        "HEAD": {
+          "OXYGEN_BONUS": 2.0
+        },
+        "FEET": {
+          "FALL_DAMAGE": -0.15
+        }
+      },
+      "success_chance": 1.0
+    }
+  }
+}

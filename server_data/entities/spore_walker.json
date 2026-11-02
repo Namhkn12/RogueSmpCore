@@ -1,0 +1,58 @@
+{
+  "id": "wood/spore_walker",
+  "entityType": "ZOMBIE",
+  "components": {
+    "display_name": "<gradient:#C5E1A5:#558B2F>Thây nấm</gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 24
+    },
+    "attributes": {
+      "max_health": 40.0,
+      "attack_damage": 4.0,
+      "armor": 4.0,
+      "knockback_resistance": 0.1
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "spore_walker"
+      },
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "trimMaterial": "emerald",
+        "trimPattern": "vex",
+        "dyeColor": "255,154,205,50"
+      },
+      "LEGS": {
+        "material": "LEATHER_LEGGINGS",
+        "dyeColor": "255,85,107,47"
+      }
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "death_cloud_spell",
+          "burstEffect": true,
+          "cloud": {
+            "radius": 3.0,
+            "duration": 100,
+            "color": "#7FB238",
+            "effects": [
+              {
+                "type": "poison",
+                "duration": 80,
+                "amplifier": 0
+              },
+              {
+                "type": "slowness",
+                "duration": 80,
+                "amplifier": 1
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

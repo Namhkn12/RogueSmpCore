@@ -1,0 +1,20 @@
+{
+  "id": "wooden_greataxe",
+  "base": "WOODEN_AXE",
+  "components": {
+    "name": "<white>Wooden Greataxe",
+    "item_model": "minecraft:wooden_greataxe",
+    "durability": 110,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 9.0,
+        "ATTACK_SPEED_BASE": 0.84,
+        "ENTITY_REACH": 0.46,
+        "SPEED_PERCENT": 0.008,
+        "KNOCKBACK_RESISTANCE": 0.084,
+        "SWEEPING_DAMAGE_RATIO": 0.416
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

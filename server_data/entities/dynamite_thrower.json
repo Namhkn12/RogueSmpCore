@@ -1,0 +1,52 @@
+{
+  "id": "metal/dynamite_thrower",
+  "entityType": "PILLAGER",
+  "components": {
+    "display_name": "<gradient:#FF7043:#B71C1C>Kẻ ném bom</gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 24
+    },
+    "attributes": {
+      "max_health": 50.0,
+      "attack_damage": 3.0,
+      "armor": 4.0,
+      "knockback_resistance": 0.1
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "dynamite_thrower"
+      },
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "trimMaterial": "gold",
+        "trimPattern": "bolt",
+        "dyeColor": "255,150,75,40"
+      },
+      "LEGS": {
+        "material": "LEATHER_LEGGINGS",
+        "dyeColor": "255,92,64,45"
+      },
+      "HAND": {
+        "material": "TNT"
+      }
+    },
+    "spells": {
+      "activeSpell": [
+        {
+          "type": "throw_tnt_spell",
+          "minRange": 5.0,
+          "maxRange": 7.0,
+          "fuseTicks": 30,
+          "cooldownTicks": 80,
+          "radius": 3.0,
+          "damageMultiplier": 2.0,
+          "falloff": true,
+          "knockback": 0.8,
+          "playersOnly": true
+        }
+      ]
+    }
+  }
+}

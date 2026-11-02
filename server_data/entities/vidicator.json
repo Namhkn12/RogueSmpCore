@@ -1,0 +1,67 @@
+{
+  "id": "dungeon_boss_warlord",
+  "entityType": "VINDICATOR",
+  "displayName": "<dark_red><bold>☠ Warlord of the Deep ☠</bold></dark_red>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": true,
+  "isElite": false,
+  "detectionRange": 35,
+  "baseStat": {
+    "max_health": 500.0,
+    "attack_damage": 15.0,
+    "movement_speed": 0.30,
+    "armor": 16.0,
+    "knockback_resistance": 0.8
+  },
+  "equipments": {
+    "HEAD": {
+      "material": "NETHERITE_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "ward"
+    },
+    "CHEST": {
+      "material": "NETHERITE_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "ward"
+    },
+    "LEGS": {
+      "material": "NETHERITE_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "ward"
+    },
+    "FEET": {
+      "material": "NETHERITE_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "ward"
+    },
+    "HAND": {
+      "material": "NETHERITE_AXE",
+      "displayName": "<dark_red>Axe of the Damned</dark_red>",
+      "lore": [
+        "<gray>Stained with the blood of a thousand fallen.",
+        "<dark_gray>Its edge never dulls."
+      ],
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

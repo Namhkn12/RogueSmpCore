@@ -1,0 +1,19 @@
+{
+  "id": "golden_longbow",
+  "base": "BOW",
+  "components": {
+    "name": "<green>Golden Longbow",
+    "item_model": "minecraft:golden_longbow",
+    "durability": 540,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 7.75,
+        "PROJECTILE_SPEED_BASE": 1.166,
+        "SPEED_PERCENT": -0.055,
+        "FALL_DAMAGE": -0.15,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

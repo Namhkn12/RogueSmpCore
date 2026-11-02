@@ -1,0 +1,10 @@
+{
+  "base": "PAPER",
+  "components": {
+    "item_model": "smp:arcane_reactor",
+    "name": "Coal Generator",
+    "block_place": {
+      "block": "coal_generator"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "netherite_crossbow",
+  "base": "CROSSBOW",
+  "components": {
+    "name": "<gold>Netherite Crossbow",
+    "item_model": "minecraft:netherite_crossbow",
+    "durability": 2340,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 15.0,
+        "PROJECTILE_SPEED_BASE": 0.88,
+        "SPEED_PERCENT": -0.14,
+        "BURNING_TIME": -0.4,
+        "KNOCKBACK_RESISTANCE": 0.1,
+        "SNEAKING_SPEED": 0.05
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

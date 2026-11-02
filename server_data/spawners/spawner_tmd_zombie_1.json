@@ -1,0 +1,23 @@
+{
+  "id": "spawner_tmd_zombie_1",
+  "name": "TMD Zombie Spawner Basic",
+  "mobs": {
+    "tmd_ashbound_zombie": 70,
+    "tmd_ashbound_zombie_2": 30
+  },
+  "delay": 0,
+  "minDelay": 150,
+  "maxDelay": 280,
+  "activeRange": 28,
+  "spawnRange": 4,
+  "maxNearBy": 6,
+  "spawnCount": 4,
+  "behaviors": [
+    {
+      "type": "protector",
+      "params": {
+        "requireBreak": 3
+      }
+    }
+  ]
+}

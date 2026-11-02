@@ -1,0 +1,18 @@
+{
+  "id": "wooden_katana",
+  "base": "WOODEN_SWORD",
+  "components": {
+    "name": "<white>Wooden Katana",
+    "item_model": "minecraft:wooden_katana",
+    "durability": 66,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.1,
+        "ATTACK_SPEED_BASE": 1.915,
+        "ENTITY_REACH": 0.46,
+        "SWEEPING_DAMAGE_RATIO": 0.208
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

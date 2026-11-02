@@ -1,0 +1,129 @@
+{
+  "title": "<gold>Thợ Công Cụ Barrett",
+  "layout": {
+    "pattern": [
+      "#########",
+      "#OOOOOOO#",
+      "#OOOOOOO#",
+      "#########"
+    ],
+    "keys": {
+      "#": "BLACK_STAINED_GLASS_PANE"
+    },
+    "fill": "GRAY_STAINED_GLASS_PANE"
+  },
+  "offers": [
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 1350
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "barretts_pickaxe"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 780
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "barretts_axe"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 545
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "barretts_shovel"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 75
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_jade_1"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 200
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_jade_2"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 10
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "hemp_rope"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 5
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "hardwood_stick"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 8
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "bamboo_pole"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "golden_recurve_bow",
+  "base": "BOW",
+  "components": {
+    "name": "<green>Golden Recurve Bow",
+    "item_model": "minecraft:golden_recurve_bow",
+    "durability": 480,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 6.12,
+        "PROJECTILE_SPEED_BASE": 1.378,
+        "SPEED_PERCENT": 0.07,
+        "FALL_DAMAGE": -0.25
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

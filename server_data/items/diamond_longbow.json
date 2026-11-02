@@ -1,0 +1,19 @@
+{
+  "id": "diamond_longbow",
+  "base": "BOW",
+  "components": {
+    "name": "<dark_purple>Diamond Longbow",
+    "item_model": "minecraft:diamond_longbow",
+    "durability": 1350,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 11.25,
+        "PROJECTILE_SPEED_BASE": 1.034,
+        "SPEED_PERCENT": -0.155,
+        "BURNING_TIME": -0.25,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

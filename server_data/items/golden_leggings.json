@@ -1,0 +1,15 @@
+{
+  "id": "golden_leggings",
+  "base": "GOLDEN_LEGGINGS",
+  "components": {
+    "name": "<green>Golden Leggings",
+    "durability": 570,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 4.2,
+        "SPEED_PERCENT": 0.005
+      },
+      "slot": "LEGS"
+    }
+  }
+}

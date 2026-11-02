@@ -1,0 +1,39 @@
+{
+  "display_name": "Hỏa Kích",
+  "icon": "BLAZE_POWDER",
+  "type": "ACTIVE",
+  "description": [
+    "<!i><gold>Cách kích hoạt: <yellow>Chuột Phải + Shift (RIGHT_CLICK)",
+    "<!i><gray>Giải phóng một luồng sóng lửa theo hình nón phía trước.",
+    "<!i><gray>Gây sát thương diện rộng và đẩy lùi nhẹ kẻ địch.",
+    "",
+    "<!i><gray>Sát thương: <red><damage>",
+    "<!i><gray>Tầm lan tỏa: <yellow><radius>m",
+    "<!i><gray>Hồi chiêu: <green><cooldown>s"
+  ],
+  "scaling": {
+    "damage": [14.0, 18.0, 22.0, 26.0, 32.0],
+    "radius": [4.5, 5.0, 5.5, 6.0, 7.0],
+    "cooldown": [120, 110, 100, 90, 70]
+  },
+  "trigger": {
+    "execute": {
+      "key": "RIGHT_CLICK",
+      "options": ["sneaking", "not_holding_projectile", "not_holding_consumable"]
+    }
+  },
+  "upgrades": {
+    "2": [
+      { "type": "exp", "level": 6, "cost": 100 }
+    ],
+    "3": [
+      { "type": "item", "item_id": "blaze_rod", "amount": 2 }
+    ],
+    "4": [
+      { "type": "exp", "level": 15, "cost": 400 }
+    ],
+    "5": [
+      { "type": "item", "item_id": "fire_essence", "amount": 1 }
+    ]
+  }
+}

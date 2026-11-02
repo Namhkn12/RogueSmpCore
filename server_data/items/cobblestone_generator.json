@@ -1,0 +1,11 @@
+{
+  "id": "cobblestone_generator",
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:dropper",
+    "name": "Cobblestone Generator",
+    "block_place": {
+      "block": "cobblestone_generator"
+    }
+  }
+}

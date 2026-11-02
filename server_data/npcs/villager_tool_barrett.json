@@ -1,0 +1,14 @@
+{
+  "entityType": "VILLAGER",
+  "name": "<gradient:#FFCA28:#EF6C00><bold>Toolsmith Barrett</bold></gradient>",
+  "description": [
+    "<yellow>Cung cấp công cụ khai thác</yellow>"
+  ],
+  "profession": "minecraft:toolsmith",
+  "actions": [
+    {
+      "type": "open_gui",
+      "gui": "shop:tool_barrett"
+    }
+  ]
+}

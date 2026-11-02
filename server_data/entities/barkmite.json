@@ -1,0 +1,16 @@
+{
+  "id": "wood/barkmite",
+  "entityType": "SILVERFISH",
+  "components": {
+    "display_name": "<#A1887F>Mọt gỗ",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 10.0,
+      "attack_damage": 2.5,
+      "armor": 0.0
+    }
+  }
+}

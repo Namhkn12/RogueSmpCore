@@ -1,0 +1,15 @@
+{
+  "type": "wireless_node",
+  "model": "smp:energy_relay",
+  "display_name": "Trạm chuyển tiếp năng lượng",
+  "hardness": 3,
+  "drops": [
+    { "item": "energy_relay" }
+  ],
+  "place_sound": "block.metal.place",
+  "break_sound": "block.metal.break",
+  "data": {
+    "throughput": 40,
+    "model_active": "smp:energy_relay_on"
+  }
+}

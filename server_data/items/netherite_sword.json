@@ -1,0 +1,16 @@
+{
+  "id": "netherite_sword",
+  "base": "NETHERITE_SWORD",
+  "components": {
+    "name": "<gold>Netherite Sword",
+    "durability": 1950,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 9.5,
+        "ATTACK_SPEED_BASE": 1.4,
+        "SWEEPING_DAMAGE_RATIO": 0.06
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

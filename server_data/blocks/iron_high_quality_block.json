@@ -1,0 +1,16 @@
+{
+  "display_name": "Khối sắt chất lượng cao",
+  "model": "minecraft:ores/iron_high_quality_block",
+  "hardness": 5,
+  "break_strength": 1,
+  "drops": [
+    {
+      "item": "iron_high_quality_block",
+      "min_amount": 1,
+      "max_amount": 1,
+      "chance": 1.0
+    }
+  ],
+  "place_sound": "block.metal.place",
+  "break_sound": "block.metal.break"
+}

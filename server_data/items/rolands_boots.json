@@ -1,0 +1,19 @@
+{
+  "base": "IRON_BOOTS",
+  "components": {
+    "name": "<#C9D1D9>Roland's Boots",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Giày bọc sắt, kêu lạch cạch mỗi bước.",
+      "<dark_gray><!i>Hàng của Armorer Roland"
+    ],
+    "durability": 480,
+    "socket": 1,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.0
+      },
+      "slot": "FEET"
+    }
+  }
+}

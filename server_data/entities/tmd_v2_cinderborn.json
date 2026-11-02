@@ -1,0 +1,24 @@
+{
+  "id": "tmd_cinderborn",
+  "entityType": "BLAZE",
+  "displayName": "<yellow>Cinderborn</yellow>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 28,
+  "baseStat": {
+    "max_health": 44.0,
+    "attack_damage": 9.0,
+    "movement_speed": 0.28,
+    "armor": 4.0,
+    "knockback_resistance": 0.1
+  },
+  "equipments": {
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

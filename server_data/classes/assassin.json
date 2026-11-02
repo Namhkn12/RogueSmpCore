@@ -1,0 +1,18 @@
+{
+  "id": "assassin",
+  "display_name": "Assassin",
+  "icon": "minecraft:iron_sword",
+  "description": [
+    "An assassin use stealth to approach an enemy and",
+    "deliver devastating attacks."
+  ],
+  "default_abilities": {
+    "dodging": 1,
+    "dagger_throw": 1,
+    "bodkin_blitz": 1,
+    "cloak_of_shadows": 1,
+    "advancing_shadow": 1,
+    "armor_breaker": 1
+  },
+  "allowedWeapons": ["swords"]
+}

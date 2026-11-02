@@ -1,0 +1,14 @@
+{
+  "entityType": "VILLAGER",
+  "name": "<gradient:#FFE082:#FB8C00><bold>Baker Oliver</bold></gradient>",
+  "description": [
+    "<yellow>Bánh mì và thực phẩm</yellow>"
+  ],
+  "profession": "minecraft:farmer",
+  "actions": [
+    {
+      "gui": "shop:food_vegetable",
+      "type": "open_gui"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "netherite_helmet",
+  "base": "NETHERITE_HELMET",
+  "components": {
+    "name": "<gold>Netherite Helmet",
+    "durability": 1365,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 4.8
+      },
+      "slot": "HEAD"
+    }
+  }
+}

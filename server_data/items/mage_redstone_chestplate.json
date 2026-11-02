@@ -1,0 +1,25 @@
+{
+  "id": "mage_redstone_chestplate",
+  "base": "IRON_CHESTPLATE",
+  "components": {
+    "name": "<blue>Redstone Mage Robe",
+    "item_model": "minecraft:redstone_chestplate",
+    "equippable": {
+      "slot": "CHEST",
+      "asset_id": "minecraft:redstone"
+    },
+    "enchant": {
+      "enchants": {
+        "BLAST_PROTECTION": 1
+      }
+    },
+    "durability": 450,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.4,
+        "MAGIC_DAMAGE_PERCENT": 0.0325
+      },
+      "slot": "CHEST"
+    }
+  }
+}

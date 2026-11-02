@@ -1,0 +1,14 @@
+{
+  "type": "generator",
+  "display_name": "Máy đào đá cuội",
+  "drops": [
+    {"item": "cobblestone_generator"}
+  ],
+  "model": "minecraft:dropper",
+  "data": {
+    "place": "minecraft:stone",
+    "drops": [
+      {"item": "minecraft:cobblestone", "min_amount": 1, "max_amount": 2}
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "item": "minecraft:prismarine_crystals",
+          "weight": 25,
+          "min_amount": 1,
+          "max_amount": 3
+        },
+        {
+          "type": "item",
+          "item": "minecraft:gold_ingot",
+          "weight": 25,
+          "min_amount": 1,
+          "max_amount": 3
+        },
+        {
+          "type": "item",
+          "item": "minecraft:name_tag",
+          "weight": 20
+        },
+        {
+          "type": "item",
+          "item": "minecraft:nautilus_shell",
+          "weight": 20
+        },
+        {
+          "type": "item",
+          "item": "minecraft:lapis_lazuli",
+          "weight": 10,
+          "min_amount": 3,
+          "max_amount": 6
+        }
+      ]
+    }
+  ]
+}

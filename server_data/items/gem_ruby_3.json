@@ -1,0 +1,20 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#E62635>Fine Ruby",
+    "description": [
+      "<dark_gray><!i>Ngọc Tinh",
+      "<gray><i>Đỏ trong như máu tươi,",
+      "<gray><i>khẽ rung theo từng nhát vung."
+    ],
+    "head_skin": "gem_ruby",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "MELEE_DAMAGE_BASE": 0.55
+        }
+      },
+      "success_chance": 0.62
+    }
+  }
+}

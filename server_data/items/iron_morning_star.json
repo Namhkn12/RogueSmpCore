@@ -1,0 +1,19 @@
+{
+  "id": "iron_morning_star",
+  "base": "IRON_AXE",
+  "components": {
+    "name": "<blue>Iron Morning Star",
+    "item_model": "minecraft:iron_morning_star",
+    "durability": 1260,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 9.25,
+        "ATTACK_SPEED_BASE": 0.85,
+        "ENTITY_REACH": 0.1,
+        "SWEEPING_DAMAGE_RATIO": 0.06,
+        "SAFE_FALL_DISTANCE": 0.5
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

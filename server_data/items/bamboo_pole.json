@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<gray>Bamboo Pole",
+    "description": [
+      "<dark_gray><!i>Low Tier Material",
+      "<gray><!i>Cán dài cho giáo, thương và trượng",
+      "<gray><!i>Nguyên liệu đồ Nén và Chất lượng cao"
+    ],
+    "item_model": "minecraft:bamboo"
+  }
+}

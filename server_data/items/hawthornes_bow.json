@@ -1,0 +1,23 @@
+{
+  "base": "BOW",
+  "components": {
+    "name": "<#C8A27A>Hawthorne's Bow",
+    "item_model": "minecraft:wooden_bow",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Cung săn gỗ tần bì, nhẹ tay và dễ di chuyển.",
+      "<dark_gray><!i>Hàng của Bowyer Hawthorne"
+    ],
+    "durability": 120,
+    "socket": 1,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 4.8,
+        "PROJECTILE_SPEED_BASE": 1.15,
+        "SPEED_PERCENT": 0.07,
+        "SNEAKING_SPEED": 0.15
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

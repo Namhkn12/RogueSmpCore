@@ -1,0 +1,29 @@
+{
+  "id": "metal/zombie_miner",
+  "entityType": "ZOMBIE_VILLAGER",
+  "components": {
+    "display_name": "<#B0BEC5>Quái vật mỏ",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 46.0,
+      "attack_damage": 5.0,
+      "armor": 2.0
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "zombie_miner"
+      },
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "dyeColor": "255,230,140,30"
+      },
+      "HAND": {
+        "material": "STONE_PICKAXE"
+      }
+    }
+  }
+}

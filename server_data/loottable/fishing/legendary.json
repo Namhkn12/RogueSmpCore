@@ -1,0 +1,38 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "item": "minecraft:heart_of_the_sea",
+          "weight": 30
+        },
+        {
+          "type": "item",
+          "item": "minecraft:netherite_scrap",
+          "weight": 25,
+          "min_amount": 1,
+          "max_amount": 2
+        },
+        {
+          "type": "item",
+          "item": "minecraft:diamond",
+          "weight": 25,
+          "min_amount": 2,
+          "max_amount": 4
+        },
+        {
+          "type": "item",
+          "item": "minecraft:enchanted_golden_apple",
+          "weight": 15
+        },
+        {
+          "type": "item",
+          "item": "minecraft:trident",
+          "weight": 5
+        }
+      ]
+    }
+  ]
+}

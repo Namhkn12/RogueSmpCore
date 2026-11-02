@@ -1,0 +1,19 @@
+{
+  "id": "wooden_tekko",
+  "base": "WOODEN_SWORD",
+  "components": {
+    "name": "<white>Wooden Tekko",
+    "item_model": "minecraft:wooden_tekko",
+    "durability": 103,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 2.25,
+        "ATTACK_SPEED_BASE": 2.61,
+        "ENTITY_REACH": -0.79,
+        "DEFENSE_FLAT": 0.3,
+        "KNOCKBACK_RESISTANCE": 0.084
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "mage_gray_leggings",
+  "base": "LEATHER_LEGGINGS",
+  "components": {
+    "name": "<white>Ashen Mage Leggings",
+    "dyed_color": "#474F52",
+    "enchant": {
+      "enchants": {
+        "BLAST_PROTECTION": 1
+      }
+    },
+    "durability": 152,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.35,
+        "SPEED_PERCENT": 0.02
+      },
+      "slot": "LEGS"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "wooden_morning_star",
+  "base": "WOODEN_AXE",
+  "components": {
+    "name": "<white>Wooden Morning Star",
+    "item_model": "minecraft:wooden_morning_star",
+    "durability": 88,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.35,
+        "ATTACK_SPEED_BASE": 1.03,
+        "ENTITY_REACH": 0.21,
+        "SWEEPING_DAMAGE_RATIO": 0.104,
+        "SAFE_FALL_DISTANCE": 1.05
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

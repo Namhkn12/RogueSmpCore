@@ -1,0 +1,29 @@
+{
+  "entityType": "WITHER_SKELETON",
+  "components": {
+    "ai": {
+      "presets": [
+        "hostile"
+      ],
+      "goals": [
+        {
+          "interval": 1,
+          "pullTime": 1,
+          "type": "bow_attack"
+        }
+      ]
+    },
+    "equipment": {
+      "HAND": {
+        "material": "BOW"
+      }
+    },
+    "attributes": {
+      "MAX_HEALTH": 100.0,
+      "FOLLOW_RANGE": 20.0,
+      "MOVEMENT_SPEED": 1.0,
+      "ATTACK_DAMAGE": 5.0
+    },
+    "display_name": "Destroyer of World"
+  }
+}

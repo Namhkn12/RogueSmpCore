@@ -1,0 +1,51 @@
+{
+  "id": "wood/hollow_hunter",
+  "entityType": "SKELETON",
+  "components": {
+    "display_name": "<gradient:#E0E0E0:#2E7D32><bold>✦ Thợ săn ma ✦</bold></gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 32
+    },
+    "attributes": {
+      "max_health": 70.0,
+      "attack_damage": 6.0,
+      "armor": 8.0,
+      "knockback_resistance": 0.5
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "hollow_hunter"
+      },
+      "CHEST": {
+        "material": "CHAINMAIL_CHESTPLATE",
+        "trimMaterial": "emerald",
+        "trimPattern": "sentry"
+      },
+      "LEGS": {
+        "material": "LEATHER_LEGGINGS",
+        "trimMaterial": "emerald",
+        "trimPattern": "sentry",
+        "dyeColor": "255,46,79,36"
+      },
+      "HAND": {
+        "material": "BOW",
+        "displayName": "<#A5D6A7>Cung Bóng Ma",
+        "lore": [
+          "<gray>Mũi tên tự tìm đến con mồi."
+        ],
+        "enchantGlint": true
+      }
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "homing_projectile_spell",
+          "turnStrength": 0.3,
+          "maxTrackingTicks": 50
+        }
+      ]
+    }
+  }
+}

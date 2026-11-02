@@ -1,0 +1,17 @@
+{
+  "id": "netherite_lance",
+  "base": "NETHERITE_SPEAR",
+  "components": {
+    "name": "<gold>Netherite Lance",
+    "item_model": "minecraft:netherite_lance",
+    "durability": 1950,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 12.0,
+        "ATTACK_SPEED_BASE": 0.7,
+        "ENTITY_REACH": 1.25
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

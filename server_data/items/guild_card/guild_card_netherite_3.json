@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<#A89BA9>Netherite Guild Card III",
+    "description": [
+      "<dark_gray><!i>Hạng A · Netherite III",
+      "<gray><!i>Thẻ mạo hiểm giả của Guild",
+      "<gray><!i>Cấp mạo hiểm: 45 - 46"
+    ],
+    "item_model": "smp:guild_card_netherite_3"
+  }
+}

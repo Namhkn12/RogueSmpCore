@@ -1,0 +1,31 @@
+{
+  "display_name": "Thiên Thạch Núi Lửa",
+  "icon": "MAGMA_BLOCK",
+  "type": "ACTIVE",
+  "description": [
+    "<!i><gold>Cách kích hoạt: <yellow>F + Shift",
+    "<!i><gray>Triệu hồi một thiên thạch dung nham từ bầu trời.",
+    "<!i><gray>Gây sát thương nổ cực lớn và thiêu đốt mục tiêu.",
+    "",
+    "<!i><gray>Sát thương va chạm: <red><impact_damage>",
+    "<!i><gray>Bán kính nổ: <yellow><radius>m",
+    "<!i><gray>Hồi chiêu: <green><cooldown>s"
+  ],
+  "scaling": {
+    "impact_damage": [35.0, 45.0, 55.0, 65.0, 80.0],
+    "radius": [5.0, 5.5, 6.0, 6.5, 7.5],
+    "cooldown": [600, 540, 480, 400, 300]
+  },
+  "trigger": {
+    "execute": {
+      "key": "SWAP",
+      "options": ["sneaking"]
+    }
+  },
+  "upgrades": {
+    "2": [{ "type": "exp", "level": 15, "cost": 400 }],
+    "3": [{ "type": "item", "item_id": "magma_core", "amount": 3 }],
+    "4": [{ "type": "exp", "level": 30, "cost": 1000 }],
+    "5": [{ "type": "item", "item_id": "volcanic_heart", "amount": 1 }]
+  }
+}

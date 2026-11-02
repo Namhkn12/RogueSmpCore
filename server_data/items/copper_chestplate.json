@@ -1,0 +1,14 @@
+{
+  "id": "copper_chestplate",
+  "base": "COPPER_CHESTPLATE",
+  "components": {
+    "name": "<white>Copper Chestplate",
+    "durability": 195,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.68
+      },
+      "slot": "CHEST"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "iron_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<blue>Iron Shield",
+    "durability": 1050,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.0,
+        "SPEED_PERCENT": -0.01,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

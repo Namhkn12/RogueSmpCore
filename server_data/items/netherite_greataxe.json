@@ -1,0 +1,19 @@
+{
+  "id": "netherite_greataxe",
+  "base": "NETHERITE_AXE",
+  "components": {
+    "name": "<gold>Netherite Greataxe",
+    "item_model": "minecraft:netherite_greataxe",
+    "durability": 2925,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 20.0,
+        "ATTACK_SPEED_BASE": 0.4,
+        "ENTITY_REACH": 0.25,
+        "SPEED_PERCENT": -0.08,
+        "SWEEPING_DAMAGE_RATIO": 0.08
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

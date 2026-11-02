@@ -1,0 +1,17 @@
+{
+  "id": "golden_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<green>Golden Shield",
+    "item_model": "minecraft:golden_shield",
+    "durability": 600,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.25,
+        "SPEED_PERCENT": 0.01,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

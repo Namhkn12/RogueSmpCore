@@ -1,0 +1,24 @@
+{
+  "id": "tmd_magma_lurker",
+  "entityType": "MAGMA_CUBE",
+  "displayName": "<red>Magma Lurker</red>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 20,
+  "baseStat": {
+    "max_health": 50.0,
+    "attack_damage": 10.0,
+    "movement_speed": 0.25,
+    "armor": 6.0,
+    "knockback_resistance": 0.4
+  },
+  "equipments": {
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

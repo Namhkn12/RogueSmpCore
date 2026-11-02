@@ -1,0 +1,18 @@
+{
+  "id": "wooden_halberd",
+  "base": "WOODEN_SPEAR",
+  "components": {
+    "name": "<white>Wooden Halberd",
+    "item_model": "minecraft:wooden_halberd",
+    "durability": 96,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.8,
+        "ATTACK_SPEED_BASE": 1.035,
+        "ENTITY_REACH": 0.96,
+        "SWEEPING_DAMAGE_RATIO": 0.312
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

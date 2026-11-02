@@ -1,0 +1,17 @@
+{
+  "id": "iron_tomahawk",
+  "base": "IRON_AXE",
+  "components": {
+    "name": "<blue>Iron Tomahawk",
+    "item_model": "minecraft:iron_tomahawk",
+    "durability": 735,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.75,
+        "ATTACK_SPEED_BASE": 1.425,
+        "ENTITY_REACH": -0.15
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

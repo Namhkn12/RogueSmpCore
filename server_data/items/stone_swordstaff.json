@@ -1,0 +1,17 @@
+{
+  "base": "STONE_SWORD",
+  "components": {
+    "item_model": "minecraft:stone_swordstaff",
+    "durability": 135,
+    "name": "<white>Stone Swordstaff",
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.0,
+        "ATTACK_SPEED_BASE": 1.475,
+        "SWEEPING_DAMAGE_RATIO": 0.184,
+        "ENTITY_REACH": 0.93
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

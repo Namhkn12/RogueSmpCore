@@ -1,0 +1,42 @@
+{
+  "id": "metal/cart_op_zombie",
+  "entityType": "HUSK",
+  "components": {
+    "display_name": "<#BCAAA4>Thây lái xe goòng",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 54.0,
+      "attack_damage": 3.0,
+      "armor": 2.0
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "cart_op_zombie"
+      },
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "dyeColor": "255,150,75,40"
+      },
+      "LEGS": {
+        "material": "LEATHER_LEGGINGS",
+        "dyeColor": "255,92,64,45"
+      },
+      "HAND": {
+        "material": "IRON_SHOVEL"
+      }
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "extended_reach_spell",
+          "reach": 2.5,
+          "attackCooldownTicks": 20
+        }
+      ]
+    }
+  }
+}

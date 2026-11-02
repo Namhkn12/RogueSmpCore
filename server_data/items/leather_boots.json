@@ -1,0 +1,16 @@
+{
+  "id": "leather_boots",
+  "base": "LEATHER_BOOTS",
+  "components": {
+    "name": "<white>Leather Boots",
+    "durability": 59,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 0.84,
+        "SPEED_PERCENT": 0.019,
+        "SNEAKING_SPEED": 0.1
+      },
+      "slot": "FEET"
+    }
+  }
+}

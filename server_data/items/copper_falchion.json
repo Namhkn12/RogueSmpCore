@@ -1,0 +1,18 @@
+{
+  "id": "copper_falchion",
+  "base": "COPPER_SWORD",
+  "components": {
+    "name": "<white>Copper Falchion",
+    "item_model": "minecraft:copper_falchion",
+    "durability": 195,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.75,
+        "ATTACK_SPEED_BASE": 1.5,
+        "ENTITY_REACH": 0.2,
+        "SWEEPING_DAMAGE_RATIO": 0.4
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

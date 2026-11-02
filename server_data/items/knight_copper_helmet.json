@@ -1,0 +1,21 @@
+{
+  "id": "knight_copper_helmet",
+  "base": "COPPER_HELMET",
+  "components": {
+    "name": "<white>Knight Copper Helmet",
+    "item_model": "minecraft:knight_copper_helmet",
+    "equippable": {
+      "slot": "HEAD",
+      "asset_id": "minecraft:knight_copper"
+    },
+    "durability": 137,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.31,
+        "MELEE_DAMAGE_PERCENT": 0.009,
+        "CRIT_DAMAGE_FLAT": 0.6
+      },
+      "slot": "HEAD"
+    }
+  }
+}

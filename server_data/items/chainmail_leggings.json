@@ -1,0 +1,15 @@
+{
+  "id": "chainmail_leggings",
+  "base": "CHAINMAIL_LEGGINGS",
+  "components": {
+    "name": "<white>Chainmail Leggings",
+    "durability": 142,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.4,
+        "SPEED_PERCENT": 0.011
+      },
+      "slot": "LEGS"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "id": "metal/mold_miner",
+  "entityType": "BOGGED",
+  "components": {
+    "display_name": "<#9E9D24>Thây mỏ nấm mốc",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 32.0,
+      "attack_damage": 2.5,
+      "armor": 2.0
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "mold_miner"
+      },
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "dyeColor": "255,181,128,50"
+      },
+      "HAND": {
+        "material": "BOW"
+      }
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "apply_effect_on_hit_spell",
+          "trigger": "ANY",
+          "effects": [
+            {
+              "type": "poison",
+              "duration": 200,
+              "amplifier": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

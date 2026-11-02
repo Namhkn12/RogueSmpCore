@@ -1,0 +1,18 @@
+{
+  "id": "netherite_bastard",
+  "base": "NETHERITE_SWORD",
+  "components": {
+    "name": "<gold>Netherite Bastard",
+    "item_model": "minecraft:netherite_bastard",
+    "durability": 2145,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 11.5,
+        "ATTACK_SPEED_BASE": 1.05,
+        "ENTITY_REACH": 0.25,
+        "SWEEPING_DAMAGE_RATIO": 0.06
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

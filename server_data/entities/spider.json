@@ -1,0 +1,23 @@
+{
+  "id": "dungeon_spider",
+  "entityType": "SPIDER",
+  "displayName": "<dark_purple><bold>✦ Venom Spider ✦</bold></dark_purple>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 20,
+  "baseStat": {
+    "max_health": 30.0,
+    "attack_damage": 6.0,
+    "movement_speed": 0.35,
+    "armor": 2.0,
+    "knockback_resistance": 0.0
+  },
+  "equipments": {},
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

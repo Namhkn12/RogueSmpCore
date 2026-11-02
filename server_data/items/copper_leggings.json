@@ -1,0 +1,15 @@
+{
+  "id": "copper_leggings",
+  "base": "COPPER_LEGGINGS",
+  "components": {
+    "name": "<white>Copper Leggings",
+    "durability": 185,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.76,
+        "SPEED_PERCENT": 0.015
+      },
+      "slot": "LEGS"
+    }
+  }
+}

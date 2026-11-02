@@ -1,0 +1,8 @@
+{
+  "id": "spawner_tmd_venom_crawler",
+  "name": "TMD Venom Crawler Spawner",
+  "mobs": { "tmd_venom_crawler": 100 },
+  "delay": 0, "minDelay": 220, "maxDelay": 380,
+  "activeRange": 18, "spawnRange": 5, "maxNearBy": 5, "spawnCount": 2,
+  "behaviors": []
+}

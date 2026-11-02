@@ -1,0 +1,12 @@
+{
+  "base": "PAPER",
+  "components": {
+    "name": "<#D98A5C>Copper Guild Card V",
+    "description": [
+      "<dark_gray><!i>Hạng E · Đồng V",
+      "<gray><!i>Thẻ mạo hiểm giả của Guild",
+      "<gray><!i>Cấp mạo hiểm: 9 - 10"
+    ],
+    "item_model": "smp:guild_card_copper_5"
+  }
+}

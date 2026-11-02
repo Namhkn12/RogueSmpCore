@@ -1,0 +1,16 @@
+{
+  "id": "golden_pickaxe",
+  "base": "GOLDEN_PICKAXE",
+  "components": {
+    "durability": 32,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 2.0,
+        "ATTACK_SPEED_BASE": 1.2000000476837158,
+        "BREAK_STRENGTH": 1.0,
+        "MINING_SPEED": 220.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

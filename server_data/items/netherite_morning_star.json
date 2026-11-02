@@ -1,0 +1,17 @@
+{
+  "id": "netherite_morning_star",
+  "base": "NETHERITE_AXE",
+  "components": {
+    "name": "<gold>Netherite Morning Star",
+    "item_model": "minecraft:netherite_morning_star",
+    "durability": 2340,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 12.5,
+        "ATTACK_SPEED_BASE": 0.7,
+        "SWEEPING_DAMAGE_RATIO": 0.02
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

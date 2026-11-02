@@ -1,0 +1,26 @@
+{
+  "id": "boss_hunter_3",
+  "name": "<gold>Thợ Săn Trùm III</gold>",
+  "icon":"NETHER_STAR",
+  "description": [
+    "<gray>Tiêu diệt trùm"
+  ],
+  "objectives": {
+    "kill_zombies_task": {
+      "type": "kill_mob",
+      "mobId": "hell_knight",
+      "amount": 10
+    }
+  },
+  "requirements": [
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": {
+        "copper_block_currency": 10,
+        "star_chestplate": 1
+      }
+    }
+  ]
+}

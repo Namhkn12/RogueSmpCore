@@ -1,0 +1,20 @@
+{
+  "base": "IRON_AXE",
+  "components": {
+    "name": "<#C9D1D9>Barrett's Axe",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Rìu đốn gỗ, lưỡi dày và hơi nặng tay.",
+      "<dark_gray><!i>Hàng của Toolsmith Barrett"
+    ],
+    "durability": 220,
+    "socket": 1,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.5,
+        "ATTACK_SPEED_BASE": 0.95
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

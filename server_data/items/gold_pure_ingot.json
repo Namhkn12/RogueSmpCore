@@ -1,0 +1,11 @@
+{
+  "id": "ores/gold_pure_ingot",
+  "base": "PAPER",
+  "components": {
+    "name": "<aqua>Thỏi vàng nguyên chất",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Nguyên chất"
+    ],
+    "item_model": "minecraft:ores/gold_pure_ingot"
+  }
+}

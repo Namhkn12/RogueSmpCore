@@ -1,0 +1,13 @@
+{
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:ores/iron_high_quality_block",
+    "name": "<green>Khối sắt chất lượng cao",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Chất lượng cao"
+    ],
+    "block_place": {
+      "block": "iron_high_quality_block"
+    }
+  }
+}

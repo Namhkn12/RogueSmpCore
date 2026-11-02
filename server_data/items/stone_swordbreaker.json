@@ -1,0 +1,18 @@
+{
+  "id": "stone_swordbreaker",
+  "base": "STONE_SWORD",
+  "components": {
+    "name": "<white>Stone Swordbreaker",
+    "item_model": "minecraft:stone_swordbreaker",
+    "durability": 180,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.0,
+        "ATTACK_SPEED_BASE": 1.685,
+        "ENTITY_REACH": -0.07,
+        "DEFENSE_FLAT": 0.6
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

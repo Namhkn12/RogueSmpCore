@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "minecraft:block/ores/diamond/diamond_magic_block"
+  }
+}

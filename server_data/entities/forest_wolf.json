@@ -1,0 +1,27 @@
+{
+  "id": "wood/forest_wolf",
+  "entityType": "WOLF",
+  "components": {
+    "display_name": "<#AED581>Sói rừng",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 30.0,
+      "attack_damage": 2.5,
+      "movement_speed": 0.32,
+      "armor": 2.0
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "bleed_on_hit_spell",
+          "trigger": "MELEE",
+          "duration": 100,
+          "damagePerSecond": 1.0
+        }
+      ]
+    }
+  }
+}

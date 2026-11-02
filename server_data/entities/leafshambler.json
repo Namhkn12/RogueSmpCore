@@ -1,0 +1,30 @@
+{
+  "id": "wood/leafshambler",
+  "entityType": "ZOMBIE_VILLAGER",
+  "components": {
+    "display_name": "<#66BB6A>Thây lá",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 40.0,
+      "attack_damage": 4.0,
+      "armor": 2.0
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "leafshambler"
+      },
+      "LEGS": {
+        "material": "LEATHER_LEGGINGS",
+        "dyeColor": "255,94,124,22"
+      },
+      "FEET": {
+        "material": "LEATHER_BOOTS",
+        "dyeColor": "255,128,199,31"
+      }
+    }
+  }
+}

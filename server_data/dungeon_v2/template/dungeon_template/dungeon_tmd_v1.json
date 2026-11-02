@@ -1,0 +1,64 @@
+{
+  "id": "dungeon_tmd_01",
+  "name": "The Molten Depths",
+  "description": "A volcanic dungeon buried deep beneath molten stone, where ash, fire, and forgotten forge-born creatures still roam.",
+  "lootTableId": "rogue:dungeons/tmd_final_reward_1",
+  "playTime": 45,
+  "active": true,
+  "minimumRooms": 3,
+  "pools": [
+    {
+      "id": "pool_entrance",
+      "icon": "IRON_DOOR",
+      "name": "Entrance Rooms",
+      "weight": 1.0,
+      "min": 1,
+      "max": 1,
+      "rooms": [
+        {
+          "roomId": "tmd_entrance_01",
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "id": "pool_combat",
+      "icon": "IRON_SWORD",
+      "name": "Combat Rooms",
+      "weight": 3.0,
+      "min": 3,
+      "max": 3,
+      "rooms": [
+        {
+          "roomId": "tmd_brute_combat_01",
+          "weight": 3.0
+        },
+        {
+          "roomId": "tmd_nether_cave_combat_01",
+          "weight": 3.0
+        },
+        {
+          "roomId": "tmd_nether_fortress_combat_01",
+          "weight": 3.0
+        }
+      ]
+    },
+    {
+      "id": "pool_boss",
+      "icon": "WITHER_SKELETON_SKULL",
+      "name": "Boss Room",
+      "weight": 1.0,
+      "min": 1,
+      "max": 1,
+      "rooms": [
+        {
+          "roomId": "tmd_boss_01",
+          "weight": 1.0
+        }
+      ]
+    }
+  ],
+  "treasureRooms": [
+    "tmd_final_reward_01"
+  ]
+}

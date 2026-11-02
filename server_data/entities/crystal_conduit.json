@@ -1,0 +1,17 @@
+{
+  "id": "crystal_conduit",
+  "entityType": "SLIME",
+  "factory": "crystal_conduit",
+  "components": {
+    "display_name": "<gold>Dẫn Lưu</gold>",
+    "behavior": { "noAi": true },
+    "attributes": {
+      "SCALE": 1.0,
+      "MAX_HEALTH": 120.0,
+      "ARMOR": 6.0,
+      "KNOCKBACK_RESISTANCE": 1.0,
+      "EXPLOSION_KNOCKBACK_RESISTANCE": 1.0
+    },
+    "nameplate": { "showHealth": true, "showName": true }
+  }
+}

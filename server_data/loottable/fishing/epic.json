@@ -1,0 +1,38 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "item": "minecraft:diamond",
+          "weight": 30,
+          "min_amount": 1,
+          "max_amount": 2
+        },
+        {
+          "type": "item",
+          "item": "minecraft:emerald",
+          "weight": 30,
+          "min_amount": 2,
+          "max_amount": 4
+        },
+        {
+          "type": "item",
+          "item": "minecraft:golden_apple",
+          "weight": 20
+        },
+        {
+          "type": "item",
+          "item": "minecraft:nautilus_shell",
+          "weight": 15
+        },
+        {
+          "type": "item",
+          "item": "minecraft:heart_of_the_sea",
+          "weight": 5
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "amethyst_staff",
+  "base": "STICK",
+  "components": {
+    "name": "<green>Amethyst Staff",
+    "item_model": "minecraft:amethyst_staff",
+    "mage_staff": {
+      "color": "#B04BFF"
+    },
+    "durability": 700,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 2.0,
+        "STAFF_DAMAGE_BASE": 10.5,
+        "STAFF_RANGE_BASE": 28,
+        "ATTACK_SPEED_BASE": 0.75,
+        "SPEED_PERCENT": -0.06,
+        "MAGIC_DAMAGE_PERCENT": 0.08,
+        "KNOCKBACK_RESISTANCE": 0.05,
+        "CRIT_DAMAGE_FLAT": 2.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

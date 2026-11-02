@@ -1,0 +1,18 @@
+{
+  "id": "wooden_heater_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<white>Wooden Heater Shield",
+    "item_model": "minecraft:wooden_heater_shield",
+    "durability": 81,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.4,
+        "SPEED_PERCENT": 0.018,
+        "SNEAKING_SPEED": 0.1,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

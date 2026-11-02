@@ -1,0 +1,11 @@
+{
+  "id": "ores/copper_pure_ingot",
+  "base": "PAPER",
+  "components": {
+    "name": "<aqua>Thỏi đồng nguyên chất",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Nguyên chất"
+    ],
+    "item_model": "minecraft:ores/copper_pure_ingot"
+  }
+}

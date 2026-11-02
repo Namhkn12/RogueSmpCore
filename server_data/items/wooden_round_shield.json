@@ -1,0 +1,17 @@
+{
+  "id": "wooden_round_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<white>Wooden Round Shield",
+    "item_model": "minecraft:wooden_round_shield",
+    "durability": 59,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 0.8,
+        "SPEED_PERCENT": 0.0585,
+        "SNEAKING_SPEED": 0.1
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

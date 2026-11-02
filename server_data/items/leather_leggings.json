@@ -1,0 +1,15 @@
+{
+  "id": "leather_leggings",
+  "base": "LEATHER_LEGGINGS",
+  "components": {
+    "name": "<white>Leather Leggings",
+    "durability": 70,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.68,
+        "SPEED_PERCENT": 0.019
+      },
+      "slot": "LEGS"
+    }
+  }
+}

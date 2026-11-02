@@ -1,0 +1,78 @@
+{
+  "id": "tmd_cinderwalker",
+  "entityType": "ZOMBIE",
+  "displayName": "<dark_red><bold>Cinderwalker</bold></dark_red>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 24,
+
+  "baseStat": {
+    "max_health": 40.0,
+    "attack_damage": 7.0,
+    "movement_speed": 0.34,
+    "armor": 8.0,
+    "knockback_resistance": 0.10
+  },
+
+  "equipments": {
+
+    "HEAD": {
+      "material": "IRON_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "rib"
+    },
+
+    "CHEST": {
+      "material": "CHAINMAIL_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "flow"
+    },
+
+    "LEGS": {
+      "material": "IRON_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "bolt"
+    },
+
+    "FEET": {
+      "material": "CHAINMAIL_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "vex"
+    },
+
+    "HAND": {
+      "material": "IRON_SWORD",
+      "displayName": "<dark_red>Cinder Blade</dark_red>",
+      "lore": [
+        "<gray>Its edge glows with ember heat."
+      ],
+      "enchantGlint": false,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+
+  "activeSpell": [
+    "fire_aspect_spell"
+  ],
+  "passiveSpell": [
+    "fire_resistance_spell"
+  ],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

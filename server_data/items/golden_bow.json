@@ -1,0 +1,18 @@
+{
+  "id": "golden_bow",
+  "base": "BOW",
+  "components": {
+    "name": "<green>Golden Bow",
+    "item_model": "minecraft:golden_bow",
+    "durability": 600,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 6.5,
+        "PROJECTILE_SPEED_BASE": 1.06,
+        "SPEED_PERCENT": 0.02,
+        "FALL_DAMAGE": -0.15
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "anglers_light",
+  "base": "GLOWSTONE_DUST",
+  "components": {
+    "name": "<aqua>Angler's Light",
+    "brew_ingredient": {
+      "stats": {
+        "projectile_damage_percent": {
+          "min": 0.2,
+          "max": 0.25
+        }
+      },
+      "duration": -90,
+      "color": "#40C0FF"
+    }
+  }
+}

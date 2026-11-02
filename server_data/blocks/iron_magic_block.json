@@ -1,0 +1,16 @@
+{
+  "display_name": "Khối sắt ma thuật",
+  "model": "minecraft:ores/iron_magic_block",
+  "hardness": 7,
+  "break_strength": 1,
+  "drops": [
+    {
+      "item": "iron_magic_block",
+      "min_amount": 1,
+      "max_amount": 1,
+      "chance": 1.0
+    }
+  ],
+  "place_sound": "block.metal.place",
+  "break_sound": "block.metal.break"
+}

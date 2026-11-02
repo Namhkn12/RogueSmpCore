@@ -1,0 +1,20 @@
+{
+  "id": "mage_lapis_leggings",
+  "base": "IRON_LEGGINGS",
+  "components": {
+    "name": "<blue>Lapis Mage Leggings",
+    "item_model": "minecraft:lapis_leggings",
+    "equippable": {
+      "slot": "LEGS",
+      "asset_id": "minecraft:lapis"
+    },
+    "durability": 380,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.1,
+        "SPEED_PERCENT": 0.0175
+      },
+      "slot": "LEGS"
+    }
+  }
+}

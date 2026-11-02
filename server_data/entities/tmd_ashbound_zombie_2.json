@@ -1,0 +1,76 @@
+{
+  "id": "tmd_ashbound_zombie_2",
+  "entityType": "ZOMBIE",
+  "displayName": "<gold>Ashbound Zombie</gold>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 24,
+
+  "baseStat": {
+    "max_health": 36.0,
+    "attack_damage": 9.0,
+    "movement_speed": 0.35,
+    "armor": 8.0,
+    "knockback_resistance": 0.10
+  },
+
+  "equipments": {
+
+    "HEAD": {
+      "material": "CHAINMAIL_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "flow"
+    },
+
+    "CHEST": {
+      "material": "IRON_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "silence"
+    },
+
+    "LEGS": {
+      "material": "IRON_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "copper",
+      "trimPattern": "silence"
+    },
+
+    "FEET": {
+      "material": "CHAINMAIL_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "silence"
+    },
+
+    "HAND": {
+      "material": "DIAMOND_SWORD",
+      "displayName": "<gold>Ember Fang</gold>",
+      "lore": [
+        "<gray>Tempered in molten ruin."
+      ],
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+
+  "activeSpell": [],
+  "passiveSpell": [
+    "fire_resistance_spell"
+  ],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

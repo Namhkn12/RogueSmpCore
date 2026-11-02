@@ -1,0 +1,228 @@
+{
+  "title": "<dark_gray>Thợ Giáp Roland",
+  "layout": {
+    "pattern": [
+      "#########",
+      "#OOOOOOO#",
+      "#OOOOOOO#",
+      "#OOOOOOO#",
+      "#########"
+    ],
+    "keys": {
+      "#": "BLACK_STAINED_GLASS_PANE"
+    },
+    "fill": "GRAY_STAINED_GLASS_PANE"
+  },
+  "offers": [
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 130
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "rolands_helmet"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 250
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "rolands_chestplate"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 180
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "rolands_leggings"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 130
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "rolands_boots"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 70
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_onyx_1"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 65
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_rose_quartz_1"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 170
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_onyx_2"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 10
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "raw_leather_cap"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 25
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "raw_leather_tunic"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 20
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "raw_leather_pants"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 10
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "raw_leather_boots"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 20
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "loose_chain_coif"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 50
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "loose_chain_hauberk"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 40
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "loose_chain_leggings"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 20
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "loose_chain_boots"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "netherite_swordbreaker",
+  "base": "NETHERITE_SWORD",
+  "components": {
+    "name": "<gold>Netherite Swordbreaker",
+    "item_model": "minecraft:netherite_swordbreaker",
+    "durability": 2340,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.5,
+        "ATTACK_SPEED_BASE": 1.55,
+        "ENTITY_REACH": -0.25,
+        "DEFENSE_FLAT": 3.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

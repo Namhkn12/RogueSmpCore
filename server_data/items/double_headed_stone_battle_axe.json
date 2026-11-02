@@ -1,0 +1,18 @@
+{
+  "id": "double_headed_stone_battle_axe",
+  "base": "STONE_AXE",
+  "components": {
+    "name": "<white>Double Headed Stone Battle Axe",
+    "item_model": "minecraft:double_headed_stone_battle_axe",
+    "durability": 195,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 8.5,
+        "ATTACK_SPEED_BASE": 0.87,
+        "ENTITY_REACH": 0.18,
+        "SWEEPING_DAMAGE_RATIO": 0.368
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

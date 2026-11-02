@@ -1,0 +1,21 @@
+{
+  "entityType": "IRON_GOLEM",
+  "factory": "blackvein_horror",
+  "components": {
+    "ai": {
+      "presets": [
+        "hostile"
+      ]
+    },
+    "attributes": {
+      "MAX_HEALTH": 500.0
+    },
+    "behavior": {
+      "persistent": true
+    },
+    "display_name": "<red>Blackvein Horror",
+    "nameplate": {
+      "heightOffset": 0.30000001192092896
+    }
+  }
+}

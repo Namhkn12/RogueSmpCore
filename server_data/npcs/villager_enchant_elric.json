@@ -1,0 +1,9 @@
+{
+  "entityType": "VILLAGER",
+  "name": "<gradient:#E1BEE7:#9C27B0><bold>Arcane Scholar Elric</bold></gradient>",
+  "description": [
+    "<light_purple>Hỗ trợ phù phép và nâng cấp trang bị</light_purple>"
+  ],
+  "profession": "minecraft:librarian",
+  "actions": []
+}

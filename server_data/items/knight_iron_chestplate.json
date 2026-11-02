@@ -1,0 +1,21 @@
+{
+  "id": "knight_iron_chestplate",
+  "base": "IRON_CHESTPLATE",
+  "components": {
+    "name": "<blue>Knight Iron Chestplate",
+    "item_model": "minecraft:knight_iron_chestplate",
+    "equippable": {
+      "slot": "CHEST",
+      "asset_id": "minecraft:knight_iron"
+    },
+    "durability": 1050,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 7.6,
+        "MELEE_DAMAGE_PERCENT": 0.0225,
+        "KNOCKBACK_RESISTANCE": 0.05
+      },
+      "slot": "CHEST"
+    }
+  }
+}

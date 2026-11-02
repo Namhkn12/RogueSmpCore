@@ -1,0 +1,17 @@
+{
+  "base": "DIAMOND_SWORD",
+  "components": {
+    "item_model": "minecraft:diamond_halberd",
+    "durability": 1950,
+    "name": "<dark_purple>Diamond Halberd",
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 11.75,
+        "ATTACK_SPEED_BASE": 0.7375,
+        "SWEEPING_DAMAGE_RATIO": 0.12,
+        "ENTITY_REACH": 0.8
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

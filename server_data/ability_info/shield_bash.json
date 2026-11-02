@@ -1,0 +1,24 @@
+{
+  "display_name": "Shield Bash",
+  "icon": "SHIELD",
+  "type": "ACTIVE",
+  "description": [
+    "<gray>While blocking, strike the enemy in front of you, dealing damage, knockback, and stunning nearby foes.",
+    "",
+    "<white>Damage: <yellow><damage>",
+    "<white>Range: <yellow><range> blocks",
+    "<white>Radius: <yellow><radius> blocks",
+    "<white>Stun Duration: <yellow><stun_duration:second>s",
+    "<white>Cooldown: <yellow><cooldown:second>s"
+  ],
+  "scaling": {
+    "damage": [5.0, 6.0, 7.0, 8.0, 9.0],
+    "cooldown": [160.0, 150.0, 140.0, 130.0, 120.0],
+    "stun_duration": [100.0, 35.0, 40.0, 45.0, 50.0],
+    "range": [3.5, 3.5, 4.0, 4.0, 4.5],
+    "radius": [2.0, 2.0, 2.5, 2.5, 3.0],
+    "knockback_strength": [1.0, 1.2, 1.4, 1.6, 1.8]
+  },
+  "trigger": {},
+  "upgrades": {}
+}

@@ -1,0 +1,43 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "item": "minecraft:salmon",
+          "weight": 30,
+          "min_amount": 1,
+          "max_amount": 2
+        },
+        {
+          "type": "item",
+          "item": "minecraft:tropical_fish",
+          "weight": 25
+        },
+        {
+          "type": "item",
+          "item": "minecraft:pufferfish",
+          "weight": 20
+        },
+        {
+          "type": "item",
+          "item": "minecraft:ink_sac",
+          "weight": 10,
+          "min_amount": 1,
+          "max_amount": 2
+        },
+        {
+          "type": "item",
+          "item": "minecraft:lily_pad",
+          "weight": 10
+        },
+        {
+          "type": "item",
+          "item": "minecraft:nautilus_shell",
+          "weight": 5
+        }
+      ]
+    }
+  ]
+}

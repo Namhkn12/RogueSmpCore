@@ -1,0 +1,40 @@
+{
+  "pools": [
+    {
+      "entries": [
+        {
+          "weight": 50,
+          "item": "minecraft:cod",
+          "max_amount": 2,
+          "type": "item"
+        },
+        {
+          "weight": 30,
+          "item": "minecraft:salmon",
+          "type": "item"
+        },
+        {
+          "weight": 10,
+          "item": "minecraft:kelp",
+          "max_amount": 3,
+          "type": "item"
+        },
+        {
+          "weight": 5,
+          "item": "minecraft:stick",
+          "type": "item"
+        },
+        {
+          "weight": 5,
+          "item": "minecraft:bowl",
+          "type": "item"
+        },
+        {
+          "weight": 100,
+          "item": "lucky_catalyst",
+          "type": "item"
+        }
+      ]
+    }
+  ]
+}

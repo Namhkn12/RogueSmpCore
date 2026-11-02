@@ -1,0 +1,21 @@
+{
+  "base": "POTION",
+  "components": {
+    "name": "<#C2FF66>Potion of Night Vision",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Uống vào nhận Nhìn Đêm trong 3 phút.",
+      "<dark_gray><!i>Hàng của Alchemist Magnus"
+    ],
+    "potion_content": {
+      "color": "255,194,255,102",
+      "effects": [
+        {
+          "type": "night_vision",
+          "duration": 3600,
+          "amplifier": 0
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "spawner_spider_nest",
+  "name": "Spider Nest",
+  "mobs": {
+    "dungeon_spider": 100
+  },
+  "delay": 0,
+  "minDelay": 80,
+  "maxDelay": 160,
+  "activeRange": 18,
+  "spawnRange": 5,
+  "maxNearBy": 8,
+  "spawnCount": 5,
+  "behaviors": [
+    {
+      "type": "protector",
+      "params": {
+        "requireBreak": 4
+      }
+    }
+  ]
+}

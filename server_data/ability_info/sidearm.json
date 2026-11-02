@@ -1,0 +1,31 @@
+{
+  "display_name": "Súng Lục Thép",
+  "icon": "IRON_HORSE_ARMOR",
+  "type": "ACTIVE",
+  "description": [
+    "<!i><gold>Cách kích hoạt: <yellow>Chuột phải",
+    "<!i><gray>Bắn một tia thép nén từ tầm mắt.",
+    "<!i><gray>Tự động hồi lại cộng dồn theo thời gian.",
+    "",
+    "<!i><gray>Sát thương: <red><damage>",
+    "<!i><gray>Cộng dồn tối đa: <gold><max_stacks>",
+    "<!i><gray>Thời gian hồi chiêu: <green><cooldown> ticks"
+  ],
+  "scaling": {
+    "damage": [6.0, 9.0, 12.0, 15.0, 18.0],
+    "max_stacks": [3, 3, 4, 4, 5],
+    "cooldown": [120, 100, 100, 80, 60]
+  },
+  "trigger": {
+    "execute": {
+      "key": "RIGHT_CLICK",
+      "options": ["not_holding_projectile", "not_holding_consumable"]
+    }
+  },
+  "upgrades": {
+    "2": [{ "type": "exp", "level": 5, "cost": 100 }],
+    "3": [{ "type": "item", "item_id": "iron_ingot", "amount": 64 }],
+    "4": [{ "type": "exp", "level": 15, "cost": 500 }],
+    "5": [{ "type": "item", "item_id": "steel_plate", "amount": 1 }]
+  }
+}

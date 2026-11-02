@@ -1,0 +1,25 @@
+{
+  "display_name": "Advancing Shadow",
+  "icon": "ENDER_PEARL",
+  "type": "ACTIVE",
+  "description": [
+    "<gray>Dash toward your target through the shadows, gaining a burst of bonus damage.",
+    "",
+    "<white>Range: <yellow><range> blocks",
+    "<white>Cooldown: <yellow><cooldown:second>s",
+    "<white>Bonus Damage: <yellow><dmgBonus:percent>%<white> for <yellow><duration:second>s"
+  ],
+  "scaling": {
+    "range": [8.0, 8.0, 9.0, 9.0, 10.0],
+    "cooldown": [140.0, 130.0, 120.0, 110.0, 100.0],
+    "duration": [40.0, 45.0, 50.0, 55.0, 60.0],
+    "dmgBonus": [0.15, 0.18, 0.21, 0.24, 0.3]
+  },
+  "trigger": {
+    "cast": {
+      "key": "RIGHT_CLICK",
+      "options": []
+    }
+  },
+  "upgrades": {}
+}

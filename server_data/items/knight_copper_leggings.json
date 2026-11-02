@@ -1,0 +1,20 @@
+{
+  "id": "knight_copper_leggings",
+  "base": "COPPER_LEGGINGS",
+  "components": {
+    "name": "<white>Knight Copper Leggings",
+    "item_model": "minecraft:knight_copper_leggings",
+    "equippable": {
+      "slot": "LEGS",
+      "asset_id": "minecraft:knight_copper"
+    },
+    "durability": 185,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.62,
+        "SPEED_PERCENT": 0.015
+      },
+      "slot": "LEGS"
+    }
+  }
+}

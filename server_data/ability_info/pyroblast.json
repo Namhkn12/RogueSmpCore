@@ -1,0 +1,26 @@
+{
+  "display_name": "Siêu Pháo Hỏa",
+  "icon": "TNT_MINECART",
+  "type": "ACTIVE",
+  "description": [
+    "<!i><gray>Ngồi xuống khi bắn tên để kích hoạt Pyroblast.",
+    "<!i><gray>Mũi tên sẽ nổ tung khi va chạm, gây sát thương phép.",
+    "",
+    "<!i><gray>Sát thương nổ: <red><damage>",
+    "<!i><gray>Bán kính nổ: <yellow><radius>m",
+    "<!i><gray>Hồi chiêu: <green><cooldown>s"
+  ],
+  "scaling": {
+    "damage": [20.0, 24.0, 28.0, 32.0, 44.0],
+    "radius": [3.5, 4.0, 4.5, 5.0, 6.0],
+    "cooldown": [240, 220, 200, 180, 140]
+  },
+  "trigger": {
+  },
+  "upgrades": {
+    "2": [{ "type": "exp", "level": 8, "cost": 150 }],
+    "3": [{ "type": "item", "item_id": "fire_gem", "amount": 5 }],
+    "4": [{ "type": "exp", "level": 15, "cost": 400 }],
+    "5": [{ "type": "item", "item_id": "blaze_core", "amount": 1 }]
+  }
+}

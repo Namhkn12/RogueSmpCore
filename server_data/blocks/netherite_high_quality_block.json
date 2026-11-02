@@ -1,0 +1,16 @@
+{
+  "display_name": "Khối Netherite chất lượng cao",
+  "model": "minecraft:ores/netherite_high_quality_block",
+  "hardness": 9,
+  "break_strength": 4,
+  "drops": [
+    {
+      "item": "netherite_high_quality_block",
+      "min_amount": 1,
+      "max_amount": 1,
+      "chance": 1.0
+    }
+  ],
+  "place_sound": "block.netherite_block.place",
+  "break_sound": "block.netherite_block.break"
+}

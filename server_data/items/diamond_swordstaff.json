@@ -1,0 +1,17 @@
+{
+  "base": "DIAMOND_SWORD",
+  "components": {
+    "item_model": "minecraft:diamond_swordstaff",
+    "durability": 1350,
+    "name": "<dark_purple>Diamond Swordstaff",
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 7.375,
+        "ATTACK_SPEED_BASE": 1.3125,
+        "SWEEPING_DAMAGE_RATIO": 0.08,
+        "ENTITY_REACH": 0.8
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

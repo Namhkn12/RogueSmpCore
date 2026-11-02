@@ -1,0 +1,28 @@
+{
+  "id": "metal/rust_eater",
+  "entityType": "ENDERMITE",
+  "components": {
+    "display_name": "<#BF7341>Quái ăn rỉ",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 48.0,
+      "attack_damage": 3.0,
+      "armor": 0.0
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "armor_shred_on_hit_spell",
+          "trigger": "MELEE",
+          "durabilityDamage": 8
+        },
+        {
+          "type": "fire_resistance_spell"
+        }
+      ]
+    }
+  }
+}

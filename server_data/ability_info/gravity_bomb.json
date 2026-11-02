@@ -1,0 +1,38 @@
+{
+  "display_name": "Bom Trọng Lực",
+  "icon": "DRAGON_EGG",
+  "type": "ACTIVE",
+  "description": [
+    "<!i><gold>Cách kích hoạt: <yellow>F (SWAP_HAND)",
+    "<!i><gray>Phóng một quả cầu nén trọng lực cực mạnh.",
+    "<!i><gray>Hút tất cả kẻ địch xung quanh vào tâm nổ và gây sát thương.",
+    "",
+    "<!i><gray>Sát thương: <red><damage>",
+    "<!i><gray>Bán kính hút: <yellow><radius>m",
+    "<!i><gray>Hồi chiêu: <green><cooldown>s"
+  ],
+  "scaling": {
+    "damage": [8.0, 12.0, 16.0, 20.0, 26.0],
+    "radius": [5.0, 5.5, 6.0, 6.5, 8.0],
+    "cooldown": [300, 260, 220, 180, 120]
+  },
+  "trigger": {
+    "execute": {
+      "key": "SWAP"
+    }
+  },
+  "upgrades": {
+    "2": [
+      { "type": "exp", "level": 10, "cost": 200 }
+    ],
+    "3": [
+      { "type": "item", "item_id": "obsidian", "amount": 16 }
+    ],
+    "4": [
+      { "type": "exp", "level": 20, "cost": 600 }
+    ],
+    "5": [
+      { "type": "item", "item_id": "netherite_scrap", "amount": 1 }
+    ]
+  }
+}

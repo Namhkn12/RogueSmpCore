@@ -1,0 +1,15 @@
+{
+  "id": "crystal_orb",
+  "entityType": "SLIME",
+  "factory": "crystal_orb",
+  "components": {
+    "display_name": "<aqua>Quả Cầu Năng Lượng</aqua>",
+    "behavior": { "noAi": true },
+    "attributes": {
+      "SCALE": 0.7,
+      "MAX_HEALTH": 12.0,
+      "KNOCKBACK_RESISTANCE": 1.0
+    },
+    "nameplate": { "showHealth": true, "showName": false }
+  }
+}

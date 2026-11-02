@@ -1,0 +1,13 @@
+{
+  "entityType": "MANNEQUIN",
+  "name": "Các lệnh cơ bản",
+  "skinId": "list_commander",
+  "description": [
+    "Click npc để xem các lệnh cơ bản của server",
+    "Heloline 2",
+    "heloline3",
+    "",
+    "Heloline 5 but not 4"
+  ],
+  "actions": []
+}

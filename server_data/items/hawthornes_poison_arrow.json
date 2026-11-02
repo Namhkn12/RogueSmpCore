@@ -1,0 +1,21 @@
+{
+  "base": "TIPPED_ARROW",
+  "components": {
+    "name": "<#87A363>Poison Arrow",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Trúng đích gây Độc I trong 5 giây.",
+      "<dark_gray><!i>Hàng của Bowyer Hawthorne"
+    ],
+    "potion_content": {
+      "color": "255,135,163,99",
+      "effects": [
+        {
+          "type": "poison",
+          "duration": 100,
+          "amplifier": 0
+        }
+      ]
+    }
+  }
+}

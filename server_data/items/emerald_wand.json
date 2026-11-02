@@ -1,0 +1,24 @@
+{
+  "id": "emerald_wand",
+  "base": "STICK",
+  "components": {
+    "name": "<green>Emerald Wand",
+    "item_model": "minecraft:emerald_wand",
+    "mage_staff": {
+      "color": "#3FE06A"
+    },
+    "durability": 600,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 1.0,
+        "STAFF_DAMAGE_BASE": 4.5,
+        "STAFF_RANGE_BASE": 16,
+        "ATTACK_SPEED_BASE": 2.4,
+        "SPEED_PERCENT": 0.02,
+        "MAGIC_DAMAGE_PERCENT": 0.052,
+        "LUCK": 0.5
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

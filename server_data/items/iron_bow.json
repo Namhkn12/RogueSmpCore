@@ -1,0 +1,18 @@
+{
+  "id": "iron_bow",
+  "base": "BOW",
+  "components": {
+    "name": "<blue>Iron Bow",
+    "item_model": "minecraft:iron_bow",
+    "durability": 1050,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 8.0,
+        "PROJECTILE_SPEED_BASE": 1.0,
+        "SPEED_PERCENT": -0.02,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

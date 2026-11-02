@@ -1,0 +1,22 @@
+{
+  "id": "stone_heater_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<white>Stone Heater Shield",
+    "item_model": "minecraft:stone_heater_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 165,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.75,
+        "SPEED_PERCENT": 0.002,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

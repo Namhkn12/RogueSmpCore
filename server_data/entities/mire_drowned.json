@@ -1,0 +1,36 @@
+{
+  "id": "wood/mire_drowned",
+  "entityType": "DROWNED",
+  "components": {
+    "display_name": "<#4DB6AC>Thây đầm lầy",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 36.0,
+      "attack_damage": 3.0,
+      "armor": 2.0
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "mire_drowned"
+      },
+      "LEGS": {
+        "material": "LEATHER_LEGGINGS",
+        "dyeColor": "255,85,107,47"
+      }
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "suffocate_on_hit_spell",
+          "trigger": "MELEE",
+          "airDrain": 150,
+          "drownDamage": 2.0
+        }
+      ]
+    }
+  }
+}

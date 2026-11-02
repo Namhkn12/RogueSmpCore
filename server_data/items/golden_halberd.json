@@ -1,0 +1,17 @@
+{
+  "base": "GOLDEN_SWORD",
+  "components": {
+    "item_model": "minecraft:golden_halberd",
+    "durability": 780,
+    "name": "<green>Golden Halberd",
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 8.25,
+        "ATTACK_SPEED_BASE": 0.9125,
+        "SWEEPING_DAMAGE_RATIO": 0.24,
+        "ENTITY_REACH": 0.9
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

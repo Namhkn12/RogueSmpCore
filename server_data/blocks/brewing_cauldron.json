@@ -1,0 +1,23 @@
+{
+  "type": "brewing",
+  "display_name": "<light_purple>Brewing Cauldron",
+  "model": "minecraft:brewing_stand",
+  "hardness": 5,
+  "tools": [
+    "pickaxe"
+  ],
+  "break_strength": 1,
+  "place_sound": "block.metal.place",
+  "break_sound": "block.metal.break",
+  "drops": [
+    {
+      "item": "brewing_cauldron"
+    }
+  ],
+  "data": {
+    "max_energy": 10000,
+    "energy_per_tick": 10,
+    "brew_ticks": 200,
+    "potion_item": "brewed_potion"
+  }
+}

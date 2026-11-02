@@ -1,0 +1,20 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#7FE0A8>Flawed Jade",
+    "description": [
+      "<dark_gray><!i>Ngọc Rạn",
+      "<gray><i>Ngọc rạn, nhưng thợ mỏ già",
+      "<gray><i>vẫn giữ làm bùa may."
+    ],
+    "head_skin": "gem_jade",
+    "gem_data": {
+      "attributes": {
+        "MAINHAND": {
+          "MINING_EFFICIENCY": 0.6
+        }
+      },
+      "success_chance": 0.88
+    }
+  }
+}

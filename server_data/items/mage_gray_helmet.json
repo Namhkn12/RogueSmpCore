@@ -1,0 +1,16 @@
+{
+  "id": "mage_gray_helmet",
+  "base": "LEATHER_HELMET",
+  "components": {
+    "name": "<white>Ashen Mage Hood",
+    "dyed_color": "#474F52",
+    "durability": 112,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 0.675,
+        "MAGIC_DAMAGE_PERCENT": 0.015
+      },
+      "slot": "HEAD"
+    }
+  }
+}

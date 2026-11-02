@@ -1,0 +1,18 @@
+{
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:nether_star",
+    "glint": true,
+    "name": "Main Menu",
+    "actions": {
+      "actions": [
+        {
+          "action": {
+            "gui": "main_menu",
+            "type": "open_gui"
+          }
+        }
+      ]
+    }
+  }
+}

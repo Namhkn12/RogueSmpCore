@@ -1,0 +1,16 @@
+{
+  "id": "copper_axe",
+  "base": "COPPER_AXE",
+  "components": {
+    "name": "<white>Copper Axe",
+    "durability": 195,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.8,
+        "ATTACK_SPEED_BASE": 1.0,
+        "ENTITY_REACH": 0.2
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

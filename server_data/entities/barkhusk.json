@@ -1,0 +1,28 @@
+{
+  "id": "wood/barkhusk",
+  "entityType": "CREAKING",
+  "components": {
+    "display_name": "<gradient:#BCAAA4:#4E342E><bold>✦ Thây gỗ ✦</bold></gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 28
+    },
+    "attributes": {
+      "max_health": 90.0,
+      "attack_damage": 5.0,
+      "armor": 8.0,
+      "knockback_resistance": 0.5
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "hunger_drain_on_hit_spell",
+          "trigger": "MELEE",
+          "foodDrain": 3,
+          "saturationDrain": 3.0,
+          "negateDamage": true
+        }
+      ]
+    }
+  }
+}

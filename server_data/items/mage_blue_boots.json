@@ -1,0 +1,22 @@
+{
+  "id": "mage_blue_boots",
+  "base": "LEATHER_BOOTS",
+  "components": {
+    "name": "<white>Azure Mage Boots",
+    "dyed_color": "#3C44AA",
+    "enchant": {
+      "enchants": {
+        "DEPTH_STRIDER": 1
+      }
+    },
+    "durability": 128,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 0.675,
+        "SPEED_PERCENT": 0.02,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "FEET"
+    }
+  }
+}

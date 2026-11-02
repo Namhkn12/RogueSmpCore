@@ -1,0 +1,64 @@
+{
+  "id": "dungeon_skeleton",
+  "entityType": "SKELETON",
+  "displayName": "<gray><bold>⚔ Dungeon Archer ⚔</bold></gray>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 25,
+  "baseStat": {
+    "max_health": 40.0,
+    "attack_damage": 10.0,
+    "movement_speed": 0.75,
+    "armor": 16.0,
+    "knockback_resistance": 0.0
+  },
+  "equipments": {
+    "HEAD": {
+      "material": "IRON_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": null,
+      "trimPattern": null
+    },
+    "CHEST": {
+      "material": "CHAINMAIL_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": null,
+      "trimPattern": null
+    },
+    "LEGS": {
+      "material": "CHAINMAIL_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": null,
+      "trimPattern": null
+    },
+    "FEET": {
+      "material": "CHAINMAIL_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": null,
+      "trimPattern": null
+    },
+    "HAND": {
+      "material": "BOW",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

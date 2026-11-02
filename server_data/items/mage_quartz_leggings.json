@@ -1,0 +1,25 @@
+{
+  "id": "mage_quartz_leggings",
+  "base": "IRON_LEGGINGS",
+  "components": {
+    "name": "<green>Quartz Mage Leggings",
+    "item_model": "minecraft:quartz_leggings",
+    "equippable": {
+      "slot": "LEGS",
+      "asset_id": "minecraft:quartz"
+    },
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 665,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.6,
+        "SPEED_PERCENT": 0.0125
+      },
+      "slot": "LEGS"
+    }
+  }
+}

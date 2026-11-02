@@ -1,0 +1,18 @@
+{
+  "id": "copper_shortsword",
+  "base": "COPPER_SWORD",
+  "components": {
+    "name": "<white>Copper Shortsword",
+    "item_model": "minecraft:copper_shortsword",
+    "durability": 156,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 3.65,
+        "ATTACK_SPEED_BASE": 2.0,
+        "ENTITY_REACH": 0.2,
+        "SWEEPING_DAMAGE_RATIO": 0.2
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

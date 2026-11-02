@@ -1,0 +1,29 @@
+{
+  "size": 7,
+  "level": {
+    "baseExp": 100,
+    "increment": 50,
+    "maxLevel": 50,
+    "acceptLimits": {
+      "1": 2,
+      "5": 3,
+      "10": 4,
+      "20": 5,
+      "35": 6
+    },
+    "rewards": {
+      "2": [ { "type": "money", "amount": 200 } ],
+      "3": [ { "type": "money", "amount": 300 } ],
+      "5": [ { "type": "money", "amount": 1000 } ],
+      "10": [ { "type": "money", "amount": 2500 } ],
+      "15": [ { "type": "money", "amount": 4000 } ],
+      "20": [ { "type": "money", "amount": 6000 } ],
+      "25": [ { "type": "money", "amount": 8000 } ],
+      "30": [ { "type": "money", "amount": 10000 } ],
+      "35": [ { "type": "money", "amount": 13000 } ],
+      "40": [ { "type": "money", "amount": 16000 } ],
+      "45": [ { "type": "money", "amount": 20000 } ],
+      "50": [ { "type": "money", "amount": 30000 } ]
+    }
+  }
+}

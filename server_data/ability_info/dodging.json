@@ -1,0 +1,23 @@
+{
+  "display_name": "Né Tránh",
+  "icon": "COBWEB",
+  "type": "PASSIVE",
+  "description": [
+    "<!i><gray>Tự động né tránh các đòn tấn công từ xa.",
+    "<!i><gray>Càng nâng cấp, thời gian chờ giữa các lần né càng ngắn.",
+    "",
+    "<!i><gray>Hồi chiêu né: <green><cooldown>s"
+  ],
+  "scaling": {
+    "cooldown": [340, 300, 260, 220, 120]
+  },
+  "trigger": {
+
+  },
+  "upgrades": {
+    "2": [{ "type": "exp", "level": 5, "cost": 100 }],
+    "3": [{ "type": "item", "item_id": "wind_essence", "amount": 5 }],
+    "4": [{ "type": "exp", "level": 15, "cost": 400 }],
+    "5": [{ "type": "item", "item_id": "phantom_membrane", "amount": 8 }]
+  }
+}

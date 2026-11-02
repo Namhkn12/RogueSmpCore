@@ -1,0 +1,18 @@
+{
+  "id": "iron_katana",
+  "base": "IRON_SWORD",
+  "components": {
+    "name": "<blue>Iron Katana",
+    "item_model": "minecraft:iron_katana",
+    "durability": 945,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.5,
+        "ATTACK_SPEED_BASE": 1.825,
+        "ENTITY_REACH": 0.35,
+        "SWEEPING_DAMAGE_RATIO": 0.12
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

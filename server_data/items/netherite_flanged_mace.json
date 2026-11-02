@@ -1,0 +1,17 @@
+{
+  "id": "netherite_flanged_mace",
+  "base": "NETHERITE_AXE",
+  "components": {
+    "name": "<gold>Netherite Flanged Mace",
+    "item_model": "minecraft:netherite_flanged_mace",
+    "durability": 2340,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 11.5,
+        "ATTACK_SPEED_BASE": 0.85,
+        "SWEEPING_DAMAGE_RATIO": 0.02
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "cave_combat_01",
+  "type": "NORMAL",
+  "schemetaId": "schemeta_cave_combat_01_fix",
+  "objectives": [
+    {
+      "type": "spawner_breaker",
+      "params": {
+        "score": 15,
+        "require": 3
+      }
+    }
+  ]
+}

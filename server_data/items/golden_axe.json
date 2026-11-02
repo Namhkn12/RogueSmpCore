@@ -1,0 +1,16 @@
+{
+  "id": "golden_axe",
+  "base": "GOLDEN_AXE",
+  "components": {
+    "name": "<green>Golden Axe",
+    "durability": 600,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 8.0,
+        "ATTACK_SPEED_BASE": 0.9375,
+        "ENTITY_REACH": 0.15
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

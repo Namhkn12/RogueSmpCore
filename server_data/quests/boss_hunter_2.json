@@ -1,0 +1,27 @@
+{
+  "id": "boss_hunter_2",
+  "name": "<gold>Thợ Săn Trùm II</gold>",
+  "icon":"NETHER_STAR",
+  "description": [
+    "<gray>Tiêu diệt trùm"
+  ],
+  "objectives": {
+    "kill_zombies_task": {
+      "type": "kill_mob",
+      "mobId": "hell_knight",
+      "amount": 5
+    }
+  },
+  "requirements": [
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": {
+        "copper_block_currency": 1,
+        "copper_ingot_currency": 10,
+        "wind_gaze": 1
+      }
+    }
+  ]
+}

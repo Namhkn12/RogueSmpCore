@@ -1,0 +1,20 @@
+{
+  "id": "knight_diamond_leggings",
+  "base": "DIAMOND_LEGGINGS",
+  "components": {
+    "name": "<dark_purple>Knight Diamond Leggings",
+    "item_model": "minecraft:knight_diamond_leggings",
+    "equippable": {
+      "slot": "LEGS",
+      "asset_id": "minecraft:knight_diamond"
+    },
+    "durability": 1425,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 7.41,
+        "SPEED_PERCENT": -0.015
+      },
+      "slot": "LEGS"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "knight_golden_helmet",
+  "base": "GOLDEN_HELMET",
+  "components": {
+    "name": "<green>Knight Golden Helmet",
+    "item_model": "minecraft:knight_golden_helmet",
+    "equippable": {
+      "slot": "HEAD",
+      "asset_id": "minecraft:knight_gold"
+    },
+    "durability": 420,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.99,
+        "MELEE_DAMAGE_PERCENT": 0.015,
+        "CRIT_DAMAGE_FLAT": 1.0
+      },
+      "slot": "HEAD"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "spawner_tmd_hellforged_brute",
+  "name": "TMD Hellforged Brute Spawner",
+  "mobs": { "tmd_hellforged_brute": 100 },
+  "delay": 0, "minDelay": 400, "maxDelay": 650,
+  "activeRange": 12, "spawnRange": 5, "maxNearBy": 2, "spawnCount": 1,
+  "behaviors": [
+      {
+        "type": "teleport",
+        "params": {
+          "max_teleports": 3,
+          "teleport_radius": 15.0,
+          "safe_check_radius": 10.0
+        }
+      }
+    ]
+}

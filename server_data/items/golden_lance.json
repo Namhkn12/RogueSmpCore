@@ -1,0 +1,18 @@
+{
+  "id": "golden_lance",
+  "base": "GOLDEN_SPEAR",
+  "components": {
+    "name": "<green>Golden Lance",
+    "item_model": "minecraft:golden_lance",
+    "durability": 600,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 7.5,
+        "ATTACK_SPEED_BASE": 0.925,
+        "ENTITY_REACH": 1.4,
+        "KNOCKBACK_RESISTANCE": 0.06
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "iron_heater_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<blue>Iron Heater Shield",
+    "item_model": "minecraft:iron_heater_shield",
+    "durability": 1155,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.5,
+        "SPEED_PERCENT": -0.03,
+        "KNOCKBACK_RESISTANCE": 0.2
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

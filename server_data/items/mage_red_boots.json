@@ -1,0 +1,22 @@
+{
+  "id": "mage_red_boots",
+  "base": "LEATHER_BOOTS",
+  "components": {
+    "name": "<white>Crimson Mage Boots",
+    "dyed_color": "#B02E26",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 128,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 0.675,
+        "SPEED_PERCENT": 0.02,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "FEET"
+    }
+  }
+}

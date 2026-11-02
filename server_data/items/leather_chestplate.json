@@ -1,0 +1,14 @@
+{
+  "id": "leather_chestplate",
+  "base": "LEATHER_CHESTPLATE",
+  "components": {
+    "name": "<white>Leather Chestplate",
+    "durability": 73,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.24
+      },
+      "slot": "CHEST"
+    }
+  }
+}

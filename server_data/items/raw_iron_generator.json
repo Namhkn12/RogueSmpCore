@@ -1,0 +1,11 @@
+{
+  "id": "raw_iron_generator",
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:dropper",
+    "name": "Raw Iron Generator",
+    "block_place": {
+      "block": "raw_iron_generator"
+    }
+  }
+}

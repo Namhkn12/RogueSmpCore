@@ -1,0 +1,16 @@
+{
+  "display_name": "Khối vàng nén",
+  "model": "minecraft:ores/gold_compressed_block",
+  "hardness": 4,
+  "break_strength": 2,
+  "drops": [
+    {
+      "item": "gold_compressed_block",
+      "min_amount": 1,
+      "max_amount": 1,
+      "chance": 1.0
+    }
+  ],
+  "place_sound": "block.metal.place",
+  "break_sound": "block.metal.break"
+}

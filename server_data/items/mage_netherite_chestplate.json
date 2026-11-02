@@ -1,0 +1,22 @@
+{
+  "id": "mage_netherite_chestplate",
+  "base": "NETHERITE_CHESTPLATE",
+  "components": {
+    "name": "<gold>Netherite Mage Robe",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1,
+        "BLAST_PROTECTION": 1
+      }
+    },
+    "durability": 1450,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 7.6,
+        "MAGIC_DAMAGE_PERCENT": 0.06,
+        "KNOCKBACK_RESISTANCE": 0.05
+      },
+      "slot": "CHEST"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "hollowheart_crystal",
+  "entityType": "SLIME",
+  "factory": "hollowheart_crystal",
+  "components": {
+    "display_name": "<gradient:#C77DFF:#E0A8FF><bold>Hollowheart Crystal</bold></gradient>",
+    "behavior": {
+      "noAi": true,
+      "detectionRange": 32
+    },
+    "attributes": {
+      "SCALE": 1.5,
+      "MAX_HEALTH": 1200.0,
+      "ATTACK_DAMAGE": 20.0,
+      "ARMOR": 10.0,
+      "KNOCKBACK_RESISTANCE": 1.0,
+      "EXPLOSION_KNOCKBACK_RESISTANCE": 1.0
+    },
+    "boss_bar": {
+      "range": 40,
+      "color": "PURPLE",
+      "style": "NOTCHED_10",
+      "bossFog": true
+    },
+    "nameplate": {
+      "showHealth": false,
+      "showName": true
+    }
+  }
+}

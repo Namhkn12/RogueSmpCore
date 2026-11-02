@@ -1,0 +1,32 @@
+{
+  "id": "dungeon_pillager_brute",
+  "entityType": "VINDICATOR",
+  "displayName": "<gold><bold>⚒ Pillager Brute ⚒</bold></gold>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": true,
+  "detectionRange": 28,
+  "baseStat": {
+    "max_health": 120.0,
+    "attack_damage": 15.0,
+    "movement_speed": 0.66,
+    "armor": 17.0,
+    "knockback_resistance": 0.3
+  },
+  "equipments": {
+    "HAND": {
+      "material": "IRON_AXE",
+      "displayName": "<gold>Brute Cleaver</gold>",
+      "lore": ["<gray>Forged for one purpose — destruction."],
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

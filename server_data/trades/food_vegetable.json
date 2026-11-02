@@ -1,0 +1,96 @@
+{
+  "title": "<dark_green>Quầy Nông Sản",
+  "layout": {
+    "pattern": [
+      "#########",
+      "#.OOOOO.#",
+      "#########"
+    ],
+    "keys": {
+      "#": "GREEN_STAINED_GLASS_PANE"
+    },
+    "fill": "LIME_STAINED_GLASS_PANE"
+  },
+  "offers": [
+    {
+      "name": "<yellow>Bánh Mì",
+      "costs": [
+        {
+          "type": "money",
+          "amount": 350
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:bread",
+          "amount": 16
+        }
+      ]
+    },
+    {
+      "name": "<gold>Khoai Tây Nướng",
+      "costs": [
+        {
+          "type": "money",
+          "amount": 350
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:baked_potato",
+          "amount": 16
+        }
+      ]
+    },
+    {
+      "name": "<gold>Bánh Bí Ngô",
+      "costs": [
+        {
+          "type": "money",
+          "amount": 205
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:pumpkin_pie",
+          "amount": 8
+        }
+      ]
+    },
+    {
+      "name": "<light_purple>Dưa Hấu Lấp Lánh",
+      "costs": [
+        {
+          "type": "money",
+          "amount": 240
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:glistering_melon_slice",
+          "amount": 8
+        }
+      ]
+    },
+    {
+      "name": "<gold><b>Cà Rốt Vàng",
+      "costs": [
+        {
+          "type": "money",
+          "amount": 490
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:golden_carrot",
+          "amount": 8
+        }
+      ]
+    }
+  ]
+}

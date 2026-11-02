@@ -1,0 +1,113 @@
+{
+  "title": "<dark_red>Quầy Thịt Chín",
+  "layout": {
+    "pattern": [
+      "#########",
+      "#.O.O.O.#",
+      "#.O.O.O.#",
+      "#########"
+    ],
+    "keys": {
+      "#": "RED_STAINED_GLASS_PANE"
+    },
+    "fill": "BROWN_STAINED_GLASS_PANE"
+  },
+  "offers": [
+    {
+      "name": "<red>Bít Tết",
+      "costs": [
+        {
+          "type": "money",
+          "amount": 665
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:cooked_beef",
+          "amount": 16
+        }
+      ]
+    },
+    {
+      "name": "<red>Sườn Heo Nướng",
+      "costs": [
+        {
+          "type": "money",
+          "amount": 665
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:cooked_porkchop",
+          "amount": 16
+        }
+      ]
+    },
+    {
+      "name": "<gold>Thịt Cừu Nướng",
+      "costs": [
+        {
+          "type": "money",
+          "amount": 500
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:cooked_mutton",
+          "amount": 16
+        }
+      ]
+    },
+    {
+      "name": "<gold>Cá Hồi Nướng",
+      "costs": [
+        {
+          "type": "money",
+          "amount": 500
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:cooked_salmon",
+          "amount": 16
+        }
+      ]
+    },
+    {
+      "name": "<yellow>Gà Nướng",
+      "costs": [
+        {
+          "type": "money",
+          "amount": 420
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:cooked_chicken",
+          "amount": 16
+        }
+      ]
+    },
+    {
+      "name": "<yellow>Cá Tuyết Nướng",
+      "costs": [
+        {
+          "type": "money",
+          "amount": 350
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "minecraft:cooked_cod",
+          "amount": 16
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "id": "tmd_scorched_bones",
+  "entityType": "SKELETON",
+  "displayName": "<gradient:#ff4500:#8b0000>Scorched Bones</gradient>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 30,
+
+  "baseStat": {
+    "max_health": 44.0,
+    "attack_damage": 8.0,
+    "movement_speed": 0.28,
+    "armor": 10.0,
+    "knockback_resistance": 0.12
+  },
+
+  "equipments": {
+
+    "HEAD": {
+      "material": "NETHERITE_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "silence"
+    },
+
+    "CHEST": {
+      "material": "NETHERITE_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "rib"
+    },
+
+    "LEGS": {
+      "material": "NETHERITE_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "flow"
+    },
+
+    "FEET": {
+      "material": "NETHERITE_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "snout"
+    },
+
+    "HAND": {
+      "material": "BOW",
+      "displayName": "<gradient:#ff4500:#8b0000>Ashen Bow</gradient>",
+      "lore": [
+        "<dark_gray>Forged in the heart of the Nether,",
+        "<dark_gray>each arrow carries the wrath",
+        "<dark_gray>of a thousand furnace souls.",
+        "",
+        "<dark_red>✦ <red>Scorched for eternity<dark_red> ✦"
+      ],
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+
+  "activeSpell": [],
+  "passiveSpell": [
+    "fire_resistance_spell"
+  ],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

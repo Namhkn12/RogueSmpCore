@@ -1,0 +1,14 @@
+{
+  "id": "op_entity_zapper",
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:barrier",
+    "glint": true,
+    "name": "<red>Entity Zapper",
+    "passive_ability": [
+      {
+        "type": "entity_zapper"
+      }
+    ]
+  }
+}

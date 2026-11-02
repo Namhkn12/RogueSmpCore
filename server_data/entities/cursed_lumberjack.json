@@ -1,0 +1,61 @@
+{
+  "id": "wood/cursed_lumberjack",
+  "entityType": "ZOMBIE_VILLAGER",
+  "components": {
+    "display_name": "<gradient:#E57373:#4E342E><bold>✦ Thợ rừng bị nguyền ✦</bold></gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 28
+    },
+    "attributes": {
+      "max_health": 90.0,
+      "attack_damage": 8.0,
+      "armor": 8.0,
+      "knockback_resistance": 0.5
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "cursed_lumberjack"
+      },
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "trimMaterial": "gold",
+        "trimPattern": "wild",
+        "dyeColor": "255,139,30,30"
+      },
+      "LEGS": {
+        "material": "CHAINMAIL_LEGGINGS"
+      },
+      "FEET": {
+        "material": "LEATHER_BOOTS",
+        "dyeColor": "255,93,64,55"
+      },
+      "HAND": {
+        "material": "DIAMOND_AXE",
+        "displayName": "<#E57373>Rìu Nguyền Rủa",
+        "lore": [
+          "<gray>Lưỡi rìu đã đốn ngã cả khu rừng,",
+          "<dark_red>và giờ khát máu người."
+        ],
+        "enchantGlint": true
+      }
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "apply_effect_on_hit_spell",
+          "trigger": "MELEE",
+          "chance": 0.65,
+          "effects": [
+            {
+              "type": "nausea",
+              "duration": 100,
+              "amplifier": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

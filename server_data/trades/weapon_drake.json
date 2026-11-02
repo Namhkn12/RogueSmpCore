@@ -1,0 +1,129 @@
+{
+  "title": "<dark_red>Thợ Rèn Drake",
+  "layout": {
+    "pattern": [
+      "#########",
+      "#OOOOOOO#",
+      "#OOOOOOO#",
+      "#########"
+    ],
+    "keys": {
+      "#": "BLACK_STAINED_GLASS_PANE"
+    },
+    "fill": "GRAY_STAINED_GLASS_PANE"
+  },
+  "offers": [
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 310
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "drakes_shortsword"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 450
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "drakes_longsword"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 85
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_ruby_1"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 85
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_amber_1"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 85
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_garnet_1"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 220
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "gem_ruby_2"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 40
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "sword_core"
+        }
+      ]
+    },
+    {
+      "costs": [
+        {
+          "type": "money",
+          "amount": 15
+        }
+      ],
+      "results": [
+        {
+          "type": "item",
+          "item": "bow_grip_crude"
+        }
+      ]
+    }
+  ]
+}

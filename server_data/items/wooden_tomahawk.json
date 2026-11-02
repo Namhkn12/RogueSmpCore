@@ -1,0 +1,17 @@
+{
+  "id": "wooden_tomahawk",
+  "base": "WOODEN_AXE",
+  "components": {
+    "name": "<white>Wooden Tomahawk",
+    "item_model": "minecraft:wooden_tomahawk",
+    "durability": 51,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.05,
+        "ATTACK_SPEED_BASE": 1.515,
+        "ENTITY_REACH": -0.04
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

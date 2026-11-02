@@ -1,0 +1,12 @@
+{
+  "id": "test/red_cow",
+  "entityType": "CHICKEN",
+  "components": {
+    "attributes": {
+      "MAX_HEALTH": 30.0,
+      "FOLLOW_RANGE": 16.0,
+      "ATTACK_DAMAGE": 10.0
+    },
+    "display_name": "<red>Bo do"
+  }
+}

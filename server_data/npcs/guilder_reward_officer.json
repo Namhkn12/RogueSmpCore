@@ -1,0 +1,9 @@
+{
+  "entityType": "MANNEQUIN",
+  "name": "<gradient:#81C784:#2E7D32><bold>Reward Officer Lucia</bold></gradient>",
+  "skinId": "guilder_girl",
+  "description": [
+    "<green>Nhận thưởng nhiệm vụ hoàn thành</green>"
+  ],
+  "actions": []
+}

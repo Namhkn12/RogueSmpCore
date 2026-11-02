@@ -1,0 +1,19 @@
+{
+  "id": "diamond_crossbow",
+  "base": "CROSSBOW",
+  "components": {
+    "name": "<dark_purple>Diamond Crossbow",
+    "item_model": "minecraft:diamond_crossbow",
+    "durability": 1800,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 13.0,
+        "PROJECTILE_SPEED_BASE": 0.94,
+        "SPEED_PERCENT": -0.1,
+        "BURNING_TIME": -0.25,
+        "SNEAKING_SPEED": 0.05
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

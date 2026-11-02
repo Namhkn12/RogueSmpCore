@@ -1,0 +1,20 @@
+{
+  "id": "mage_lapis_helmet",
+  "base": "IRON_HELMET",
+  "components": {
+    "name": "<blue>Lapis Mage Hood",
+    "item_model": "minecraft:lapis_helmet",
+    "equippable": {
+      "slot": "HEAD",
+      "asset_id": "minecraft:lapis"
+    },
+    "durability": 280,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.05,
+        "MAGIC_DAMAGE_PERCENT": 0.04
+      },
+      "slot": "HEAD"
+    }
+  }
+}

@@ -1,0 +1,283 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "smp:icon/server.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue000"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:icon/coin.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue001"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:fishing/track.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue002"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:fishing/bar_segment.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue003"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:fishing/indicator.png",
+      "ascent": 9,
+      "height": 12,
+      "chars": [
+        "\ue004"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_copper_1.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue100"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_copper_2.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue101"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_copper_3.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue102"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_copper_4.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue103"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_copper_5.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue104"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_silver_1.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue105"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_silver_2.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue106"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_silver_3.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue107"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_silver_4.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue108"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_silver_5.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue109"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_gold_1.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue10a"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_gold_2.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue10b"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_gold_3.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue10c"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_gold_4.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue10d"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_gold_5.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue10e"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_diamond_1.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue10f"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_diamond_2.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue110"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_diamond_3.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue111"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_diamond_4.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue112"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_diamond_5.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue113"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_netherite_1.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue114"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_netherite_2.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue115"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_netherite_3.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue116"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_netherite_4.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue117"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_netherite_5.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue118"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "smp:item/guild_card_s.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue119"
+      ]
+    }
+  ]
+}

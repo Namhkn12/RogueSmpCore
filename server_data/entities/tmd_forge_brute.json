@@ -1,0 +1,74 @@
+{
+  "id": "tmd_forge_brute",
+  "entityType": "VINDICATOR",
+  "displayName": "<dark_red><bold>Forge Brute</bold></dark_red>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": true,
+  "detectionRange": 28,
+
+  "baseStat": {
+    "max_health": 30.0,
+    "attack_damage": 5.0,
+    "movement_speed": 0.33,
+    "armor": 16.0,
+    "knockback_resistance": 0.35
+  },
+
+  "equipments": {
+
+    "HEAD": {
+      "material": "NETHERITE_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "rib"
+    },
+
+    "CHEST": {
+      "material": "NETHERITE_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "silence"
+    },
+
+    "LEGS": {
+      "material": "NETHERITE_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "flow"
+    },
+
+    "FEET": {
+      "material": "NETHERITE_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": false,
+      "trimMaterial": "redstone",
+      "trimPattern": "snout"
+    },
+
+    "HAND": {
+      "material": "NETHERITE_AXE",
+      "displayName": "<dark_red>Forge Cleaver</dark_red>",
+      "lore": [
+        "<gray>Its edge was quenched in molten rock."
+      ],
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

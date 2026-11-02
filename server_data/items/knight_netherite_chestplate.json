@@ -1,0 +1,26 @@
+{
+  "id": "knight_netherite_chestplate",
+  "base": "NETHERITE_CHESTPLATE",
+  "components": {
+    "name": "<gold>Knight Netherite Chestplate",
+    "item_model": "minecraft:knight_netherite_chestplate",
+    "equippable": {
+      "slot": "CHEST",
+      "asset_id": "minecraft:knight_netherite"
+    },
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 1950,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 12.16,
+        "MELEE_DAMAGE_PERCENT": 0.0375,
+        "KNOCKBACK_RESISTANCE": 0.05
+      },
+      "slot": "CHEST"
+    }
+  }
+}

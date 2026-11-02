@@ -1,0 +1,18 @@
+{
+  "id": "diamond_katana",
+  "base": "DIAMOND_SWORD",
+  "components": {
+    "name": "<dark_purple>Diamond Katana",
+    "item_model": "minecraft:diamond_katana",
+    "durability": 1350,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.5,
+        "ATTACK_SPEED_BASE": 1.7875,
+        "ENTITY_REACH": 0.3,
+        "SWEEPING_DAMAGE_RATIO": 0.08
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

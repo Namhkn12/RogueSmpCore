@@ -1,0 +1,18 @@
+{
+  "id": "golden_rapier",
+  "base": "GOLDEN_SWORD",
+  "components": {
+    "name": "<green>Golden Rapier",
+    "item_model": "minecraft:golden_rapier",
+    "durability": 360,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.375,
+        "ATTACK_SPEED_BASE": 1.775,
+        "ENTITY_REACH": 0.9,
+        "DEFENSE_FLAT": 1.0
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

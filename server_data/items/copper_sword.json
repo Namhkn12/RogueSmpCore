@@ -1,0 +1,17 @@
+{
+  "id": "copper_sword",
+  "base": "COPPER_SWORD",
+  "components": {
+    "name": "<white>Copper Sword",
+    "durability": 195,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.75,
+        "ATTACK_SPEED_BASE": 1.6,
+        "ENTITY_REACH": 0.2,
+        "SWEEPING_DAMAGE_RATIO": 0.3
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

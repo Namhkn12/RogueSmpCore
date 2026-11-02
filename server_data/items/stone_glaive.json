@@ -1,0 +1,18 @@
+{
+  "id": "stone_glaive",
+  "base": "STONE_SPEAR",
+  "components": {
+    "name": "<white>Stone Glaive",
+    "item_model": "minecraft:stone_glaive",
+    "durability": 165,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.0,
+        "ATTACK_SPEED_BASE": 1.27,
+        "ENTITY_REACH": 1.18,
+        "SWEEPING_DAMAGE_RATIO": 0.46
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

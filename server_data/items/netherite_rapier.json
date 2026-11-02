@@ -1,0 +1,18 @@
+{
+  "id": "netherite_rapier",
+  "base": "NETHERITE_SWORD",
+  "components": {
+    "name": "<gold>Netherite Rapier",
+    "item_model": "minecraft:netherite_rapier",
+    "durability": 1170,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 7.0,
+        "ATTACK_SPEED_BASE": 1.7,
+        "ENTITY_REACH": 0.75,
+        "DEFENSE_FLAT": 2.5
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

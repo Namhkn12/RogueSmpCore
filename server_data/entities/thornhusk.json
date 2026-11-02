@@ -1,0 +1,57 @@
+{
+  "id": "wood/thornhusk",
+  "entityType": "HUSK",
+  "components": {
+    "display_name": "<gradient:#DCE775:#827717><bold>✦ Thây gai ✦</bold></gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 28
+    },
+    "attributes": {
+      "max_health": 80.0,
+      "attack_damage": 7.0,
+      "armor": 8.0,
+      "knockback_resistance": 0.5
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "headSkin": "thornhusk"
+      },
+      "CHEST": {
+        "material": "IRON_CHESTPLATE",
+        "trimMaterial": "emerald",
+        "trimPattern": "wild"
+      },
+      "LEGS": {
+        "material": "LEATHER_LEGGINGS",
+        "trimMaterial": "emerald",
+        "trimPattern": "wild",
+        "dyeColor": "255,46,79,36"
+      },
+      "FEET": {
+        "material": "IRON_BOOTS",
+        "trimMaterial": "emerald",
+        "trimPattern": "wild"
+      },
+      "HAND": {
+        "material": "IRON_SWORD",
+        "displayName": "<#C0CA33>Gai Cổ Mộc",
+        "lore": [
+          "<gray>Kẻ nào chạm vào cũng sẽ rỉ máu."
+        ],
+        "enchantGlint": true
+      }
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "thorns_spell",
+          "reflectRatio": 0.25,
+          "minDamage": 1.5,
+          "trigger": "MELEE"
+        }
+      ]
+    }
+  }
+}

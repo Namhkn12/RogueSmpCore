@@ -1,0 +1,19 @@
+{
+  "display_name": "Armor Breaker",
+  "icon": "IRON_AXE",
+  "type": "PASSIVE",
+  "description": [
+    "<gray>Your melee attacks shred the target's armor, increasing the melee damage you deal to them.",
+    "",
+    "<white>Bonus per Stack: <yellow><bonus_per_stack:percent>%",
+    "<white>Max Stacks: <yellow><max_stack>",
+    "<white>Duration: <yellow><duration:second>s<white> (refreshed on hit)"
+  ],
+  "scaling": {
+    "duration": [100.0, 110.0, 120.0, 130.0, 140.0],
+    "max_stack": [3.0, 4.0, 5.0, 6.0, 7.0],
+    "bonus_per_stack": [0.2]
+  },
+  "trigger": {},
+  "upgrades": {}
+}

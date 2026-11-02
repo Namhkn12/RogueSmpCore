@@ -1,0 +1,20 @@
+{
+  "id": "mage_diamond_chestplate",
+  "base": "DIAMOND_CHESTPLATE",
+  "components": {
+    "name": "<dark_purple>Diamond Mage Robe",
+    "enchant": {
+      "enchants": {
+        "PROJECTILE_PROTECTION": 1
+      }
+    },
+    "durability": 1100,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 6.0,
+        "MAGIC_DAMAGE_PERCENT": 0.05
+      },
+      "slot": "CHEST"
+    }
+  }
+}

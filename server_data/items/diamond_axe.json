@@ -1,0 +1,16 @@
+{
+  "id": "diamond_axe",
+  "base": "DIAMOND_AXE",
+  "components": {
+    "name": "<dark_purple>Diamond Axe",
+    "durability": 1500,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 11.0,
+        "ATTACK_SPEED_BASE": 0.8125,
+        "ENTITY_REACH": 0.05
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

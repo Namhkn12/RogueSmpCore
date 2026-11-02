@@ -1,0 +1,18 @@
+{
+  "id": "diamond_flanged_mace",
+  "base": "DIAMOND_AXE",
+  "components": {
+    "name": "<dark_purple>Diamond Flanged Mace",
+    "item_model": "minecraft:diamond_flanged_mace",
+    "durability": 1800,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 10.0,
+        "ATTACK_SPEED_BASE": 0.9125,
+        "ENTITY_REACH": 0.05,
+        "SWEEPING_DAMAGE_RATIO": 0.04
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "stone_tomahawk",
+  "base": "STONE_AXE",
+  "components": {
+    "name": "<white>Stone Tomahawk",
+    "item_model": "minecraft:stone_tomahawk",
+    "durability": 105,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.5,
+        "ATTACK_SPEED_BASE": 1.485,
+        "ENTITY_REACH": -0.07
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "heavy_helmet",
+  "base": "IRON_HELMET",
+  "components": {
+    "name": "<gray>Heavy Helmet",
+    "item_model": "minecraft:heavy_helmet",
+    "equippable": {
+      "slot": "HEAD",
+      "asset_id": "minecraft:heavy"
+    }
+  }
+}

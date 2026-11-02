@@ -1,0 +1,28 @@
+{
+  "id": "wood/warhorn",
+  "entityType": "RAVAGER",
+  "components": {
+    "display_name": "<gradient:#FFCC80:#6D4C41><bold>✦ Trâu rừng ✦</bold></gradient>",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 28
+    },
+    "attributes": {
+      "max_health": 120.0,
+      "attack_damage": 8.5,
+      "armor": 10.0,
+      "knockback_resistance": 1.0
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "knockback_on_hit_spell",
+          "trigger": "MELEE",
+          "chance": 0.7,
+          "horizontal": 1.6,
+          "vertical": 0.35
+        }
+      ]
+    }
+  }
+}

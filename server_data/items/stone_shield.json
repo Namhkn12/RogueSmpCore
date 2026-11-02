@@ -1,0 +1,21 @@
+{
+  "id": "stone_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<white>Stone Shield",
+    "item_model": "minecraft:stone_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 150,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.5,
+        "SPEED_PERCENT": 0.022
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

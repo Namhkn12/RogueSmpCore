@@ -1,0 +1,18 @@
+{
+  "id": "diamond_scythe",
+  "base": "DIAMOND_HOE",
+  "components": {
+    "name": "<dark_purple>Diamond Scythe",
+    "item_model": "minecraft:diamond_scythe",
+    "durability": 1350,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 7.375,
+        "ATTACK_SPEED_BASE": 1.0125,
+        "ENTITY_REACH": 0.55,
+        "SWEEPING_DAMAGE_RATIO": 0.32
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

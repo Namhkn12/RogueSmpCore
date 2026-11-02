@@ -1,0 +1,32 @@
+{
+  "id": "wood/woodweaver",
+  "entityType": "SPIDER",
+  "components": {
+    "display_name": "<#689F38>Nhện độc",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "attributes": {
+      "max_health": 50.0,
+      "attack_damage": 3.0,
+      "armor": 2.0
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "apply_effect_on_hit_spell",
+          "trigger": "MELEE",
+          "chance": 0.35,
+          "effects": [
+            {
+              "type": "poison",
+              "duration": 80,
+              "amplifier": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

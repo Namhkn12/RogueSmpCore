@@ -1,0 +1,6 @@
+{ "type": "coke_oven",
+  "ingredients": [{ "item": "minecraft:charcoal", "count": 16 },
+  { "item": "minecraft:iron_ingot", "count": 16 }],
+  "results": [{ "item": "minecraft:coal_block", "count": 1 }],
+  "duration": 400,
+  "id":"oven_test_recipe" }

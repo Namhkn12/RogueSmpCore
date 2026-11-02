@@ -1,0 +1,16 @@
+{
+  "id": "golden_boots",
+  "base": "GOLDEN_BOOTS",
+  "components": {
+    "name": "<green>Golden Boots",
+    "durability": 480,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.1,
+        "SPEED_PERCENT": 0.005,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "FEET"
+    }
+  }
+}

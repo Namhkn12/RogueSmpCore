@@ -1,0 +1,17 @@
+{
+  "id": "double_headed_netherite_battle_axe",
+  "base": "NETHERITE_AXE",
+  "components": {
+    "name": "<gold>Double Headed Netherite Battle Axe",
+    "item_model": "minecraft:double_headed_netherite_battle_axe",
+    "durability": 2535,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 16.0,
+        "ATTACK_SPEED_BASE": 0.6,
+        "SWEEPING_DAMAGE_RATIO": 0.08
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

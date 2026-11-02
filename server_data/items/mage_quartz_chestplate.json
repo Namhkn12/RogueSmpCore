@@ -1,0 +1,25 @@
+{
+  "id": "mage_quartz_chestplate",
+  "base": "IRON_CHESTPLATE",
+  "components": {
+    "name": "<green>Quartz Mage Robe",
+    "item_model": "minecraft:quartz_chestplate",
+    "equippable": {
+      "slot": "CHEST",
+      "asset_id": "minecraft:quartz"
+    },
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 700,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 4.8,
+        "MAGIC_DAMAGE_PERCENT": 0.0425
+      },
+      "slot": "CHEST"
+    }
+  }
+}

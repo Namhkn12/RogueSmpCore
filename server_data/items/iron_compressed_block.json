@@ -1,0 +1,13 @@
+{
+  "base": "PAPER",
+  "components": {
+    "item_model": "minecraft:ores/iron_compressed_block",
+    "name": "<white>Khối sắt nén",
+    "description": [
+      "<dark_gray><!i>Quặng cơ bản · Nén"
+    ],
+    "block_place": {
+      "block": "iron_compressed_block"
+    }
+  }
+}

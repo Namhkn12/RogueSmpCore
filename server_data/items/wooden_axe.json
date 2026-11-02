@@ -1,0 +1,16 @@
+{
+  "id": "wooden_axe",
+  "base": "WOODEN_AXE",
+  "components": {
+    "name": "<white>Wooden Axe",
+    "durability": 73,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 5.9,
+        "ATTACK_SPEED_BASE": 1.025,
+        "ENTITY_REACH": 0.21
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

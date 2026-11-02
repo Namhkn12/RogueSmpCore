@@ -1,0 +1,9 @@
+{
+  "entityType": "VILLAGER",
+  "name": "<gold><bold>Farmer <yellow>Wheatley</yellow> </bold></gold>",
+  "description": [
+    "<green>Mua hạt giống tại đây</green>"
+  ],
+  "profession": "minecraft:farmer",
+  "actions": []
+}

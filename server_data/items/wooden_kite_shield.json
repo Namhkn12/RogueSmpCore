@@ -1,0 +1,23 @@
+{
+  "id": "wooden_kite_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<white>Wooden Kite Shield",
+    "item_model": "minecraft:wooden_kite_shield",
+    "enchant": {
+      "enchants": {
+        "BLAST_PROTECTION": 1
+      }
+    },
+    "durability": 96,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 1.6,
+        "SPEED_PERCENT": -0.0025,
+        "SNEAKING_SPEED": 0.1,
+        "KNOCKBACK_RESISTANCE": 0.15
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

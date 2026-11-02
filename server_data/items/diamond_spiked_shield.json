@@ -1,0 +1,22 @@
+{
+  "id": "diamond_spiked_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<dark_purple>Diamond Spiked Shield",
+    "item_model": "minecraft:diamond_spiked_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1,
+        "THORNS": 3
+      }
+    },
+    "durability": 1650,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.75,
+        "SPEED_PERCENT": -0.05
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

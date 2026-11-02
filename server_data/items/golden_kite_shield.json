@@ -1,0 +1,23 @@
+{
+  "id": "golden_kite_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<green>Golden Kite Shield",
+    "item_model": "minecraft:golden_kite_shield",
+    "enchant": {
+      "enchants": {
+        "BLAST_PROTECTION": 1
+      }
+    },
+    "durability": 780,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 3.0,
+        "SPEED_PERCENT": -0.0375,
+        "FALL_DAMAGE": -0.1,
+        "KNOCKBACK_RESISTANCE": 0.15
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "spawner_tmd_tier3",
+  "name": "TMD Tier 3 - Nether Hazards Spawner",
+  "mobs": {
+    "tmd_magma_lurker": 34,
+    "tmd_cinderborn": 33,
+    "tmd_venom_crawler": 33
+  },
+  "delay": 0,
+  "minDelay": 240,
+  "maxDelay": 400,
+  "activeRange": 12,
+  "spawnRange": 5,
+  "maxNearBy": 4,
+  "spawnCount": 2,
+  "behaviors": [
+      {
+        "type": "wave",
+        "params": {
+          "waves": 3
+        }
+      }
+    ]
+}

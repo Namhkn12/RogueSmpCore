@@ -1,0 +1,23 @@
+{
+  "base": "CROSSBOW",
+  "components": {
+    "name": "<#8D6E63>Hawthorne's Crossbow",
+    "item_model": "minecraft:wooden_crossbow",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Nỏ gỗ cứng nẹp đồng, nạp chậm nhưng mỗi phát đều nặng.",
+      "<dark_gray><!i>Hàng của Bowyer Hawthorne"
+    ],
+    "durability": 180,
+    "socket": 1,
+    "attribute": {
+      "attributes": {
+        "PROJECTILE_DAMAGE_BASE": 6.7,
+        "PROJECTILE_SPEED_BASE": 1.14,
+        "SPEED_PERCENT": 0.036,
+        "SNEAKING_SPEED": 0.2
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

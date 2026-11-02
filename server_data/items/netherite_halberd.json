@@ -1,0 +1,18 @@
+{
+  "id": "netherite_halberd",
+  "base": "NETHERITE_SPEAR",
+  "components": {
+    "name": "<gold>Netherite Halberd",
+    "item_model": "minecraft:netherite_halberd",
+    "durability": 2535,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 13.5,
+        "ATTACK_SPEED_BASE": 0.65,
+        "ENTITY_REACH": 0.75,
+        "SWEEPING_DAMAGE_RATIO": 0.06
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

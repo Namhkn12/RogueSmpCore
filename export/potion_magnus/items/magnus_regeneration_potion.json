@@ -1,0 +1,21 @@
+{
+  "base": "POTION",
+  "components": {
+    "name": "<#CD5CAB>Potion of Regeneration",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Uống vào nhận Hồi Phục I trong 45 giây.",
+      "<dark_gray><!i>Hàng của Alchemist Magnus"
+    ],
+    "potion_content": {
+      "color": "255,205,92,171",
+      "effects": [
+        {
+          "type": "regeneration",
+          "duration": 900,
+          "amplifier": 0
+        }
+      ]
+    }
+  }
+}

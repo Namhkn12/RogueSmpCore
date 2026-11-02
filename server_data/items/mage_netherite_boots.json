@@ -1,0 +1,21 @@
+{
+  "id": "mage_netherite_boots",
+  "base": "NETHERITE_BOOTS",
+  "components": {
+    "name": "<gold>Netherite Mage Boots",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 1160,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 2.85,
+        "SPEED_PERCENT": 0.005,
+        "FALL_DAMAGE": -0.1
+      },
+      "slot": "FEET"
+    }
+  }
+}

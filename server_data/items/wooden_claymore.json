@@ -1,0 +1,20 @@
+{
+  "id": "wooden_claymore",
+  "base": "WOODEN_SWORD",
+  "components": {
+    "name": "<white>Wooden Claymore",
+    "item_model": "minecraft:wooden_claymore",
+    "durability": 96,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.2,
+        "ATTACK_SPEED_BASE": 1.135,
+        "ENTITY_REACH": 0.71,
+        "SPEED_PERCENT": 0.007,
+        "KNOCKBACK_RESISTANCE": 0.084,
+        "SWEEPING_DAMAGE_RATIO": 0.52
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

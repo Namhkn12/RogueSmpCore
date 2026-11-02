@@ -1,0 +1,23 @@
+{
+  "base": "PLAYER_HEAD",
+  "components": {
+    "name": "<#7AA7FF>Flawed Sapphire",
+    "description": [
+      "<dark_gray><!i>Ngọc Rạn",
+      "<gray><i>Rạn mà vẫn bền,",
+      "<gray><i>đã qua nhiều lần lặn sâu, rơi xa."
+    ],
+    "head_skin": "gem_sapphire",
+    "gem_data": {
+      "attributes": {
+        "HEAD": {
+          "OXYGEN_BONUS": 3.0
+        },
+        "FEET": {
+          "FALL_DAMAGE": -0.2
+        }
+      },
+      "success_chance": 0.9
+    }
+  }
+}

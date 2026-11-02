@@ -1,0 +1,22 @@
+{
+  "id": "diamond_heater_shield",
+  "base": "SHIELD",
+  "components": {
+    "name": "<dark_purple>Diamond Heater Shield",
+    "item_model": "minecraft:diamond_heater_shield",
+    "enchant": {
+      "enchants": {
+        "FIRE_PROTECTION": 1
+      }
+    },
+    "durability": 1650,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 4.38,
+        "SPEED_PERCENT": -0.05,
+        "KNOCKBACK_RESISTANCE": 0.1
+      },
+      "slot": "OFFHAND"
+    }
+  }
+}

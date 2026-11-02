@@ -1,0 +1,38 @@
+{
+  "id": "wood/mossling",
+  "entityType": "SLIME",
+  "components": {
+    "display_name": "<#9CCC65>Nhầy rêu",
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 20
+    },
+    "slime": { "size": 3 },
+    "attributes": {
+      "max_health": 44.0,
+      "attack_damage": 3.5,
+      "scale": 2.0,
+      "armor": 0.0
+    },
+    "spells": {
+      "passiveSpell": [
+        {
+          "type": "apply_effect_on_hit_spell",
+          "trigger": "MELEE",
+          "effects": [
+            {
+              "type": "poison",
+              "duration": 60,
+              "amplifier": 0
+            },
+            {
+              "type": "slowness",
+              "duration": 60,
+              "amplifier": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

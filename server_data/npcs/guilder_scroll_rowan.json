@@ -1,0 +1,9 @@
+{
+  "entityType": "MANNEQUIN",
+  "name": "<gradient:#FFD54F:#FF6F00><bold>Dungeon Keeper Rowan</bold></gradient>",
+  "skinId": "guilder_boy",
+  "description": [
+    "<gold>Mua giấy phép khám phá Dungeon tại đây</gold>"
+  ],
+  "actions": []
+}

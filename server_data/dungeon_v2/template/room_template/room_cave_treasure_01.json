@@ -1,0 +1,15 @@
+{
+  "id": "cave_treasure_01",
+  "type": "LOOT",
+  "schemetaId": "schemeta_cave_treasure_01",
+  "objectives": [
+    {
+      "type": "item_collector",
+      "params": {
+        "score": 10,
+        "require": 5,
+        "target": "diamond"
+      }
+    }
+  ]
+}

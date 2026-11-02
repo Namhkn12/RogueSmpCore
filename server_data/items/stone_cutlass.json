@@ -1,0 +1,18 @@
+{
+  "id": "stone_cutlass",
+  "base": "STONE_SWORD",
+  "components": {
+    "name": "<white>Stone Cutlass",
+    "item_model": "minecraft:stone_cutlass",
+    "durability": 150,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 4.0,
+        "ATTACK_SPEED_BASE": 1.58,
+        "ENTITY_REACH": 0.18,
+        "SWEEPING_DAMAGE_RATIO": 0.276
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

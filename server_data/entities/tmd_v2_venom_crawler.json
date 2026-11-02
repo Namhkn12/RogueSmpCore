@@ -1,0 +1,24 @@
+{
+  "id": "tmd_venom_crawler",
+  "entityType": "SPIDER",
+  "displayName": "<dark_purple>Venom Crawler</dark_purple>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": false,
+  "detectionRange": 24,
+  "baseStat": {
+    "max_health": 40.0,
+    "attack_damage": 8.0,
+    "movement_speed": 0.38,
+    "armor": 2.0,
+    "knockback_resistance": 0.05
+  },
+  "equipments": {
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

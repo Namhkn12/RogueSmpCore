@@ -1,0 +1,16 @@
+{
+  "display_name": "Khối kim cương nguyên chất",
+  "model": "minecraft:ores/diamond_pure_block",
+  "hardness": 7,
+  "break_strength": 3,
+  "drops": [
+    {
+      "item": "diamond_pure_block",
+      "min_amount": 1,
+      "max_amount": 1,
+      "chance": 1.0
+    }
+  ],
+  "place_sound": "block.metal.place",
+  "break_sound": "block.metal.break"
+}

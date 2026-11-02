@@ -1,0 +1,18 @@
+{
+  "id": "stone_halberd",
+  "base": "STONE_SPEAR",
+  "components": {
+    "name": "<white>Stone Halberd",
+    "item_model": "minecraft:stone_halberd",
+    "durability": 195,
+    "attribute": {
+      "attributes": {
+        "MELEE_DAMAGE_BASE": 6.5,
+        "ATTACK_SPEED_BASE": 0.965,
+        "ENTITY_REACH": 0.93,
+        "SWEEPING_DAMAGE_RATIO": 0.276
+      },
+      "slot": "MAINHAND"
+    }
+  }
+}

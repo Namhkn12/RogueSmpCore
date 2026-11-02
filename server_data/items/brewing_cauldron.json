@@ -1,0 +1,10 @@
+{
+  "id": "brewing_cauldron",
+  "base": "BREWING_STAND",
+  "components": {
+    "name": "<light_purple>Brewing Cauldron",
+    "block_place": {
+      "block": "brewing_cauldron"
+    }
+  }
+}

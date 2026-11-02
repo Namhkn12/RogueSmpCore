@@ -1,0 +1,67 @@
+{
+  "id": "tmd_hellforged_brute",
+  "entityType": "PIGLIN_BRUTE",
+  "displayName": "<dark_red>Hellforged Brute</dark_red>",
+  "noAi": false,
+  "persistent": true,
+  "isBoss": false,
+  "isElite": true,
+  "detectionRange": 32,
+  "baseStat": {
+    "max_health": 120.0,
+    "attack_damage": 20.0,
+    "movement_speed": 0.35,
+    "armor": 18.0,
+    "knockback_resistance": 0.6
+  },
+  "equipments": {
+    "HEAD": {
+      "material": "GOLDEN_HELMET",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "gold",
+      "trimPattern": "snout"
+    },
+    "CHEST": {
+      "material": "NETHERITE_CHESTPLATE",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "bolt"
+    },
+    "LEGS": {
+      "material": "NETHERITE_LEGGINGS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "redstone",
+      "trimPattern": "bolt"
+    },
+    "FEET": {
+      "material": "GOLDEN_BOOTS",
+      "displayName": null,
+      "lore": null,
+      "enchantGlint": true,
+      "trimMaterial": "gold",
+      "trimPattern": "snout"
+    },
+    "HAND": {
+      "material": "GOLDEN_AXE",
+      "displayName": "<gold>Hellforged War Axe</gold>",
+      "lore": [
+        "<dark_red>Tempered in lava, blessed by the nether.",
+        "<gray>Its weight alone breaks lesser warriors."
+      ],
+      "enchantGlint": true,
+      "trimMaterial": null,
+      "trimPattern": null
+    }
+  },
+  "activeSpell": [],
+  "passiveSpell": [],
+  "passiveInterval": 0,
+  "canCastSameSpellTwice": false,
+  "spellParams": {}
+}

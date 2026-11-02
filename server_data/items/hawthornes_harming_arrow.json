@@ -1,0 +1,21 @@
+{
+  "base": "TIPPED_ARROW",
+  "components": {
+    "name": "<#A9656A>Harming Arrow",
+    "description": [
+      "<dark_gray><!i>Low Tier Stuff",
+      "<gray><!i>Trúng đích gây Sát Thương Tức Thời I.",
+      "<dark_gray><!i>Hàng của Bowyer Hawthorne"
+    ],
+    "potion_content": {
+      "color": "255,169,101,106",
+      "effects": [
+        {
+          "type": "instant_damage",
+          "duration": 1,
+          "amplifier": 0
+        }
+      ]
+    }
+  }
+}

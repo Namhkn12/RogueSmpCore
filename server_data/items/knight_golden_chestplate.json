@@ -1,0 +1,20 @@
+{
+  "id": "knight_golden_chestplate",
+  "base": "GOLDEN_CHESTPLATE",
+  "components": {
+    "name": "<green>Knight Golden Chestplate",
+    "item_model": "minecraft:knight_golden_chestplate",
+    "equippable": {
+      "slot": "CHEST",
+      "asset_id": "minecraft:knight_gold"
+    },
+    "durability": 600,
+    "attribute": {
+      "attributes": {
+        "DEFENSE_FLAT": 5.32,
+        "MELEE_DAMAGE_PERCENT": 0.015
+      },
+      "slot": "CHEST"
+    }
+  }
+}
