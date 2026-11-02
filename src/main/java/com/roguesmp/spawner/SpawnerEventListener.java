@@ -1,18 +1,21 @@
 package com.roguesmp.spawner;
 
 import com.roguesmp.constant.Keys;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.Component;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
+import com.destroystokyo.paper.event.entity.PreSpawnerSpawnEvent;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Marker;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.SpawnerSpawnEvent;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 public class SpawnerEventListener implements Listener {
@@ -23,14 +26,11 @@ public class SpawnerEventListener implements Listener {
         this.spawnerController = spawnerController;
     }
 
-    @EventHandler
-    public void onSpawnerPlace(BlockPlaceEvent event){
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onSpawnerPlace(BlockPlaceEvent event) {
         if (event.getBlock().getType() != Material.SPAWNER) return;
         String sid = event.getItemInHand().getPersistentDataContainer().get(Keys.SPAWNER_TID, PersistentDataType.STRING);
-        if (sid == null) return;
-
-        event.getPlayer().sendMessage(Component.text("Place spawner with sid: " + sid, NamedTextColor.GRAY));
-        spawnerController.handlePlaceSpawner(event.getBlock(), sid);
+        if (sid != null) spawnerController.handlePlaceSpawner(event.getBlock(), sid);
     }
 
     @EventHandler
@@ -41,25 +41,44 @@ public class SpawnerEventListener implements Listener {
         spawnerController.handleSpawnerAppear(marker);
     }
 
-    @EventHandler
-    public void onSpawnerBreak(BlockBreakEvent event){
+    @EventHandler(ignoreCancelled = true)
+    public void onSpawnerBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
-        if (block.getType() != Material.SPAWNER || !(block.getState() instanceof CreatureSpawner spawner)) return;
-        if (!spawner.getPersistentDataContainer().has(Keys.SPAWNER_IID) && !SpawnerSystem.isActive(block.getLocation())) return;
-        boolean allowBreak  = spawnerController.handleSpawnerBreak(event.getBlock(), event.getPlayer());
-        event.setCancelled(!allowBreak );
+        if (isManagedSpawner(block) && !spawnerController.canBreak(block, event.getPlayer())) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onSpawnerBroken(BlockBreakEvent event) {
+        if (event.getBlock().getType() == Material.SPAWNER) spawnerController.handleSpawnerBroken(event.getBlock());
     }
 
     @EventHandler
-    public void onSpawnerSpawn(SpawnerSpawnEvent event){
-        if (!SpawnerSystem.isActive(event.getLocation())) {
-            if (event.getSpawner() != null && event.getSpawner().getPersistentDataContainer().has(Keys.SPAWNER_TID)) event.setCancelled(true);
-            return;
+    public void onPreSpawnerSpawn(PreSpawnerSpawnEvent event) {
+        if (isManagedSpawner(event.getSpawnerLocation().getBlock())) {
+            event.setCancelled(true);
+            event.setShouldAbortSpawn(true);
         }
-        boolean allowSpawn = spawnerController.handleSpawnerSpawn(event.getSpawner(),
-                event.getEntity(),
-                event.getLocation().getNearbyPlayers(20).stream().toList());
-        event.setCancelled(!allowSpawn);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onEntityExplode(EntityExplodeEvent event) {
+        event.blockList().removeIf(SpawnerEventListener::isManagedSpawner);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockExplode(BlockExplodeEvent event) {
+        event.blockList().removeIf(SpawnerEventListener::isManagedSpawner);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onEntityChangeBlock(EntityChangeBlockEvent event) {
+        if (isManagedSpawner(event.getBlock())) event.setCancelled(true);
+    }
+
+    private static boolean isManagedSpawner(Block block) {
+        if (block.getType() != Material.SPAWNER || !(block.getState(false) instanceof CreatureSpawner spawner)) return false;
+        PersistentDataContainer pdc = spawner.getPersistentDataContainer();
+        return pdc.has(Keys.SPAWNER_IID) || pdc.has(Keys.SPAWNER_TID);
     }
 
 }

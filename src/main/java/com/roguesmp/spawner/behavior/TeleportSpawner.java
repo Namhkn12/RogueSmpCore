@@ -171,7 +171,9 @@ public class TeleportSpawner extends BaseBehavior {
         copiedSpawner.update(true, false);
 
         from.getBlock().setType(Material.AIR);
-        if (instance != null) instance.setLocation(to.getBlock().getLocation());
+        Location target = to.getBlock().getLocation();
+        SpawnerSystem.markersAt(from.getBlock().getLocation()).forEach(marker -> marker.teleport(target.clone().add(0.5, 0, 0.5)));
+        if (instance != null) instance.setLocation(target);
     }
 
     @Override

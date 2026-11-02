@@ -85,7 +85,7 @@ public record TreasureFeature(List<String> rooms, int extendSeconds, int spacing
     public void onEvent(FeatureContext<State> context, DungeonEvent event) {
         switch (event) {
             case DungeonEvent.Custom custom when custom.id().equals(RoomsFeature.BOSS_DEFEATED) -> onBossDefeated(context);
-            case DungeonEvent.BlockInteracted interacted when interacted.block().getState() instanceof Vault && bossDefeated(context) -> {
+            case DungeonEvent.BlockInteracted interacted when interacted.block().getState(false) instanceof Vault && bossDefeated(context) -> {
                 interacted.event().setCancelled(true);
                 openPortal(context, interacted.block());
             }

@@ -221,12 +221,12 @@ public record RoomsFeature(List<Pool> pools, int minimumRooms, int maxChoices) i
     @Override
     public void onEvent(FeatureContext<State> context, DungeonEvent event) {
         if (event instanceof DungeonEvent.BlockInteracted interacted) {
-            if (interacted.block().getState() instanceof Vault) {
+            if (interacted.block().getState(false) instanceof Vault) {
                 interacted.event().setCancelled(true);
                 openDoor(context, interacted.player(), interacted.block());
                 return;
             }
-            if (interacted.block().getState() instanceof TrialSpawner) {
+            if (interacted.block().getState(false) instanceof TrialSpawner) {
                 interacted.event().setCancelled(true);
                 openBossTrigger(context, interacted.player(), interacted.block());
                 return;

@@ -3,6 +3,7 @@ package com.roguesmp.gui.spawner;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.spawner.Spawner;
+import com.roguesmp.spawner.SpawnerSystem;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.spawner.behavior.BehaviorData;
 import com.roguesmp.utils.PlayerUtils;
@@ -174,6 +175,8 @@ public class SpawnerBrowserGui extends BaseGui {
                 .yesButton(Component.text("Xoá"), null, (response, audience) -> Utils.runLater(() -> {
                     if (!Registries.SPAWNER.removeAndDeleteFiles(RogueSmpCore.getInstance(), spawner.getId())) {
                         player.sendMessage(Utils.fromString("<red>Không thể xoá spawner " + spawner.getId() + "."));
+                    } else {
+                        SpawnerSystem.getInstance().deleteTemplate(spawner.getId());
                     }
                     showInventory(player);
                 }))
