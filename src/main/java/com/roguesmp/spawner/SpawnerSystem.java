@@ -19,16 +19,20 @@ public final class SpawnerSystem {
 
     private static final int TICK_PERIOD = 5;
     private static final double VIEW_RANGE = 48;
+    private static final long VISUALIZER_PERIOD = 10L;
 
     private static SpawnerSystem INSTANCE;
 
     private final SpawnerInstanceManager instances;
     private final SpawnerEventListener listener;
+    private final SpawnerVisualizer visualizer;
 
     private SpawnerSystem(RogueSmpCore plugin) {
         this.instances = new SpawnerInstanceManager();
-        this.listener = new SpawnerEventListener(new SpawnerEventController(instances, plugin));
+        this.visualizer = new SpawnerVisualizer(instances);
+        this.listener = new SpawnerEventListener(new SpawnerEventController(instances, plugin), visualizer);
         plugin.getServer().getScheduler().runTaskTimer(plugin, () -> instances.tickAll(VIEW_RANGE, TICK_PERIOD), TICK_PERIOD, TICK_PERIOD);
+        plugin.getServer().getScheduler().runTaskTimer(plugin, visualizer::tick, VISUALIZER_PERIOD, VISUALIZER_PERIOD);
     }
 
     public static void init(RogueSmpCore plugin) {
@@ -41,6 +45,10 @@ public final class SpawnerSystem {
 
     public SpawnerEventListener listener() {
         return listener;
+    }
+
+    public SpawnerVisualizer visualizer() {
+        return visualizer;
     }
 
     public static boolean isActive(Location location) {

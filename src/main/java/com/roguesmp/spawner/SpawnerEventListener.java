@@ -15,15 +15,23 @@ import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 public class SpawnerEventListener implements Listener {
 
     private final SpawnerEventController spawnerController;
+    private final SpawnerVisualizer visualizer;
 
-    public SpawnerEventListener(SpawnerEventController spawnerController) {
+    public SpawnerEventListener(SpawnerEventController spawnerController, SpawnerVisualizer visualizer) {
         this.spawnerController = spawnerController;
+        this.visualizer = visualizer;
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        visualizer.forget(event.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

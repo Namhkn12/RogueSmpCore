@@ -4,6 +4,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.spawner.behavior.BaseBehavior;
 import com.roguesmp.spawner.behavior.BehaviorFactory;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -33,7 +34,7 @@ public class SpawnerInstanceManager {
                 SpawnerSystem.markersAt(location).forEach(Entity::remove);
                 continue;
             }
-            List<Player> viewers = List.copyOf(location.getNearbyPlayers(viewRange));
+            List<Player> viewers = List.copyOf(location.getNearbyPlayers(viewRange, player -> player.getGameMode() != GameMode.SPECTATOR));
             if (viewers.isEmpty()) continue;
             try {
                 instance.tick(period, viewers);
