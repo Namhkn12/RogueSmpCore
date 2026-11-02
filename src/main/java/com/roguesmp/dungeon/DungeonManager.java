@@ -87,6 +87,7 @@ public final class DungeonManager {
 
         instances.values().forEach(instance -> dispatch(instance, DungeonFeature::onRestore));
         Bukkit.getScheduler().runTaskTimer(plugin, this::tick, TICK_INTERVAL_TICKS, TICK_INTERVAL_TICKS);
+        Bukkit.getScheduler().runTaskTimer(plugin, this::gameTick, 1L, 1L);
     }
 
     public Collection<DungeonInstance> instances() {
@@ -371,6 +372,13 @@ public final class DungeonManager {
         }
         worlds.saveAllOnStop();
         store.close();
+    }
+
+    private void gameTick() {
+        for (DungeonInstance instance : List.copyOf(instances.values())) {
+            World world = worldOf(instance);
+            if (world != null && !world.getPlayers().isEmpty()) dispatch(instance, (feature, context) -> feature.onGameTick(context, world));
+        }
     }
 
     private void tick() {

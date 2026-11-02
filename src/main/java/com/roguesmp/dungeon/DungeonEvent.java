@@ -9,12 +9,17 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.Cancellable;
+import com.roguesmp.block.BlockPos;
+import com.roguesmp.block.BlockRef;
+import com.roguesmp.block.SmpBlock;
+import com.roguesmp.block.manager.BlockManager;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,7 +41,11 @@ public sealed interface DungeonEvent {
             Map.entry("item_picked_up", Set.of("amount")),
             Map.entry("portal_entered", Set.of()),
             Map.entry("player_died", Set.of()),
-            Map.entry("quest_completed", Set.of())
+            Map.entry("quest_completed", Set.of()),
+            Map.entry("redstone_activated", Set.of("x", "y", "z", "powered")),
+            Map.entry("var_changed", Set.of("value", "old")),
+            Map.entry("countdown_ended", Set.of()),
+            Map.entry("timer", Set.of("ticks"))
     );
 
     String id();
@@ -63,6 +72,11 @@ public sealed interface DungeonEvent {
 
     default @Nullable Location location() {
         return null;
+    }
+
+    static String blockId(Block block) {
+        SmpBlock custom = BlockManager.getInstance().get(BlockPos.of(block));
+        return custom != null ? custom.getId() : BlockRef.VANILLA_PREFIX + block.getType().getKey().getKey();
     }
 
     static Map<String, DataValue> blockPosition(Block block) {
@@ -200,7 +214,7 @@ public sealed interface DungeonEvent {
 
         @Override
         public String subject() {
-            return block.getType().getKey().getKey();
+            return blockId(block);
         }
 
         @Override
@@ -228,7 +242,7 @@ public sealed interface DungeonEvent {
 
         @Override
         public String subject() {
-            return block.getType().getKey().getKey();
+            return blockId(block);
         }
 
         @Override
@@ -248,7 +262,8 @@ public sealed interface DungeonEvent {
     }
 
     // Features may cancel the event.
-    record BlockPlaced(Player player, Block block, BlockPlaceEvent event) implements DungeonEvent {
+    // blockId: the custom block id, or minecraft:<block> for vanilla.
+    record BlockPlaced(Player player, Block block, String blockId, Cancellable event) implements DungeonEvent {
         @Override
         public String id() {
             return "block_placed";
@@ -256,7 +271,7 @@ public sealed interface DungeonEvent {
 
         @Override
         public String subject() {
-            return block.getType().getKey().getKey();
+            return blockId;
         }
 
         @Override
@@ -275,7 +290,7 @@ public sealed interface DungeonEvent {
         }
     }
 
-    // itemId: custom item id, or the vanilla material key.
+    // itemId: custom item id, or minecraft:<material> for vanilla.
     record ItemPickedUp(Player player, ItemStack item, String itemId, int amount) implements DungeonEvent {
         @Override
         public String id() {
@@ -320,6 +335,73 @@ public sealed interface DungeonEvent {
         @Override
         public Location location() {
             return player.getLocation();
+        }
+    }
+
+    // powered: whether the block is powered after this activation.
+    record RedstoneActivated(Player player, Block block, boolean powered) implements DungeonEvent {
+        @Override
+        public String id() {
+            return "redstone_activated";
+        }
+
+        @Override
+        public String subject() {
+            return blockId(block);
+        }
+
+        @Override
+        public Map<String, DataValue> data() {
+            Map<String, DataValue> data = new HashMap<>(blockPosition(block));
+            data.put("powered", DataValue.of(powered));
+            return data;
+        }
+
+        @Override
+        public Location location() {
+            return block.getLocation();
+        }
+    }
+
+    record VarChanged(String var, @Nullable DataValue oldValue, DataValue newValue, @Nullable Player player) implements DungeonEvent {
+        @Override
+        public String id() {
+            return "var_changed";
+        }
+
+        @Override
+        public String subject() {
+            return var;
+        }
+
+        @Override
+        public Map<String, DataValue> data() {
+            return oldValue == null ? Map.of("value", newValue) : Map.of("value", newValue, "old", oldValue);
+        }
+    }
+
+    record CountdownEnded(String countdown) implements DungeonEvent {
+        @Override
+        public String id() {
+            return "countdown_ended";
+        }
+
+        @Override
+        public String subject() {
+            return countdown;
+        }
+    }
+
+    // ticks: the run world's game time.
+    record Timer(long ticks) implements DungeonEvent {
+        @Override
+        public String id() {
+            return "timer";
+        }
+
+        @Override
+        public Map<String, DataValue> data() {
+            return Map.of("ticks", DataValue.of(ticks));
         }
     }
 

@@ -8,6 +8,7 @@ import com.roguesmp.codec.DynamicOps;
 import com.roguesmp.dungeon.script.DataValue;
 import com.roguesmp.codec.JsonOps;
 import com.roguesmp.world.PolarTemplateData;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.roguesmp.world.PolarWorldKey;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -35,6 +37,13 @@ public class DungeonInstance {
         }
     };
 
+    private static final Codec<BlockVector3> BED_POSITION = Codec.listOf(Codec.INT).comapFlatMap(
+            coords -> coords.size() == 3
+                    ? DataResult.success(BlockVector3.at(coords.get(0), coords.get(1), coords.get(2)))
+                    : DataResult.error("Bed position needs [x, y, z]"),
+            position -> List.of(position.x(), position.y(), position.z())
+    );
+
     public static final Codec<DungeonInstance> CODEC = Codec.composite(
             Codec.UUID.fieldOf("id").forGetter(DungeonInstance::id),
             Codec.STRING.fieldOf("dungeon").forGetter(DungeonInstance::dungeonId),
@@ -43,6 +52,7 @@ public class DungeonInstance {
             Codec.listOf(Codec.UUID).<Set<UUID>>xmap(LinkedHashSet::new, ArrayList::new).fieldOf("members").forGetter(instance -> instance.members),
             Codec.LONG.fieldOf("created_at").forGetter(DungeonInstance::createdAt),
             Codec.unboundedMap(DataValue.CODEC).optionalFieldOf("variables", Map.of()).forGetter(instance -> instance.variables),
+            Codec.unboundedMap(Codec.UUID, BED_POSITION).optionalFieldOf("bed_spawns", Map.of()).forGetter(instance -> instance.bedSpawns),
             Codec.unboundedMap(JSON).optionalFieldOf("features", Map.of()).forGetter(DungeonInstance::encodeStates),
             DungeonInstance::new
     );
@@ -54,12 +64,13 @@ public class DungeonInstance {
     private final Set<UUID> members;
     private final long createdAt;
     private final Map<String, DataValue> variables = new HashMap<>();
+    private final Map<UUID, BlockVector3> bedSpawns = new HashMap<>();
     // Raw until bound to a definition, so runs of a removed dungeon keep their data.
     private final Map<String, JsonElement> savedStates = new HashMap<>();
     private final Map<String, Object> states = new HashMap<>();
     private @Nullable DungeonDefinition definition;
 
-    private DungeonInstance(UUID id, String dungeonId, PolarWorldKey template, Optional<PolarTemplateData> worldData, Set<UUID> members, long createdAt, Map<String, DataValue> variables, Map<String, JsonElement> savedStates) {
+    private DungeonInstance(UUID id, String dungeonId, PolarWorldKey template, Optional<PolarTemplateData> worldData, Set<UUID> members, long createdAt, Map<String, DataValue> variables, Map<UUID, BlockVector3> bedSpawns, Map<String, JsonElement> savedStates) {
         this.id = id;
         this.dungeonId = dungeonId;
         this.template = template;
@@ -67,11 +78,12 @@ public class DungeonInstance {
         this.members = new LinkedHashSet<>(members);
         this.createdAt = createdAt;
         this.variables.putAll(variables);
+        this.bedSpawns.putAll(bedSpawns);
         this.savedStates.putAll(savedStates);
     }
 
     public DungeonInstance(String dungeonId, DungeonDefinition definition, PolarTemplateData worldData, Set<UUID> members) {
-        this(UUID.randomUUID(), dungeonId, definition.template(), Optional.of(worldData), members, System.currentTimeMillis(), Map.of(), Map.of());
+        this(UUID.randomUUID(), dungeonId, definition.template(), Optional.of(worldData), members, System.currentTimeMillis(), Map.of(), Map.of(), Map.of());
         bind(definition);
     }
 
@@ -126,6 +138,15 @@ public class DungeonInstance {
 
     public void setVariable(String name, DataValue value) {
         variables.put(name, value);
+    }
+
+    public @Nullable BlockVector3 bedSpawn(UUID playerId) {
+        return bedSpawns.get(playerId);
+    }
+
+    public void setBedSpawn(UUID playerId, @Nullable BlockVector3 position) {
+        if (position == null) bedSpawns.remove(playerId);
+        else bedSpawns.put(playerId, position);
     }
 
     public String displayName() {
