@@ -3,6 +3,7 @@ package com.roguesmp.gui.spawner;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.spawner.Spawner;
+import com.roguesmp.spawner.SpawnerSystem;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.spawner.behavior.BehaviorData;
 import com.roguesmp.utils.PlayerUtils;
@@ -27,6 +28,7 @@ public class SpawnerBrowserGui extends BaseGui {
     private static final int CREATE_NEW_SLOT = 0;
     private static final int GUIDE_SLOT = 4;
     private static final int SEARCH_SLOT = 8;
+    private static final int VISUALIZE_SLOT = 6;
 
     private final Player player;
     private String searchQuery = null;
@@ -55,6 +57,16 @@ public class SpawnerBrowserGui extends BaseGui {
                 Utils.text("Chuột trái để lấy spawner", NamedTextColor.GREEN),
                 Utils.text("Chuột phải để edit spawner", NamedTextColor.GREEN),
                 Utils.text("Shift + chuột phải để xoá spawner", NamedTextColor.RED)), ClickHandler.noAction());
+
+        boolean visualizing = SpawnerSystem.getInstance().visualizer().isEnabled(player);
+        addButton(VISUALIZE_SLOT, button(visualizing ? Material.ENDER_EYE : Material.ENDER_PEARL, "Hiển thị spawner: " + (visualizing ? "Bật" : "Tắt"),
+                visualizing ? NamedTextColor.GREEN : NamedTextColor.RED,
+                Utils.text("Khi cầm spawner, các spawner cùng loại đã đặt sẽ phát sáng.", NamedTextColor.GRAY),
+                Utils.text("Click để bật/tắt.", NamedTextColor.YELLOW)), event -> {
+            event.setCancelled(true);
+            SpawnerSystem.getInstance().visualizer().toggle(player);
+            setup();
+        });
 
         addButton(SEARCH_SLOT, button(Material.COMPASS, "Tìm kiếm theo ID", NamedTextColor.GOLD,
                 Utils.text("Từ khóa hiện tại: " + (searchQuery == null || searchQuery.isBlank() ? "Trống" : searchQuery), NamedTextColor.YELLOW),
@@ -174,6 +186,8 @@ public class SpawnerBrowserGui extends BaseGui {
                 .yesButton(Component.text("Xoá"), null, (response, audience) -> Utils.runLater(() -> {
                     if (!Registries.SPAWNER.removeAndDeleteFiles(RogueSmpCore.getInstance(), spawner.getId())) {
                         player.sendMessage(Utils.fromString("<red>Không thể xoá spawner " + spawner.getId() + "."));
+                    } else {
+                        SpawnerSystem.getInstance().deleteTemplate(spawner.getId());
                     }
                     showInventory(player);
                 }))

@@ -41,6 +41,6 @@ public class RewardChestListener implements Listener {
     }
 
     private static boolean isRewardChest(Block block) {
-        return block.getState() instanceof TileState tile && tile.getPersistentDataContainer().has(Keys.REWARD_CID, PersistentDataType.STRING);
+        return block.getState(false) instanceof TileState tile && tile.getPersistentDataContainer().has(Keys.REWARD_CID, PersistentDataType.STRING);
     }
 }

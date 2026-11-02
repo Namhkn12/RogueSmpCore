@@ -5,8 +5,10 @@ import com.roguesmp.dungeon.DungeonDefinition;
 import com.roguesmp.dungeon.DungeonEvent;
 import com.roguesmp.dungeon.action.DungeonActions;
 import com.roguesmp.registry.Registries;
-import org.bukkit.Material;
+import com.roguesmp.utils.ItemRef;
 import org.bukkit.NamespacedKey;
+
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,18 +22,25 @@ public final class DungeonValidation {
 
     private final String path;
     private final Report report;
+    private final @Nullable String function;
 
-    private DungeonValidation(String path, Report report) {
+    private DungeonValidation(String path, Report report, @Nullable String function) {
         this.path = path;
         this.report = report;
+        this.function = function;
     }
 
     public static void validateAll() {
         int warnings = 0;
         for (Map.Entry<String, DungeonDefinition> entry : Registries.DUNGEON.getAll().entrySet()) {
             Report report = new Report();
-            DungeonValidation root = new DungeonValidation("", report);
+            DungeonValidation root = new DungeonValidation("", report, null);
             entry.getValue().variables().keySet().forEach(report.writtenVars::add);
+            report.functions.addAll(entry.getValue().functions().keySet());
+            entry.getValue().functions().forEach((name, actions) -> {
+                DungeonValidation at = new DungeonValidation("functions." + name, report, name);
+                for (int i = 0; i < actions.size(); i++) actions.get(i).validate(at.at("[" + i + "]"));
+            });
             entry.getValue().features().forEach((featureId, feature) -> feature.validate(featureId, root.at("features." + featureId)));
             report.finish();
             report.warnings.forEach(warning -> RogueSmpCore.LOGGER.warn("Dungeon {}: {}", entry.getKey(), warning));
@@ -41,7 +50,7 @@ public final class DungeonValidation {
     }
 
     public DungeonValidation at(String segment) {
-        return new DungeonValidation(path.isEmpty() ? segment : segment.startsWith("[") ? path + segment : path + "." + segment, report);
+        return new DungeonValidation(path.isEmpty() ? segment : segment.startsWith("[") ? path + segment : path + "." + segment, report, function);
     }
 
     public void warn(String message) {
@@ -67,6 +76,8 @@ public final class DungeonValidation {
     public void readsText(String text) {
         Matcher matcher = DungeonActions.VAR_PLACEHOLDER.matcher(text);
         while (matcher.find()) readsVar(matcher.group(1));
+        Matcher playerMatcher = DungeonActions.PLAYER_VAR_PLACEHOLDER.matcher(text);
+        while (playerMatcher.find()) readsVar(playerMatcher.group(1));
     }
 
     public void checkMob(String mob) {
@@ -76,7 +87,13 @@ public final class DungeonValidation {
     }
 
     public void checkItem(String item) {
-        if (Registries.ITEM.get(item) == null && Material.matchMaterial(item) == null) warn("unknown item '" + item + "'");
+        boolean known = ItemRef.isVanilla(item) ? ItemRef.vanillaMaterial(item) != null : Registries.ITEM.get(item) != null;
+        if (!known) warn("unknown item '" + item + "' (vanilla items need the minecraft: prefix)");
+    }
+
+    public void checkFunction(String function) {
+        if (!report.functions.contains(function)) warn("unknown function '" + function + "'");
+        if (this.function != null) report.calls.computeIfAbsent(this.function, caller -> new HashSet<>()).add(function);
     }
 
     public void checkRoom(String room) {
@@ -96,8 +113,13 @@ public final class DungeonValidation {
         private final List<Listen> listened = new ArrayList<>();
         private final Set<String> writtenVars = new HashSet<>();
         private final List<Listen> readVars = new ArrayList<>();
+        private final Set<String> functions = new HashSet<>();
+        private final Map<String, Set<String>> calls = new HashMap<>();
 
         private void finish() {
+            for (String function : functions) {
+                if (callsItself(function, function, new HashSet<>())) warnings.add("functions." + function + ": calls itself (directly or through other functions)");
+            }
             for (Listen listen : listened) {
                 EventMatcher matcher = (EventMatcher) listen.target();
                 Set<String> keys = emitted.get(matcher.event());
@@ -114,6 +136,14 @@ public final class DungeonValidation {
                     warnings.add(read.path() + ": variable '" + read.target() + "' is never declared or set");
                 }
             }
+        }
+
+        private boolean callsItself(String start, String current, Set<String> visited) {
+            for (String next : calls.getOrDefault(current, Set.of())) {
+                if (next.equals(start)) return true;
+                if (visited.add(next) && callsItself(start, next, visited)) return true;
+            }
+            return false;
         }
     }
 }

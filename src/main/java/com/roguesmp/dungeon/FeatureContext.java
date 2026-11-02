@@ -10,6 +10,10 @@ import java.util.Map;
 
 public record FeatureContext<S>(DungeonManager manager, DungeonInstance instance, String featureId, DungeonFeature<S> feature, S state) {
 
+    public static String varName(String var, boolean perPlayer, @Nullable Player player) {
+        return perPlayer && player != null ? "player." + player.getUniqueId() + "." + var : var;
+    }
+
     public @Nullable World world() {
         return manager.worldOf(instance);
     }

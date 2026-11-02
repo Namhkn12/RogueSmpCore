@@ -165,13 +165,8 @@ public class Spawner {
     }
 
     public void applyTo(CreatureSpawner spawner) {
-        spawner.setDelay(delay);
-        spawner.setSpawnRange(spawnRange);
-        spawner.setMaxNearbyEntities(maxNearBy);
-        spawner.setMinSpawnDelay(minDelay);
-        spawner.setMaxSpawnDelay(maxDelay);
         spawner.setRequiredPlayerRange(activeRange);
-        spawner.setSpawnCount(spawnCount);
+        spawner.setSpawnCount(0);
 
         List<SpawnerEntry> entries = new ArrayList<>();
         mobs.forEach((mid, weight) -> {
@@ -183,6 +178,8 @@ public class Spawner {
         });
 
         spawner.setPotentialSpawns(entries);
+        if (!entries.isEmpty()) spawner.setSpawnedEntity(entries.getFirst());
         spawner.update();
     }
+
 }

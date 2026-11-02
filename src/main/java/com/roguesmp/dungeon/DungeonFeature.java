@@ -4,6 +4,7 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.dungeon.script.DungeonValidation;
 import com.roguesmp.registry.Registries;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.Set;
@@ -39,6 +40,10 @@ public interface DungeonFeature<S> {
 
     // Every second, whether the run's world is loaded or not.
     default void onTick(FeatureContext<S> context) {
+    }
+
+    // Every server tick, only while the run's world is loaded with players in it.
+    default void onGameTick(FeatureContext<S> context, World world) {
     }
 
     default void onEvent(FeatureContext<S> context, DungeonEvent signal) {

@@ -85,59 +85,48 @@ Bảng đầy đủ mọi component (`display_name`, `behavior`, `attributes`, `
 
 ```java
 public static final Codec<SpellComponent> CODEC = Codec.composite(
-        Codec.listOf(SpellParams.CODEC).optionalFieldOf("activeSpell", List.of()).forGetter(SpellComponent::getActiveSpellParams),
-        Codec.listOf(SpellParams.CODEC).optionalFieldOf("passiveSpell", List.of()).forGetter(SpellComponent::getPassiveSpellParams),
-        Codec.INT.optionalFieldOf("passiveInterval", 0).forGetter(SpellComponent::getPassiveIntervalConfig),
-        Codec.BOOLEAN.optionalFieldOf("canCastSameSpellTwice", false).forGetter(SpellComponent::isCanCastSameSpellTwiceConfig),
+        Codec.listOf(SpellConfig.CODEC).optionalFieldOf("spells", List.of()).forGetter(SpellComponent::getSpellConfigs),
+        Codec.BOOLEAN.optionalFieldOf("canCastSameSpellTwice", false).forGetter(SpellComponent::isCanCastSameSpellTwice),
         SpellComponent::new
 );
 ```
 
-Mỗi phần tử của `activeSpell`/`passiveSpell` là 1 `SpellParams` đa hình, dispatch trên field `"type"` qua [`Registries.ENTITY_SPELL`](../src/main/java/com/roguesmp/entity/spell/EntitySpells.java) (mỗi `SpellType` đăng ký cả id lẫn `Codec` params riêng của nó). `passiveInterval` ≤ 0 → dùng mặc định `SmpEntity.PASSIVE_RUN_INTERVAL_DEFAULT` (2 tick).
+Mỗi phần tử của `spells` là 1 `SpellConfig(SpellType, SpellParams)`, dispatch trên field `"type"` qua [`Registries.ENTITY_SPELL`](../src/main/java/com/roguesmp/entity/spell/EntitySpells.java). Active hay passive không khai trong JSON: spell nào là `ActiveSpell` thì vào vòng cast, còn lại chỉ nhận `tick(...)` + các hook sự kiện.
 
 ```json
 "spells": {
-  "activeSpell": [ { "type": "self_destruct_spell", "particleCount": 20 } ],
-  "passiveSpell": [ { "type": "slow_aura_spell" } ],
-  "passiveInterval": 40,
+  "spells": [ { "type": "summon_spell", "entityIds": ["goblin_warrior"] }, { "type": "slow_aura_spell" } ],
   "canCastSameSpellTwice": false
 }
 ```
 
-Ví dụ `SelfDestructSpell.Params`, cho thấy shape 1 `SpellParams` cụ thể:
+Ví dụ `SelfDestructSpell.Params`:
 
 ```java
 public record Params(int particleCount) implements SpellParams {
     public static final Codec<Params> CODEC = Codec.INT.optionalFieldOf("particleCount", 10)
             .xmap(Params::new, Params::particleCount).codec();
-    @Override public String getTypeId() { return "self_destruct_spell"; }
 }
 ```
 
-Lịch chạy: `activeSpell` chọn 1 spell qua `SpellManager` (`floor((số-spell-1)/2)` cooldown chống chọn lại ngay), timer tiếp theo lấy từ `cooldownTicks()` của spell vừa cast; `passiveSpell` tick **mọi** spell mỗi chu kỳ, tự tắt (`activeSpells.cancelAll()`) khi không còn player nào trong `detectionRange`.
+Lịch chạy (`tick` mỗi `SmpEntity.PASSIVE_RUN_INTERVAL_DEFAULT` = 2 tick): mọi spell nhận `tick(context, interval)`; vòng active là máy trạng thái `IDLE → WINDUP → RECOVERY`. Ở `IDLE`, sau `castLockUntil`, chọn ngẫu nhiên theo `weight()` trong các `ActiveSpell` đã hết hồi chiêu và `canCast(...)` (loại spell vừa cast trừ khi `canCastSameSpellTwice` hoặc chỉ có 1 spell). `startCast` đặt hồi chiêu, bắn `SpellCastEvent`, gọi `onWindupStart`; `onWindupTick` mỗi chu kỳ tới khi đủ `windup()` → `onCast` → `RECOVERY` trong `recovery()` tick. Mất mục tiêu khi niệm → `onInterrupted`. Không còn player trong `detectionRange` → ngủ (hủy cast, ngừng tick); hook sự kiện vẫn chạy. Boss có thể đổi bộ spell bằng `setSpells(...)` hoặc ép cast bằng `forceCast(...)`.
 
 ### Boss code-driven không khai spell trong JSON
 
-Boss viết tay không cần `spells` trong JSON — dùng constructor `new SpellComponent(SmpEntity owner)`, bind ngay lập tức để có thể gọi `startSpell(...)`/`changePhase(...)` từ chính constructor của boss:
+Boss viết tay không cần `spells` trong JSON — tự dựng spell rồi gắn bằng constructor `new SpellComponent(List<Spell> spells, int detectionRange, int startDelay, boolean canCastSameSpellTwice)` (ví dụ thật: [`VeinStalker`](../src/main/java/com/roguesmp/entity/boss/veinstalker/VeinStalker.java)):
 
 ```java
 public class MyBoss extends SmpEntity {
-    private final SpellComponent spellComponent;
-
     public MyBoss(BaseEntity base, LivingEntity entity) {
         super(base, entity);
-        this.spellComponent = new SpellComponent(this);
-        setComponent(EntityComponentKeys.SPELLS, spellComponent);
-    }
-
-    @Override
-    protected void onInitialized() {
-        spellComponent.startSpell(new SpellManager(phase1Actives), phase1Passives, detectionRange);
+        setComponent(EntityComponentKeys.SPELLS, new SpellComponent(
+                List.of(new WebSnareSpell(entity), new DarknessSpell(entity)),
+                24, 40, false));
     }
 }
 ```
 
-`changePhase(SpellManager newActive, List<Spell> newPassive, @Nullable Consumer<LivingEntity> phaseAction)` (+ overload có `spellDelay`) cancel spell hiện tại rồi thay bằng list mới — primitive cốt lõi để chuyển pha kiểu boss.
+Chuyển pha: `spellComponent.setSpells(List<Spell> next, int castDelay)` — hủy cast đang niệm, gọi `onRemoved()` cho spell bị bỏ (spell giữ lại cùng instance thì giữ nguyên trạng thái/hồi chiêu), chặn cast mới trong `castDelay` tick.
 
 <a id="phasecomponent--ngưỡng-máu-chuyển-pha"></a>
 ## `PhaseComponent` — ngưỡng máu chuyển pha
@@ -146,7 +135,7 @@ public class MyBoss extends SmpEntity {
 
 ```java
 Map<Integer, PhaseComponent.BossHealthAction> phaseEvents = new HashMap<>();
-phaseEvents.put(70, boss -> this.changePhase(new SpellManager(phase2Active), phase2Passive, null));
+phaseEvents.put(70, boss -> spellComponent.setSpells(phase2Spells, 20));
 phaseEvents.put(30, boss -> { /* triệu hồi minion, đổi pha cuối */ });
 
 setComponent(EntityComponentKeys.PHASE, new PhaseComponent(phaseEvents, true));
@@ -177,10 +166,10 @@ Id truyền vào `register` phải khớp chính xác `id` trong file JSON của
 
 ## Cách thêm 1 loại spell mới (do JSON điều khiển)
 
-1. Tạo `record`/class implement `SpellParams` (`getTypeId()` trả type-id, cộng `public static final Codec<...> CODEC`).
-2. Viết class `Spell` thật (extend `entity/spell/Spell.java` — `run(int interval)`, `cooldownTicks()` là 2 method abstract) đọc dữ liệu từ `Params`.
+1. Tạo `record Params(...) implements SpellParams` với `public static final Codec<Params> CODEC` (mọi field nên `optionalFieldOf` — `register` decode `{}` để lấy mặc định, thiếu là crash lúc khởi động).
+2. Viết class spell: extend `Spell` (passive — override `tick`/hook sự kiện) hoặc `ActiveSpell` (gọi `super(cooldown, windup, recovery)`, cài `onCast`, tùy chọn `canCast`/`onWindupStart`/`onWindupTick`/`onInterrupted`).
 3. Đăng ký cả type-id lẫn params-codec vào [`EntitySpells.java`](../src/main/java/com/roguesmp/entity/spell/EntitySpells.java) (tương tự `ItemComponentKeys`/`ComponentKeys` — 1 `SpellType<Params>` gói cả factory dựng `Spell` thật lẫn `CODEC` của `Params`).
-4. Dùng `"type": "your_id"` trong `activeSpell`/`passiveSpell` của bất kỳ entity JSON nào.
+4. Dùng `"type": "your_id"` trong mảng `spells` của bất kỳ entity JSON nào.
 
 ## Lưu ý & lỗi thường gặp
 
@@ -188,7 +177,7 @@ Id truyền vào `register` phải khớp chính xác `id` trong file JSON của
 - **`EntityComponentKeys.loadClass()` phải được gọi trong `RogueSmpCore.init()`** (cùng lúc với `ItemComponentKeys.loadClass()`) — bỏ sót thì codec của mọi entity component không được đăng ký, mọi file `entities/*.json` fail decode.
 - **`phase` không thể khai trong JSON** — `BossHealthAction` là 1 lambda Java thuần, chỉ gắn được từ code (`setComponent(EntityComponentKeys.PHASE, ...)`), khác với mọi component khác trong bảng.
 - **Đăng ký sai/thiếu id trong `SpecialEntities.java`** khiến 1 boss âm thầm chạy như `SmpEntity` thường — không có exception nào báo, chỉ đơn giản là không có phase/spell riêng nào chạy.
-- **`TickingComponent.tick(entity, interval)` không tick nhanh hơn `SmpEntity.PASSIVE_RUN_INTERVAL_DEFAULT` (2 tick)** dù bạn có gọi `startSpell`/cấu hình gì khác — 1 component cần chu kỳ chậm hơn (chậm hơn 2 tick) nên tự đếm ngược nội bộ và trừ `interval` mỗi lần `tick` được gọi.
+- **`TickingComponent.tick(entity, interval)` không tick nhanh hơn `SmpEntity.PASSIVE_RUN_INTERVAL_DEFAULT` (2 tick)** — 1 component cần chu kỳ chậm hơn (chậm hơn 2 tick) nên tự đếm ngược nội bộ và trừ `interval` mỗi lần `tick` được gọi.
 
 ---
 ◀ [GUI Framework](GUI-Framework.md) · Về [Trang chủ](Home.md) · Tiếp theo: [Player Ability System](Player-Ability-System.md)

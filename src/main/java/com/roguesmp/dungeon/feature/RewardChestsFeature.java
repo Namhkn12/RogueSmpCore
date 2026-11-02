@@ -104,7 +104,7 @@ public record RewardChestsFeature(String lootTable) implements DungeonFeature<No
 
     private static @Nullable String tableOf(Block block) {
         if (block.getType() != Material.CHEST && block.getType() != Material.TRAPPED_CHEST) return null;
-        if (!(block.getState() instanceof TileState tile)) return null;
+        if (!(block.getState(false) instanceof TileState tile)) return null;
         String table = tile.getPersistentDataContainer().get(Keys.REWARD_CID, PersistentDataType.STRING);
         return table == null || table.isBlank() ? null : table;
     }
@@ -115,7 +115,7 @@ public record RewardChestsFeature(String lootTable) implements DungeonFeature<No
     }
 
     private static boolean claimedBy(Block block, Player player) {
-        if (!(block.getState() instanceof TileState tile)) return false;
+        if (!(block.getState(false) instanceof TileState tile)) return false;
         List<String> claimed = tile.getPersistentDataContainer().get(Keys.REWARD_CLAIMED, PersistentDataType.LIST.strings());
         return claimed != null && claimed.contains(player.getUniqueId().toString());
     }
@@ -137,7 +137,7 @@ public record RewardChestsFeature(String lootTable) implements DungeonFeature<No
     }
 
     private static @Nullable Block otherHalf(Block block) {
-        if (!(block.getState() instanceof Chest chest) || !(chest.getInventory() instanceof DoubleChestInventory inventory)) return null;
+        if (!(block.getState(false) instanceof Chest chest) || !(chest.getInventory() instanceof DoubleChestInventory inventory)) return null;
         if (!(inventory.getHolder() instanceof DoubleChest doubleChest)) return null;
         if (doubleChest.getLeftSide() instanceof Chest left && !left.getBlock().equals(block)) return left.getBlock();
         if (doubleChest.getRightSide() instanceof Chest right && !right.getBlock().equals(block)) return right.getBlock();

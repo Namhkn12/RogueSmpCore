@@ -78,7 +78,7 @@ public class ChestOpenAnimation {
     }
 
     private Location getAnimCenter(Block block) {
-        if (block.getState() instanceof Chest chest
+        if (block.getState(false) instanceof Chest chest
                 && chest.getInventory() instanceof DoubleChestInventory inventory
                 && inventory.getHolder() instanceof DoubleChest doubleChest) {
             return doubleChest.getLocation().add(0.5, 0, 0.5);

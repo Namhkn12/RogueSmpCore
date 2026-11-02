@@ -71,6 +71,8 @@ public class EntitySpells {
             register("undermine_spell", UndermineSpell.Params.CODEC, UndermineSpell::new);
     public static final SpellType<HealAlliesSpell.Params> HEAL_ALLIES =
             register("heal_allies_spell", HealAlliesSpell.Params.CODEC, HealAlliesSpell::new);
+    public static final SpellType<SummonSpell.Params> SUMMON =
+            register(SummonSpell.TYPE_KEY, SummonSpell.Params.CODEC, SummonSpell::new);
 //    public static final SpellType<PrimordialSlimeAltarSpell.Params> PRIMORDIAL_SLIME_ALTAR =
 //            register(PrimordialSlimeAltarSpell.TYPE_KEY, PrimordialSlimeAltarSpell.Params.CODEC, PrimordialSlimeAltarSpell::new);
 

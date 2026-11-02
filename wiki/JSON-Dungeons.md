@@ -309,6 +309,8 @@ Script là phần "lập trình bằng JSON" của dungeon: **khi sự kiện X 
 | `on` | bắt buộc | [Matcher](#matcher). |
 | `conditions` | `[]` | Tất cả phải đúng. |
 | `once` | `false` | Chỉ chạy 1 lần mỗi instance. |
+| `cooldown` | `0` | Số tick tối thiểu giữa 2 lần chạy (20 tick = 1 giây; 0 = không giới hạn). |
+| `interval` | `20` | Chỉ cho sự kiện `timer`: chạy mỗi `interval` tick. |
 | `actions` | bắt buộc | Chạy theo thứ tự. |
 
 Trigger được xét **theo thứ tự trong danh sách**; action của trigger trước đã chạy xong khi trigger sau được xét (vd. trigger 1 `add_var`, trigger 2 kiểm tra biến đó thấy giá trị mới).
@@ -336,12 +338,17 @@ Trigger được xét **theo thứ tự trong danh sách**; action của trigger
 | `mob_killed` | Người chơi giết mob | id mob (tuỳ chỉnh hoặc vanilla) | |
 | `mob_died` | Mob chết vì bất kỳ lý do gì (người chơi, môi trường, ...) | id mob | `tag` (nếu mob được sinh bằng `spawn_mob` có `tag`) |
 | `mob_damaged` | Mob nhận sát thương | id mob | `damage`, `health_percent` (0–100, sau đòn) |
-| `block_interacted` | Chuột phải block | id block (`oak_door`) | |
-| `block_broken` | Phá block | id block | |
-| `item_picked_up` | Nhặt item | id item (tuỳ chỉnh hoặc vanilla) | `amount` |
+| `block_interacted` | Chuột phải block | id block (`minecraft:oak_door`, hoặc id block tuỳ chỉnh) | `x`, `y`, `z` (toạ độ block) |
+| `block_broken` | Phá block | id block (`minecraft:…` hoặc tuỳ chỉnh) | `x`, `y`, `z` (toạ độ block) |
+| `block_placed` | Đặt block (cả block tuỳ chỉnh) | id block (`minecraft:…` hoặc tuỳ chỉnh) | `x`, `y`, `z` (toạ độ block) |
+| `item_picked_up` | Nhặt item | id item tuỳ chỉnh, hoặc `minecraft:<vật liệu>` cho vanilla | `amount` |
 | `portal_entered` | Bước vào block cổng | id block cổng | |
 | `player_died` | Người chơi chết (kể cả khi `revive` giữ lại) | | |
 | `quest_completed` | Quest nhóm của instance hoàn thành | id quest | |
+| `redstone_activated` | Bấm nút, gạt cần, dẫm tấm áp lực / dây bẫy (1 lần mỗi lần kích hoạt, không lặp khi đứng yên) | id block (`minecraft:…`) | `x`, `y`, `z`, `powered` (cần gạt: trạng thái sau khi gạt; còn lại luôn `true`) |
+| `var_changed` | Biến đổi giá trị qua `set_var` / `add_var` | tên biến | `value`, `old` (nếu đã có giá trị trước) |
+| `countdown_ended` | Đếm ngược của action `countdown` hết giờ | id đếm ngược | |
+| `timer` | Mỗi `interval` tick của trigger, khi có người trong instance | | `ticks` (game time của world instance) |
 | `room_started` | Vào phòng mới (`rooms`) | | `room`, `type`, `cleared`, `score` |
 | `room_cleared` | Phòng sạch | | `room`, `type`, `cleared`, `score` |
 | `boss_defeated` | Objective `ends_dungeon` hoàn thành | | |
@@ -370,6 +377,7 @@ Dạng đầy đủ:
 | `event` | Id sự kiện. |
 | `subject` | (tuỳ chọn) [Điều kiện giá trị](#điều-kiện-giá-trị) trên subject. |
 | `data` | (tuỳ chọn) Mỗi khoá → điều kiện giá trị; tất cả phải khớp. |
+| `region` | (tuỳ chọn) Id region WorldGuard; vị trí sự kiện (block, mob, người chơi) phải nằm trong region. |
 
 ### Điều kiện giá trị
 
@@ -389,11 +397,11 @@ So sánh số dùng giá trị thực: `3` và `3.0` là như nhau. Giá trị k
 
 ### Condition
 
-Kiểm tra **trạng thái instance**, không phải sự kiện.
+Kiểm tra **trạng thái instance** hoặc **người gây ra sự kiện** (`in_region`, `has_item`, `player_health`, biến `player`).
 
 | `type` | Ví dụ | Đúng khi |
 | :--- | :--- | :--- |
-| `var` | `{ "type": "var", "var": "keys", "value": { "min": 3 } }` | Biến khớp điều kiện. |
+| `var` | `{ "type": "var", "var": "keys", "value": { "min": 3 } }` | Biến khớp điều kiện. `"player": true` → đọc biến riêng của người gây sự kiện. |
 | `room_type` | `{ "type": "room_type", "value": "boss" }` | Loại phòng hiện tại khớp (cần `rooms`). |
 | `members` | `{ "type": "members", "value": { "max": 2 } }` | Số thành viên khớp. |
 | `mob_count` | `{ "type": "mob_count", "tag": "gate_guard", "count": { "max": 1 } }` | Số mob mang `tag` đang có trong world instance (chunk đã nạp) khớp điều kiện. |
@@ -401,6 +409,11 @@ Kiểm tra **trạng thái instance**, không phải sự kiện.
 | `all_of` | `{ "type": "all_of", "conditions": [ ... ] }` | Tất cả đúng. |
 | `any_of` | `{ "type": "any_of", "conditions": [ ... ] }` | Ít nhất 1 đúng. |
 | `not` | `{ "type": "not", "condition": { ... } }` | Condition bên trong sai. |
+| `in_region` | `{ "type": "in_region", "region": "altar", "all": false }` | Người gây sự kiện đứng trong region. `all: true` → mọi người trong instance đều đứng trong đó. |
+| `has_item` | `{ "type": "has_item", "item": "crypt_key", "amount": 1 }` | Người gây sự kiện có ít nhất `amount` item (id tuỳ chỉnh hoặc vanilla) trong túi. |
+| `player_health` | `{ "type": "player_health", "value": { "max": 30 } }` | % máu (0–100) của người gây sự kiện khớp. |
+| `alive_count` | `{ "type": "alive_count", "value": 1 }` | Số người còn sống (không chết, không ở spectator) trong instance khớp. |
+| `random` | `{ "type": "random", "chance": 0.25 }` | Ngẫu nhiên với xác suất `chance` (0–1). |
 
 ### Action
 
@@ -412,13 +425,26 @@ Kiểm tra **trạng thái instance**, không phải sự kiện.
 | `title` | `{ "type": "title", "title": "<gold>Chiến thắng!", "subtitle": "<gray>Kho báu đã mở", "all": true }` | Hiện title. `fade_in` 10, `stay` 70, `fade_out` 20 (tick). |
 | `play_sound` | `{ "type": "play_sound", "sound": "minecraft:entity.wither.spawn", "volume": 1, "pitch": 1, "all": true }` | Phát âm thanh tại người nghe. |
 | `teleport` | `{ "type": "teleport", "x": 120.5, "y": 64, "z": -40.5, "yaw": 90, "all": true }` | Dịch chuyển trong world instance. |
-| `give_item` | `{ "type": "give_item", "item": "crypt_relic", "amount": 1 }` | Trao item. Id tuỳ chỉnh trước, rồi tới vật liệu vanilla. Túi đầy thì rơi xuống đất (chỉ người nhận thấy). |
+| `give_item` | `{ "type": "give_item", "item": "crypt_relic", "amount": 1 }` | Trao item. Item vanilla phải có tiền tố `minecraft:` (`minecraft:diamond`), item tuỳ chỉnh dùng id trần. Túi đầy thì rơi xuống đất (chỉ người nhận thấy). |
 | `spawn_mob` | `{ "type": "spawn_mob", "mob": "skeleton_guard", "count": 4, "x": 130, "y": 64, "z": -50, "spread": 4 }` | Sinh mob, rải ngẫu nhiên trong bán kính `spread`. Id tuỳ chỉnh trước, rồi vanilla. `tag` (tuỳ chọn) để theo dõi mob, xem [Mob được theo dõi](#mob-được-theo-dõi). |
-| `set_block` | `{ "type": "set_block", "x": 120, "y": 64, "z": -40, "block": "minecraft:oak_door[open=true]" }` | Đặt block, hỗ trợ block state. Sai cú pháp → lỗi khi nạp. |
+| `set_block` | `{ "type": "set_block", "x": 120, "y": 64, "z": -40, "block": "minecraft:oak_door[open=true]" }` | Đặt block. Vanilla: `minecraft:<block>` (hỗ trợ block state, vd. `minecraft:oak_door[open=true]`); block tuỳ chỉnh: id trần. Block tuỳ chỉnh đang ở vị trí đó được gỡ đúng cách trước. Sai cú pháp → lỗi khi nạp. |
+| `fill_block` | `{ "type": "fill_block", "from": [118, 64, -42], "to": [122, 67, -42], "block": "minecraft:air", "replace": "minecraft:iron_bars" }` | Lấp đầy khối hộp giữa hai góc bằng `block` (cùng cách viết id như `set_block`, hỗ trợ block tuỳ chỉnh). `replace` tuỳ chọn: chỉ thay block có id đó (`minecraft:iron_bars` hoặc id tuỳ chỉnh). Quá 32768 block → cảnh báo khi nạp. |
 | `set_var` | `{ "type": "set_var", "var": "gate_open", "value": true }` | Gán biến. |
-| `add_var` | `{ "type": "add_var", "var": "keys", "amount": 1 }` | Cộng vào biến số (chưa có = 0). Dùng `amount` âm để trừ. |
+| `add_var` | `{ "type": "add_var", "var": "keys", "amount": 1 }` | Cộng vào biến số (chưa có = 0). Dùng `amount` âm để trừ. `"player": true` → biến riêng của người gây sự kiện (cả `set_var`). |
+| `take_item` | `{ "type": "take_item", "item": "crypt_key", "amount": 1 }` | Lấy item khỏi túi (tối đa `amount`, có bao nhiêu lấy bấy nhiêu). Kết hợp `has_item` để kiểm tra trước. |
+| `effect` | `{ "type": "effect", "effect": "slowness", "duration": 100, "amplifier": 1, "all": true }` | Thêm hiệu ứng (`duration` tính bằng tick). `"clear": true` → xoá hiệu ứng đó. |
+| `particles` | `{ "type": "particles", "particle": "flame", "x": 120.5, "y": 65, "z": -40.5, "count": 30, "spread": 0.5, "speed": 0 }` | Hiện hạt tại vị trí. Hạt cần dữ liệu thêm (dust, block...) chưa hỗ trợ. |
+| `countdown` | `{ "type": "countdown", "id": "collapse", "ticks": 1200, "title": "<red>Sụp đổ sau {time}", "color": "red" }` | Hiện thanh boss đếm ngược `ticks` tick cho mọi người trong instance (`{time}` hiển thị theo giây); hết giờ bắn sự kiện `countdown_ended` (subject = `id`). Chạy lại cùng `id` → bắt đầu lại. Không giữ qua restart server. |
+| `stop_countdown` | `{ "type": "stop_countdown", "id": "collapse" }` | Huỷ đếm ngược, không bắn sự kiện. |
+| `choose` | `{ "type": "choose", "options": [ { "weight": 3, "actions": [ ... ] }, { "weight": 1, "actions": [ ... ] } ] }` | Chạy ngẫu nhiên 1 lựa chọn theo `weight` (mặc định 1). |
+| `command` | `{ "type": "command", "command": "effect give {player} glowing 5", "as_player": false }` | Chạy lệnh từ console (hoặc với tư cách người chơi nếu `as_player`). Hỗ trợ placeholder như `message`. |
+| `call` | `{ "type": "call", "function": "open_gate" }` | Chạy danh sách action trong `functions` của file dungeon. |
+
 | `signal` | `{ "type": "signal", "id": "gate_open", "amount": 1, "data": { "gate": "north" } }` | Bắn sự kiện tự đặt. Trigger khác bắt bằng `"on": { "event": "gate_open" }`; quest nhóm có objective `signal` cùng id cũng tiến `amount`. |
 | `start_quest` | `{ "type": "start_quest", "quest": "crypt_epilogue" }` | Giao quest cho nhóm quest của instance, mọi thành viên được nhận thưởng. Cần feature `quests`. |
+| `create_region` | `{ "type": "create_region", "id": "arena", "shapes": [ { "from": [100, 60, -50], "to": [120, 80, -30] }, { "from": [120, 60, -40], "to": [140, 70, -35] } ], "priority": 10, "flags": { "pvp": "deny" } }` | Tạo region WorldGuard từ một hoặc nhiều hình hộp (`shapes`); nhiều hình → region nhóm, flag dùng chung. `replace` (mặc định `true`) thay toàn bộ hình cũ; `false` → thêm hình vào region đã có. `priority`, `flags` tuỳ chọn. Flag/giá trị sai → cảnh báo khi nạp. |
+| `region_flag` | `{ "type": "region_flag", "region": "arena", "flag": "block-break", "value": "allow", "group": "members" }` | Đặt flag cho region. Bỏ `region` → `__global__`. Bỏ `value` → xoá flag. `group` (`all`, `members`, `owners`, `non_members`, `non_owners`, `none`) mặc định `all`. |
+| `remove_region` | `{ "type": "remove_region", "id": "arena" }` | Xoá region (kể cả mọi hình con). |
 | `sequence` | xem dưới | Chạy action lần lượt, có thể chờ. |
 | `delay` | `{ "type": "delay", "ticks": 60 }` | Chỉ có tác dụng trong `sequence`. Tính bằng tick (20 tick = 1 giây). |
 | `repeat` | xem dưới | Lặp lại action. |
@@ -504,9 +530,11 @@ Muốn giữ 1 nhóm mob với số lượng cố định (không quan tâm từ
   "actions": [ { "type": "spawn_mob", "mob": "minecraft:zombie", "x": 0, "y": 70, "z": 0, "spread": 4, "tag": "patrol" } ] }
 ```
 
-Text trong `message` và `title` hỗ trợ:
+Text trong `message`, `title`, `countdown` và `command` hỗ trợ:
 - `{player}` — tên người gây sự kiện.
 - `{var.<tên>}` — giá trị biến (số nguyên hiện không có `.0`).
+- `{pvar.<tên>}` — biến riêng của người gây sự kiện.
+- `{time}` — chỉ trong `countdown`: thời gian còn lại.
 
 ### Biến
 
@@ -515,6 +543,205 @@ Biến là giá trị **số, chuỗi hoặc true/false** lưu theo từng insta
 - Khai báo giá trị ban đầu ở `variables` của file dungeon. Instance cũ nhận thêm biến mới khai báo khi được nạp lại.
 - Ghi: `set_var`, `add_var`, và `once` của trigger.
 - Đọc: condition `var`, `{var.<tên>}` trong text.
+- **Biến riêng người chơi**: thêm `"player": true` vào `set_var` / `add_var` / condition `var`, đọc bằng `{pvar.<tên>}`. Mỗi người có giá trị riêng (lưu dưới tên `player.<uuid>.<tên>`). Không có người gây sự kiện → dùng biến chung.
+
+### Function
+
+Danh sách action dùng lại nhiều nơi, khai báo ở `functions` của file dungeon và gọi bằng action `call`:
+```json
+"functions": {
+  "open_gate": [
+    { "type": "fill_block", "from": [118, 64, -42], "to": [122, 67, -42], "block": "minecraft:air" },
+    { "type": "play_sound", "sound": "minecraft:block.iron_door.open", "all": true }
+  ]
+}
+```
+Function nhận người gây sự kiện của nơi gọi. Gọi function không tồn tại hoặc function tự gọi lại chính nó (trực tiếp hay qua function khác) → cảnh báo khi nạp; khi chạy, lồng quá 16 tầng thì dừng.
+
+### Ví dụ đầy đủ
+
+Các ví dụ dưới đây là phần `triggers` (và `functions` / `variables` nếu cần) của 1 file dungeon. Toạ độ chỉ để minh hoạ.
+
+#### Cửa khoá bằng chìa
+
+Người chơi cầm `crypt_key` chuột phải vào cửa sắt thì cửa mở và chìa bị lấy đi; không có chìa thì nhận thông báo. `cooldown` chặn spam tin nhắn khi bấm liên tục. Hành động mở cửa đặt trong function để tái sử dụng (vd. lệnh admin, hoặc mở cửa khi boss chết).
+
+```json
+"functions": {
+  "open_crypt_gate": [
+    { "type": "fill_block", "from": [118, 64, -42], "to": [122, 67, -42], "block": "minecraft:air", "replace": "minecraft:iron_bars" },
+    { "type": "particles", "particle": "minecraft:cloud", "x": 120.5, "y": 65.5, "z": -41.5, "count": 40, "spread": 1.5 },
+    { "type": "play_sound", "sound": "minecraft:block.iron_door.open", "all": true },
+    { "type": "set_var", "var": "gate_open", "value": true }
+  ]
+},
+"variables": { "gate_open": false },
+"features": {
+  "triggers": { "triggers": [
+    { "on": { "event": "block_interacted", "subject": "minecraft:iron_bars", "region": "crypt_gate" },
+      "cooldown": 40,
+      "conditions": [ { "type": "var", "var": "gate_open", "value": false } ],
+      "actions": [
+        { "type": "if",
+          "conditions": [ { "type": "has_item", "item": "crypt_key" } ],
+          "then": [
+            { "type": "take_item", "item": "crypt_key" },
+            { "type": "message", "text": "<green>{player} đã mở cổng hầm mộ.", "all": true },
+            { "type": "call", "function": "open_crypt_gate" } ],
+          "else": [ { "type": "title", "subtitle": "<gray>Cần <gold>Chìa hầm mộ</gold> để mở" } ] }
+      ] }
+  ] }
+}
+```
+
+- `"region": "crypt_gate"` ở matcher: chỉ cửa sắt **trong** region này mới tính, các song sắt khác trong map không kích hoạt.
+- `has_item` / `take_item` dùng id trần cho item tuỳ chỉnh; item vanilla viết `minecraft:...`.
+- `fill_block` với `replace` chỉ xoá song sắt, tường đá xung quanh trong khối hộp giữ nguyên.
+
+#### Câu đố đặt khối lên bệ thờ
+
+Đặt đủ 4 khối vàng lên bệ (region `altar`). Mỗi lần đặt cộng biến; `var_changed` bắt đúng lúc biến chạm 4 để mở thưởng, không cần lặp lại điều kiện ở mọi trigger. Phá khối trên bệ thì trừ lại.
+
+```json
+"variables": { "altar_gold": 0 },
+"features": {
+  "triggers": { "triggers": [
+    { "on": { "event": "block_placed", "subject": "minecraft:gold_block", "region": "altar" },
+      "actions": [
+        { "type": "add_var", "var": "altar_gold", "amount": 1 },
+        { "type": "particles", "particle": "minecraft:end_rod", "x": 200.5, "y": 66, "z": 40.5, "count": 15, "spread": 0.3 },
+        { "type": "message", "text": "<yellow>Bệ thờ: {var.altar_gold}/4", "all": true } ] },
+    { "on": { "event": "block_broken", "subject": "minecraft:gold_block", "region": "altar" },
+      "actions": [ { "type": "add_var", "var": "altar_gold", "amount": -1 } ] },
+    { "on": { "event": "var_changed", "subject": "altar_gold", "data": { "value": 4 } },
+      "once": true,
+      "actions": [
+        { "type": "title", "title": "<gold>Bệ thờ thức tỉnh", "all": true },
+        { "type": "set_block", "x": 200, "y": 65, "z": 44, "block": "ancient_reliquary" },
+        { "type": "give_item", "item": "altar_blessing", "all": true } ] }
+  ] }
+}
+```
+
+- `set_block` đặt block **tuỳ chỉnh** `ancient_reliquary` (id trần) — block vanilla thì viết `minecraft:...`.
+- `once` ở trigger cuối: phá rồi đặt lại khối thứ 4 không trao thưởng lần nữa.
+
+#### Câu đố 3 cần gạt
+
+Cả 3 cần gạt phải ở trạng thái bật cùng lúc. `powered` trong `data` cho biết cần gạt vừa bật hay tắt, nên mỗi cần gạt cần 2 trigger (bật → `true`, tắt → `false`). Kiểm tra đáp án đặt trong function để cả 3 cần gạt dùng chung.
+
+```json
+"variables": { "lever_a": false, "lever_b": false, "lever_c": false },
+"functions": {
+  "check_levers": [
+    { "type": "if",
+      "conditions": [
+        { "type": "var", "var": "lever_a", "value": true },
+        { "type": "var", "var": "lever_b", "value": true },
+        { "type": "var", "var": "lever_c", "value": true } ],
+      "then": [ { "type": "signal", "id": "levers_solved" } ] }
+  ]
+},
+"features": {
+  "triggers": { "triggers": [
+    { "on": { "event": "redstone_activated", "data": { "x": 50, "y": 64, "z": 10, "powered": true } },
+      "actions": [ { "type": "set_var", "var": "lever_a", "value": true }, { "type": "call", "function": "check_levers" } ] },
+    { "on": { "event": "redstone_activated", "data": { "x": 50, "y": 64, "z": 10, "powered": false } },
+      "actions": [ { "type": "set_var", "var": "lever_a", "value": false } ] },
+    { "on": { "event": "redstone_activated", "data": { "x": 54, "y": 64, "z": 10, "powered": true } },
+      "actions": [ { "type": "set_var", "var": "lever_b", "value": true }, { "type": "call", "function": "check_levers" } ] },
+    { "on": { "event": "redstone_activated", "data": { "x": 54, "y": 64, "z": 10, "powered": false } },
+      "actions": [ { "type": "set_var", "var": "lever_b", "value": false } ] },
+    { "on": { "event": "redstone_activated", "data": { "x": 58, "y": 64, "z": 10, "powered": true } },
+      "actions": [ { "type": "set_var", "var": "lever_c", "value": true }, { "type": "call", "function": "check_levers" } ] },
+    { "on": { "event": "redstone_activated", "data": { "x": 58, "y": 64, "z": 10, "powered": false } },
+      "actions": [ { "type": "set_var", "var": "lever_c", "value": false } ] },
+    { "on": "levers_solved", "once": true,
+      "actions": [ { "type": "fill_block", "from": [52, 64, 14], "to": [56, 66, 14], "block": "minecraft:air" } ] }
+  ] }
+}
+```
+
+Tấm áp lực và nút bấm luôn có `powered: true`, nên chỉ cần 1 trigger cho mỗi cái.
+
+#### Đấu trường boss: nhốt người chơi và đếm ngược
+
+Khi cả đội vào đấu trường: tạo region nhiều hình (sàn chính + ban công) chặn rời khỏi và cấm phá block, rồi bắt đầu đếm ngược 3 phút. Trong lúc đánh, cứ 10 giây boss phun lửa linh hồn làm chậm cả đội. Hết giờ thì thất bại; boss chết trước thì dừng đếm ngược và gỡ region.
+
+```json
+"features": {
+  "triggers": { "triggers": [
+    { "on": { "event": "region_entered", "subject": "arena_door" },
+      "once": true,
+      "conditions": [ { "type": "in_region", "region": "arena_door", "all": true } ],
+      "actions": [
+        { "type": "create_region", "id": "arena_lock",
+          "shapes": [
+            { "from": [300, 60, 300], "to": [340, 85, 340] },
+            { "from": [340, 70, 310], "to": [348, 78, 330] } ],
+          "priority": 20,
+          "flags": { "exit": "deny", "block-break": "deny" } },
+        { "type": "countdown", "id": "boss_enrage", "ticks": 3600, "title": "<red>Boss nổi điên sau <white>{time}", "color": "red" },
+        { "type": "spawn_mob", "mob": "hellknight", "x": 320, "y": 62, "z": 320 },
+        { "type": "set_var", "var": "fight_active", "value": true } ] },
+
+    { "on": "timer", "interval": 200,
+      "conditions": [ { "type": "var", "var": "fight_active", "value": true } ],
+      "actions": [
+        { "type": "particles", "particle": "minecraft:soul_fire_flame", "x": 320.5, "y": 61, "z": 320.5, "count": 80, "spread": 4 },
+        { "type": "effect", "effect": "minecraft:slowness", "duration": 60, "amplifier": 1, "all": true } ] },
+
+    { "on": { "event": "countdown_ended", "subject": "boss_enrage" },
+      "actions": [
+        { "type": "title", "title": "<dark_red>Thất bại", "subtitle": "<gray>Boss đã nổi điên", "all": true },
+        { "type": "end", "reason": "hết thời gian đánh boss" } ] },
+
+    { "on": { "event": "mob_killed", "subject": "hellknight" },
+      "once": true,
+      "actions": [
+        { "type": "stop_countdown", "id": "boss_enrage" },
+        { "type": "set_var", "var": "fight_active", "value": false },
+        { "type": "remove_region", "id": "arena_lock" },
+        { "type": "effect", "effect": "minecraft:regeneration", "duration": 200, "amplifier": 1, "all": true } ] },
+
+    { "on": { "event": "player_died" },
+      "conditions": [ { "type": "alive_count", "value": 0 } ],
+      "actions": [ { "type": "end", "reason": "cả đội đã gục" } ] }
+  ] }
+}
+```
+
+- `in_region` với `all: true`: chỉ bắt đầu khi **cả đội** đã đứng ở cửa, không ai bị nhốt ngoài.
+- `create_region` nhiều `shapes` gộp thành 1 region, flag áp dụng chung cho cả hai hình.
+- `interval` tính bằng tick (200 = 10 giây); biến `fight_active` tắt timer khi trận kết thúc.
+- `countdown` hiện thanh boss cho mọi người trong instance; `{time}` hiển thị theo giây.
+
+#### Đền ban phước theo từng người
+
+Mỗi người chỉ được cầu nguyện 3 lần. Biến `"player": true` đếm riêng từng người; `cooldown` chống bấm liên tục; `choose` chọn ngẫu nhiên phần thưởng, `random` thêm cơ hội hiếm.
+
+```json
+{ "on": { "event": "block_interacted", "subject": "minecraft:lodestone", "region": "shrine" },
+  "cooldown": 20,
+  "actions": [
+    { "type": "if",
+      "conditions": [ { "type": "var", "var": "prayers", "player": true, "value": { "min": 3 } } ],
+      "then": [ { "type": "message", "text": "<gray>Đền thờ không đáp lại bạn nữa." } ],
+      "else": [
+        { "type": "add_var", "var": "prayers", "player": true },
+        { "type": "message", "text": "<aqua>Lời cầu nguyện thứ {pvar.prayers}/3..." },
+        { "type": "choose", "options": [
+          { "weight": 3, "actions": [ { "type": "effect", "effect": "minecraft:regeneration", "duration": 200, "amplifier": 1 } ] },
+          { "weight": 2, "actions": [ { "type": "effect", "effect": "minecraft:strength", "duration": 600 } ] },
+          { "weight": 1, "actions": [ { "type": "give_item", "item": "minecraft:golden_apple" } ] } ] },
+        { "type": "if",
+          "conditions": [ { "type": "random", "chance": 0.05 }, { "type": "player_health", "value": { "max": 50 } } ],
+          "then": [ { "type": "give_item", "item": "shrine_relic" }, { "type": "message", "text": "<gold>{player} nhận được thánh tích!", "all": true } ] } ] }
+  ] }
+```
+
+- Biến riêng người chơi chưa có giá trị → `{ "min": 3 }` sai, nên lần đầu luôn vào nhánh `else`.
+- Điều kiện `random` + `player_health`: chỉ người đang dưới 50% máu mới có 5% cơ hội nhận thánh tích.
 
 ## Kiểm tra khi nạp
 

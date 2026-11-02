@@ -12,6 +12,13 @@ import com.roguesmp.dungeon.feature.QuestsFeature;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.utils.WorldPos;
+import com.destroystokyo.paper.event.player.PlayerSetSpawnEvent;
+import com.roguesmp.region.ServerRegionManager;
+import com.roguesmp.region.SmpRegionFlags;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.roguesmp.utils.ItemStackUtils;
+import com.roguesmp.block.BlockRef;
+import com.roguesmp.utils.ItemRef;
 import com.roguesmp.world.Hub;
 import io.papermc.paper.event.player.AsyncPlayerSpawnLocationEvent;
 import com.roguesmp.entity.BaseEntity;
@@ -46,14 +53,20 @@ import java.util.Map;
 import java.util.Set;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.Event;
+import org.bukkit.Tag;
+import org.bukkit.block.data.type.Switch;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.AnaloguePowerable;
+import org.bukkit.block.data.Powerable;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import com.roguesmp.constant.Keys;
 import com.roguesmp.block.event.SmpBlockPlaceEvent;
 import com.roguesmp.utils.Utils;
@@ -182,8 +195,28 @@ public class DungeonListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onInteract(PlayerInteractEvent event) {
         Block block = event.getClickedBlock();
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() != EquipmentSlot.HAND || block == null) return;
+        if (block == null) return;
+        if (event.getAction() == Action.PHYSICAL) {
+            if (isPressurePlate(block) && !isPowered(block.getBlockData())) {
+                fire(block.getWorld(), new DungeonEvent.RedstoneActivated(event.getPlayer(), block, true));
+            }
+            return;
+        }
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() != EquipmentSlot.HAND) return;
         fire(block.getWorld(), new DungeonEvent.BlockInteracted(event.getPlayer(), block, event));
+        if (event.useInteractedBlock() == Event.Result.DENY || !(block.getBlockData() instanceof Switch button)) return;
+        boolean lever = block.getType() == Material.LEVER;
+        if (!lever && button.isPowered()) return;
+        fire(block.getWorld(), new DungeonEvent.RedstoneActivated(event.getPlayer(), block, !lever || !button.isPowered()));
+    }
+
+    private static boolean isPowered(org.bukkit.block.data.BlockData data) {
+        if (data instanceof AnaloguePowerable analogue) return analogue.getPower() > 0;
+        return data instanceof Powerable powerable && powerable.isPowered();
+    }
+
+    private static boolean isPressurePlate(Block block) {
+        return Tag.PRESSURE_PLATES.isTagged(block.getType()) || block.getType() == Material.TRIPWIRE;
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -200,11 +233,28 @@ public class DungeonListener implements Listener {
         fire(block.getWorld(), new DungeonEvent.BlockBroken(event.getPlayer(), block, event));
     }
 
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockPlace(BlockPlaceEvent event) {
+        Block block = event.getBlockPlaced();
+        if (isCustomPlacement(event)) return;
+        fire(block.getWorld(), new DungeonEvent.BlockPlaced(event.getPlayer(), block, BlockRef.VANILLA_PREFIX + block.getType().getKey().getKey(), event));
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onCustomBlockPlace(SmpBlockPlaceEvent event) {
+        Block block = event.getTarget();
+        fire(block.getWorld(), new DungeonEvent.BlockPlaced(event.getPlayer(), block, event.getBlock().getId(), event));
+    }
+
+    private static boolean isCustomPlacement(BlockPlaceEvent event) {
+        return event.getBlockPlaced().getType() == Material.BARRIER && ItemStackUtils.getBaseId(event.getItemInHand()) != null;
+    }
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPickup(EntityPickupItemEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         ItemStack item = event.getItem().getItemStack();
-        String itemId = item.getPersistentDataContainer().getOrDefault(Keys.ITEM_ID, PersistentDataType.STRING, item.getType().getKey().getKey());
+        String itemId = ItemRef.idOf(item);
         fire(player.getWorld(), new DungeonEvent.ItemPickedUp(player, item, itemId, item.getAmount()));
     }
 
@@ -258,7 +308,66 @@ public class DungeonListener implements Listener {
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
         World world = event.getPlayer().getWorld();
-        if (manager.getByWorld(world) != null) event.setRespawnLocation(world.getSpawnLocation());
+        DungeonInstance instance = manager.getByWorld(world);
+        if (instance == null) return;
+
+        Location bed = bedSpawn(event.getPlayer(), instance, world);
+        event.setRespawnLocation(bed != null ? bed : world.getSpawnLocation());
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onSetSpawn(PlayerSetSpawnEvent event) {
+        Player player = event.getPlayer();
+        DungeonInstance instance = manager.getByWorld(player.getWorld());
+        if (instance == null || event.getCause() != PlayerSetSpawnEvent.Cause.BED || event.getLocation() == null) return;
+
+        event.setCancelled(true);
+        Location bed = event.getLocation();
+        if (!allowsBedSpawn(bed)) {
+            player.sendActionBar(Utils.fromString("<red>Không thể đặt điểm hồi sinh ở đây"));
+            return;
+        }
+        instance.setBedSpawn(player.getUniqueId(), BlockVector3.at(bed.getBlockX(), bed.getBlockY(), bed.getBlockZ()));
+        manager.save(instance);
+        player.sendActionBar(Utils.fromString("<green>Đã đặt điểm hồi sinh trong hầm ngục"));
+    }
+
+    private @Nullable Location bedSpawn(Player player, DungeonInstance instance, World world) {
+        BlockVector3 position = instance.bedSpawn(player.getUniqueId());
+        if (position == null) return null;
+
+        Block bed = world.getBlockAt(position.x(), position.y(), position.z());
+        if (!allowsBedSpawn(bed.getLocation())) return null;
+        if (!Tag.BEDS.isTagged(bed.getType())) {
+            instance.setBedSpawn(player.getUniqueId(), null);
+            manager.save(instance);
+            player.sendMessage(Utils.fromString("<red>Giường của bạn trong hầm ngục đã bị phá"));
+            return null;
+        }
+        Location spot = standingSpot(bed);
+        if (spot == null) player.sendMessage(Utils.fromString("<red>Giường của bạn trong hầm ngục đang bị chặn"));
+        return spot;
+    }
+
+    private static @Nullable Location standingSpot(Block bed) {
+        if (fitsPlayer(bed.getRelative(BlockFace.UP))) return bed.getLocation().add(0.5, 0.5625, 0.5);
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                for (int dy = 0; dy >= -1; dy--) {
+                    Block feet = bed.getRelative(dx, dy, dz);
+                    if (fitsPlayer(feet) && feet.getRelative(BlockFace.DOWN).isSolid()) return feet.getLocation().add(0.5, 0, 0.5);
+                }
+            }
+        }
+        return null;
+    }
+
+    private static boolean fitsPlayer(Block feet) {
+        return feet.isPassable() && !feet.isLiquid() && feet.getRelative(BlockFace.UP).isPassable();
+    }
+
+    private static boolean allowsBedSpawn(Location location) {
+        return ServerRegionManager.getInstance().regionsAt(location).testState(null, SmpRegionFlags.BED_SPAWN);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

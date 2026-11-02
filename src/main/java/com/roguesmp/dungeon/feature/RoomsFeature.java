@@ -221,12 +221,12 @@ public record RoomsFeature(List<Pool> pools, int minimumRooms, int maxChoices) i
     @Override
     public void onEvent(FeatureContext<State> context, DungeonEvent event) {
         if (event instanceof DungeonEvent.BlockInteracted interacted) {
-            if (interacted.block().getState() instanceof Vault) {
+            if (interacted.block().getState(false) instanceof Vault) {
                 interacted.event().setCancelled(true);
                 openDoor(context, interacted.player(), interacted.block());
                 return;
             }
-            if (interacted.block().getState() instanceof TrialSpawner) {
+            if (interacted.block().getState(false) instanceof TrialSpawner) {
                 interacted.event().setCancelled(true);
                 openBossTrigger(context, interacted.player(), interacted.block());
                 return;
@@ -328,7 +328,7 @@ public record RoomsFeature(List<Pool> pools, int minimumRooms, int maxChoices) i
         for (int i = 0; i < objectives.size(); i++) {
             RoomObjective objective = objectives.get(i);
             int done = state.progress(i);
-            if (done >= objective.count() || !objective.on().matches(event) || !DungeonCondition.all(objective.conditions(), context)) continue;
+            if (done >= objective.count() || !objective.on().matches(event) || !DungeonCondition.all(objective.conditions(), context, event.player())) continue;
 
             int now = Math.min(objective.count(), done + Math.max(1, event.amount()));
             state.progress.put(String.valueOf(i), now);

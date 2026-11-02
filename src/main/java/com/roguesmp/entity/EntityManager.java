@@ -48,6 +48,8 @@ public class EntityManager {
             Bukkit.getMobGoals().removeGoal(evoker, VanillaGoal.EVOKER_SUMMON_SPELL); // Evoker won't summon vexes.
         }
         if (entity instanceof PiglinAbstract piglinAbstract) CombatPiglinSensor.applyTo(piglinAbstract);
+        if (entity instanceof Hoglin hoglin) hoglin.setImmuneToZombification(true);
+        if (entity instanceof Zombie zombie) zombie.stopDrowning();
 
         String entityId = entity.getPersistentDataContainer().get(Keys.MOB_ID, PersistentDataType.STRING);
         if (entityId == null) return;

@@ -9,6 +9,7 @@ import com.roguesmp.entity.component.EntityComponentKey;
 import com.roguesmp.entity.component.impl.DisplayNameComponent;
 import com.roguesmp.registry.Registries;
 import org.bukkit.Location;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.entity.*;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -77,6 +78,12 @@ public class BaseEntity {
         EntityManager.getInstance().register(smpEntity);
 
         return smpEntity;
+    }
+
+    public BoundingBox boundingBoxAt(Location location) {
+        Entity entity = location.getWorld().createEntity(location, this.getEntityType().getEntityClass());
+        processEntity(entity);
+        return entity.getBoundingBox();
     }
 
     public EntitySnapshot spawnOnlyEquipmentSnapshot(Location location) {

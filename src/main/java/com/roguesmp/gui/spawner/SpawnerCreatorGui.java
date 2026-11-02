@@ -5,6 +5,7 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.entity.EntityManager;
 import com.roguesmp.spawner.Spawner;
+import com.roguesmp.spawner.SpawnerSystem;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.spawner.behavior.BehaviorData;
 import com.roguesmp.spawner.behavior.BehaviorFactory;
@@ -169,6 +170,7 @@ public class SpawnerCreatorGui {
 
         if (originalId != null && !originalId.equals(id)) Registries.SPAWNER.removeAndDeleteFiles(RogueSmpCore.getInstance(), originalId);
         Registries.SPAWNER.registerAndSave(RogueSmpCore.getInstance(), id, spawner);
+        SpawnerSystem.getInstance().refreshTemplate(originalId != null ? originalId : id, spawner);
 
         player.sendMessage(Utils.fromString("<green>Đã lưu spawner " + id + "."));
         new SpawnerBrowserGui(player).showInventory(player);

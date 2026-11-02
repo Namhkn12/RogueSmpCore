@@ -44,6 +44,8 @@ public class Keys {
 
     public static final NamespacedKey SPAWNER_TID = new NamespacedKey(DUNGEON_NAMESPACE, "spawner_tid");
 
+    public static final NamespacedKey SPAWNER_OWNER = new NamespacedKey(DUNGEON_NAMESPACE, "spawner_owner");
+
     public static final NamespacedKey REWARD_CID = new NamespacedKey(DUNGEON_NAMESPACE, "reward_cid");
 
     public static final NamespacedKey REWARD_CLAIMED = new NamespacedKey(DUNGEON_NAMESPACE, "reward_claimed");
