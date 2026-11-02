@@ -84,7 +84,8 @@ public class EffectManager {
                 while (entryIterator.hasNext()) {
                     var entry = entryIterator.next();
                     UUID uuid = entry.getKey();
-                    Entity entity = Bukkit.getEntity(uuid);
+                    Player onlinePlayer = Bukkit.getPlayer(uuid);
+                    Entity entity = onlinePlayer != null ? onlinePlayer : Bukkit.getEntity(uuid);
                     if (entity instanceof Player player) {
                         // A player on the death screen reads as dead/invalid, but their KEEP/HALVES_ON_DEATH
                         // effects must survive until respawn. Death is handled by onPlayerDeath.
