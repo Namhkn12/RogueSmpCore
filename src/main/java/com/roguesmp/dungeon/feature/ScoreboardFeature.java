@@ -75,8 +75,8 @@ public record ScoreboardFeature(int priority) implements DungeonFeature<NoState>
             TabScoreboardView.Builder builder = TabScoreboardView.builder(viewer, "dungeon_run_scoreboard")
                     .title(ScoreboardDefaults.title())
                     .line(ScoreboardDefaults.divider())
-                    .line(ScoreboardDefaults.regionLine())
-                    .line("<gold>Phó bản: <white>" + name);
+                    .line("<gold>Phó bản: <white>" + name)
+                    .line(ScoreboardDefaults.regionLine());
             FeatureContext<ExpiryFeature.State> expiry = manager.feature(instance, ExpiryFeature.class);
             if (expiry != null) builder.line(TabElement.ticking(20, c -> timeLeftLine(expiry.state())));
             FeatureContext<RoomsFeature.State> rooms = manager.feature(instance, RoomsFeature.class);
@@ -92,6 +92,7 @@ public record ScoreboardFeature(int priority) implements DungeonFeature<NoState>
             }
             return builder
                     .lines(ScoreboardDefaults.playerInfo(viewer))
+                    .lines(ScoreboardDefaults.abilityLines(viewer))
                     .line(ScoreboardDefaults.spacer())
                     .build(tabContext);
         }));
