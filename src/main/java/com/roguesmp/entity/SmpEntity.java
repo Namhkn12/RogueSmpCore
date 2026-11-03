@@ -5,10 +5,13 @@ import com.roguesmp.entity.component.EntityComponent;
 import com.roguesmp.entity.component.EntityComponentKey;
 import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.entity.component.TickingComponent;
+import com.roguesmp.entity.component.impl.DisplayNameComponent;
 import com.roguesmp.entity.component.impl.NameplateComponent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.event.SpellCastEvent;
+import com.roguesmp.utils.Utils;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.*;
 import org.jetbrains.annotations.NotNull;
@@ -142,6 +145,11 @@ public class SmpEntity {
 
     public LivingEntity getEntity() {
         return entity;
+    }
+
+    public Component displayName() {
+        DisplayNameComponent displayName = getComponent(EntityComponentKeys.DISPLAY_NAME);
+        return displayName != null ? Utils.fromString(displayName.name()) : entity.name();
     }
 
     public boolean isInitialized() {
