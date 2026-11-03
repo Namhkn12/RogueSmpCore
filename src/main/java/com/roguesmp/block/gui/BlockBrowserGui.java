@@ -5,9 +5,14 @@ import com.roguesmp.block.BlockVisual;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
+import com.roguesmp.utils.dialog.DialogBuilder;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -18,12 +23,19 @@ import java.util.Map;
 public class BlockBrowserGui extends BaseGui {
 
     private static final int PER_PAGE = 28;
+    private static final int SEARCH_SLOT = 8;
 
     private final Player player;
     private int page;
+    private String searchQuery;
 
     public BlockBrowserGui(Player player) {
         this(player, 0);
+    }
+
+    public BlockBrowserGui(Player player, String query) {
+        this(player, 0);
+        this.searchQuery = query;
     }
 
     public BlockBrowserGui(Player player, int page) {
@@ -40,10 +52,18 @@ public class BlockBrowserGui extends BaseGui {
                 if (r == 0 || r == 5 || c == 0 || c == 8) addButton(r, c, FILLER_BLACK, ClickHandler.noAction());
             }
         }
+        addButton(SEARCH_SLOT, searchButton(), event -> {
+            event.setCancelled(true);
+            if (event.getClick().isShiftClick()) {
+                searchQuery = null;
+                page = 0;
+                setup();
+                return;
+            }
+            openSearchDialog();
+        });
 
-        List<Map.Entry<String, BlockData>> blocks = Registries.BLOCK.getAll().entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .toList();
+        List<Map.Entry<String, BlockData>> blocks = filteredBlocks();
         int pages = Math.max(1, (blocks.size() + PER_PAGE - 1) / PER_PAGE);
         page = Math.min(page, pages - 1);
         int index = page * PER_PAGE;
@@ -70,6 +90,47 @@ public class BlockBrowserGui extends BaseGui {
             setup();
         });
         fillEmpty(FILLER);
+    }
+
+    private List<Map.Entry<String, BlockData>> filteredBlocks() {
+        String query = searchQuery == null || searchQuery.isBlank() ? null : Utils.removeVietnameseTones(searchQuery.toLowerCase().trim());
+        return Registries.BLOCK.getAll().entrySet().stream()
+                .filter(entry -> query == null || matches(entry.getKey(), entry.getValue(), query))
+                .sorted(Map.Entry.comparingByKey())
+                .toList();
+    }
+
+    private static boolean matches(String id, BlockData block, String query) {
+        if (Utils.removeVietnameseTones(id.toLowerCase()).contains(query)) return true;
+        String name = PlainTextComponentSerializer.plainText().serialize(Utils.fromString(block.properties().displayName()));
+        return Utils.removeVietnameseTones(name.toLowerCase()).contains(query);
+    }
+
+    private void openSearchDialog() {
+        Dialog dialog = DialogBuilder.create(Component.text("Tìm kiếm block"))
+                .addTextInput("value", Component.text("Nhập ID hoặc tên block..."), b -> b.initial(searchQuery == null ? "" : searchQuery))
+                .confirmation()
+                .yesButton(Component.text("Tìm kiếm"), null, (response, audience) -> {
+                    searchQuery = response.getText("value");
+                    page = 0;
+                    Utils.runLater(() -> showInventory(player));
+                })
+                .noButton(Component.text("Huỷ"), null, (response, audience) -> Utils.runLater(() -> showInventory(player)))
+                .build();
+
+        player.closeInventory();
+        player.showDialog(dialog);
+    }
+
+    private ItemStack searchButton() {
+        ItemStack item = ItemStack.of(Material.COMPASS);
+        item.setData(DataComponentTypes.ITEM_NAME, Component.text("Tìm kiếm theo ID hoặc tên", NamedTextColor.GOLD));
+        item.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
+                Utils.text("Từ khóa hiện tại: " + (searchQuery == null || searchQuery.isBlank() ? "Trống" : searchQuery), NamedTextColor.YELLOW),
+                Utils.text("Click để đổi từ khóa.", NamedTextColor.GRAY),
+                Utils.text("Shift-Click để xoá bộ lọc.", NamedTextColor.RED)
+        )));
+        return item;
     }
 
     private static ItemStack icon(String id, BlockData block) {

@@ -63,7 +63,7 @@ public class RecipeBrowserGui extends BaseGui {
     }
 
     private final Player player;
-    private final List<CraftingRecipe> allEntries;
+    private List<CraftingRecipe> allEntries;
     private List<CraftingRecipe> filteredEntries;
 
     private TypeFilter typeFilter = TypeFilter.ALL;
@@ -71,18 +71,24 @@ public class RecipeBrowserGui extends BaseGui {
     private int currentPage = 0;
     private int totalPages;
 
+    public RecipeBrowserGui(Player player, String query) {
+        this(player);
+        this.searchQuery = query;
+        updateFilters();
+    }
+
     public RecipeBrowserGui(Player player) {
         super(Component.text("Xem Công Thức"), 6);
         this.player = player;
-
-        this.allEntries = new ArrayList<>(Registries.CRAFTING_RECIPE.getAll().values());
-        allEntries.sort(Comparator.comparing(CraftingRecipe::getId));
         updateFilters();
     }
 
     @Override
     public void setup() {
         clearUi();
+        int keepPage = currentPage;
+        updateFilters();
+        currentPage = Math.max(0, Math.min(keepPage, totalPages - 1));
         for (int i = 0; i < 9; i++) {
             addButton(i, FILLER_BLACK, ClickHandler.noAction());
         }
@@ -162,6 +168,8 @@ public class RecipeBrowserGui extends BaseGui {
     }
 
     private void updateFilters() {
+        this.allEntries = new ArrayList<>(Registries.CRAFTING_RECIPE.getAll().values());
+        allEntries.sort(Comparator.comparing(CraftingRecipe::getId));
         filteredEntries = new ArrayList<>();
         String query = (searchQuery == null || searchQuery.isBlank()) ? null : searchQuery.toLowerCase().trim();
 

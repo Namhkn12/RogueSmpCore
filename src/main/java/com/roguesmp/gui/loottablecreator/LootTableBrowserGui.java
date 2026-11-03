@@ -44,25 +44,31 @@ public class LootTableBrowserGui extends BaseGui {
     private static final int SEARCH_SLOT = 8;
 
     private final Player player;
-    private final List<String> allIds;
+    private List<String> allIds;
     private List<String> filteredIds;
 
     private String searchQuery = null;
     private int currentPage = 0;
     private int totalPages;
 
+    public LootTableBrowserGui(Player player, String query) {
+        this(player);
+        this.searchQuery = query;
+        updateFilters();
+    }
+
     public LootTableBrowserGui(Player player) {
         super(Component.text("Loot Table Browser", NamedTextColor.DARK_GRAY), 6);
         this.player = player;
-
-        this.allIds = new ArrayList<>(Registries.LOOT_TABLE.getAll().keySet());
-        Collections.sort(allIds);
         updateFilters();
     }
 
     @Override
     public void setup() {
         clearUi();
+        int keepPage = currentPage;
+        updateFilters();
+        currentPage = Math.max(0, Math.min(keepPage, totalPages - 1));
         for (int i = 0; i < 9; i++) {
             addButton(i, FILLER_BLACK, ClickHandler.noAction());
         }
@@ -166,6 +172,8 @@ public class LootTableBrowserGui extends BaseGui {
     }
 
     private void updateFilters() {
+        this.allIds = new ArrayList<>(Registries.LOOT_TABLE.getAll().keySet());
+        Collections.sort(allIds);
         if (searchQuery == null || searchQuery.isBlank()) {
             this.filteredIds = new ArrayList<>(allIds);
         } else {
