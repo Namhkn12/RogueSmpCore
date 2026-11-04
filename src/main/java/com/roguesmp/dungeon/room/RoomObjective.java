@@ -11,7 +11,7 @@ public record RoomObjective(EventMatcher on, List<DungeonCondition> conditions, 
 
     public static final Codec<RoomObjective> CODEC = Codec.composite(
             EventMatcher.CODEC.fieldOf("on").forGetter(RoomObjective::on),
-            Codec.listOf(DungeonCondition.CODEC).optionalFieldOf("conditions", List.of()).forGetter(RoomObjective::conditions),
+            DungeonCondition.LIST_CODEC.optionalFieldOf("if", List.of(), "conditions").forGetter(RoomObjective::conditions),
             Codec.INT.optionalFieldOf("count", 1).forGetter(RoomObjective::count),
             Codec.INT.optionalFieldOf("score", 0).forGetter(RoomObjective::score),
             Codec.BOOLEAN.optionalFieldOf("ends_dungeon", false).forGetter(RoomObjective::endsDungeon),

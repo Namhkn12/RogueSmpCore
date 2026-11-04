@@ -161,11 +161,11 @@ public final class DungeonManager {
                     }
                     instances.put(instance.id(), instance);
                     dispatch(instance, DungeonFeature::onStart);
-                    return persist(instance).thenCompose(saved -> {
+                    return persist(instance).thenCompose(saved -> AsyncUtils.onMainThread(() -> {
                         if (!saved) return discardUnsaved(instance);
                         fire(instance, new DungeonEvent.Started());
                         return CompletableFuture.completedFuture(instance);
-                    });
+                    }));
                 }))
                 .whenComplete((created, error) -> creating.remove(pendingKey));
     }
@@ -311,6 +311,7 @@ public final class DungeonManager {
         if (!instances.containsKey(instance.id()) || !ending.add(instance.id())) return CompletableFuture.completedFuture(null);
 
         dispatchAll(instance, DungeonFeature::onEnd);
+        instance.countdowns().stopAll();
         invites.remove(instance.id());
         World world = worldOf(instance);
         if (world != null) world.getPlayers().forEach(this::leave);

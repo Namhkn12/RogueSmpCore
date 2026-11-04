@@ -12,10 +12,12 @@ Một lõi nhỏ quản lý instance; mọi luật chơi là **feature** cấu h
 | `DungeonInstance` | 1 lượt chơi: thành viên, biến, state của từng feature. Lưu ở `dungeon/instances.db`. |
 | `DungeonManager` | Singleton lõi: tạo/vào/kết thúc instance, mời/rời, phát sự kiện, tick mỗi giây, lưu. |
 | `DungeonWorldManager` | Sao chép Polar template thành world `dungeoninstance:*`, load/unload/xoá. |
-| `DungeonListener` | Đổi sự kiện Bukkit thành `DungeonEvent`. |
+| `DungeonListener` | Việc không phải sự kiện script: điểm spawn khi đăng nhập, giường, chặn cổng dịch chuyển, theo dõi mob, unload world. |
+| `BukkitEventAdapter` | Đổi 1 sự kiện Bukkit thành 1 hoặc nhiều `DungeonEvent` và khai báo id, khoá `data`, có huỷ được không (registry `DUNGEON_BUKKIT_EVENT`, đăng ký trong `BukkitEventAdapters`). Adapter `custom(...).always()` sinh record có kiểu cho feature dùng; adapter `of(...)` chỉ cho script, gói thành `DungeonEvent.External`. `BukkitEventAdapters.listen` lắng nghe adapter `always` và adapter mà dungeon nào đó dùng. |
 | `DungeonFeature<S>` | Điểm mở rộng: 1 luật chơi + state `S` theo instance. |
 | `DungeonEvent` | Sealed interface; con đường duy nhất để feature nhận sự kiện. |
-| `script/` | `EventMatcher`, `ValuePredicate`, `DataValue`, `DungeonCondition`, `DungeonValidation`. |
+| `script/` | `EventMatcher`, `ValuePredicate`, `DataValue`, `DungeonCondition`, `DungeonValidation`, `ScriptContext`, `ScriptFunction`, `ScriptCountdowns` (thanh đếm ngược của 1 run, nằm trên `DungeonInstance`, không lưu). |
+| `script/expr/` | Biểu thức kiểu Molang: `Expression`, `Statements` (lệnh gán), `ScriptText` (text có `{...}`), `ScriptValue` (hằng hoặc biểu thức), `ScriptNumber` (trường số: số hoặc biểu thức), `DungeonQueries` (registry `DUNGEON_QUERY`). |
 | `action/` | `DungeonAction` dùng bởi trigger. |
 | `room/` | Định nghĩa phòng, objective, effect, schematic. |
 | `build/` | `/dungeonbuild` và rương thưởng. |
@@ -57,13 +59,18 @@ Thêm feature: implement, khai báo `CODEC`, đăng ký trong `DungeonFeatures`.
 
 ## Script
 
-- `EventMatcher` khớp `id` + `subject` + `data` của sự kiện bằng `ValuePredicate`.
-- `DungeonCondition` (dispatch `"type"`, đăng ký trong `DungeonConditions`) kiểm tra trạng thái instance.
-- `DungeonAction` (đăng ký trong `DungeonActions`) thực thi; `sequence` + `delay` lên lịch phần còn lại và chỉ chạy tiếp nếu `manager.isLive(instance)`.
+- `EventMatcher` khớp `id` + `subject` + `data` của sự kiện bằng `ValuePredicate`; dạng chuỗi được `EventMatcher.parse` đổi sang cùng record.
+- `ScriptContext` là thứ action/condition nhận khi chạy: `FeatureContext`, người gây sự kiện, sự kiện (cho `c.`), tham số function, biến tạm `t.`. Đọc/ghi biến qua `variable` / `setVariable` (ghi thì bắn `var_changed`).
+- `DungeonCondition` (dispatch `"type"`, đăng ký trong `DungeonConditions`) kiểm tra trạng thái instance; chuỗi JSON được đọc thành condition `expr`.
+- `DungeonAction` (đăng ký trong `DungeonActions`) thực thi; chuỗi JSON được đọc thành action `eval`. `sequence` + `delay` lên lịch phần còn lại và chỉ chạy tiếp nếu `manager.isLive(instance)`.
+- `LIST_CODEC` của action/condition nhận 1 phần tử hoặc danh sách; `codec.fieldOf("do", "actions")` / `codec.optionalFieldOf("if", mặc định, "conditions")` (trong `Codec`) đọc khoá có tên thay thế; `Codec.listOrSingle` nhận 1 phần tử hoặc danh sách.
+- Biểu thức được phân tích 1 lần khi nạp (`ExprParser` → cây `Expr`). `ExprRefs` ghi lại biến, khoá `c.`, query mà biểu thức đọc để `DungeonValidation` kiểm tra theo phạm vi (sự kiện của trigger, `when`, tham số function).
+- Trigger `when` kiểm tra lại khi `var_changed` của 1 biến nó đọc, lưu trạng thái trước ở biến `<feature>.<i>.when`. `recheck` kiểm tra thêm mỗi N tick trong `onGameTick`.
+- `ScriptContext.depth` đếm số tầng `call` lồng nhau (tối đa 16) theo từng chuỗi gọi.
 - Biến (`DataValue`) nằm trên `DungeonInstance`, khai báo ban đầu ở definition.
 - Trigger không có state riêng; `once` lưu thành biến.
 
-Thêm action/condition: record + `CODEC` + đăng ký; override `validate` nếu nó tham chiếu id, biến hoặc bắn sự kiện.
+Thêm action/condition: record + `CODEC` + đăng ký; override `validate` nếu nó tham chiếu id, biến hoặc bắn sự kiện (`check.reads(...)` cho biểu thức/text). Thêm query: `ExprFunction` đăng ký trong `DungeonQueries` (`ExprFunction.player(...)` nếu cần người chơi). Thêm sự kiện Bukkit: `BukkitEventAdapter.of(id, Event.class)...build()` (chỉ script) hoặc `custom(name, Event.class).always().emits(...).translate(...)` (record có kiểu) trong `BukkitEventAdapters`.
 
 ## Kiểm tra khi nạp
 

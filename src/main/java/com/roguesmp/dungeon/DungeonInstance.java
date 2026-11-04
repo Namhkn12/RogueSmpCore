@@ -6,6 +6,7 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.DynamicOps;
 import com.roguesmp.dungeon.script.DataValue;
+import com.roguesmp.dungeon.script.ScriptCountdowns;
 import com.roguesmp.codec.JsonOps;
 import com.roguesmp.world.PolarTemplateData;
 import com.sk89q.worldedit.math.BlockVector3;
@@ -68,6 +69,7 @@ public class DungeonInstance {
     // Raw until bound to a definition, so runs of a removed dungeon keep their data.
     private final Map<String, JsonElement> savedStates = new HashMap<>();
     private final Map<String, Object> states = new HashMap<>();
+    private final ScriptCountdowns countdowns = new ScriptCountdowns();
     private @Nullable DungeonDefinition definition;
 
     private DungeonInstance(UUID id, String dungeonId, PolarWorldKey template, Optional<PolarTemplateData> worldData, Set<UUID> members, long createdAt, Map<String, DataValue> variables, Map<UUID, BlockVector3> bedSpawns, Map<String, JsonElement> savedStates) {
@@ -130,6 +132,10 @@ public class DungeonInstance {
 
     public @Nullable DungeonDefinition definition() {
         return definition;
+    }
+
+    public ScriptCountdowns countdowns() {
+        return countdowns;
     }
 
     public @Nullable DataValue variable(String name) {

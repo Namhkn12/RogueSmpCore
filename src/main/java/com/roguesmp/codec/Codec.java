@@ -468,6 +468,102 @@ public interface Codec<A> {
     }
 
     /**
+     * A required field that may also be written under any of {@code aliases}; encodes under {@code name}.
+     */
+    default MapCodec<A> fieldOf(String name, String... aliases) {
+        MapCodec<Optional<A>> optional = aliasedFieldOf(name, Optional.empty(), aliases);
+        return new MapCodec<>() {
+            @Override
+            public <O> DataResult<O> encodeFields(A input, O targetMap, DynamicOps<O> ops) {
+                return optional.encodeFields(Optional.of(input), targetMap, ops);
+            }
+
+            @Override
+            public <O> DataResult<A> decodeFields(O inputMap, DynamicOps<O> ops) {
+                return optional.decodeFields(inputMap, ops).flatMap(value -> value
+                        .map(DataResult::success)
+                        .orElseGet(() -> DataResult.error(missingFieldMessage(name, inputMap, ops))));
+            }
+        };
+    }
+
+    /**
+     * An optional field that may also be written under any of {@code aliases}; encodes under {@code name}.
+     * Setting more than one of the names is an error.
+     */
+    default MapCodec<A> optionalFieldOf(String name, A defaultValue, String... aliases) {
+        return aliasedFieldOf(name, Optional.of(defaultValue), aliases).xmap(Optional::get, Optional::of);
+    }
+
+    private MapCodec<Optional<A>> aliasedFieldOf(String name, Optional<A> defaultValue, String... aliases) {
+        Codec<A> parent = this;
+        List<String> names = new ArrayList<>();
+        names.add(name);
+        names.addAll(List.of(aliases));
+        return new MapCodec<>() {
+            @Override
+            public <O> DataResult<O> encodeFields(Optional<A> input, O targetMap, DynamicOps<O> ops) {
+                if (input.isEmpty() || input.equals(defaultValue)) return DataResult.success(targetMap);
+                return parent.encode(input.get(), ops).map(encoded -> ops.setMapEntry(targetMap, name, encoded));
+            }
+
+            @Override
+            public <O> DataResult<Optional<A>> decodeFields(O inputMap, DynamicOps<O> ops) {
+                String found = null;
+                O value = null;
+                for (String candidate : names) {
+                    DataResult<O> field = ops.getMapField(inputMap, candidate);
+                    if (!field.isSuccess()) continue;
+                    if (found != null) return DataResult.error("Fields '" + found + "' and '" + candidate + "' mean the same thing, use one");
+                    found = candidate;
+                    value = field.result();
+                }
+                if (found == null) return DataResult.success(defaultValue);
+                String fieldName = found;
+                DataResult<A> decoded = parent.decode(value, ops);
+                if (!decoded.isSuccess()) return DataResult.error("Field '" + fieldName + "': " + decoded.error());
+                return decoded.map(Optional::of);
+            }
+        };
+    }
+
+    /**
+     * A list that may also be written as a single element.
+     */
+    static <E> Codec<List<E>> listOrSingle(Codec<E> elementCodec) {
+        Codec<List<E>> list = listOf(elementCodec);
+        return new Codec<>() {
+            @Override
+            public <O> DataResult<O> encode(List<E> input, DynamicOps<O> ops) {
+                return list.encode(input, ops);
+            }
+
+            @Override
+            public <O> DataResult<List<E>> decode(O input, DynamicOps<O> ops) {
+                return ops.getList(input).isSuccess() ? list.decode(input, ops) : elementCodec.decode(input, ops).map(List::of);
+            }
+        };
+    }
+
+    /**
+     * Decodes strings with {@code fromString} and everything else with {@code primary}, so each
+     * shape reports only its own error. Encodes with {@code primary}.
+     */
+    static <A> Codec<A> stringOr(Codec<A> primary, Codec<A> fromString) {
+        return new Codec<>() {
+            @Override
+            public <O> DataResult<O> encode(A input, DynamicOps<O> ops) {
+                return primary.encode(input, ops);
+            }
+
+            @Override
+            public <O> DataResult<A> decode(O input, DynamicOps<O> ops) {
+                return ops.getString(input).isSuccess() ? fromString.decode(input, ops) : primary.decode(input, ops);
+            }
+        };
+    }
+
+    /**
      * Creates an optional field that silently uses a fallback value if missing or invalid.
      *
      * @param name the field key name
