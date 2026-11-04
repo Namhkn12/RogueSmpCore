@@ -1,6 +1,7 @@
 package com.roguesmp.dungeon.room;
 
 import com.roguesmp.codec.Codec;
+import com.roguesmp.dungeon.script.DungeonCondition;
 import com.roguesmp.dungeon.script.DungeonValidation;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public record RoomDefinition(RoomType type, String name, String schematic, List<
             RoomObjective objective = objectives.get(i);
             DungeonValidation at = check.at("objectives[" + i + "]");
             at.at("on").listens(objective.on());
-            for (int j = 0; j < objective.conditions().size(); j++) objective.conditions().get(j).validate(at.at("conditions[" + j + "]"));
+            DungeonCondition.validateAll(objective.conditions(), at.inEvent(objective.on().event()).at("if"));
         }
     }
 }

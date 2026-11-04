@@ -36,23 +36,30 @@ public class EntityBrowserGui extends BaseGui {
     private static final int CREATE_NEW_SLOT = 0;
 
     private final Player player;
-    private final List<BaseEntity> allEntries;
+    private List<BaseEntity> allEntries;
     private List<BaseEntity> filteredEntries;
     private String searchQuery = null;
     private int currentPage = 0;
     private int totalPages;
 
+    public EntityBrowserGui(Player player, String query) {
+        this(player);
+        this.searchQuery = query;
+        updateFilters();
+    }
+
     public EntityBrowserGui(Player player) {
         super(Component.text("Browse Entity"), 6);
         this.player = player;
-        this.allEntries = new ArrayList<>(Registries.ENTITY.getAll().values());
-        allEntries.sort(Comparator.comparing(BaseEntity::getId));
         updateFilters();
     }
 
     @Override
     public void setup() {
         clearUi();
+        int keepPage = currentPage;
+        updateFilters();
+        currentPage = Math.max(0, Math.min(keepPage, totalPages - 1));
         for (int i = 0; i < 9; i++) {
             addButton(i, FILLER_BLACK, ClickHandler.noAction());
         }
@@ -119,6 +126,8 @@ public class EntityBrowserGui extends BaseGui {
     }
 
     private void updateFilters() {
+        this.allEntries = new ArrayList<>(Registries.ENTITY.getAll().values());
+        allEntries.sort(Comparator.comparing(BaseEntity::getId));
         filteredEntries = new ArrayList<>();
         String query = (searchQuery == null || searchQuery.isBlank()) ? null : searchQuery.toLowerCase().trim();
 

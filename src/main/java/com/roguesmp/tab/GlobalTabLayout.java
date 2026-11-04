@@ -6,11 +6,6 @@ import com.roguesmp.party.PartyManager;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import java.util.UUID;
-import com.roguesmp.player.PlayerManager;
-import com.roguesmp.player.SmpPlayer;
-import com.roguesmp.player.ability.Ability;
-import com.roguesmp.player.ability.AbilityLoadout;
-import com.roguesmp.player.ability.AbilityWithCharge;
 import com.roguesmp.tab.element.TabElement;
 import com.roguesmp.tab.layout.TabClaim;
 import com.roguesmp.tab.scoreboard.ScoreboardDefaults;
@@ -61,23 +56,12 @@ public class GlobalTabLayout {
     }
 
     public static TabScoreboardView scoreboardView(Player player, TabContext context) {
-        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
-        AbilityLoadout loadout = smpPlayer == null ? null : smpPlayer.getAbilityLoadout();
-
-        List<TabElement> abilityLines = new ArrayList<>();
-        for (int i = 0; i < AbilityLoadout.SLOT_COUNT; i++) {
-            int index = i;
-            abilityLines.add(TabElement.ticking(10, c -> abilityLine(loadout, index)));
-        }
-
         return TabScoreboardView.builder(player, "global_scoreboard_tab")
                 .title(ScoreboardDefaults.title())
                 .line(ScoreboardDefaults.divider())
                 .line(ScoreboardDefaults.regionLine())
                 .lines(ScoreboardDefaults.playerInfo(player))
-                .line(ScoreboardDefaults.spacer())
-                .line("<gold>Kỹ năng:")
-                .lines(abilityLines)
+                .lines(ScoreboardDefaults.abilityLines(player))
                 .line(ScoreboardDefaults.spacer())
                 .build(context);
     }
@@ -123,26 +107,5 @@ public class GlobalTabLayout {
     private static String partyOverflow(Player viewer) {
         int extra = partyMembers(viewer).size() - MAX_PARTY_LINES;
         return extra > 0 ? "<gray>(và " + extra + " người khác...)</gray>" : "";
-    }
-
-    private static String abilityLine(AbilityLoadout loadout, int index) {
-        if (loadout == null) return "";
-        Ability[] abilities = loadout.getAbilities();
-        if (index >= abilities.length || abilities[index] == null) {
-            return "<gray> - Trống -</gray>";
-        }
-        Ability ability = abilities[index];
-        String name = " " + Utils.toString(ability.getAbilityInfo().getFormattedDisplayName());
-        if (ability instanceof AbilityWithCharge charged) {
-            String color = charged.getCharges() > 0 ? "green" : "red";
-            String text = "<" + color + ">" + charged.getCharges() + "/" + charged.getMaxCharges() + "</" + color + ">";
-            if (charged.getCharges() < charged.getMaxCharges()) {
-                text += " <gray>(" + (int) Math.ceil(ability.getCooldownTick() / 20.0) + "s)</gray>";
-            }
-            return name + " " + text;
-        } else if (ability.isOnCooldown()) {
-            return name + " <red>" + (int) Math.ceil(ability.getCooldownTick() / 20.0) + "s</red>";
-        }
-        return name + " <green>R</green>";
     }
 }

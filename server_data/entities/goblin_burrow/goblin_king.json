@@ -1,0 +1,70 @@
+{
+  "entityType": "HUSK",
+  "factory": "goblin_king",
+  "components": {
+    "ai": {
+      "presets": [
+        "hostile"
+      ]
+    },
+    "attributes": {
+      "MAX_HEALTH": 512,
+      "ATTACK_DAMAGE": 9.0,
+      "MOVEMENT_SPEED": 0.3,
+      "FOLLOW_RANGE": 40.0,
+      "KNOCKBACK_RESISTANCE": 1.0,
+      "FALL_DAMAGE_MULTIPLIER": 0.0,
+      "SCALE": 1.3
+    },
+    "behavior": {
+      "persistent": true,
+      "detectionRange": 32
+    },
+    "equipment": {
+      "HEAD": {
+        "material": "PLAYER_HEAD",
+        "displayName": "<gold>Goblin Crown",
+        "headSkin": "orc_king",
+        "enchantGlint": true
+      },
+      "CHEST": {
+        "material": "LEATHER_CHESTPLATE",
+        "displayName": "<gold>Royal Hide Mantle",
+        "dyeColor": "#3E6B1F",
+        "trimMaterial": "minecraft:gold",
+        "trimPattern": "minecraft:rib"
+      },
+      "LEGS": {
+        "material": "CHAINMAIL_LEGGINGS",
+        "displayName": "<gold>Royal Chain Greaves",
+        "trimMaterial": "minecraft:gold",
+        "trimPattern": "minecraft:rib"
+      },
+      "FEET": {
+        "material": "LEATHER_BOOTS",
+        "displayName": "<gold>Royal Hide Boots",
+        "dyeColor": "#4A3420",
+        "trimMaterial": "minecraft:gold",
+        "trimPattern": "minecraft:rib"
+      },
+      "HAND": {
+        "material": "GOLDEN_AXE",
+        "displayName": "<gold>Royal Axe",
+        "enchantGlint": true
+      }
+    },
+    "effect_immunity": [
+      "stun"
+    ],
+    "boss_bar": {
+      "range": 40,
+      "color": "GREEN",
+      "style": "NOTCHED_10",
+      "bossFog": true
+    },
+    "display_name": "<dark_green><bold>\uD83D\uDC80 Goblin King",
+    "nameplate": {
+      "heightOffset": 0.6
+    }
+  }
+}

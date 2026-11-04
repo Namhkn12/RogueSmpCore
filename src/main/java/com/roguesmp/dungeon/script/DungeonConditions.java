@@ -1,21 +1,10 @@
 package com.roguesmp.dungeon.script;
 
 import com.roguesmp.codec.Codec;
-import com.roguesmp.dungeon.FeatureContext;
-import com.roguesmp.dungeon.feature.ExpiryFeature;
-import com.roguesmp.dungeon.feature.RoomsFeature;
-import com.roguesmp.dungeon.room.RoomDefinition;
+import com.roguesmp.dungeon.script.expr.DungeonQueries;
+import com.roguesmp.dungeon.script.expr.Expression;
 import com.roguesmp.registry.Registries;
-
-import com.roguesmp.region.ServerRegionManager;
-import com.roguesmp.utils.PlayerUtils;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -41,8 +30,8 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, @Nullable Player player) {
-            return value.test(context.instance().variable(FeatureContext.varName(var, perPlayer, player)));
+        public boolean test(ScriptContext context) {
+            return value.test(context.variable(var, perPlayer));
         }
     }
 
@@ -58,11 +47,9 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, @Nullable Player player) {
-            FeatureContext<RoomsFeature.State> rooms = context.manager().feature(context.instance(), RoomsFeature.class);
-            String roomId = rooms == null ? null : rooms.state().room();
-            RoomDefinition room = roomId == null ? null : Registries.DUNGEON_ROOM.get(roomId);
-            return value.test(room == null ? null : DataValue.of(room.type().name().toLowerCase()));
+        public boolean test(ScriptContext context) {
+            String type = DungeonQueries.roomType(context.feature());
+            return value.test(type == null ? null : DataValue.of(type));
         }
     }
 
@@ -78,8 +65,8 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, @Nullable Player player) {
-            return value.test(DataValue.of(context.instance().members().size()));
+        public boolean test(ScriptContext context) {
+            return value.test(DataValue.of(context.feature().instance().members().size()));
         }
     }
 
@@ -96,10 +83,9 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, @Nullable Player player) {
-            FeatureContext<ExpiryFeature.State> expiry = context.manager().feature(context.instance(), ExpiryFeature.class);
-            if (expiry == null) return value.test(null);
-            return value.test(DataValue.of((expiry.state().expiresAt() - System.currentTimeMillis()) / 1000.0));
+        public boolean test(ScriptContext context) {
+            Double seconds = DungeonQueries.timeLeft(context.feature());
+            return value.test(seconds == null ? null : DataValue.of(seconds));
         }
     }
 
@@ -116,12 +102,12 @@ public class DungeonConditions {
 
         @Override
         public void validate(DungeonValidation check) {
-            for (int i = 0; i < conditions.size(); i++) conditions.get(i).validate(check.at("conditions[" + i + "]"));
+            DungeonCondition.validateAll(conditions, check.at("conditions"));
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, @Nullable Player player) {
-            return DungeonCondition.all(conditions, context, player);
+        public boolean test(ScriptContext context) {
+            return DungeonCondition.all(conditions, context);
         }
     }
 
@@ -138,12 +124,12 @@ public class DungeonConditions {
 
         @Override
         public void validate(DungeonValidation check) {
-            for (int i = 0; i < conditions.size(); i++) conditions.get(i).validate(check.at("conditions[" + i + "]"));
+            DungeonCondition.validateAll(conditions, check.at("conditions"));
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, @Nullable Player player) {
-            return conditions.stream().anyMatch(condition -> condition.test(context, player));
+        public boolean test(ScriptContext context) {
+            return conditions.stream().anyMatch(condition -> condition.test(context));
         }
     }
 
@@ -164,8 +150,8 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, @Nullable Player player) {
-            return !condition.test(context, player);
+        public boolean test(ScriptContext context) {
+            return !condition.test(context);
         }
     }
 
@@ -182,9 +168,8 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, @Nullable Player player) {
-            World world = context.world();
-            return count.test(DataValue.of(world == null ? 0 : context.manager().trackedMobs().aliveCount(world, tag)));
+        public boolean test(ScriptContext context) {
+            return count.test(DataValue.of(DungeonQueries.mobCount(context.feature(), tag)));
         }
     }
 
@@ -201,14 +186,8 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, @Nullable Player player) {
-            if (!all) return player != null && contains(player.getLocation());
-            List<Player> players = context.onlinePlayers();
-            return !players.isEmpty() && players.stream().allMatch(target -> contains(target.getLocation()));
-        }
-
-        private boolean contains(Location location) {
-            return ServerRegionManager.getInstance().regionIdsAt(location).contains(region);
+        public boolean test(ScriptContext context) {
+            return DungeonQueries.inRegion(context.feature(), context.player(), region, all);
         }
     }
 
@@ -230,8 +209,8 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, @Nullable Player player) {
-            return player != null && PlayerUtils.countItemsInInventory(player, item) >= amount;
+        public boolean test(ScriptContext context) {
+            return DungeonQueries.hasItem(context.player(), item, amount);
         }
     }
 
@@ -248,11 +227,9 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, @Nullable Player player) {
-            if (player == null) return value.test(null);
-            AttributeInstance max = player.getAttribute(Attribute.MAX_HEALTH);
-            double maxHealth = max == null ? 20 : max.getValue();
-            return value.test(DataValue.of(maxHealth <= 0 ? 0 : player.getHealth() / maxHealth * 100));
+        public boolean test(ScriptContext context) {
+            Player player = context.player();
+            return value.test(player == null ? null : DataValue.of(DungeonQueries.playerHealth(player)));
         }
     }
 
@@ -268,9 +245,8 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, @Nullable Player player) {
-            long alive = context.onlinePlayers().stream().filter(target -> !target.isDead() && target.getGameMode() != GameMode.SPECTATOR).count();
-            return value.test(DataValue.of(alive));
+        public boolean test(ScriptContext context) {
+            return value.test(DataValue.of(DungeonQueries.aliveCount(context.feature())));
         }
     }
 
@@ -291,11 +267,34 @@ public class DungeonConditions {
         }
 
         @Override
-        public boolean test(FeatureContext<?> context, @Nullable Player player) {
+        public boolean test(ScriptContext context) {
             return ThreadLocalRandom.current().nextDouble() < chance;
         }
     }
 
+    public record Expr(Expression expression) implements DungeonCondition {
+        public static final Codec<Expr> CODEC = Codec.composite(
+                Expression.CODEC.fieldOf("expr").forGetter(Expr::expression),
+                Expr::new
+        );
+
+        @Override
+        public String getTypeId() {
+            return "expr";
+        }
+
+        @Override
+        public void validate(DungeonValidation check) {
+            check.reads(expression.refs());
+        }
+
+        @Override
+        public boolean test(ScriptContext context) {
+            return expression.test(context);
+        }
+    }
+
+    public static final Codec<Expr> EXPR = register("expr", Expr.CODEC);
     public static final Codec<MobCount> MOB_COUNT = register("mob_count", MobCount.CODEC);
     public static final Codec<Var> VAR = register("var", Var.CODEC);
     public static final Codec<RoomType> ROOM_TYPE = register("room_type", RoomType.CODEC);

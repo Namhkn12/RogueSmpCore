@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ItemBrowser extends BaseGui {
-    private final List<Map.Entry<String, BaseItem>> allEntries;
+    private List<Map.Entry<String, BaseItem>> allEntries;
     private List<Map.Entry<String, BaseItem>> filteredEntries;
 
     private final ItemStack infoBook = ItemStack.of(Material.BOOK);
@@ -38,11 +38,14 @@ public class ItemBrowser extends BaseGui {
     private int currentPage = 0;
     private String searchQuery = null;
 
+    public ItemBrowser(String query) {
+        this();
+        this.searchQuery = query;
+        updateSearchFilters();
+    }
+
     public ItemBrowser() {
         super(Utils.fromString("Item Browser"), 6);
-
-        this.allEntries = new ArrayList<>(Registries.ITEM.getAll().entrySet());
-        this.allEntries.sort(Map.Entry.comparingByKey());
         this.filteredEntries = new ArrayList<>(allEntries);
 
         infoBook.setData(DataComponentTypes.ITEM_NAME, Component.text("Item Browser", NamedTextColor.GREEN));
@@ -59,6 +62,9 @@ public class ItemBrowser extends BaseGui {
     @Override
     public void setup() {
         clearUi();
+        int keepPage = currentPage;
+        updateSearchFilters();
+        currentPage = Math.max(0, Math.min(keepPage, totalPages - 1));
 
         searchButton.setData(DataComponentTypes.ITEM_NAME, Component.text("Tìm kiếm Vật phẩm", NamedTextColor.GOLD));
         searchButton.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
@@ -159,6 +165,8 @@ public class ItemBrowser extends BaseGui {
     }
 
     private void updateSearchFilters() {
+        this.allEntries = new ArrayList<>(Registries.ITEM.getAll().entrySet());
+        this.allEntries.sort(Map.Entry.comparingByKey());
         if (searchQuery == null || searchQuery.isBlank()) {
             this.filteredEntries = new ArrayList<>(allEntries);
         } else {

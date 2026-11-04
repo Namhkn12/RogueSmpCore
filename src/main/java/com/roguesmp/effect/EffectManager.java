@@ -6,6 +6,10 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.codec.JsonOps;
 import com.roguesmp.effect.impl.VanillaPotionEffect;
+import com.roguesmp.entity.EntityManager;
+import com.roguesmp.entity.SmpEntity;
+import com.roguesmp.entity.component.EntityComponentKeys;
+import com.roguesmp.entity.component.impl.EffectImmunityComponent;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
@@ -147,6 +151,11 @@ public class EffectManager {
     public void addEffect(Entity entity, String sourceId, SmpEffect smpEffect) {
         // e.g. an ability's damage killed it before its effect was applied - nothing would ever clean this up
         if (entity.isDead()) return;
+        if (entity instanceof LivingEntity living) {
+            SmpEntity smpEntity = EntityManager.getInstance().getSmpEntity(living);
+            EffectImmunityComponent immunity = smpEntity == null ? null : smpEntity.getComponent(EntityComponentKeys.EFFECT_IMMUNITY);
+            if (immunity != null && immunity.isImmuneTo(smpEffect)) return;
+        }
         EntityEffects entityEffects = allEffects.computeIfAbsent(entity.getUniqueId(), k -> new EntityEffects());
         entityEffects.getOrCreateStack(sourceId).add(entity, smpEffect);
     }

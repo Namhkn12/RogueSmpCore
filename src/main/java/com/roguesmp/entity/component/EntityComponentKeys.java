@@ -17,6 +17,7 @@ public class EntityComponentKeys {
     public static final EntityComponentKey<LootTableComponent> LOOT_TABLE;
     public static final EntityComponentKey<AiComponent> AI;
     public static final EntityComponentKey<BabyComponent> BABY = register("baby", BabyComponent.CODEC);
+    public static final EntityComponentKey<EffectImmunityComponent> EFFECT_IMMUNITY = register("effect_immunity", EffectImmunityComponent.CODEC);
 
     static {
         DISPLAY_NAME = register("display_name", DisplayNameComponent.CODEC);

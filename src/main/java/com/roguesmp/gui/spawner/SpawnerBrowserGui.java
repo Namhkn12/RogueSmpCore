@@ -34,6 +34,11 @@ public class SpawnerBrowserGui extends BaseGui {
     private String searchQuery = null;
     private int currentPage = 0;
 
+    public SpawnerBrowserGui(Player player, String query) {
+        this(player);
+        this.searchQuery = query;
+    }
+
     public SpawnerBrowserGui(Player player) {
         super(Component.text("Browse Spawner"), 6);
         this.player = player;

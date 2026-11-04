@@ -10,6 +10,7 @@ import com.roguesmp.dungeon.FeatureContext;
 import com.roguesmp.dungeon.room.RoomDefinition;
 import com.roguesmp.dungeon.script.DataValue;
 import com.roguesmp.dungeon.script.DungeonCondition;
+import com.roguesmp.dungeon.script.ScriptContext;
 import com.roguesmp.dungeon.script.DungeonValidation;
 import com.roguesmp.dungeon.room.RoomEffect;
 import com.roguesmp.dungeon.room.RoomEffectContext;
@@ -328,7 +329,7 @@ public record RoomsFeature(List<Pool> pools, int minimumRooms, int maxChoices) i
         for (int i = 0; i < objectives.size(); i++) {
             RoomObjective objective = objectives.get(i);
             int done = state.progress(i);
-            if (done >= objective.count() || !objective.on().matches(event) || !DungeonCondition.all(objective.conditions(), context, event.player())) continue;
+            if (done >= objective.count() || !objective.on().matches(event) || !DungeonCondition.all(objective.conditions(), ScriptContext.of(context, event))) continue;
 
             int now = Math.min(objective.count(), done + Math.max(1, event.amount()));
             state.progress.put(String.valueOf(i), now);

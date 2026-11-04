@@ -10,10 +10,14 @@ import com.roguesmp.dungeon.script.DataValue;
 import com.roguesmp.dungeon.script.DungeonCondition;
 import com.roguesmp.dungeon.script.DungeonValidation;
 import com.roguesmp.dungeon.script.EventMatcher;
+import com.roguesmp.dungeon.script.ScriptContext;
+import com.roguesmp.dungeon.script.expr.Expression;
 
 import org.bukkit.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 public record TriggersFeature(List<Trigger> triggers) implements DungeonFeature<NoState> {
 
@@ -22,19 +26,26 @@ public record TriggersFeature(List<Trigger> triggers) implements DungeonFeature<
     private static final DataValue FIRED = DataValue.of(true);
     private static final String TIMER_EVENT = "timer";
 
-    public record Trigger(EventMatcher on, List<DungeonCondition> conditions, boolean once, int cooldown, int interval, List<DungeonAction> actions) {
+    // Exactly one of "on" (an event) or "when" (fires when the expression turns true). "recheck" also re-tests "when" every N ticks.
+    public record Trigger(Optional<EventMatcher> on, Optional<Expression> when, List<DungeonCondition> conditions, boolean once, int cooldown, int interval, int recheck, List<DungeonAction> actions) {
         public static final Codec<Trigger> CODEC = Codec.composite(
-                EventMatcher.CODEC.fieldOf("on").forGetter(Trigger::on),
-                Codec.listOf(DungeonCondition.CODEC).optionalFieldOf("conditions", List.of()).forGetter(Trigger::conditions),
+                EventMatcher.CODEC.optionalFieldOf("on").forGetter(Trigger::on),
+                Expression.CODEC.optionalFieldOf("when").forGetter(Trigger::when),
+                DungeonCondition.LIST_CODEC.optionalFieldOf("if", List.of(), "conditions").forGetter(Trigger::conditions),
                 Codec.BOOLEAN.optionalFieldOf("once", false).forGetter(Trigger::once),
                 Codec.INT.optionalFieldOf("cooldown", 0).forGetter(Trigger::cooldown),
                 Codec.INT.optionalFieldOf("interval", 20).forGetter(Trigger::interval),
-                Codec.listOf(DungeonAction.CODEC).fieldOf("actions").forGetter(Trigger::actions),
+                Codec.INT.optionalFieldOf("recheck", 0).forGetter(Trigger::recheck),
+                DungeonAction.LIST_CODEC.fieldOf("do", "actions").forGetter(Trigger::actions),
                 Trigger::new
         );
 
         boolean isTimer() {
-            return TIMER_EVENT.equals(on.event());
+            return on.isPresent() && TIMER_EVENT.equals(on.get().event());
+        }
+
+        boolean watches(DungeonEvent event) {
+            return when.isPresent() && event instanceof DungeonEvent.VarChanged changed && when.get().refs().vars().contains(changed.var());
         }
     }
 
@@ -53,12 +64,24 @@ public record TriggersFeature(List<Trigger> triggers) implements DungeonFeature<
         for (int i = 0; i < triggers.size(); i++) {
             Trigger trigger = triggers.get(i);
             DungeonValidation at = check.at("triggers[" + i + "]");
-            at.at("on").listens(trigger.on());
-            for (int j = 0; j < trigger.conditions().size(); j++) trigger.conditions().get(j).validate(at.at("conditions[" + j + "]"));
-            for (int j = 0; j < trigger.actions().size(); j++) trigger.actions().get(j).validate(at.at("actions[" + j + "]"));
+            if (trigger.on().isPresent() == trigger.when().isPresent()) {
+                at.warn("needs exactly one of 'on' or 'when'");
+                continue;
+            }
+            DungeonValidation scoped = trigger.on().map(on -> at.inEvent(on.event())).orElseGet(at::withoutEvent);
+            trigger.on().ifPresent(on -> at.at("on").listens(on));
+            trigger.when().ifPresent(when -> {
+                scoped.at("when").reads(when.refs());
+                if (!when.refs().queries().isEmpty() && trigger.recheck() <= 0) at.at("when").warn("uses queries, which don't re-check it on their own; add \"recheck\": <ticks>");
+                else if (when.refs().vars().isEmpty() && trigger.recheck() <= 0) at.at("when").warn("reads no v. variables, so it is only checked when the run starts; add \"recheck\": <ticks>");
+            });
+            DungeonCondition.validateAll(trigger.conditions(), scoped.at("if"));
+            DungeonAction.validateAll(trigger.actions(), scoped.at("do"));
             if (trigger.once()) at.writesVar(featureId + "." + i);
             if (trigger.interval() <= 0) at.warn("'interval' must be positive");
             if (trigger.interval() != 20 && !trigger.isTimer()) at.warn("'interval' only applies to the 'timer' event");
+            if (trigger.recheck() < 0) at.warn("'recheck' can't be negative");
+            if (trigger.recheck() > 0 && trigger.when().isEmpty()) at.warn("'recheck' only applies to 'when' triggers");
         }
     }
 
@@ -73,11 +96,25 @@ public record TriggersFeature(List<Trigger> triggers) implements DungeonFeature<
     }
 
     @Override
+    public void onStart(FeatureContext<NoState> context) {
+        checkAllWhen(context);
+    }
+
+    @Override
+    public void onRestore(FeatureContext<NoState> context) {
+        checkAllWhen(context);
+    }
+
+    @Override
     public void onGameTick(FeatureContext<NoState> context, World world) {
         long ticks = world.getGameTime();
         DungeonEvent.Timer event = null;
         for (int i = 0; i < triggers.size(); i++) {
             Trigger trigger = triggers.get(i);
+            if (trigger.when().isPresent() && trigger.recheck() > 0 && ticks % trigger.recheck() == 0) {
+                checkWhen(context, i, trigger);
+                continue;
+            }
             if (!trigger.isTimer() || trigger.interval() <= 0 || ticks % trigger.interval() != 0) continue;
             if (event == null) event = new DungeonEvent.Timer(ticks);
             fire(context, i, trigger, event);
@@ -88,24 +125,42 @@ public record TriggersFeature(List<Trigger> triggers) implements DungeonFeature<
     public void onEvent(FeatureContext<NoState> context, DungeonEvent event) {
         for (int i = 0; i < triggers.size(); i++) {
             Trigger trigger = triggers.get(i);
-            if (!trigger.isTimer()) fire(context, i, trigger, event);
+            if (trigger.watches(event)) checkWhen(context, i, trigger);
+            else if (!trigger.isTimer() && trigger.on().isPresent() && trigger.on().get().matches(event)) fire(context, i, trigger, event);
         }
     }
 
-    private void fire(FeatureContext<NoState> context, int index, Trigger trigger, DungeonEvent event) {
+    private void checkAllWhen(FeatureContext<NoState> context) {
+        for (int i = 0; i < triggers.size(); i++) {
+            if (triggers.get(i).when().isPresent()) checkWhen(context, i, triggers.get(i));
+        }
+    }
+
+    private void checkWhen(FeatureContext<NoState> context, int index, Trigger trigger) {
+        String stateVar = context.featureId() + "." + index + ".when";
+        boolean now = trigger.when().orElseThrow().test(ScriptContext.of(context, (DungeonEvent) null));
+        boolean before = FIRED.equals(context.instance().variable(stateVar));
+        if (now == before) return;
+        context.instance().setVariable(stateVar, DataValue.of(now));
+        context.save();
+        if (now) fire(context, index, trigger, null);
+    }
+
+    private void fire(FeatureContext<NoState> context, int index, Trigger trigger, @Nullable DungeonEvent event) {
         String onceVar = context.featureId() + "." + index;
         String cooldownVar = onceVar + ".cooldown";
         long now = System.currentTimeMillis();
-        if (!trigger.on().matches(event)) return;
         if (trigger.once() && FIRED.equals(context.instance().variable(onceVar))) return;
         if (trigger.cooldown() > 0 && context.instance().variable(cooldownVar) instanceof DataValue.NumberValue(double until) && now < until) return;
-        if (!DungeonCondition.all(trigger.conditions(), context, event.player())) return;
+
+        ScriptContext script = ScriptContext.of(context, event);
+        if (!DungeonCondition.all(trigger.conditions(), script)) return;
 
         if (trigger.once()) {
             context.instance().setVariable(onceVar, FIRED);
             context.save();
         }
         if (trigger.cooldown() > 0) context.instance().setVariable(cooldownVar, DataValue.of(now + trigger.cooldown() * 50L));
-        trigger.actions().forEach(action -> action.run(context, event.player()));
+        DungeonAction.runAll(trigger.actions(), script);
     }
 }

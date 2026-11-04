@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon;
 
+import com.roguesmp.dungeon.listener.BukkitEventAdapter;
 import com.roguesmp.dungeon.script.DataValue;
 import com.roguesmp.quest.Quest;
 import org.bukkit.Location;
@@ -25,28 +26,15 @@ import java.util.Set;
 
 public sealed interface DungeonEvent {
 
-    // Data keys each built-in event carries.
-    Map<String, Set<String>> BUILT_IN = Map.ofEntries(
-            Map.entry("started", Set.of()),
-            Map.entry("player_entered", Set.of()),
-            Map.entry("player_left", Set.of()),
-            Map.entry("region_entered", Set.of()),
-            Map.entry("region_left", Set.of()),
-            Map.entry("mob_killed", Set.of()),
-            Map.entry("mob_died", Set.of("tag")),
-            Map.entry("mob_damaged", Set.of("damage", "health_percent")),
-            Map.entry("block_interacted", Set.of("x", "y", "z")),
-            Map.entry("block_broken", Set.of("x", "y", "z")),
-            Map.entry("block_placed", Set.of("x", "y", "z")),
-            Map.entry("item_picked_up", Set.of("amount")),
-            Map.entry("portal_entered", Set.of()),
-            Map.entry("player_died", Set.of()),
-            Map.entry("quest_completed", Set.of()),
-            Map.entry("redstone_activated", Set.of("x", "y", "z", "powered")),
-            Map.entry("var_changed", Set.of("value", "old")),
-            Map.entry("countdown_ended", Set.of()),
-            Map.entry("timer", Set.of("ticks"))
+    // Data keys of events not fired from a Bukkit event; those are declared on their BukkitEventAdapter.
+    Map<String, Set<String>> BUILT_IN = Map.of(
+            "started", Set.of(),
+            "var_changed", Set.of("value", "old"),
+            "countdown_ended", Set.of(),
+            "timer", Set.of("ticks")
     );
+
+    Set<String> NO_PLAYER = Set.of("started", "countdown_ended", "timer", "quest_completed");
 
     String id();
 
@@ -64,6 +52,9 @@ public sealed interface DungeonEvent {
 
     default boolean cancelled() {
         return false;
+    }
+
+    default void cancel() {
     }
 
     default @Nullable Player player() {
@@ -223,6 +214,12 @@ public sealed interface DungeonEvent {
         }
 
         @Override
+        public void cancel() {
+            event.setUseInteractedBlock(Event.Result.DENY);
+            event.setUseItemInHand(Event.Result.DENY);
+        }
+
+        @Override
         public Map<String, DataValue> data() {
             return blockPosition(block);
         }
@@ -248,6 +245,11 @@ public sealed interface DungeonEvent {
         @Override
         public boolean cancelled() {
             return event.isCancelled();
+        }
+
+        @Override
+        public void cancel() {
+            event.setCancelled(true);
         }
 
         @Override
@@ -277,6 +279,11 @@ public sealed interface DungeonEvent {
         @Override
         public boolean cancelled() {
             return event.isCancelled();
+        }
+
+        @Override
+        public void cancel() {
+            event.setCancelled(true);
         }
 
         @Override
@@ -425,6 +432,43 @@ public sealed interface DungeonEvent {
         @Override
         public @Nullable Player player() {
             return source;
+        }
+    }
+
+    record External(BukkitEventAdapter.Simple<?> adapter, Event event) implements DungeonEvent {
+        @Override
+        public String id() {
+            return adapter.id();
+        }
+
+        @Override
+        public String subject() {
+            return adapter.subjectOf(event);
+        }
+
+        @Override
+        public Map<String, DataValue> data() {
+            return adapter.dataOf(event);
+        }
+
+        @Override
+        public @Nullable Player player() {
+            return adapter.playerOf(event);
+        }
+
+        @Override
+        public @Nullable Location location() {
+            return adapter.locationOf(event);
+        }
+
+        @Override
+        public boolean cancelled() {
+            return event instanceof Cancellable cancellable && cancellable.isCancelled();
+        }
+
+        @Override
+        public void cancel() {
+            if (event instanceof Cancellable cancellable) cancellable.setCancelled(true);
         }
     }
 }

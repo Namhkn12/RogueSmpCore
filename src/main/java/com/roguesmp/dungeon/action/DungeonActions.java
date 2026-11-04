@@ -27,6 +27,13 @@ import com.roguesmp.quest.holder.GroupHolder;
 import com.roguesmp.utils.ItemRef;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.dungeon.FeatureContext;
+import com.roguesmp.codec.MapCodec;
+import com.roguesmp.dungeon.script.ScriptContext;
+import com.roguesmp.dungeon.script.ScriptFunction;
+import com.roguesmp.dungeon.script.expr.ScriptNumber;
+import com.roguesmp.dungeon.script.expr.ScriptText;
+import com.roguesmp.dungeon.script.expr.ScriptValue;
+import com.roguesmp.dungeon.script.expr.Statements;
 import com.roguesmp.dungeon.script.DataValue;
 import com.roguesmp.dungeon.script.DungeonValidation;
 import com.roguesmp.registry.Registries;
@@ -54,23 +61,19 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Matcher;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.regex.Pattern;
 
 public class DungeonActions {
 
-    public static final Pattern VAR_PLACEHOLDER = Pattern.compile("\\{var\\.([\\w.]+)}");
-    public static final Pattern PLAYER_VAR_PLACEHOLDER = Pattern.compile("\\{pvar\\.([\\w.]+)}");
-
-    public record Signal(String id, int amount, Map<String, DataValue> data) implements DungeonAction {
+    public record Signal(String id, int amount, Map<String, ScriptValue> data) implements DungeonAction {
         public static final Codec<Signal> CODEC = Codec.composite(
                 Codec.STRING.fieldOf("id").forGetter(Signal::id),
                 Codec.INT.optionalFieldOf("amount", 1).forGetter(Signal::amount),
-                Codec.unboundedMap(DataValue.CODEC).optionalFieldOf("data", Map.of()).forGetter(Signal::data),
+                Codec.unboundedMap(ScriptValue.CODEC).optionalFieldOf("data", Map.of()).forGetter(Signal::data),
                 Signal::new
         );
 
@@ -82,17 +85,59 @@ public class DungeonActions {
         @Override
         public void validate(DungeonValidation check) {
             check.emits(id, data.keySet());
+            data.forEach((key, value) -> check.at("data." + key).reads(value));
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            context.signal(id, amount, player, data);
+        public void run(ScriptContext context) {
+            context.feature().signal(id, amount, context.player(), evaluate(data, context));
         }
     }
 
-    public record Message(String text, boolean all) implements DungeonAction {
+    public record Eval(Statements statements) implements DungeonAction {
+        public static final Codec<Eval> CODEC = Codec.composite(
+                Statements.CODEC.fieldOf("run").forGetter(Eval::statements),
+                Eval::new
+        );
+
+        @Override
+        public String getTypeId() {
+            return "eval";
+        }
+
+        @Override
+        public void validate(DungeonValidation check) {
+            check.runs(statements);
+        }
+
+        @Override
+        public void run(ScriptContext context) {
+            statements.run(context);
+        }
+    }
+
+    public record Cancel() implements DungeonAction {
+        public static final Codec<Cancel> CODEC = MapCodec.unit(Cancel::new);
+
+        @Override
+        public String getTypeId() {
+            return "cancel";
+        }
+
+        @Override
+        public void validate(DungeonValidation check) {
+            check.cancels();
+        }
+
+        @Override
+        public void run(ScriptContext context) {
+            if (context.event() != null) context.event().cancel();
+        }
+    }
+
+    public record Message(ScriptText text, boolean all) implements DungeonAction {
         public static final Codec<Message> CODEC = Codec.composite(
-                Codec.STRING.fieldOf("text").forGetter(Message::text),
+                ScriptText.CODEC.fieldOf("text").forGetter(Message::text),
                 Codec.BOOLEAN.optionalFieldOf("all", false).forGetter(Message::all),
                 Message::new
         );
@@ -104,22 +149,22 @@ public class DungeonActions {
 
         @Override
         public void validate(DungeonValidation check) {
-            check.readsText(text);
+            check.reads(text);
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            String formatted = format(context, player, text);
-            targets(context, player, all).forEach(target -> target.sendMessage(Utils.fromString(formatted)));
+        public void run(ScriptContext context) {
+            String formatted = text.format(context);
+            targets(context, all).forEach(target -> target.sendMessage(Utils.fromString(formatted)));
         }
     }
 
-    public record Teleport(double x, double y, double z, float yaw, float pitch, boolean all,
+    public record Teleport(ScriptNumber x, ScriptNumber y, ScriptNumber z, float yaw, float pitch, boolean all,
                            Optional<TeleportDestination> destination, boolean fx) implements DungeonAction {
         public static final Codec<Teleport> CODEC = Codec.composite(
-                Codec.DOUBLE.optionalFieldOf("x", 0.0).forGetter(Teleport::x),
-                Codec.DOUBLE.optionalFieldOf("y", 0.0).forGetter(Teleport::y),
-                Codec.DOUBLE.optionalFieldOf("z", 0.0).forGetter(Teleport::z),
+                ScriptNumber.CODEC.optionalFieldOf("x", ZERO).forGetter(Teleport::x),
+                ScriptNumber.CODEC.optionalFieldOf("y", ZERO).forGetter(Teleport::y),
+                ScriptNumber.CODEC.optionalFieldOf("z", ZERO).forGetter(Teleport::z),
                 Codec.FLOAT.optionalFieldOf("yaw", 0f).forGetter(Teleport::yaw),
                 Codec.FLOAT.optionalFieldOf("pitch", 0f).forGetter(Teleport::pitch),
                 Codec.BOOLEAN.optionalFieldOf("all", false).forGetter(Teleport::all),
@@ -134,17 +179,22 @@ public class DungeonActions {
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
+        public void validate(DungeonValidation check) {
+            readsAll(check, x, y, z);
+        }
+
+        @Override
+        public void run(ScriptContext context) {
             TeleportOptions options = fx ? TeleportOptions.DEFAULT.withSafe(false) : TeleportOptions.EXACT;
             if (destination.isPresent()) {
-                targets(context, player, all).forEach(target -> TeleportService.getInstance().teleport(target, destination.get(), options));
+                targets(context, all).forEach(target -> TeleportService.getInstance().teleport(target, destination.get(), options));
                 return;
             }
 
-            World world = context.world();
+            World world = context.feature().world();
             if (world == null) return;
-            Location location = new Location(world, x, y, z, yaw, pitch);
-            targets(context, player, all).forEach(target -> TeleportService.getInstance().teleport(target, location, options));
+            Location location = new Location(world, x.get(context), y.get(context), z.get(context), yaw, pitch);
+            targets(context, all).forEach(target -> TeleportService.getInstance().teleport(target, location, options));
         }
     }
 
@@ -160,15 +210,15 @@ public class DungeonActions {
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            context.end(reason);
+        public void run(ScriptContext context) {
+            context.feature().end(reason);
         }
     }
 
-    public record SetVar(String var, DataValue value, boolean perPlayer) implements DungeonAction {
+    public record SetVar(String var, ScriptValue value, boolean perPlayer) implements DungeonAction {
         public static final Codec<SetVar> CODEC = Codec.composite(
                 Codec.STRING.fieldOf("var").forGetter(SetVar::var),
-                DataValue.CODEC.fieldOf("value").forGetter(SetVar::value),
+                ScriptValue.CODEC.fieldOf("value").forGetter(SetVar::value),
                 Codec.BOOLEAN.optionalFieldOf("player", false).forGetter(SetVar::perPlayer),
                 SetVar::new
         );
@@ -181,18 +231,19 @@ public class DungeonActions {
         @Override
         public void validate(DungeonValidation check) {
             check.writesVar(var);
+            check.reads(value);
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            changeVar(context, player, var, perPlayer, value);
+        public void run(ScriptContext context) {
+            context.setVariable(var, perPlayer, value.get(context));
         }
     }
 
-    public record AddVar(String var, double amount, boolean perPlayer) implements DungeonAction {
+    public record AddVar(String var, ScriptValue amount, boolean perPlayer) implements DungeonAction {
         public static final Codec<AddVar> CODEC = Codec.composite(
                 Codec.STRING.fieldOf("var").forGetter(AddVar::var),
-                Codec.DOUBLE.optionalFieldOf("amount", 1.0).forGetter(AddVar::amount),
+                ScriptValue.CODEC.optionalFieldOf("amount", ScriptValue.of(DataValue.of(1))).forGetter(AddVar::amount),
                 Codec.BOOLEAN.optionalFieldOf("player", false).forGetter(AddVar::perPlayer),
                 AddVar::new
         );
@@ -205,18 +256,20 @@ public class DungeonActions {
         @Override
         public void validate(DungeonValidation check) {
             check.writesVar(var);
+            check.reads(amount);
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            double current = context.instance().variable(FeatureContext.varName(var, perPlayer, player)) instanceof DataValue.NumberValue(double value) ? value : 0;
-            changeVar(context, player, var, perPlayer, DataValue.of(current + amount));
+        public void run(ScriptContext context) {
+            double current = context.variable(var, perPlayer) instanceof DataValue.NumberValue(double value) ? value : 0;
+            double added = amount.get(context) instanceof DataValue.NumberValue(double value) ? value : 0;
+            context.setVariable(var, perPlayer, DataValue.of(current + added));
         }
     }
 
-    public record Delay(int ticks) implements DungeonAction {
+    public record Delay(ScriptNumber ticks) implements DungeonAction {
         public static final Codec<Delay> CODEC = Codec.composite(
-                Codec.INT.fieldOf("ticks").forGetter(Delay::ticks),
+                ScriptNumber.CODEC.fieldOf("ticks").forGetter(Delay::ticks),
                 Delay::new
         );
 
@@ -225,15 +278,20 @@ public class DungeonActions {
             return "delay";
         }
 
+        @Override
+        public void validate(DungeonValidation check) {
+            check.reads(ticks.refs());
+        }
+
         // Only meaningful inside a sequence, which waits on it.
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
+        public void run(ScriptContext context) {
         }
     }
 
     public record Sequence(List<DungeonAction> steps) implements DungeonAction {
         public static final Codec<Sequence> CODEC = Codec.composite(
-                Codec.listOf(DungeonAction.CODEC).fieldOf("steps").forGetter(Sequence::steps),
+                DungeonAction.LIST_CODEC.fieldOf("steps").forGetter(Sequence::steps),
                 Sequence::new
         );
 
@@ -244,35 +302,35 @@ public class DungeonActions {
 
         @Override
         public void validate(DungeonValidation check) {
-            for (int i = 0; i < steps.size(); i++) steps.get(i).validate(check.at("steps[" + i + "]"));
+            DungeonAction.validateAll(steps, check.at("steps"));
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            runFrom(context, player, 0);
+        public void run(ScriptContext context) {
+            runFrom(context, 0);
         }
 
-        private void runFrom(FeatureContext<?> context, @Nullable Player player, int start) {
+        private void runFrom(ScriptContext context, int start) {
             for (int i = start; i < steps.size(); i++) {
-                if (steps.get(i) instanceof Delay(int ticks)) {
+                if (steps.get(i) instanceof Delay delay) {
                     int next = i + 1;
                     Utils.runLater(() -> {
-                        if (!context.manager().isLive(context.instance())) return;
-                        runFrom(context, player != null && player.isOnline() ? player : null, next);
-                    }, Math.max(1, ticks));
+                        if (!context.feature().manager().isLive(context.feature().instance())) return;
+                        runFrom(context.withPlayer(context.player() != null && context.player().isOnline() ? context.player() : null), next);
+                    }, Math.max(1, delay.ticks().getInt(context)));
                     return;
                 }
-                steps.get(i).run(context, player);
+                steps.get(i).run(context);
             }
         }
     }
 
-    public record Repeat(int times, List<DungeonCondition> whileConditions, int interval, List<DungeonAction> actions) implements DungeonAction {
+    public record Repeat(ScriptNumber times, List<DungeonCondition> whileConditions, ScriptNumber interval, List<DungeonAction> actions) implements DungeonAction {
         public static final Codec<Repeat> CODEC = Codec.composite(
-                Codec.INT.fieldOf("times").forGetter(Repeat::times),
-                Codec.listOf(DungeonCondition.CODEC).optionalFieldOf("while", List.of()).forGetter(Repeat::whileConditions),
-                Codec.INT.optionalFieldOf("interval", 0).forGetter(Repeat::interval),
-                Codec.listOf(DungeonAction.CODEC).fieldOf("actions").forGetter(Repeat::actions),
+                ScriptNumber.CODEC.fieldOf("times").forGetter(Repeat::times),
+                DungeonCondition.LIST_CODEC.optionalFieldOf("while", List.of()).forGetter(Repeat::whileConditions),
+                ScriptNumber.CODEC.optionalFieldOf("interval", ZERO).forGetter(Repeat::interval),
+                DungeonAction.LIST_CODEC.fieldOf("do", "actions").forGetter(Repeat::actions),
                 Repeat::new
         );
 
@@ -283,25 +341,26 @@ public class DungeonActions {
 
         @Override
         public void validate(DungeonValidation check) {
-            if (times <= 0) check.warn("'times' must be positive");
-            for (int i = 0; i < whileConditions.size(); i++) whileConditions.get(i).validate(check.at("while[" + i + "]"));
-            for (int i = 0; i < actions.size(); i++) actions.get(i).validate(check.at("actions[" + i + "]"));
+            if (times.isConstant() && times.constant() <= 0) check.warn("'times' must be positive");
+            readsAll(check, times, interval);
+            DungeonCondition.validateAll(whileConditions, check.at("while"));
+            DungeonAction.validateAll(actions, check.at("actions"));
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            runFrom(context, player, 0);
+        public void run(ScriptContext context) {
+            runFrom(context, 0, times.getInt(context), interval.getInt(context));
         }
 
-        private void runFrom(FeatureContext<?> context, @Nullable Player player, int iteration) {
+        private void runFrom(ScriptContext context, int iteration, int times, int interval) {
             for (int i = iteration; i < times; i++) {
-                if (!DungeonCondition.all(whileConditions, context, player)) return;
-                actions.forEach(action -> action.run(context, player));
+                if (!DungeonCondition.all(whileConditions, context)) return;
+                DungeonAction.runAll(actions, context);
                 if (interval > 0 && i + 1 < times) {
                     int next = i + 1;
                     Utils.runLater(() -> {
-                        if (!context.manager().isLive(context.instance())) return;
-                        runFrom(context, player != null && player.isOnline() ? player : null, next);
+                        if (!context.feature().manager().isLive(context.feature().instance())) return;
+                        runFrom(context.withPlayer(context.player() != null && context.player().isOnline() ? context.player() : null), next, times, interval);
                     }, interval);
                     return;
                 }
@@ -311,9 +370,9 @@ public class DungeonActions {
 
     public record If(List<DungeonCondition> conditions, List<DungeonAction> then, List<DungeonAction> otherwise) implements DungeonAction {
         public static final Codec<If> CODEC = Codec.composite(
-                Codec.listOf(DungeonCondition.CODEC).fieldOf("conditions").forGetter(If::conditions),
-                Codec.listOf(DungeonAction.CODEC).optionalFieldOf("then", List.of()).forGetter(If::then),
-                Codec.listOf(DungeonAction.CODEC).optionalFieldOf("else", List.of()).forGetter(If::otherwise),
+                DungeonCondition.LIST_CODEC.fieldOf("if", "conditions").forGetter(If::conditions),
+                DungeonAction.LIST_CODEC.optionalFieldOf("then", List.of()).forGetter(If::then),
+                DungeonAction.LIST_CODEC.optionalFieldOf("else", List.of()).forGetter(If::otherwise),
                 If::new
         );
 
@@ -324,26 +383,26 @@ public class DungeonActions {
 
         @Override
         public void validate(DungeonValidation check) {
-            for (int i = 0; i < conditions.size(); i++) conditions.get(i).validate(check.at("conditions[" + i + "]"));
-            for (int i = 0; i < then.size(); i++) then.get(i).validate(check.at("then[" + i + "]"));
-            for (int i = 0; i < otherwise.size(); i++) otherwise.get(i).validate(check.at("else[" + i + "]"));
+            DungeonCondition.validateAll(conditions, check.at("if"));
+            DungeonAction.validateAll(then, check.at("then"));
+            DungeonAction.validateAll(otherwise, check.at("else"));
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            List<DungeonAction> branch = DungeonCondition.all(conditions, context, player) ? then : otherwise;
-            branch.forEach(action -> action.run(context, player));
+        public void run(ScriptContext context) {
+            List<DungeonAction> branch = DungeonCondition.all(conditions, context) ? then : otherwise;
+            DungeonAction.runAll(branch, context);
         }
     }
 
-    public record SpawnMob(String mob, int count, double x, double y, double z, double spread, String tag) implements DungeonAction {
+    public record SpawnMob(String mob, ScriptNumber count, ScriptNumber x, ScriptNumber y, ScriptNumber z, ScriptNumber spread, String tag) implements DungeonAction {
         public static final Codec<SpawnMob> CODEC = Codec.composite(
                 Codec.STRING.fieldOf("mob").forGetter(SpawnMob::mob),
-                Codec.INT.optionalFieldOf("count", 1).forGetter(SpawnMob::count),
-                Codec.DOUBLE.fieldOf("x").forGetter(SpawnMob::x),
-                Codec.DOUBLE.fieldOf("y").forGetter(SpawnMob::y),
-                Codec.DOUBLE.fieldOf("z").forGetter(SpawnMob::z),
-                Codec.DOUBLE.optionalFieldOf("spread", 0.0).forGetter(SpawnMob::spread),
+                ScriptNumber.CODEC.optionalFieldOf("count", ONE).forGetter(SpawnMob::count),
+                ScriptNumber.CODEC.fieldOf("x").forGetter(SpawnMob::x),
+                ScriptNumber.CODEC.fieldOf("y").forGetter(SpawnMob::y),
+                ScriptNumber.CODEC.fieldOf("z").forGetter(SpawnMob::z),
+                ScriptNumber.CODEC.optionalFieldOf("spread", ZERO).forGetter(SpawnMob::spread),
                 Codec.STRING.optionalFieldOf("tag", "").forGetter(SpawnMob::tag),
                 SpawnMob::new
         );
@@ -356,21 +415,24 @@ public class DungeonActions {
         @Override
         public void validate(DungeonValidation check) {
             check.checkMob(mob);
+            readsAll(check, count, x, y, z, spread);
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            World world = context.world();
+        public void run(ScriptContext context) {
+            World world = context.feature().world();
             if (world == null) return;
             boolean tracked = !tag.isEmpty();
             ThreadLocalRandom random = ThreadLocalRandom.current();
+            int count = this.count.getInt(context);
+            double x = this.x.get(context), y = this.y.get(context), z = this.z.get(context), spread = Math.max(0, this.spread.get(context));
             for (int i = 0; i < count; i++) {
                 Location location = new Location(world, x + random.nextDouble(-spread, spread + 1e-9), y, z + random.nextDouble(-spread, spread + 1e-9));
-                Entity spawned = spawn(context, world, location);
+                Entity spawned = spawn(context.feature(), world, location);
                 if (spawned == null) break;
-                if (tracked && spawned instanceof LivingEntity living) context.manager().trackedMobs().track(tag, living);
+                if (tracked && spawned instanceof LivingEntity living) context.feature().manager().trackedMobs().track(tag, living);
             }
-            if (tracked) context.save();
+            if (tracked) context.feature().save();
         }
 
         private @Nullable Entity spawn(FeatureContext<?> context, World world, Location location) {
@@ -386,10 +448,10 @@ public class DungeonActions {
         }
     }
 
-    public record GiveItem(String item, int amount, boolean all) implements DungeonAction {
+    public record GiveItem(String item, ScriptNumber amount, boolean all) implements DungeonAction {
         public static final Codec<GiveItem> CODEC = Codec.composite(
                 Codec.STRING.fieldOf("item").forGetter(GiveItem::item),
-                Codec.INT.optionalFieldOf("amount", 1).forGetter(GiveItem::amount),
+                ScriptNumber.CODEC.optionalFieldOf("amount", ONE).forGetter(GiveItem::amount),
                 Codec.BOOLEAN.optionalFieldOf("all", false).forGetter(GiveItem::all),
                 GiveItem::new
         );
@@ -402,15 +464,18 @@ public class DungeonActions {
         @Override
         public void validate(DungeonValidation check) {
             check.checkItem(item);
+            check.reads(amount.refs());
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
+        public void run(ScriptContext context) {
+            int amount = this.amount.getInt(context);
+            if (amount <= 0) return;
             if (ItemRef.toItemStack(item, amount) == null) {
-                RogueSmpCore.LOGGER.warn("give_item: unknown item {} in dungeon {}", item, context.instance().dungeonId());
+                RogueSmpCore.LOGGER.warn("give_item: unknown item {} in dungeon {}", item, context.feature().instance().dungeonId());
                 return;
             }
-            for (Player target : targets(context, player, all)) PlayerUtils.giveItem(target, ItemRef.toItemStack(item, amount));
+            for (Player target : targets(context, all)) PlayerUtils.giveItem(target, ItemRef.toItemStack(item, amount));
         }
     }
 
@@ -434,8 +499,8 @@ public class DungeonActions {
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            World world = context.world();
+        public void run(ScriptContext context) {
+            World world = context.feature().world();
             if (world != null) placeBlock(world.getBlockAt(x, y, z), block);
         }
     }
@@ -470,8 +535,8 @@ public class DungeonActions {
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            World world = context.world();
+        public void run(ScriptContext context) {
+            World world = context.feature().world();
             if (world == null) return;
 
             BlockVector3 min = from.getMinimum(to);
@@ -488,10 +553,10 @@ public class DungeonActions {
         }
     }
 
-    public record ShowTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut, boolean all) implements DungeonAction {
+    public record ShowTitle(ScriptText title, ScriptText subtitle, int fadeIn, int stay, int fadeOut, boolean all) implements DungeonAction {
         public static final Codec<ShowTitle> CODEC = Codec.composite(
-                Codec.STRING.optionalFieldOf("title", "").forGetter(ShowTitle::title),
-                Codec.STRING.optionalFieldOf("subtitle", "").forGetter(ShowTitle::subtitle),
+                ScriptText.CODEC.optionalFieldOf("title", ScriptText.EMPTY).forGetter(ShowTitle::title),
+                ScriptText.CODEC.optionalFieldOf("subtitle", ScriptText.EMPTY).forGetter(ShowTitle::subtitle),
                 Codec.INT.optionalFieldOf("fade_in", 10).forGetter(ShowTitle::fadeIn),
                 Codec.INT.optionalFieldOf("stay", 70).forGetter(ShowTitle::stay),
                 Codec.INT.optionalFieldOf("fade_out", 20).forGetter(ShowTitle::fadeOut),
@@ -506,17 +571,17 @@ public class DungeonActions {
 
         @Override
         public void validate(DungeonValidation check) {
-            check.readsText(title);
-            check.readsText(subtitle);
+            check.reads(title);
+            check.reads(subtitle);
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
+        public void run(ScriptContext context) {
             Title shown = Title.title(
-                    Utils.fromString(format(context, player, title)),
-                    Utils.fromString(format(context, player, subtitle)),
+                    Utils.fromString(title.format(context)),
+                    Utils.fromString(subtitle.format(context)),
                     Title.Times.times(Duration.ofMillis(fadeIn * 50L), Duration.ofMillis(stay * 50L), Duration.ofMillis(fadeOut * 50L)));
-            targets(context, player, all).forEach(target -> target.showTitle(shown));
+            targets(context, all).forEach(target -> target.showTitle(shown));
         }
     }
 
@@ -535,9 +600,9 @@ public class DungeonActions {
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
+        public void run(ScriptContext context) {
             Sound played = Sound.sound(sound, Sound.Source.MASTER, volume, pitch);
-            targets(context, player, all).forEach(target -> target.playSound(played));
+            targets(context, all).forEach(target -> target.playSound(played));
         }
     }
 
@@ -554,11 +619,11 @@ public class DungeonActions {
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
+        public void run(ScriptContext context) {
             QuestManager questManager = QuestManager.getInstance();
-            GroupHolder holder = QuestsFeature.holder(context.instance());
+            GroupHolder holder = QuestsFeature.holder(context.feature().instance());
             if (!questManager.startQuest(holder, quest)) return;
-            context.instance().members().forEach(member -> questManager.addEligible(holder, quest.getId(), member));
+            context.feature().instance().members().forEach(member -> questManager.addEligible(holder, quest.getId(), member));
         }
     }
 
@@ -599,8 +664,8 @@ public class DungeonActions {
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            World world = context.world();
+        public void run(ScriptContext context) {
+            World world = context.feature().world();
             if (world == null || shapes.isEmpty()) return;
 
             ServerRegionManager regions = ServerRegionManager.getInstance();
@@ -637,13 +702,13 @@ public class DungeonActions {
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            World world = context.world();
+        public void run(ScriptContext context) {
+            World world = context.feature().world();
             if (world == null) return;
 
             ServerRegionManager regions = ServerRegionManager.getInstance();
             if (regions.get(world, region) == null) {
-                RogueSmpCore.LOGGER.warn("region_flag: unknown region {} in dungeon {}", region, context.instance().dungeonId());
+                RogueSmpCore.LOGGER.warn("region_flag: unknown region {} in dungeon {}", region, context.feature().instance().dungeonId());
                 return;
             }
             if (value.isPresent()) {
@@ -668,13 +733,13 @@ public class DungeonActions {
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            World world = context.world();
+        public void run(ScriptContext context) {
+            World world = context.feature().world();
             if (world == null) return;
 
             ServerRegionManager regions = ServerRegionManager.getInstance();
             if (regions.get(world, id) == null) {
-                RogueSmpCore.LOGGER.warn("remove_region: unknown region {} in dungeon {}", id, context.instance().dungeonId());
+                RogueSmpCore.LOGGER.warn("remove_region: unknown region {} in dungeon {}", id, context.feature().instance().dungeonId());
                 return;
             }
             regions.remove(world, id);
@@ -682,10 +747,10 @@ public class DungeonActions {
         }
     }
 
-    public record TakeItem(String item, int amount, boolean all) implements DungeonAction {
+    public record TakeItem(String item, ScriptNumber amount, boolean all) implements DungeonAction {
         public static final Codec<TakeItem> CODEC = Codec.composite(
                 Codec.STRING.fieldOf("item").forGetter(TakeItem::item),
-                Codec.INT.optionalFieldOf("amount", 1).forGetter(TakeItem::amount),
+                ScriptNumber.CODEC.optionalFieldOf("amount", ONE).forGetter(TakeItem::amount),
                 Codec.BOOLEAN.optionalFieldOf("all", false).forGetter(TakeItem::all),
                 TakeItem::new
         );
@@ -698,21 +763,23 @@ public class DungeonActions {
         @Override
         public void validate(DungeonValidation check) {
             check.checkItem(item);
+            check.reads(amount.refs());
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            targets(context, player, all).forEach(target -> PlayerUtils.removeItem(target, item, amount));
+        public void run(ScriptContext context) {
+            int amount = this.amount.getInt(context);
+            if (amount > 0) targets(context, all).forEach(target -> PlayerUtils.removeItem(target, item, amount));
         }
     }
 
-    public record Effect(PotionEffectType effect, int duration, int amplifier, boolean clear, boolean all) implements DungeonAction {
+    public record Effect(PotionEffectType effect, ScriptNumber duration, ScriptNumber amplifier, boolean clear, boolean all) implements DungeonAction {
         private static final Codec<PotionEffectType> EFFECT_TYPE = registryCodec(Registry.EFFECT, "effect");
 
         public static final Codec<Effect> CODEC = Codec.composite(
                 EFFECT_TYPE.fieldOf("effect").forGetter(Effect::effect),
-                Codec.INT.optionalFieldOf("duration", 200).forGetter(Effect::duration),
-                Codec.INT.optionalFieldOf("amplifier", 0).forGetter(Effect::amplifier),
+                ScriptNumber.CODEC.optionalFieldOf("duration", ScriptNumber.of(200)).forGetter(Effect::duration),
+                ScriptNumber.CODEC.optionalFieldOf("amplifier", ZERO).forGetter(Effect::amplifier),
                 Codec.BOOLEAN.optionalFieldOf("clear", false).forGetter(Effect::clear),
                 Codec.BOOLEAN.optionalFieldOf("all", false).forGetter(Effect::all),
                 Effect::new
@@ -724,23 +791,30 @@ public class DungeonActions {
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            for (Player target : targets(context, player, all)) {
+        public void validate(DungeonValidation check) {
+            readsAll(check, duration, amplifier);
+        }
+
+        @Override
+        public void run(ScriptContext context) {
+            int duration = this.duration.getInt(context);
+            int amplifier = Math.max(0, this.amplifier.getInt(context));
+            for (Player target : targets(context, all)) {
                 if (clear) target.removePotionEffect(effect);
                 else target.addPotionEffect(new PotionEffect(effect, duration, amplifier));
             }
         }
     }
 
-    public record Particles(Particle particle, double x, double y, double z, int count, double spread, double speed) implements DungeonAction {
+    public record Particles(Particle particle, ScriptNumber x, ScriptNumber y, ScriptNumber z, ScriptNumber count, double spread, double speed) implements DungeonAction {
         private static final Codec<Particle> PARTICLE_TYPE = registryCodec(Registry.PARTICLE_TYPE, "particle");
 
         public static final Codec<Particles> CODEC = Codec.composite(
                 PARTICLE_TYPE.fieldOf("particle").forGetter(Particles::particle),
-                Codec.DOUBLE.fieldOf("x").forGetter(Particles::x),
-                Codec.DOUBLE.fieldOf("y").forGetter(Particles::y),
-                Codec.DOUBLE.fieldOf("z").forGetter(Particles::z),
-                Codec.INT.optionalFieldOf("count", 20).forGetter(Particles::count),
+                ScriptNumber.CODEC.fieldOf("x").forGetter(Particles::x),
+                ScriptNumber.CODEC.fieldOf("y").forGetter(Particles::y),
+                ScriptNumber.CODEC.fieldOf("z").forGetter(Particles::z),
+                ScriptNumber.CODEC.optionalFieldOf("count", ScriptNumber.of(20)).forGetter(Particles::count),
                 Codec.DOUBLE.optionalFieldOf("spread", 0.5).forGetter(Particles::spread),
                 Codec.DOUBLE.optionalFieldOf("speed", 0.0).forGetter(Particles::speed),
                 Particles::new
@@ -753,22 +827,25 @@ public class DungeonActions {
 
         @Override
         public void validate(DungeonValidation check) {
+            readsAll(check, x, y, z, count);
             if (particle.getDataType() != Void.class) check.warn("particle '" + particle.getKey().getKey() + "' needs extra data and is not supported");
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            World world = context.world();
+        public void run(ScriptContext context) {
+            World world = context.feature().world();
             if (world == null || particle.getDataType() != Void.class) return;
-            world.spawnParticle(particle, x, y, z, count, spread, spread, spread, speed);
+            world.spawnParticle(particle, x.get(context), y.get(context), z.get(context), Math.max(0, count.getInt(context)), spread, spread, spread, speed);
         }
     }
 
-    public record StartCountdown(String id, int ticks, String title, BossBar.Color color) implements DungeonAction {
+    public record StartCountdown(String id, ScriptNumber ticks, ScriptText title, BossBar.Color color) implements DungeonAction {
+        private static final ScriptText TIME = ScriptText.compile("{time}").result();
+
         public static final Codec<StartCountdown> CODEC = Codec.composite(
                 Codec.STRING.fieldOf("id").forGetter(StartCountdown::id),
-                Codec.INT.fieldOf("ticks").forGetter(StartCountdown::ticks),
-                Codec.STRING.optionalFieldOf("title", "{time}").forGetter(StartCountdown::title),
+                ScriptNumber.CODEC.fieldOf("ticks").forGetter(StartCountdown::ticks),
+                ScriptText.CODEC.optionalFieldOf("title", TIME).forGetter(StartCountdown::title),
                 Codec.enumOf(BossBar.Color.class).optionalFieldOf("color", BossBar.Color.RED).forGetter(StartCountdown::color),
                 StartCountdown::new
         );
@@ -780,14 +857,15 @@ public class DungeonActions {
 
         @Override
         public void validate(DungeonValidation check) {
-            if (ticks <= 0) check.warn("'ticks' must be positive");
-            check.readsText(title);
+            if (ticks.isConstant() && ticks.constant() <= 0) check.warn("'ticks' must be positive");
+            check.reads(ticks.refs());
+            check.reads(title);
             check.emits("countdown_ended", java.util.Set.of());
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            ScriptCountdowns.start(context, id, ticks, title, color);
+        public void run(ScriptContext context) {
+            context.feature().instance().countdowns().start(context, id, ticks.getInt(context), title, color);
         }
     }
 
@@ -803,8 +881,8 @@ public class DungeonActions {
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            ScriptCountdowns.stop(context.instance(), id);
+        public void run(ScriptContext context) {
+            context.feature().instance().countdowns().stop(id);
         }
     }
 
@@ -812,7 +890,7 @@ public class DungeonActions {
         public record Option(double weight, List<DungeonAction> actions) {
             public static final Codec<Option> CODEC = Codec.composite(
                     Codec.DOUBLE.optionalFieldOf("weight", 1.0).forGetter(Option::weight),
-                    Codec.listOf(DungeonAction.CODEC).fieldOf("actions").forGetter(Option::actions),
+                    DungeonAction.LIST_CODEC.fieldOf("do", "actions").forGetter(Option::actions),
                     Option::new
             );
         }
@@ -831,29 +909,28 @@ public class DungeonActions {
         public void validate(DungeonValidation check) {
             if (options.isEmpty()) check.warn("'options' is empty");
             for (int i = 0; i < options.size(); i++) {
-                List<DungeonAction> actions = options.get(i).actions();
-                for (int j = 0; j < actions.size(); j++) actions.get(j).validate(check.at("options[" + i + "].actions[" + j + "]"));
+                DungeonAction.validateAll(options.get(i).actions(), check.at("options[" + i + "].do"));
             }
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
+        public void run(ScriptContext context) {
             double total = options.stream().mapToDouble(Option::weight).sum();
             if (total <= 0) return;
             double roll = ThreadLocalRandom.current().nextDouble(total);
             for (Option option : options) {
                 roll -= option.weight();
                 if (roll < 0) {
-                    option.actions().forEach(action -> action.run(context, player));
+                    DungeonAction.runAll(option.actions(), context);
                     return;
                 }
             }
         }
     }
 
-    public record RunCommand(String command, boolean asPlayer) implements DungeonAction {
+    public record RunCommand(ScriptText command, boolean asPlayer) implements DungeonAction {
         public static final Codec<RunCommand> CODEC = Codec.composite(
-                Codec.STRING.fieldOf("command").forGetter(RunCommand::command),
+                ScriptText.CODEC.fieldOf("command").forGetter(RunCommand::command),
                 Codec.BOOLEAN.optionalFieldOf("as_player", false).forGetter(RunCommand::asPlayer),
                 RunCommand::new
         );
@@ -865,27 +942,27 @@ public class DungeonActions {
 
         @Override
         public void validate(DungeonValidation check) {
-            check.readsText(command);
+            check.reads(command);
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            String formatted = format(context, player, command);
+        public void run(ScriptContext context) {
+            String formatted = command.format(context);
             if (formatted.startsWith("/")) formatted = formatted.substring(1);
             if (asPlayer) {
-                if (player != null) player.performCommand(formatted);
+                if (context.player() != null) context.player().performCommand(formatted);
                 return;
             }
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), formatted);
         }
     }
 
-    public record Call(String function) implements DungeonAction {
+    public record Call(String function, Map<String, ScriptValue> args) implements DungeonAction {
         private static final int MAX_DEPTH = 16;
-        private static int depth;
 
         public static final Codec<Call> CODEC = Codec.composite(
                 Codec.STRING.fieldOf("function").forGetter(Call::function),
+                Codec.unboundedMap(ScriptValue.CODEC).optionalFieldOf("args", Map.of()).forGetter(Call::args),
                 Call::new
         );
 
@@ -896,31 +973,29 @@ public class DungeonActions {
 
         @Override
         public void validate(DungeonValidation check) {
-            check.checkFunction(function);
+            check.checkFunction(function, args.keySet());
+            args.forEach((key, value) -> check.at("args." + key).reads(value));
         }
 
         @Override
-        public void run(FeatureContext<?> context, @Nullable Player player) {
-            DungeonDefinition definition = context.instance().definition();
-            List<DungeonAction> actions = definition == null ? null : definition.functions().get(function);
-            if (actions == null) {
-                RogueSmpCore.LOGGER.warn("call: unknown function {} in dungeon {}", function, context.instance().dungeonId());
+        public void run(ScriptContext context) {
+            DungeonDefinition definition = context.feature().instance().definition();
+            ScriptFunction called = definition == null ? null : definition.functions().get(function);
+            if (called == null) {
+                RogueSmpCore.LOGGER.warn("call: unknown function {} in dungeon {}", function, context.feature().instance().dungeonId());
                 return;
             }
-            if (depth >= MAX_DEPTH) {
-                RogueSmpCore.LOGGER.warn("call: function {} nested deeper than {} in dungeon {}, stopping", function, MAX_DEPTH, context.instance().dungeonId());
+            if (context.depth() >= MAX_DEPTH) {
+                RogueSmpCore.LOGGER.warn("call: function {} nested deeper than {} in dungeon {}, stopping", function, MAX_DEPTH, context.feature().instance().dungeonId());
                 return;
             }
-            depth++;
-            try {
-                actions.forEach(action -> action.run(context, player));
-            } finally {
-                depth--;
-            }
+            DungeonAction.runAll(called.actions(), context.call(called.params().isEmpty() ? null : evaluate(args, context)));
         }
     }
 
     public static final Codec<Signal> SIGNAL = register("signal", Signal.CODEC);
+    public static final Codec<Eval> EVAL = register("eval", Eval.CODEC);
+    public static final Codec<Cancel> CANCEL = register("cancel", Cancel.CODEC);
     public static final Codec<SetVar> SET_VAR = register("set_var", SetVar.CODEC);
     public static final Codec<AddVar> ADD_VAR = register("add_var", AddVar.CODEC);
     public static final Codec<Message> MESSAGE = register("message", Message.CODEC);
@@ -949,13 +1024,26 @@ public class DungeonActions {
     public static final Codec<RunCommand> COMMAND = register("command", RunCommand.CODEC);
     public static final Codec<Call> CALL = register("call", Call.CODEC);
 
+    private static final ScriptNumber ZERO = ScriptNumber.of(0);
+    private static final ScriptNumber ONE = ScriptNumber.of(1);
+
     public static void loadClass() {
 
     }
 
-    private static List<Player> targets(FeatureContext<?> context, @Nullable Player player, boolean all) {
-        if (all || player == null) return context.onlinePlayers();
-        return List.of(player);
+    private static void readsAll(DungeonValidation check, ScriptNumber... numbers) {
+        for (ScriptNumber number : numbers) check.reads(number.refs());
+    }
+
+    private static List<Player> targets(ScriptContext context, boolean all) {
+        if (all || context.player() == null) return context.feature().onlinePlayers();
+        return List.of(context.player());
+    }
+
+    private static Map<String, DataValue> evaluate(Map<String, ScriptValue> values, ScriptContext context) {
+        Map<String, DataValue> result = new HashMap<>();
+        values.forEach((key, value) -> result.put(key, value.get(context)));
+        return result;
     }
 
     private static void placeBlock(Block target, BlockRef block) {
@@ -975,26 +1063,6 @@ public class DungeonActions {
             T value = key == null ? null : registry.get(key);
             return value != null ? DataResult.success(value) : DataResult.error("Unknown " + kind + " " + name);
         }, value -> value.getKey().asString());
-    }
-
-    static String format(FeatureContext<?> context, @Nullable Player player, String text) {
-        String withPlayer = text.replace("{player}", player != null ? player.getName() : "");
-        String withPlayerVars = PLAYER_VAR_PLACEHOLDER.matcher(withPlayer).replaceAll(match -> {
-            DataValue value = player == null ? null : context.instance().variable(FeatureContext.varName(match.group(1), true, player));
-            return Matcher.quoteReplacement(value != null ? value.display() : "");
-        });
-        return VAR_PLACEHOLDER.matcher(withPlayerVars).replaceAll(match -> {
-            DataValue value = context.instance().variable(match.group(1));
-            return Matcher.quoteReplacement(value != null ? value.display() : "");
-        });
-    }
-
-    private static void changeVar(FeatureContext<?> context, @Nullable Player player, String var, boolean perPlayer, DataValue value) {
-        String name = FeatureContext.varName(var, perPlayer, player);
-        DataValue old = context.instance().variable(name);
-        context.instance().setVariable(name, value);
-        context.save();
-        if (!value.equals(old)) context.fire(new DungeonEvent.VarChanged(var, old, value, player));
     }
 
     private static void validateFlag(DungeonValidation check, String flag, String value) {

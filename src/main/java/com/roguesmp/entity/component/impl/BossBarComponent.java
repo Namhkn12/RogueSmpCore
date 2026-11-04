@@ -4,10 +4,8 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.entity.SmpEntity;
 import com.roguesmp.entity.component.EntityComponent;
-import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.entity.component.TickingComponent;
 import com.roguesmp.utils.EntityUtils;
-import com.roguesmp.utils.Utils;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -92,17 +90,12 @@ public class BossBarComponent implements TickingComponent {
 
     @Override
     public void onSpawn(SmpEntity smpEntity) {
-        Component title = titleOf(smpEntity);
+        Component title = smpEntity.displayName();
         if (bar != null) {
             bar.name(title);
             return;
         }
         build(smpEntity.getEntity(), title);
-    }
-
-    private static Component titleOf(SmpEntity smpEntity) {
-        DisplayNameComponent displayName = smpEntity.getComponent(EntityComponentKeys.DISPLAY_NAME);
-        return displayName != null ? Utils.fromString(displayName.name()) : smpEntity.getEntity().name();
     }
 
     private void build(LivingEntity entity, Component title) {
