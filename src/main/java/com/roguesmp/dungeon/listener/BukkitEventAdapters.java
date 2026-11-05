@@ -51,6 +51,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -191,6 +192,9 @@ public final class BukkitEventAdapters {
         register(BukkitEventAdapter.custom("player_death", PlayerDeathEvent.class).always().priority(EventPriority.HIGH)
                 .emits("player_died")
                 .translate((event, emit) -> emit.fire(event.getPlayer().getWorld(), new DungeonEvent.PlayerDied(event.getPlayer(), event))));
+        register(BukkitEventAdapter.custom("player_respawn", PlayerRespawnEvent.class).always().priority(EventPriority.HIGH)
+                .emits("player_respawned")
+                .translate((event, emit) -> emit.fire(event.getPlayer().getWorld(), new DungeonEvent.PlayerRespawned(event.getPlayer(), event))));
         register(BukkitEventAdapter.custom("quest_completed", QuestCompletedEvent.class).always()
                 .emits("quest_completed")
                 .translate((event, emit) -> {

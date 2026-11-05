@@ -46,7 +46,6 @@ public class ItemBrowser extends BaseGui {
 
     public ItemBrowser() {
         super(Utils.fromString("Item Browser"), 6);
-        this.filteredEntries = new ArrayList<>(allEntries);
 
         infoBook.setData(DataComponentTypes.ITEM_NAME, Component.text("Item Browser", NamedTextColor.GREEN));
         infoBook.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(

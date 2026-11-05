@@ -17,6 +17,7 @@ public class DungeonFeatures {
     public static final Codec<TreasureFeature> TREASURE = register(TreasureFeature.TYPE_KEY, TreasureFeature.CODEC);
     public static final Codec<ScoreboardFeature> SCOREBOARD = register(ScoreboardFeature.TYPE_KEY, ScoreboardFeature.CODEC);
     public static final Codec<BlockPalettesFeature> BLOCK_PALETTES = register(BlockPalettesFeature.TYPE_KEY, BlockPalettesFeature.CODEC);
+    public static final Codec<BedSpawnFeature> BED_SPAWN = register(BedSpawnFeature.TYPE_KEY, BedSpawnFeature.CODEC);
 
     public static void loadClass() {
 
