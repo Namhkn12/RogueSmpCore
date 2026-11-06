@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 
 public final class StatSheet {
@@ -53,9 +54,9 @@ public final class StatSheet {
         return odds / (1 + odds);
     }
 
-    public List<Component> describe() {
+    public List<Component> describe(Set<BlockStat> stats) {
         List<Component> lines = new ArrayList<>();
-        for (BlockStat stat : BlockStat.values()) {
+        for (BlockStat stat : stats) {
             double flat = flatSum(stat);
             double percent = percentSums.getOrDefault(stat, 0.0);
             double total = totalProducts.getOrDefault(stat, 1.0);

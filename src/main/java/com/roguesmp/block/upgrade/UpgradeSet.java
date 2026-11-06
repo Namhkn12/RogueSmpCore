@@ -73,7 +73,7 @@ public final class UpgradeSet {
     }
 
     public List<Component> describe() {
-        List<Component> lines = new ArrayList<>(sheet.describe());
+        List<Component> lines = new ArrayList<>(sheet.describe(host.stats()));
         behaviors.forEach(behavior -> lines.addAll(behavior.getDisplay()));
         return lines;
     }

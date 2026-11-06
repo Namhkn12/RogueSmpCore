@@ -36,6 +36,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -47,6 +48,10 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     private static final MapCodec<BlockFace> DIRECTION_CODEC = Directional.CODEC.optionalFieldOf("direction", BlockFace.EAST);
     private static final MapCodec<Optional<Integer>> ENERGY_CODEC = Codec.INT.optionalFieldOf("energy");
     private static final MapCodec<Optional<ActiveCatalyst>> CATALYST_CODEC = ActiveCatalyst.CODEC.optionalFieldOf("active_catalyst");
+
+    private static final Set<BlockStat> STATS = EnumSet.of(BlockStat.ENERGY_PER_TICK, BlockStat.MAX_ENERGY,
+            BlockStat.GENERATOR_PLACE_DELAY, BlockStat.GENERATOR_BREAK_DELAY, BlockStat.GENERATOR_LOOT_CAPACITY,
+            BlockStat.GENERATOR_DROP_AMOUNT, BlockStat.GENERATOR_RARE_DROP_CHANCE, BlockStat.GENERATOR_COMMON_DROP_AMOUNT);
 
     private final GeneratorData data;
     private final @Nullable Material placeMaterial;
@@ -212,6 +217,11 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     @Override
     public UpgradeSet upgrades() {
         return upgrades;
+    }
+
+    @Override
+    public Set<BlockStat> stats() {
+        return STATS;
     }
 
     @Override

@@ -72,7 +72,8 @@ public class ResourceGeneratorGui extends MachineGui {
         if (Math.abs(result - base) < 1e-9) return line.append(Component.text(Utils.formatDecimal(base) + suffix, NamedTextColor.GRAY));
 
         NamedTextColor color = result > base == higherIsBetter ? NamedTextColor.GREEN : NamedTextColor.RED;
-        return line.append(Component.text(Utils.formatDecimal(base) + suffix + " → ", NamedTextColor.GRAY))
+        return line.append(Component.text(Utils.formatDecimal(base) + suffix, NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH))
+                .append(Component.text(" → ", NamedTextColor.GRAY))
                 .append(Component.text(Utils.formatDecimal(result) + suffix, color));
     }
 
