@@ -22,7 +22,7 @@ public class EnergyGeneratorGui extends MachineGui {
     private final EnergyGeneratorBlock generator;
 
     public EnergyGeneratorGui(EnergyGeneratorBlock generator) {
-        super(Component.text("Máy phát năng lượng"), 3, generator.itemStorage(), generator::openGui);
+        super(Utils.fromString(generator.getProperties().displayName()), 3, generator.itemStorage(), generator::openGui);
         this.generator = generator;
     }
 

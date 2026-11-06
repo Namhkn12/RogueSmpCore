@@ -17,12 +17,14 @@ public class CraftingRecipes {
     public static final RecipeKey<ShapelessCraftingRecipe> SHAPELESS;
     public static final RecipeKey<FusionRecipe> FUSION;
     public static final RecipeKey<CokeOvenRecipe> COKE_OVEN;
+    public static final RecipeKey<CrusherRecipe> CRUSHER;
 
     static {
         SHAPED = register(ShapedCraftingRecipe.TYPE_KEY, ShapedCraftingRecipe.TYPE_NAME, ShapedCraftingRecipe.CODEC);
         SHAPELESS = register(ShapelessCraftingRecipe.TYPE_KEY, ShapelessCraftingRecipe.TYPE_NAME, ShapelessCraftingRecipe.CODEC);
         FUSION = register(FusionRecipe.TYPE_KEY, FusionRecipe.TYPE_NAME, FusionRecipe.CODEC);
         COKE_OVEN = register(CokeOvenRecipe.TYPE_KEY, CokeOvenRecipe.TYPE_NAME, CokeOvenRecipe.CODEC);
+        CRUSHER = register(CrusherRecipe.TYPE_KEY, CrusherRecipe.TYPE_NAME, CrusherRecipe.CODEC);
     }
 
     public static void loadClass() {

@@ -37,7 +37,7 @@ public class ResourceGeneratorGui extends MachineGui {
     private final UpgradePanel upgrades;
 
     public ResourceGeneratorGui(ResourceGeneratorBlock generator) {
-        super(Component.text("Resource Generator"), 4, generator.itemStorage(), generator::openGui);
+        super(Utils.fromString(generator.getProperties().displayName()), 4, generator.itemStorage(), generator::openGui);
         this.generator = generator;
         this.upgrades = new UpgradePanel(this, generator.upgrades(), this::refresh);
     }
@@ -57,7 +57,6 @@ public class ResourceGeneratorGui extends MachineGui {
         List<Component> infoLore = new ArrayList<>();
         infoLore.add(Utils.text("Năng lượng: ", NamedTextColor.YELLOW).append(Component.text(generator.getEnergy() + "/" + generator.getMaxEnergy(), NamedTextColor.GRAY)));
         infoLore.add(Utils.text("Sức chứa: ", NamedTextColor.YELLOW).append(Component.text(generator.loot().occupied() + "/" + generator.loot().capacity(), NamedTextColor.GRAY)));
-        infoLore.add(statLine("Năng lượng tối đa", data.maxEnergy(), generator.getMaxEnergy(), "", true));
         infoLore.add(statLine("Sức chứa tối đa", data.lootCapacity(), generator.lootCapacity(), "", true));
         infoLore.add(statLine("Thời gian đặt", data.placeDelayTicks() / 20d, generator.placeDelayTicks() / 20d, "s", false));
         infoLore.add(statLine("Thời gian khai thác", data.breakDelayTicks() / 20d, generator.breakDelayTicks() / 20d, "s", false));
@@ -65,16 +64,6 @@ public class ResourceGeneratorGui extends MachineGui {
         infoLore.add(Utils.text("Module: ", NamedTextColor.YELLOW).append(Component.text(IntStream.range(0, generator.modules().size()).filter(i -> generator.modules().get(i) != null).count() + "/" + generator.modules().size(), NamedTextColor.GRAY)));
         ItemStackUtils.setLore(item, infoLore);
         addButton(MAIN_INFO_SLOT, item, ClickHandler.noAction());
-    }
-
-    private Component statLine(String label, double base, double result, String suffix, boolean higherIsBetter) {
-        Component line = Utils.text(label + ": ", NamedTextColor.YELLOW);
-        if (Math.abs(result - base) < 1e-9) return line.append(Component.text(Utils.formatDecimal(base) + suffix, NamedTextColor.GRAY));
-
-        NamedTextColor color = result > base == higherIsBetter ? NamedTextColor.GREEN : NamedTextColor.RED;
-        return line.append(Component.text(Utils.formatDecimal(base) + suffix, NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH))
-                .append(Component.text(" → ", NamedTextColor.GRAY))
-                .append(Component.text(Utils.formatDecimal(result) + suffix, color));
     }
 
     private void renderStatus() {
@@ -218,7 +207,7 @@ public class ResourceGeneratorGui extends MachineGui {
         renderMainInfo();
         renderStatus();
         upgrades.renderModules(generator.modules(), MODULE_SLOTS, generator::checkModule, generator::isValidModule);
-        upgrades.renderCatalyst(generator.catalystFeed(), generator::isValidCatalyst, generator.catalyst(), generator.isCatalystPaused(), generator::clearCatalyst, CATALYST_SLOT, ACTIVE_CATALYST_SLOT);
+        upgrades.renderCatalyst(generator.catalyst(), generator.getEnergy() > 0, CATALYST_SLOT, ACTIVE_CATALYST_SLOT);
         upgrades.renderSummary(BUFF_SUMMARY_SLOT);
         renderLootSlots();
     }

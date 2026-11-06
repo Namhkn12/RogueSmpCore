@@ -1,0 +1,89 @@
+package com.roguesmp.crafting.recipe;
+
+import com.roguesmp.block.BlockDrop;
+import com.roguesmp.codec.Codec;
+import com.roguesmp.crafting.CraftingIngredient;
+import com.roguesmp.utils.ItemRef;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.util.List;
+
+public final class CrusherRecipe extends CraftingRecipe {
+    public static final String TYPE_KEY = "crusher";
+    public static final String TYPE_NAME = "Máy nghiền";
+
+    public static final Codec<CrusherRecipe> CODEC = Codec.composite(
+            CraftingRecipe.BASE_CODEC.forGetter(CraftingRecipe::getBaseProperties),
+            CraftingIngredient.CODEC.fieldOf("input").forGetter(CrusherRecipe::getInput),
+            Codec.INT.fieldOf("duration").forGetter(CrusherRecipe::getDuration),
+            Codec.listOf(BlockDrop.CODEC).optionalFieldOf("extra", List.of()).forGetter(CrusherRecipe::getExtra),
+            Codec.INT.optionalFieldOf("min_tier", 1).forGetter(CrusherRecipe::getMinTier),
+            CrusherRecipe::new
+    );
+
+    private final CraftingIngredient input;
+    private final int duration;
+    private final List<BlockDrop> extra;
+    private final int minTier;
+
+    public CrusherRecipe(@NotNull BaseProperties base, @NotNull CraftingIngredient input, int duration, @NotNull List<BlockDrop> extra, int minTier) {
+        super(base);
+        this.input = input;
+        this.duration = Math.max(1, duration);
+        this.extra = List.copyOf(extra);
+        this.minTier = Math.max(1, minTier);
+    }
+
+    @Override
+    public @NotNull String getTypeId() {
+        return TYPE_KEY;
+    }
+
+    @Override
+    public @NotNull String getTypeName() {
+        return TYPE_NAME;
+    }
+
+    @Override
+    public @NotNull List<RecipeInput> getIndexInputs() {
+        return List.of(RecipeInput.unordered(List.of(input)));
+    }
+
+    @Override
+    public @NotNull @Unmodifiable List<CraftingIngredient> getInputs() {
+        return List.of(input);
+    }
+
+    @Override
+    public boolean matches(@NotNull ItemStack @NotNull [] items, int width, int height) {
+        if (items.length == 0) return false;
+
+        String key = ItemRef.idOf(items[0]);
+        return key != null && key.equals(input.key()) && items[0].getAmount() >= input.count();
+    }
+
+    @Override
+    public @NotNull ItemStack[] consume(@NotNull ItemStack @NotNull [] items, int width, int height) {
+        int[] amountsToConsume = new int[items.length];
+        if (items.length > 0) amountsToConsume[0] = input.count();
+        return applyConsumption(items, amountsToConsume);
+    }
+
+    public @NotNull CraftingIngredient getInput() {
+        return input;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public @NotNull @Unmodifiable List<BlockDrop> getExtra() {
+        return extra;
+    }
+
+    public int getMinTier() {
+        return minTier;
+    }
+}

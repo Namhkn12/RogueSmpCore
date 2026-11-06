@@ -11,6 +11,7 @@ import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.HumanEntity;
@@ -76,6 +77,16 @@ public abstract class MachineGui extends BaseGui {
 
     private static String faceNames(List<BlockFace> faces) {
         return faces.isEmpty() ? "chưa có mặt nào" : String.join(", ", faces.stream().map(SideConfig::displayName).toList());
+    }
+
+    protected static Component statLine(String label, double base, double result, String suffix, boolean higherIsBetter) {
+        Component line = Utils.text(label + ": ", NamedTextColor.YELLOW);
+        if (Math.abs(result - base) < 1e-9) return line.append(Component.text(Utils.formatDecimal(base) + suffix, NamedTextColor.GRAY));
+
+        NamedTextColor color = result > base == higherIsBetter ? NamedTextColor.GREEN : NamedTextColor.RED;
+        return line.append(Component.text(Utils.formatDecimal(base) + suffix, NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH))
+                .append(Component.text(" → ", NamedTextColor.GRAY))
+                .append(Component.text(Utils.formatDecimal(result) + suffix, color));
     }
 
     protected void addSidesButton(int slot) {

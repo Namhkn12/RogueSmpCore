@@ -11,7 +11,11 @@ public enum BlockStat {
     GENERATOR_LOOT_CAPACITY("Sức chứa", true),
     GENERATOR_DROP_AMOUNT("Sản lượng", true),
     GENERATOR_RARE_DROP_CHANCE("Tỉ lệ vật phẩm hiếm", true),
-    GENERATOR_COMMON_DROP_AMOUNT("Sản lượng vật phẩm thường", true);
+    GENERATOR_COMMON_DROP_AMOUNT("Sản lượng vật phẩm thường", true),
+
+    CRUSHER_SPEED("Tốc độ nghiền", true),
+    CRUSHER_OUTPUT_AMOUNT("Sản lượng", true),
+    CRUSHER_EXTRA_CHANCE("Tỉ lệ sản phẩm phụ", true);
 
     public static final Codec<BlockStat> CODEC = Codec.enumOf(BlockStat.class);
 

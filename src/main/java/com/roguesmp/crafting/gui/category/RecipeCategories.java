@@ -2,6 +2,7 @@ package com.roguesmp.crafting.gui.category;
 
 import com.roguesmp.block.BlockData;
 import com.roguesmp.crafting.recipe.CokeOvenRecipe;
+import com.roguesmp.crafting.recipe.CrusherRecipe;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
 import com.roguesmp.crafting.recipe.FusionRecipe;
 import com.roguesmp.crafting.recipe.ScrappingRecipe;
@@ -27,6 +28,7 @@ public final class RecipeCategories {
             ShapelessCraftingRecipe.TYPE_KEY, CRAFTING,
             FusionRecipe.TYPE_KEY, new FusionCategory(),
             CokeOvenRecipe.TYPE_KEY, new CokeOvenCategory(),
+            CrusherRecipe.TYPE_KEY, new CrusherCategory(),
             ScrappingRecipe.TYPE_KEY, new ScrappingCategory()
     );
 

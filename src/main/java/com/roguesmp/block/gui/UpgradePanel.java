@@ -3,6 +3,7 @@ package com.roguesmp.block.gui;
 import com.roguesmp.block.StoredItem;
 import com.roguesmp.block.storage.FixedSlots;
 import com.roguesmp.block.upgrade.ActiveCatalyst;
+import com.roguesmp.block.upgrade.CatalystBurner;
 import com.roguesmp.block.upgrade.UpgradeInstallResult;
 import com.roguesmp.block.upgrade.UpgradeType;
 import com.roguesmp.block.upgrade.UpgradeSet;
@@ -54,16 +55,18 @@ public final class UpgradePanel {
         }
     }
 
-    public void renderCatalyst(FixedSlots feed, Predicate<String> valid, @Nullable ActiveCatalyst active, boolean paused, Runnable clear, int inputGuiSlot, int activeGuiSlot) {
+    public void renderCatalyst(CatalystBurner catalyst, boolean running, int inputGuiSlot, int activeGuiSlot) {
         String name = UpgradeType.CATALYST.displayName();
+        FixedSlots feed = catalyst.feed();
         StoredItem stored = feed.get(0);
         ItemStack display = stored != null ? stored.toItemStack() : null;
-        if (display != null && !valid.test(stored.item())) appendLore(display, Utils.text("Không còn là " + name.toLowerCase() + ", không có tác dụng", NamedTextColor.RED));
+        if (display != null && !catalyst.isValid(stored.item())) appendLore(display, Utils.text("Không còn là " + name.toLowerCase() + ", không có tác dụng", NamedTextColor.RED));
         gui.bindSlotDisplay(inputGuiSlot, feed, 0, display != null ? display : placeholder(Material.LIME_STAINED_GLASS_PANE, name, "Đặt " + name.toLowerCase() + " vào đây"));
 
-        ItemStack activeDisplay = active == null ? null : activeDisplay(active, paused);
+        ActiveCatalyst active = catalyst.active();
+        ItemStack activeDisplay = active == null ? null : activeDisplay(active, catalyst.isPaused(running));
         gui.addButton(activeGuiSlot, activeDisplay != null ? activeDisplay : placeholder(Material.GRAY_STAINED_GLASS_PANE, "Hiệu ứng " + name.toLowerCase(), "Chưa có hiệu ứng nào"),
-                event -> onActiveClick(event, active, clear));
+                event -> onActiveClick(event, active, catalyst::clear));
     }
 
     public void renderSummary(int guiSlot) {

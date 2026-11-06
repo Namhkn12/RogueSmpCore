@@ -6,6 +6,7 @@ import com.roguesmp.block.impl.energy.WirelessNodeBlock;
 import com.roguesmp.block.impl.PaletteMarkerBlock;
 import com.roguesmp.block.impl.TallyBlock;
 import com.roguesmp.block.impl.cokeoven.CokeOvenBlock;
+import com.roguesmp.block.impl.crusher.CrusherBlock;
 import com.roguesmp.block.impl.energy.EnergyGeneratorBlock;
 import com.roguesmp.block.impl.altar.AltarMainBlock;
 import com.roguesmp.block.impl.altar.AltarSideBlock;
@@ -27,6 +28,8 @@ public class BlockTypes {
     public static final BlockType<NoData, AltarSideBlock> ALTAR_SIDE = plain("altar_side", "Bàn thờ phụ", AltarSideBlock::new);
     public static final BlockType<CokeOvenData, CokeOvenBlock> COKE_OVEN =
             register("coke_oven", "Lò cốc", CokeOvenData.CODEC, CokeOvenData.DEFAULT, CokeOvenBlock::new);
+    public static final BlockType<CrusherData, CrusherBlock> CRUSHER =
+            register("crusher", "Máy nghiền", CrusherData.CODEC, CrusherData.DEFAULT, CrusherBlock::new);
     public static final BlockType<GeneratorData, ResourceGeneratorBlock> GENERATOR =
             register("generator", "Máy tạo tài nguyên", GeneratorData.CODEC, GeneratorData.DEFAULT, ResourceGeneratorBlock::new);
     public static final BlockType<EnergyGeneratorData, EnergyGeneratorBlock> ENERGY_GENERATOR =

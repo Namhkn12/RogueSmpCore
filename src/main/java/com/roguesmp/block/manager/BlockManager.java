@@ -39,6 +39,7 @@ public class BlockManager {
     private final Map<BlockPos, SmpBlock> blocks = new HashMap<>();
     private final Set<Tickable> tickingBlocks = new HashSet<>();
     private final Set<ItemStorageHolder> storageBlocks = new HashSet<>();
+    private final Set<Object> failedTicks = new HashSet<>();
     private final RogueSmpCore plugin;
     private final BlockDataRepository repository;
     private final MiningManager mining;
@@ -60,11 +61,26 @@ public class BlockManager {
 
     private void tickBlocks(){
         for(Tickable block : tickingBlocks){
-            block.tick();
+            try {
+                block.tick();
+            } catch (RuntimeException exception) {
+                reportTickFailure(block, exception);
+            }
         }
         for(ItemStorageHolder block : storageBlocks){
-            block.itemStorage().tick();
+            try {
+                block.itemStorage().tick();
+            } catch (RuntimeException exception) {
+                reportTickFailure(block, exception);
+            }
         }
+    }
+
+    private void reportTickFailure(Object block, RuntimeException exception) {
+        if (!failedTicks.add(block)) return;
+
+        String where = block instanceof SmpBlock smpBlock ? smpBlock.getId() + " at " + smpBlock.getPos() : block.toString();
+        plugin.getLogger().log(java.util.logging.Level.SEVERE, "Block tick failed for " + where + " (further errors from this block are suppressed)", exception);
     }
 
     private void registerIfTickable(SmpBlock block){
