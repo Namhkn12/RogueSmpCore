@@ -10,6 +10,7 @@ import com.roguesmp.block.event.SmpBlockRemoveEvent;
 import com.roguesmp.block.mining.MiningManager;
 import com.roguesmp.block.persistence.BlockDataRepository;
 import com.roguesmp.block.storage.ItemStorageHolder;
+import com.roguesmp.block.upgrade.UpgradeHost;
 import com.roguesmp.codec.DataResult;
 import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
@@ -501,6 +502,12 @@ public class BlockManager {
 
     public @Nullable SmpBlock get(BlockPos pos){
         return blocks.get(pos);
+    }
+
+    public void rebuildUpgrades(){
+        for (SmpBlock block : blocks.values()) {
+            if (block instanceof UpgradeHost host && block.isHydrated()) host.upgrades().rebuild();
+        }
     }
 
     public List<SmpBlock> blocksIn(NamespacedKey world){

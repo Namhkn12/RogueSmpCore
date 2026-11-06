@@ -183,6 +183,9 @@ public final class RogueSmpCore extends JavaPlugin {
         if (found && (locationKey.equalsIgnoreCase(Registries.DUNGEON.getLocationKey()) || locationKey.equalsIgnoreCase(Registries.DUNGEON_ROOM.getLocationKey()))) {
             DungeonValidation.validateAll(); // re-checks scripts and re-registers the Bukkit events they listen to
         }
+        if (found && (locationKey.equalsIgnoreCase(Registries.ITEM.getLocationKey()) || locationKey.equalsIgnoreCase(Registries.ITEM_TYPE.getLocationKey()))) {
+            BlockManager.getInstance().rebuildUpgrades();
+        }
         return found;
     }
 

@@ -190,14 +190,10 @@ public class ItemCreatorGui {
         multi.addButton(componentLabel(ItemComponentKeys.ENERGY_SOURCE),
                 tooltip("Nhiên liệu cho máy phát năng lượng.", "Tổng năng lượng = energy_per_tick x burn_ticks"),
                 (response, audience) -> player.showDialog(buildEnergySourceDialog(player)));
-        multi.addButton(componentLabel(ItemComponentKeys.GENERATOR_CATALYST),
-                tooltip("Chất xúc tác cho máy tạo tài nguyên.", "Hiệu ứng (modifiers, behaviors) và thời lượng"),
-                (response, audience) -> Utils.runLater(() -> player.showDialog(new GeneratorCatalystEditorGui(this,
-                        (GeneratorCatalystComponent) components.get(ItemComponentKeys.GENERATOR_CATALYST.id())).buildHubDialog(player))));
-        multi.addButton(componentLabel(ItemComponentKeys.GENERATOR_MODULE),
-                tooltip("Module lắp vào máy tạo tài nguyên.", "Hiệu ứng, giới hạn, module xung khắc và synergy"),
-                (response, audience) -> Utils.runLater(() -> player.showDialog(new GeneratorModuleEditorGui(this,
-                        (GeneratorModuleComponent) components.get(ItemComponentKeys.GENERATOR_MODULE.id())).buildHubDialog(player))));
+        multi.addButton(componentLabel(ItemComponentKeys.BLOCK_UPGRADE),
+                tooltip("Module hoặc chất xúc tác lắp vào khối.", "Loại khối dùng được, hiệu ứng, thời lượng, giới hạn và synergy"),
+                (response, audience) -> Utils.runLater(() -> player.showDialog(new BlockUpgradeEditorGui(this,
+                        (BlockUpgradeComponent) components.get(ItemComponentKeys.BLOCK_UPGRADE.id())).buildHubDialog(player))));
 
         multi.addButton(Component.text("save", NamedTextColor.GOLD), null,
                 (response, audience) -> Utils.runLater(() -> player.showDialog(buildSaveDialog(player))));
