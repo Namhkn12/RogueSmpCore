@@ -161,7 +161,7 @@ public final class DungeonValidation {
 
     private static final class Report {
         private final List<String> warnings = new ArrayList<>();
-        private final Map<String, Set<String>> emitted = new HashMap<>(DungeonEvent.BUILT_IN);
+        private final Map<String, Set<String>> emitted = new HashMap<>();
         private final List<Listen> listened = new ArrayList<>();
         private final Set<String> writtenVars = new HashSet<>();
         private final List<Listen> readVars = new ArrayList<>();
@@ -171,6 +171,7 @@ public final class DungeonValidation {
         private final Map<String, Set<String>> calls = new HashMap<>();
 
         private Report() {
+            DungeonEvent.BUILT_IN.forEach((event, keys) -> emitted.put(event, new HashSet<>(keys)));
             BukkitEventAdapters.adapters().forEach(adapter -> adapter.emits().forEach(emits -> emitted.computeIfAbsent(emits.id(), id -> new HashSet<>()).addAll(emits.dataKeys())));
         }
 
