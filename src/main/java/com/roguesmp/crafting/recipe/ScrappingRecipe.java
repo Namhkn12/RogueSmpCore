@@ -9,12 +9,12 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
-public final class ScrappingRecipe extends CraftingRecipe {
+public final class ScrappingRecipe extends Recipe {
     public static final String TYPE_KEY = "scrapping";
     public static final String TYPE_NAME = "Phân rã";
 
     public static final Codec<ScrappingRecipe> CODEC = Codec.composite(
-            CraftingRecipe.BASE_CODEC.forGetter(CraftingRecipe::getBaseProperties),
+            Recipe.BASE_CODEC.forGetter(Recipe::getBaseProperties),
             CraftingIngredient.CODEC.fieldOf("input").forGetter(ScrappingRecipe::getInput),
             ScrappingRecipe::new
     );
@@ -46,20 +46,12 @@ public final class ScrappingRecipe extends CraftingRecipe {
         return List.of(input);
     }
 
-    @Override
-    public boolean matches(@NotNull ItemStack @NotNull [] items, int width, int height) {
+    public boolean matches(@NotNull ItemStack @NotNull [] items) {
         if (items.length == 0) return false;
 
         ItemStack stack = items[0];
         String key = ItemRef.idOf(stack);
         return key != null && key.equals(input.key()) && stack.getAmount() == input.count(); // exact, not "at least"
-    }
-
-    @Override
-    public @NotNull ItemStack[] consume(@NotNull ItemStack @NotNull [] items, int width, int height) {
-        int[] amountsToConsume = new int[items.length];
-        if (items.length > 0) amountsToConsume[0] = input.count();
-        return applyConsumption(items, amountsToConsume);
     }
 
     public @NotNull CraftingIngredient getInput() {

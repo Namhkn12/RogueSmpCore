@@ -4,6 +4,7 @@ import com.roguesmp.crafting.CraftingIngredient;
 import com.roguesmp.crafting.gui.RecipeDialogEditor;
 import com.roguesmp.crafting.gui.RecipeViewerGui;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.Recipe;
 import com.roguesmp.crafting.recipe.FusionRecipe;
 import com.roguesmp.crafting.recipe.ShapedCraftingRecipe;
 import com.roguesmp.crafting.recipe.ShapelessCraftingRecipe;
@@ -31,7 +32,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Single, unified read-only browser for every registered {@link CraftingRecipe} - replaces what
+ * Single, unified read-only browser for every registered {@link Recipe} - replaces what
  * used to be two separate per-kind browsers with one paginated list (same shape as
  * {@code gui.ItemBrowser}), filtered in place by {@link #typeFilter} (cycled via
  * {@link #FILTER_SLOT}) and/or a substring search over recipe id, output item id and output name (via {@link #SEARCH_SLOT}).
@@ -63,8 +64,8 @@ public class RecipeBrowserGui extends BaseGui {
     }
 
     private final Player player;
-    private List<CraftingRecipe> allEntries;
-    private List<CraftingRecipe> filteredEntries;
+    private List<Recipe> allEntries;
+    private List<Recipe> filteredEntries;
 
     private TypeFilter typeFilter = TypeFilter.ALL;
     private String searchQuery = null;
@@ -149,7 +150,7 @@ public class RecipeBrowserGui extends BaseGui {
         }
 
         int slot = 9;
-        for (CraftingRecipe recipe : getPage()) {
+        for (Recipe recipe : getPage()) {
             addButton(slot, previewButtonFor(recipe), event -> {
                 event.setCancelled(true);
                 if (event.getClick() == ClickType.RIGHT) {
@@ -169,11 +170,11 @@ public class RecipeBrowserGui extends BaseGui {
 
     private void updateFilters() {
         this.allEntries = new ArrayList<>(Registries.CRAFTING_RECIPE.getAll().values());
-        allEntries.sort(Comparator.comparing(CraftingRecipe::getId));
+        allEntries.sort(Comparator.comparing(Recipe::getId));
         filteredEntries = new ArrayList<>();
         String query = (searchQuery == null || searchQuery.isBlank()) ? null : searchQuery.toLowerCase().trim();
 
-        for (CraftingRecipe recipe : allEntries) {
+        for (Recipe recipe : allEntries) {
             if (!matchesType(recipe)) continue;
             if (query != null && !matchesQuery(recipe, query)) continue;
             filteredEntries.add(recipe);
@@ -183,7 +184,7 @@ public class RecipeBrowserGui extends BaseGui {
         currentPage = 0;
     }
 
-    private static boolean matchesQuery(CraftingRecipe recipe, String query) {
+    private static boolean matchesQuery(Recipe recipe, String query) {
         if (recipe.getId().toLowerCase().contains(query)) return true;
 
         for (CraftingIngredient output : recipe.getOutputs()) {
@@ -195,7 +196,7 @@ public class RecipeBrowserGui extends BaseGui {
         return false;
     }
 
-    private boolean matchesType(CraftingRecipe recipe) {
+    private boolean matchesType(Recipe recipe) {
         return switch (typeFilter) {
             case ALL -> true;
             case SHAPED_SHAPELESS -> recipe instanceof ShapedCraftingRecipe || recipe instanceof ShapelessCraftingRecipe;
@@ -203,20 +204,20 @@ public class RecipeBrowserGui extends BaseGui {
         };
     }
 
-    private List<CraftingRecipe> getPage() {
+    private List<Recipe> getPage() {
         int from = currentPage * PAGE_SIZE;
         int to = Math.min(from + PAGE_SIZE, filteredEntries.size());
         if (from >= filteredEntries.size()) return Collections.emptyList();
         return filteredEntries.subList(from, to);
     }
 
-    private void openDetail(CraftingRecipe recipe) {
+    private void openDetail(Recipe recipe) {
         RecipeViewerGui.forRecipe(player, recipe, this).showInventory(player);
     }
 
-    private void openEditor(CraftingRecipe recipe) {
-        if (RecipeDialogEditor.usesGridEditor(recipe)) {
-            ShapedShapelessRecipeEditorGui gui = ShapedShapelessRecipeEditorGui.editExisting(player, recipe);
+    private void openEditor(Recipe recipe) {
+        if (recipe instanceof CraftingRecipe grid) {
+            ShapedShapelessRecipeEditorGui gui = ShapedShapelessRecipeEditorGui.editExisting(player, grid);
             gui.setRefundItem(false);
             gui.showInventory(player);
             return;
@@ -260,7 +261,7 @@ public class RecipeBrowserGui extends BaseGui {
         player.showDialog(dialog);
     }
 
-    private ItemStack previewButtonFor(CraftingRecipe recipe) {
+    private ItemStack previewButtonFor(Recipe recipe) {
         ItemStack result = resolvePreview(recipe.getPrimaryOutput());
 
         List<Component> lore = new ArrayList<>();

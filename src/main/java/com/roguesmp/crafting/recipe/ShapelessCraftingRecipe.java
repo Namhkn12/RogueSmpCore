@@ -20,7 +20,8 @@ public final class ShapelessCraftingRecipe extends CraftingRecipe {
     public static final String TYPE_NAME = "Chế tạo không định hình";
 
     public static final Codec<ShapelessCraftingRecipe> CODEC = Codec.composite(
-            CraftingRecipe.BASE_CODEC.forGetter(CraftingRecipe::getBaseProperties),
+            Recipe.BASE_CODEC.forGetter(Recipe::getBaseProperties),
+            CraftingRecipe.QUICK_CRAFT_CODEC.forGetter(CraftingRecipe::isQuickCraftable),
             Codec.listOf(CraftingIngredient.CODEC).fieldOf("ingredients").forGetter(ShapelessCraftingRecipe::getIngredients),
             ShapelessCraftingRecipe::new
     );
@@ -29,8 +30,8 @@ public final class ShapelessCraftingRecipe extends CraftingRecipe {
 
     private final Map<String, List<Integer>> requiredCountsByKey;
 
-    public ShapelessCraftingRecipe(@NotNull BaseProperties base, @NotNull List<CraftingIngredient> ingredients) {
-        super(base, 1);
+    public ShapelessCraftingRecipe(@NotNull BaseProperties base, boolean quickCraft, @NotNull List<CraftingIngredient> ingredients) {
+        super(base, quickCraft);
         this.ingredients = List.copyOf(ingredients);
 
         Map<String, List<Integer>> grouped = new TreeMap<>();

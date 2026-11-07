@@ -42,7 +42,7 @@ public class AltarMainBlock extends AltarBlock {
             items[i + 1] = sideItem == null ? null : sideItem.clone();
         }
 
-        FusionRecipe recipe = CraftingManager.getInstance().match(CraftingRecipes.FUSION, items, 0, 0);
+        FusionRecipe recipe = CraftingManager.getInstance().match(CraftingRecipes.FUSION, items, candidate -> candidate.matches(items));
         if (recipe == null || recipe.getPrimaryOutputStack() == null) return FusionAssessment.failed(FusionIssue.NO_RECIPE);
         return new FusionAssessment(FusionIssue.NONE, recipe, sides, items);
     }

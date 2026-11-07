@@ -19,7 +19,8 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
     public static final String TYPE_NAME = "Chế tạo có định hình";
 
     public static final Codec<ShapedCraftingRecipe> CODEC = Codec.composite(
-            CraftingRecipe.BASE_CODEC.forGetter(CraftingRecipe::getBaseProperties),
+            Recipe.BASE_CODEC.forGetter(Recipe::getBaseProperties),
+            CraftingRecipe.QUICK_CRAFT_CODEC.forGetter(CraftingRecipe::isQuickCraftable),
             Codec.listOf(Codec.STRING).fieldOf("pattern").forGetter(ShapedCraftingRecipe::getPattern),
             Codec.unboundedMap(CraftingIngredient.CODEC).fieldOf("key").forGetter(ShapedCraftingRecipe::getKeyMap),
             Codec.BOOLEAN.optionalFieldOf("mirrored", true).forGetter(ShapedCraftingRecipe::isMirrored),
@@ -34,8 +35,8 @@ public final class ShapedCraftingRecipe extends CraftingRecipe {
 
     private final int[] requiredAmounts;
 
-    public ShapedCraftingRecipe(@NotNull BaseProperties base, @NotNull List<String> pattern, @NotNull Map<String, CraftingIngredient> keyMap, boolean mirrored) {
-        super(base, 1);
+    public ShapedCraftingRecipe(@NotNull BaseProperties base, boolean quickCraft, @NotNull List<String> pattern, @NotNull Map<String, CraftingIngredient> keyMap, boolean mirrored) {
+        super(base, quickCraft);
         this.pattern = List.copyOf(pattern);
         this.keyMap = Map.copyOf(keyMap);
         this.mirrored = mirrored;

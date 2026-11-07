@@ -2,7 +2,7 @@ package com.roguesmp.crafting.gui;
 
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.crafting.CraftingManager;
-import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.Recipe;
 import com.roguesmp.crafting.recipe.CraftingRecipes;
 import com.roguesmp.crafting.recipe.RecipeKey;
 import com.roguesmp.crafting.recipe.ShapedCraftingRecipe;
@@ -29,11 +29,7 @@ public final class RecipeDialogEditor {
     private RecipeDialogEditor() {
     }
 
-    public static boolean usesGridEditor(CraftingRecipe recipe) {
-        return recipe instanceof ShapedCraftingRecipe || recipe instanceof ShapelessCraftingRecipe;
-    }
-
-    public static void openExisting(Player player, CraftingRecipe recipe, Runnable onExit) {
+    public static void openExisting(Player player, Recipe recipe, Runnable onExit) {
         player.closeInventory();
         player.showDialog(entryDialog(player, recipe.getId(), onExit).build(player, recipe));
     }
@@ -54,8 +50,8 @@ public final class RecipeDialogEditor {
         player.showDialog(multi.build());
     }
 
-    private static JsonEntryDialog<CraftingRecipe> entryDialog(Player player, @Nullable String originalId, Runnable onExit) {
-        return JsonEntryDialog.of(originalId == null ? "Công thức mới" : "Công thức: " + originalId, CraftingRecipe.CODEC,
+    private static JsonEntryDialog<Recipe> entryDialog(Player player, @Nullable String originalId, Runnable onExit) {
+        return JsonEntryDialog.of(originalId == null ? "Công thức mới" : "Công thức: " + originalId, Recipe.CODEC,
                 recipe -> {
                     Registries.CRAFTING_RECIPE.registerAndSave(RogueSmpCore.getInstance(), recipe.getId(), recipe);
                     if (originalId != null && !originalId.equals(recipe.getId())) {
@@ -76,7 +72,7 @@ public final class RecipeDialogEditor {
                 .withValidator(recipe -> validate(recipe, originalId));
     }
 
-    private static @Nullable String validate(CraftingRecipe recipe, @Nullable String originalId) {
+    private static @Nullable String validate(Recipe recipe, @Nullable String originalId) {
         String id = recipe.getId();
         if (id == null || id.isBlank()) return "Cần đặt id công thức.";
         if (!id.equals(originalId) && Registries.CRAFTING_RECIPE.get(id) != null) return "Đã tồn tại công thức với id '" + id + "'.";

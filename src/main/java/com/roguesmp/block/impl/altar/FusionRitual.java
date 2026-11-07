@@ -93,7 +93,7 @@ final class FusionRitual {
 
     private void complete() {
         FusionRecipe recipe = plan.recipe();
-        ItemStack[] remaining = recipe.consume(plan.items(), 0, 0);
+        ItemStack[] remaining = recipe.consume(plan.items());
         List<AltarSideBlock> sides = plan.sides();
         for (int i = 0; i < sides.size(); i++) {
             sides.get(i).setItem(remaining[i + 1]);

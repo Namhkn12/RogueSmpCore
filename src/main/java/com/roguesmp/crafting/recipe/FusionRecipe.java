@@ -15,12 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public final class FusionRecipe extends CraftingRecipe {
+public final class FusionRecipe extends Recipe {
     public static final String TYPE_KEY = "fusion";
     public static final String TYPE_NAME = "Dung hợp";
 
     public static final Codec<FusionRecipe> CODEC = Codec.composite(
-            CraftingRecipe.BASE_CODEC.forGetter(CraftingRecipe::getBaseProperties),
+            Recipe.BASE_CODEC.forGetter(Recipe::getBaseProperties),
             CraftingIngredient.CODEC.fieldOf("input").forGetter(FusionRecipe::getInput),
             Codec.listOf(CraftingIngredient.CODEC).fieldOf("ingredients").forGetter(FusionRecipe::getIngredients),
             FusionRecipe::new
@@ -69,8 +69,7 @@ public final class FusionRecipe extends CraftingRecipe {
         return Collections.unmodifiableList(inputs);
     }
 
-    @Override
-    public boolean matches(@NotNull ItemStack @NotNull [] items, int width, int height) {
+    public boolean matches(@NotNull ItemStack @NotNull [] items) {
         if (items.length == 0) return false;
 
         ItemStack inputStack = items[0];
@@ -88,8 +87,7 @@ public final class FusionRecipe extends CraftingRecipe {
         return true;
     }
 
-    @Override
-    public @NotNull ItemStack[] consume(@NotNull ItemStack @NotNull [] items, int width, int height) {
+    public @NotNull ItemStack[] consume(@NotNull ItemStack @NotNull [] items) {
         int[] amountsToConsume = new int[items.length];
         if (items.length > 0) amountsToConsume[0] = input.count();
 

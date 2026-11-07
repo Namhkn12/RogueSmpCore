@@ -1,4 +1,4 @@
 package com.roguesmp.crafting.recipe;
 
-public record RecipeKey<T extends CraftingRecipe>(String id, String displayName) {
+public record RecipeKey<T extends Recipe>(String id, String displayName) {
 }

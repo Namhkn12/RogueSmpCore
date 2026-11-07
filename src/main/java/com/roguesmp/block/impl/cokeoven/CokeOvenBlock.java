@@ -105,7 +105,7 @@ public class CokeOvenBlock extends SmpBlock implements Tickable, ItemStorageHold
             stacks[i] = stored == null ? null : stored.toItemStack();
             if (stacks[i] != null) empty = false;
         }
-        return empty ? null : CraftingManager.getInstance().match(CraftingRecipes.COKE_OVEN, stacks, 0, 0);
+        return empty ? null : CraftingManager.getInstance().match(CraftingRecipes.COKE_OVEN, stacks, recipe -> recipe.matches(stacks));
     }
 
     private void onInputsChanged() {

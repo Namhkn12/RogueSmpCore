@@ -40,7 +40,7 @@ public class CraftingRecipes {
         return BY_ID.get(id);
     }
 
-    private static <T extends CraftingRecipe> RecipeKey<T> register(String id, String displayName, Codec<T> codec) {
+    private static <T extends Recipe> RecipeKey<T> register(String id, String displayName, Codec<T> codec) {
         Registries.CRAFTING_RECIPE_CODEC.register(id, codec);
         RecipeKey<T> key = new RecipeKey<>(id, displayName);
         BY_ID.put(id, key);

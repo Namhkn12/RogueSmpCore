@@ -3,6 +3,7 @@ package com.roguesmp.crafting;
 import com.roguesmp.utils.ItemRef;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.Recipe;
 import com.roguesmp.crafting.recipe.RecipeInput;
 import com.roguesmp.crafting.recipe.RecipeKey;
 import com.roguesmp.crafting.recipe.ShapedCraftingRecipe;
@@ -13,13 +14,14 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class CraftingManager {
     private static CraftingManager INSTANCE;
 
-    private final Trie<CraftingRecipe> trie = new Trie<>();
-    private final Map<String, List<CraftingRecipe>> byOutput = new HashMap<>();
-    private final Map<String, List<CraftingRecipe>> byInput = new HashMap<>();
+    private final Trie<Recipe> trie = new Trie<>();
+    private final Map<String, List<Recipe>> byOutput = new HashMap<>();
+    private final Map<String, List<Recipe>> byInput = new HashMap<>();
 
     private CraftingManager() {
         rebuild();
@@ -38,7 +40,7 @@ public class CraftingManager {
         byOutput.clear();
         byInput.clear();
 
-        for (CraftingRecipe recipe : Registries.CRAFTING_RECIPE.getAll().values()) {
+        for (Recipe recipe : Registries.CRAFTING_RECIPE.getAll().values()) {
             for (RecipeInput input : recipe.getIndexInputs()) {
                 insert(recipe, input.toIndexPath());
             }
@@ -47,9 +49,9 @@ public class CraftingManager {
         }
     }
 
-    private static void index(Map<String, List<CraftingRecipe>> target, List<CraftingIngredient> ingredients, CraftingRecipe recipe) {
+    private static void index(Map<String, List<Recipe>> target, List<CraftingIngredient> ingredients, Recipe recipe) {
         for (CraftingIngredient ingredient : ingredients) {
-            List<CraftingRecipe> recipes = target.computeIfAbsent(ingredient.key(), key -> new ArrayList<>());
+            List<Recipe> recipes = target.computeIfAbsent(ingredient.key(), key -> new ArrayList<>());
             if (!recipes.contains(recipe)) recipes.add(recipe);
         }
     }
@@ -58,22 +60,22 @@ public class CraftingManager {
         return Set.copyOf(byOutput.keySet());
     }
 
-    public @NotNull @Unmodifiable List<CraftingRecipe> getRecipesProducing(@NotNull String itemKey) {
+    public @NotNull @Unmodifiable List<Recipe> getRecipesProducing(@NotNull String itemKey) {
         return Collections.unmodifiableList(byOutput.getOrDefault(itemKey, List.of()));
     }
 
-    public @NotNull @Unmodifiable List<CraftingRecipe> getRecipesUsing(@NotNull String itemKey) {
+    public @NotNull @Unmodifiable List<Recipe> getRecipesUsing(@NotNull String itemKey) {
         return Collections.unmodifiableList(byInput.getOrDefault(itemKey, List.of()));
     }
 
-    private void insert(CraftingRecipe recipe, List<String> path) {
+    private void insert(Recipe recipe, List<String> path) {
         List<String> prefixed = withType(recipe.getTypeId(), path);
         warnIfColliding(prefixed, recipe);
         trie.insert(prefixed, recipe);
     }
 
-    private void warnIfColliding(List<String> path, CraftingRecipe recipe) {
-        for (CraftingRecipe existing : trie.find(path)) {
+    private void warnIfColliding(List<String> path, Recipe recipe) {
+        for (Recipe existing : trie.find(path)) {
             if (existing != recipe) {
                 RogueSmpCore.LOGGER.warn("Crafting recipes '{}' and '{}' share the same shape/ingredient-set index path - if an input " +
                                 "satisfies both (e.g. two amount thresholds over the same ingredients), whichever is checked first wins",
@@ -89,16 +91,24 @@ public class CraftingManager {
         return prefixed;
     }
 
-    @SuppressWarnings("unchecked")
     public @Nullable <T extends CraftingRecipe> T match(@NotNull RecipeKey<T> key, @NotNull ItemStack[] items, int width, int height) {
+        return match(key, items, width, height, recipe -> recipe.matches(items, width, height));
+    }
+
+    public @Nullable <T extends Recipe> T match(@NotNull RecipeKey<T> key, @NotNull ItemStack[] items, @NotNull Predicate<? super T> matcher) {
+        return match(key, items, 0, 0, matcher);
+    }
+
+    @SuppressWarnings("unchecked")
+    private @Nullable <T extends Recipe> T match(RecipeKey<T> key, ItemStack[] items, int width, int height, Predicate<? super T> matcher) {
         RecipeInput queryInput = toQueryInput(items, width, height);
         if (queryInput == null) return null;
 
         List<String> path = withType(key.id(), queryInput.toIndexPath());
 
-        // The trie only narrows by shape/ingredient identity; amounts are checked by matches().
-        for (CraftingRecipe candidate : trie.find(path)) {
-            if (candidate.matches(items, width, height)) return (T) candidate;
+        // The trie only narrows by shape/ingredient identity; amounts are checked by the matcher.
+        for (Recipe candidate : trie.find(path)) {
+            if (matcher.test((T) candidate)) return (T) candidate;
         }
         return null;
     }
@@ -118,10 +128,10 @@ public class CraftingManager {
     }
 
     @SuppressWarnings("unchecked")
-    public @NotNull <T extends CraftingRecipe> List<T> getAll(@NotNull RecipeKey<T> key) {
-        LinkedHashSet<CraftingRecipe> unique = new LinkedHashSet<>(trie.collect(List.of(key.id())));
+    public @NotNull <T extends Recipe> List<T> getAll(@NotNull RecipeKey<T> key) {
+        LinkedHashSet<Recipe> unique = new LinkedHashSet<>(trie.collect(List.of(key.id())));
         List<T> result = new ArrayList<>(unique.size());
-        for (CraftingRecipe recipe : unique) result.add((T) recipe);
+        for (Recipe recipe : unique) result.add((T) recipe);
         return List.copyOf(result);
     }
 }

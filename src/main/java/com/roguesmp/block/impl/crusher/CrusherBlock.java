@@ -25,7 +25,7 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.MapCodec;
 import com.roguesmp.crafting.CraftingIngredient;
 import com.roguesmp.crafting.CraftingManager;
-import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.Recipe;
 import com.roguesmp.crafting.recipe.CraftingRecipes;
 import com.roguesmp.crafting.recipe.CrusherRecipe;
 import com.roguesmp.item.component.impl.BlockUpgradeComponent;
@@ -162,15 +162,12 @@ public class CrusherBlock extends SmpBlock implements Tickable, EnergyStorage, I
         ItemStack stack = stored == null ? null : stored.toItemStack();
         if (stack == null) return null;
 
-        ItemStack[] items = {stack};
-        for (CrusherRecipe recipe : CraftingManager.getInstance().getAll(CraftingRecipes.CRUSHER)) {
-            if (recipe.getMinTier() <= data.tier() && recipe.matches(items, 0, 0)) return recipe;
-        }
-        return null;
+        return CraftingManager.getInstance().match(CraftingRecipes.CRUSHER, new ItemStack[]{stack},
+                recipe -> recipe.getMinTier() <= data.tier() && recipe.matches(stack));
     }
 
     private boolean isRecipeInput(String itemId) {
-        for (CraftingRecipe recipe : CraftingManager.getInstance().getRecipesUsing(itemId)) {
+        for (Recipe recipe : CraftingManager.getInstance().getRecipesUsing(itemId)) {
             if (recipe instanceof CrusherRecipe crusherRecipe && crusherRecipe.getMinTier() <= data.tier()) return true;
         }
         return false;

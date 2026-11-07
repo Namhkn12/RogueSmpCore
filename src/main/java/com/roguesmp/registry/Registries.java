@@ -36,7 +36,7 @@ import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.ability.ItemAbility;
 import com.roguesmp.item.ability.ItemAbilities;
 import com.roguesmp.item.component.ItemComponent;
-import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.Recipe;
 import com.roguesmp.crafting.recipe.CraftingRecipes;
 import com.roguesmp.loot.LootConfig;
 import com.roguesmp.loot.LootEntry;
@@ -173,8 +173,8 @@ public class Registries {
     public static final Registry<Codec<? extends TeleportEffect>> TELEPORT_EFFECT_CODEC = register(registry -> TeleportEffects.loadClass());
     public static final Registry<Warp> WARP = new Registry<>("warps", Warp.CODEC);
 
-    public static final Registry<Codec<? extends CraftingRecipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());
-    public static final Registry<CraftingRecipe> CRAFTING_RECIPE = new Registry<>("crafting_recipes", CraftingRecipe.CODEC);
+    public static final Registry<Codec<? extends Recipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());
+    public static final Registry<Recipe> CRAFTING_RECIPE = new Registry<>("crafting_recipes", Recipe.CODEC);
 
     public static void loadAllData(RogueSmpCore plugin) {
         Registry.loadAll(plugin);

@@ -8,8 +8,7 @@ import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.persistence.StateSection;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.crafting.CraftingManager;
-import com.roguesmp.crafting.recipe.CraftingRecipe;
-import com.roguesmp.crafting.recipe.ManualRecipe;
+import com.roguesmp.crafting.recipe.Recipe;
 import com.roguesmp.crafting.recipe.RecipeKey;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
@@ -32,7 +31,7 @@ import org.joml.Vector3f;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class ManualProcessorBlock<R extends CraftingRecipe & ManualRecipe> extends SmpBlock {
+public abstract class ManualProcessorBlock<R extends Recipe> extends SmpBlock {
 
     public record Style(String verb, String rejectMessage, String doneMessage, Sound workSound, Sound finishSound) {}
 
@@ -51,6 +50,18 @@ public abstract class ManualProcessorBlock<R extends CraftingRecipe & ManualReci
         this.data = data;
         this.recipeKey = recipeKey;
         this.style = style;
+    }
+
+    protected abstract boolean accepts(R recipe, ItemStack stack);
+
+    protected abstract int inputCount(R recipe);
+
+    protected abstract int duration(R recipe);
+
+    protected abstract List<StoredItem> roll(R recipe);
+
+    protected int tier() {
+        return data.tier();
     }
 
     @Override
@@ -82,7 +93,7 @@ public abstract class ManualProcessorBlock<R extends CraftingRecipe & ManualReci
             return;
         }
 
-        int count = recipe.getInput().count();
+        int count = inputCount(recipe);
         held = offered.withAmount(count);
         progress = 0;
         hand.setAmount(hand.getAmount() - count);
@@ -106,12 +117,12 @@ public abstract class ManualProcessorBlock<R extends CraftingRecipe & ManualReci
         if (particleItem != null) center.getWorld().spawnParticle(Particle.ITEM, center, 6, 0.15, 0.1, 0.15, 0.05, particleItem);
         center.getWorld().playSound(center, style.workSound(), 0.6f, 0.8f + Utils.RANDOM.nextFloat() * 0.4f);
 
-        if (progress < recipe.getDuration()) {
+        if (progress < duration(recipe)) {
             showProgress(player, recipe);
             return;
         }
 
-        for (StoredItem result : recipe.roll()) drop(result);
+        for (StoredItem result : roll(recipe)) drop(result);
         held = null;
         progress = 0;
         markDirty();
@@ -163,7 +174,7 @@ public abstract class ManualProcessorBlock<R extends CraftingRecipe & ManualReci
     }
 
     private void showProgress(Player player, R recipe) {
-        int percent = Math.min(100, progress * 100 / recipe.getDuration());
+        int percent = Math.min(100, progress * 100 / duration(recipe));
         int filled = percent * BAR_LENGTH / 100;
         Component bar = Component.text("■".repeat(filled), NamedTextColor.GREEN)
                 .append(Component.text("■".repeat(BAR_LENGTH - filled), NamedTextColor.DARK_GRAY));
@@ -176,11 +187,7 @@ public abstract class ManualProcessorBlock<R extends CraftingRecipe & ManualReci
         ItemStack stack = item.toItemStack();
         if (stack == null) return null;
 
-        ItemStack[] items = {stack};
-        for (R recipe : CraftingManager.getInstance().getAll(recipeKey)) {
-            if (recipe.getMinTier() <= data.tier() && recipe.matches(items, 0, 0)) return recipe;
-        }
-        return null;
+        return CraftingManager.getInstance().match(recipeKey, new ItemStack[]{stack}, recipe -> accepts(recipe, stack));
     }
 
     private void drop(StoredItem stored) {

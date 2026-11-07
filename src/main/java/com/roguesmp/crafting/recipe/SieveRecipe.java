@@ -7,17 +7,18 @@ import com.roguesmp.crafting.CraftingIngredient;
 import com.roguesmp.utils.ItemRef;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class SieveRecipe extends CraftingRecipe implements ManualRecipe {
+public final class SieveRecipe extends Recipe {
     public static final String TYPE_KEY = "sieve";
     public static final String TYPE_NAME = "Sàng";
 
     public static final Codec<SieveRecipe> CODEC = Codec.composite(
-            Codec.STRING.fieldOf("id").forGetter(CraftingRecipe::getId),
+            Codec.STRING.fieldOf("id").forGetter(Recipe::getId),
             CraftingIngredient.CODEC.fieldOf("input").forGetter(SieveRecipe::getInput),
             Codec.INT.fieldOf("duration").forGetter(SieveRecipe::getDuration),
             Codec.listOf(BlockDrop.CODEC).fieldOf("drops").forGetter(SieveRecipe::getDrops),
@@ -31,7 +32,7 @@ public final class SieveRecipe extends CraftingRecipe implements ManualRecipe {
     private final int minTier;
 
     public SieveRecipe(@NotNull String id, @NotNull CraftingIngredient input, int duration, @NotNull List<BlockDrop> drops, int minTier) {
-        super(new BaseProperties(id, drops.stream().map(drop -> new CraftingIngredient(drop.item(), Math.max(1, drop.minAmount()))).toList(), false));
+        super(new BaseProperties(id, drops.stream().map(drop -> new CraftingIngredient(drop.item(), Math.max(1, drop.minAmount()))).toList()));
         this.input = input;
         this.duration = Math.max(1, duration);
         this.drops = List.copyOf(drops);
@@ -58,22 +59,11 @@ public final class SieveRecipe extends CraftingRecipe implements ManualRecipe {
         return List.of(input);
     }
 
-    @Override
-    public boolean matches(@NotNull ItemStack @NotNull [] items, int width, int height) {
-        if (items.length == 0) return false;
-
-        String key = ItemRef.idOf(items[0]);
-        return key != null && key.equals(input.key()) && items[0].getAmount() >= input.count();
+    public boolean matches(@Nullable ItemStack stack) {
+        String key = ItemRef.idOf(stack);
+        return key != null && key.equals(input.key()) && stack.getAmount() >= input.count();
     }
 
-    @Override
-    public @NotNull ItemStack[] consume(@NotNull ItemStack @NotNull [] items, int width, int height) {
-        int[] amountsToConsume = new int[items.length];
-        if (items.length > 0) amountsToConsume[0] = input.count();
-        return applyConsumption(items, amountsToConsume);
-    }
-
-    @Override
     public @NotNull List<StoredItem> roll() {
         List<StoredItem> results = new ArrayList<>();
         for (BlockDrop drop : drops) {
@@ -83,12 +73,10 @@ public final class SieveRecipe extends CraftingRecipe implements ManualRecipe {
         return results;
     }
 
-    @Override
     public @NotNull CraftingIngredient getInput() {
         return input;
     }
 
-    @Override
     public int getDuration() {
         return duration;
     }
@@ -97,7 +85,6 @@ public final class SieveRecipe extends CraftingRecipe implements ManualRecipe {
         return drops;
     }
 
-    @Override
     public int getMinTier() {
         return minTier;
     }

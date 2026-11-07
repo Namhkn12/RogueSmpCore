@@ -7,17 +7,18 @@ import com.roguesmp.crafting.CraftingIngredient;
 import com.roguesmp.utils.ItemRef;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class CrusherRecipe extends CraftingRecipe implements ManualRecipe {
+public final class CrusherRecipe extends Recipe {
     public static final String TYPE_KEY = "crusher";
     public static final String TYPE_NAME = "Máy nghiền";
 
     public static final Codec<CrusherRecipe> CODEC = Codec.composite(
-            CraftingRecipe.BASE_CODEC.forGetter(CraftingRecipe::getBaseProperties),
+            Recipe.BASE_CODEC.forGetter(Recipe::getBaseProperties),
             CraftingIngredient.CODEC.fieldOf("input").forGetter(CrusherRecipe::getInput),
             Codec.INT.fieldOf("duration").forGetter(CrusherRecipe::getDuration),
             Codec.listOf(BlockDrop.CODEC).optionalFieldOf("extra", List.of()).forGetter(CrusherRecipe::getExtra),
@@ -58,22 +59,11 @@ public final class CrusherRecipe extends CraftingRecipe implements ManualRecipe 
         return List.of(input);
     }
 
-    @Override
-    public boolean matches(@NotNull ItemStack @NotNull [] items, int width, int height) {
-        if (items.length == 0) return false;
-
-        String key = ItemRef.idOf(items[0]);
-        return key != null && key.equals(input.key()) && items[0].getAmount() >= input.count();
+    public boolean matches(@Nullable ItemStack stack) {
+        String key = ItemRef.idOf(stack);
+        return key != null && key.equals(input.key()) && stack.getAmount() >= input.count();
     }
 
-    @Override
-    public @NotNull ItemStack[] consume(@NotNull ItemStack @NotNull [] items, int width, int height) {
-        int[] amountsToConsume = new int[items.length];
-        if (items.length > 0) amountsToConsume[0] = input.count();
-        return applyConsumption(items, amountsToConsume);
-    }
-
-    @Override
     public @NotNull List<StoredItem> roll() {
         List<StoredItem> results = new ArrayList<>();
         for (CraftingIngredient output : getOutputs()) results.add(new StoredItem(output.key(), output.count()));
@@ -84,12 +74,10 @@ public final class CrusherRecipe extends CraftingRecipe implements ManualRecipe 
         return results;
     }
 
-    @Override
     public @NotNull CraftingIngredient getInput() {
         return input;
     }
 
-    @Override
     public int getDuration() {
         return duration;
     }
@@ -98,7 +86,6 @@ public final class CrusherRecipe extends CraftingRecipe implements ManualRecipe 
         return extra;
     }
 
-    @Override
     public int getMinTier() {
         return minTier;
     }
