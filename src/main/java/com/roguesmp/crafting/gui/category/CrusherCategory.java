@@ -25,7 +25,7 @@ final class CrusherCategory extends RecipeCategory<CrusherRecipe> {
     private static final int OUTPUTS_PER_ROW = 3;
 
     CrusherCategory() {
-        super("crusher", "Máy nghiền", Material.GRINDSTONE, List.of(), Set.of(BlockTypes.CRUSHER));
+        super("crusher", "Máy nghiền", Material.GRINDSTONE, List.of(), Set.of(BlockTypes.CRUSHER, BlockTypes.HAND_CRUSHER));
     }
 
     @Override
