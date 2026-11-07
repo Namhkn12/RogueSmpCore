@@ -22,7 +22,7 @@ final class SieveCategory extends RecipeCategory<SieveRecipe> {
     private static final int OUTPUTS_PER_ROW = 3;
 
     SieveCategory() {
-        super("sieve", "Sàng", Material.SCAFFOLDING, List.of(), Set.of(BlockTypes.SIEVE));
+        super("sieve", "Sàng", Material.SCAFFOLDING, List.of(), Set.of(BlockTypes.HAND_SIEVE, BlockTypes.SIEVE));
     }
 
     @Override

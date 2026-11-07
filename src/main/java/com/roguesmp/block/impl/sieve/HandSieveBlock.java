@@ -1,15 +1,15 @@
-package com.roguesmp.block.impl;
+package com.roguesmp.block.impl.sieve;
 
+import com.roguesmp.crafting.recipe.CraftingRecipes;
+import com.roguesmp.crafting.recipe.SieveRecipe;
 import com.roguesmp.block.BlockProperties;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.StoredItem;
-import com.roguesmp.block.data.ManualProcessorData;
+import com.roguesmp.block.data.HandSieveData;
 import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.persistence.StateSection;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.crafting.CraftingManager;
-import com.roguesmp.crafting.recipe.Recipe;
-import com.roguesmp.crafting.recipe.RecipeKey;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -31,37 +31,24 @@ import org.joml.Vector3f;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class ManualProcessorBlock<R extends Recipe> extends SmpBlock {
-
-    public record Style(String verb, String rejectMessage, String doneMessage, Sound workSound, Sound finishSound) {}
+public class HandSieveBlock extends SmpBlock {
 
     private static final int BAR_LENGTH = 10;
     private static final float ITEM_SCALE = 0.5f;
+    private static final String VERB = "Sàng";
+    private static final String REJECT_MESSAGE = "Vật phẩm này không thể sàng";
+    private static final String DONE_MESSAGE = "Đã sàng xong";
+    private static final Sound WORK_SOUND = Sound.BLOCK_SAND_HIT;
+    private static final Sound FINISH_SOUND = Sound.BLOCK_GRAVEL_BREAK;
 
-    private final ManualProcessorData data;
-    private final RecipeKey<R> recipeKey;
-    private final Style style;
+    private final HandSieveData data;
     private @Nullable StoredItem held;
     private int progress;
     private @Nullable ItemDisplay heldDisplay;
 
-    protected ManualProcessorBlock(BlockProperties properties, ManualProcessorData data, RecipeKey<R> recipeKey, Style style) {
+    public HandSieveBlock(BlockProperties properties, HandSieveData data) {
         super(properties);
         this.data = data;
-        this.recipeKey = recipeKey;
-        this.style = style;
-    }
-
-    protected abstract boolean accepts(R recipe, ItemStack stack);
-
-    protected abstract int inputCount(R recipe);
-
-    protected abstract int duration(R recipe);
-
-    protected abstract List<StoredItem> roll(R recipe);
-
-    protected int tier() {
-        return data.tier();
     }
 
     @Override
@@ -87,13 +74,13 @@ public abstract class ManualProcessorBlock<R extends Recipe> extends SmpBlock {
 
     private void insert(Player player, @Nullable ItemStack hand) {
         StoredItem offered = StoredItem.of(hand);
-        R recipe = offered == null ? null : recipeFor(offered);
+        SieveRecipe recipe = offered == null ? null : recipeFor(offered);
         if (hand == null || offered == null || recipe == null) {
-            player.sendActionBar(Utils.text(style.rejectMessage(), NamedTextColor.RED));
+            player.sendActionBar(Utils.text(REJECT_MESSAGE, NamedTextColor.RED));
             return;
         }
 
-        int count = inputCount(recipe);
+        int count = recipe.getInput().count();
         held = offered.withAmount(count);
         progress = 0;
         hand.setAmount(hand.getAmount() - count);
@@ -104,7 +91,7 @@ public abstract class ManualProcessorBlock<R extends Recipe> extends SmpBlock {
     }
 
     private void work(Player player) {
-        R recipe = held == null ? null : recipeFor(held);
+        SieveRecipe recipe = held == null ? null : recipeFor(held);
         if (recipe == null) {
             takeBack(player);
             return;
@@ -115,20 +102,20 @@ public abstract class ManualProcessorBlock<R extends Recipe> extends SmpBlock {
         Location center = getLocation().toCenterLocation().add(0, 0.6, 0);
         ItemStack particleItem = held.toItemStack();
         if (particleItem != null) center.getWorld().spawnParticle(Particle.ITEM, center, 6, 0.15, 0.1, 0.15, 0.05, particleItem);
-        center.getWorld().playSound(center, style.workSound(), 0.6f, 0.8f + Utils.RANDOM.nextFloat() * 0.4f);
+        center.getWorld().playSound(center, WORK_SOUND, 0.6f, 0.8f + Utils.RANDOM.nextFloat() * 0.4f);
 
-        if (progress < duration(recipe)) {
+        if (progress < recipe.getDuration()) {
             showProgress(player, recipe);
             return;
         }
 
-        for (StoredItem result : roll(recipe)) drop(result);
+        for (StoredItem result : recipe.roll()) drop(result);
         held = null;
         progress = 0;
         markDirty();
         syncHeldDisplay();
-        center.getWorld().playSound(center, style.finishSound(), 1f, 0.9f);
-        player.sendActionBar(Utils.text(style.doneMessage(), NamedTextColor.GREEN));
+        center.getWorld().playSound(center, FINISH_SOUND, 1f, 0.9f);
+        player.sendActionBar(Utils.text(DONE_MESSAGE, NamedTextColor.GREEN));
     }
 
     private void takeBack(Player player) {
@@ -173,21 +160,21 @@ public abstract class ManualProcessorBlock<R extends Recipe> extends SmpBlock {
         heldDisplay = null;
     }
 
-    private void showProgress(Player player, R recipe) {
-        int percent = Math.min(100, progress * 100 / duration(recipe));
+    private void showProgress(Player player, SieveRecipe recipe) {
+        int percent = Math.min(100, progress * 100 / recipe.getDuration());
         int filled = percent * BAR_LENGTH / 100;
         Component bar = Component.text("■".repeat(filled), NamedTextColor.GREEN)
                 .append(Component.text("■".repeat(BAR_LENGTH - filled), NamedTextColor.DARK_GRAY));
-        player.sendActionBar(Utils.text(style.verb() + " ", NamedTextColor.YELLOW).append(held.displayName())
+        player.sendActionBar(Utils.text(VERB + " ", NamedTextColor.YELLOW).append(held.displayName())
                 .append(Component.text(" ", NamedTextColor.GRAY)).append(bar)
                 .append(Component.text(" " + percent + "%", NamedTextColor.GRAY)));
     }
 
-    private @Nullable R recipeFor(StoredItem item) {
+    private @Nullable SieveRecipe recipeFor(StoredItem item) {
         ItemStack stack = item.toItemStack();
         if (stack == null) return null;
 
-        return CraftingManager.getInstance().match(recipeKey, new ItemStack[]{stack}, recipe -> accepts(recipe, stack));
+        return CraftingManager.getInstance().match(CraftingRecipes.SIEVE, new ItemStack[]{stack}, recipe -> recipe.getMinTier() <= data.tier() && recipe.matches(stack));
     }
 
     private void drop(StoredItem stored) {

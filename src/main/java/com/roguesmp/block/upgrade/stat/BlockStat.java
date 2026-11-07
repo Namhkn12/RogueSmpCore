@@ -15,7 +15,11 @@ public enum BlockStat {
 
     CRUSHER_SPEED("Tốc độ nghiền", true),
     CRUSHER_OUTPUT_AMOUNT("Sản lượng", true),
-    CRUSHER_EXTRA_CHANCE("Tỉ lệ sản phẩm phụ", true);
+    CRUSHER_EXTRA_CHANCE("Tỉ lệ sản phẩm phụ", true),
+
+    SIEVE_SPEED("Tốc độ sàng", true),
+    SIEVE_DROP_AMOUNT("Sản lượng sàng", true),
+    SIEVE_DROP_CHANCE("Tỉ lệ thêm sản phẩm phụ khi sàng", true);
 
     public static final Codec<BlockStat> CODEC = Codec.enumOf(BlockStat.class);
 

@@ -1,5 +1,8 @@
 package com.roguesmp.block.impl.crusher;
 
+import com.roguesmp.crafting.recipe.CraftingRecipes;
+import com.roguesmp.crafting.recipe.CrusherRecipe;
+import com.roguesmp.block.gui.CrusherGui;
 import com.roguesmp.block.BlockDrop;
 import com.roguesmp.block.BlockProperties;
 import com.roguesmp.block.EnergyStorage;
@@ -23,11 +26,7 @@ import com.roguesmp.block.upgrade.effect.OutputContext;
 import com.roguesmp.block.upgrade.stat.BlockStat;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.MapCodec;
-import com.roguesmp.crafting.CraftingIngredient;
 import com.roguesmp.crafting.CraftingManager;
-import com.roguesmp.crafting.recipe.Recipe;
-import com.roguesmp.crafting.recipe.CraftingRecipes;
-import com.roguesmp.crafting.recipe.CrusherRecipe;
 import com.roguesmp.item.component.impl.BlockUpgradeComponent;
 import org.bukkit.Location;
 import org.bukkit.entity.HumanEntity;
@@ -129,11 +128,7 @@ public class CrusherBlock extends SmpBlock implements Tickable, EnergyStorage, I
         StoredItem consumed = input.extract(0, recipe.getInput().count(), false);
 
         List<StoredItem> produced = new ArrayList<>();
-        for (CraftingIngredient result : recipe.getOutputs()) {
-            StoredItem rolled = roll(new BlockDrop(result.key(), result.count(), result.count(), 1.0));
-            if (rolled != null) produced.add(rolled);
-        }
-        for (BlockDrop drop : recipe.getExtra()) {
+        for (BlockDrop drop : recipe.getDrops()) {
             StoredItem rolled = roll(drop);
             if (rolled != null) produced.add(rolled);
         }
@@ -167,8 +162,8 @@ public class CrusherBlock extends SmpBlock implements Tickable, EnergyStorage, I
     }
 
     private boolean isRecipeInput(String itemId) {
-        for (Recipe recipe : CraftingManager.getInstance().getRecipesUsing(itemId)) {
-            if (recipe instanceof CrusherRecipe crusherRecipe && crusherRecipe.getMinTier() <= data.tier()) return true;
+        for (CrusherRecipe recipe : CraftingManager.getInstance().getAll(CraftingRecipes.CRUSHER)) {
+            if (recipe.getMinTier() <= data.tier() && recipe.getInput().key().equals(itemId)) return true;
         }
         return false;
     }

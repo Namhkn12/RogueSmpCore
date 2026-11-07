@@ -8,6 +8,7 @@ import com.roguesmp.block.impl.TallyBlock;
 import com.roguesmp.block.impl.cokeoven.CokeOvenBlock;
 import com.roguesmp.block.impl.crusher.CrusherBlock;
 import com.roguesmp.block.impl.crusher.HandCrusherBlock;
+import com.roguesmp.block.impl.sieve.HandSieveBlock;
 import com.roguesmp.block.impl.sieve.SieveBlock;
 import com.roguesmp.block.impl.energy.EnergyGeneratorBlock;
 import com.roguesmp.block.impl.altar.AltarMainBlock;
@@ -32,10 +33,12 @@ public class BlockTypes {
             register("coke_oven", "Lò cốc", CokeOvenData.CODEC, CokeOvenData.DEFAULT, CokeOvenBlock::new);
     public static final BlockType<CrusherData, CrusherBlock> CRUSHER =
             register("crusher", "Máy nghiền", CrusherData.CODEC, CrusherData.DEFAULT, CrusherBlock::new);
-    public static final BlockType<ManualProcessorData, HandCrusherBlock> HAND_CRUSHER =
-            register("hand_crusher", "Máy nghiền tay", ManualProcessorData.CODEC, ManualProcessorData.DEFAULT, HandCrusherBlock::new);
-    public static final BlockType<ManualProcessorData, SieveBlock> SIEVE =
-            register("sieve", "Sàng", ManualProcessorData.CODEC, ManualProcessorData.DEFAULT, SieveBlock::new);
+    public static final BlockType<HandCrusherData, HandCrusherBlock> HAND_CRUSHER =
+            register("hand_crusher", "Máy nghiền tay", HandCrusherData.CODEC, HandCrusherData.DEFAULT, HandCrusherBlock::new);
+    public static final BlockType<HandSieveData, HandSieveBlock> HAND_SIEVE =
+            register("hand_sieve", "Sàng tay", HandSieveData.CODEC, HandSieveData.DEFAULT, HandSieveBlock::new);
+    public static final BlockType<SieveData, SieveBlock> SIEVE =
+            register("sieve", "Máy sàng", SieveData.CODEC, SieveData.DEFAULT, SieveBlock::new);
     public static final BlockType<GeneratorData, ResourceGeneratorBlock> GENERATOR =
             register("generator", "Máy tạo tài nguyên", GeneratorData.CODEC, GeneratorData.DEFAULT, ResourceGeneratorBlock::new);
     public static final BlockType<EnergyGeneratorData, EnergyGeneratorBlock> ENERGY_GENERATOR =

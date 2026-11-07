@@ -30,6 +30,7 @@ public final class CrusherRecipe extends Recipe {
     private final int duration;
     private final List<BlockDrop> extra;
     private final int minTier;
+    private final List<BlockDrop> drops;
 
     public CrusherRecipe(@NotNull BaseProperties base, @NotNull CraftingIngredient input, int duration, @NotNull List<BlockDrop> extra, int minTier) {
         super(base);
@@ -37,6 +38,14 @@ public final class CrusherRecipe extends Recipe {
         this.duration = Math.max(1, duration);
         this.extra = List.copyOf(extra);
         this.minTier = Math.max(1, minTier);
+        List<BlockDrop> all = new ArrayList<>();
+        for (CraftingIngredient output : getOutputs()) all.add(new BlockDrop(output.key(), output.count(), output.count(), 1.0));
+        all.addAll(this.extra);
+        this.drops = List.copyOf(all);
+    }
+
+    public @NotNull @Unmodifiable List<BlockDrop> getDrops() {
+        return drops;
     }
 
     @Override
