@@ -1,6 +1,5 @@
 package com.roguesmp.gui.island;
 
-import com.roguesmp.block.BlockType;
 import com.roguesmp.gate.GateDisplay;
 import com.roguesmp.gate.cost.Cost;
 import com.roguesmp.gate.requirement.Requirement;
@@ -77,16 +76,11 @@ public class IslandLevelGui extends BaseGui {
                 Utils.text("Mạng năng lượng tối đa: ", NamedTextColor.GRAY).append(Component.text(islandLevel.maxEnergyNetworks(), NamedTextColor.WHITE)),
                 Utils.text("Dung lượng mỗi mạng: ", NamedTextColor.GRAY).append(Component.text(Utils.formatMoney(islandLevel.energyNetworkCapacity()), NamedTextColor.WHITE))
         ));
-        if (!islandLevel.blockLimits().isEmpty()) {
-            lore.add(Component.empty());
-            lore.add(Utils.text("Giới hạn khối:", NamedTextColor.YELLOW));
-            islandLevel.blockLimits().forEach((blockType, limit) -> {
-                int count = island.getBlockCount(blockType);
-                BlockType<?, ?> type = Registries.BLOCK_TYPE.get(blockType);
-                lore.add(line(Component.text((type != null ? type.displayName() : blockType) + ": ", NamedTextColor.GRAY)
-                        .append(Component.text(count, count >= limit ? NamedTextColor.RED : NamedTextColor.GREEN))
-                        .append(Component.text("/" + limit, NamedTextColor.GRAY))));
-            });
+        if (islandLevel.hasBlockCapacity()) {
+            int used = island.getUsedCapacity();
+            lore.add(Utils.text("Giới hạn khối: ", NamedTextColor.GRAY)
+                    .append(Component.text(used, used >= islandLevel.blockCapacity() ? NamedTextColor.RED : NamedTextColor.GREEN))
+                    .append(Component.text("/" + islandLevel.blockCapacity(), NamedTextColor.GRAY)));
         }
         return lore;
     }

@@ -28,7 +28,8 @@ public record BlockProperties(
         List<BlockDrop> drops,
         BlockExperience experience,
         Key placeSound,
-        Key breakSound
+        Key breakSound,
+        int capacityCost
 ) {
 
     public static final BlockProperties DEFAULT = new BlockProperties(
@@ -40,7 +41,8 @@ public record BlockProperties(
             List.of(),
             BlockExperience.NONE,
             Key.key("block.stone.place"),
-            Key.key("block.stone.break")
+            Key.key("block.stone.break"),
+            0
     );
 
     private static final Codec<Set<Holder<ItemType>>> TOOLS_CODEC = Codec.listOf(Registry.referenceCodec(() -> Registries.ITEM_TYPE))
@@ -56,6 +58,7 @@ public record BlockProperties(
             BlockExperience.CODEC.optionalFieldOf("experience", DEFAULT.experience()).forGetter(BlockProperties::experience),
             Codec.KEY.optionalFieldOf("place_sound", DEFAULT.placeSound()).forGetter(BlockProperties::placeSound),
             Codec.KEY.optionalFieldOf("break_sound", DEFAULT.breakSound()).forGetter(BlockProperties::breakSound),
+            Codec.INT.optionalFieldOf("capacity_cost", DEFAULT.capacityCost()).forGetter(BlockProperties::capacityCost),
             BlockProperties::new
     );
 }

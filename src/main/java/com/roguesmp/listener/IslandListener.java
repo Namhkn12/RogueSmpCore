@@ -4,7 +4,6 @@ import com.roguesmp.teleport.destination.HubDestination;
 import com.roguesmp.teleport.TeleportOptions;
 import com.roguesmp.teleport.TeleportService;
 import com.roguesmp.RogueSmpCore;
-import com.roguesmp.block.BlockType;
 import com.roguesmp.block.event.SmpBlockInteractEvent;
 import com.roguesmp.block.event.SmpBlockPlaceEvent;
 import com.roguesmp.block.event.SmpBlockRemoveEvent;
@@ -153,29 +152,32 @@ public class IslandListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onBlockLimitCheck(SmpBlockPlaceEvent event) {
+    public void onBlockCapacityCheck(SmpBlockPlaceEvent event) {
         IslandData island = islandManager.getIslandByWorld(event.getTarget().getWorld());
         if (island == null) return;
 
-        BlockType<?, ?> blockType = event.getBlock().getType();
-        Integer limit = IslandLevel.of(island.getLevel()).blockLimits().get(blockType.key());
-        if (limit == null || island.getBlockCount(blockType.key()) < limit) return;
+        IslandLevel islandLevel = IslandLevel.of(island.getLevel());
+        int cost = event.getBlock().getProperties().capacityCost();
+        if (cost <= 0 || !islandLevel.hasBlockCapacity()) return;
+        int used = island.getUsedCapacity();
+        if (used + cost <= islandLevel.blockCapacity()) return;
 
         event.setCancelled(true);
-        event.getPlayer().sendMessage(Utils.fromString("<red>Đảo đã đạt giới hạn <yellow>" + limit + " " + blockType.displayName() + "<red>. Nâng cấp đảo để đặt thêm!"));
+        event.getPlayer().sendMessage(Utils.fromString("<red>Không đủ sức chứa khối! Cần <yellow>" + cost + "<red>, còn trống <yellow>"
+                + Math.max(0, islandLevel.blockCapacity() - used) + "/" + islandLevel.blockCapacity() + "<red>. Nâng cấp đảo hoặc dỡ bớt khối."));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockPlaced(SmpBlockPlaceEvent event) {
         IslandData island = islandManager.getIslandByWorld(event.getTarget().getWorld());
-        if (island != null) island.changeBlockCount(event.getBlock().getType().key(), 1);
+        if (island != null) island.changeBlockCount(event.getBlock(), 1);
     }
 
     @EventHandler
     public void onBlockRemoved(SmpBlockRemoveEvent event) {
         World world = event.getBlock().getLocation().getWorld();
         IslandData island = world == null ? null : islandManager.getIslandByWorld(world);
-        if (island != null) island.changeBlockCount(event.getBlock().getType().key(), -1);
+        if (island != null) island.changeBlockCount(event.getBlock(), -1);
     }
 
     @EventHandler(ignoreCancelled = true)
