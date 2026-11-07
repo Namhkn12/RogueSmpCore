@@ -1,6 +1,6 @@
 package com.roguesmp.island;
 
-import com.roguesmp.gate.cost.Cost;
+import com.roguesmp.gate.cost.CostPayment;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
@@ -40,8 +40,7 @@ public class IslandLevelService {
         if (result != Result.SUCCESS) return result;
 
         Map.Entry<Integer, IslandLevel> next = IslandLevel.next(island.getLevel());
-        for (Cost cost : next.getValue().costs()) cost.takeFrom(bukkitPlayer.getInventory());
-        for (Cost cost : next.getValue().costs()) cost.take(player);
+        if (!CostPayment.pay(player, next.getValue().costs())) return Result.CANNOT_AFFORD;
 
         setLevel(island, next.getKey());
         broadcast(island, "<green>" + bukkitPlayer.getName() + " đã nâng cấp đảo lên <yellow>cấp " + next.getKey() + "<green>!");

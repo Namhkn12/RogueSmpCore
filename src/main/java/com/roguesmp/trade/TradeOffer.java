@@ -1,5 +1,6 @@
 package com.roguesmp.trade;
 
+import com.roguesmp.gate.cost.CostPayment;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.gate.cost.Cost;
@@ -7,7 +8,6 @@ import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.trade.result.TradeResult;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -43,27 +43,36 @@ public class TradeOffer {
     }
 
     public boolean canAfford(SmpPlayer player) {
-        return costs.stream().allMatch(cost -> cost.canAfford(player));
+        return CostPayment.canAfford(player, costs);
     }
 
     public Status trade(SmpPlayer player) {
         Player bukkitPlayer = player.getBukkitPlayer();
         if (bukkitPlayer == null || !meetsRequirements(player) || !canAfford(player)) return Status.NOT_ELIGIBLE;
 
-        PlayerInventory inventory = bukkitPlayer.getInventory();
-        ItemStack[] snapshot = inventory.getStorageContents();
-        costs.forEach(cost -> cost.takeFrom(inventory));
         ItemStack[] items = results.stream()
                 .flatMap(result -> result.createItems(player).stream())
                 .toArray(ItemStack[]::new);
-        if (items.length > 0 && !inventory.addItem(items).isEmpty()) {
-            inventory.setStorageContents(snapshot);
-            return Status.INVENTORY_FULL;
-        }
+        if (slotsNeeded(items) > emptySlots(bukkitPlayer)) return Status.INVENTORY_FULL;
+        if (!CostPayment.pay(player, costs)) return Status.NOT_ELIGIBLE;
 
-        costs.forEach(cost -> cost.take(player));
+        bukkitPlayer.getInventory().addItem(items);
         results.forEach(result -> result.give(player));
         return Status.SUCCESS;
+    }
+
+    private static int slotsNeeded(ItemStack[] items) {
+        int slots = 0;
+        for (ItemStack item : items) slots += Math.ceilDiv(item.getAmount(), item.getMaxStackSize());
+        return slots;
+    }
+
+    private static int emptySlots(Player player) {
+        int empty = 0;
+        for (ItemStack stack : player.getInventory().getStorageContents()) {
+            if (stack == null || stack.isEmpty()) empty++;
+        }
+        return empty;
     }
 
     public @Nullable String getName() {

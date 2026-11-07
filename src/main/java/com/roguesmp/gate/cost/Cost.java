@@ -17,13 +17,13 @@ public interface Cost {
 
     boolean canAfford(SmpPlayer player);
 
-    default void take(SmpPlayer player) {
+    Component getDisplay(SmpPlayer player);
+
+    default void takeFromInventory(Inventory inventory) {
 
     }
 
-    Component getDisplay(SmpPlayer player);
-
-    default void takeFrom(Inventory inventory) {
+    default void takeFromPlayer(SmpPlayer player) {
 
     }
 }

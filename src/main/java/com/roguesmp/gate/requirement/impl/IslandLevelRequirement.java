@@ -8,17 +8,17 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 
-public class LevelRequirement implements Requirement {
+public class IslandLevelRequirement implements Requirement {
 
-    public static final String TYPE_KEY = "level";
-    public static final Codec<LevelRequirement> CODEC = Codec.composite(
-            Codec.INT.fieldOf("min").forGetter(LevelRequirement::getMin),
-            LevelRequirement::new
+    public static final String TYPE_KEY = "island_level";
+    public static final Codec<IslandLevelRequirement> CODEC = Codec.composite(
+            Codec.INT.fieldOf("min").forGetter(IslandLevelRequirement::getMin),
+            IslandLevelRequirement::new
     );
 
     private final int min;
 
-    public LevelRequirement(int min) {
+    public IslandLevelRequirement(int min) {
         this.min = min;
     }
 

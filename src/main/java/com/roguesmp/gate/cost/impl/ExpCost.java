@@ -40,7 +40,7 @@ public final class ExpCost implements Cost {
     }
 
     @Override
-    public void take(SmpPlayer player) {
+    public void takeFromPlayer(SmpPlayer player) {
         Player bukkitPlayer = player.getBukkitPlayer();
         if (bukkitPlayer == null) return;
         PlayerUtils.changeExp(bukkitPlayer, -expCost);

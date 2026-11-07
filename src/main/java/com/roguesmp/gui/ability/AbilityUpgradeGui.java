@@ -1,5 +1,6 @@
 package com.roguesmp.gui.ability;
 
+import com.roguesmp.gate.cost.CostPayment;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.AbilityInfo;
@@ -15,7 +16,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -109,11 +109,7 @@ public class AbilityUpgradeGui extends BaseGui {
 
         addButton(4, 4, confirm, event -> {
             event.setCancelled(true);
-            if (!costs.stream().allMatch(cost -> cost.canAfford(smpPlayer))) return;
-
-            Inventory inventory = event.getWhoClicked().getInventory();
-            costs.forEach(cost -> cost.takeFrom(inventory));
-            costs.forEach(cost -> cost.take(smpPlayer));
+            if (!CostPayment.pay(smpPlayer, costs)) return;
             smpPlayer.getPlayerData().setAbilityLevel(info.getId(), nextLevel);
 
             event.getWhoClicked().sendMessage(Component.text("Nâng cấp thành công!", NamedTextColor.GREEN));
