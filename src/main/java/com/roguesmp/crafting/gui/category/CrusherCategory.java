@@ -60,7 +60,7 @@ final class CrusherCategory extends RecipeCategory<CrusherRecipe> {
         return FIRST_OUTPUT_COL + index % OUTPUTS_PER_ROW;
     }
 
-    private static ItemStack extraDisplay(BlockDrop drop) {
+    static ItemStack extraDisplay(BlockDrop drop) {
         ItemStack item = ItemRef.toItemStack(drop.item(), Math.max(1, drop.minAmount()));
         if (item == null) return null;
 

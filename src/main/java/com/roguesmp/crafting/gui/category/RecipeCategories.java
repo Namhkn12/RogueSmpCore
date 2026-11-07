@@ -6,6 +6,7 @@ import com.roguesmp.crafting.recipe.CrusherRecipe;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
 import com.roguesmp.crafting.recipe.FusionRecipe;
 import com.roguesmp.crafting.recipe.ScrappingRecipe;
+import com.roguesmp.crafting.recipe.SieveRecipe;
 import com.roguesmp.crafting.recipe.ShapedCraftingRecipe;
 import com.roguesmp.crafting.recipe.ShapelessCraftingRecipe;
 import com.roguesmp.item.BaseItem;
@@ -29,6 +30,7 @@ public final class RecipeCategories {
             FusionRecipe.TYPE_KEY, new FusionCategory(),
             CokeOvenRecipe.TYPE_KEY, new CokeOvenCategory(),
             CrusherRecipe.TYPE_KEY, new CrusherCategory(),
+            SieveRecipe.TYPE_KEY, new SieveCategory(),
             ScrappingRecipe.TYPE_KEY, new ScrappingCategory()
     );
 

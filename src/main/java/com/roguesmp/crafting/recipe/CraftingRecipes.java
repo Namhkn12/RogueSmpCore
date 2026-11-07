@@ -18,6 +18,7 @@ public class CraftingRecipes {
     public static final RecipeKey<FusionRecipe> FUSION;
     public static final RecipeKey<CokeOvenRecipe> COKE_OVEN;
     public static final RecipeKey<CrusherRecipe> CRUSHER;
+    public static final RecipeKey<SieveRecipe> SIEVE;
 
     static {
         SHAPED = register(ShapedCraftingRecipe.TYPE_KEY, ShapedCraftingRecipe.TYPE_NAME, ShapedCraftingRecipe.CODEC);
@@ -25,6 +26,7 @@ public class CraftingRecipes {
         FUSION = register(FusionRecipe.TYPE_KEY, FusionRecipe.TYPE_NAME, FusionRecipe.CODEC);
         COKE_OVEN = register(CokeOvenRecipe.TYPE_KEY, CokeOvenRecipe.TYPE_NAME, CokeOvenRecipe.CODEC);
         CRUSHER = register(CrusherRecipe.TYPE_KEY, CrusherRecipe.TYPE_NAME, CrusherRecipe.CODEC);
+        SIEVE = register(SieveRecipe.TYPE_KEY, SieveRecipe.TYPE_NAME, SieveRecipe.CODEC);
     }
 
     public static void loadClass() {

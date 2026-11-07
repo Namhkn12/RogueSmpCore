@@ -1,6 +1,7 @@
 package com.roguesmp.crafting.recipe;
 
 import com.roguesmp.block.BlockDrop;
+import com.roguesmp.block.StoredItem;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.crafting.CraftingIngredient;
 import com.roguesmp.utils.ItemRef;
@@ -8,9 +9,10 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public final class CrusherRecipe extends CraftingRecipe {
+public final class CrusherRecipe extends CraftingRecipe implements ManualRecipe {
     public static final String TYPE_KEY = "crusher";
     public static final String TYPE_NAME = "Máy nghiền";
 
@@ -71,10 +73,23 @@ public final class CrusherRecipe extends CraftingRecipe {
         return applyConsumption(items, amountsToConsume);
     }
 
+    @Override
+    public @NotNull List<StoredItem> roll() {
+        List<StoredItem> results = new ArrayList<>();
+        for (CraftingIngredient output : getOutputs()) results.add(new StoredItem(output.key(), output.count()));
+        for (BlockDrop drop : extra) {
+            StoredItem rolled = drop.rollStored();
+            if (rolled != null) results.add(rolled);
+        }
+        return results;
+    }
+
+    @Override
     public @NotNull CraftingIngredient getInput() {
         return input;
     }
 
+    @Override
     public int getDuration() {
         return duration;
     }
@@ -83,6 +98,7 @@ public final class CrusherRecipe extends CraftingRecipe {
         return extra;
     }
 
+    @Override
     public int getMinTier() {
         return minTier;
     }
