@@ -35,8 +35,8 @@ public class Efficiency implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng tốc độ đào khối";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Tăng tốc độ đào khối"));
     }
 
     @Override

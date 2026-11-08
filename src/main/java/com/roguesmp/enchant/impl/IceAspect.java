@@ -47,8 +47,11 @@ public class IceAspect implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Kẻ địch sẽ bị làm chậm 10% mỗi cấp khi đánh trúng, kéo dài 2 giây";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Kẻ địch sẽ bị làm chậm 10% mỗi cấp khi đánh trúng,"),
+                Component.text("kéo dài 2 giây")
+        );
     }
 
     @Override

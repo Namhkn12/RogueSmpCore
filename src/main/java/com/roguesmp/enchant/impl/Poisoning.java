@@ -49,8 +49,12 @@ public class Poisoning implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tấn công full lực trúng kẻ địch gây cộng dồn hiệu ứng Kịch độc kéo dài 2s. Tối đa 5 stack, mỗi stack gây (cấp) sát thương";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Tấn công full lực trúng kẻ địch gây cộng dồn"),
+                Component.text("hiệu ứng Kịch độc kéo dài 2s."),
+                Component.text("Tối đa 5 stack, mỗi stack gây (cấp) sát thương")
+        );
     }
 
     @Override

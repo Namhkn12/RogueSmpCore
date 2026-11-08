@@ -45,8 +45,11 @@ public class FireSlayer implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng 2 sát thương gốc gây ra cho quái hệ lửa mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Tăng 2 sát thương gốc gây ra cho quái hệ lửa"),
+                Component.text("mỗi cấp")
+        );
     }
 
     @Override

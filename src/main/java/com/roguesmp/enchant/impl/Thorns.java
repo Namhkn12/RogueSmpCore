@@ -27,8 +27,11 @@ public class Thorns implements SmpEnchant {
     @Override public @NotNull String getSimpleName() { return "Gai"; }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Khi chịu sát thương, kẻ địch gây sát thương đó sẽ phải chịu 1 sát thương mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Khi chịu sát thương, kẻ địch gây sát thương đó"),
+                Component.text("sẽ phải chịu 1 sát thương mỗi cấp")
+        );
     }
 
     @Override

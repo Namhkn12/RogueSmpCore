@@ -36,8 +36,11 @@ public class Retrieval implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Mũi tên bắn ra có tỉ lệ 10% không bị tiêu hao mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Mũi tên bắn ra có tỉ lệ 10% không bị tiêu hao"),
+                Component.text("mỗi cấp")
+        );
     }
 
     @Override

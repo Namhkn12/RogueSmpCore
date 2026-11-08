@@ -128,6 +128,18 @@ public class Utils {
         return Component.text(text, color).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
     }
 
+    /**
+     * Return a non-italic, defaultColor list of Component.
+     */
+    public static List<Component> text(List<Component> lines, TextColor defaultColor) {
+        List<Component> list = new ArrayList<>();
+        for (Component line : lines) {
+            Component component = line.colorIfAbsent(defaultColor).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
+            list.add(component);
+        }
+        return list;
+    }
+
     public static Component text(String text) {
         return Component.text(text).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
     }

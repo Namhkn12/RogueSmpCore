@@ -28,8 +28,8 @@ public class FrostWalker implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Hoạt động như vanilla";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Hoạt động như vanilla"));
     }
 
     @Override

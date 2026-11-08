@@ -6,6 +6,7 @@ import com.roguesmp.enchant.Enchants;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.utils.Utils;
 import com.roguesmp.utils.DamageUtils;
 import com.roguesmp.utils.Hitbox;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -51,8 +52,13 @@ public class Ember implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Đòn đánh tích tầng Hỏa Ngục lên mục tiêu. Đủ 5 tầng sẽ phát nổ, gây 3 sát thương mỗi cấp cho kẻ địch xung quanh";
+    public @NotNull List<Component> getDescription(int level) {
+        String damage = level > 0 ? Utils.compactNumber(DAMAGE_PER_LEVEL * level) : "3 mỗi cấp";
+        return List.of(
+                Component.text("Đòn đánh tích tầng Hỏa Ngục lên mục tiêu."),
+                Component.text("Đủ " + STACKS_TO_DETONATE + " tầng sẽ phát nổ, gây"),
+                Utils.fromString("<gold>" + damage + "</gold> sát thương cho kẻ địch xung quanh.")
+        );
     }
 
     @Override

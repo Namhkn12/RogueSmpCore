@@ -40,8 +40,11 @@ public class Explosive implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Mũi tên tạo hiệu ứng nổ khi va chạm, không gây sát thương vì đây dùng để test!";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Mũi tên tạo hiệu ứng nổ khi va chạm,"),
+                Component.text("không gây sát thương vì đây dùng để test!")
+        );
     }
 
     @Override

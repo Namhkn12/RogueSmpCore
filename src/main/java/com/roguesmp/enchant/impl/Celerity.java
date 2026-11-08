@@ -33,8 +33,8 @@ public class Celerity implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng tốc độ di chuyển thêm " + Utils.formatDecimal(VALUE_PER_LEVEL * 100) + "% mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Tăng tốc độ di chuyển thêm " + Utils.formatDecimal(VALUE_PER_LEVEL * 100) + "% mỗi cấp"));
     }
 
     @Override

@@ -42,8 +42,11 @@ public interface SmpEnchant {
 
     @NotNull Set<EquipSlot> getActiveSlots();
 
-    default @NotNull String getSimpleDescription() {
-        return "Phù phép này chưa có mô tả, xin hãy thông báo tới admin để được thêm.";
+    /**
+     * @param level the level to describe, or 0 when no specific level applies (e.g. browsing a list)
+     */
+    default @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Phù phép này chưa có mô tả, xin hãy thông báo tới admin để được thêm."));
     }
 
     default Material getIcon() {

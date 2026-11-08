@@ -209,7 +209,7 @@ public class InfusionGui extends BaseGui {
         optionItem.setData(DataComponentTypes.ITEM_NAME, Component.text(title, NamedTextColor.GOLD, TextDecoration.BOLD));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Utils.text(smpEnchant.getSimpleDescription(), NamedTextColor.GRAY));
+        lore.addAll(Utils.text(smpEnchant.getDescription(Math.max(1, currentLevel)), NamedTextColor.GRAY));
         lore.add(Component.empty());
         lore.add(Utils.text("Cấp độ hiện tại: ", NamedTextColor.GRAY)
                 .append(Component.text(currentLevel == 0 ? "Chưa có" : currentLevel + "/" + infusion.maxLevel(), NamedTextColor.YELLOW)));

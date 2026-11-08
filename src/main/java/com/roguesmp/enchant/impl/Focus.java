@@ -43,8 +43,8 @@ public class Focus implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Nhận 1% sát thương tầm xa mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Nhận 1% sát thương tầm xa mỗi cấp"));
     }
 
     @Override

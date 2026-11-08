@@ -43,8 +43,8 @@ public class Epoch implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Giảm thời gian hồi chiêu 1% mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Giảm thời gian hồi chiêu 1% mỗi cấp"));
     }
 
     @Override

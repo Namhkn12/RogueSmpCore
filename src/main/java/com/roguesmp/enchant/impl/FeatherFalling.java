@@ -27,8 +27,8 @@ public class FeatherFalling implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Giảm sát thương rơi phải nhận 10% mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Giảm sát thương rơi phải nhận 10% mỗi cấp"));
     }
 
     @Override

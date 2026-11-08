@@ -27,8 +27,11 @@ public class Impaling implements SmpEnchant {
     @Override public @NotNull String getSimpleName() { return "Đâm vào da thịt"; }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng sát thương gốc gây ra cho thủy quái thêm 2 mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Tăng sát thương gốc gây ra cho thủy quái"),
+                Component.text("thêm 2 mỗi cấp")
+        );
     }
 
     @Override

@@ -43,8 +43,11 @@ public class BaneOfArthropods implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Sát thương gốc gây ra cho quái chân đốt tăng thêm 2 mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Sát thương gốc gây ra cho quái chân đốt"),
+                Component.text("tăng thêm 2 mỗi cấp")
+        );
     }
 
     @Override

@@ -36,8 +36,11 @@ public class DepthStrider implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng hiệu suất di chuyển dưới nước thêm 1/3 mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Tăng hiệu suất di chuyển dưới nước"),
+                Component.text("thêm 1/3 mỗi cấp")
+        );
     }
 
     @Override

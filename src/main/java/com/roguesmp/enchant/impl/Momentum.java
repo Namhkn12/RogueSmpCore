@@ -7,6 +7,7 @@ import com.roguesmp.enchant.Enchants;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -43,8 +44,13 @@ public class Momentum implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Đánh liên tiếp cùng một mục tiêu trong 2 giây tích 1 tầng (tối đa 5). Mỗi tầng tăng 4% sát thương cận chiến mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        String bonus = level > 0 ? Math.round(BONUS_PER_STACK_PER_LEVEL * level * 100) + "%" : "4% mỗi cấp";
+        return List.of(
+                Component.text("Đánh liên tiếp cùng một mục tiêu trong 2 giây"),
+                Component.text("tích 1 tầng (tối đa " + MAX_STACKS + ")."),
+                Utils.fromString("Mỗi tầng tăng <red>" + bonus + "</red> sát thương cận chiến.")
+        );
     }
 
     @Override

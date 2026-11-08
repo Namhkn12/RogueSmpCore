@@ -23,8 +23,8 @@ public class Respiration implements SmpEnchant {
     @Override public @NotNull String getSimpleName() { return "Hô hấp"; }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Nhận 1 điểm chỉ số " + Attributes.OXYGEN_BONUS.getAttribute().getSimpleName() + " mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Nhận 1 điểm chỉ số " + Attributes.OXYGEN_BONUS.getAttribute().getSimpleName() + " mỗi cấp"));
     }
 
     @Override

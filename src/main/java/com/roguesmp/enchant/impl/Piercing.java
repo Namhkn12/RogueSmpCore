@@ -23,8 +23,8 @@ public class Piercing implements SmpEnchant {
     @Override public @NotNull String getSimpleName() { return "Xuyên thấu"; }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Hoạt động giống vanilla";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Hoạt động giống vanilla"));
     }
 
     @Override

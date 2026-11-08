@@ -30,8 +30,8 @@ public class Vigor implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Nhận 1% sát thương cận chiến mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Nhận 1% sát thương cận chiến mỗi cấp"));
     }
 
     @Override

@@ -29,8 +29,8 @@ public class Multishot implements SmpEnchant {
     @Override public @NotNull String getSimpleName() { return "Bắn nhiều tia"; }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Đạn bắn ra sẽ đi kèm thêm hai viên đạn mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Đạn bắn ra sẽ đi kèm thêm hai viên đạn mỗi cấp"));
     }
 
     @Override

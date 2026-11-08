@@ -45,8 +45,11 @@ public class Regicide implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng sát thương gây ra cho quái Elite và Boss thêm 10% mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Tăng sát thương gây ra cho quái Elite và Boss"),
+                Component.text("thêm 10% mỗi cấp")
+        );
     }
 
     @Override

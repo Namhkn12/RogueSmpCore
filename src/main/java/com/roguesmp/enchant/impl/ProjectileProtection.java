@@ -26,8 +26,8 @@ public class ProjectileProtection implements SmpEnchant {
     @Override public @NotNull String getSimpleName() { return "Bảo vệ đạn đạo"; }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Nhận 5 phòng ngự khi nhận sát thương tầm xa";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Nhận 5 phòng ngự khi nhận sát thương tầm xa"));
     }
 
     @Override

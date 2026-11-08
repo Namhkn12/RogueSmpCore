@@ -30,8 +30,8 @@ public class Perspicacity implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Nhận thêm 1% sát thương phép mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Nhận thêm 1% sát thương phép mỗi cấp"));
     }
 
     @Override

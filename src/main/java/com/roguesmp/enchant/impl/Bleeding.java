@@ -48,8 +48,12 @@ public class Bleeding implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tấn công trúng kẻ địch gán hiệu ứng Chảy máu kéo dài 3 giây, mỗi giây gây x sát thương mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Tấn công trúng kẻ địch gán hiệu ứng Chảy máu"),
+                Component.text("kéo dài 3 giây, mỗi giây gây x sát thương"),
+                Component.text("mỗi cấp")
+        );
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.roguesmp.enchant.Enchants;
 import com.roguesmp.enchant.SmpEnchant;
 import com.roguesmp.event.DamageEvent;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.utils.Utils;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -40,8 +41,12 @@ public class Executioner implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Gây thêm 10% sát thương mỗi cấp lên kẻ địch dưới 35% máu";
+    public @NotNull List<Component> getDescription(int level) {
+        String bonus = level > 0 ? Math.round(BONUS_PER_LEVEL * level * 100) + "%" : "10% mỗi cấp";
+        return List.of(
+                Utils.fromString("Gây thêm <red>" + bonus + "</red> sát thương"),
+                Component.text("lên kẻ địch dưới 35% máu.")
+        );
     }
 
     @Override

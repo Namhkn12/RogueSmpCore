@@ -42,8 +42,11 @@ public class Channeling implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Giáng sấm sét xuống kẻ địch bị trúng tên, gây " + Utils.formatDecimal(DMG_PER_LEVEL) + " sát thương phép mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Giáng sấm sét xuống kẻ địch bị trúng tên,"),
+                Component.text("gây " + Utils.formatDecimal(DMG_PER_LEVEL) + " sát thương phép mỗi cấp")
+        );
     }
 
     @Override

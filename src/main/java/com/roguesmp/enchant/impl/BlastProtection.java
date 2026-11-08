@@ -38,8 +38,8 @@ public class BlastProtection implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Nhận +" + Utils.formatDecimal(DEF_PER_LVL) + "phòng thủ khi nhận sát thương nổ";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Nhận +" + Utils.formatDecimal(DEF_PER_LVL) + "phòng thủ khi nhận sát thương nổ"));
     }
 
     @Override

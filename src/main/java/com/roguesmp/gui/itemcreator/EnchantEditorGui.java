@@ -1,5 +1,6 @@
 package com.roguesmp.gui.itemcreator;
 
+import net.kyori.adventure.text.JoinConfiguration;
 import com.roguesmp.enchant.Enchants;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.component.impl.EnchantComponent;
@@ -17,7 +18,7 @@ import java.util.Map;
 /**
  * Dialog-based sub-editor of {@link ItemCreatorGui} for a single {@link EnchantComponent}'s
  * (enchant -> level) map. A {@code multiAction()} with one button per {@link Enchants} constant
- * ({@link com.roguesmp.enchant.SmpEnchant#getSimpleDescription()} as the hover tooltip). Same
+ * ({@link com.roguesmp.enchant.SmpEnchant#getDescription(int)} as the hover tooltip). Same
  * immediate-commit shape as {@link AttributeEditorGui}.
  * <p>
  * An <em>empty</em> {@code EnchantComponent} is meaningful on its own - per the item docs, it
@@ -57,7 +58,7 @@ public class EnchantEditorGui {
             int current = values.getOrDefault(enchant, 0);
             boolean valuePresent = current > 0;
             multi.addButton(Component.text(enchant.name(), valuePresent ? NamedTextColor.GREEN : NamedTextColor.GRAY),
-                    Utils.text(enchant.getEnchant().getSimpleDescription(), NamedTextColor.GRAY),
+                    Component.join(JoinConfiguration.newlines(), Utils.text(enchant.getEnchant().getDescription(0), NamedTextColor.GRAY)),
                     (response, audience) -> Utils.runLater(() -> player.showDialog(buildValueDialog(player, enchant))));
         }
 
