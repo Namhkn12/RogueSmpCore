@@ -47,6 +47,18 @@ public final class ExpCost implements Cost {
     }
 
     @Override
+    public void refund(SmpPlayer player) {
+        Player bukkitPlayer = player.getBukkitPlayer();
+        if (bukkitPlayer == null) return;
+        PlayerUtils.changeExp(bukkitPlayer, expCost);
+    }
+
+    @Override
+    public Component getAmountDisplay() {
+        return Component.text(Utils.formatMoney(expCost) + " Exp", NamedTextColor.YELLOW);
+    }
+
+    @Override
     public Component getDisplay(SmpPlayer player) {
         Player bukkitPlayer = player.getBukkitPlayer();
         if (bukkitPlayer == null) return Component.text(level + " Exp Level", NamedTextColor.GRAY);

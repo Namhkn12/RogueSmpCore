@@ -6,7 +6,12 @@ import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.gate.GateDisplay;
 import com.roguesmp.gate.GateInventoryUtils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import com.roguesmp.utils.ItemRef;
+import com.roguesmp.utils.PlayerUtils;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 public class ItemCost implements Cost {
 
@@ -46,6 +51,19 @@ public class ItemCost implements Cost {
     @Override
     public void takeFromInventory(Inventory inventory) {
         GateInventoryUtils.remove(inventory, item, amount);
+    }
+
+    @Override
+    public void refund(SmpPlayer player) {
+        Player bukkitPlayer = player.getBukkitPlayer();
+        ItemStack stack = ItemRef.toItemStack(item, amount);
+        if (bukkitPlayer == null || stack == null) return;
+        PlayerUtils.giveItem(bukkitPlayer, stack);
+    }
+
+    @Override
+    public Component getAmountDisplay() {
+        return Component.text(amount + " ", NamedTextColor.YELLOW).append(GateDisplay.itemName(item));
     }
 
     @Override

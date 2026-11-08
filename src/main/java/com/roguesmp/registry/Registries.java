@@ -20,6 +20,7 @@ import com.roguesmp.item.ItemType;
 import com.roguesmp.item.ItemTypeGroup;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.enchant.Enchants;
+import com.roguesmp.enchant.infusion.InfusionDefinition;
 import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.effect.EffectCodecs;
 import com.roguesmp.effect.SmpEffect;
@@ -136,6 +137,7 @@ public class Registries {
     // No bulk JSON entries of its own (Enchants is a hardcoded enum) - only exists so enchants
     // can have a "enchants/tags/*.json" folder like every other registry.
     public static final Registry<Enchants> ENCHANTS = register("enchants", registry -> Enchants.bootstrap());
+    public static final Registry<InfusionDefinition> INFUSION = new Registry<>("infusions", InfusionDefinition.CODEC);
 
     public static final Registry<SpellType<? extends SpellParams>> ENTITY_SPELL = register(registry -> EntitySpells.loadClass());
     public static final Registry<EntityFactory<? extends SmpEntity>> ENTITY_FACTORY = register(registry -> SpecialEntities.loadClass());
