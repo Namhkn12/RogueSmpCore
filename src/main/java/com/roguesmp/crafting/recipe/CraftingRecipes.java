@@ -17,12 +17,16 @@ public class CraftingRecipes {
     public static final RecipeKey<ShapelessCraftingRecipe> SHAPELESS;
     public static final RecipeKey<FusionRecipe> FUSION;
     public static final RecipeKey<CokeOvenRecipe> COKE_OVEN;
+    public static final RecipeKey<CrusherRecipe> CRUSHER;
+    public static final RecipeKey<SieveRecipe> SIEVE;
 
     static {
         SHAPED = register(ShapedCraftingRecipe.TYPE_KEY, ShapedCraftingRecipe.TYPE_NAME, ShapedCraftingRecipe.CODEC);
         SHAPELESS = register(ShapelessCraftingRecipe.TYPE_KEY, ShapelessCraftingRecipe.TYPE_NAME, ShapelessCraftingRecipe.CODEC);
         FUSION = register(FusionRecipe.TYPE_KEY, FusionRecipe.TYPE_NAME, FusionRecipe.CODEC);
         COKE_OVEN = register(CokeOvenRecipe.TYPE_KEY, CokeOvenRecipe.TYPE_NAME, CokeOvenRecipe.CODEC);
+        CRUSHER = register(CrusherRecipe.TYPE_KEY, CrusherRecipe.TYPE_NAME, CrusherRecipe.CODEC);
+        SIEVE = register(SieveRecipe.TYPE_KEY, SieveRecipe.TYPE_NAME, SieveRecipe.CODEC);
     }
 
     public static void loadClass() {
@@ -36,7 +40,7 @@ public class CraftingRecipes {
         return BY_ID.get(id);
     }
 
-    private static <T extends CraftingRecipe> RecipeKey<T> register(String id, String displayName, Codec<T> codec) {
+    private static <T extends Recipe> RecipeKey<T> register(String id, String displayName, Codec<T> codec) {
         Registries.CRAFTING_RECIPE_CODEC.register(id, codec);
         RecipeKey<T> key = new RecipeKey<>(id, displayName);
         BY_ID.put(id, key);

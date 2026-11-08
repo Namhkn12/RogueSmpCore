@@ -2,7 +2,7 @@ package com.roguesmp.crafting.gui.category;
 
 import com.roguesmp.block.BlockType;
 import com.roguesmp.crafting.CraftingIngredient;
-import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.Recipe;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public abstract class RecipeCategory<T extends CraftingRecipe> {
+public abstract class RecipeCategory<T extends Recipe> {
 
     protected static final ItemStack EMPTY_CELL = BaseGui.createDecoration(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
 

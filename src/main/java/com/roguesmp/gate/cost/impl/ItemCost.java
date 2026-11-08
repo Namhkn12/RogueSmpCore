@@ -44,7 +44,7 @@ public class ItemCost implements Cost {
     }
 
     @Override
-    public void takeFrom(Inventory inventory) {
+    public void takeFromInventory(Inventory inventory) {
         GateInventoryUtils.remove(inventory, item, amount);
     }
 

@@ -1,6 +1,5 @@
 package com.roguesmp.crafting.recipe;
 
-import com.roguesmp.utils.ItemRef;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.crafting.CraftingIngredient;
 import org.bukkit.inventory.ItemStack;
@@ -8,17 +7,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public final class CokeOvenRecipe extends CraftingRecipe {
+public final class CokeOvenRecipe extends Recipe {
     public static final String TYPE_KEY = "coke_oven";
     public static final String TYPE_NAME = "Lò luyện cốc";
 
     public static final Codec<CokeOvenRecipe> CODEC = Codec.composite(
-            CraftingRecipe.BASE_CODEC.forGetter(CraftingRecipe::getBaseProperties),
+            Recipe.BASE_CODEC.forGetter(Recipe::getBaseProperties),
             Codec.listOf(CraftingIngredient.CODEC).fieldOf("ingredients").forGetter(CokeOvenRecipe::getIngredients),
             Codec.INT.fieldOf("duration").forGetter(CokeOvenRecipe::getDuration),
             CokeOvenRecipe::new
@@ -58,8 +56,7 @@ public final class CokeOvenRecipe extends CraftingRecipe {
         return ingredients;
     }
 
-    @Override
-    public boolean matches(@NotNull ItemStack @NotNull [] items, int width, int height) {
+    public boolean matches(@NotNull ItemStack @NotNull [] items) {
         Map<String, Integer> actual = CraftingIngredient.aggregateCounts(items);
         if (actual.size() != requiredCounts.size()) return false;
 
@@ -68,24 +65,6 @@ public final class CokeOvenRecipe extends CraftingRecipe {
             if (have == null || have < entry.getValue()) return false;
         }
         return true;
-    }
-
-    @Override
-    public @NotNull ItemStack[] consume(@NotNull ItemStack @NotNull [] items, int width, int height) {
-        int[] amountsToConsume = new int[items.length];
-        Map<String, Integer> stillNeeded = new HashMap<>(requiredCounts);
-        for (int i = 0; i < items.length; i++) {
-            String key = ItemRef.idOf(items[i]);
-            if (key == null) continue;
-
-            Integer needed = stillNeeded.get(key);
-            if (needed == null || needed <= 0) continue;
-
-            int take = Math.min(needed, items[i].getAmount());
-            amountsToConsume[i] = take;
-            stillNeeded.put(key, needed - take);
-        }
-        return applyConsumption(items, amountsToConsume);
     }
 
     public @NotNull @Unmodifiable List<CraftingIngredient> getIngredients() {

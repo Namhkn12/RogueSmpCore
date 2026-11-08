@@ -1,7 +1,7 @@
 package com.roguesmp.crafting.gui.category;
 
 import com.roguesmp.crafting.CraftingIngredient;
-import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.Recipe;
 import org.bukkit.Material;
 
 import java.util.LinkedHashMap;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-final class GenericCategory extends RecipeCategory<CraftingRecipe> {
+final class GenericCategory extends RecipeCategory<Recipe> {
 
     private static final int INPUTS_PER_ROW = 4;
     private static final int FIRST_OUTPUT_COL = 6;
@@ -20,7 +20,7 @@ final class GenericCategory extends RecipeCategory<CraftingRecipe> {
     }
 
     @Override
-    public void layout(CraftingRecipe recipe, RecipeLayout layout) {
+    public void layout(Recipe recipe, RecipeLayout layout) {
         Map<String, Integer> merged = new LinkedHashMap<>();
         for (CraftingIngredient input : recipe.getInputs()) merged.merge(input.key(), input.count(), Integer::sum);
 

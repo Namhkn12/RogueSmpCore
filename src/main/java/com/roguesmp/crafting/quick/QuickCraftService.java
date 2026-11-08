@@ -3,8 +3,6 @@ package com.roguesmp.crafting.quick;
 import com.roguesmp.crafting.CraftingIngredient;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
-import com.roguesmp.crafting.recipe.ShapedCraftingRecipe;
-import com.roguesmp.crafting.recipe.ShapelessCraftingRecipe;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.utils.ItemRef;
 import com.roguesmp.utils.PlayerUtils;
@@ -39,14 +37,11 @@ public final class QuickCraftService {
         Set<String> seen = new HashSet<>();
         return have.keySet().stream()
                 .flatMap(key -> CraftingManager.getInstance().getRecipesUsing(key).stream())
-                .filter(QuickCraftService::isQuickCraftable)
+                .filter(recipe -> recipe instanceof CraftingRecipe grid && grid.isQuickCraftable())
+                .map(CraftingRecipe.class::cast)
                 .filter(recipe -> seen.add(recipe.getId()))
                 .map(recipe -> evaluate(recipe, have))
                 .filter(candidate -> candidate.maxCrafts() > 0);
-    }
-
-    private static boolean isQuickCraftable(CraftingRecipe recipe) {
-        return recipe.isQuickCraftable() && (recipe instanceof ShapedCraftingRecipe || recipe instanceof ShapelessCraftingRecipe);
     }
 
     private static QuickCraftCandidate evaluate(CraftingRecipe recipe, Map<String, Integer> have) {
@@ -62,7 +57,7 @@ public final class QuickCraftService {
     }
 
     public static void craft(@NotNull Player player, @NotNull CraftingRecipe recipe, boolean craftAll) {
-        if (!isQuickCraftable(recipe)) {
+        if (!recipe.isQuickCraftable()) {
             deny(player, "Công thức này không hỗ trợ chế tạo nhanh!");
             return;
         }

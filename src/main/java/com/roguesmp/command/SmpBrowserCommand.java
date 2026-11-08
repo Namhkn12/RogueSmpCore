@@ -77,6 +77,6 @@ public class SmpBrowserCommand {
     }
 
     private static String query(CommandArguments args) {
-        return (String) args.getOrDefault("query", null);
+        return (String) args.get("query");
     }
 }

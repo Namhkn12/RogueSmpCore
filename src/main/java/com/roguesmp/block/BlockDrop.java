@@ -47,7 +47,7 @@ public record BlockDrop(String item, int minAmount, int maxAmount, double chance
         if (Utils.RANDOM.nextDouble() >= chance) return 0;
 
         int base = minAmount + (maxAmount > minAmount ? Utils.RANDOM.nextInt(maxAmount - minAmount + 1) : 0);
-        double scaled = Math.max(0, base * amountMultiplier + flatAmount);
+        double scaled = Math.max(0, base + flatAmount) * amountMultiplier;
         int whole = (int) scaled;
         double fraction = scaled - whole;
         return fraction > 0 && Utils.RANDOM.nextDouble() < fraction ? whole + 1 : whole;

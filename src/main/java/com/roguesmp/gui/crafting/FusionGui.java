@@ -142,7 +142,8 @@ public class FusionGui extends BaseGui {
     protected void onContentsSettled() {
         if (state == State.PROCESSING) return;
 
-        matched = CraftingManager.getInstance().match(CraftingRecipes.FUSION, currentItems(), 0, 0);
+        ItemStack[] items = currentItems();
+        matched = CraftingManager.getInstance().match(CraftingRecipes.FUSION, items, recipe -> recipe.matches(items));
         processAndRender();
     }
 
@@ -258,7 +259,7 @@ public class FusionGui extends BaseGui {
         if (state != State.IDLE) return;
 
         ItemStack[] items = currentItems(); // a defensive clone of every slot - the animation is about to overwrite the live ones
-        FusionRecipe matched = CraftingManager.getInstance().match(CraftingRecipes.FUSION, items, 0, 0);
+        FusionRecipe matched = CraftingManager.getInstance().match(CraftingRecipes.FUSION, items, recipe -> recipe.matches(items));
         if (matched == null) return;
 
         ItemStack result = matched.getPrimaryOutputStack();

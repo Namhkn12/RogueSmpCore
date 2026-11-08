@@ -17,6 +17,7 @@ import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.manager.BlockManager;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -342,6 +343,18 @@ public sealed interface DungeonEvent {
         @Override
         public Location location() {
             return player.getLocation();
+        }
+    }
+
+    record PlayerRespawned(Player player, PlayerRespawnEvent event) implements DungeonEvent {
+        @Override
+        public String id() {
+            return "player_respawned";
+        }
+
+        @Override
+        public Location location() {
+            return event.getRespawnLocation();
         }
     }
 

@@ -5,6 +5,7 @@ import com.roguesmp.RogueSmpCore;
 import com.roguesmp.crafting.CraftingIngredient;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.Recipe;
 import com.roguesmp.crafting.recipe.ShapedCraftingRecipe;
 import com.roguesmp.crafting.recipe.ShapelessCraftingRecipe;
 import com.roguesmp.gui.BaseGui;
@@ -322,7 +323,7 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
         }
 
         CraftingIngredient result = new CraftingIngredient(resultKey, resultStack.getAmount());
-        return new ShapedCraftingRecipe(new CraftingRecipe.BaseProperties(id, result, quickCraft), pattern, keyMap, mirrored);
+        return new ShapedCraftingRecipe(new Recipe.BaseProperties(id, result), quickCraft, pattern, keyMap, mirrored);
     }
 
     /**
@@ -347,7 +348,7 @@ public class ShapedShapelessRecipeEditorGui extends BaseGui {
         if (ingredients.isEmpty()) return null;
 
         CraftingIngredient result = new CraftingIngredient(resultKey, resultStack.getAmount());
-        return new ShapelessCraftingRecipe(new CraftingRecipe.BaseProperties(id, result, quickCraft), ingredients);
+        return new ShapelessCraftingRecipe(new Recipe.BaseProperties(id, result), quickCraft, ingredients);
     }
 
     private static @Nullable ItemStack resolveStack(@Nullable CraftingIngredient ingredient) {

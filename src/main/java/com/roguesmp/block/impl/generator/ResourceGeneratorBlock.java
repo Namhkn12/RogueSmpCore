@@ -12,14 +12,16 @@ import com.roguesmp.block.storage.ItemStorage;
 import com.roguesmp.block.storage.ItemStorageHolder;
 import com.roguesmp.block.storage.PooledSlots;
 import com.roguesmp.block.storage.SlotAccess;
-import com.roguesmp.item.component.impl.GeneratorCatalystComponent;
+import com.roguesmp.block.upgrade.UpgradeHost;
+import com.roguesmp.block.upgrade.UpgradeSet;
+import com.roguesmp.block.upgrade.CatalystBurner;
+import com.roguesmp.block.upgrade.UpgradeInstallResult;
+import com.roguesmp.block.upgrade.UpgradeType;
+import com.roguesmp.block.upgrade.effect.OutputContext;
+import com.roguesmp.item.component.impl.BlockUpgradeComponent;
+import com.roguesmp.block.upgrade.stat.BlockStat;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.codec.MapCodec;
-import com.roguesmp.block.impl.generator.stat.GeneratorEffect;
-import com.roguesmp.block.impl.generator.part.GeneratorCatalyst;
-import com.roguesmp.block.impl.generator.stat.GeneratorStats;
-import com.roguesmp.block.impl.generator.part.ModuleInstallResult;
-import com.roguesmp.block.impl.generator.part.ModuleSlots;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -33,26 +35,32 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Directional, EnergyStorage, ItemStorageHolder {
+public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Directional, EnergyStorage, ItemStorageHolder, UpgradeHost {
 
     private static final int GUI_REFRESH_INTERVAL = 10;
 
     private static final MapCodec<BlockFace> DIRECTION_CODEC = Directional.CODEC.optionalFieldOf("direction", BlockFace.EAST);
     private static final MapCodec<Optional<Integer>> ENERGY_CODEC = Codec.INT.optionalFieldOf("energy");
+    private static final MapCodec<Double> ENERGY_DEBT_CODEC = Codec.DOUBLE.optionalFieldOf("energy_debt", 0.0);
+
+    private static final Set<BlockStat> STATS = EnumSet.of(BlockStat.ENERGY_PER_TICK, BlockStat.MAX_ENERGY,
+            BlockStat.GENERATOR_PLACE_DELAY, BlockStat.GENERATOR_BREAK_DELAY, BlockStat.GENERATOR_LOOT_CAPACITY,
+            BlockStat.GENERATOR_DROP_AMOUNT, BlockStat.GENERATOR_RARE_DROP_CHANCE, BlockStat.GENERATOR_COMMON_DROP_AMOUNT);
 
     private final GeneratorData data;
     private final @Nullable Material placeMaterial;
-    private final ModuleSlots modules;
     private final ItemStorage storage = new ItemStorage(this).lockFaces(() -> Set.of(this.faceDirection));
-    private final FixedSlots catalystSlot = storage.add(new FixedSlots("catalyst", "Chất xúc tác", 1, SlotAccess.INSERT, item -> GeneratorCatalystComponent.of(item.item()) != null), this::onCatalystSlotChanged);
-    private final PooledSlots loot = storage.add(new PooledSlots("loot", "Kho", () -> this.stats.lootCapacity(), SlotAccess.EXTRACT));
-    private final GeneratorCatalyst catalyst = new GeneratorCatalyst(this, catalystSlot, this::rebuildStats, this::markDirty);
+    private final FixedSlots catalystFeed = storage.add(new FixedSlots("catalyst", "Chất xúc tác", 1, SlotAccess.INSERT, item -> CatalystBurner.isValid(this, item.item())), this::refreshGui);
+    private final PooledSlots loot = storage.add(new PooledSlots("loot", "Kho", this::lootCapacity, SlotAccess.EXTRACT), this::refreshGui);
     private final CrackDisplay crack = new CrackDisplay();
-    private GeneratorStats stats;
+    private final UpgradeSet upgrades = new UpgradeSet(this);
+    private final FixedSlots modules;
+    private final CatalystBurner catalyst = new CatalystBurner(this, catalystFeed, this::markDirty);
     private double energyDebt;
 
     private BlockFace faceDirection = BlockFace.EAST;
@@ -67,19 +75,17 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         super(properties);
         this.data = data;
         this.placeMaterial = ItemRef.vanillaMaterial(data.place());
-        this.modules = new ModuleSlots(data.moduleSlots());
-        this.stats = new GeneratorStats(data, List.of());
+        this.modules = storage.add(new FixedSlots("modules", "Mô-đun", data.moduleSlots(), SlotAccess.NONE, item -> checkModule(item.item()) == UpgradeInstallResult.INSTALLED), this::onModulesChanged);
     }
 
     @Override
     public void onHydrated() {
-        rebuildStats();
+        upgrades.rebuild();
     }
 
     @Override
     public void tick() {
-        catalyst.consume();
-        catalyst.tick();
+        catalyst.tick(getEnergy() > 0);
         if (mining) tickMining();
         else if (getEnergy() > 0) tickWaiting();
         tickGuiRefresh();
@@ -103,7 +109,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         if (--placeDelay > 0) return;
 
         if (!target.getType().isAir()) {
-            placeDelay = stats.placeDelayTicks();
+            placeDelay = placeDelayTicks();
             return;
         }
 
@@ -113,9 +119,10 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
 
     private void beginMining(Block target) {
         mining = true;
-        breakTicksLeft = stats.breakDelayTicks();
+        breakTicksLeft = breakDelayTicks();
         markDirty();
         crack.show(target);
+        refreshGui();
     }
 
     private void tickMining() {
@@ -138,13 +145,13 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     }
 
     private int crackStage() {
-        int total = stats.breakDelayTicks();
+        int total = breakDelayTicks();
         int elapsed = total - breakTicksLeft;
         return Math.min((elapsed * BlockVisual.CRACK_STAGES) / total, BlockVisual.CRACK_STAGES - 1);
     }
 
     private void consumeTickEnergy() {
-        energyDebt += stats.energyPerTick();
+        energyDebt += energyPerTick();
         int cost = (int) energyDebt;
         energyDebt -= cost;
         removeEnergy(cost);
@@ -152,9 +159,10 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
 
     private void resetToWaiting() {
         mining = false;
-        placeDelay = stats.placeDelayTicks();
+        placeDelay = placeDelayTicks();
         crack.remove(targetToMine());
         markDirty();
+        refreshGui();
     }
 
     private Block targetToMine() {
@@ -181,15 +189,15 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
 
         List<StoredItem> drops = new ArrayList<>();
         for (BlockDrop drop : data.drops()) {
-            StoredItem item = stats.rollDrop(drop);
+            StoredItem item = rollDrop(drop);
             if (item != null) drops.add(item);
         }
-        stats.behaviors().forEach(behavior -> behavior.onHarvest(this, drops));
+        drops = upgrades.output(new OutputContext(null, drops, this::rollDrop));
         for (StoredItem drop : drops) {
             int overflow = drop.amount() - loot.insert(drop, false);
             if (overflow > 0) dropAtCenter(drop.withAmount(overflow));
         }
-        catalyst.onHarvest();
+        catalyst.cycle();
         markDirty();
     }
 
@@ -201,28 +209,85 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         center.getWorld().dropItemNaturally(center, item);
     }
 
-    private void rebuildStats() {
-        catalyst.resolve();
-
-        List<GeneratorEffect> effects = new ArrayList<>();
-        modules.collectEffects(catalyst.activeItem(), effects);
-        catalyst.collectEffects(effects);
-
-        stats = new GeneratorStats(data, effects);
-        energy = Math.min(energy, stats.maxEnergy());
-        breakTicksLeft = Math.min(breakTicksLeft, stats.breakDelayTicks());
+    @Override
+    public void onUpgradesChanged() {
+        catalyst.revalidate();
+        energy = Math.min(energy, getMaxEnergy());
+        breakTicksLeft = Math.min(breakTicksLeft, breakDelayTicks());
+        refreshGui();
     }
 
-    public GeneratorStats stats() {
-        return stats;
+    @Override
+    public UpgradeSet upgrades() {
+        return upgrades;
     }
 
-    public ModuleSlots modules() {
+    @Override
+    public Set<BlockStat> stats() {
+        return STATS;
+    }
+
+    @Override
+    public List<String> upgradeItems() {
+        List<String> items = new ArrayList<>();
+        for (int i = 0; i < modules.size(); i++) {
+            StoredItem stored = modules.get(i);
+            if (stored != null && isValidModule(stored.item())) items.add(stored.item());
+        }
+        catalyst.collectItems(items);
+        return items;
+    }
+
+    public UpgradeInstallResult checkModule(String itemId) {
+        UpgradeInstallResult result = BlockUpgradeComponent.check(itemId, this, UpgradeType.MODULE);
+        return result == UpgradeInstallResult.INSTALLED ? upgrades.canAdd(itemId) : result;
+    }
+
+    public boolean isValidModule(String itemId) {
+        return BlockUpgradeComponent.check(itemId, this, UpgradeType.MODULE) == UpgradeInstallResult.INSTALLED;
+    }
+
+    private void onModulesChanged() {
+        upgrades.rebuild();
+        refreshGui();
+    }
+
+
+    private @Nullable StoredItem rollDrop(BlockDrop drop) {
+        boolean rare = drop.chance() < 1.0;
+        double chance = rare ? upgrades.sheet().applyChance(BlockStat.GENERATOR_RARE_DROP_CHANCE, drop.chance()) : drop.chance();
+        double amountMultiplier = upgrades.sheet().multiplier(BlockStat.GENERATOR_DROP_AMOUNT)
+                * (rare ? 1.0 : upgrades.sheet().multiplier(BlockStat.GENERATOR_COMMON_DROP_AMOUNT));
+        double flatAmount = upgrades.sheet().flatSum(BlockStat.GENERATOR_DROP_AMOUNT)
+                + (rare ? 0.0 : upgrades.sheet().flatSum(BlockStat.GENERATOR_COMMON_DROP_AMOUNT));
+        return drop.rollStored(chance, amountMultiplier, flatAmount);
+    }
+
+    public int placeDelayTicks() {
+        return upgrades.sheet().applyInt(BlockStat.GENERATOR_PLACE_DELAY, data.placeDelayTicks());
+    }
+
+    public int breakDelayTicks() {
+        return upgrades.sheet().applyInt(BlockStat.GENERATOR_BREAK_DELAY, data.breakDelayTicks());
+    }
+
+    public int lootCapacity() {
+        return upgrades.sheet().applyInt(BlockStat.GENERATOR_LOOT_CAPACITY, data.lootCapacity());
+    }
+
+    public double energyPerTick() {
+        return upgrades.sheet().apply(BlockStat.ENERGY_PER_TICK, data.energyPerTick());
+    }
+
+    public GeneratorData data() {
+        return data;
+    }
+
+    public FixedSlots modules() {
         return modules;
     }
 
-    private void onCatalystSlotChanged() {
-        catalyst.consume();
+    private void refreshGui() {
         if (gui != null) gui.refresh();
     }
 
@@ -231,15 +296,11 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         return storage;
     }
 
-    public FixedSlots catalystSlot() {
-        return catalystSlot;
-    }
-
     public PooledSlots loot() {
         return loot;
     }
 
-    public GeneratorCatalyst catalyst() {
+    public CatalystBurner catalyst() {
         return catalyst;
     }
 
@@ -252,24 +313,6 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         return breakTicksLeft;
     }
 
-    public ModuleInstallResult installModule(String itemId) {
-        ModuleInstallResult result = modules.install(itemId);
-        if (result == ModuleInstallResult.INSTALLED) {
-            rebuildStats();
-            markDirty();
-        }
-        return result;
-    }
-
-    public @Nullable String removeModule(int index) {
-        String removed = modules.remove(index);
-        if (removed != null) {
-            rebuildStats();
-            markDirty();
-        }
-        return removed;
-    }
-
     @Override
     public int getEnergy() {
         return energy;
@@ -277,12 +320,12 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
 
     @Override
     public int getMaxEnergy() {
-        return stats.maxEnergy();
+        return upgrades.sheet().applyInt(BlockStat.MAX_ENERGY, data.maxEnergy());
     }
 
     @Override
     public int addEnergy(int amount) {
-        int accepted = Math.min(amount, stats.maxEnergy() - energy);
+        int accepted = Math.min(amount, getMaxEnergy() - energy);
         energy += accepted;
         if (accepted > 0) markDirty();
         return accepted;
@@ -307,7 +350,7 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     @Override
     public void onPlaced(Player player, ItemStack placedFrom) {
         faceDirection = getPlacementFacing(player);
-        placeDelay = stats.placeDelayTicks();
+        placeDelay = placeDelayTicks();
         markDirty();
         rotateDisplay(Bukkit.getEntity(getDisplayId()), faceDirection);
     }
@@ -332,7 +375,6 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     @Override
     public void onBlockBreak(SmpBlockBreakEvent event) {
         if (gui != null) gui.closeAll();
-        modules.drain().forEach(moduleId -> dropAtCenter(new StoredItem(moduleId, 1)));
     }
 
     @Override
@@ -345,8 +387,8 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
         super.collectSections(sections);
         sections.add(StateSection.of(DIRECTION_CODEC, () -> faceDirection, direction -> this.faceDirection = direction));
         sections.add(StateSection.of(ENERGY_CODEC, () -> Optional.of(energy), value -> energy = value.orElse(0)));
-        sections.add(modules.section());
-        sections.add(catalyst.activeSection());
+        sections.add(StateSection.of(ENERGY_DEBT_CODEC, () -> energyDebt, value -> energyDebt = value));
+        sections.add(catalyst.section());
     }
 
     @Override

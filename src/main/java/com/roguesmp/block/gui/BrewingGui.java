@@ -27,7 +27,7 @@ public class BrewingGui extends MachineGui {
     private final BrewingBlock brewer;
 
     public BrewingGui(BrewingBlock brewer) {
-        super(Component.text("Bàn pha chế"), 5, brewer.itemStorage(), brewer::openGui);
+        super(Utils.fromString(brewer.getProperties().displayName()), 5, brewer.itemStorage(), brewer::openGui);
         this.brewer = brewer;
     }
 

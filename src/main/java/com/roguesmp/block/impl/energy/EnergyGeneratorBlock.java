@@ -30,7 +30,7 @@ public class EnergyGeneratorBlock extends SmpBlock implements Tickable, EnergySt
 
     private final EnergyGeneratorData data;
     private final ItemStorage storage = new ItemStorage(this);
-    private final FixedSlots fuelSlot = storage.add(new FixedSlots("fuel", "Nhiên liệu", 1, SlotAccess.INSERT, item -> EnergySourceComponent.of(item.item()) != null));
+    private final FixedSlots fuelSlot = storage.add(new FixedSlots("fuel", "Nhiên liệu", 1, SlotAccess.INSERT, item -> EnergySourceComponent.of(item.item()) != null), this::refreshGui);
     private int energy;
     private int burnTicksLeft;
     private int burnTicksTotal;
@@ -63,6 +63,7 @@ public class EnergyGeneratorBlock extends SmpBlock implements Tickable, EnergySt
         burnTicksLeft = burnTicksTotal = source.burnTicks();
         burnEnergyPerTick = source.energyPerTick();
         markDirty();
+        refreshGui();
     }
 
     private void burn() {
@@ -71,6 +72,11 @@ public class EnergyGeneratorBlock extends SmpBlock implements Tickable, EnergySt
         addEnergy(burnEnergyPerTick);
         burnTicksLeft--;
         markDirty();
+        if (burnTicksLeft <= 0) refreshGui();
+    }
+
+    private void refreshGui() {
+        if (gui != null) gui.refresh();
     }
 
     private void tickGuiRefresh() {

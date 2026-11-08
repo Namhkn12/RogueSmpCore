@@ -33,8 +33,7 @@ public class ItemComponentKeys {
     public static final ComponentKey<RandomStatComponent> RANDOM_STAT = register("random_stat", RandomStatComponent.CODEC);
     public static final ComponentKey<UsageTimerComponent> USAGE_TIMER = register("usage_timer", UsageTimerComponent.CODEC);
     public static final ComponentKey<CommandExecutorComponent> COMMAND_EXECUTOR = register("command_executor", CommandExecutorComponent.CODEC);
-    public static final ComponentKey<GeneratorModuleComponent> GENERATOR_MODULE = register("generator_module", GeneratorModuleComponent.CODEC);
-    public static final ComponentKey<GeneratorCatalystComponent> GENERATOR_CATALYST = register("generator_catalyst", GeneratorCatalystComponent.CODEC);
+    public static final ComponentKey<BlockUpgradeComponent> BLOCK_UPGRADE = register("block_upgrade", BlockUpgradeComponent.CODEC);
     public static final ComponentKey<EnergySourceComponent> ENERGY_SOURCE = register("energy_source", EnergySourceComponent.CODEC);
     public static final ComponentKey<RecipeViewerComponent> RECIPE_VIEWER = register("recipe_viewer", RecipeViewerComponent.CODEC);
     public static final ComponentKey<DyedColorComponent> DYED_COLOR = register("dyed_color", DyedColorComponent.CODEC);

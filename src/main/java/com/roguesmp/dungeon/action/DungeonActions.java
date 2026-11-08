@@ -68,6 +68,9 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class DungeonActions {
+    private static final ScriptNumber ZERO = ScriptNumber.of(0);
+    private static final ScriptNumber ONE = ScriptNumber.of(1);
+
 
     public record Signal(String id, int amount, Map<String, ScriptValue> data) implements DungeonAction {
         public static final Codec<Signal> CODEC = Codec.composite(
@@ -1023,9 +1026,6 @@ public class DungeonActions {
     public static final Codec<Choose> CHOOSE = register("choose", Choose.CODEC);
     public static final Codec<RunCommand> COMMAND = register("command", RunCommand.CODEC);
     public static final Codec<Call> CALL = register("call", Call.CODEC);
-
-    private static final ScriptNumber ZERO = ScriptNumber.of(0);
-    private static final ScriptNumber ONE = ScriptNumber.of(1);
 
     public static void loadClass() {
 

@@ -27,7 +27,7 @@ public class CokeOvenGui extends MachineGui {
     private final CokeOvenBlock oven;
 
     public CokeOvenGui(CokeOvenBlock oven) {
-        super(Component.text("Coke Oven"), 3, oven.itemStorage(), oven::openGui);
+        super(Utils.fromString(oven.getProperties().displayName()), 3, oven.itemStorage(), oven::openGui);
         this.oven = oven;
     }
 

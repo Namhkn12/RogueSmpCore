@@ -6,7 +6,7 @@ import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.crafting.gui.category.RecipeCategories;
 import com.roguesmp.crafting.gui.category.RecipeCategory;
 import com.roguesmp.crafting.gui.category.RecipeLayout;
-import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.Recipe;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.Utils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -51,7 +51,7 @@ public class RecipeViewerGui extends BaseGui {
     private final List<View> history;
     private final @Nullable BaseGui root;
     private final List<RecipeCategory<?>> tabs = new ArrayList<>();
-    private final Map<RecipeCategory<?>, List<CraftingRecipe>> recipesByTab = new LinkedHashMap<>();
+    private final Map<RecipeCategory<?>, List<Recipe>> recipesByTab = new LinkedHashMap<>();
     private int tab = 0;
     private int page = 0;
 
@@ -64,13 +64,13 @@ public class RecipeViewerGui extends BaseGui {
         this.history = history;
         this.root = root;
 
-        for (CraftingRecipe recipe : recipesOf(view)) recipesByTab.computeIfAbsent(RecipeCategories.of(recipe), group -> new ArrayList<>()).add(recipe);
+        for (Recipe recipe : recipesOf(view)) recipesByTab.computeIfAbsent(RecipeCategories.of(recipe), group -> new ArrayList<>()).add(recipe);
         tabs.addAll(recipesByTab.keySet());
         tab = Math.min(view.tab(), Math.max(0, tabs.size() - 1));
         page = tabs.isEmpty() ? 0 : Math.min(view.page(), recipesByTab.get(tabs.get(tab)).size() - 1);
     }
 
-    public static RecipeViewerGui forRecipe(Player player, CraftingRecipe recipe, @Nullable BaseGui root) {
+    public static RecipeViewerGui forRecipe(Player player, Recipe recipe, @Nullable BaseGui root) {
         RecipeViewerGui viewer = new RecipeViewerGui(player, new View(Mode.RECIPES, recipe.getPrimaryOutput().key(), null, 0, 0), List.of(), root);
         viewer.select(recipe);
         return viewer;
@@ -80,7 +80,7 @@ public class RecipeViewerGui extends BaseGui {
         return new RecipeViewerGui(player, new View(Mode.RECIPES, itemKey, null, 0, 0), List.of(), root);
     }
 
-    public static RecipeViewerGui forUses(Player player, String itemKey, @Nullable CraftingRecipe preferred) {
+    public static RecipeViewerGui forUses(Player player, String itemKey, @Nullable Recipe preferred) {
         RecipeViewerGui uses = new RecipeViewerGui(player, new View(Mode.USES, itemKey, null, 0, 0), List.of(), null);
         if (preferred != null) {
             if (!uses.recipesByTab.getOrDefault(RecipeCategories.of(preferred), List.of()).contains(preferred)) return forRecipe(player, preferred, null);
@@ -99,7 +99,7 @@ public class RecipeViewerGui extends BaseGui {
         };
     }
 
-    private static List<CraftingRecipe> recipesOf(View view) {
+    private static List<Recipe> recipesOf(View view) {
         return switch (view.mode()) {
             case RECIPES -> CraftingManager.getInstance().getRecipesProducing(view.focusKey());
             case USES -> CraftingManager.getInstance().getRecipesUsing(view.focusKey());
@@ -122,7 +122,7 @@ public class RecipeViewerGui extends BaseGui {
         new RecipeViewerGui(player, history.getLast(), history.subList(0, history.size() - 1), root).showInventory(player);
     }
 
-    private void select(CraftingRecipe recipe) {
+    private void select(Recipe recipe) {
         int tabIndex = tabs.indexOf(RecipeCategories.of(recipe));
         if (tabIndex < 0) return;
         tab = tabIndex;
@@ -154,7 +154,7 @@ public class RecipeViewerGui extends BaseGui {
         addTabs();
 
         RecipeCategory<?> shown = tabs.get(tab);
-        List<CraftingRecipe> tabRecipes = recipesByTab.get(shown);
+        List<Recipe> tabRecipes = recipesByTab.get(shown);
         SlotLayout layout = new SlotLayout();
         RecipeCategories.layout(tabRecipes.get(page), layout);
         layout.flush();

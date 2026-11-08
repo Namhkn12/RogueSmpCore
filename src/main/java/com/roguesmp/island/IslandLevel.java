@@ -11,18 +11,24 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-public record IslandLevel(int maxEnergyNetworks, int energyNetworkCapacity, Map<String, Integer> blockLimits, List<Requirement> requirements, List<Cost> costs) {
+public record IslandLevel(int maxEnergyNetworks, int energyNetworkCapacity, int blockCapacity, List<Requirement> requirements, List<Cost> costs) {
 
-    public static final IslandLevel DEFAULT = new IslandLevel(1, 10000, Map.of(), List.of(), List.of());
+    public static final int UNLIMITED = -1;
+
+    public static final IslandLevel DEFAULT = new IslandLevel(1, 10000, UNLIMITED, List.of(), List.of());
 
     public static final Codec<IslandLevel> CODEC = Codec.composite(
             Codec.INT.optionalFieldOf("max_energy_networks", DEFAULT.maxEnergyNetworks()).forGetter(IslandLevel::maxEnergyNetworks),
             Codec.INT.optionalFieldOf("energy_network_capacity", DEFAULT.energyNetworkCapacity()).forGetter(IslandLevel::energyNetworkCapacity),
-            Codec.unboundedMap(Codec.INT).optionalFieldOf("block_limits", Map.of()).forGetter(IslandLevel::blockLimits),
+            Codec.INT.optionalFieldOf("block_capacity", DEFAULT.blockCapacity()).forGetter(IslandLevel::blockCapacity),
             Codec.listOf(Requirement.CODEC).optionalFieldOf("requirements", List.of()).forGetter(IslandLevel::requirements),
             Codec.listOf(Cost.CODEC).optionalFieldOf("costs", List.of()).forGetter(IslandLevel::costs),
             IslandLevel::new
     );
+
+    public boolean hasBlockCapacity() {
+        return blockCapacity != UNLIMITED;
+    }
 
     public static IslandLevel of(int level) {
         Map.Entry<Integer, IslandLevel> entry = byLevel().floorEntry(level);

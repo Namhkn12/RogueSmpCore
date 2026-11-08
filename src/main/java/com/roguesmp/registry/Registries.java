@@ -17,6 +17,7 @@ import com.roguesmp.block.BlockTypes;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.fishing.FishingHotspot;
 import com.roguesmp.item.ItemType;
+import com.roguesmp.item.ItemTypeGroup;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.enchant.Enchants;
 import com.roguesmp.entity.component.EntityComponentKeys;
@@ -35,7 +36,7 @@ import com.roguesmp.item.BaseItem;
 import com.roguesmp.item.ability.ItemAbility;
 import com.roguesmp.item.ability.ItemAbilities;
 import com.roguesmp.item.component.ItemComponent;
-import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.Recipe;
 import com.roguesmp.crafting.recipe.CraftingRecipes;
 import com.roguesmp.loot.LootConfig;
 import com.roguesmp.loot.LootEntry;
@@ -81,9 +82,8 @@ import com.roguesmp.entity.spell.EntitySpells;
 import com.roguesmp.action.GuiOpenActions;
 import com.roguesmp.text.Glyph;
 import com.roguesmp.text.Glyphs;
-import com.roguesmp.block.impl.generator.catalyst.CatalystType;
-import com.roguesmp.block.impl.generator.behavior.GeneratorBehavior;
-import com.roguesmp.block.impl.generator.behavior.GeneratorBehaviors;
+import com.roguesmp.block.upgrade.effect.UpgradeBehavior;
+import com.roguesmp.block.upgrade.effect.UpgradeBehaviors;
 import com.roguesmp.teleport.TeleportDestination;
 import com.roguesmp.teleport.TeleportDestinations;
 import com.roguesmp.teleport.effect.TeleportEffect;
@@ -102,7 +102,7 @@ public class Registries {
     public static final Registry<Codec<? extends AiGoal>> AI_GOAL_CODEC = register(registry -> AiGoals.loadClass());
     public static final Registry<Codec<? extends SmpEffect>> EFFECT_CODEC = register(registry -> EffectCodecs.loadClass());
     public static final Registry<Codec<? extends ItemAbility>> ITEM_ABILITY_CODEC = register(registry -> ItemAbilities.loadClass());
-    public static final Registry<Codec<? extends GeneratorBehavior>> GENERATOR_BEHAVIOR_CODEC = register(registry -> GeneratorBehaviors.loadClass());
+    public static final Registry<Codec<? extends UpgradeBehavior>> UPGRADE_BEHAVIOR_CODEC = register(registry -> UpgradeBehaviors.loadClass());
 
     public static final Registry<Codec<? extends DungeonFeature<?>>> DUNGEON_FEATURE_CODEC = register(registry -> DungeonFeatures.loadClass());
     public static final Registry<Codec<? extends DungeonAction>> DUNGEON_ACTION_CODEC = register(registry -> DungeonActions.loadClass());
@@ -162,19 +162,19 @@ public class Registries {
     public static final Registry<Spawner> SPAWNER = new Registry<>("spawners", Spawner.CODEC);
 
     public static final Registry<LootTable> LOOT_TABLE = new Registry<>(LootConfig.LOOT_TABLE_FOLDER, LootTable.CODEC);
-    public static final Registry<ItemType> ITEM_TYPE = new Registry<>("item_types", ItemType.CODEC);
+    public static final Registry<ItemTypeGroup> ITEM_TYPE_GROUP = new Registry<>("item_types/groups", ItemTypeGroup.CODEC);
+    public static final Registry<ItemType> ITEM_TYPE = new Registry<>("item_types/types", ItemType.CODEC);
     public static final Registry<FishingHotspot> FISHING_HOTSPOT = new Registry<>("fishing_hotspots", FishingHotspot.CODEC);
     public static final Registry<PolarTemplateData> POLAR_TEMPLATE_DATA = new Registry<>("polar_template_data", PolarTemplateData.CODEC);
     public static final Registry<RoomDefinition> DUNGEON_ROOM = new Registry<>("dungeon/rooms", RoomDefinition.CODEC);
     public static final Registry<DungeonDefinition> DUNGEON = new Registry<>("dungeon/definitions", DungeonDefinition.CODEC);
-    public static final Registry<CatalystType> CATALYST_TYPE = new Registry<>("catalyst_types", CatalystType.CODEC);
 
     public static final Registry<Codec<? extends TeleportDestination>> TELEPORT_DESTINATION_CODEC = register(registry -> TeleportDestinations.loadClass());
     public static final Registry<Codec<? extends TeleportEffect>> TELEPORT_EFFECT_CODEC = register(registry -> TeleportEffects.loadClass());
     public static final Registry<Warp> WARP = new Registry<>("warps", Warp.CODEC);
 
-    public static final Registry<Codec<? extends CraftingRecipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());
-    public static final Registry<CraftingRecipe> CRAFTING_RECIPE = new Registry<>("crafting_recipes", CraftingRecipe.CODEC);
+    public static final Registry<Codec<? extends Recipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());
+    public static final Registry<Recipe> CRAFTING_RECIPE = new Registry<>("crafting_recipes", Recipe.CODEC);
 
     public static void loadAllData(RogueSmpCore plugin) {
         Registry.loadAll(plugin);

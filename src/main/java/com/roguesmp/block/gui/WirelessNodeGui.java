@@ -34,7 +34,7 @@ public class WirelessNodeGui extends BaseGui {
     private final WirelessNodeBlock node;
 
     public WirelessNodeGui(WirelessNodeBlock node) {
-        super(Component.text("Nút truyền năng lượng"), 3);
+        super(Utils.fromString(node.getProperties().displayName()), 3);
         this.node = node;
     }
 

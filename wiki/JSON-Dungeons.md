@@ -226,6 +226,10 @@ Khi nào thay:
 
 Kiểm tra khi nạp: báo block tuỳ chỉnh không tồn tại, hoặc entry/fallback lại là 1 khối `palette`. Block vanilla viết sai thì dungeon báo lỗi ngay khi đọc. Palette mà khối đánh dấu cần nhưng dungeon không có **không** được kiểm tra trước (không biết trước khối nào nằm trong world) — chỉ log khi gặp.
 
+### `bed_spawn` — hồi sinh tại giường
+
+Không có trường nào: `"bed_spawn": {}`. Chuột phải vào giường để đặt điểm hồi sinh (luôn có thông báo trên action bar, không ngủ được). Khi lượt chơi bắt đầu, đặt cờ `smp-bed-spawn` = allow trên `__global__` của thế giới phó bản, nên mọi giường đều đặt được điểm hồi sinh (lưu riêng cho mỗi lượt chơi). Vùng con đặt cờ = deny để tắt ở đó.
+
 ## Phòng
 
 File trong `dungeon/rooms/`, ví dụ `dungeon/rooms/crypt_boss.json`:
@@ -346,6 +350,7 @@ Trigger được xét **theo thứ tự trong danh sách**; action của trigger
 | `item_picked_up` | Nhặt item | id item tuỳ chỉnh, hoặc `minecraft:<vật liệu>` cho vanilla | `amount` |
 | `portal_entered` | Bước vào block cổng | id block cổng | |
 | `player_died` | Người chơi chết (kể cả khi `revive` giữ lại) | | |
+| `player_respawned` | Người chơi hồi sinh trong phó bản | | |
 | `quest_completed` | Quest nhóm của instance hoàn thành | id quest | |
 | `redstone_activated` | Bấm nút, gạt cần, dẫm tấm áp lực / dây bẫy (1 lần mỗi lần kích hoạt, không lặp khi đứng yên) | id block (`minecraft:…`) | `x`, `y`, `z`, `powered` (cần gạt: trạng thái sau khi gạt; còn lại luôn `true`) |
 | `var_changed` | Biến đổi giá trị qua `set_var` / `add_var` | tên biến | `value`, `old` (nếu đã có giá trị trước) |

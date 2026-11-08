@@ -2,9 +2,12 @@ package com.roguesmp.crafting.gui.category;
 
 import com.roguesmp.block.BlockData;
 import com.roguesmp.crafting.recipe.CokeOvenRecipe;
+import com.roguesmp.crafting.recipe.CrusherRecipe;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.Recipe;
 import com.roguesmp.crafting.recipe.FusionRecipe;
 import com.roguesmp.crafting.recipe.ScrappingRecipe;
+import com.roguesmp.crafting.recipe.SieveRecipe;
 import com.roguesmp.crafting.recipe.ShapedCraftingRecipe;
 import com.roguesmp.crafting.recipe.ShapelessCraftingRecipe;
 import com.roguesmp.item.BaseItem;
@@ -27,6 +30,8 @@ public final class RecipeCategories {
             ShapelessCraftingRecipe.TYPE_KEY, CRAFTING,
             FusionRecipe.TYPE_KEY, new FusionCategory(),
             CokeOvenRecipe.TYPE_KEY, new CokeOvenCategory(),
+            CrusherRecipe.TYPE_KEY, new CrusherCategory(),
+            SieveRecipe.TYPE_KEY, new SieveCategory(),
             ScrappingRecipe.TYPE_KEY, new ScrappingCategory()
     );
 
@@ -34,23 +39,23 @@ public final class RecipeCategories {
 
     private RecipeCategories() {}
 
-    public static RecipeCategory<?> of(CraftingRecipe recipe) {
+    public static RecipeCategory<?> of(Recipe recipe) {
         RecipeCategory<?> category = BY_TYPE.get(recipe.getTypeId());
         if (category != null) return category;
         return FALLBACKS.computeIfAbsent(recipe.getTypeId(), type -> new GenericCategory(type, recipe.getTypeName()));
     }
 
     @SuppressWarnings("unchecked")
-    public static void layout(CraftingRecipe recipe, RecipeLayout layout) {
-        ((RecipeCategory<CraftingRecipe>) of(recipe)).layout(recipe, layout);
+    public static void layout(Recipe recipe, RecipeLayout layout) {
+        ((RecipeCategory<Recipe>) of(recipe)).layout(recipe, layout);
     }
 
-    public static List<CraftingRecipe> recipesIn(RecipeCategory<?> category) {
-        List<CraftingRecipe> recipes = new ArrayList<>();
-        for (CraftingRecipe recipe : Registries.CRAFTING_RECIPE.getAll().values()) {
+    public static List<Recipe> recipesIn(RecipeCategory<?> category) {
+        List<Recipe> recipes = new ArrayList<>();
+        for (Recipe recipe : Registries.CRAFTING_RECIPE.getAll().values()) {
             if (of(recipe) == category) recipes.add(recipe);
         }
-        recipes.sort(Comparator.comparing(CraftingRecipe::getId));
+        recipes.sort(Comparator.comparing(Recipe::getId));
         return recipes;
     }
 

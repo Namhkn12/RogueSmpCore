@@ -35,7 +35,7 @@ public class MoneyCost implements Cost {
     }
 
     @Override
-    public void take(SmpPlayer player) {
+    public void takeFromPlayer(SmpPlayer player) {
         player.takeMoney(amount);
     }
 

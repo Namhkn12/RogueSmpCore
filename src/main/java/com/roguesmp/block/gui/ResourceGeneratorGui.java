@@ -1,16 +1,10 @@
 package com.roguesmp.block.gui;
 
 import com.roguesmp.block.StoredItem;
-import com.roguesmp.item.component.impl.GeneratorCatalystComponent;
-import com.roguesmp.item.component.impl.GeneratorModuleComponent;
 import com.roguesmp.utils.ItemStackUtils;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
-import com.roguesmp.block.impl.generator.part.ActiveCatalyst;
-import com.roguesmp.block.impl.generator.part.DurationUnit;
-import com.roguesmp.block.impl.generator.behavior.GeneratorBehavior;
-import com.roguesmp.block.impl.generator.stat.StatModifier;
-import com.roguesmp.block.impl.generator.part.ModuleInstallResult;
+import com.roguesmp.block.data.GeneratorData;
 import com.roguesmp.block.impl.generator.ResourceGeneratorBlock;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
@@ -19,13 +13,13 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 public class ResourceGeneratorGui extends MachineGui {
 
@@ -40,17 +34,18 @@ public class ResourceGeneratorGui extends MachineGui {
     private static final int[] MODULE_SLOTS = {28, 29, 30, 31, 32};
 
     private final ResourceGeneratorBlock generator;
+    private final UpgradePanel upgrades;
 
     public ResourceGeneratorGui(ResourceGeneratorBlock generator) {
-        super(Component.text("Resource Generator"), 4, generator.itemStorage(), generator::openGui);
+        super(Utils.fromString(generator.getProperties().displayName()), 4, generator.itemStorage(), generator::openGui);
         this.generator = generator;
+        this.upgrades = new UpgradePanel(this, generator.upgrades(), this::refresh);
     }
 
     @Override
     public void setup() {
         super.setup();
         renderTakeAllButton();
-        renderModuleSlots();
         addSidesButton(SIDES_SLOT);
     }
 
@@ -58,13 +53,15 @@ public class ResourceGeneratorGui extends MachineGui {
         ItemStack item = ItemStack.of(Material.STONE);
         item.setData(DataComponentTypes.ITEM_MODEL, generator.getProperties().model());
         ItemStackUtils.setItemName(item, Utils.fromString(generator.getProperties().displayName()));
+        GeneratorData data = generator.data();
         List<Component> infoLore = new ArrayList<>();
         infoLore.add(Utils.text("Năng lượng: ", NamedTextColor.YELLOW).append(Component.text(generator.getEnergy() + "/" + generator.getMaxEnergy(), NamedTextColor.GRAY)));
         infoLore.add(Utils.text("Sức chứa: ", NamedTextColor.YELLOW).append(Component.text(generator.loot().occupied() + "/" + generator.loot().capacity(), NamedTextColor.GRAY)));
-        infoLore.add(Utils.text("Thời gian đặt: ", NamedTextColor.YELLOW).append(Component.text(Utils.formatDecimal(generator.stats().placeDelayTicks() / 20d) + "s", NamedTextColor.GRAY)));
-        infoLore.add(Utils.text("Thời gian khai thác: ", NamedTextColor.YELLOW).append(Component.text(Utils.formatDecimal(generator.stats().breakDelayTicks() / 20d) + "s", NamedTextColor.GRAY)));
-        infoLore.add(Utils.text("Năng lượng/tick: ", NamedTextColor.YELLOW).append(Component.text(Utils.formatDecimal(generator.stats().energyPerTick()), NamedTextColor.GRAY)));
-        infoLore.add(Utils.text("Module: ", NamedTextColor.YELLOW).append(Component.text(generator.modules().items().size() + "/" + generator.modules().capacity(), NamedTextColor.GRAY)));
+        infoLore.add(statLine("Sức chứa tối đa", data.lootCapacity(), generator.lootCapacity(), "", true));
+        infoLore.add(statLine("Thời gian đặt", data.placeDelayTicks() / 20d, generator.placeDelayTicks() / 20d, "s", false));
+        infoLore.add(statLine("Thời gian khai thác", data.breakDelayTicks() / 20d, generator.breakDelayTicks() / 20d, "s", false));
+        infoLore.add(statLine("Năng lượng/tick", data.energyPerTick(), generator.energyPerTick(), "", false));
+        infoLore.add(Utils.text("Module: ", NamedTextColor.YELLOW).append(Component.text(IntStream.range(0, generator.modules().size()).filter(i -> generator.modules().get(i) != null).count() + "/" + generator.modules().size(), NamedTextColor.GRAY)));
         ItemStackUtils.setLore(item, infoLore);
         addButton(MAIN_INFO_SLOT, item, ClickHandler.noAction());
     }
@@ -80,8 +77,8 @@ public class ResourceGeneratorGui extends MachineGui {
         } else if (generator.isMining()) {
             wool = Material.LIME_WOOL;
             name = Utils.text("Đang khai thác", NamedTextColor.GREEN);
-            int elapsed = generator.stats().breakDelayTicks() - generator.getBreakTicksLeft();
-            lore.add(Utils.text("Tiến độ: " + elapsed + " / " + generator.stats().breakDelayTicks() + " tick", NamedTextColor.GRAY));
+            int elapsed = generator.breakDelayTicks() - generator.getBreakTicksLeft();
+            lore.add(Utils.text("Tiến độ: " + elapsed + " / " + generator.breakDelayTicks() + " tick", NamedTextColor.GRAY));
         } else {
             wool = Material.YELLOW_WOOL;
             name = Utils.text("Đang chờ", NamedTextColor.YELLOW);
@@ -100,19 +97,6 @@ public class ResourceGeneratorGui extends MachineGui {
         addButton(TAKE_ALL_SLOT, item, this::onTakeAllClick);
     }
 
-    private void renderCatalystSlot() {
-        StoredItem catalyst = generator.catalyst().slot();
-        ItemStack display = catalyst != null ? catalyst.toItemStack() : null;
-        if (display != null && GeneratorCatalystComponent.of(catalyst.item()) == null) withWarning(display, "Không còn là chất xúc tác, không có tác dụng");
-        bindSlotDisplay(CATALYST_SLOT, generator.catalystSlot(), 0, display != null ? display : catalystPlaceholder());
-    }
-
-    private void withWarning(ItemStack item, String warning) {
-        List<Component> lore = new ArrayList<>(item.lore() != null ? item.lore() : List.of());
-        lore.add(Utils.text(warning, NamedTextColor.RED));
-        ItemStackUtils.setLore(item, lore);
-    }
-
     private void renderLootSlots() {
         List<StoredItem> items = generator.loot().entries();
         for (int i = 0; i < LOOT_SLOTS.length; i++) {
@@ -120,39 +104,6 @@ public class ResourceGeneratorGui extends MachineGui {
             if (i < items.size()) addButton(LOOT_SLOTS[i], lootDisplayItem(items.get(i)), this::onLootClick);
             else addButton(LOOT_SLOTS[i], filler, ClickHandler.noAction());
         }
-    }
-
-    private void renderModuleSlots() {
-        List<String> modules = generator.modules().items();
-        int slots = Math.min(generator.modules().capacity(), MODULE_SLOTS.length);
-        for (int i = 0; i < MODULE_SLOTS.length; i++) {
-            if (i >= slots) {
-                addButton(MODULE_SLOTS[i], FILLER_BLACK, ClickHandler.noAction());
-                continue;
-            }
-
-            ItemStack display = i < modules.size() ? moduleDisplayItem(modules.get(i)) : null;
-            addButton(MODULE_SLOTS[i], display != null ? display : modulePlaceholder(), this::onModuleClick);
-        }
-    }
-
-    private ItemStack moduleDisplayItem(String moduleId) {
-        ItemStack display = new StoredItem(moduleId, 1).toItemStack();
-        if (display == null) return modulePlaceholder();
-        if (GeneratorModuleComponent.of(moduleId) == null) withWarning(display, "Không còn là module, không có tác dụng");
-
-        List<Component> lore = new ArrayList<>(display.lore() != null ? display.lore() : List.of());
-        lore.add(Utils.text("-------"));
-        lore.add(Utils.fromString("<!i><gray><key:key.attack> để gỡ module"));
-        ItemStackUtils.setLore(display, lore);
-        return display;
-    }
-
-    private ItemStack modulePlaceholder() {
-        ItemStack item = ItemStack.of(Material.PURPLE_STAINED_GLASS_PANE);
-        ItemStackUtils.setItemName(item, Utils.text("Ô module", NamedTextColor.LIGHT_PURPLE));
-        ItemStackUtils.setLore(item, List.of(Utils.text("Đặt module vào đây", NamedTextColor.DARK_GRAY)));
-        return item;
     }
 
     private ItemStack lootDisplayItem(StoredItem stored) {
@@ -176,64 +127,6 @@ public class ResourceGeneratorGui extends MachineGui {
         displayLore.add(Utils.fromString("<!i><gray><key:key.use> để lấy 1"));
         ItemStackUtils.setLore(display, displayLore);
         return display;
-    }
-
-    private ItemStack catalystPlaceholder() {
-        ItemStack item = ItemStack.of(Material.LIME_STAINED_GLASS_PANE);
-        ItemStackUtils.setItemName(item, Utils.text("Chất xúc tác", NamedTextColor.GRAY));
-        ItemStackUtils.setLore(item, List.of(Utils.text("Đặt chất xúc tác vào đây", NamedTextColor.DARK_GRAY)));
-        return item;
-    }
-
-    private void renderBuffSummary() {
-        ItemStack item = ItemStack.of(Material.BEACON);
-        ItemStackUtils.setItemName(item, Utils.text("Hiệu ứng đang hoạt động", NamedTextColor.GOLD));
-
-        List<Component> lore = new ArrayList<>();
-        for (StatModifier modifier : generator.stats().summary()) lore.add(modifier.describe());
-        for (GeneratorBehavior behavior : generator.stats().behaviors()) lore.addAll(behavior.getDisplay());
-        if (lore.isEmpty()) lore.add(Utils.text("Chưa có hiệu ứng nào", NamedTextColor.DARK_GRAY));
-        ItemStackUtils.setLore(item, lore);
-        addButton(BUFF_SUMMARY_SLOT, item, ClickHandler.noAction());
-    }
-
-    private void renderActiveCatalystSlot() {
-        ActiveCatalyst active = generator.catalyst().active();
-        GeneratorCatalystComponent component = generator.catalyst().activeComponent();
-        ItemStack display = active != null && component != null ? activeCatalystDisplayItem(active, component) : null;
-        addButton(ACTIVE_CATALYST_SLOT, display != null ? display : activeCatalystPlaceholder(), this::onActiveCatalystClick);
-    }
-
-    private ItemStack activeCatalystDisplayItem(ActiveCatalyst active, GeneratorCatalystComponent component) {
-        ItemStack display = new StoredItem(active.item(), 1).toItemStack();
-        if (display == null) return null;
-
-        List<Component> lore = new ArrayList<>();
-        lore.add(Utils.text("Hiệu ứng xúc tác đang chạy", NamedTextColor.GOLD));
-        lore.addAll(component.effect().describe());
-        lore.add(Utils.text("Còn lại: " + component.unit().format(active.remaining()), NamedTextColor.GRAY));
-        if (generator.getEnergy() <= 0 && component.unit() == DurationUnit.TICKS) {
-            lore.add(Utils.text("Tạm dừng: hết năng lượng", NamedTextColor.RED));
-        }
-        lore.add(Utils.text("Shift + chuột phải để hủy hiệu ứng", NamedTextColor.YELLOW));
-        ItemStackUtils.setLore(display, lore);
-        return display;
-    }
-
-    private ItemStack activeCatalystPlaceholder() {
-        ItemStack item = ItemStack.of(Material.GRAY_STAINED_GLASS_PANE);
-        ItemStackUtils.setItemName(item, Utils.text("Hiệu ứng xúc tác", NamedTextColor.GRAY));
-        ItemStackUtils.setLore(item, List.of(Utils.text("Chưa có hiệu ứng nào", NamedTextColor.DARK_GRAY)));
-        return item;
-    }
-
-    private void onActiveCatalystClick(InventoryClickEvent event) {
-        event.setCancelled(true);
-        if (event.getClick() != ClickType.SHIFT_RIGHT || !generator.catalyst().clearActive()) return;
-
-        Player player = (Player) event.getWhoClicked();
-        player.playSound(player.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1f, 1f);
-        refresh();
     }
 
     private void onLootClick(InventoryClickEvent event) {
@@ -297,58 +190,6 @@ public class ResourceGeneratorGui extends MachineGui {
         renderLootSlots();
     }
 
-    private void onModuleClick(InventoryClickEvent event) {
-        event.setCancelled(true);
-
-        int index = indexOf(MODULE_SLOTS, event.getSlot());
-        if (index < 0) return;
-
-        Player player = (Player) event.getWhoClicked();
-        ItemStack cursor = event.getView().getCursor();
-        if (cursor.getType().isAir()) {
-            removeModule(player, index);
-        } else if (index >= generator.modules().items().size()) {
-            installModule(event, player, cursor);
-        }
-        renderModuleSlots();
-        renderMainInfo();
-        renderBuffSummary();
-    }
-
-    private void removeModule(Player player, int index) {
-        String removedId = generator.removeModule(index);
-        if (removedId == null) return;
-
-        ItemStack removed = new StoredItem(removedId, 1).toItemStack();
-        if (removed != null) PlayerUtils.giveItem(player, removed);
-        player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1f, 0.8f);
-    }
-
-    private void installModule(InventoryClickEvent event, Player player, ItemStack cursor) {
-        StoredItem stored = StoredItem.of(cursor);
-        ModuleInstallResult result = stored == null ? ModuleInstallResult.NOT_A_MODULE : generator.installModule(stored.item());
-        if (result == ModuleInstallResult.INSTALLED) {
-            ItemStack remaining = cursor.clone();
-            remaining.setAmount(cursor.getAmount() - 1);
-            event.getView().setCursor(remaining.getAmount() > 0 ? remaining : null);
-            player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1f, 1.5f);
-            return;
-        }
-
-        player.sendMessage(Utils.text(installFailureMessage(result), NamedTextColor.RED));
-        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
-    }
-
-    private String installFailureMessage(ModuleInstallResult result) {
-        return switch (result) {
-            case NOT_A_MODULE -> "Vật phẩm này không phải module.";
-            case NO_FREE_SLOT -> "Máy đã hết ô module.";
-            case INCOMPATIBLE -> "Module này xung đột với module đã lắp.";
-            case LIMIT_REACHED -> "Đã đạt số lượng tối đa của module này.";
-            case INSTALLED -> "";
-        };
-    }
-
     private int indexOf(int[] slots, int slot) {
         for (int i = 0; i < slots.length; i++) {
             if (slots[i] == slot) return i;
@@ -365,9 +206,9 @@ public class ResourceGeneratorGui extends MachineGui {
     public void refresh() {
         renderMainInfo();
         renderStatus();
-        renderCatalystSlot();
-        renderActiveCatalystSlot();
-        renderBuffSummary();
+        upgrades.renderModules(generator.modules(), MODULE_SLOTS, generator::checkModule, generator::isValidModule);
+        upgrades.renderCatalyst(generator.catalyst(), generator.getEnergy() > 0, CATALYST_SLOT, ACTIVE_CATALYST_SLOT);
+        upgrades.renderSummary(BUFF_SUMMARY_SLOT);
         renderLootSlots();
     }
 }

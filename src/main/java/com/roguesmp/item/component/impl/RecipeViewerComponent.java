@@ -4,7 +4,7 @@ import com.roguesmp.utils.ItemRef;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.context.ItemLoreContext;
 import com.roguesmp.crafting.gui.RecipeViewerGui;
-import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.crafting.recipe.Recipe;
 import com.roguesmp.item.component.InteractableComponent;
 import com.roguesmp.item.component.ItemComponent;
 import com.roguesmp.player.SmpPlayer;
@@ -45,7 +45,7 @@ public record RecipeViewerComponent(String preferredRecipe) implements Interacta
         if (itemKey == null) return;
 
         Player player = event.getPlayer();
-        CraftingRecipe preferred = preferredRecipe.isBlank() ? null : Registries.CRAFTING_RECIPE.get(preferredRecipe);
+        Recipe preferred = preferredRecipe.isBlank() ? null : Registries.CRAFTING_RECIPE.get(preferredRecipe);
         RecipeViewerGui.forUses(player, itemKey, preferred).showInventory(player);
     }
 }

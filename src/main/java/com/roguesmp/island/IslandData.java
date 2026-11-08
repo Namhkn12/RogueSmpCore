@@ -1,9 +1,12 @@
 package com.roguesmp.island;
 
+import com.roguesmp.block.BlockData;
+import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.impl.energy.network.EnergyNetworkData;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.island.setting.IslandSettings;
 import com.roguesmp.island.setting.Setting;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.WorldPos;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Location;
@@ -23,7 +26,7 @@ public class IslandData {
             Codec.INT.optionalFieldOf("level", 0).forGetter(IslandData::getLevel),
             IslandSettings.VALUES_CODEC.optionalFieldOf("settings", new LinkedHashMap<String, Object>()).forGetter(data -> data.settings),
             Codec.listOf(EnergyNetworkData.CODEC).optionalFieldOf("energyNetworks", List.of()).forGetter(data -> data.energyNetworks),
-            Codec.unboundedMap(Codec.INT).optionalFieldOf("blockCounts", Map.of()).forGetter(data -> data.blockCounts),
+            Codec.unboundedMap(Codec.INT).optionalFieldOf("blockIdCounts", Map.of()).forGetter(data -> data.blockIdCounts),
             IslandData::new
     );
 
@@ -36,9 +39,9 @@ public class IslandData {
     private WorldPos spawnLocation;
     private final Map<String, Object> settings;
     private final List<EnergyNetworkData> energyNetworks;
-    private final Map<String, Integer> blockCounts;
+    private final Map<String, Integer> blockIdCounts;
 
-    private IslandData(UUID islandId, Set<UUID> members, @Nullable WorldPos spawnLocation, boolean archived, int level, Map<String, Object> settings, List<EnergyNetworkData> energyNetworks, Map<String, Integer> blockCounts) {
+    private IslandData(UUID islandId, Set<UUID> members, @Nullable WorldPos spawnLocation, boolean archived, int level, Map<String, Object> settings, List<EnergyNetworkData> energyNetworks, Map<String, Integer> blockIdCounts) {
         this.islandId = islandId;
         this.members = new HashSet<>(members);
         this.spawnLocation = spawnLocation != null ? spawnLocation : defaultSpawn(islandId);
@@ -46,7 +49,7 @@ public class IslandData {
         this.level = level;
         this.settings = new LinkedHashMap<>(settings);
         this.energyNetworks = new ArrayList<>(energyNetworks);
-        this.blockCounts = new HashMap<>(blockCounts);
+        this.blockIdCounts = new HashMap<>(blockIdCounts);
         this.dirty = false;
     }
 
@@ -58,7 +61,7 @@ public class IslandData {
         this.archived = false;
         this.settings = new LinkedHashMap<>();
         this.energyNetworks = new ArrayList<>();
-        this.blockCounts = new HashMap<>();
+        this.blockIdCounts = new HashMap<>();
     }
 
     public IslandData(IslandData source) {
@@ -70,7 +73,7 @@ public class IslandData {
         this.dirty = source.dirty;
         this.settings = new LinkedHashMap<>(source.settings);
         this.energyNetworks = new ArrayList<>(source.energyNetworks.stream().map(EnergyNetworkData::copy).toList());
-        this.blockCounts = new HashMap<>(source.blockCounts);
+        this.blockIdCounts = new HashMap<>(source.blockIdCounts);
     }
 
     private static WorldPos defaultSpawn(UUID islandId) {
@@ -157,15 +160,24 @@ public class IslandData {
         this.dirty = true;
     }
 
-    public int getBlockCount(String blockType) {
-        return blockCounts.getOrDefault(blockType, 0);
+    public void changeBlockCount(SmpBlock block, int delta) {
+        if (block.getId() != null) adjust(blockIdCounts, block.getId(), delta);
+        this.dirty = true;
     }
 
-    public void changeBlockCount(String blockType, int delta) {
-        int count = getBlockCount(blockType) + delta;
-        if (count > 0) blockCounts.put(blockType, count);
-        else blockCounts.remove(blockType);
-        this.dirty = true;
+    public int getUsedCapacity() {
+        int used = 0;
+        for (Map.Entry<String, Integer> entry : blockIdCounts.entrySet()) {
+            BlockData data = Registries.BLOCK.get(entry.getKey());
+            if (data != null) used += data.properties().capacityCost() * entry.getValue();
+        }
+        return used;
+    }
+
+    private static void adjust(Map<String, Integer> counts, String key, int delta) {
+        int count = counts.getOrDefault(key, 0) + delta;
+        if (count > 0) counts.put(key, count);
+        else counts.remove(key);
     }
 
     public void setDirty(boolean dirty) {
