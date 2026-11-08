@@ -56,12 +56,10 @@ public class GlobalTabLayout {
         partyRows.add(TabElement.ticking(20, c -> partyOverflow(player)));
         partyRows.add(TabElement.constant(""));
         partyRows.add(TabElement.constant("<bold><yellow>Nhiệm vụ</yellow></bold>"));
+        QuestLineCache questLines = new QuestLineCache(player);
         for (int i = 0; i < MAX_QUEST_LINES; i++) {
             int index = i;
-            partyRows.add(TabElement.ticking(20, c -> {
-                List<String> lines = questLines(player);
-                return index < lines.size() ? lines.get(index) : "";
-            }));
+            partyRows.add(TabElement.ticking(20, c -> questLines.line(index)));
         }
 
         TabListView view = TabListView.create(player, "global_info_tab", context)
@@ -98,6 +96,25 @@ public class GlobalTabLayout {
             return Utils.toString(Component.text("... và " + extra + " hiệu ứng khác", NamedTextColor.GRAY));
         }
         return "";
+    }
+
+    private static final class QuestLineCache {
+        private final Player player;
+        private int builtAt = -1;
+        private List<String> lines = List.of();
+
+        private QuestLineCache(Player player) {
+            this.player = player;
+        }
+
+        private String line(int index) {
+            int now = Bukkit.getCurrentTick();
+            if (now != builtAt) {
+                builtAt = now;
+                lines = questLines(player);
+            }
+            return index < lines.size() ? lines.get(index) : "";
+        }
     }
 
     /**

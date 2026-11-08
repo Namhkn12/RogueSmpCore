@@ -52,7 +52,10 @@ public class QuestGui extends BaseGui {
     private final Player player;
     private final PlayerQuestData questData;
     private final QuestManager questManager;
+    private static final int QUESTS_PER_PAGE = 28;
+
     private QuestFilter currentFilter = QuestFilter.ALL; // Đặt mặc định là hiển thị Tất cả
+    private int page;
 
     public QuestGui(Player player, PlayerQuestData questData) {
         super(Component.text("Danh sách nhiệm vụ"), 6);
@@ -89,7 +92,11 @@ public class QuestGui extends BaseGui {
                 })
                 .toList();
 
-        int currentQuestIndex = 0;
+        int pageCount = Math.max(1, (filteredProgress.size() + QUESTS_PER_PAGE - 1) / QUESTS_PER_PAGE);
+        page = Math.min(page, pageCount - 1);
+        setupPageButtons(pageCount);
+
+        int currentQuestIndex = page * QUESTS_PER_PAGE;
         SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
 
         for (int r = 1; r <= 4; r++) {
@@ -196,6 +203,7 @@ public class QuestGui extends BaseGui {
         addButton(5, 7, filterButton, event -> {
             event.setCancelled(true);
             this.currentFilter = this.currentFilter.next();
+            this.page = 0;
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.2f);
             setup();
         });
@@ -218,6 +226,28 @@ public class QuestGui extends BaseGui {
             event.setCancelled(true);
             event.getWhoClicked().closeInventory();
         });
+    }
+
+    private void setupPageButtons(int pageCount) {
+        if (page > 0) {
+            ItemStack previous = ItemStack.of(Material.ARROW);
+            previous.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang trước", NamedTextColor.YELLOW));
+            previous.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(Utils.fromString("<!i><gray>Trang " + page + "/" + pageCount))));
+            addButton(5, 3, previous, event -> turnPage(event, -1));
+        }
+        if (page < pageCount - 1) {
+            ItemStack next = ItemStack.of(Material.ARROW);
+            next.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang sau", NamedTextColor.YELLOW));
+            next.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(Utils.fromString("<!i><gray>Trang " + (page + 2) + "/" + pageCount))));
+            addButton(5, 5, next, event -> turnPage(event, 1));
+        }
+    }
+
+    private void turnPage(InventoryClickEvent event, int delta) {
+        event.setCancelled(true);
+        page += delta;
+        player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.0f, 1.0f);
+        setup();
     }
 
     @Override
