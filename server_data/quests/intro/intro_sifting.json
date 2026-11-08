@@ -1,0 +1,25 @@
+{
+  "id": "intro/intro_sifting",
+  "name": "<gold>Khởi đầu: Sàng lọc</gold>",
+  "icon": "scaffolding",
+  "description": [
+    "<gray>Cho vật liệu đã nghiền vào Sàng tay và",
+    "<gray><yellow>chuột phải</yellow> liên tục để sàng lấy khoáng sản.",
+    "",
+    "<gray>Mệt vì phải click? Máy nghiền và sàng",
+    "<gray>tự động đang chờ bạn ở phía trước."
+  ],
+  "autoPin": true,
+  "autoClaimRewards": true,
+  "objectives": {
+    "sift": {
+      "type": "hand_process",
+      "block": "hand_sieve",
+      "amount": 16
+    }
+  },
+  "rewards": [
+    { "type": "money", "amount": 250 },
+    { "type": "quest_exp", "amount": 100 }
+  ]
+}

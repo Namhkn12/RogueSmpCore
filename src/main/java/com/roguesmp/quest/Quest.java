@@ -35,6 +35,7 @@ public class Quest {
             Codec.unboundedMap(QuestObjective.CODEC).optionalFieldOf("objectives", new HashMap<>()).forGetter(Quest::getObjectives),
             Codec.listOf(QuestReward.CODEC).fieldOf("rewards").forGetter(Quest::getRewards),
             Codec.BOOLEAN.optionalFieldOf("autoClaimRewards", false).forGetter(Quest::isAutoClaimRewards),
+            Codec.BOOLEAN.optionalFieldOf("autoPin", false).forGetter(Quest::isAutoPin),
             Codec.listOf(QuestCondition.CODEC).optionalFieldOf("conditions", List.of()).forGetter(Quest::getConditions),
             QuestBoardInfo.CODEC.optionalFieldOf("board").forGetter(quest -> Optional.ofNullable(quest.board)),
             Quest::new
@@ -61,10 +62,11 @@ public class Quest {
     private final Map<String, QuestObjective> objectives;
     private final List<QuestReward> rewards;
     private final boolean autoClaimRewards;
+    private final boolean autoPin;
     private final List<QuestCondition> conditions;
     private final @Nullable QuestBoardInfo board;
 
-    public Quest(String id, String name, Key icon, @NotNull List<String> description, List<Requirement> requirements, @NotNull Map<String, QuestObjective> objectives, @NotNull List<QuestReward> rewards, boolean autoClaimRewards, List<QuestCondition> conditions, Optional<QuestBoardInfo> board) {
+    public Quest(String id, String name, Key icon, @NotNull List<String> description, List<Requirement> requirements, @NotNull Map<String, QuestObjective> objectives, @NotNull List<QuestReward> rewards, boolean autoClaimRewards, boolean autoPin, List<QuestCondition> conditions, Optional<QuestBoardInfo> board) {
         this.id = id;
         this.name = name;
         this.icon = icon;
@@ -73,6 +75,7 @@ public class Quest {
         this.objectives = objectives;
         this.rewards = rewards;
         this.autoClaimRewards = autoClaimRewards;
+        this.autoPin = autoPin;
         this.conditions = conditions;
         this.board = board.orElse(null);
     }
@@ -127,11 +130,18 @@ public class Quest {
     }
 
     /**
-     * Only applies to group quests: when true, online members receive the rewards as soon as the quest completes,
-     * and members who were offline can still claim theirs later.
+     * When true, online holders receive the rewards as soon as the quest completes; anyone offline gets them in
+     * their inbox instead.
      */
     public boolean isAutoClaimRewards() {
         return autoClaimRewards;
+    }
+
+    /**
+     * Whether starting this quest pins it for the player, replacing their current pin.
+     */
+    public boolean isAutoPin() {
+        return autoPin;
     }
 
     public @Unmodifiable List<Requirement> getRequirements() {

@@ -81,6 +81,12 @@ public class SubmitItemObjective implements QuestObjective {
     }
 
     @Override
+    public float completion(ObjectiveProgress progress) {
+        Progress counted = (Progress) progress;
+        return counted.goal <= 0 ? 1f : Math.min(1f, (float) counted.submitted / counted.goal);
+    }
+
+    @Override
     public boolean isCompleted(ObjectiveProgress progress) {
         Progress submitProgress = (Progress) progress;
         return submitProgress.submitted >= submitProgress.goal;

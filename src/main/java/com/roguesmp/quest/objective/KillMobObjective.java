@@ -98,6 +98,12 @@ public class KillMobObjective implements QuestObjective {
     }
 
     @Override
+    public float completion(ObjectiveProgress progress) {
+        Progress counted = (Progress) progress;
+        return counted.goal <= 0 ? 1f : Math.min(1f, (float) counted.killed / counted.goal);
+    }
+
+    @Override
     public boolean isCompleted(ObjectiveProgress progress) {
         Progress mobProgress = (Progress) progress;
         return mobProgress.killed >= mobProgress.goal;

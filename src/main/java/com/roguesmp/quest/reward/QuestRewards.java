@@ -13,6 +13,7 @@ public class QuestRewards {
     public static final Codec<ItemReward> ITEM = register(ItemReward.TYPE_KEY, ItemReward.CODEC);
     public static final Codec<MoneyReward> MONEY = register(MoneyReward.TYPE_KEY, MoneyReward.CODEC);
     public static final Codec<QuestExpReward> QUEST_EXP = register(QuestExpReward.TYPE_KEY, QuestExpReward.CODEC);
+    public static final Codec<StartQuestReward> START_QUEST = register(StartQuestReward.TYPE_KEY, StartQuestReward.CODEC);
 
     public static void loadClass() {
 

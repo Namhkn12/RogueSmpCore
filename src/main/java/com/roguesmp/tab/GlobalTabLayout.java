@@ -3,6 +3,13 @@ package com.roguesmp.tab;
 import com.roguesmp.effect.SmpEffect;
 import com.roguesmp.party.Party;
 import com.roguesmp.party.PartyManager;
+import com.roguesmp.player.PlayerManager;
+import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.quest.Quest;
+import com.roguesmp.quest.QuestManager;
+import com.roguesmp.quest.QuestProgress;
+import com.roguesmp.quest.objective.ObjectiveProgress;
+import java.util.Comparator;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import java.util.UUID;
@@ -29,6 +36,7 @@ public class GlobalTabLayout {
 
     private static final int MAX_EFFECT_LINES = 10;
     private static final int MAX_PARTY_LINES = 5;
+    private static final int MAX_QUEST_LINES = 11;
 
     public static final TabClaim CLAIM = new TabClaim("global", 0, GlobalTabLayout::scoreboardView, GlobalTabLayout::tabListView);
 
@@ -46,6 +54,15 @@ public class GlobalTabLayout {
             partyRows.add(TabElement.ticking(20, c -> partyLine(player, index)));
         }
         partyRows.add(TabElement.ticking(20, c -> partyOverflow(player)));
+        partyRows.add(TabElement.constant(""));
+        partyRows.add(TabElement.constant("<bold><yellow>Nhiệm vụ</yellow></bold>"));
+        for (int i = 0; i < MAX_QUEST_LINES; i++) {
+            int index = i;
+            partyRows.add(TabElement.ticking(20, c -> {
+                List<String> lines = questLines(player);
+                return index < lines.size() ? lines.get(index) : "";
+            }));
+        }
 
         TabListView view = TabListView.create(player, "global_info_tab", context)
                 .header(TabListDefaults.header())
@@ -81,6 +98,59 @@ public class GlobalTabLayout {
             return Utils.toString(Component.text("... và " + extra + " hiệu ứng khác", NamedTextColor.GRAY));
         }
         return "";
+    }
+
+    /**
+     * The pinned quest with all its unfinished objectives, then other active quests by most recent progress with
+     * only their next objective, ending in an overflow line when they don't all fit.
+     */
+    private static List<String> questLines(Player player) {
+        QuestManager questManager = QuestManager.getInstance();
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+        QuestProgress pinned = questManager.getPinnedQuest(player);
+        List<String> lines = new ArrayList<>();
+
+        if (pinned != null) {
+            lines.add("<gold>★ " + questName(pinned.getQuest()) + "</gold>");
+            for (Component objective : unfinishedObjectives(pinned, smpPlayer)) {
+                if (lines.size() >= MAX_QUEST_LINES - 1) break;
+                lines.add("  " + Utils.toString(objective));
+            }
+        }
+
+        List<QuestProgress> others = new ArrayList<>();
+        for (QuestProgress questProgress : questManager.getActiveQuests(player)) {
+            if (questProgress != pinned) {
+                others.add(questProgress);
+            }
+        }
+        others.sort(Comparator.comparingLong(QuestProgress::getLastProgressAt).reversed());
+        for (int i = 0; i < others.size(); i++) {
+            int remaining = others.size() - i;
+            int room = MAX_QUEST_LINES - lines.size();
+            if (room < 2 || (remaining > 1 && room < 3)) {
+                lines.add("<gray>... và " + remaining + " nhiệm vụ khác</gray>");
+                break;
+            }
+            QuestProgress progress = others.get(i);
+            lines.add("<yellow>• " + questName(progress.getQuest()) + "</yellow>");
+            List<Component> objectives = unfinishedObjectives(progress, smpPlayer);
+            if (!objectives.isEmpty()) lines.add("  " + Utils.toString(objectives.getFirst()));
+        }
+        return lines;
+    }
+
+    private static List<Component> unfinishedObjectives(QuestProgress progress, SmpPlayer smpPlayer) {
+        List<Component> displays = new ArrayList<>();
+        progress.getQuest().getObjectives().forEach((id, objective) -> {
+            ObjectiveProgress objectiveProgress = progress.getProgressMap().get(id);
+            if (objectiveProgress != null && !progress.isObjectiveCompleted(id)) displays.addAll(objective.getDisplay(smpPlayer, objectiveProgress));
+        });
+        return displays;
+    }
+
+    private static String questName(Quest quest) {
+        return quest.getName() != null ? quest.getName() : quest.getId();
     }
 
     private static List<String> partyMembers(Player player) {

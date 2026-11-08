@@ -100,7 +100,8 @@ public class QuestGui extends BaseGui {
                 Quest quest = qp.getQuest();
                 boolean completed = qp.isCompleted();
 
-                String statusPrefix = completed ? "<gray><st>" : "<gold>";
+                boolean pinned = !completed && quest.getId().equals(questData.getPinnedQuest());
+                String statusPrefix = completed ? "<gray><st>" : pinned ? "<gold>📌 " : "<gold>";
                 ItemStack questItem = completed ? ItemStack.of(Material.MINECART) : quest.createIcon();
                 questItem.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Set.of(DataComponentTypes.ATTRIBUTE_MODIFIERS)).build());
                 questItem.setData(DataComponentTypes.ITEM_NAME,
@@ -143,15 +144,21 @@ public class QuestGui extends BaseGui {
                 }
 
                 boolean canSubmit = !completed && quest.hasObjective(SubmitItemObjective.class);
-                if (canSubmit) {
-                    loreLines.add(Component.empty());
-                    loreLines.add(Utils.fromString("<!i><yellow>▶ Click để nộp vật phẩm"));
-                }
+                if (!completed) loreLines.add(Component.empty());
+                if (canSubmit) loreLines.add(Utils.fromString("<!i><yellow>▶ Click trái để nộp vật phẩm"));
+                if (!completed) loreLines.add(Utils.fromString(pinned ? "<!i><gold>📌 Đã ghim <gray>- Click phải để bỏ ghim" : "<!i><yellow>▶ Click phải để ghim lên Tab"));
 
                 questItem.setData(DataComponentTypes.LORE, ItemLore.lore(loreLines));
 
                 addButton(r, c, questItem, event -> {
                     event.setCancelled(true);
+                    if (event.isRightClick()) {
+                        if (completed) return;
+                        boolean nowPinned = questManager.togglePin(player, quest);
+                        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, nowPinned ? 1.4f : 0.8f);
+                        setup();
+                        return;
+                    }
                     if (!canSubmit) return;
                     if (questManager.submitItems(player, quest)) {
                         player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);

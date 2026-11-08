@@ -3,11 +3,20 @@ package com.roguesmp.listener;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.event.AdventureRankChangeEvent;
 import com.roguesmp.event.DailyResetEvent;
+import com.roguesmp.event.HandMachineProcessEvent;
 import com.roguesmp.event.QuestCompletedEvent;
+import com.roguesmp.event.QuestProgressEvent;
+import com.roguesmp.quest.holder.QuestHolder;
+import com.roguesmp.event.QuestStartedEvent;
+import com.roguesmp.event.SmpCraftEvent;
+import com.roguesmp.quest.Quest;
+import com.roguesmp.quest.holder.PlayerHolder;
+import org.bukkit.entity.Player;
 import com.roguesmp.quest.QuestManager;
 import com.roguesmp.quest.board.AdventureRank;
 import com.roguesmp.quest.board.QuestBoardManager;
 import com.roguesmp.utils.Utils;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import com.destroystokyo.paper.event.player.PlayerConnectionCloseEvent;
 import org.bukkit.event.EventHandler;
@@ -43,11 +52,13 @@ public class QuestListener implements Listener {
         }
         boardManager.refresh(event.getPlayer());
         boardManager.syncStatus(event.getPlayer());
+        questManager.refreshPinnedBar(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerLeave(PlayerQuitEvent event) {
         questManager.getQuestDataManager().saveAndUncache(event.getPlayer().getUniqueId());
+        questManager.forgetPinnedBar(event.getPlayer().getUniqueId());
         boardManager.clearStatus(event.getPlayer().getUniqueId());
     }
 
@@ -72,10 +83,44 @@ public class QuestListener implements Listener {
     @EventHandler
     public void onQuestCompleted(QuestCompletedEvent event) {
         boardManager.onQuestCompleted(event);
+        refreshPinnedBar(event.getHolder());
+    }
+
+    @EventHandler
+    public void onQuestProgress(QuestProgressEvent event) {
+        refreshPinnedBar(event.getHolder());
+    }
+
+    private void refreshPinnedBar(QuestHolder holder) {
+        if (!(holder instanceof PlayerHolder playerHolder)) return;
+        Player player = Bukkit.getPlayer(playerHolder.id());
+        if (player != null) questManager.refreshPinnedBar(player);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onKillEntity(EntityDeathEvent event) {
         questManager.onKillEntity(event);
+    }
+
+    @EventHandler
+    public void onCraft(SmpCraftEvent event) {
+        questManager.onCraft(event);
+    }
+
+    @EventHandler
+    public void onHandMachineProcess(HandMachineProcessEvent event) {
+        questManager.onHandMachineProcess(event);
+    }
+
+    @EventHandler
+    public void onQuestStarted(QuestStartedEvent event) {
+        refreshPinnedBar(event.getHolder());
+        Quest quest = event.getProgress().getQuest();
+        if (!quest.isAutoPin() || !(event.getHolder() instanceof PlayerHolder holder)) return;
+        Player player = Bukkit.getPlayer(holder.id());
+        if (player == null) return;
+        String name = quest.getName() != null ? quest.getName() : quest.getId();
+        player.sendMessage(Utils.fromString("<aqua><bold>NHIỆM VỤ MỚI</bold></aqua> <gray>»</gray> " + name + " <dark_gray>(/quest để xem chi tiết)</dark_gray>"));
+        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.4f);
     }
 }

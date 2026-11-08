@@ -1,0 +1,22 @@
+{
+  "id": "intro/intro_hand_sieve",
+  "name": "<gold>Khởi đầu: Sàng tay</gold>",
+  "icon": "scaffolding",
+  "description": [
+    "<gray>Những thứ bạn vừa nghiền còn chứa nhiều hơn bạn nghĩ.",
+    "<gray>Chế tạo một <white>Sàng tay</white> để lọc chúng."
+  ],
+  "autoPin": true,
+  "autoClaimRewards": true,
+  "objectives": {
+    "craft_sieve": {
+      "type": "craft_item",
+      "item": "hand_sieve",
+      "amount": 1
+    }
+  },
+  "rewards": [
+    { "type": "money", "amount": 50 },
+    { "type": "start_quest", "quest": "intro/intro_sifting" }
+  ]
+}

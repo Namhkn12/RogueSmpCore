@@ -1,0 +1,23 @@
+{
+  "id": "intro/intro_crushing",
+  "name": "<gold>Khởi đầu: Nghiền đá</gold>",
+  "icon": "grindstone",
+  "description": [
+    "<gray>Đặt Máy nghiền tay xuống, <yellow>chuột phải</yellow> bằng vật phẩm",
+    "<gray>để cho vào, rồi tiếp tục <yellow>chuột phải</yellow> để nghiền.",
+    "<gray><yellow>Shift + chuột phải</yellow> để lấy lại vật phẩm."
+  ],
+  "autoPin": true,
+  "autoClaimRewards": true,
+  "objectives": {
+    "crush": {
+      "type": "hand_process",
+      "block": "hand_crusher",
+      "amount": 10
+    }
+  },
+  "rewards": [
+    { "type": "money", "amount": 100 },
+    { "type": "start_quest", "quest": "intro/intro_hand_sieve" }
+  ]
+}

@@ -3,6 +3,7 @@ package com.roguesmp.crafting.quick;
 import com.roguesmp.crafting.CraftingIngredient;
 import com.roguesmp.crafting.CraftingManager;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
+import com.roguesmp.event.SmpCraftEvent;
 import com.roguesmp.item.BaseItem;
 import com.roguesmp.utils.ItemRef;
 import com.roguesmp.utils.PlayerUtils;
@@ -85,6 +86,7 @@ public final class QuickCraftService {
         player.getInventory().setStorageContents(contents);
 
         PlayerUtils.giveItem(player, splitIntoStacks(output, output.getAmount() * times));
+        new SmpCraftEvent(player, recipe, output, times).callEvent();
     }
 
     private static List<ItemStack> splitIntoStacks(ItemStack template, int total) {

@@ -17,6 +17,10 @@ public class QuestObjectives {
             register(SignalObjective.TYPE_KEY, SignalObjective.CODEC, SignalObjective.Progress.CODEC);
     public static final Codec<SubmitItemObjective> SUBMIT_ITEM =
             register(SubmitItemObjective.TYPE_KEY, SubmitItemObjective.CODEC, SubmitItemObjective.Progress.CODEC);
+    public static final Codec<CraftItemObjective> CRAFT_ITEM =
+            register(CraftItemObjective.TYPE_KEY, CraftItemObjective.CODEC, CraftItemObjective.Progress.CODEC);
+    public static final Codec<HandProcessObjective> HAND_PROCESS =
+            register(HandProcessObjective.TYPE_KEY, HandProcessObjective.CODEC, HandProcessObjective.Progress.CODEC);
 
     public static void loadClass() {
 

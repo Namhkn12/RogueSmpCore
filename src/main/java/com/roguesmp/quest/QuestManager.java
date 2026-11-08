@@ -11,7 +11,9 @@ import com.roguesmp.quest.objective.ObjectiveProgress;
 import com.roguesmp.quest.objective.QuestObjective;
 import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.event.HandMachineProcessEvent;
 import com.roguesmp.event.QuestCompletedEvent;
+import com.roguesmp.event.SmpCraftEvent;
 import com.roguesmp.event.QuestProgressEvent;
 import com.roguesmp.event.QuestStartedEvent;
 import com.roguesmp.player.PlayerManager;
@@ -43,6 +45,7 @@ public class QuestManager {
 
     private final RogueSmpCore plugin;
     private final QuestDataManager questDataManager;
+    private final PinnedQuestBar pinnedBar = new PinnedQuestBar();
 
     public QuestManager(RogueSmpCore plugin) {
         this.plugin = plugin;
@@ -87,6 +90,7 @@ public class QuestManager {
         if (log.getQuestProgresses().containsKey(quest.getId())) return false;
         QuestProgress progress = new QuestProgress(quest);
         log.setQuestProgress(quest.getId(), progress);
+        if (quest.isAutoPin() && log instanceof PlayerQuestData data) data.setPinnedQuest(quest.getId());
         new QuestStartedEvent(holder, progress).callEvent();
         return true;
     }
@@ -236,6 +240,7 @@ public class QuestManager {
             progress.getEligible().forEach(member -> giveOrDeliver(member, source, quest));
             questDataManager.saveGroupAsync(group);
         } else {
+            if (log instanceof PlayerQuestData data && quest.getId().equals(data.getPinnedQuest())) data.setPinnedQuest(null);
             String origin = quest.getBoard() != null ? "Bảng nhiệm vụ" : "Nhiệm vụ";
             giveOrDeliver(log.getHolder().id(), new InboxSource(origin, displayName(quest), quest.getIcon()), quest);
         }
@@ -358,6 +363,59 @@ public class QuestManager {
         if (!(event.getDamageSource().getCausingEntity() instanceof Player player)) return;
 
         handleProgress(player, (questObjective, objectiveProgress) -> questObjective.onKillEntity(event, objectiveProgress));
+    }
+
+    public void onCraft(SmpCraftEvent event) {
+        handleProgress(event.getPlayer(), (objective, progress) -> objective.onCraft(event, progress));
+    }
+
+    public void onHandMachineProcess(HandMachineProcessEvent event) {
+        handleProgress(event.getPlayer(), (objective, progress) -> objective.onHandMachineProcess(event, progress));
+    }
+
+    /**
+     * Drops a player's quest (technically their progress), active or completed, so it can be assigned again. Rewards already delivered are kept.
+     *
+     * @return false if the player had no such quest
+     */
+    public boolean removeQuest(Player player, String questId) {
+        PlayerQuestData data = getPlayerQuestData(player.getUniqueId());
+        if (data == null || data.removeQuestProgress(questId) == null) return false;
+        if (questId.equals(data.getPinnedQuest())) data.setPinnedQuest(null);
+        questDataManager.saveAsync(data);
+        refreshPinnedBar(player);
+        return true;
+    }
+
+    /**
+     * Pins the player's active quest, or unpins it if it already is.
+     *
+     * @return whether the quest is pinned afterwards
+     */
+    public boolean togglePin(Player player, Quest quest) {
+        PlayerQuestData data = getPlayerQuestData(player.getUniqueId());
+        QuestProgress progress = data == null ? null : data.getQuestProgress(quest.getId());
+        if (progress == null || progress.isCompleted()) return false;
+
+        boolean pin = !quest.getId().equals(data.getPinnedQuest());
+        data.setPinnedQuest(pin ? quest.getId() : null);
+        refreshPinnedBar(player);
+        return pin;
+    }
+
+    public void refreshPinnedBar(Player player) {
+        pinnedBar.refresh(player, getPinnedQuest(player));
+    }
+
+    public void forgetPinnedBar(UUID playerId) {
+        pinnedBar.forget(playerId);
+    }
+
+    public @Nullable QuestProgress getPinnedQuest(Player player) {
+        PlayerQuestData data = getPlayerQuestData(player.getUniqueId());
+        if (data == null || data.getPinnedQuest() == null) return null;
+        QuestProgress progress = data.getQuestProgress(data.getPinnedQuest());
+        return progress == null || progress.isCompleted() ? null : progress;
     }
 
     public void onDisable() {

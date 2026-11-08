@@ -60,6 +60,7 @@ public class IslandMembershipService {
                 .thenAccept(world -> Utils.runLater(() -> regionManager.addTeammate(world, recruitId)));
 
         dataManager.saveAsync(islandData);
+        IslandManager.assignIntroQuest(recruit);
         return true;
     }
 
