@@ -45,8 +45,8 @@ public class SweepingDamageRatio implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng tỉ lệ sát thương quét cạnh thêm x %";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng tỉ lệ sát thương quét cạnh thêm x %"));
     }
 
     @Override

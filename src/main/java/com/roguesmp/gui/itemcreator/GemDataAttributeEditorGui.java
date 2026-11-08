@@ -1,5 +1,6 @@
 package com.roguesmp.gui.itemcreator;
 
+import net.kyori.adventure.text.JoinConfiguration;
 import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.utils.Utils;
@@ -17,7 +18,7 @@ import java.util.Map;
  * Dialog-based editor for one {@link EquipSlot}'s attribute map inside a
  * {@link com.roguesmp.item.component.impl.GemDataComponent}. Same shape as
  * {@link AttributeEditorGui} (including the hover tooltip from
- * {@link com.roguesmp.attribute.SmpAttribute#getSimpleDescription()}), but scoped to a single
+ * {@link com.roguesmp.attribute.SmpAttribute#getDescription()}), but scoped to a single
  * slot within the parent {@link GemDataEditorGui}'s (slot -> attribute -> value) map instead of
  * committing a whole standalone {@code EquipAttributeComponent}.
  */
@@ -45,7 +46,7 @@ public class GemDataAttributeEditorGui {
             double current = values.getOrDefault(attribute, 0d);
             boolean valuePresent = !Utils.isEffectiveZero(current);
             multi.addButton(Component.text(attribute.name(), valuePresent ? NamedTextColor.GREEN : NamedTextColor.GRAY),
-                    Utils.text(attribute.getAttribute().getSimpleDescription(), NamedTextColor.GRAY),
+                    Component.join(JoinConfiguration.newlines(), Utils.text(attribute.getAttribute().getDescription(), NamedTextColor.GRAY)),
                     (response, audience) -> Utils.runLater(() -> player.showDialog(buildValueDialog(player, attribute))));
         }
 

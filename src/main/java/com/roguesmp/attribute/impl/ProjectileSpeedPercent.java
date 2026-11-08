@@ -59,7 +59,7 @@ public class ProjectileSpeedPercent implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng tốc độ đạn bắn ra thêm x %";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng tốc độ đạn bắn ra thêm x %"));
     }
 }

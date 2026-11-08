@@ -59,8 +59,11 @@ public class OxygenBonus implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Thay đổi tỉ lệ mất không khí mỗi 50 mili giây khi ở dưới nước theo công thức 1/(x+1)";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Thay đổi tỉ lệ mất không khí mỗi 50 mili giây"),
+                Component.text("khi ở dưới nước theo công thức 1/(x+1)")
+        );
     }
 
     @Override

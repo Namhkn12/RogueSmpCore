@@ -45,8 +45,11 @@ public class SafeFallDistance implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng độ cao tối đa trước khi nhận sát thương rơi thễm x khối";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Tăng độ cao tối đa trước khi nhận sát thương rơi"),
+                Component.text("thêm x khối")
+        );
     }
 
     @Override

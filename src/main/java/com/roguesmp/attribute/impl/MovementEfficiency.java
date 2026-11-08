@@ -45,8 +45,11 @@ public class MovementEfficiency implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng hiệu suất di chuyển khi đi qua cát linh hồn, tơ nhện thêm x %";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Tăng hiệu suất di chuyển khi đi qua cát linh hồn,"),
+                Component.text("tơ nhện thêm x %")
+        );
     }
 
     @Override

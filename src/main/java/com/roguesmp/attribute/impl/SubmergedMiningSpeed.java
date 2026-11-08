@@ -45,8 +45,8 @@ public class SubmergedMiningSpeed implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng tốc độ đào dưới nước thêm x";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng tốc độ đào dưới nước thêm x"));
     }
 
     @Override

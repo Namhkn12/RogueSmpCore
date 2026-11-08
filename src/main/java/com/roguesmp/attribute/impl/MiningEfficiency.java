@@ -42,8 +42,8 @@ public class MiningEfficiency implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Hoạt động giống vanilla";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Hoạt động giống vanilla"));
     }
 
     @Override

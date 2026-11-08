@@ -32,8 +32,8 @@ public interface SmpAttribute {
     //return null for no display
     @Nullable List<Component> getDisplayText(double value, @Nullable SmpPlayer player, PersistentDataContainerView pdc);
 
-    default @NotNull String getSimpleDescription() {
-        return "Chỉ số này chưa có mô tả, xin hãy thông báo tới admin để được thêm.";
+    default @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Chỉ số này chưa có mô tả, xin hãy thông báo tới admin để được thêm."));
     }
 
     default Material getIcon() {

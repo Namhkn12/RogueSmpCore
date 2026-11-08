@@ -45,8 +45,8 @@ public class EntityReach implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng tầm với khi tấn công kẻ địch thêm x khối";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng tầm với khi tấn công kẻ địch thêm x khối"));
     }
 
     @Override

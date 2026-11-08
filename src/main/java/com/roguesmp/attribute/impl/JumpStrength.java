@@ -45,8 +45,8 @@ public class JumpStrength implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng gia tốc khi nhảy thêm x %";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng gia tốc khi nhảy thêm x %"));
     }
 
     @Override

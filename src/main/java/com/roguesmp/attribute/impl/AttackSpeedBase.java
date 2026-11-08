@@ -62,8 +62,8 @@ public class AttackSpeedBase implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Hoạt động giống như minecraft thông thường";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Hoạt động giống như minecraft thông thường"));
     }
 
     @Override

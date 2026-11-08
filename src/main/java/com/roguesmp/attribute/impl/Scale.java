@@ -45,8 +45,8 @@ public class Scale implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng kích cỡ bản thân thêm x";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng kích cỡ bản thân thêm x"));
     }
 
     @Override

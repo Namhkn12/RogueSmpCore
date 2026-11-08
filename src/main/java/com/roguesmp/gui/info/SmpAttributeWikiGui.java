@@ -61,7 +61,7 @@ public class SmpAttributeWikiGui extends BaseGui {
             lore.add(Component.empty());
 
             lore.add(Utils.text("Mô tả:", NamedTextColor.YELLOW));
-            lore.add(Utils.text(" " + smpAttr.getSimpleDescription(), NamedTextColor.GRAY));
+            lore.addAll(Utils.text(smpAttr.getDescription(), NamedTextColor.GRAY));
 
             icon.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
 

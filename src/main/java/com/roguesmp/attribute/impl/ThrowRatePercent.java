@@ -34,8 +34,8 @@ public class ThrowRatePercent implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng tốc ném thêm x %";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng tốc ném thêm x %"));
     }
 
     @Override

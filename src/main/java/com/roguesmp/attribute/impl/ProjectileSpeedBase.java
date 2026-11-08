@@ -62,7 +62,11 @@ public class ProjectileSpeedBase implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tốc độ đạn khi bắn/ném ra (gồm: đinh ba, mũi tên, trứng, v.v...) tăng x lần (Chữ xanh lá trên vũ khí)";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Tốc độ đạn khi bắn/ném ra tăng x lần"),
+                Component.text("(gồm: đinh ba, mũi tên, trứng, v.v...)"),
+                Component.text("(Chữ xanh lá trên vũ khí)")
+        );
     }
 }

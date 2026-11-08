@@ -56,8 +56,11 @@ public class ThrowRateBase implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tốc độ ném vũ khí gốc (đinh ba, trứng, v.v...), càng cao thì thời gian chờ càng nhỏ";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Tốc độ ném vũ khí gốc (đinh ba, trứng, v.v...),"),
+                Component.text("càng cao thì thời gian chờ càng nhỏ")
+        );
     }
 
     @Override

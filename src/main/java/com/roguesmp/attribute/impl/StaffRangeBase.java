@@ -37,8 +37,11 @@ public class StaffRangeBase implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Khoảng cách tối đa (số block) mà tia phép từ trượng có thể bay tới";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Khoảng cách tối đa (số block) mà tia phép"),
+                Component.text("từ trượng có thể bay tới")
+        );
     }
 
     @Override
