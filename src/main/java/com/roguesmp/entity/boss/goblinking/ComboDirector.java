@@ -120,7 +120,9 @@ public class ComboDirector extends Spell {
         drawCrown();
         hazards.addAll(pending);
         pending.clear();
-        hazards.removeIf(hazard -> hazard.tick(interval));
+        for (Hazard hazard : List.copyOf(hazards)) {
+            if (hazards.contains(hazard) && hazard.tick(interval)) hazards.remove(hazard);
+        }
 
         if (run == null) return;
         if (!owner.isValid() || owner.isDead()) {
