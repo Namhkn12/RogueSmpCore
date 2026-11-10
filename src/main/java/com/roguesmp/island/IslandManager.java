@@ -5,6 +5,7 @@ import com.roguesmp.teleport.TeleportService;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
+import com.roguesmp.quest.QuestManager;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -30,6 +31,7 @@ public class IslandManager {
     private final IslandPurgeService purgeService;
     private final IslandVisitService visitService;
     private final IslandLevelService levelService;
+
     private final Set<UUID> creating = new HashSet<>();
 
     private IslandManager(RogueSmpCore plugin, PlayerManager playerManager) {
@@ -86,6 +88,8 @@ public class IslandManager {
         islandDataManager.saveAsync(islandData);
         creator.sendMessage(Utils.fromString("<green>Tạo đảo thành công! Chuẩn bị dịch chuyển..."));
         TeleportService.getInstance().teleport(creator, spawnPoint, TeleportOptions.INSTANT);
+
+        QuestManager.getInstance().refresh(creator);
     }
 
     public boolean setIslandSpawn(Player player, Location targetLocation) {

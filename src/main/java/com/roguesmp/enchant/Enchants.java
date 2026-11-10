@@ -79,6 +79,11 @@ public enum Enchants {
     PERSPICACITY(new Perspicacity()),
     CELERITY(new Celerity()),
 
+    //Advanced infusion
+    EXECUTIONER(new Executioner()),
+    MOMENTUM(new Momentum()),
+    EMBER(new Ember()),
+
     //Cosmetic
     GLOWING(new Glowing()),
 

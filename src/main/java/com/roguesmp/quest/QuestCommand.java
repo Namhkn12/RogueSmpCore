@@ -28,11 +28,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class QuestCommand {
 
     private static final int TOP_LINES = 10;
+    private static final String REMOVE_ALL = "*";
 
     private final QuestManager questManager;
 
@@ -131,6 +133,33 @@ public class QuestCommand {
                     }
                 });
 
+        CommandAPICommand removeSubcommand = new CommandAPICommand("remove")
+                .withPermission(Permissions.QUEST_ASSIGN.node())
+                .withArguments(new EntitySelectorArgument.OnePlayer("target"))
+                .withArguments(new TextArgument("quest_id")
+                        .replaceSuggestions(ArgumentSuggestions.strings(info -> {
+                            Player target = info.previousArgs().getUnchecked("target");
+                            PlayerQuestData data = target == null ? null : questManager.getPlayerQuestData(target.getUniqueId());
+                            List<String> ids = new ArrayList<>(List.of(REMOVE_ALL));
+                            if (data != null) ids.addAll(data.getQuestProgresses().keySet());
+                            return ids.toArray(new String[0]);
+                        }))
+                )
+                .executes((sender, args) -> {
+                    Player target = (Player) args.get("target");
+                    String questId = (String) args.get("quest_id");
+                    PlayerQuestData data = questData(sender, target);
+                    if (data == null) return;
+
+                    List<String> toRemove = REMOVE_ALL.equals(questId) ? List.copyOf(data.getQuestProgresses().keySet()) : List.of(questId);
+                    long removed = toRemove.stream().filter(id -> questManager.removeQuest(target, id)).count();
+                    if (removed == 0) {
+                        sender.sendMessage(Utils.fromString("<red>" + target.getName() + " không có nhiệm vụ <yellow>" + questId));
+                        return;
+                    }
+                    sender.sendMessage(Utils.text("Đã xóa " + removed + " nhiệm vụ của " + target.getName() + ".", NamedTextColor.GREEN));
+                });
+
         CommandAPICommand boardSubcommand = new CommandAPICommand("board")
                 .executesPlayer((player, args) -> {
                     new QuestBoardGui(player).showInventory(player);
@@ -208,6 +237,7 @@ public class QuestCommand {
         new CommandAPICommand("quest")
                 .withSubcommand(infoSubcommand)
                 .withSubcommand(assignSubcommand)
+                .withSubcommand(removeSubcommand)
                 .withSubcommand(boardSubcommand)
                 .withSubcommand(inboxSubcommand)
                 .withSubcommand(levelSubcommand)

@@ -40,6 +40,16 @@ public class MoneyCost implements Cost {
     }
 
     @Override
+    public void refund(SmpPlayer player) {
+        player.giveMoney(amount);
+    }
+
+    @Override
+    public Component getAmountDisplay() {
+        return GateDisplay.money(amount, true);
+    }
+
+    @Override
     public Component getDisplay(SmpPlayer player) {
         return GateDisplay.money(amount, canAfford(player));
     }

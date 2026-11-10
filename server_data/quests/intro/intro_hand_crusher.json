@@ -1,0 +1,23 @@
+{
+  "id": "intro/intro_hand_crusher",
+  "name": "<gold>Khởi đầu: Máy nghiền tay</gold>",
+  "icon": "grindstone",
+  "description": [
+    "<gray>Mọi thứ bắt đầu từ việc nghiền đá.",
+    "<gray>Xem công thức trong <yellow>/recipes</yellow> rồi chế tạo",
+    "<gray>một <white>Máy nghiền tay</white> tại bàn chế tạo."
+  ],
+  "autoPin": true,
+  "autoClaimRewards": true,
+  "objectives": {
+    "craft_crusher": {
+      "type": "craft_item",
+      "item": "hand_crusher",
+      "amount": 1
+    }
+  },
+  "rewards": [
+    { "type": "money", "amount": 50 },
+    { "type": "start_quest", "quest": "intro/intro_crushing" }
+  ]
+}

@@ -39,6 +39,7 @@ Thư mục: `quests/` (Registry, id = đường dẫn file: `quests/board/gather
 | `objectives` | `{}` | Map **tên → objective**. Tên do bạn đặt, dùng làm khoá lưu tiến độ (đổi tên = mất tiến độ của objective đó). Quest hoàn thành khi **mọi** objective xong; không có objective = hoàn thành ngay khi được giao. |
 | `rewards` | bắt buộc (có thể `[]`) | Phần thưởng khi hoàn thành. |
 | `autoClaimRewards` | `false` | Xem [nhận thưởng](#nhận-thưởng). Lưu ý viết **camelCase**. |
+| `autoPin` | `false` | Khi được giao, quest tự được ghim lên thanh tiến độ, và người chơi nhận thông báo "Nhiệm vụ mới". Viết **camelCase**. |
 | `conditions` | `[]` | [Điều kiện](#condition) để hành động của người chơi được tính tiến độ. |
 | `requirements` | `[]` | [Requirement](#requirement) để quest lên bảng và được nhận. |
 | `board` | không có | Có key này → quest nằm trong [bảng nhiệm vụ](#bảng-nhiệm-vụ). |
@@ -51,7 +52,26 @@ Thư mục: `quests/` (Registry, id = đường dẫn file: `quests/board/gather
 | `signal` | `{ "type": "signal", "signal": "gate_open", "amount": 3, "display": "Mở 3 cổng" }` | Tiến độ khi có **tín hiệu** cùng id được gửi tới (từ dungeon hoặc code). Tín hiệu mang số lượng; tổng không vượt `amount` (mặc định 1). `display` là nhãn trong GUI. |
 | `submit_item` | `{ "type": "submit_item", "item": "ruby_shard", "amount": 10 }` | Nộp item tuỳ chỉnh (id trong `items/`). Người chơi **chuột trái** vào quest trong bảng nhiệm vụ để nộp. Phải có **đủ** số lượng mới nộp được; nộp 1 lần, lấy đúng `amount` (mặc định 1). |
 
-`signal` là objective dùng chung cho mọi thứ không phải giết mob hay nộp đồ: dungeon gửi tín hiệu qua action `signal`, hệ thống khác (NPC, block...) có thể gửi bằng code.
+| `craft_item` | `{ "type": "craft_item", "item": "hand_crusher", "amount": 1 }` | Cộng số item tuỳ chỉnh `item` mà người chơi chế tạo được (tính theo tổng số lượng ra, kể cả chế tạo nhanh). |
+| `hand_process` | `{ "type": "hand_process", "block": "hand_crusher", "amount": 10 }` | +1 mỗi lần người chơi hoàn thành 1 lượt trên máy thủ công có id `block` (hiện có: `hand_crusher`, `hand_sieve`). |
+| `dungeon_clear` | `{ "type": "dungeon_clear", "dungeon": "abandoned_mine", "amount": 1, "display": "Mỏ bỏ hoang" }` | +1 cho **mọi thành viên** của instance khi objective phòng có `ends_dungeon` hoàn thành (hạ boss). Tính vào quest **cá nhân** của từng người, không cần quest nhóm. `display` là tên dungeon trong GUI (mặc định là id). |
+| `class_selected` | `{ "type": "class_selected" }`, `{ "type": "class_selected", "class": "mage" }` | Người chơi đã có lớp nhân vật (tuỳ chọn: đúng lớp `class`). |
+| `in_hub` | `{ "type": "in_hub" }` | Người chơi đang ở Hub (world mặc định của Multiverse). |
+| `has_island` | `{ "type": "has_island" }` | Người chơi đã có đảo (tự tạo hoặc là thành viên đảo khác). |
+| `island_level` | `{ "type": "island_level", "level": 3 }` | Đảo của người chơi đạt **ít nhất** cấp `level`. Thành viên nào nâng cấp đảo cũng tính cho cả đảo. |
+
+`signal` là objective dùng chung cho mọi thứ không có objective riêng: dungeon gửi tín hiệu qua action `signal`, hệ thống khác (NPC, block...) có thể gửi bằng code.
+
+### Objective trạng thái
+
+`class_selected`, `in_hub`, `has_island` và `island_level` kiểm tra **trạng thái hiện tại** của người chơi, không phải hành động. Trạng thái đã đạt **trước khi** nhận quest vẫn tính: quest xong ngay khi được giao. Đã xong thì giữ nguyên, kể cả khi trạng thái thay đổi sau đó (vd. rời đảo).
+
+Trạng thái được kiểm tra lại khi:
+- quest được giao,
+- người chơi vào server,
+- người chơi đổi world,
+- người chơi chọn lớp,
+- người chơi tạo đảo, vào đảo, hoặc đảo đổi cấp (mọi thành viên đang online; người offline được kiểm tra khi vào lại).
 
 ### `amount` dạng khoảng
 
@@ -74,6 +94,7 @@ Hành động của người chơi (giết mob, tín hiệu từ người chơi,
 | `item` | `{ "type": "item", "item": { "fire_sword": 1, "ruby_shard": 5 } }` | Trao item tuỳ chỉnh (id trong `items/` → số lượng). Key là `item` số ít, giá trị là object. Id không tồn tại bị bỏ qua. |
 | `money` | `{ "type": "money", "amount": 500 }` | Cộng tiền. |
 | `quest_exp` | `{ "type": "quest_exp", "amount": 50 }` | Cộng kinh nghiệm Mạo hiểm (xem [Cấp Mạo hiểm](#cấp-mạo-hiểm)). |
+| `start_quest` | `{ "type": "start_quest", "quest": "intro/go_to_hub" }` | Giao quest `quest` cho người chơi (bỏ qua nếu họ đã có quest đó, kể cả đã xong). Dùng để nối quest thành chuỗi. |
 
 ## Requirement
 
@@ -168,6 +189,26 @@ Feature `quests` trong [dungeon](JSON-Dungeons.md#quests--quest-nhóm) tạo 1 n
 - Quest nhóm hoàn thành → sự kiện dungeon `quest_completed` (subject = id quest), trigger bắt được.
 - Instance kết thúc → nhóm quest kết thúc theo.
 
+## Chuỗi hướng dẫn (intro)
+
+Người chơi chưa từng có quest `intro/choose_class` (chưa nhận và chưa xong) thì:
+1. **spawn ở Lobby** (world `minecraft:lobby`, toạ độ ghi cứng trong `QuestListener`),
+2. được giao `intro/choose_class` khi vào server.
+
+Từ lần vào sau, người chơi spawn như bình thường. Chuỗi chỉ là **gợi ý**: không có gì bị khoá hay ép buộc.
+
+| Quest | Objective | Quest tiếp theo |
+| :--- | :--- | :--- |
+| `intro/choose_class` | `class_selected` | `intro/go_to_hub` |
+| `intro/go_to_hub` | `in_hub` | `intro/create_island` |
+| `intro/create_island` | `has_island` | `intro/intro_hand_crusher` |
+| `intro/intro_hand_crusher` | `craft_item` hand_crusher | `intro/intro_crushing` |
+| `intro/intro_crushing` | `hand_process` hand_crusher ×10 | `intro/intro_hand_sieve` |
+| `intro/intro_hand_sieve` | `craft_item` hand_sieve | `intro/intro_sifting` |
+| `intro/intro_sifting` | `hand_process` hand_sieve ×16 | — |
+
+Các bước đầu dùng [objective trạng thái](#objective-trạng-thái), nên người chơi cũ (đã có lớp, đã có đảo) đi qua chúng ngay lập tức. Xoá quest intro của 1 người chơi (`/quest remove`) sẽ đưa họ về Lobby ở lần vào sau.
+
 ## Lệnh
 
 | Lệnh | Tác dụng |
@@ -177,6 +218,7 @@ Feature `quests` trong [dungeon](JSON-Dungeons.md#quests--quest-nhóm) tạo 1 n
 | `/quest inbox` | Mở hộp thư thưởng. |
 | `/quest info <quest>` | Xem định nghĩa 1 quest (mục tiêu, phần thưởng). |
 | `/quest assign <player> <quest>` | Admin: giao quest cho người chơi. Quyền `quest.assign`. |
+| `/quest remove <player> <quest\|all>` | Admin: xoá tiến độ quest (đang làm hoặc đã xong) để có thể giao lại. Thưởng đã nhận được giữ. Quyền `quest.assign`. |
 
 ---
 ◀ [JSON-Classes](JSON-Classes.md) · Về [Trang chủ](Home.md) · Tiếp theo: [JSON-Npcs](JSON-Npcs.md)

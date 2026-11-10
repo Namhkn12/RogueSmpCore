@@ -1,5 +1,6 @@
 package com.roguesmp.island;
 
+import com.roguesmp.quest.QuestManager;
 import com.roguesmp.teleport.destination.HubDestination;
 import com.roguesmp.teleport.TeleportOptions;
 import com.roguesmp.teleport.TeleportService;
@@ -60,6 +61,7 @@ public class IslandMembershipService {
                 .thenAccept(world -> Utils.runLater(() -> regionManager.addTeammate(world, recruitId)));
 
         dataManager.saveAsync(islandData);
+        QuestManager.getInstance().refresh(recruit);
         return true;
     }
 

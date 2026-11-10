@@ -23,8 +23,8 @@ public class SwiftSneak implements SmpEnchant {
     @Override public @NotNull String getSimpleName() { return "Bò nhanh"; }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng chỉ số " + Attributes.SNEAKING_SPEED.getAttribute().getSimpleName() + " thêm 0.15 mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Tăng chỉ số " + Attributes.SNEAKING_SPEED.getAttribute().getSimpleName() + " thêm 0.15 mỗi cấp"));
     }
 
     @Override

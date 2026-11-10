@@ -43,8 +43,8 @@ public class MeleeDamagePercent implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng sát thương cận chiến thêm x %";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng sát thương cận chiến thêm x %"));
     }
 
     @Override

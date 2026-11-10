@@ -59,8 +59,8 @@ public class Glowing implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Người mang sẽ phát sáng khi trang bị";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Người mang sẽ phát sáng khi trang bị"));
     }
 
     @Override

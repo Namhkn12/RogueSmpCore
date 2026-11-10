@@ -8,6 +8,7 @@ import com.roguesmp.crafting.quick.QuickCraftCandidate;
 import com.roguesmp.crafting.quick.QuickCraftService;
 import com.roguesmp.crafting.recipe.CraftingRecipe;
 import com.roguesmp.crafting.recipe.CraftingRecipes;
+import com.roguesmp.event.SmpCraftEvent;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.SmpItemUtils;
@@ -253,6 +254,7 @@ public class CraftingGui extends BaseGui {
             }
 
             applyConsumedItems(consume(customRecipe, items, 1));
+            new SmpCraftEvent(player, customRecipe, cleanResultItem, 1).callEvent();
         } else {
             int maxCrafts = getMaxCraftsByInventory(customRecipe, items, cleanResultItem);
             if (maxCrafts <= 0) return;
@@ -262,6 +264,7 @@ public class CraftingGui extends BaseGui {
             }
 
             applyConsumedItems(consume(customRecipe, items, maxCrafts));
+            new SmpCraftEvent(player, customRecipe, cleanResultItem, maxCrafts).callEvent();
         }
 
         scheduleRefresh();

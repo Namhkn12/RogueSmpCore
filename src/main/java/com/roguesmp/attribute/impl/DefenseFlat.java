@@ -59,8 +59,12 @@ public class DefenseFlat implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Giảm sát thương cận chiến, phép, vật bắn ra, vụ nổ nhận vào, công thức: ST * (20 / (20 + x))";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Giảm sát thương cận chiến, phép, vật bắn ra,"),
+                Component.text("vụ nổ nhận vào."),
+                Component.text("Công thức: ST * (20 / (20 + x))")
+        );
     }
 
     @Override

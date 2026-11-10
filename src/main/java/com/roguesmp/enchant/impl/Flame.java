@@ -31,8 +31,11 @@ public class Flame implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Mũi tên bọc lửa, khiến kẻ địch bị cháy 5 giây mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Mũi tên bọc lửa, khiến kẻ địch bị cháy"),
+                Component.text("5 giây mỗi cấp")
+        );
     }
 
     @Override

@@ -36,6 +36,7 @@ public class QuestProgress {
 
     private final Set<String> incompleteObjectives; // Checklist for incomplete objectives so we don't have to loop through all objectives every time
     private final Set<UUID> eligible = new HashSet<>();
+    private long lastProgressAt;
 
     /**
      * Create a new progress instance for the given quest.
@@ -92,6 +93,7 @@ public class QuestProgress {
     public boolean updateObjectiveProgress(String objectiveId, Predicate<ObjectiveProgress> updater) {
         ObjectiveProgress objProgress = this.progress.get(objectiveId);
         if (objProgress == null || !updater.test(objProgress)) return false;
+        lastProgressAt = System.currentTimeMillis();
 
         QuestObjective objective = quest.getObjective(objectiveId);
         if (objective != null && objective.isCompleted(objProgress)) {
@@ -106,6 +108,13 @@ public class QuestProgress {
         }
 
         return true;
+    }
+
+    /**
+     * When an objective last advanced in this session, or the accept time if none has; not saved.
+     */
+    public long getLastProgressAt() {
+        return Math.max(lastProgressAt, acceptTimestamp);
     }
 
     public boolean isObjectiveCompleted(String objectiveId) {

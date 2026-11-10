@@ -55,8 +55,8 @@ public class FallDamage implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng sát thương rơi nhận phải thêm x %";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng sát thương rơi nhận phải thêm x %"));
     }
 
     @Override

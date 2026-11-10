@@ -20,6 +20,7 @@ import com.roguesmp.item.ItemType;
 import com.roguesmp.item.ItemTypeGroup;
 import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.enchant.Enchants;
+import com.roguesmp.enchant.infusion.InfusionDefinition;
 import com.roguesmp.entity.component.EntityComponentKeys;
 import com.roguesmp.effect.EffectCodecs;
 import com.roguesmp.effect.SmpEffect;
@@ -89,10 +90,14 @@ import com.roguesmp.teleport.TeleportDestinations;
 import com.roguesmp.teleport.effect.TeleportEffect;
 import com.roguesmp.teleport.effect.TeleportEffects;
 import com.roguesmp.warp.Warp;
+import com.roguesmp.worldboss.definition.WorldBossDefinition;
+import com.roguesmp.worldboss.encounter.WorldBossEncounter;
+import com.roguesmp.worldboss.encounter.WorldBossEncounters;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class Registries {
     private static final List<Consumer<RogueSmpCore>> BOOTSTRAPPERS = new ArrayList<>();
@@ -136,6 +141,7 @@ public class Registries {
     // No bulk JSON entries of its own (Enchants is a hardcoded enum) - only exists so enchants
     // can have a "enchants/tags/*.json" folder like every other registry.
     public static final Registry<Enchants> ENCHANTS = register("enchants", registry -> Enchants.bootstrap());
+    public static final Registry<InfusionDefinition> INFUSION = new Registry<>("infusions", InfusionDefinition.CODEC);
 
     public static final Registry<SpellType<? extends SpellParams>> ENTITY_SPELL = register(registry -> EntitySpells.loadClass());
     public static final Registry<EntityFactory<? extends SmpEntity>> ENTITY_FACTORY = register(registry -> SpecialEntities.loadClass());
@@ -172,6 +178,9 @@ public class Registries {
     public static final Registry<Codec<? extends TeleportDestination>> TELEPORT_DESTINATION_CODEC = register(registry -> TeleportDestinations.loadClass());
     public static final Registry<Codec<? extends TeleportEffect>> TELEPORT_EFFECT_CODEC = register(registry -> TeleportEffects.loadClass());
     public static final Registry<Warp> WARP = new Registry<>("warps", Warp.CODEC);
+
+    public static final Registry<Supplier<? extends WorldBossEncounter>> WORLD_BOSS_ENCOUNTER = register(registry -> WorldBossEncounters.loadClass());
+    public static final Registry<WorldBossDefinition> WORLD_BOSS = new Registry<>("world_bosses", WorldBossDefinition.CODEC);
 
     public static final Registry<Codec<? extends Recipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());
     public static final Registry<Recipe> CRAFTING_RECIPE = new Registry<>("crafting_recipes", Recipe.CODEC);

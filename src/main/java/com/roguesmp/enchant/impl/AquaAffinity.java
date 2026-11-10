@@ -41,8 +41,8 @@ public class AquaAffinity implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng thời gian thở dưới nước thêm 15s mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Tăng thời gian thở dưới nước thêm 15s mỗi cấp"));
     }
 
     @Override

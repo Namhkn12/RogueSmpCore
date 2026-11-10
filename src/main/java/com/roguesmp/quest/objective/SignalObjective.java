@@ -83,6 +83,12 @@ public class SignalObjective implements QuestObjective {
     }
 
     @Override
+    public float completion(ObjectiveProgress progress) {
+        Progress counted = (Progress) progress;
+        return counted.goal <= 0 ? 1f : Math.min(1f, (float) counted.count / counted.goal);
+    }
+
+    @Override
     public boolean isCompleted(ObjectiveProgress progress) {
         Progress signalProgress = (Progress) progress;
         return signalProgress.count >= signalProgress.goal;

@@ -31,8 +31,11 @@ public class Density implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng sát thương gốc gây ra thêm " + Utils.formatDecimal(DMG_PER_LEVEL) + " * {khoảng cách rơi} mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Tăng sát thương gốc gây ra thêm"),
+                Component.text(Utils.formatDecimal(DMG_PER_LEVEL) + " * {khoảng cách rơi} mỗi cấp")
+        );
     }
 
     @Override

@@ -18,7 +18,7 @@ public final class GateDisplay {
     }
 
     public static Component itemProgress(String item, int amount, int current) {
-        return Component.text(amount + "x ", NamedTextColor.YELLOW)
+        return Component.text(amount + " ", NamedTextColor.YELLOW)
                 .append(itemName(item))
                 .append(Component.text(" (", NamedTextColor.GRAY))
                 .append(Component.text(current, current >= amount ? NamedTextColor.GREEN : NamedTextColor.RED))

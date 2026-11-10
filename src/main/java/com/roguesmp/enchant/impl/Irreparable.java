@@ -31,8 +31,11 @@ public class Irreparable implements SmpEnchant {
     @Override public @NotNull String getSimpleName() { return "Không thể sửa"; }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Vật phẩm mang lời nguyền này không thể được sửa chữa bằng bất kỳ cách nào";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Vật phẩm mang lời nguyền này không thể"),
+                Component.text("được sửa chữa bằng bất kỳ cách nào")
+        );
     }
 
     @Override

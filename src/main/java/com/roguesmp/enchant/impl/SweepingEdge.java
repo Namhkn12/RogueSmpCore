@@ -23,8 +23,11 @@ public class SweepingEdge implements SmpEnchant {
     @Override public @NotNull String getSimpleName() { return "Quét cạnh"; }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng chỉ số " + Attributes.SWEEPING_DAMAGE_RATIO.getAttribute().getSimpleName() + " thêm 0.1 mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Tăng chỉ số " + Attributes.SWEEPING_DAMAGE_RATIO.getAttribute().getSimpleName()),
+                Component.text("thêm 0.1 mỗi cấp")
+        );
     }
 
     @Override

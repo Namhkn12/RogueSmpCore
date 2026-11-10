@@ -47,8 +47,12 @@ public class StaffDamageBase implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Sát thương gốc của tia phép từ trượng (chữ xanh lam trên trượng), tất cả các buff phép sẽ dựa vào con số này";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Sát thương gốc của tia phép từ trượng"),
+                Component.text("(chữ xanh lam trên trượng), tất cả các buff phép"),
+                Component.text("sẽ dựa vào con số này")
+        );
     }
 
     @Override

@@ -62,7 +62,7 @@ public class SmpEnchantWikiGui extends BaseGui {
 
             // Description
             lore.add(Utils.text("Hiệu ứng:", NamedTextColor.YELLOW));
-            lore.add(Utils.text(" " + smpEnch.getSimpleDescription(), NamedTextColor.GRAY));
+            lore.addAll(Utils.text(smpEnch.getDescription(0), NamedTextColor.GRAY));
             lore.add(Component.empty());
 
             // Active Slots Information

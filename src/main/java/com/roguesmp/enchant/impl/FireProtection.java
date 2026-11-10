@@ -29,8 +29,11 @@ public class FireProtection implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Nhận 4 phòng ngự mỗi cấp khi chịu sát thương lửa và giảm thời gian cháy 10% mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Nhận 4 phòng ngự mỗi cấp khi chịu sát thương lửa"),
+                Component.text("và giảm thời gian cháy 10% mỗi cấp")
+        );
     }
 
     @Override

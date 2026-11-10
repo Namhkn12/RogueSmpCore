@@ -47,8 +47,11 @@ public class BreakStrength implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Nếu sức đào thấp hơn độ cứng của khối thì sẽ không đào được";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Nếu sức đào thấp hơn độ cứng của khối"),
+                Component.text("thì sẽ không đào được")
+        );
     }
 
     @Override

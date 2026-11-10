@@ -7,6 +7,8 @@ import com.roguesmp.player.PlayerManager;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.player.ability.AbilityInfo;
 import com.roguesmp.player.classes.PlayerClass;
+import com.roguesmp.quest.QuestManager;
+import org.bukkit.entity.Player;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -74,6 +76,7 @@ public class ClassSelectionGui extends BaseGui {
                 event.setCancelled(true);
                 if (!isCurrent) {
                     smpPlayer.setPlayerClass(playerClass);
+                    if (event.getWhoClicked() instanceof Player player) QuestManager.getInstance().refresh(player);
                     smpPlayer.sendMessage(Component.text("Bạn đã chọn lớp nhân vật: ", NamedTextColor.GREEN)
                             .append(playerClass.getFormattedDisplayName()));
                     event.getWhoClicked().playSound(Sound.sound(SoundEventKeys.ENTITY_PLAYER_LEVELUP, Sound.Source.PLAYER, 0.8f, 1.2f));

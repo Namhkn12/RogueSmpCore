@@ -67,8 +67,8 @@ public class BurningTime implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng thời gian cháy thêm x %";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng thời gian cháy thêm x %"));
     }
 
     @Override

@@ -19,11 +19,17 @@ public interface Cost {
 
     Component getDisplay(SmpPlayer player);
 
+    Component getAmountDisplay();
+
     default void takeFromInventory(Inventory inventory) {
 
     }
 
     default void takeFromPlayer(SmpPlayer player) {
+
+    }
+
+    default void refund(SmpPlayer player) {
 
     }
 }

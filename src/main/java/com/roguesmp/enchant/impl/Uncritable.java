@@ -44,8 +44,8 @@ public class Uncritable implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Vũ khí sẽ không thể gây sát thương chí mạng";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Vũ khí sẽ không thể gây sát thương chí mạng"));
     }
 
     @Override

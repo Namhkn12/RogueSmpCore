@@ -1,143 +1,81 @@
 package com.roguesmp.utils.modification;
 
-import com.roguesmp.utils.ItemRef;
-import org.bukkit.inventory.ItemStack;
-import com.roguesmp.item.component.ItemComponentKeys;
-import com.roguesmp.enchant.Enchants;
-import com.roguesmp.enchant.Infusion;
+import com.roguesmp.enchant.infusion.InfusionDefinition;
+import com.roguesmp.enchant.infusion.InfusionLevel;
+import com.roguesmp.enchant.infusion.InfusionType;
+import com.roguesmp.gate.cost.CostPayment;
 import com.roguesmp.item.SmpItem;
+import com.roguesmp.item.component.ItemComponentKeys;
 import com.roguesmp.item.component.impl.EnchantComponent;
-import com.roguesmp.utils.PlayerUtils;
+import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.utils.SmpItemUtils;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class InfusionUtil {
 
-    public static int getLevel(SmpItem smpItem, Infusion infusion) {
+    public static int getLevel(SmpItem smpItem, InfusionDefinition infusion) {
         EnchantComponent enchantComponent = smpItem.getComponent(ItemComponentKeys.ENCHANT);
         if (enchantComponent == null) return 0;
-        return enchantComponent.getTotalLevel(infusion.getSmpEnchant());
+        return enchantComponent.getPersistentLevel(infusion.enchant());
     }
 
-    public static @Nullable Infusion getActiveInfusion(SmpItem smpItem) {
+    public static @Nullable InfusionDefinition getActiveInfusion(SmpItem smpItem, InfusionType type) {
         EnchantComponent enchantComponent = smpItem.getComponent(ItemComponentKeys.ENCHANT);
         if (enchantComponent == null) return null;
 
-        for (Infusion inf : Infusion.values()) {
-            if (enchantComponent.getTotalLevel(inf.getSmpEnchant()) > 0) {
-                return inf;
-            }
+        for (InfusionDefinition infusion : InfusionDefinition.sorted(type)) {
+            if (enchantComponent.getPersistentLevel(infusion.enchant()) > 0) return infusion;
         }
         return null;
-    }
-
-    public static boolean hasAnyInfusion(SmpItem smpItem) {
-        return getActiveInfusion(smpItem) != null;
     }
 
     public static boolean isEnchantable(SmpItem smpItem) {
         return smpItem.getComponent(ItemComponentKeys.ENCHANT) != null;
     }
 
-    private static int getExpCostForLevel(Infusion infusion, int level) {
-        if (level <= 0) return 0;
-        int multiplier = (int) Math.pow(2, level - 1);
-        return PlayerUtils.getExpFromLevel(infusion.getBaseExpLevelCost() * multiplier);
+    public static @Nullable InfusionLevel getNextLevel(SmpItem smpItem, InfusionDefinition infusion) {
+        return infusion.level(getLevel(smpItem, infusion) + 1);
     }
 
-    private static int getMaterialCostForLevel(Infusion infusion, int level) {
-        if (level <= 0) return 0;
-        int multiplier = (int) Math.pow(2, level - 1);
-        return infusion.getBaseMaterialCost() * multiplier;
+    public static @Nullable InfusionLevel getCurrentLevel(SmpItem smpItem, InfusionDefinition infusion) {
+        return infusion.level(Math.min(getLevel(smpItem, infusion), infusion.maxLevel()));
     }
 
-    public static int getUpgradeExpCost(SmpItem smpItem, Infusion infusion) {
-        return getExpCostForLevel(infusion, getLevel(smpItem, infusion) + 1);
+    public static Result upgrade(SmpPlayer player, SmpItem smpItem, InfusionDefinition infusion) {
+        if (!isEnchantable(smpItem)) return Result.NOT_ENCHANTABLE;
+
+        InfusionDefinition active = getActiveInfusion(smpItem, infusion.type());
+        if (active != null && active != infusion) return Result.OTHER_INFUSION_ACTIVE;
+
+        InfusionLevel next = getNextLevel(smpItem, infusion);
+        if (next == null) return Result.MAX_LEVEL;
+
+        if (!CostPayment.pay(player, next.costs())) return Result.CANNOT_AFFORD;
+        if (ThreadLocalRandom.current().nextDouble() >= next.successChance()) return Result.FAILED_ROLL;
+
+        SmpItemUtils.addEnchant(smpItem, Map.of(infusion.enchant(), 1));
+        return Result.SUCCESS;
     }
 
-    public static int getUpgradeMaterialCost(SmpItem smpItem, Infusion infusion) {
-        return getMaterialCostForLevel(infusion, getLevel(smpItem, infusion) + 1);
+    public static Result downgrade(SmpPlayer player, SmpItem smpItem, InfusionDefinition infusion) {
+        InfusionLevel current = getCurrentLevel(smpItem, infusion);
+        if (current == null) return Result.NO_ACTIVE_INFUSION;
+
+        SmpItemUtils.addEnchant(smpItem, Map.of(infusion.enchant(), -1));
+        CostPayment.refund(player, current.costs());
+        return Result.SUCCESS;
     }
 
-    public static int getDowngradeExpRefund(SmpItem smpItem, Infusion infusion) {
-        return getExpCostForLevel(infusion, getLevel(smpItem, infusion) - 1) / 2;
-    }
-
-    public static int getDowngradeMaterialRefund(SmpItem smpItem, Infusion infusion) {
-        return getMaterialCostForLevel(infusion, getLevel(smpItem, infusion) - 1);
-    }
-
-    // =========================================================================
-    // VALIDATION CHECKERS
-    // =========================================================================
-
-    public static boolean canAffordUpgrade(Player player, SmpItem smpItem, Infusion infusion) {
-        boolean hasXp = PlayerUtils.getExp(player) >= getUpgradeExpCost(smpItem, infusion);
-        boolean hasMaterials = PlayerUtils.countItemsInInventory(player, infusion.getCostItemId()) >= getUpgradeMaterialCost(smpItem, infusion);
-        return hasXp && hasMaterials;
-    }
-
-    // =========================================================================
-    // TRANSACTION MUTATIONS (UPGRADE / DOWNGRADE)
-    // =========================================================================
-
-    public static OperationStatus executeUpgrade(Player player, SmpItem smpItem, Infusion infusion, int maxLevelCap) {
-        if (!isEnchantable(smpItem)) return OperationStatus.ERROR_NOT_ENCHANTABLE;
-
-        int currentLevel = getLevel(smpItem, infusion);
-        if (currentLevel >= maxLevelCap) return OperationStatus.ERROR_MAX_LEVEL;
-
-        Infusion active = getActiveInfusion(smpItem);
-        if (active != null && active != infusion) return OperationStatus.ERROR_OTHER_INFUSION_ACTIVE;
-
-        int expCost = getUpgradeExpCost(smpItem, infusion);
-        int materialCost = getUpgradeMaterialCost(smpItem, infusion);
-
-        if (PlayerUtils.getExp(player) < expCost) return OperationStatus.ERROR_INSUFFICIENT_EXP;
-        if (PlayerUtils.countItemsInInventory(player, infusion.getCostItemId()) < materialCost) {
-            return OperationStatus.ERROR_INSUFFICIENT_MATERIALS;
-        }
-
-        // Charge
-        PlayerUtils.changeExp(player, -expCost);
-        PlayerUtils.removeItem(player, infusion.getCostItemId(), materialCost);
-
-        // Mutate
-        Map<Enchants, Integer> modification = Map.of(infusion.getSmpEnchant(), 1);
-        SmpItemUtils.addEnchant(smpItem, modification);
-
-        return OperationStatus.SUCCESS;
-    }
-
-    public static OperationStatus executeDowngrade(Player player, SmpItem smpItem, Infusion infusion) {
-        int currentLevel = getLevel(smpItem, infusion);
-        if (currentLevel <= 0) return OperationStatus.ERROR_NO_ACTIVE_INFUSION;
-
-        int expRefund = getDowngradeExpRefund(smpItem, infusion);
-        int materialRefund = getDowngradeMaterialRefund(smpItem, infusion);
-
-        // Refund
-        PlayerUtils.changeExp(player, expRefund);
-        ItemStack refund = materialRefund > 0 ? ItemRef.toItemStack(infusion.getCostItemId(), materialRefund) : null;
-        if (refund != null) PlayerUtils.giveItem(player, refund);
-
-        // Mutate (reduce level by 1)
-        Map<Enchants, Integer> modification = Map.of(infusion.getSmpEnchant(), -1);
-        SmpItemUtils.addEnchant(smpItem, modification);
-
-        return OperationStatus.SUCCESS;
-    }
-
-    public enum OperationStatus {
+    public enum Result {
         SUCCESS,
-        ERROR_NOT_ENCHANTABLE,
-        ERROR_OTHER_INFUSION_ACTIVE,
-        ERROR_INSUFFICIENT_EXP,
-        ERROR_INSUFFICIENT_MATERIALS,
-        ERROR_MAX_LEVEL,
-        ERROR_NO_ACTIVE_INFUSION
+        FAILED_ROLL,
+        NOT_ENCHANTABLE,
+        OTHER_INFUSION_ACTIVE,
+        CANNOT_AFFORD,
+        MAX_LEVEL,
+        NO_ACTIVE_INFUSION
     }
 }

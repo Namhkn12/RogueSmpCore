@@ -44,8 +44,8 @@ public class Regeneration implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Mỗi 3 giây hồi sqrt(cấp) máu, chia ra làm 4 khoảng";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Mỗi 3 giây hồi sqrt(cấp) máu, chia ra làm 4 khoảng"));
     }
 
     @Override

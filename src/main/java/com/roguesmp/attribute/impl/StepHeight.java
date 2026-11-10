@@ -46,8 +46,12 @@ public class StepHeight implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng độ cao bước chân thêm x khối (Khi x = 0.5, người chơi có thể bước lên khối mà không cần nhảy";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Tăng độ cao bước chân thêm x khối"),
+                Component.text("(Khi x = 0.5, người chơi có thể bước lên khối"),
+                Component.text("mà không cần nhảy)")
+        );
     }
 
     @Override

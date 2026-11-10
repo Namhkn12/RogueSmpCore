@@ -2,6 +2,9 @@ package com.roguesmp.quest.objective;
 
 import com.roguesmp.quest.Quest;
 import com.roguesmp.codec.Codec;
+import com.roguesmp.event.DungeonClearEvent;
+import com.roguesmp.event.HandMachineProcessEvent;
+import com.roguesmp.event.SmpCraftEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.Registries;
 import net.kyori.adventure.text.Component;
@@ -38,6 +41,13 @@ public interface QuestObjective {
     List<Component> getDisplay(SmpPlayer smpPlayer);
 
     boolean isCompleted(ObjectiveProgress progress);
+
+    /**
+     * How far along the objective is, from 0 to 1.
+     */
+    default float completion(ObjectiveProgress progress) {
+        return isCompleted(progress) ? 1f : 0f;
+    }
 
     String getTypeId();
 
@@ -80,6 +90,36 @@ public interface QuestObjective {
      * @return whether the progress changed
      */
     default boolean onSubmitItems(SmpPlayer smpPlayer, ObjectiveProgress progress) {
+        return false;
+    }
+
+    /**
+     * @return whether the progress changed
+     */
+    default boolean onCraft(SmpCraftEvent event, ObjectiveProgress progress) {
+        return false;
+    }
+
+    /**
+     * @return whether the progress changed
+     */
+    default boolean onHandMachineProcess(HandMachineProcessEvent event, ObjectiveProgress progress) {
+        return false;
+    }
+
+    /**
+     * Re-checks the player's current state, for objectives that complete on a state rather than an action.
+     *
+     * @return whether the progress changed
+     */
+    default boolean onRefresh(SmpPlayer smpPlayer, ObjectiveProgress progress) {
+        return false;
+    }
+
+    /**
+     * @return whether the progress changed
+     */
+    default boolean onDungeonClear(DungeonClearEvent event, ObjectiveProgress progress) {
         return false;
     }
 

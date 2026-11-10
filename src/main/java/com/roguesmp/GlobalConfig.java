@@ -8,8 +8,13 @@ import com.roguesmp.utils.Utils;
 import org.jetbrains.annotations.Blocking;
 
 import java.io.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 public class GlobalConfig {
+
+    public static final String ALL_WORLD_BOSSES = "*";
 
     private static final String DEFAULT_MINESKIN_API_KEY = "mineSkinApiKey";
     private static final String DEFAULT_RESOURCE_PACK_URL = "https://cdn.minepack.fr/pack/cd5754e4-701d-4037-a815-935b1a2f1290";
@@ -20,6 +25,7 @@ public class GlobalConfig {
             Codec.STRING.optionalFieldOf("resourcePackUrl", DEFAULT_RESOURCE_PACK_URL).forGetter(GlobalConfig::getResourcePackUrl),
             Codec.STRING.optionalFieldOf("resourcePackHash", DEFAULT_RESOURCE_PACK_HASH).forGetter(GlobalConfig::getResourcePackHash),
             Codec.LONG.optionalFieldOf("lastDailyReset", 0L).forGetter(GlobalConfig::getLastDailyReset),
+            Codec.listOf(Codec.STRING).optionalFieldOf("disabledWorldBosses", List.of()).forGetter(config -> List.copyOf(config.disabledWorldBosses)),
             GlobalConfig::new
     );
 
@@ -27,12 +33,15 @@ public class GlobalConfig {
     private final String resourcePackUrl;
     private final String resourcePackHash;
     private long lastDailyReset;
+    private final Set<String> disabledWorldBosses;
 
-    public GlobalConfig(String mineskinApiKey, String resourcePackUrl, String resourcePackHash, long lastDailyReset) {
+    public GlobalConfig(String mineskinApiKey, String resourcePackUrl, String resourcePackHash, long lastDailyReset,
+                        List<String> disabledWorldBosses) {
         this.mineskinApiKey = mineskinApiKey;
         this.resourcePackUrl = resourcePackUrl;
         this.resourcePackHash = resourcePackHash;
         this.lastDailyReset = lastDailyReset;
+        this.disabledWorldBosses = new LinkedHashSet<>(disabledWorldBosses);
     }
 
     private static GlobalConfig defaults() {
@@ -105,5 +114,14 @@ public class GlobalConfig {
 
     public String getResourcePackUrl() {
         return resourcePackUrl;
+    }
+
+    public boolean isWorldBossDisabled(String bossId) {
+        return disabledWorldBosses.contains(ALL_WORLD_BOSSES) || disabledWorldBosses.contains(bossId);
+    }
+
+    public void setWorldBossDisabled(String bossId, boolean disabled) {
+        if (disabled) disabledWorldBosses.add(bossId);
+        else disabledWorldBosses.remove(bossId);
     }
 }

@@ -58,8 +58,8 @@ public class SpeedFlat implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng tốc độ di chuyển thêm x";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng tốc độ di chuyển thêm x"));
     }
 
     @Override

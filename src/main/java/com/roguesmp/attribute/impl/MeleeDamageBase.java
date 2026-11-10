@@ -52,8 +52,11 @@ public class MeleeDamageBase implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Sát thương cận chiến gốc (chữ xanh lá trên vũ khí), tất cả các buff sẽ dựa vào con số này";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Sát thương cận chiến gốc (chữ xanh lá trên vũ khí),"),
+                Component.text("tất cả các buff sẽ dựa vào con số này")
+        );
     }
 
     @Override

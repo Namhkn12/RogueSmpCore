@@ -60,8 +60,11 @@ public class ProjectileDamageBase implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Sát thương tầm xa gốc (Chữ xanh trên vũ khí), tất cả buff sẽ dựa vào con số này";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Sát thương tầm xa gốc (Chữ xanh trên vũ khí),"),
+                Component.text("tất cả buff sẽ dựa vào con số này")
+        );
     }
 
     @Override

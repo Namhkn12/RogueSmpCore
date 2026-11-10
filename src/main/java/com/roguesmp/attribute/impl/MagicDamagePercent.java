@@ -43,8 +43,8 @@ public class MagicDamagePercent implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng sát thương phép thêm x %";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng sát thương phép thêm x %"));
     }
 
     @Override

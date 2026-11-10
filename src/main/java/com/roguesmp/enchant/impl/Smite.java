@@ -27,8 +27,11 @@ public class Smite implements SmpEnchant {
     @Override public @NotNull String getSimpleName() { return "Hại thây ma"; }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Gây thêm 2 sát thương gốc mỗi cấp khi tấn công kẻ địch dạng thây ma";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Gây thêm 2 sát thương gốc mỗi cấp khi tấn công"),
+                Component.text("kẻ địch dạng thây ma")
+        );
     }
 
     @Override

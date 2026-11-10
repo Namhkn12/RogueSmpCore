@@ -55,8 +55,12 @@ public class Smash implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Khi tung ra đòn cận chiến Chí Mạng, gây thêm 10% sát thương mỗi cấp trong bán kĩnh 2 khối quanh mục tiêu";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Khi tung ra đòn cận chiến Chí Mạng, gây thêm"),
+                Component.text("10% sát thương mỗi cấp trong bán kính 2 khối"),
+                Component.text("quanh mục tiêu")
+        );
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.roguesmp.block.event.SmpBlockBreakEvent;
 import com.roguesmp.block.persistence.StateSection;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.crafting.CraftingManager;
+import com.roguesmp.event.HandMachineProcessEvent;
 import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -109,13 +110,15 @@ public class HandCrusherBlock extends SmpBlock {
             return;
         }
 
-        for (StoredItem result : recipe.roll()) drop(result);
+        List<StoredItem> results = recipe.roll();
+        for (StoredItem result : results) drop(result);
         held = null;
         progress = 0;
         markDirty();
         syncHeldDisplay();
         center.getWorld().playSound(center, FINISH_SOUND, 1f, 0.9f);
         player.sendActionBar(Utils.text(DONE_MESSAGE, NamedTextColor.GREEN));
+        new HandMachineProcessEvent(player, getId(), results).callEvent();
     }
 
     private void takeBack(Player player) {

@@ -45,8 +45,12 @@ public class WaterMovementEfficiency implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng hiệu suất di chuyển dưới nước thêm x (Khi hiệu suất bằng 1, di chuyển cảm giác như trên cạn)";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Tăng hiệu suất di chuyển dưới nước thêm x"),
+                Component.text("(Khi hiệu suất bằng 1, di chuyển cảm giác"),
+                Component.text("như trên cạn)")
+        );
     }
 
     @Override

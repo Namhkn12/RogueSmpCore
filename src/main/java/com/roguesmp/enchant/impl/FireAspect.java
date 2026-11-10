@@ -30,8 +30,8 @@ public class FireAspect implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Là phù phép vanilla <:";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Là phù phép vanilla <:"));
     }
 
     @Override

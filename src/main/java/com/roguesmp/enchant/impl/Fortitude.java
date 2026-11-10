@@ -30,8 +30,8 @@ public class Fortitude implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Nhận 0.5 phòng ngự mỗi cấp";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Nhận 0.5 phòng ngự mỗi cấp"));
     }
 
     @Override

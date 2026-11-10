@@ -42,8 +42,8 @@ public class Lifesteal implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Đòn đánh cận chiến full lực sẽ hồi sqrt(cấp) máu";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(Component.text("Đòn đánh cận chiến full lực sẽ hồi sqrt(cấp) máu"));
     }
 
     @Override

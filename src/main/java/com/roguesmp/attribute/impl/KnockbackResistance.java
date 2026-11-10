@@ -45,8 +45,11 @@ public class KnockbackResistance implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng kháng đẩy lùi thêm x. Khi đạt 10 thì sẽ không bị đẩy lùi nữa";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Tăng kháng đẩy lùi thêm x."),
+                Component.text("Khi đạt 10 thì sẽ không bị đẩy lùi nữa")
+        );
     }
 
     @Override

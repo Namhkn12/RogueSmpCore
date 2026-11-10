@@ -1,5 +1,6 @@
 package com.roguesmp.gui.itemcreator;
 
+import net.kyori.adventure.text.JoinConfiguration;
 import com.roguesmp.attribute.Attributes;
 import com.roguesmp.constant.EquipSlot;
 import com.roguesmp.item.component.ItemComponentKeys;
@@ -18,7 +19,7 @@ import java.util.Map;
 /**
  * Dialog-based sub-editor of {@link ItemCreatorGui} for a single {@link EquipAttributeComponent}'s
  * (slot, attribute -> value) map. A {@code multiAction()} with one button per {@link Attributes}
- * constant (its raw enum name as the label, {@link com.roguesmp.attribute.SmpAttribute#getSimpleDescription()}
+ * constant (its raw enum name as the label, {@link com.roguesmp.attribute.SmpAttribute#getDescription()}
  * as the hover tooltip); each entry commits straight into the parent's draft on "Lưu"/"Xoá".
  * <p>
  * An <em>empty</em> {@code EquipAttributeComponent} is meaningful on its own - per the item docs,
@@ -61,7 +62,7 @@ public class AttributeEditorGui {
             double current = values.getOrDefault(attribute, 0d);
             boolean valuePresent = !Utils.isEffectiveZero(current);
             multi.addButton(Component.text(attribute.name(), valuePresent ? NamedTextColor.GREEN : NamedTextColor.GRAY),
-                    Utils.text(attribute.getAttribute().getSimpleDescription(), NamedTextColor.GRAY),
+                    Component.join(JoinConfiguration.newlines(), Utils.text(attribute.getAttribute().getDescription(), NamedTextColor.GRAY)),
                     (response, audience) -> Utils.runLater(() -> player.showDialog(buildValueDialog(player, attribute))));
         }
 

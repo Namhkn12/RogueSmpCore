@@ -28,8 +28,11 @@ public class BlockReflect implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Phản lại x% sát thương đã đỡ được về phía kẻ tấn công.";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Phản lại x% sát thương đã đỡ được"),
+                Component.text("về phía kẻ tấn công.")
+        );
     }
 
     @Override

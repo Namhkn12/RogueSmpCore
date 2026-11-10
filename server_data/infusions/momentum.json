@@ -1,0 +1,49 @@
+{
+  "enchant": "momentum",
+  "type": "advanced",
+  "order": 1,
+  "levels": [
+    {
+      "costs": [
+        {
+          "type": "exp",
+          "level": 40
+        },
+        {
+          "type": "item",
+          "item": "copper_ingot_currency",
+          "amount": 10
+        }
+      ],
+      "success_chance": 1.0
+    },
+    {
+      "costs": [
+        {
+          "type": "exp",
+          "level": 80
+        },
+        {
+          "type": "item",
+          "item": "copper_ingot_currency",
+          "amount": 20
+        }
+      ],
+      "success_chance": 0.8
+    },
+    {
+      "costs": [
+        {
+          "type": "exp",
+          "level": 160
+        },
+        {
+          "type": "item",
+          "item": "copper_ingot_currency",
+          "amount": 40
+        }
+      ],
+      "success_chance": 0.6
+    }
+  ]
+}

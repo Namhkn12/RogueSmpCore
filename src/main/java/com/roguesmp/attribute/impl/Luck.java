@@ -45,8 +45,8 @@ public class Luck implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng may mắn thêm x";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng may mắn thêm x"));
     }
 
     @Override

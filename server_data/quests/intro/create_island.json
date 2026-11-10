@@ -1,0 +1,18 @@
+{
+  "id": "intro/create_island",
+  "name": "<gold>Khởi đầu: Hòn đảo mới</gold>",
+  "icon": "grass_block",
+  "description": [
+    "<gray>Dùng <yellow>/island</yellow> để tạo đảo của riêng bạn,",
+    "<gray>hoặc nhận lời mời vào đảo của bạn bè."
+  ],
+  "autoPin": true,
+  "autoClaimRewards": true,
+  "objectives": {
+    "island": { "type": "has_island" }
+  },
+  "rewards": [
+    { "type": "money", "amount": 50 },
+    { "type": "start_quest", "quest": "intro/intro_hand_crusher" }
+  ]
+}

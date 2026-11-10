@@ -45,8 +45,11 @@ public class SneakingSpeed implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng tốc độ bò thêm x (Tối đa 1, khi này tốc độ bò bằng tốc độ đi bộ)";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Tăng tốc độ bò thêm x"),
+                Component.text("(Tối đa 1, khi này tốc độ bò bằng tốc độ đi bộ)")
+        );
     }
 
     @Override

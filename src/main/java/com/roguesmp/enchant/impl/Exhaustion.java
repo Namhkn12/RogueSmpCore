@@ -50,8 +50,12 @@ public class Exhaustion implements SmpEnchant {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Khi tấn công sẽ tiêu hao 0.5 điểm đói mỗi cấp, nếu không còn điểm đói sẽ không thể gây sát thương nữa";
+    public @NotNull List<Component> getDescription(int level) {
+        return List.of(
+                Component.text("Khi tấn công sẽ tiêu hao 0.5 điểm đói mỗi cấp."),
+                Component.text("Nếu không còn điểm đói sẽ không thể"),
+                Component.text("gây sát thương nữa")
+        );
     }
 
     @Override

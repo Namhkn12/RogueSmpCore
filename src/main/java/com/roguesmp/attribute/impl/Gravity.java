@@ -55,8 +55,8 @@ public class Gravity implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng gia tốc trọng lực thêm x %";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng gia tốc trọng lực thêm x %"));
     }
 
     @Override

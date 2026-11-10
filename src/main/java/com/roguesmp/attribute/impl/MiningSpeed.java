@@ -44,8 +44,11 @@ public class MiningSpeed implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng tốc độ đào các khối (chỉ hoạt động với khối custom)";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Tăng tốc độ đào các khối"),
+                Component.text("(chỉ hoạt động với khối custom)")
+        );
     }
 
     @Override

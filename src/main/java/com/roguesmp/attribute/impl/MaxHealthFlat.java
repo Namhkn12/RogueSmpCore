@@ -45,8 +45,8 @@ public class MaxHealthFlat implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng máu tối đa thêm x";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng máu tối đa thêm x"));
     }
 
     @Override

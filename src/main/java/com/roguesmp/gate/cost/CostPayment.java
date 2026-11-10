@@ -27,4 +27,8 @@ public final class CostPayment {
         costs.forEach(cost -> cost.takeFromPlayer(player));
         return true;
     }
+
+    public static void refund(SmpPlayer player, Collection<? extends Cost> costs) {
+        costs.forEach(cost -> cost.refund(player));
+    }
 }

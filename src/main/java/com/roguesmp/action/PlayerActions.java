@@ -7,7 +7,6 @@ import com.roguesmp.action.impl.RunCommandAction;
 import com.roguesmp.action.impl.TeleportAction;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.registry.Registries;
-
 public class PlayerActions {
 
     public static final Codec<RunCommandAction> RUN_COMMAND = register(RunCommandAction.TYPE_KEY, RunCommandAction.CODEC);
@@ -15,7 +14,6 @@ public class PlayerActions {
     public static final Codec<TeleportAction> TELEPORT = register(TeleportAction.TYPE_KEY, TeleportAction.CODEC);
     public static final Codec<EntityZapperAction> ENTITY_ZAPPER = register(EntityZapperAction.TYPE_KEY, EntityZapperAction.CODEC);
     public static final Codec<ClearDeathCurseAction> CLEAR_DEATH_CURSE = register(ClearDeathCurseAction.TYPE_KEY, ClearDeathCurseAction.CODEC);
-
     public static void loadClass() {
 
     }

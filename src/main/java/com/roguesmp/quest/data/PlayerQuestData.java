@@ -27,6 +27,7 @@ public class PlayerQuestData extends QuestLog {
             Codec.LONG.optionalFieldOf("exp", 0L).forGetter(PlayerQuestData::getExp),
             Codec.LONG.optionalFieldOf("expUpdatedAt", 0L).forGetter(PlayerQuestData::getExpUpdatedAt),
             Codec.listOf(Codec.INT).optionalFieldOf("claimedRewards", () -> null).forGetter(data -> data.claimedRewards == null ? null : List.copyOf(data.claimedRewards)),
+            Codec.STRING.optionalFieldOf("pinnedQuest", () -> null).forGetter(PlayerQuestData::getPinnedQuest),
             PlayerQuestData::new
     );
 
@@ -36,11 +37,12 @@ public class PlayerQuestData extends QuestLog {
     private long exp;
     private long expUpdatedAt;
     private @Nullable Set<Integer> claimedRewards = new HashSet<>();
+    private @Nullable String pinnedQuest;
 
     /**
      * Reconstruction constructor used when decoding from storage (see {@link #CODEC}).
      */
-    public PlayerQuestData(UUID uuid, Map<String, QuestProgress> progresses, PlayerBoard board, long exp, long expUpdatedAt, @Nullable List<Integer> claimedRewards) {
+    public PlayerQuestData(UUID uuid, Map<String, QuestProgress> progresses, PlayerBoard board, long exp, long expUpdatedAt, @Nullable List<Integer> claimedRewards, @Nullable String pinnedQuest) {
         this.uuid = uuid;
         this.holder = new PlayerHolder(uuid);
         this.progresses.putAll(progresses);
@@ -48,6 +50,7 @@ public class PlayerQuestData extends QuestLog {
         this.exp = exp;
         this.expUpdatedAt = expUpdatedAt;
         this.claimedRewards = claimedRewards == null ? null : new HashSet<>(claimedRewards);
+        this.pinnedQuest = pinnedQuest;
         this.dirty = false;
     }
 
@@ -59,6 +62,7 @@ public class PlayerQuestData extends QuestLog {
         this.exp = toClone.exp;
         this.expUpdatedAt = toClone.expUpdatedAt;
         this.claimedRewards = toClone.claimedRewards == null ? null : new HashSet<>(toClone.claimedRewards);
+        this.pinnedQuest = toClone.pinnedQuest;
     }
 
     /**
@@ -110,6 +114,15 @@ public class PlayerQuestData extends QuestLog {
         this.uuid = uuid;
         this.holder = new PlayerHolder(uuid);
         this.board = new PlayerBoard();
+    }
+
+    public @Nullable String getPinnedQuest() {
+        return pinnedQuest;
+    }
+
+    public void setPinnedQuest(@Nullable String pinnedQuest) {
+        this.pinnedQuest = pinnedQuest;
+        dirty = true;
     }
 
     public PlayerBoard getBoard() {

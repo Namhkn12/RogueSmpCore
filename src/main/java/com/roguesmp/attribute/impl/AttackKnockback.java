@@ -45,8 +45,11 @@ public class AttackKnockback implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng khoảng cách mục tiêu bị đẩy lùi khi tấn công thêm x khối";
+    public @NotNull List<Component> getDescription() {
+        return List.of(
+                Component.text("Tăng khoảng cách mục tiêu bị đẩy lùi"),
+                Component.text("khi tấn công thêm x khối")
+        );
     }
 
     @Override

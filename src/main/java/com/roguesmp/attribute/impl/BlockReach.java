@@ -51,8 +51,8 @@ public class BlockReach implements SmpAttribute {
     }
 
     @Override
-    public @NotNull String getSimpleDescription() {
-        return "Tăng tầm với khi đặt/phá khối thêm x khối";
+    public @NotNull List<Component> getDescription() {
+        return List.of(Component.text("Tăng tầm với khi đặt/phá khối thêm x khối"));
     }
 
     @Override

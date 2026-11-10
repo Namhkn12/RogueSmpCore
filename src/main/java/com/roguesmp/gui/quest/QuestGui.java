@@ -52,7 +52,10 @@ public class QuestGui extends BaseGui {
     private final Player player;
     private final PlayerQuestData questData;
     private final QuestManager questManager;
+    private static final int QUESTS_PER_PAGE = 28;
+
     private QuestFilter currentFilter = QuestFilter.ALL; // Đặt mặc định là hiển thị Tất cả
+    private int page;
 
     public QuestGui(Player player, PlayerQuestData questData) {
         super(Component.text("Danh sách nhiệm vụ"), 6);
@@ -89,7 +92,11 @@ public class QuestGui extends BaseGui {
                 })
                 .toList();
 
-        int currentQuestIndex = 0;
+        int pageCount = Math.max(1, (filteredProgress.size() + QUESTS_PER_PAGE - 1) / QUESTS_PER_PAGE);
+        page = Math.min(page, pageCount - 1);
+        setupPageButtons(pageCount);
+
+        int currentQuestIndex = page * QUESTS_PER_PAGE;
         SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
 
         for (int r = 1; r <= 4; r++) {
@@ -100,7 +107,8 @@ public class QuestGui extends BaseGui {
                 Quest quest = qp.getQuest();
                 boolean completed = qp.isCompleted();
 
-                String statusPrefix = completed ? "<gray><st>" : "<gold>";
+                boolean pinned = !completed && quest.getId().equals(questData.getPinnedQuest());
+                String statusPrefix = completed ? "<gray><st>" : pinned ? "<gold>📌 " : "<gold>";
                 ItemStack questItem = completed ? ItemStack.of(Material.MINECART) : quest.createIcon();
                 questItem.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Set.of(DataComponentTypes.ATTRIBUTE_MODIFIERS)).build());
                 questItem.setData(DataComponentTypes.ITEM_NAME,
@@ -143,15 +151,21 @@ public class QuestGui extends BaseGui {
                 }
 
                 boolean canSubmit = !completed && quest.hasObjective(SubmitItemObjective.class);
-                if (canSubmit) {
-                    loreLines.add(Component.empty());
-                    loreLines.add(Utils.fromString("<!i><yellow>▶ Click để nộp vật phẩm"));
-                }
+                if (!completed) loreLines.add(Component.empty());
+                if (canSubmit) loreLines.add(Utils.fromString("<!i><yellow>▶ Click trái để nộp vật phẩm"));
+                if (!completed) loreLines.add(Utils.fromString(pinned ? "<!i><gold>📌 Đã ghim <gray>- Click phải để bỏ ghim" : "<!i><yellow>▶ Click phải để ghim lên Tab"));
 
                 questItem.setData(DataComponentTypes.LORE, ItemLore.lore(loreLines));
 
                 addButton(r, c, questItem, event -> {
                     event.setCancelled(true);
+                    if (event.isRightClick()) {
+                        if (completed) return;
+                        boolean nowPinned = questManager.togglePin(player, quest);
+                        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, nowPinned ? 1.4f : 0.8f);
+                        setup();
+                        return;
+                    }
                     if (!canSubmit) return;
                     if (questManager.submitItems(player, quest)) {
                         player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
@@ -189,6 +203,7 @@ public class QuestGui extends BaseGui {
         addButton(5, 7, filterButton, event -> {
             event.setCancelled(true);
             this.currentFilter = this.currentFilter.next();
+            this.page = 0;
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.2f);
             setup();
         });
@@ -211,6 +226,28 @@ public class QuestGui extends BaseGui {
             event.setCancelled(true);
             event.getWhoClicked().closeInventory();
         });
+    }
+
+    private void setupPageButtons(int pageCount) {
+        if (page > 0) {
+            ItemStack previous = ItemStack.of(Material.ARROW);
+            previous.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang trước", NamedTextColor.YELLOW));
+            previous.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(Utils.fromString("<!i><gray>Trang " + page + "/" + pageCount))));
+            addButton(5, 3, previous, event -> turnPage(event, -1));
+        }
+        if (page < pageCount - 1) {
+            ItemStack next = ItemStack.of(Material.ARROW);
+            next.setData(DataComponentTypes.ITEM_NAME, Component.text("Trang sau", NamedTextColor.YELLOW));
+            next.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(Utils.fromString("<!i><gray>Trang " + (page + 2) + "/" + pageCount))));
+            addButton(5, 5, next, event -> turnPage(event, 1));
+        }
+    }
+
+    private void turnPage(InventoryClickEvent event, int delta) {
+        event.setCancelled(true);
+        page += delta;
+        player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.0f, 1.0f);
+        setup();
     }
 
     @Override
