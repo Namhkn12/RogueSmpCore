@@ -3,6 +3,7 @@ package com.roguesmp.block.impl.sieve;
 import com.roguesmp.crafting.recipe.CraftingRecipes;
 import com.roguesmp.crafting.recipe.SieveRecipe;
 import com.roguesmp.block.BlockProperties;
+import com.roguesmp.block.ClickShield;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.StoredItem;
 import com.roguesmp.block.data.HandSieveData;
@@ -46,6 +47,7 @@ public class HandSieveBlock extends SmpBlock {
     private @Nullable StoredItem held;
     private int progress;
     private @Nullable ItemDisplay heldDisplay;
+    private final ClickShield shield = new ClickShield(this);
 
     public HandSieveBlock(BlockProperties properties, HandSieveData data) {
         super(properties);
@@ -67,10 +69,20 @@ public class HandSieveBlock extends SmpBlock {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         event.setCancelled(true);
-        Player player = event.getPlayer();
+        onShieldInteract(event.getPlayer(), event.getItem());
+    }
+
+    @Override
+    public void onShieldInteract(Player player, @Nullable ItemStack hand) {
+        shield.refresh(player);
         if (player.isSneaking()) takeBack(player);
-        else if (held == null) insert(player, event.getItem());
+        else if (held == null) insert(player, hand);
         else work(player);
+    }
+
+    @Override
+    public void onShieldAttack(Player player) {
+        shield.release(player);
     }
 
     private void insert(Player player, @Nullable ItemStack hand) {
@@ -204,6 +216,7 @@ public class HandSieveBlock extends SmpBlock {
     @Override
     public void onUnload() {
         heldDisplay = null;
+        Utils.runLater(shield::clear);
     }
 
     @Override

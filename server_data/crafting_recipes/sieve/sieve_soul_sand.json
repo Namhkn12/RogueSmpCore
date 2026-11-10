@@ -1,0 +1,13 @@
+{
+  "type": "sieve",
+  "id": "sieve_soul_sand",
+  "input": "minecraft:soul_sand",
+  "duration": 80,
+  "min_tier": 2,
+  "drops": [
+    { "item": "minecraft:quartz", "min_amount": 1, "max_amount": 2, "chance": 0.3 },
+    { "item": "minecraft:glowstone_dust", "chance": 0.15 },
+    { "item": "minecraft:nether_wart", "chance": 0.05 },
+    { "item": "minecraft:ghast_tear", "chance": 0.01 }
+  ]
+}

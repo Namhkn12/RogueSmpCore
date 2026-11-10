@@ -1,0 +1,10 @@
+{
+  "type": "crusher",
+  "id": "andesite_to_gravel",
+  "input": "minecraft:andesite",
+  "result": "minecraft:gravel",
+  "duration": 40,
+  "extra": [
+    { "item": "minecraft:iron_nugget", "chance": 0.1 }
+  ]
+}

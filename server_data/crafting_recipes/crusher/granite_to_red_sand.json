@@ -1,0 +1,10 @@
+{
+  "type": "crusher",
+  "id": "granite_to_red_sand",
+  "input": "minecraft:granite",
+  "result": "minecraft:red_sand",
+  "duration": 40,
+  "extra": [
+    { "item": "minecraft:copper_ingot", "chance": 0.05 }
+  ]
+}

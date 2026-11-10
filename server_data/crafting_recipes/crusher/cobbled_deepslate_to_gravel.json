@@ -1,0 +1,12 @@
+{
+  "type": "crusher",
+  "id": "cobbled_deepslate_to_gravel",
+  "input": "minecraft:cobbled_deepslate",
+  "result": { "item": "minecraft:gravel", "count": 2 },
+  "duration": 80,
+  "min_tier": 2,
+  "extra": [
+    { "item": "minecraft:iron_nugget", "min_amount": 1, "max_amount": 3, "chance": 0.25 },
+    { "item": "minecraft:gold_nugget", "chance": 0.1 }
+  ]
+}

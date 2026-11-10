@@ -1,0 +1,12 @@
+{
+  "type": "sieve",
+  "id": "sieve_sand",
+  "input": "minecraft:sand",
+  "duration": 40,
+  "drops": [
+    { "item": "minecraft:clay_ball", "chance": 0.25 },
+    { "item": "minecraft:cactus", "chance": 0.05 },
+    { "item": "minecraft:gold_nugget", "chance": 0.1 },
+    { "item": "minecraft:redstone", "chance": 0.08 }
+  ]
+}
