@@ -16,6 +16,7 @@ import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -36,6 +37,7 @@ import java.util.Optional;
 public class HandCrusherBlock extends SmpBlock {
 
     private static final int BAR_LENGTH = 10;
+    private static final int CLICK_COOLDOWN = 4;
     private static final float ITEM_SCALE = 0.5f;
     private static final String VERB = "Nghiền";
     private static final String REJECT_MESSAGE = "Vật phẩm này không thể nghiền";
@@ -46,6 +48,7 @@ public class HandCrusherBlock extends SmpBlock {
     private final HandCrusherData data;
     private @Nullable StoredItem held;
     private int progress;
+    private int nextWorkTick;
     private @Nullable ItemDisplay heldDisplay;
     private final ClickShield shield = new ClickShield(this);
 
@@ -99,7 +102,7 @@ public class HandCrusherBlock extends SmpBlock {
         hand.setAmount(hand.getAmount() - count);
         markDirty();
         syncHeldDisplay();
-        player.playSound(getLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 1f, 1f);
+        player.playSound(getLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 0.3f, 1f);
         showProgress(player, recipe);
     }
 
@@ -110,12 +113,16 @@ public class HandCrusherBlock extends SmpBlock {
             return;
         }
 
+        int now = Bukkit.getCurrentTick();
+        if (now < nextWorkTick) return;
+        nextWorkTick = now + CLICK_COOLDOWN;
+
         progress += Math.max(1, data.progressPerClick());
         markDirty();
         Location center = getLocation().toCenterLocation().add(0, 0.6, 0);
         ItemStack particleItem = held.toItemStack();
         if (particleItem != null) center.getWorld().spawnParticle(Particle.ITEM, center, 6, 0.15, 0.1, 0.15, 0.05, particleItem);
-        center.getWorld().playSound(center, WORK_SOUND, 0.6f, 0.8f + Utils.RANDOM.nextFloat() * 0.4f);
+        center.getWorld().playSound(center, WORK_SOUND, 0.3f, 0.8f + Utils.RANDOM.nextFloat() * 0.4f);
 
         if (progress < recipe.getDuration()) {
             showProgress(player, recipe);
