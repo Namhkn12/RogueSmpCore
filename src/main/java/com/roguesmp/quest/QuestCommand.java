@@ -123,11 +123,10 @@ public class QuestCommand {
 
                     boolean success = questManager.assignQuest(target, quest);
 
-                    Component qName = quest.getName() != null ? Utils.fromString(quest.getName()) : Component.text(quest.getId());
 
                     if (success) {
                         sender.sendMessage(Utils.text("Đã giao nhiệm vụ thành công cho " + target.getName(), NamedTextColor.GREEN));
-                        target.sendMessage(Utils.text("Bạn đã được giao nhiệm vụ mới: ", NamedTextColor.GOLD).append(qName));
+                        if (!quest.isAutoPin()) QuestNotifications.started(target, quest);
                     } else {
                         sender.sendMessage(Utils.text(target.getName() + " đã hoặc đang thực hiện nhiệm vụ này rồi!", NamedTextColor.RED));
                     }
@@ -174,6 +173,7 @@ public class QuestCommand {
                             long amount = (long) args.get("amount");
                             if (questData(sender, target) == null) return;
                             QuestBoardManager.getInstance().giveExp(target, amount);
+                            target.sendMessage(Utils.fromString("<aqua>+" + amount + " kinh nghiệm Mạo hiểm"));
                             sendExpStatus(sender, target);
                         }))
                 .withSubcommand(new CommandAPICommand("take")

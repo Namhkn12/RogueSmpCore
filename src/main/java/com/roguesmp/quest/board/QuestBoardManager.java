@@ -273,7 +273,6 @@ public class QuestBoardManager {
         data.addExp(amount);
         questManager.getQuestDataManager().saveAsync(data);
         int after = getLevel(data);
-        player.sendMessage(Utils.fromString("<aqua>+" + amount + " kinh nghiệm Mạo hiểm"));
         syncStatus(player);
         if (after <= before) return;
         player.sendMessage(Utils.fromString("<gold><bold>LÊN CẤP!</bold></gold> <yellow>Cấp Mạo hiểm <gold>" + after + "</gold>. Có thể nhận <gold>" + settings.level().acceptLimit(after) + "</gold> nhiệm vụ cùng lúc."));
