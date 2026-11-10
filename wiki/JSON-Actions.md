@@ -50,6 +50,7 @@ Field chọn loại: `"type"`.
 | `quest` | [Bảng nhiệm vụ](JSON-Quests.md#bảng-nhiệm-vụ) |
 | `inbox` | Hộp thư thưởng |
 | `shop:<shop_id>` | Cửa hàng, id trong `trades/` (xem [JSON-Trades](JSON-Trades.md)) |
+| `world_boss:<boss_id>` | GUI triệu hồi world boss, id trong `world_bosses/` (chỉ boss `summoned`, xem [JSON-WorldBosses](JSON-WorldBosses.md)) |
 
 Id khác → người chơi nhận thông báo lỗi đỏ + log cảnh báo.
 

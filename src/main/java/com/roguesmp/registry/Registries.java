@@ -90,10 +90,14 @@ import com.roguesmp.teleport.TeleportDestinations;
 import com.roguesmp.teleport.effect.TeleportEffect;
 import com.roguesmp.teleport.effect.TeleportEffects;
 import com.roguesmp.warp.Warp;
+import com.roguesmp.worldboss.definition.WorldBossDefinition;
+import com.roguesmp.worldboss.encounter.WorldBossEncounter;
+import com.roguesmp.worldboss.encounter.WorldBossEncounters;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class Registries {
     private static final List<Consumer<RogueSmpCore>> BOOTSTRAPPERS = new ArrayList<>();
@@ -174,6 +178,9 @@ public class Registries {
     public static final Registry<Codec<? extends TeleportDestination>> TELEPORT_DESTINATION_CODEC = register(registry -> TeleportDestinations.loadClass());
     public static final Registry<Codec<? extends TeleportEffect>> TELEPORT_EFFECT_CODEC = register(registry -> TeleportEffects.loadClass());
     public static final Registry<Warp> WARP = new Registry<>("warps", Warp.CODEC);
+
+    public static final Registry<Supplier<? extends WorldBossEncounter>> WORLD_BOSS_ENCOUNTER = register(registry -> WorldBossEncounters.loadClass());
+    public static final Registry<WorldBossDefinition> WORLD_BOSS = new Registry<>("world_bosses", WorldBossDefinition.CODEC);
 
     public static final Registry<Codec<? extends Recipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());
     public static final Registry<Recipe> CRAFTING_RECIPE = new Registry<>("crafting_recipes", Recipe.CODEC);

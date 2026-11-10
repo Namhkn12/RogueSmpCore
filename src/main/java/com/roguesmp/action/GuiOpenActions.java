@@ -6,6 +6,7 @@ import com.roguesmp.gui.BlacksmithGui;
 import com.roguesmp.menu.MenuEntries;
 import com.roguesmp.menu.gui.MainMenuGui;
 import com.roguesmp.warp.gui.WarpGui;
+import com.roguesmp.worldboss.gui.WorldBossSummonGui;
 import com.roguesmp.player.inbox.gui.InboxGui;
 import com.roguesmp.quest.board.gui.QuestBoardGui;
 import com.roguesmp.registry.Registries;
@@ -37,6 +38,7 @@ public class GuiOpenActions {
         player.playSound(Sound.sound(SoundEventKeys.ITEM_BOOK_PAGE_TURN, Sound.Source.PLAYER, 1f, 0.9f));
     });
     private static final String SHOP_PREFIX = "shop:";
+    private static final String WORLD_BOSS_PREFIX = "world_boss:";
 
     public static final OpenAction INBOX = register("inbox", player -> new InboxGui(player, null).showInventory(player));
     public static final OpenAction MAIN_MENU = register("main_menu", player -> new MainMenuGui(player).showInventory(player));
@@ -51,6 +53,7 @@ public class GuiOpenActions {
     }
 
     public static boolean runOpenAction(String id, Player player) {
+        if (id.startsWith(WORLD_BOSS_PREFIX)) return WorldBossSummonGui.open(player, id.substring(WORLD_BOSS_PREFIX.length()));
         OpenAction openAction = id.startsWith(SHOP_PREFIX)
                 ? shopOpenAction(id.substring(SHOP_PREFIX.length()))
                 : Registries.GUI_OPEN_ACTION.get(id);

@@ -20,7 +20,8 @@ public enum Permissions {
     POLAR_TEMPLATE_ADMIN("polartemplate.admin"),
     WARP_ADMIN("warp.admin"),
     TELEPORT("teleport"),
-    MONEY_ADMIN("money.admin");
+    MONEY_ADMIN("money.admin"),
+    WORLD_BOSS_ADMIN("worldboss.admin");
 
     private static final String ROOT = "roguesmp.";
 

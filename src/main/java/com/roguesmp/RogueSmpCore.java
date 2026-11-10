@@ -77,6 +77,9 @@ import com.roguesmp.server.VanillaRecipeReplacer;
 import com.roguesmp.tab.TabEngine;
 import com.roguesmp.text.GlyphFontCommand;
 import com.roguesmp.utils.GlowUtils;
+import com.roguesmp.worldboss.WorldBossManager;
+import com.roguesmp.worldboss.arena.ArenaGuard;
+import com.roguesmp.worldboss.command.WorldBossCommand;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
@@ -137,6 +140,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         //Entity
         EntityManager.init(this);
+        WorldBossManager.init(this);
 
         FishingManager.init(this);
         FishingHotspotManager.init(this);
@@ -166,6 +170,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         CraftingManager.init(); // indexes Registries.CRAFTING_RECIPE - must run after it's loaded above
         VanillaRecipeReplacer.replaceAll(); // swaps matching vanilla tool/armor recipes - must run after items load above
+        WorldBossManager.getInstance().validate();
     }
 
     /**
@@ -192,6 +197,7 @@ public final class RogueSmpCore extends JavaPlugin {
     //Run on onDisable
     public void saveData() {
         PlayerTradeManager.getInstance().cancelAll();
+        WorldBossManager.getInstance().shutdown();
         BlockManager.getInstance().shutdown();
 
         PlayerManager.getInstance().onDisable();
@@ -236,6 +242,7 @@ public final class RogueSmpCore extends JavaPlugin {
         registerListener(new InboxListener(InboxManager.getInstance()));
 
         registerListener(new EntityGoalSpawnListener());
+        registerListener(new ArenaGuard(WorldBossManager.getInstance()));
     }
 
     //Register CommandAPICommand
@@ -272,6 +279,7 @@ public final class RogueSmpCore extends JavaPlugin {
         DungeonBuildCommand.register();
         SpawnerCommand.register();
         GlyphFontCommand.register();
+        WorldBossCommand.register();
     }
 
     @Override
@@ -292,6 +300,8 @@ public final class RogueSmpCore extends JavaPlugin {
 
         this.resetScheduler = new DailyResetScheduler(this);
         this.resetScheduler.start();
+
+        WorldBossManager.getInstance().start();
 
         BlockManager.getInstance().sweepLoadedChunks();
     }

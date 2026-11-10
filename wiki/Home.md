@@ -26,6 +26,7 @@ Mỗi trang = 1 thư mục dữ liệu: **mỗi key làm gì, kiểu gì, bắt 
 | [JSON-Blocks](JSON-Blocks.md) | `blocks/`, `catalyst_types/` | Block, máy phát (generator), module, chất xúc tác, altar, khối ngẫu nhiên `palette`, trình duyệt block |
 | [JSON-Dungeons](JSON-Dungeons.md) | `dungeon/` | Dungeon, feature, phòng, script (sự kiện, condition, action, biến) |
 | [JSON-Spawners](JSON-Spawners.md) | `spawners/` | Spawner tuỳ chỉnh, behavior, flag `smp-spawners` |
+| [JSON-WorldBosses](JSON-WorldBosses.md) | `world_bosses/` | World boss: đấu trường, triệu hồi / chu kỳ, điều kiện, lối ra, lệnh `/worldboss` |
 | [Region-Flags](Region-Flags.md) | (WorldGuard) | Flag `smp-*`: ability, tên khu vực, particle, điểm spawn, cổng dịch chuyển |
 
 ## 2. Kiến trúc — cho dev
@@ -40,7 +41,8 @@ Giải thích **vì sao** hệ thống chạy như vậy và cách mở rộng b
 6. **[Entity, Boss & Spell System](Entity-Boss-Spell-System.md)** — `BaseEntity`/`SmpEntity`, `EntityComponent`, `SpellComponent`, `PhaseComponent`.
 7. **[Player Ability System](Player-Ability-System.md)** — `Ability`, `AbilityInfo` (code) tách khỏi `AbilityConfig` (JSON), `AbilityLoadout`, trigger & capture.
 8. **[Dungeon System](Dungeon-System.md)** — lõi instance nhỏ + feature, sự kiện, script JSON, kiểm tra khi nạp.
-9. **[Fx System](Fx-System.md)** — hiệu ứng particle/display thuần hiển thị: `FxShape` + `FxMotion` + `FxRenderer`. Không JSON-hóa được.
+9. **[World Boss System](World-Boss-System.md)** — luật trận chung trong `WorldBossManager`, kịch bản từng boss là `WorldBossEncounter` (hook + `Announcer`), thưởng do encounter quyết định.
+10. **[Fx System](Fx-System.md)** — hiệu ứng particle/display thuần hiển thị: `FxShape` + `FxMotion` + `FxRenderer`. Không JSON-hóa được.
 
 Mọi thứ khởi động từ [`RogueSmpCore`](../src/main/java/com/roguesmp/RogueSmpCore.java): `init()` (khởi tạo singleton + bootstrap các bảng tra codec), `loadData()` (decode mọi `*.json` qua Registry), `initListeners()`, `initCommands()`.
 
