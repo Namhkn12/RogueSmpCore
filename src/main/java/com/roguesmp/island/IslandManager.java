@@ -5,9 +5,7 @@ import com.roguesmp.teleport.TeleportService;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.player.PlayerData;
 import com.roguesmp.player.PlayerManager;
-import com.roguesmp.quest.Quest;
 import com.roguesmp.quest.QuestManager;
-import com.roguesmp.registry.Registries;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -33,7 +31,6 @@ public class IslandManager {
     private final IslandPurgeService purgeService;
     private final IslandVisitService visitService;
     private final IslandLevelService levelService;
-    private static final String INTRO_QUEST = "intro/intro_hand_crusher";
 
     private final Set<UUID> creating = new HashSet<>();
 
@@ -92,12 +89,7 @@ public class IslandManager {
         creator.sendMessage(Utils.fromString("<green>Tạo đảo thành công! Chuẩn bị dịch chuyển..."));
         TeleportService.getInstance().teleport(creator, spawnPoint, TeleportOptions.INSTANT);
 
-        assignIntroQuest(creator);
-    }
-
-    static void assignIntroQuest(Player player) {
-        Quest intro = Registries.QUEST.get(INTRO_QUEST);
-        if (intro != null) QuestManager.getInstance().assignQuest(player, intro);
+        QuestManager.getInstance().refresh(creator);
     }
 
     public boolean setIslandSpawn(Player player, Location targetLocation) {

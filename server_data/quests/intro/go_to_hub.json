@@ -1,0 +1,19 @@
+{
+  "id": "intro/go_to_hub",
+  "name": "<gold>Khởi đầu: Đến Hub</gold>",
+  "icon": "compass",
+  "description": [
+    "<gray>Hub là trung tâm của server: nơi tạo đảo,",
+    "<gray>gặp NPC và bắt đầu chuyến phiêu lưu.",
+    "<gray>Dùng <yellow>/hub</yellow> để dịch chuyển đến đó."
+  ],
+  "autoPin": true,
+  "autoClaimRewards": true,
+  "objectives": {
+    "hub": { "type": "in_hub" }
+  },
+  "rewards": [
+    { "type": "money", "amount": 25 },
+    { "type": "start_quest", "quest": "intro/create_island" }
+  ]
+}

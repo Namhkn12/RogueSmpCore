@@ -11,6 +11,7 @@ import com.roguesmp.quest.objective.ObjectiveProgress;
 import com.roguesmp.quest.objective.QuestObjective;
 import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.event.DungeonClearEvent;
 import com.roguesmp.event.HandMachineProcessEvent;
 import com.roguesmp.event.QuestCompletedEvent;
 import com.roguesmp.event.SmpCraftEvent;
@@ -371,6 +372,25 @@ public class QuestManager {
 
     public void onHandMachineProcess(HandMachineProcessEvent event) {
         handleProgress(event.getPlayer(), (objective, progress) -> objective.onHandMachineProcess(event, progress));
+    }
+
+    public void onDungeonClear(DungeonClearEvent event) {
+        for (UUID memberId : event.getMembers()) {
+            Player member = Bukkit.getPlayer(memberId);
+            if (member != null) handleProgress(member, (objective, progress) -> objective.onDungeonClear(event, progress));
+        }
+    }
+
+    public void refresh(Player player) {
+        SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
+        if (smpPlayer != null) handleProgress(player, (objective, progress) -> objective.onRefresh(smpPlayer, progress));
+    }
+
+    public void refresh(Collection<UUID> playerIds) {
+        for (UUID playerId : playerIds) {
+            Player player = Bukkit.getPlayer(playerId);
+            if (player != null) refresh(player);
+        }
     }
 
     /**

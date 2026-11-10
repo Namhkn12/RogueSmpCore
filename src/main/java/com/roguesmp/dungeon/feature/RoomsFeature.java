@@ -1,5 +1,6 @@
 package com.roguesmp.dungeon.feature;
 
+import com.roguesmp.event.DungeonClearEvent;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.codec.Codec;
 import com.roguesmp.constant.Keys;
@@ -340,6 +341,7 @@ public record RoomsFeature(List<Pool> pools, int minimumRooms, int maxChoices) i
             if (objective.endsDungeon() && !state.bossDefeated) {
                 state.bossDefeated = true;
                 context.signal(BOSS_DEFEATED, 1, event.player());
+                new DungeonClearEvent(context.instance().dungeonId(), context.instance().members()).callEvent();
             }
         }
         if (!changed) return;

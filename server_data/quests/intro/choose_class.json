@@ -1,0 +1,19 @@
+{
+  "id": "intro/choose_class",
+  "name": "<gold>Khởi đầu: Chọn lớp nhân vật</gold>",
+  "icon": "iron_sword",
+  "description": [
+    "<gray>Mỗi lớp nhân vật có lối chơi và kỹ năng riêng.",
+    "<gray>Dùng <yellow>/class</yellow> để xem và chọn một lớp.",
+    "<gray>Bạn có thể đổi lớp bất cứ lúc nào."
+  ],
+  "autoPin": true,
+  "autoClaimRewards": true,
+  "objectives": {
+    "class": { "type": "class_selected" }
+  },
+  "rewards": [
+    { "type": "money", "amount": 50 },
+    { "type": "start_quest", "quest": "intro/go_to_hub" }
+  ]
+}

@@ -2,6 +2,7 @@ package com.roguesmp.island;
 
 import com.roguesmp.gate.cost.CostPayment;
 import com.roguesmp.player.SmpPlayer;
+import com.roguesmp.quest.QuestManager;
 import com.roguesmp.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -50,6 +51,7 @@ public class IslandLevelService {
     public void setLevel(IslandData island, int level) {
         island.setLevel(level);
         dataManager.saveAsync(island);
+        QuestManager.getInstance().refresh(island.getMembers());
     }
 
     private void broadcast(IslandData island, String message) {

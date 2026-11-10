@@ -3,6 +3,8 @@ package com.roguesmp.listener;
 import com.roguesmp.RogueSmpCore;
 import com.roguesmp.event.AdventureRankChangeEvent;
 import com.roguesmp.event.DailyResetEvent;
+import com.roguesmp.event.DungeonClearEvent;
+import com.roguesmp.registry.Registries;
 import com.roguesmp.event.HandMachineProcessEvent;
 import com.roguesmp.event.QuestCompletedEvent;
 import com.roguesmp.event.QuestProgressEvent;
@@ -24,10 +26,21 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import com.roguesmp.quest.data.PlayerQuestData;
+import io.papermc.paper.event.player.AsyncPlayerSpawnLocationEvent;
+import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
+import org.bukkit.World;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class QuestListener implements Listener {
+
+    private static final String INTRO_QUEST = "intro/choose_class";
+    private static final NamespacedKey LOBBY_WORLD = NamespacedKey.minecraft("lobby");
+    private static final double LOBBY_X = -30.5, LOBBY_Y = 62.0, LOBBY_Z = 0.5;
+    private static final float LOBBY_YAW = -90f, LOBBY_PITCH = 0f;
 
     private final QuestManager questManager;
     private final QuestBoardManager boardManager;
@@ -45,14 +58,31 @@ public class QuestListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
+    public void onSpawnLocation(AsyncPlayerSpawnLocationEvent event) {
+        PlayerQuestData data = questManager.getPlayerQuestData(event.getConnection().getProfile().getId());
+        if (data == null || data.getQuestProgress(INTRO_QUEST) != null) return;
+
+        World lobby = Bukkit.getWorld(LOBBY_WORLD);
+        if (lobby != null) event.setSpawnLocation(new Location(lobby, LOBBY_X, LOBBY_Y, LOBBY_Z, LOBBY_YAW, LOBBY_PITCH));
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (questManager.getQuestDataManager().getCachedData(event.getPlayer().getUniqueId()) == null) {
             RogueSmpCore.LOGGER.error("No quest data was loaded for {} before joining", event.getPlayer().getName());
             return;
         }
-        boardManager.refresh(event.getPlayer());
-        boardManager.syncStatus(event.getPlayer());
-        questManager.refreshPinnedBar(event.getPlayer());
+        Player player = event.getPlayer();
+        boardManager.refresh(player);
+        boardManager.syncStatus(player);
+        questManager.refreshPinnedBar(player);
+        suggestIntro(player);
+        questManager.refresh(player);
+    }
+
+    private void suggestIntro(Player player) {
+        Quest intro = Registries.QUEST.get(INTRO_QUEST);
+        if (intro != null) questManager.assignQuest(player, intro);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -103,6 +133,11 @@ public class QuestListener implements Listener {
     }
 
     @EventHandler
+    public void onChangeWorld(PlayerChangedWorldEvent event) {
+        questManager.refresh(event.getPlayer());
+    }
+
+    @EventHandler
     public void onCraft(SmpCraftEvent event) {
         questManager.onCraft(event);
     }
@@ -113,12 +148,22 @@ public class QuestListener implements Listener {
     }
 
     @EventHandler
+    public void onDungeonClear(DungeonClearEvent event) {
+        questManager.onDungeonClear(event);
+    }
+
+    @EventHandler
     public void onQuestStarted(QuestStartedEvent event) {
         refreshPinnedBar(event.getHolder());
-        Quest quest = event.getProgress().getQuest();
-        if (!quest.isAutoPin() || !(event.getHolder() instanceof PlayerHolder holder)) return;
+        if (!(event.getHolder() instanceof PlayerHolder holder)) return;
         Player player = Bukkit.getPlayer(holder.id());
         if (player == null) return;
+        Utils.runLater(() -> {
+            if (player.isOnline()) questManager.refresh(player);
+        });
+
+        Quest quest = event.getProgress().getQuest();
+        if (!quest.isAutoPin()) return;
         String name = quest.getName() != null ? quest.getName() : quest.getId();
         player.sendMessage(Utils.fromString("<aqua><bold>NHIỆM VỤ MỚI</bold></aqua> <gray>»</gray> " + name + " <dark_gray>(/quest để xem chi tiết)</dark_gray>"));
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.4f);
