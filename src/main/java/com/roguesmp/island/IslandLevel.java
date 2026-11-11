@@ -4,6 +4,7 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.gate.cost.Cost;
 import com.roguesmp.gate.requirement.Requirement;
 import com.roguesmp.registry.Registries;
+import com.roguesmp.utils.Utils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -26,8 +27,18 @@ public record IslandLevel(int maxEnergyNetworks, int energyNetworkCapacity, int 
             IslandLevel::new
     );
 
+    public record Perk(String label, boolean unlocked, String value) {}
+
     public boolean hasBlockCapacity() {
         return blockCapacity != UNLIMITED;
+    }
+
+    public List<Perk> perks() {
+        return List.of(
+                new Perk("Sức chứa khối", blockCapacity != 0, hasBlockCapacity() ? String.valueOf(blockCapacity) : "∞"),
+                new Perk("Mạng năng lượng tối đa", maxEnergyNetworks > 0, String.valueOf(maxEnergyNetworks)),
+                new Perk("Dung lượng mỗi mạng", maxEnergyNetworks > 0 && energyNetworkCapacity > 0, Utils.formatMoney(energyNetworkCapacity))
+        );
     }
 
     public static IslandLevel of(int level) {

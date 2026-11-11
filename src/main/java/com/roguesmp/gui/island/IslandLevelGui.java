@@ -191,15 +191,15 @@ public class IslandLevelGui extends BaseGui {
     }
 
     private void askMoneyAmount(SmpPlayer smpPlayer, IslandLevelService levelService, int targetLevel) {
-        Dialog dialog = DialogBuilder.create(Component.text("Góp tiền cho đảo", NamedTextColor.GOLD))
+        Dialog dialog = DialogBuilder.create(Component.text("Đóng góp xu cho đảo", NamedTextColor.GOLD))
                 .addTextBody(Utils.text("Số dư: ", NamedTextColor.GRAY).append(Component.text(Utils.formatMoney(smpPlayer.getPlayerData().getMoney()), NamedTextColor.YELLOW)))
-                .addTextInput(MONEY_INPUT, Component.text("Số tiền muốn góp"))
+                .addTextInput(MONEY_INPUT, Component.text("Số xu muốn góp"))
                 .confirmation()
                 .yesButton(Component.text("Góp", NamedTextColor.GREEN), null, (response, audience) -> Utils.runLater(() -> {
                     String input = response.getText(MONEY_INPUT);
                     String digits = input == null ? "" : input.replaceAll("[^0-9]", "");
                     long amount = digits.isEmpty() || digits.length() > 18 ? 0 : Long.parseLong(digits);
-                    if (amount <= 0) player.sendMessage(Utils.fromString("<red>Số tiền không hợp lệ."));
+                    if (amount <= 0) player.sendMessage(Utils.fromString("<red>Số xu không hợp lệ."));
                     else contributeMoney(smpPlayer, levelService, targetLevel, amount);
                     showInventory(player);
                 }))
@@ -211,7 +211,7 @@ public class IslandLevelGui extends BaseGui {
     private void contributeMoney(SmpPlayer smpPlayer, IslandLevelService levelService, int targetLevel, long maxAmount) {
         long amount = levelService.contributeMoney(smpPlayer, island, targetLevel, maxAmount);
         if (amount > 0) {
-            player.sendActionBar(Utils.fromString("<green>Đã góp <yellow>" + Utils.formatMoney(amount) + " tiền"));
+            player.sendActionBar(Utils.fromString("<green>Đã góp <yellow>" + Utils.formatMoney(amount) + " xu"));
             player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.8f, 1.2f);
             refreshViewers(island);
         }
@@ -229,18 +229,19 @@ public class IslandLevelGui extends BaseGui {
         ));
         if (!done) {
             lore.add(Component.empty());
-            lore.add(Utils.text("Click: Nhập số tiền", NamedTextColor.YELLOW));
+            lore.add(Utils.text("Click: Nhập số xu", NamedTextColor.YELLOW));
             lore.add(Utils.text("Shift + Click: Góp tối đa", NamedTextColor.YELLOW));
         }
-        icon.setData(DataComponentTypes.ITEM_NAME, Utils.text(done ? "✔ Tiền" : "Góp tiền", done ? NamedTextColor.GREEN : NamedTextColor.GOLD));
+        icon.setData(DataComponentTypes.ITEM_NAME, Utils.text(done ? "✔ Xu" : "Góp xu", done ? NamedTextColor.GREEN : NamedTextColor.GOLD));
         icon.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
         return icon;
     }
 
     private static Component moneyProgress(long contributed, long goal) {
-        return Utils.text("Tiền: ", NamedTextColor.GRAY)
-                .append(Component.text(Utils.formatMoney(contributed), contributed >= goal ? NamedTextColor.GREEN : NamedTextColor.YELLOW))
-                .append(Component.text("/" + Utils.formatMoney(goal), NamedTextColor.GRAY));
+        return Component.text(Utils.formatMoney(goal) + " xu", NamedTextColor.GOLD)
+                .append(Component.text(" (", NamedTextColor.GRAY))
+                .append(Component.text(Utils.formatMoney(contributed), contributed >= goal ? NamedTextColor.GREEN : NamedTextColor.RED))
+                .append(Component.text("/" + Utils.formatMoney(goal) + ")", NamedTextColor.GRAY));
     }
 
     private ItemStack contributionItem(SmpPlayer smpPlayer, String itemId, int goal) {
@@ -265,22 +266,29 @@ public class IslandLevelGui extends BaseGui {
 
     public static List<Component> statLore(IslandData island, IslandLevel level) {
         List<Component> lore = new ArrayList<>();
-        if (level.hasBlockCapacity()) {
-            int used = island.getUsedCapacity();
-            lore.add(line(Utils.text("Sức chứa khối: ", NamedTextColor.GRAY)
-                    .append(Component.text(used, used >= level.blockCapacity() ? NamedTextColor.RED : NamedTextColor.GREEN))
-                    .append(Component.text("/" + level.blockCapacity(), NamedTextColor.GRAY))));
+        List<IslandLevel.Perk> perks = level.perks();
+        for (int i = 0; i < perks.size(); i++) {
+            IslandLevel.Perk perk = perks.get(i);
+            if (!perk.unlocked()) continue;
+            Component value = i == 0 && level.hasBlockCapacity() ? usedCapacity(island, level) : Component.text(perk.value(), NamedTextColor.WHITE);
+            lore.add(line(Utils.text(perk.label() + ": ", NamedTextColor.GRAY).append(value)));
         }
-        lore.add(line(Utils.text("Mạng năng lượng tối đa: ", NamedTextColor.GRAY).append(Component.text(level.maxEnergyNetworks(), NamedTextColor.WHITE))));
-        lore.add(line(Utils.text("Dung lượng mỗi mạng: ", NamedTextColor.GRAY).append(Component.text(Utils.formatMoney(level.energyNetworkCapacity()), NamedTextColor.WHITE))));
         return lore;
+    }
+
+    private static Component usedCapacity(IslandData island, IslandLevel level) {
+        int used = island.getUsedCapacity();
+        return Component.text(used, used >= level.blockCapacity() ? NamedTextColor.RED : NamedTextColor.GREEN)
+                .append(Component.text("/" + level.blockCapacity(), NamedTextColor.GRAY));
     }
 
     private List<Component> nextLore(SmpPlayer smpPlayer, IslandLevel current, IslandLevel next, IslandLevelService.Result result) {
         List<Component> lore = new ArrayList<>();
-        lore.add(line(compare("Sức chứa khối", capacityText(current), capacityText(next))));
-        lore.add(line(compare("Mạng năng lượng tối đa", String.valueOf(current.maxEnergyNetworks()), String.valueOf(next.maxEnergyNetworks()))));
-        lore.add(line(compare("Dung lượng mỗi mạng", Utils.formatMoney(current.energyNetworkCapacity()), Utils.formatMoney(next.energyNetworkCapacity()))));
+        List<IslandLevel.Perk> from = current.perks();
+        List<IslandLevel.Perk> to = next.perks();
+        for (int i = 0; i < to.size(); i++) {
+            if (to.get(i).unlocked()) lore.add(line(compare(from.get(i), to.get(i))));
+        }
 
         Map<String, Integer> goals = IslandLevelService.contributionGoals(next);
         long moneyGoal = IslandLevelService.moneyGoal(next);
@@ -337,13 +345,11 @@ public class IslandLevelGui extends BaseGui {
         return count == 0 ? 100 : (int) (sum * 100 / count);
     }
 
-    private static String capacityText(IslandLevel level) {
-        return level.hasBlockCapacity() ? String.valueOf(level.blockCapacity()) : "∞";
-    }
-
-    private static Component compare(String label, String from, String to) {
-        Component line = Utils.text(label + ": ", NamedTextColor.GRAY).append(Component.text(from, NamedTextColor.WHITE));
-        return from.equals(to) ? line : line.append(Component.text(" → ", NamedTextColor.DARK_GRAY)).append(Component.text(to, NamedTextColor.GREEN));
+    private static Component compare(IslandLevel.Perk from, IslandLevel.Perk to) {
+        Component label = Utils.text(to.label() + ": ", NamedTextColor.GRAY);
+        if (!from.unlocked()) return label.append(Component.text(to.value(), NamedTextColor.GREEN)).append(Component.text(" (Mới!)", NamedTextColor.GOLD));
+        Component line = label.append(Component.text(from.value(), NamedTextColor.WHITE));
+        return from.value().equals(to.value()) ? line : line.append(Component.text(" → ", NamedTextColor.DARK_GRAY)).append(Component.text(to.value(), NamedTextColor.GREEN));
     }
 
     private static Component line(Component content) {

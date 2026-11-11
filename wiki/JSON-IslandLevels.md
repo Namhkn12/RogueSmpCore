@@ -54,12 +54,12 @@ Click vào **cấp tiếp theo**:
 
 Cost `item` và `money` **không** bị lấy 1 lần khi nâng cấp. Thành viên đảo **góp dần** trong màn hình Đóng góp:
 
-- Mỗi mục là 1 ô, 21 ô mỗi trang, có phân trang. Ô tiền (nếu có) nằm đầu tiên. Ô đã đủ hiện kính xanh lá ✔. Đầu màn hình hiện % tiến độ chung. Nút quay lại về màn hình chính.
+- Mỗi mục là 1 ô, 21 ô mỗi trang, có phân trang. Ô xu (nếu có) nằm đầu tiên. Ô đã đủ hiện kính xanh lá ✔. Đầu màn hình hiện % tiến độ chung. Nút quay lại về màn hình chính.
 - **Ô item:**
   - **Click:** góp tối đa 64.
   - **Shift + Click:** góp tất cả trong túi.
-- **Ô tiền:**
-  - **Click:** mở hộp thoại nhập số tiền (dấu `,` `.` được bỏ qua).
+- **Ô xu:**
+  - **Click:** mở hộp thoại nhập số xu (dấu `,` `.` được bỏ qua).
   - **Shift + Click:** góp toàn bộ số dư.
 - Luôn chỉ lấy **đúng phần còn thiếu**.
 - Mọi thành viên đều góp được, bao nhiêu lần cũng được. Tiến độ lưu theo đảo: `levelContributions` (item) và `moneyContribution` (tiền) trong dữ liệu đảo.

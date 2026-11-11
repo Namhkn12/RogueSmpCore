@@ -12,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,18 +125,20 @@ public class IslandLevelService {
     }
 
     private void announceUpgrade(IslandData island, String upgrader, int level, IslandLevel previous, IslandLevel current) {
-        List<String> lines = List.of(
+        List<String> lines = new ArrayList<>(List.of(
                 DIVIDER,
                 "",
                 "  <gold><bold>⬆ ĐẢO ĐÃ LÊN CẤP " + level + "!</bold>",
                 "  <gray>Nâng cấp bởi <white>" + upgrader,
-                "",
-                compareLine("Sức chứa khối", capacityText(previous), capacityText(current)),
-                compareLine("Mạng năng lượng tối đa", String.valueOf(previous.maxEnergyNetworks()), String.valueOf(current.maxEnergyNetworks())),
-                compareLine("Dung lượng mỗi mạng", Utils.formatMoney(previous.energyNetworkCapacity()), Utils.formatMoney(current.energyNetworkCapacity())),
-                "",
-                DIVIDER
-        );
+                ""
+        ));
+        List<IslandLevel.Perk> from = previous.perks();
+        List<IslandLevel.Perk> to = current.perks();
+        for (int i = 0; i < to.size(); i++) {
+            if (to.get(i).unlocked()) lines.add(compareLine(from.get(i), to.get(i)));
+        }
+        lines.add("");
+        lines.add(DIVIDER);
         for (UUID memberId : island.getMembers()) {
             Player member = Bukkit.getPlayer(memberId);
             if (member == null) continue;
@@ -145,12 +148,10 @@ public class IslandLevelService {
         }
     }
 
-    private static String compareLine(String label, String from, String to) {
-        if (from.equals(to)) return "   <dark_gray>▪ <gray>" + label + ": <white>" + to;
-        return "   <green>▪ <gray>" + label + ": <dark_gray>" + from + " → <green><bold>" + to + "</bold>";
-    }
-
-    private static String capacityText(IslandLevel level) {
-        return level.hasBlockCapacity() ? String.valueOf(level.blockCapacity()) : "∞";
+    private static String compareLine(IslandLevel.Perk from, IslandLevel.Perk to) {
+        String label = "<gray>" + to.label() + ": ";
+        if (!from.unlocked()) return "   <gold>✦ " + label + "<green><bold>" + to.value() + "</bold> <gold>(Mới mở khoá!)";
+        if (from.value().equals(to.value())) return "   <dark_gray>▪ " + label + "<white>" + to.value();
+        return "   <green>▪ " + label + "<dark_gray>" + from.value() + " → <green><bold>" + to.value() + "</bold>";
     }
 }
