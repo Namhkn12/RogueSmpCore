@@ -1,0 +1,5 @@
+{
+  "block_capacity": 3,
+  "max_energy_networks": 1,
+  "energy_network_capacity": 5000
+}

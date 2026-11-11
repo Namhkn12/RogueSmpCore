@@ -20,6 +20,7 @@ Mỗi trang = 1 thư mục dữ liệu: **mỗi key làm gì, kiểu gì, bắt 
 | [JSON-Actions](JSON-Actions.md) | (dùng chung) | Action khi click cho NPC và item: chạy lệnh, mở GUI, dịch chuyển, xoá entity |
 | [JSON-Trades](JSON-Trades.md) | `trades/` | Cửa hàng NPC: giá, điều kiện, phần thưởng, bố cục GUI |
 | [JSON-Infusions](JSON-Infusions.md) | `infusions/` | Ấn Ký: chi phí theo cấp, tỉ lệ thành công, hoàn trả khi hạ cấp |
+| [JSON-IslandLevels](JSON-IslandLevels.md) | `island_levels/` | Cấp đảo: sức chứa khối, mạng năng lượng, chi phí góp dần |
 | [JSON-Warps](JSON-Warps.md) | `warps/` | Điểm dịch chuyển `/warp`, điểm đến, hiệu ứng dịch chuyển |
 | [JSON-Loot](JSON-Loot.md) | `loottable/` | Pool, entry, condition, thuật toán roll |
 | [JSON-Crafting](JSON-Crafting.md) | `crafting_recipes/` | `shaped`, `shapeless`, `fusion` |

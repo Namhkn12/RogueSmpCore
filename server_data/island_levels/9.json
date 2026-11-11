@@ -1,0 +1,13 @@
+{
+  "block_capacity": 18,
+  "max_energy_networks": 3,
+  "energy_network_capacity": 25000,
+  "costs": [
+    { "type": "item", "item": "minecraft:cobblestone", "amount": 6144 },
+    { "type": "item", "item": "minecraft:sand", "amount": 3072 },
+    { "type": "item", "item": "copper_compressed_ingot", "amount": 32 },
+    { "type": "item", "item": "iron_compressed_ingot", "amount": 32 },
+    { "type": "item", "item": "gold_compressed_ingot", "amount": 16 },
+    { "type": "money", "amount": 5000 }
+  ]
+}

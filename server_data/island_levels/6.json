@@ -1,0 +1,12 @@
+{
+  "block_capacity": 14,
+  "max_energy_networks": 2,
+  "energy_network_capacity": 15000,
+  "costs": [
+    { "type": "item", "item": "minecraft:sand", "amount": 1536 },
+    { "type": "item", "item": "minecraft:clay_ball", "amount": 256 },
+    { "type": "item", "item": "minecraft:copper_ingot", "amount": 256 },
+    { "type": "item", "item": "minecraft:gold_nugget", "amount": 256 },
+    { "type": "money", "amount": 1500 }
+  ]
+}

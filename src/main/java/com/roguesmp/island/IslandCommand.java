@@ -132,6 +132,7 @@ public class IslandCommand {
                         return;
                     }
                     islandManager.getLevelService().setLevel(island, level);
+                    IslandLevelGui.refreshViewers(island);
                     sender.sendMessage(Utils.fromString("<green>Đã đặt cấp đảo của <yellow>" + target.getName() + " <green>thành <yellow>" + level + "<green>."));
                 });
     }

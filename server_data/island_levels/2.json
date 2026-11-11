@@ -1,0 +1,11 @@
+{
+  "block_capacity": 6,
+  "max_energy_networks": 1,
+  "energy_network_capacity": 5000,
+  "costs": [
+    { "type": "item", "item": "minecraft:gravel", "amount": 256 },
+    { "type": "item", "item": "minecraft:sand", "amount": 128 },
+    { "type": "item", "item": "minecraft:flint", "amount": 32 },
+    { "type": "item", "item": "minecraft:iron_nugget", "amount": 64 }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "block_capacity": 10,
+  "max_energy_networks": 1,
+  "energy_network_capacity": 10000,
+  "costs": [
+    { "type": "item", "item": "minecraft:charcoal", "amount": 128 },
+    { "type": "item", "item": "minecraft:coal", "amount": 128 },
+    { "type": "item", "item": "minecraft:iron_ingot", "amount": 64 },
+    { "type": "item", "item": "minecraft:redstone", "amount": 64 },
+    { "type": "money", "amount": 500 }
+  ]
+}
