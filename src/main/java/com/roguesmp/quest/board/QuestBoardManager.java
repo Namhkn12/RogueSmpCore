@@ -132,35 +132,14 @@ public class QuestBoardManager {
     private void fill(PlayerQuestData data, @Nullable Player player, long now) {
         PlayerBoard board = data.getBoard();
         SmpPlayer smpPlayer = player == null ? null : PlayerManager.getInstance().getSmpPlayer(player);
-        List<Quest> candidates = new ArrayList<>();
         for (Quest quest : getBoardQuests()) {
             long cycle = quest.cycleAt(now);
             if (board.getEntry(quest.getId()) != null || board.isCompleted(quest.getId(), cycle)) continue;
             if (data.getQuestProgress(quest.getId()) != null) continue;
             if (smpPlayer != null && !quest.getRequirements().stream().allMatch(requirement -> requirement.test(smpPlayer))) continue;
-            candidates.add(quest);
-        }
-
-        while (board.getEntries().size() < settings.size() && !candidates.isEmpty()) {
-            Quest picked = pickWeighted(candidates);
-            candidates.remove(picked);
-            board.addEntry(new BoardEntry(picked.getId(), picked.cycleAt(now)));
+            board.addEntry(new BoardEntry(quest.getId(), cycle));
             data.setDirty(true);
         }
-    }
-
-    private static Quest pickWeighted(List<Quest> candidates) {
-        int total = candidates.stream().mapToInt(QuestBoardManager::weight).sum();
-        int roll = Utils.RANDOM.nextInt(total);
-        for (Quest quest : candidates) {
-            roll -= weight(quest);
-            if (roll < 0) return quest;
-        }
-        return candidates.getLast();
-    }
-
-    private static int weight(Quest quest) {
-        return Math.max(1, quest.getBoard().weight());
     }
 
     public int countClaimableRewards(PlayerQuestData data) {
