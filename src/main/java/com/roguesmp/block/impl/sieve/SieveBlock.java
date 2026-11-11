@@ -93,7 +93,7 @@ public class SieveBlock extends SmpBlock implements Tickable, EnergyStorage, Ite
 
     private void tickProgress() {
         if (!flushPending()) return;
-        if (activeRecipe == null) return;
+        if (activeRecipe == null || !hasRoomFor(activeRecipe)) return;
 
         if (progress < duration) {
             if (getEnergy() <= 0) return;
@@ -137,6 +137,14 @@ public class SieveBlock extends SmpBlock implements Tickable, EnergyStorage, Ite
         progress = 0;
         markDirty();
         flushPending();
+    }
+
+    private boolean hasRoomFor(SieveRecipe recipe) {
+        double multiplier = upgrades.sheet().multiplier(BlockStat.SIEVE_DROP_AMOUNT);
+        double flat = upgrades.sheet().flatSum(BlockStat.SIEVE_DROP_AMOUNT);
+        List<StoredItem> worstCase = new ArrayList<>();
+        for (BlockDrop drop : recipe.getDrops()) worstCase.add(drop.maxStored(multiplier, flat));
+        return outputs.canFitAll(worstCase);
     }
 
     private @Nullable StoredItem roll(BlockDrop drop) {
@@ -207,7 +215,7 @@ public class SieveBlock extends SmpBlock implements Tickable, EnergyStorage, Ite
     }
 
     public boolean isRunning() {
-        return activeRecipe != null && pending.isEmpty() && getEnergy() > 0;
+        return activeRecipe != null && pending.isEmpty() && getEnergy() > 0 && hasRoomFor(activeRecipe);
     }
 
     public SieveData data() {
@@ -241,7 +249,7 @@ public class SieveBlock extends SmpBlock implements Tickable, EnergyStorage, Ite
     }
 
     public boolean isStalled() {
-        return !pending.isEmpty();
+        return !pending.isEmpty() || activeRecipe != null && !hasRoomFor(activeRecipe);
     }
 
     @Override

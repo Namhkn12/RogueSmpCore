@@ -93,7 +93,7 @@ public class CrusherBlock extends SmpBlock implements Tickable, EnergyStorage, I
 
     private void tickProgress() {
         if (!flushPending()) return;
-        if (activeRecipe == null) return;
+        if (activeRecipe == null || !hasRoomFor(activeRecipe)) return;
 
         if (progress < duration) {
             if (getEnergy() <= 0) return;
@@ -137,6 +137,14 @@ public class CrusherBlock extends SmpBlock implements Tickable, EnergyStorage, I
         progress = 0;
         markDirty();
         flushPending();
+    }
+
+    private boolean hasRoomFor(CrusherRecipe recipe) {
+        double multiplier = upgrades.sheet().multiplier(BlockStat.CRUSHER_OUTPUT_AMOUNT);
+        double flat = upgrades.sheet().flatSum(BlockStat.CRUSHER_OUTPUT_AMOUNT);
+        List<StoredItem> worstCase = new ArrayList<>();
+        for (BlockDrop drop : recipe.getDrops()) worstCase.add(drop.maxStored(multiplier, flat));
+        return outputs.canFitAll(worstCase);
     }
 
     private @Nullable StoredItem roll(BlockDrop drop) {
@@ -207,7 +215,7 @@ public class CrusherBlock extends SmpBlock implements Tickable, EnergyStorage, I
     }
 
     public boolean isRunning() {
-        return activeRecipe != null && pending.isEmpty() && getEnergy() > 0;
+        return activeRecipe != null && pending.isEmpty() && getEnergy() > 0 && hasRoomFor(activeRecipe);
     }
 
     public CrusherData data() {
@@ -241,7 +249,7 @@ public class CrusherBlock extends SmpBlock implements Tickable, EnergyStorage, I
     }
 
     public boolean isStalled() {
-        return !pending.isEmpty();
+        return !pending.isEmpty() || activeRecipe != null && !hasRoomFor(activeRecipe);
     }
 
     @Override
