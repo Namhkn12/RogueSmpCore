@@ -1,9 +1,16 @@
 package com.roguesmp.fishing;
 
 import net.kyori.adventure.text.format.TextColor;
-import org.jetbrains.annotations.Nullable;
 
-public record FishingMinigameSettings(int barSegments, double barTurnChance, TextColor barColor) {
+public record FishingMinigameSettings(
+        int barSegments,
+        double barTurnChance,
+        TextColor barColor,
+        int durationTicks,
+        double startProgress,
+        double lossMultiplier,
+        double barMaxSpeed
+) {
 
     private static final int DURATION_TICKS = 80;
     private static final double START_PROGRESS = 0.5;
@@ -13,27 +20,40 @@ public record FishingMinigameSettings(int barSegments, double barTurnChance, Tex
     private static final int MIN_BAR_SEGMENTS = 1;
     private static final int MAX_BAR_SEGMENTS = 20;
 
-    public static FishingMinigameSettings of(FishTier tier, @Nullable FishingHotspot hotspot) {
-        TextColor color = tier.color();
-        if (hotspot == null) return new FishingMinigameSettings(tier.barSegments(), tier.barTurnChance(), color);
-
-        int segments = Math.max(MIN_BAR_SEGMENTS, Math.min(MAX_BAR_SEGMENTS, tier.barSegments() + hotspot.barSegmentsBonus()));
-        return new FishingMinigameSettings(segments, tier.barTurnChance() * hotspot.barTurnChanceMultiplier(), color);
+    public FishingMinigameSettings {
+        barSegments = Math.max(MIN_BAR_SEGMENTS, Math.min(MAX_BAR_SEGMENTS, barSegments));
+        durationTicks = Math.max(1, durationTicks);
     }
 
-    public int durationTicks() {
-        return DURATION_TICKS;
+    public static FishingMinigameSettings of(FishTier tier) {
+        return new FishingMinigameSettings(tier.barSegments(), tier.barTurnChance(), tier.color(), DURATION_TICKS, START_PROGRESS, LOSS_MULTIPLIER, BAR_MAX_SPEED);
     }
 
-    public double startProgress() {
-        return START_PROGRESS;
+    public FishingMinigameSettings withBarSegments(int barSegments) {
+        return new FishingMinigameSettings(barSegments, barTurnChance, barColor, durationTicks, startProgress, lossMultiplier, barMaxSpeed);
     }
 
-    public double lossMultiplier() {
-        return LOSS_MULTIPLIER;
+    public FishingMinigameSettings withBarTurnChance(double barTurnChance) {
+        return new FishingMinigameSettings(barSegments, barTurnChance, barColor, durationTicks, startProgress, lossMultiplier, barMaxSpeed);
     }
 
-    public double barMaxSpeed() {
-        return BAR_MAX_SPEED;
+    public FishingMinigameSettings withBarColor(TextColor barColor) {
+        return new FishingMinigameSettings(barSegments, barTurnChance, barColor, durationTicks, startProgress, lossMultiplier, barMaxSpeed);
+    }
+
+    public FishingMinigameSettings withDurationTicks(int durationTicks) {
+        return new FishingMinigameSettings(barSegments, barTurnChance, barColor, durationTicks, startProgress, lossMultiplier, barMaxSpeed);
+    }
+
+    public FishingMinigameSettings withStartProgress(double startProgress) {
+        return new FishingMinigameSettings(barSegments, barTurnChance, barColor, durationTicks, startProgress, lossMultiplier, barMaxSpeed);
+    }
+
+    public FishingMinigameSettings withLossMultiplier(double lossMultiplier) {
+        return new FishingMinigameSettings(barSegments, barTurnChance, barColor, durationTicks, startProgress, lossMultiplier, barMaxSpeed);
+    }
+
+    public FishingMinigameSettings withBarMaxSpeed(double barMaxSpeed) {
+        return new FishingMinigameSettings(barSegments, barTurnChance, barColor, durationTicks, startProgress, lossMultiplier, barMaxSpeed);
     }
 }

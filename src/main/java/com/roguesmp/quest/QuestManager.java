@@ -16,6 +16,7 @@ import com.roguesmp.event.DungeonClearEvent;
 import com.roguesmp.event.HandMachineProcessEvent;
 import com.roguesmp.event.QuestCompletedEvent;
 import com.roguesmp.event.SmpCraftEvent;
+import com.roguesmp.event.SmpFishEvent;
 import com.roguesmp.event.QuestProgressEvent;
 import com.roguesmp.event.QuestStartedEvent;
 import com.roguesmp.player.PlayerManager;
@@ -366,6 +367,10 @@ public class QuestManager {
 
     public void onCraft(SmpCraftEvent event) {
         handleProgress(event.getPlayer(), (objective, progress) -> objective.onCraft(event, progress));
+    }
+
+    public void onFish(SmpFishEvent event) {
+        handleProgress(event.getPlayer(), (objective, progress) -> objective.onFish(event, progress));
     }
 
     public void onHandMachineProcess(HandMachineProcessEvent event) {

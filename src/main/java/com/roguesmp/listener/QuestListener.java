@@ -11,6 +11,7 @@ import com.roguesmp.event.QuestProgressEvent;
 import com.roguesmp.quest.holder.QuestHolder;
 import com.roguesmp.event.QuestStartedEvent;
 import com.roguesmp.event.SmpCraftEvent;
+import com.roguesmp.event.SmpFishEvent;
 import com.roguesmp.quest.Quest;
 import com.roguesmp.quest.QuestNotifications;
 import com.roguesmp.quest.holder.PlayerHolder;
@@ -141,6 +142,11 @@ public class QuestListener implements Listener {
     @EventHandler
     public void onCraft(SmpCraftEvent event) {
         questManager.onCraft(event);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onFish(SmpFishEvent event) {
+        questManager.onFish(event);
     }
 
     @EventHandler

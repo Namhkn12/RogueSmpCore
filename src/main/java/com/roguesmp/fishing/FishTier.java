@@ -6,14 +6,16 @@ import com.roguesmp.registry.Registries;
 import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Locale;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.ToDoubleFunction;
 
 public enum FishTier {
 
-    COMMON(500, 12, 0.02, TextColor.color(0xC8C8C8)),
-    UNCOMMON(500, 11, 0.03, TextColor.color(0x55FF55)),
-    RARE(500, 10, 0.045, TextColor.color(0x55AAFF)),
-    EPIC(500, 8, 0.055, TextColor.color(0xAA55FF)),
-    LEGENDARY(500, 7, 0.055, TextColor.color(0xFFAA00));
+    COMMON(800, 12, 0.02, TextColor.color(0xC8C8C8)),
+    UNCOMMON(700, 11, 0.03, TextColor.color(0x55FF55)),
+    RARE(550, 10, 0.045, TextColor.color(0x55AAFF)),
+    EPIC(450, 8, 0.055, TextColor.color(0xAA55FF)),
+    LEGENDARY(300, 7, 0.06, TextColor.color(0xFFAA00));
 
     private static final String LOOT_TABLE_FOLDER = "fishing/";
 
@@ -53,5 +55,22 @@ public enum FishTier {
 
     public Holder<LootTable> lootTable() {
         return Registries.LOOT_TABLE.getHolder(LOOT_TABLE_FOLDER + id);
+    }
+
+    public static FishTier roll(ToDoubleFunction<FishTier> weightMultiplier) {
+        FishTier[] tiers = values();
+        double[] weights = new double[tiers.length];
+        double totalWeight = 0;
+        for (int i = 0; i < tiers.length; i++) {
+            weights[i] = tiers[i].weight * weightMultiplier.applyAsDouble(tiers[i]);
+            totalWeight += weights[i];
+        }
+
+        double roll = ThreadLocalRandom.current().nextDouble(totalWeight);
+        for (int i = 0; i < tiers.length; i++) {
+            roll -= weights[i];
+            if (roll < 0) return tiers[i];
+        }
+        return COMMON;
     }
 }

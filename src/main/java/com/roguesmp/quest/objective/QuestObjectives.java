@@ -32,6 +32,9 @@ public class QuestObjectives {
     public static final Codec<DungeonClearObjective> DUNGEON_CLEAR =
             register(DungeonClearObjective.TYPE_KEY, DungeonClearObjective.CODEC, DungeonClearObjective.Progress.CODEC);
 
+    public static final Codec<FishObjective> FISH =
+            register(FishObjective.TYPE_KEY, FishObjective.CODEC, FishObjective.Progress.CODEC);
+
     public static void loadClass() {
 
     }
