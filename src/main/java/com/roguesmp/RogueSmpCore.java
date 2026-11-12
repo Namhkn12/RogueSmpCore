@@ -1,5 +1,6 @@
 package com.roguesmp;
 
+import com.roguesmp.server.ResourcePackManager;
 import com.roguesmp.block.impl.energy.network.EnergyNetworkManager;
 import com.roguesmp.block.manager.BlockManager;
 import com.roguesmp.command.FishingHotspotCommand;
@@ -223,6 +224,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         registerListener(new DamageListener());
         registerListener(new PlayerListener(PlayerManager.getInstance(), IslandManager.getInstance()));
+        registerListener(new ResourcePackManager());
         registerListener(new DeathMessageListener(PlayerManager.getInstance()));
         registerListener(new EffectListener(EffectManager.getInstance()));
         registerListener(new ThrownPotionListener(this));
