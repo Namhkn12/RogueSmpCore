@@ -8,18 +8,24 @@ import org.bukkit.event.player.PlayerEvent;
 public abstract class RegionEvent extends PlayerEvent {
 
     private final World world;
+    private final World destination;
     private final String regionId;
     private final ApplicableRegionSet regions;
 
-    protected RegionEvent(Player player, World world, String regionId, ApplicableRegionSet regions) {
+    protected RegionEvent(Player player, World world, World destination, String regionId, ApplicableRegionSet regions) {
         super(player);
         this.world = world;
+        this.destination = destination;
         this.regionId = regionId;
         this.regions = regions;
     }
 
     public World getWorld() {
         return world;
+    }
+
+    public World getDestination() {
+        return destination;
     }
 
     public String getRegionId() {

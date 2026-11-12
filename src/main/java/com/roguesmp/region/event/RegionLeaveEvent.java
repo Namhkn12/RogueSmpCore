@@ -10,8 +10,8 @@ public class RegionLeaveEvent extends RegionEvent {
 
     private static final HandlerList HANDLERS = new HandlerList();
 
-    public RegionLeaveEvent(Player player, World world, String regionId, ApplicableRegionSet regions) {
-        super(player, world, regionId, regions);
+    public RegionLeaveEvent(Player player, World world, World destination, String regionId, ApplicableRegionSet regions) {
+        super(player, world, destination, regionId, regions);
     }
 
     @NotNull
