@@ -48,7 +48,7 @@ public final class JsonEntryDialog<T> {
     }
 
     public Dialog build(Player player, @Nullable T current) {
-        return build(player, current == null ? "" : LenientJson.format(codec, current), null);
+        return build(player, current == null ? "" : LenientJson.formatPretty(codec, current), null);
     }
 
     public Dialog buildWithText(Player player, String text) {

@@ -76,14 +76,29 @@ Field chọn loại: `"type"`.
 
 ## Requirement (`requirements`)
 
-| `type` | Key | Ý nghĩa |
+| `type` | Key | Đạt khi |
 | :--- | :--- | :--- |
-| `level` | `min` (int, bắt buộc) | Cấp người chơi ≥ `min`. |
-| `quest_completed` | `quest` (id quest, bắt buộc) | Đã hoàn thành quest này. |
-| `permission` | `permission` (string, bắt buộc), `display` (string MiniMessage, mặc định `"Không có quyền"`) | Có permission. `display` là dòng hiện trong lore. |
-| `money` | `amount` (long, bắt buộc) | Đang **sở hữu** ít nhất `amount` xu (không bị trừ). |
-| `item` | `item` (bắt buộc), `amount` (mặc định `1`) | Đang **sở hữu** item (không bị lấy). |
-| `date_single` | `targetTimestamp` (long, epoch **mili-giây**, bắt buộc) | Chỉ giao dịch được trong đúng 1 ngày. Giá trị phải là **00:00 giờ Việt Nam (GMT+7)** của ngày đó (vd. 01/11/2026 → `1793466000000`). `-1` → luôn đạt. Lore: *"Chỉ trong ngày dd/MM/yyyy"*. |
+| `has_island` | — | Có đảo (chủ hoặc thành viên). |
+| `island_level` | `min` (int) | Cấp đảo ≥ `min`. |
+| `exp_level` | `min` (int) | Cấp XP vanilla ≥ `min`. |
+| `adventure_level` | `min` (int) | Cấp phiêu lưu ≥ `min`. |
+| `class` | `class` (id class) | Đang chọn class này. |
+| `ability` | `ability` (id ability), `level` (mặc định `1`) | Có ability ở cấp ≥ `level`. |
+| `quest_completed` | `quest` (id quest) | Đã hoàn thành quest. |
+| `quest_active` | `quest` (id quest) | Đang làm quest. |
+| `permission` | `permission`, `display` (mặc định `"Không có quyền"`) | Có permission. |
+| `money` | `amount` (long) | Có ≥ `amount` xu. |
+| `item` | `item`, `amount` (mặc định `1`) | Có item trong túi đồ. |
+| `placeholder` | `placeholder`, `operator` (mặc định `gte`), `value`, `display` (bắt buộc) | Kết quả placeholder so với `value` thoả `operator`. |
+| `not` | `requirement` | Điều kiện con không đạt. |
+| `any_of` | `requirements` (mảng) | Ít nhất 1 điều kiện con đạt. |
+| `all_of` | `requirements` (mảng) | Mọi điều kiện con đạt. |
+
+`operator` của `placeholder`: `eq`, `neq` so chuỗi; `gt`, `gte`, `lt`, `lte` so số (giá trị không phải số → không đạt).
+
+`display` của `permission` / `placeholder` là dòng hiện ở nơi liệt kê điều kiện (lore).
+
+Requirement dùng chung ở cửa hàng NPC, quest và [billboard](JSON-Billboards.md).
 
 ⚠️ `money`/`item` có ở cả `costs` lẫn `requirements` với cùng tên `type` — **mảng chứa nó** quyết định có bị lấy đi hay không.
 

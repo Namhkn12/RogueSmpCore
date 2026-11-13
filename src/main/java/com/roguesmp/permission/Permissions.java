@@ -21,7 +21,8 @@ public enum Permissions {
     WARP_ADMIN("warp.admin"),
     TELEPORT("teleport"),
     MONEY_ADMIN("money.admin"),
-    WORLD_BOSS_ADMIN("worldboss.admin");
+    WORLD_BOSS_ADMIN("worldboss.admin"),
+    BILLBOARD_ADMIN("billboard.admin");
 
     private static final String ROOT = "roguesmp.";
 

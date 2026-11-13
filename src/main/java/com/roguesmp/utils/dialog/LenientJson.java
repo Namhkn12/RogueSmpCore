@@ -30,6 +30,8 @@ public final class LenientJson {
     public static final String HELP = "Gson lenient format: có thể không cần {} ngoài cùng, key và text đơn giản không cần ngoặc kép. "
             + "Value có dấu cách hoặc ':' cần đặt trong \"...\" hoặc '...'. Vd: count: 2, item: 'minecraft:stone', item: stone";
 
+    private static final int PRETTY_INLINE_LIMIT = 50;
+    private static final String PRETTY_INDENT = "  ";
     private static final Pattern BARE_WORD = Pattern.compile("[A-Za-z_][A-Za-z0-9_.\\-]*");
 
     private LenientJson() {
@@ -78,13 +80,42 @@ public final class LenientJson {
         return formatValue(element);
     }
 
+    public static <T> String formatPretty(Codec<T> codec, T value) {
+        DataResult<JsonElement> encoded = codec.encode(value, JsonOps.INSTANCE);
+        if (!encoded.isSuccess()) return "";
+        JsonElement element = encoded.result();
+        if (!element.isJsonObject()) return prettyValue(element, "");
+        StringJoiner joiner = new StringJoiner(",\n");
+        for (Map.Entry<String, JsonElement> entry : element.getAsJsonObject().entrySet()) {
+            joiner.add(formatKey(entry.getKey()) + ": " + prettyValue(entry.getValue(), ""));
+        }
+        return joiner.toString();
+    }
+
+    private static String prettyValue(JsonElement value, String indent) {
+        String inline = formatValue(value);
+        if (inline.length() <= PRETTY_INLINE_LIMIT || !(value.isJsonObject() || value.isJsonArray())) return inline;
+        String inner = indent + PRETTY_INDENT;
+        StringJoiner joiner;
+        if (value.isJsonObject()) {
+            joiner = new StringJoiner(",\n", "{\n", "\n" + indent + "}");
+            for (Map.Entry<String, JsonElement> entry : value.getAsJsonObject().entrySet()) {
+                joiner.add(inner + formatKey(entry.getKey()) + ": " + prettyValue(entry.getValue(), inner));
+            }
+        } else {
+            joiner = new StringJoiner(",\n", "[\n", "\n" + indent + "]");
+            for (JsonElement element : value.getAsJsonArray()) joiner.add(inner + prettyValue(element, inner));
+        }
+        return joiner.toString();
+    }
+
     public static Component typesHelp(Collection<String> types) {
         return Component.text("type: ", NamedTextColor.YELLOW)
                 .append(Component.text(String.join(", ", new TreeSet<>(types)), NamedTextColor.GRAY));
     }
 
     public static TextDialogInput.MultilineOptions multiline() {
-        return TextDialogInput.MultilineOptions.create(null, 140);
+        return TextDialogInput.MultilineOptions.create(null, 220);
     }
 
     public static void addInput(DialogBuilder builder, String id, Component label, String initial) {

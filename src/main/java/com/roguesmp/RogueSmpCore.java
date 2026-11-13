@@ -81,6 +81,9 @@ import com.roguesmp.utils.GlowUtils;
 import com.roguesmp.worldboss.WorldBossManager;
 import com.roguesmp.worldboss.arena.ArenaGuard;
 import com.roguesmp.worldboss.command.WorldBossCommand;
+import com.roguesmp.billboard.BillboardCommand;
+import com.roguesmp.billboard.BillboardListener;
+import com.roguesmp.billboard.BillboardManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
@@ -161,6 +164,7 @@ public final class RogueSmpCore extends JavaPlugin {
         this.autoSaveScheduler.start();
 
         TabEngine.init(this);
+        BillboardManager.init(this);
     }
 
     // Load data from files, databases, etc
@@ -172,6 +176,7 @@ public final class RogueSmpCore extends JavaPlugin {
         CraftingManager.init(); // indexes Registries.CRAFTING_RECIPE - must run after it's loaded above
         VanillaRecipeReplacer.replaceAll(); // swaps matching vanilla tool/armor recipes - must run after items load above
         WorldBossManager.getInstance().validate();
+        BillboardManager.getInstance().reload();
     }
 
     /**
@@ -188,6 +193,9 @@ public final class RogueSmpCore extends JavaPlugin {
         }
         if (found && (locationKey.equalsIgnoreCase(Registries.DUNGEON.getLocationKey()) || locationKey.equalsIgnoreCase(Registries.DUNGEON_ROOM.getLocationKey()))) {
             DungeonValidation.validateAll(); // re-checks scripts and re-registers the Bukkit events they listen to
+        }
+        if (found && locationKey.equalsIgnoreCase(Registries.BILLBOARD.getLocationKey())) {
+            BillboardManager.getInstance().reload();
         }
         if (found && (locationKey.equalsIgnoreCase(Registries.ITEM.getLocationKey()) || locationKey.equalsIgnoreCase(Registries.ITEM_TYPE.getLocationKey()))) {
             BlockManager.getInstance().rebuildUpgrades();
@@ -245,6 +253,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         registerListener(new EntityGoalSpawnListener());
         registerListener(new ArenaGuard(WorldBossManager.getInstance()));
+        registerListener(new BillboardListener(BillboardManager.getInstance()));
     }
 
     //Register CommandAPICommand
@@ -282,6 +291,7 @@ public final class RogueSmpCore extends JavaPlugin {
         SpawnerCommand.register();
         GlyphFontCommand.register();
         WorldBossCommand.register();
+        BillboardCommand.register();
     }
 
     @Override
@@ -324,6 +334,7 @@ public final class RogueSmpCore extends JavaPlugin {
 
         FxEngine.getInstance().shutdown();
         TabEngine.getInstance().shutdown();
+        BillboardManager.getInstance().shutdown();
         RegionBoundaryHandler.unregister();
         LuckPermsIntegration.getInstance().shutdown();
 
