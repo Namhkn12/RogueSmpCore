@@ -13,9 +13,6 @@ public final class Hub {
     }
 
     public static @NotNull Location spawn() {
-        return MultiverseCoreApi.get().getWorldManager().getDefaultWorld()
-                .flatMap(LoadedMultiverseWorld::getBukkitWorld)
-                .map(World::getSpawnLocation)
-                .getOrNull();
+        return MultiverseCoreApi.get().getWorldManager().getWorld("hub").get().getSpawnLocation();
     }
 }

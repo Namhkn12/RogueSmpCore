@@ -5,6 +5,7 @@ import com.roguesmp.codec.Codec;
 import com.roguesmp.event.DungeonClearEvent;
 import com.roguesmp.event.HandMachineProcessEvent;
 import com.roguesmp.event.SmpCraftEvent;
+import com.roguesmp.event.SmpFishEvent;
 import com.roguesmp.player.SmpPlayer;
 import com.roguesmp.registry.Registries;
 import net.kyori.adventure.text.Component;
@@ -97,6 +98,13 @@ public interface QuestObjective {
      * @return whether the progress changed
      */
     default boolean onCraft(SmpCraftEvent event, ObjectiveProgress progress) {
+        return false;
+    }
+
+    /**
+     * @return whether the progress changed
+     */
+    default boolean onFish(SmpFishEvent event, ObjectiveProgress progress) {
         return false;
     }
 

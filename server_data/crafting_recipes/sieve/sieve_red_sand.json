@@ -1,0 +1,11 @@
+{
+  "type": "sieve",
+  "id": "sieve_red_sand",
+  "input": "minecraft:red_sand",
+  "duration": 50,
+  "drops": [
+    { "item": "minecraft:copper_ingot", "chance": 0.1 },
+    { "item": "minecraft:gold_nugget", "min_amount": 1, "max_amount": 2, "chance": 0.15 },
+    { "item": "minecraft:dead_bush", "chance": 0.05 }
+  ]
+}

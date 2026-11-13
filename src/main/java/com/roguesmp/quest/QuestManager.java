@@ -1,5 +1,6 @@
 package com.roguesmp.quest;
 
+import com.roguesmp.quest.QuestNotifications.RewardDelivery;
 import com.roguesmp.quest.data.GroupQuestData;
 import com.roguesmp.quest.data.PlayerQuestData;
 import com.roguesmp.quest.data.QuestDataManager;
@@ -15,6 +16,7 @@ import com.roguesmp.event.DungeonClearEvent;
 import com.roguesmp.event.HandMachineProcessEvent;
 import com.roguesmp.event.QuestCompletedEvent;
 import com.roguesmp.event.SmpCraftEvent;
+import com.roguesmp.event.SmpFishEvent;
 import com.roguesmp.event.QuestProgressEvent;
 import com.roguesmp.event.QuestStartedEvent;
 import com.roguesmp.player.PlayerManager;
@@ -33,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -235,16 +238,18 @@ public class QuestManager {
 
     private void completeQuest(QuestLog log, QuestProgress progress) {
         Quest quest = progress.getQuest();
-        log.getHolder().audience().forEach(member -> sendQuestDoneNotification(member, quest));
+        Map<UUID, RewardDelivery> deliveries = new HashMap<>();
         if (log instanceof GroupQuestData group) {
             InboxSource source = new InboxSource("Nhiệm vụ nhóm", displayName(quest), quest.getIcon());
-            progress.getEligible().forEach(member -> giveOrDeliver(member, source, quest));
+            progress.getEligible().forEach(member -> deliveries.put(member, giveOrDeliver(member, source, quest)));
             questDataManager.saveGroupAsync(group);
         } else {
             if (log instanceof PlayerQuestData data && quest.getId().equals(data.getPinnedQuest())) data.setPinnedQuest(null);
             String origin = quest.getBoard() != null ? "Bảng nhiệm vụ" : "Nhiệm vụ";
-            giveOrDeliver(log.getHolder().id(), new InboxSource(origin, displayName(quest), quest.getIcon()), quest);
+            deliveries.put(log.getHolder().id(), giveOrDeliver(log.getHolder().id(), new InboxSource(origin, displayName(quest), quest.getIcon()), quest));
         }
+        log.getHolder().audience().forEach(member ->
+                QuestNotifications.completed(member, quest, deliveries.getOrDefault(member.getUniqueId(), RewardDelivery.NONE)));
         new QuestCompletedEvent(log.getHolder(), progress).callEvent();
         if (log instanceof PlayerQuestData data) questDataManager.saveAsync(data);
     }
@@ -256,23 +261,17 @@ public class QuestManager {
     /**
      * Gives the rewards right away for an auto-claimed quest when the player is online, otherwise puts them in the inbox.
      */
-    private void giveOrDeliver(UUID playerId, InboxSource source, Quest quest) {
+    private RewardDelivery giveOrDeliver(UUID playerId, InboxSource source, Quest quest) {
         Player player = Bukkit.getPlayer(playerId);
         SmpPlayer smpPlayer = player == null ? null : PlayerManager.getInstance().getSmpPlayer(player);
         if (quest.isAutoClaimRewards() && smpPlayer != null) {
             quest.getRewards().forEach(reward -> reward.giveReward(smpPlayer));
-            return;
+            return RewardDelivery.GIVEN;
         }
         InboxManager.getInstance().send(playerId, InboxEntry.of(source, quest.getRewards()));
+        return RewardDelivery.INBOX;
     }
 
-    public void sendQuestDoneNotification(Player player, Quest quest) {
-        Component questName;
-        if (quest.getName() != null) {
-            questName = Utils.fromString(quest.getName());
-        } else questName = Component.text("NO_NAME");
-        player.sendMessage(Component.text("Bạn đã hoàn thành nhiệm vụ ", NamedTextColor.GREEN).append(questName));
-    }
 
     /**
      * Instantly completes a holder's quest, through the normal completion with its rewards. Useful for administrative
@@ -368,6 +367,10 @@ public class QuestManager {
 
     public void onCraft(SmpCraftEvent event) {
         handleProgress(event.getPlayer(), (objective, progress) -> objective.onCraft(event, progress));
+    }
+
+    public void onFish(SmpFishEvent event) {
+        handleProgress(event.getPlayer(), (objective, progress) -> objective.onFish(event, progress));
     }
 
     public void onHandMachineProcess(HandMachineProcessEvent event) {

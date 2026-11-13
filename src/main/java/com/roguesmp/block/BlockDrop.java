@@ -39,6 +39,10 @@ public record BlockDrop(String item, int minAmount, int maxAmount, double chance
         return amount <= 0 ? null : new StoredItem(item, amount);
     }
 
+    public StoredItem maxStored(double amountMultiplier, double flatAmount) {
+        return new StoredItem(item, (int) Math.ceil(Math.max(0, maxAmount + flatAmount) * amountMultiplier));
+    }
+
     private int rollAmount() {
         return rollAmount(chance, 1.0, 0.0);
     }

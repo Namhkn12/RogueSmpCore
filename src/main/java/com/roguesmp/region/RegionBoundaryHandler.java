@@ -88,7 +88,7 @@ public final class RegionBoundaryHandler extends Handler {
         occupiedWorld = world;
         occupied = now;
 
-        for (String regionId : left) new RegionLeaveEvent(player, leftWorld, regionId, regions).callEvent();
-        for (String regionId : entered) new RegionEnterEvent(player, world, regionId, regions).callEvent();
+        for (String regionId : left) new RegionLeaveEvent(player, leftWorld, world, regionId, regions).callEvent();
+        for (String regionId : entered) new RegionEnterEvent(player, world, world, regionId, regions).callEvent();
     }
 }

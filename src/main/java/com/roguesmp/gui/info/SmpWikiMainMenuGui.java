@@ -1,5 +1,6 @@
 package com.roguesmp.gui.info;
 
+import com.roguesmp.crafting.gui.RecipeSearchGui;
 import com.roguesmp.gui.BaseGui;
 import com.roguesmp.utils.Utils;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -34,7 +35,7 @@ public class SmpWikiMainMenuGui extends BaseGui {
                 Component.empty(),
                 Utils.text("» Nhấn vào để xem «", NamedTextColor.YELLOW))));
 
-        addButton(11, attributeIcon, event -> {
+        addButton(15, attributeIcon, event -> {
             event.setCancelled(true);
             new SmpAttributeWikiGui((Player) event.getWhoClicked()).showInventory(event.getWhoClicked());
         });
@@ -49,9 +50,26 @@ public class SmpWikiMainMenuGui extends BaseGui {
                 Utils.text("» Nhấn vào để xem «", NamedTextColor.YELLOW)
         )));
 
-        addButton(15, enchantIcon, event -> {
+        addButton(13, enchantIcon, event -> {
             event.setCancelled(true);
             new SmpEnchantWikiGui((Player) event.getWhoClicked()).showInventory(event.getWhoClicked());
+        });
+
+        ItemStack recipeIcon = ItemStack.of(Material.CRAFTING_TABLE);
+        recipeIcon.setData(DataComponentTypes.ITEM_NAME, Component.text("DANH SÁCH CÔNG THỨC", NamedTextColor.GREEN, TextDecoration.BOLD));
+        recipeIcon.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
+                Utils.text("Xem mọi vật phẩm có công thức", NamedTextColor.GRAY),
+                Utils.text("chế tạo và cách làm ra chúng.", NamedTextColor.GRAY),
+                Component.empty(),
+                Utils.text("» Nhấn vào để xem «", NamedTextColor.YELLOW)
+        )));
+
+        addButton(11, recipeIcon, event -> {
+            event.setCancelled(true);
+            Player player = (Player) event.getWhoClicked();
+            new RecipeSearchGui(player, null)
+                    .withBackAction(getName(), viewer -> new SmpWikiMainMenuGui().withBackAction(getBackTitle(), getBackAction()).showInventory(viewer))
+                    .showInventory(player);
         });
 
         addBackButton(getSlot(2, 0));

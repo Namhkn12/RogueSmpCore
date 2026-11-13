@@ -1,0 +1,12 @@
+{
+  "block_capacity": 16,
+  "max_energy_networks": 2,
+  "energy_network_capacity": 20000,
+  "costs": [
+    { "type": "item", "item": "minecraft:coal_block", "amount": 64 },
+    { "type": "item", "item": "minecraft:iron_ingot", "amount": 256 },
+    { "type": "item", "item": "minecraft:redstone", "amount": 256 },
+    { "type": "item", "item": "copper_compressed_ingot", "amount": 16 },
+    { "type": "money", "amount": 2000 }
+  ]
+}

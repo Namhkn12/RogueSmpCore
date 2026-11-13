@@ -86,6 +86,14 @@ public class SmpBlock {
 
     }
 
+    public void onShieldInteract(Player player, @Nullable ItemStack hand) {
+
+    }
+
+    public void onShieldAttack(Player player) {
+
+    }
+
     public boolean interactsWhileSneaking() {
         return false;
     }

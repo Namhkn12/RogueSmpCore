@@ -66,7 +66,7 @@ public class CokeOvenBlock extends SmpBlock implements Tickable, ItemStorageHold
     }
 
     private void tickProgress() {
-        if (activeRecipe == null) return;
+        if (activeRecipe == null || isStalled()) return;
 
         if (progress < activeRecipe.getDuration()) {
             progress++;
@@ -74,7 +74,6 @@ public class CokeOvenBlock extends SmpBlock implements Tickable, ItemStorageHold
             return;
         }
 
-        if (!outputs.canFitAll(results(activeRecipe))) return;
         complete(activeRecipe);
     }
 
@@ -194,7 +193,7 @@ public class CokeOvenBlock extends SmpBlock implements Tickable, ItemStorageHold
     }
 
     public boolean isStalled() {
-        return activeRecipe != null && progress >= activeRecipe.getDuration() && !outputs.canFitAll(results(activeRecipe));
+        return activeRecipe != null && !outputs.canFitAll(results(activeRecipe));
     }
 
     @Override

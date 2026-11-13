@@ -1,0 +1,12 @@
+{
+  "block_capacity": 12,
+  "max_energy_networks": 2,
+  "energy_network_capacity": 15000,
+  "costs": [
+    { "type": "item", "item": "minecraft:cobblestone", "amount": 2048 },
+    { "type": "item", "item": "minecraft:gravel", "amount": 1024 },
+    { "type": "item", "item": "minecraft:iron_ingot", "amount": 128 },
+    { "type": "item", "item": "minecraft:quartz", "amount": 64 },
+    { "type": "money", "amount": 1000 }
+  ]
+}

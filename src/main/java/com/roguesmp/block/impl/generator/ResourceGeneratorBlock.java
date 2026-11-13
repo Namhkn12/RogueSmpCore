@@ -85,7 +85,9 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
 
     @Override
     public void tick() {
-        catalyst.tick(getEnergy() > 0);
+        boolean full = isLootFull();
+        catalyst.tick(getEnergy() > 0 && !full);
+        if (full) return;
         if (mining) tickMining();
         else if (getEnergy() > 0) tickWaiting();
         tickGuiRefresh();
@@ -256,11 +258,26 @@ public class ResourceGeneratorBlock extends SmpBlock implements Tickable, Direct
     private @Nullable StoredItem rollDrop(BlockDrop drop) {
         boolean rare = drop.chance() < 1.0;
         double chance = rare ? upgrades.sheet().applyChance(BlockStat.GENERATOR_RARE_DROP_CHANCE, drop.chance()) : drop.chance();
-        double amountMultiplier = upgrades.sheet().multiplier(BlockStat.GENERATOR_DROP_AMOUNT)
+        return drop.rollStored(chance, amountMultiplier(rare), flatAmount(rare));
+    }
+
+    private double amountMultiplier(boolean rare) {
+        return upgrades.sheet().multiplier(BlockStat.GENERATOR_DROP_AMOUNT)
                 * (rare ? 1.0 : upgrades.sheet().multiplier(BlockStat.GENERATOR_COMMON_DROP_AMOUNT));
-        double flatAmount = upgrades.sheet().flatSum(BlockStat.GENERATOR_DROP_AMOUNT)
+    }
+
+    private double flatAmount(boolean rare) {
+        return upgrades.sheet().flatSum(BlockStat.GENERATOR_DROP_AMOUNT)
                 + (rare ? 0.0 : upgrades.sheet().flatSum(BlockStat.GENERATOR_COMMON_DROP_AMOUNT));
-        return drop.rollStored(chance, amountMultiplier, flatAmount);
+    }
+
+    public boolean isLootFull() {
+        int worstCase = 0;
+        for (BlockDrop drop : data.drops()) {
+            boolean rare = drop.chance() < 1.0;
+            worstCase += drop.maxStored(amountMultiplier(rare), flatAmount(rare)).amount();
+        }
+        return loot.occupied() + worstCase > loot.capacity();
     }
 
     public int placeDelayTicks() {

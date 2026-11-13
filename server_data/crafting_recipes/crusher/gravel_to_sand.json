@@ -1,0 +1,10 @@
+{
+  "type": "crusher",
+  "id": "gravel_to_sand",
+  "input": "minecraft:gravel",
+  "result": "minecraft:sand",
+  "duration": 40,
+  "extra": [
+    { "item": "minecraft:flint", "chance": 0.15 }
+  ]
+}

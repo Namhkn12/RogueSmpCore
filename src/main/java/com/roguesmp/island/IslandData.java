@@ -27,6 +27,8 @@ public class IslandData {
             IslandSettings.VALUES_CODEC.optionalFieldOf("settings", new LinkedHashMap<String, Object>()).forGetter(data -> data.settings),
             Codec.listOf(EnergyNetworkData.CODEC).optionalFieldOf("energyNetworks", List.of()).forGetter(data -> data.energyNetworks),
             Codec.unboundedMap(Codec.INT).optionalFieldOf("blockIdCounts", Map.of()).forGetter(data -> data.blockIdCounts),
+            Codec.unboundedMap(Codec.INT).optionalFieldOf("levelContributions", Map.of()).forGetter(data -> data.levelContributions),
+            Codec.LONG.optionalFieldOf("moneyContribution", 0L).forGetter(IslandData::getMoneyContribution),
             IslandData::new
     );
 
@@ -40,8 +42,10 @@ public class IslandData {
     private final Map<String, Object> settings;
     private final List<EnergyNetworkData> energyNetworks;
     private final Map<String, Integer> blockIdCounts;
+    private final Map<String, Integer> levelContributions;
+    private long moneyContribution;
 
-    private IslandData(UUID islandId, Set<UUID> members, @Nullable WorldPos spawnLocation, boolean archived, int level, Map<String, Object> settings, List<EnergyNetworkData> energyNetworks, Map<String, Integer> blockIdCounts) {
+    private IslandData(UUID islandId, Set<UUID> members, @Nullable WorldPos spawnLocation, boolean archived, int level, Map<String, Object> settings, List<EnergyNetworkData> energyNetworks, Map<String, Integer> blockIdCounts, Map<String, Integer> levelContributions, long moneyContribution) {
         this.islandId = islandId;
         this.members = new HashSet<>(members);
         this.spawnLocation = spawnLocation != null ? spawnLocation : defaultSpawn(islandId);
@@ -50,6 +54,8 @@ public class IslandData {
         this.settings = new LinkedHashMap<>(settings);
         this.energyNetworks = new ArrayList<>(energyNetworks);
         this.blockIdCounts = new HashMap<>(blockIdCounts);
+        this.levelContributions = new HashMap<>(levelContributions);
+        this.moneyContribution = moneyContribution;
         this.dirty = false;
     }
 
@@ -62,6 +68,7 @@ public class IslandData {
         this.settings = new LinkedHashMap<>();
         this.energyNetworks = new ArrayList<>();
         this.blockIdCounts = new HashMap<>();
+        this.levelContributions = new HashMap<>();
     }
 
     public IslandData(IslandData source) {
@@ -74,6 +81,8 @@ public class IslandData {
         this.settings = new LinkedHashMap<>(source.settings);
         this.energyNetworks = new ArrayList<>(source.energyNetworks.stream().map(EnergyNetworkData::copy).toList());
         this.blockIdCounts = new HashMap<>(source.blockIdCounts);
+        this.levelContributions = new HashMap<>(source.levelContributions);
+        this.moneyContribution = source.moneyContribution;
     }
 
     private static WorldPos defaultSpawn(UUID islandId) {
@@ -157,6 +166,30 @@ public class IslandData {
 
     public void setLevel(int level) {
         this.level = level;
+        this.dirty = true;
+    }
+
+    public int getContribution(String itemId) {
+        return levelContributions.getOrDefault(itemId, 0);
+    }
+
+    public void addContribution(String itemId, int amount) {
+        levelContributions.merge(itemId, amount, Integer::sum);
+        this.dirty = true;
+    }
+
+    public long getMoneyContribution() {
+        return moneyContribution;
+    }
+
+    public void addMoneyContribution(long amount) {
+        moneyContribution += amount;
+        this.dirty = true;
+    }
+
+    public void clearContributions() {
+        levelContributions.clear();
+        moneyContribution = 0;
         this.dirty = true;
     }
 

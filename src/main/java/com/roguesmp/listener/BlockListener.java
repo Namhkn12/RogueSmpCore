@@ -3,6 +3,7 @@ package com.roguesmp.listener;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import com.roguesmp.block.BlockPos;
+import com.roguesmp.block.ClickShield;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.event.SmpBlockInteractEvent;
 import com.roguesmp.block.manager.BlockManager;
@@ -22,6 +23,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageAbortEvent;
 import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import java.util.List;
@@ -102,6 +105,30 @@ public class BlockListener implements Listener {
         }
 
         if(event.getAction() == Action.RIGHT_CLICK_BLOCK) tryPlace(event, clicked, target);
+    }
+
+    @EventHandler
+    public void onShieldInteract(PlayerInteractEntityEvent event){
+        BlockPos pos = ClickShield.ownerOf(event.getRightClicked());
+        if(pos == null) return;
+
+        event.setCancelled(true);
+        SmpBlock block = manager.get(pos);
+        if(event.getHand() != EquipmentSlot.HAND || block == null || !block.isHydrated()) return;
+
+        Player player = event.getPlayer();
+        ItemStack hand = player.getInventory().getItemInMainHand();
+        block.onShieldInteract(player, hand.isEmpty() ? null : hand);
+    }
+
+    @EventHandler
+    public void onShieldAttack(EntityDamageByEntityEvent event){
+        BlockPos pos = ClickShield.ownerOf(event.getEntity());
+        if(pos == null) return;
+
+        event.setCancelled(true);
+        SmpBlock block = manager.get(pos);
+        if(block != null && event.getDamager() instanceof Player player) block.onShieldAttack(player);
     }
 
     private void tryPlace(PlayerInteractEvent event, Block clicked, SmpBlock target){

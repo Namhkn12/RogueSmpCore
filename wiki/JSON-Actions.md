@@ -60,6 +60,7 @@ Id khác → người chơi nhận thông báo lỗi đỏ + log cảnh báo.
 | :--- | :--- | :--- |
 | NPC | click phải vào NPC | đánh NPC |
 | Item (`actions`) | click phải vào không khí, block, hoặc entity | click trái vào không khí, block, hoặc đánh entity |
+| [Billboard](JSON-Billboards.md) | click phải vào vùng click | đánh vào vùng click |
 
 Với item: sự kiện click chỉ bị huỷ khi có ít nhất 1 action **thực sự làm gì đó**. Ví dụ `entity_zapper` click vào không khí, `open_gui` với id sai, hay `run_command` rỗng không huỷ click — item vẫn dùng/đánh bình thường. Muốn item chỉ chạy action khi click phải mà vẫn đánh được bằng click trái, đặt `"click": "right"`.
 

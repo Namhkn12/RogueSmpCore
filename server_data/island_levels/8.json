@@ -1,0 +1,12 @@
+{
+  "block_capacity": 17,
+  "max_energy_networks": 2,
+  "energy_network_capacity": 20000,
+  "costs": [
+    { "type": "item", "item": "minecraft:gravel", "amount": 3072 },
+    { "type": "item", "item": "minecraft:flint", "amount": 512 },
+    { "type": "item", "item": "minecraft:quartz", "amount": 256 },
+    { "type": "item", "item": "iron_compressed_ingot", "amount": 16 },
+    { "type": "money", "amount": 3000 }
+  ]
+}

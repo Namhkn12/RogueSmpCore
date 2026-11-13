@@ -93,6 +93,9 @@ import com.roguesmp.warp.Warp;
 import com.roguesmp.worldboss.definition.WorldBossDefinition;
 import com.roguesmp.worldboss.encounter.WorldBossEncounter;
 import com.roguesmp.worldboss.encounter.WorldBossEncounters;
+import com.roguesmp.billboard.Billboard;
+import com.roguesmp.billboard.line.BillboardLine;
+import com.roguesmp.billboard.line.BillboardLines;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -184,6 +187,9 @@ public class Registries {
 
     public static final Registry<Codec<? extends Recipe>> CRAFTING_RECIPE_CODEC = register(registry -> CraftingRecipes.loadClass());
     public static final Registry<Recipe> CRAFTING_RECIPE = new Registry<>("crafting_recipes", Recipe.CODEC);
+
+    public static final Registry<Codec<? extends BillboardLine>> BILLBOARD_LINE_CODEC = register(registry -> BillboardLines.loadClass());
+    public static final Registry<Billboard> BILLBOARD = new Registry<>("billboards", Billboard.CODEC);
 
     public static void loadAllData(RogueSmpCore plugin) {
         Registry.loadAll(plugin);

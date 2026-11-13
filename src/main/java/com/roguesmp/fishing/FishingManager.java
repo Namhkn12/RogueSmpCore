@@ -1,14 +1,18 @@
 package com.roguesmp.fishing;
 
 import com.roguesmp.RogueSmpCore;
+import com.roguesmp.event.SmpFishEvent;
+import com.roguesmp.event.SmpFishStartEvent;
 import com.roguesmp.loot.LootTable;
 import com.roguesmp.loot.context.LootContext;
 import com.roguesmp.loot.context.LootOrigin;
 import com.roguesmp.registry.Holder;
 import com.roguesmp.registry.Registries;
 import com.roguesmp.player.PlayerManager;
+import com.roguesmp.utils.Utils;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
@@ -23,12 +27,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 public final class FishingManager {
 
     private static final double PULL_STRENGTH = 0.1;
     private static final double PULL_LIFT = 0.2;
+    private static final Component HOW_TO_PLAY = Component.text()
+            .append(Component.text("Cách câu cá", NamedTextColor.GOLD))
+            .append(Component.newline())
+            .append(Utils.fromString("<gray>Giữ <key:key.sneak> để đẩy con trỏ sang phải,"))
+            .append(Component.newline())
+            .append(Component.text("thả ra để nó trượt về bên trái.", NamedTextColor.GRAY))
+            .append(Component.newline())
+            .append(Component.text("Giữ con trỏ trong thanh di chuyển để tăng tiến độ.", NamedTextColor.GRAY))
+            .build();
 
     private static FishingManager INSTANCE;
 
@@ -51,18 +63,19 @@ public final class FishingManager {
         return sessions.containsKey(player.getUniqueId());
     }
 
-    public void start(Player player, FishHook hook) {
-        if (isFishing(player)) return;
+    public boolean start(Player player, FishHook hook) {
+        if (isFishing(player)) return true;
 
         FishingHotspotManager.ActiveHotspot active = FishingHotspotManager.getInstance().findAt(hook.getLocation());
-        FishingHotspot hotspot = active == null ? null : active.hotspot();
+        String hotspotId = active == null ? null : active.hotspotId();
 
-        FishTier tier = rollTier(hotspot);
+        SmpFishStartEvent startEvent = new SmpFishStartEvent(player, hook, hotspotId, FishTier.roll(tier -> active == null ? 1.0 : active.hotspot().tierMultiplier(tier.id())));
+        if (!startEvent.callEvent()) return false;
 
-        FishingEffects.bite(player, hook.getLocation(), tier, hotspot != null);
+        FishingEffects.bite(player, hook.getLocation(), startEvent.getTier(), hotspotId != null);
 
-        FishingMinigame game = new FishingMinigame(FishingMinigameSettings.of(tier, hotspot));
-        Session session = new Session(new FishingDisplay(player, hook), hook, game, tier, hotspot);
+        FishingMinigame game = new FishingMinigame(startEvent.getSettings());
+        Session session = new Session(new FishingDisplay(player, hook), hook, game, startEvent);
         sessions.put(player.getUniqueId(), session);
 
         session.task = player.getScheduler().runAtFixedRate(
@@ -72,6 +85,7 @@ public final class FishingManager {
                 1L,
                 1L
         );
+        return true;
     }
 
     public void abort(Player player) {
@@ -93,7 +107,7 @@ public final class FishingManager {
 
         if (state == FishingMinigame.State.RUNNING) {
             session.display.update(session.game);
-            FishingEffects.progress(player, session.hook.getLocation(), session.game, session.tier, session.hotspot != null, session.ticks++, session.wasOnTarget);
+            FishingEffects.progress(player, session.hook.getLocation(), session.game, session.tier, session.hotspotId != null, session.ticks++, session.wasOnTarget);
             session.wasOnTarget = session.game.isOnTarget();
             return;
         }
@@ -101,13 +115,28 @@ public final class FishingManager {
         end(player, session);
 
         if (state == FishingMinigame.State.CAUGHT) {
-            reward(player, session);
-            FishingEffects.caught(player, session.hook.getLocation(), session.tier, session.hotspot != null);
+            if (reward(player, session)) FishingEffects.caught(player, session.hook.getLocation(), session.tier, session.hotspotId != null);
         } else {
-            player.sendActionBar(Component.text("The fish got away...", NamedTextColor.RED));
-            FishingEffects.escaped(player, session.hook.getLocation());
+            notifyEscaped(player, session);
         }
         removeHook(session.hook);
+    }
+
+    public void escape(Player player) {
+        Session session = sessions.get(player.getUniqueId());
+        if (session == null) return;
+
+        end(player, session);
+        notifyEscaped(player, session);
+        removeHook(session.hook);
+    }
+
+    private void notifyEscaped(Player player, Session session) {
+        player.sendActionBar(Component.text("Cá đã thoát mất...", NamedTextColor.RED));
+        player.sendMessage(Component.text("Cá đã thoát mất... ", NamedTextColor.RED)
+                .append(Component.text("[Cách chơi]", NamedTextColor.YELLOW))
+                .hoverEvent(HoverEvent.showText(HOW_TO_PLAY)));
+        FishingEffects.escaped(player, session.hook.getLocation());
     }
 
     private void end(Player player, Session session) {
@@ -120,49 +149,29 @@ public final class FishingManager {
         session.display.remove();
     }
 
-    private void reward(Player player, Session session) {
+    private boolean reward(Player player, Session session) {
         Location hookLocation = session.hook.getLocation();
         Vector pull = player.getLocation().toVector().subtract(hookLocation.toVector()).multiply(PULL_STRENGTH).setY(PULL_LIFT);
 
-        for (ItemStack stack : rollCatch(player, session)) {
+        SmpFishEvent fishEvent = new SmpFishEvent(player, session.tier, session.hotspotId, rollCatch(player, session));
+        if (!fishEvent.callEvent()) return false;
+        List<ItemStack> caught = fishEvent.getCaught();
+
+        for (ItemStack stack : caught) {
             hookLocation.getWorld().dropItem(hookLocation, stack, item -> item.setVelocity(pull));
         }
-        player.sendActionBar(Component.text("You caught something!", NamedTextColor.GREEN));
-    }
-
-    private FishTier rollTier(@Nullable FishingHotspot hotspot) {
-        FishTier[] tiers = FishTier.values();
-        double[] weights = new double[tiers.length];
-        double totalWeight = 0;
-        for (int i = 0; i < tiers.length; i++) {
-            weights[i] = tiers[i].weight() * (hotspot == null ? 1.0 : hotspot.tierMultiplier(tiers[i].id()));
-            totalWeight += weights[i];
-        }
-
-        double roll = ThreadLocalRandom.current().nextDouble(totalWeight);
-        for (int i = 0; i < tiers.length; i++) {
-            roll -= weights[i];
-            if (roll < 0) return tiers[i];
-        }
-        return FishTier.COMMON;
+        player.sendActionBar(Component.text("Bạn đã câu được thứ gì đó!", NamedTextColor.GREEN));
+        return true;
     }
 
     private List<ItemStack> rollCatch(Player player, Session session) {
-        FishingHotspot hotspot = session.hotspot;
-        double luckBonus = hotspot == null ? 0.0 : hotspot.luckBonus();
-
         LootContext context = LootContext.builder(PlayerManager.getInstance().getSmpPlayer(player))
                 .origin(LootOrigin.FISHING, session.hook)
-                .luck(player.getAttribute(Attribute.LUCK).getValue() / 100.0 + luckBonus)
+                .luck(player.getAttribute(Attribute.LUCK).getValue() / 100.0 + session.luckBonus)
                 .build();
 
-        List<Holder<LootTable>> tables = new ArrayList<>();
-        boolean replaced = hotspot != null && hotspot.lootMode() == FishingHotspot.LootMode.REPLACE && !hotspot.lootTables().isEmpty();
-        if (!replaced) tables.add(session.tier.lootTable());
-        if (hotspot != null) tables.addAll(hotspot.lootTables());
-
         List<ItemStack> results = new ArrayList<>();
-        for (Holder<LootTable> table : tables) {
+        for (Holder<LootTable> table : session.lootTables) {
             if (!table.isBound()) {
                 RogueSmpCore.LOGGER.warn("[Fishing] Loot table not found: '{}'", table.getId());
                 continue;
@@ -181,17 +190,21 @@ public final class FishingManager {
         private final FishHook hook;
         private final FishingMinigame game;
         private final FishTier tier;
-        private final @Nullable FishingHotspot hotspot;
+        private final @Nullable String hotspotId;
+        private final List<Holder<LootTable>> lootTables;
+        private final double luckBonus;
         private ScheduledTask task;
         private int ticks;
         private boolean wasOnTarget;
 
-        private Session(FishingDisplay display, FishHook hook, FishingMinigame game, FishTier tier, @Nullable FishingHotspot hotspot) {
-            this.tier = tier;
-            this.hotspot = hotspot;
+        private Session(FishingDisplay display, FishHook hook, FishingMinigame game, SmpFishStartEvent start) {
             this.display = display;
             this.hook = hook;
             this.game = game;
+            this.tier = start.getTier();
+            this.hotspotId = start.getHotspotId();
+            this.lootTables = List.copyOf(start.getLootTables());
+            this.luckBonus = start.getLuckBonus();
         }
     }
 }

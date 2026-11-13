@@ -19,6 +19,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.World;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,24 +55,30 @@ public class RegionListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        updateTabRegionName(player, ServerRegionManager.getInstance().regionsAt(player.getLocation()));
+        updateTabRegionName(player, player.getWorld(), ServerRegionManager.getInstance().regionsAt(player.getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onChangedWorld(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
+        updateTabRegionName(player, player.getWorld(), ServerRegionManager.getInstance().regionsAt(player.getLocation()));
     }
 
     private void updateTabRegionName(RegionEvent event) {
-        updateTabRegionName(event.getPlayer(), event.getRegions());
+        updateTabRegionName(event.getPlayer(), event.getDestination(), event.getRegions());
     }
 
-    private void updateTabRegionName(Player player, ApplicableRegionSet regions) {
+    private void updateTabRegionName(Player player, World world, ApplicableRegionSet regions) {
         SmpPlayer smpPlayer = playerManager.getSmpPlayer(player);
         if (smpPlayer == null) return;
 
-        String name = islandRegionName(player);
+        String name = islandRegionName(player, world);
         if (name == null) name = regions.queryValue(null, SmpRegionFlags.DISPLAY_NAME);
         smpPlayer.getTabContext().set(TabKeys.REGION_NAME, name == null || name.isBlank() ? null : name);
     }
 
-    private @Nullable String islandRegionName(Player player) {
-        IslandData island = IslandManager.getInstance().getIslandByWorld(player.getWorld());
+    private @Nullable String islandRegionName(Player player, World world) {
+        IslandData island = IslandManager.getInstance().getIslandByWorld(world);
         if (island == null) return null;
         return island.isMember(player.getUniqueId()) ? "<green>Đảo cá nhân" : "<green>Đảo cá nhân <gray>(Khách)";
     }

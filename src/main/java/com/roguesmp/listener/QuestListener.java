@@ -11,7 +11,9 @@ import com.roguesmp.event.QuestProgressEvent;
 import com.roguesmp.quest.holder.QuestHolder;
 import com.roguesmp.event.QuestStartedEvent;
 import com.roguesmp.event.SmpCraftEvent;
+import com.roguesmp.event.SmpFishEvent;
 import com.roguesmp.quest.Quest;
+import com.roguesmp.quest.QuestNotifications;
 import com.roguesmp.quest.holder.PlayerHolder;
 import org.bukkit.entity.Player;
 import com.roguesmp.quest.QuestManager;
@@ -142,6 +144,11 @@ public class QuestListener implements Listener {
         questManager.onCraft(event);
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onFish(SmpFishEvent event) {
+        questManager.onFish(event);
+    }
+
     @EventHandler
     public void onHandMachineProcess(HandMachineProcessEvent event) {
         questManager.onHandMachineProcess(event);
@@ -164,8 +171,8 @@ public class QuestListener implements Listener {
 
         Quest quest = event.getProgress().getQuest();
         if (!quest.isAutoPin()) return;
-        String name = quest.getName() != null ? quest.getName() : quest.getId();
-        player.sendMessage(Utils.fromString("<aqua><bold>NHIỆM VỤ MỚI</bold></aqua> <gray>»</gray> " + name + " <dark_gray>(/quest để xem chi tiết)</dark_gray>"));
-        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.4f);
+        Utils.runLater(() -> {
+            if (player.isOnline()) QuestNotifications.started(player, quest);
+        }, 20);
     }
 }

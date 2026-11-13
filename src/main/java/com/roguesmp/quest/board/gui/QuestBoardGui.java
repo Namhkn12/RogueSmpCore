@@ -41,9 +41,12 @@ import java.util.Set;
 
 public class QuestBoardGui extends BaseGui {
 
+    private static final int PAGE_SIZE = 28;
+
     private final Player player;
     private final QuestManager questManager;
     private final QuestBoardManager boardManager;
+    private int page;
 
     public QuestBoardGui(Player player) {
         super(Component.text("Bảng nhiệm vụ"), 6);
@@ -73,7 +76,9 @@ public class QuestBoardGui extends BaseGui {
         SmpPlayer smpPlayer = PlayerManager.getInstance().getSmpPlayer(player);
         long now = System.currentTimeMillis();
         List<BoardEntry> entries = data.getBoard().getEntries();
-        int index = 0;
+        int totalPages = Math.max(1, (entries.size() + PAGE_SIZE - 1) / PAGE_SIZE);
+        page = Math.clamp(page, 0, totalPages - 1);
+        int index = page * PAGE_SIZE;
         for (int r = 1; r <= 4; r++) {
             for (int c = 1; c <= 7; c++) {
                 if (index >= entries.size()) break;
@@ -86,6 +91,21 @@ public class QuestBoardGui extends BaseGui {
                     onQuestClicked(event, quest, progress);
                 });
             }
+        }
+
+        if (page > 0) {
+            addButton(5, 3, PREV_PAGE_BUTTON, event -> {
+                event.setCancelled(true);
+                page--;
+                setup();
+            });
+        }
+        if (page < totalPages - 1) {
+            addButton(5, 5, NEXT_PAGE_BUTTON, event -> {
+                event.setCancelled(true);
+                page++;
+                setup();
+            });
         }
 
         setupActionButtons(data);

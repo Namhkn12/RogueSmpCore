@@ -1,0 +1,7 @@
+{
+  "type": "crusher",
+  "id": "cobblestone_to_gravel",
+  "input": "minecraft:cobblestone",
+  "result": "minecraft:gravel",
+  "duration": 40
+}

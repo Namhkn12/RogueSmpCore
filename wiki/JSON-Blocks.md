@@ -34,6 +34,7 @@ Các key chung nằm **phẳng ở cấp ngoài cùng** cạnh `type`; dữ li�
 | `experience` | object | không rơi | XP rơi khi phá. |
 | `place_sound` | Key | `block.stone.place` | Âm thanh đặt (kênh BLOCKS). |
 | `break_sound` | Key | `block.stone.break` | Âm thanh phá. |
+| `capacity_cost` | int | `1` | Sức chứa khối mà block này chiếm trên đảo. Tổng của mọi block trên đảo không được vượt `block_capacity` của cấp đảo (xem [JSON-IslandLevels](JSON-IslandLevels.md)). `0` = không tính. |
 
 Mẹo âm thanh: âm thanh cũng phát phía client, nên nếu item/model của block là 1 block đặt được vanilla sẽ nghe trùng 2 lần — dùng model/base không phải block.
 

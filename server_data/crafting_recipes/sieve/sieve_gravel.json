@@ -1,0 +1,12 @@
+{
+  "type": "sieve",
+  "id": "sieve_gravel",
+  "input": "minecraft:gravel",
+  "duration": 40,
+  "drops": [
+    { "item": "minecraft:flint", "chance": 0.3 },
+    { "item": "minecraft:iron_nugget", "min_amount": 1, "max_amount": 2, "chance": 0.2 },
+    { "item": "minecraft:coal", "chance": 0.15 },
+    { "item": "minecraft:gold_nugget", "chance": 0.05 }
+  ]
+}

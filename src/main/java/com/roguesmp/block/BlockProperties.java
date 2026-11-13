@@ -42,7 +42,7 @@ public record BlockProperties(
             BlockExperience.NONE,
             Key.key("block.stone.place"),
             Key.key("block.stone.break"),
-            0
+            1
     );
 
     private static final Codec<Set<Holder<ItemType>>> TOOLS_CODEC = Codec.listOf(Registry.referenceCodec(() -> Registries.ITEM_TYPE))

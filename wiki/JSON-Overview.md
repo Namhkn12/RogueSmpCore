@@ -18,8 +18,10 @@ Phần lớn nội dung game (item, mob/boss, ability, class, quest, NPC, loot, 
 | `classes/` | Lớp nhân vật | [JSON-Classes](JSON-Classes.md) |
 | `quests/` | Quest | [JSON-Quests](JSON-Quests.md) |
 | `npcs/` | NPC | [JSON-Npcs](JSON-Npcs.md) |
+| `island_levels/` | Cấp đảo: sức chứa khối, năng lượng, chi phí góp dần | [JSON-IslandLevels](JSON-IslandLevels.md) |
 | `trades/` | Cửa hàng NPC | [JSON-Trades](JSON-Trades.md) |
 | `warps/` | Điểm dịch chuyển | [JSON-Warps](JSON-Warps.md) |
+| `billboards/` | Bảng chữ nổi (hologram) theo từng người xem | [JSON-Billboards](JSON-Billboards.md) |
 | `loottable/` | Loot table (số ít, không gạch dưới) | [JSON-Loot](JSON-Loot.md) |
 | `crafting_recipes/` | Công thức chế tạo | [JSON-Crafting](JSON-Crafting.md) |
 | `blocks/` | Block tùy chỉnh (generator, altar, palette, ...) | [JSON-Blocks](JSON-Blocks.md) |

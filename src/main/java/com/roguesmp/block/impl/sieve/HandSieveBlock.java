@@ -3,6 +3,7 @@ package com.roguesmp.block.impl.sieve;
 import com.roguesmp.crafting.recipe.CraftingRecipes;
 import com.roguesmp.crafting.recipe.SieveRecipe;
 import com.roguesmp.block.BlockProperties;
+import com.roguesmp.block.ClickShield;
 import com.roguesmp.block.SmpBlock;
 import com.roguesmp.block.StoredItem;
 import com.roguesmp.block.data.HandSieveData;
@@ -15,6 +16,7 @@ import com.roguesmp.utils.PlayerUtils;
 import com.roguesmp.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -35,6 +37,7 @@ import java.util.Optional;
 public class HandSieveBlock extends SmpBlock {
 
     private static final int BAR_LENGTH = 10;
+    private static final int CLICK_COOLDOWN = 4;
     private static final float ITEM_SCALE = 0.5f;
     private static final String VERB = "Sàng";
     private static final String REJECT_MESSAGE = "Vật phẩm này không thể sàng";
@@ -45,7 +48,9 @@ public class HandSieveBlock extends SmpBlock {
     private final HandSieveData data;
     private @Nullable StoredItem held;
     private int progress;
+    private int nextWorkTick;
     private @Nullable ItemDisplay heldDisplay;
+    private final ClickShield shield = new ClickShield(this);
 
     public HandSieveBlock(BlockProperties properties, HandSieveData data) {
         super(properties);
@@ -67,10 +72,20 @@ public class HandSieveBlock extends SmpBlock {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         event.setCancelled(true);
-        Player player = event.getPlayer();
+        onShieldInteract(event.getPlayer(), event.getItem());
+    }
+
+    @Override
+    public void onShieldInteract(Player player, @Nullable ItemStack hand) {
+        shield.refresh(player);
         if (player.isSneaking()) takeBack(player);
-        else if (held == null) insert(player, event.getItem());
+        else if (held == null) insert(player, hand);
         else work(player);
+    }
+
+    @Override
+    public void onShieldAttack(Player player) {
+        shield.release(player);
     }
 
     private void insert(Player player, @Nullable ItemStack hand) {
@@ -87,7 +102,7 @@ public class HandSieveBlock extends SmpBlock {
         hand.setAmount(hand.getAmount() - count);
         markDirty();
         syncHeldDisplay();
-        player.playSound(getLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 1f, 1f);
+        player.playSound(getLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 0.3f, 1f);
         showProgress(player, recipe);
     }
 
@@ -98,12 +113,16 @@ public class HandSieveBlock extends SmpBlock {
             return;
         }
 
+        int now = Bukkit.getCurrentTick();
+        if (now < nextWorkTick) return;
+        nextWorkTick = now + CLICK_COOLDOWN;
+
         progress += Math.max(1, data.progressPerClick());
         markDirty();
         Location center = getLocation().toCenterLocation().add(0, 0.6, 0);
         ItemStack particleItem = held.toItemStack();
         if (particleItem != null) center.getWorld().spawnParticle(Particle.ITEM, center, 6, 0.15, 0.1, 0.15, 0.05, particleItem);
-        center.getWorld().playSound(center, WORK_SOUND, 0.6f, 0.8f + Utils.RANDOM.nextFloat() * 0.4f);
+        center.getWorld().playSound(center, WORK_SOUND, 0.3f, 0.8f + Utils.RANDOM.nextFloat() * 0.4f);
 
         if (progress < recipe.getDuration()) {
             showProgress(player, recipe);
@@ -204,6 +223,7 @@ public class HandSieveBlock extends SmpBlock {
     @Override
     public void onUnload() {
         heldDisplay = null;
+        Utils.runLater(shield::clear);
     }
 
     @Override

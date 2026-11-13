@@ -1,0 +1,9 @@
+{
+  "block_capacity": 4,
+  "max_energy_networks": 1,
+  "energy_network_capacity": 5000,
+  "costs": [
+    { "type": "item", "item": "minecraft:cobblestone", "amount": 256 },
+    { "type": "item", "item": "minecraft:gravel", "amount": 64 }
+  ]
+}

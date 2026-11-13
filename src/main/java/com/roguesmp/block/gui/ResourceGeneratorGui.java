@@ -71,7 +71,11 @@ public class ResourceGeneratorGui extends MachineGui {
         Component name;
         List<Component> lore = new ArrayList<>();
 
-        if (generator.getEnergy() <= 0) {
+        if (generator.isLootFull()) {
+            wool = Material.ORANGE_WOOL;
+            name = Utils.text("Tạm dừng", NamedTextColor.GOLD);
+            lore.add(Utils.text("Kho đã đầy", NamedTextColor.GRAY));
+        } else if (generator.getEnergy() <= 0) {
             wool = Material.RED_WOOL;
             name = Utils.text("Hết năng lượng", NamedTextColor.RED);
         } else if (generator.isMining()) {

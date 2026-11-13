@@ -1,6 +1,7 @@
 package com.roguesmp.gui.island;
 
 import com.roguesmp.gui.BaseGui;
+import com.roguesmp.island.IslandLevel;
 import com.roguesmp.island.IslandData;
 import com.roguesmp.island.IslandManager;
 import com.roguesmp.island.setting.IslandSettings;
@@ -177,11 +178,12 @@ public class IslandMainGui extends BaseGui {
 
         ItemStack levelItem = ItemStack.of(Material.EXPERIENCE_BOTTLE);
         levelItem.setData(DataComponentTypes.ITEM_NAME, Component.text("Cấp Độ Đảo", NamedTextColor.AQUA).decoration(TextDecoration.BOLD, true));
-        levelItem.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
-                Utils.text("Cấp hiện tại: ", NamedTextColor.GRAY).append(Component.text(islandData.getLevel(), NamedTextColor.YELLOW)),
-                Component.empty(),
-                Utils.text("Click chuột để xem và nâng cấp.", NamedTextColor.YELLOW)
-        )));
+        List<Component> levelLore = new ArrayList<>();
+        levelLore.add(Utils.text("Cấp hiện tại: ", NamedTextColor.GRAY).append(Component.text(islandData.getLevel(), NamedTextColor.YELLOW)));
+        levelLore.addAll(IslandLevelGui.statLore(islandData, IslandLevel.of(islandData.getLevel())));
+        levelLore.add(Component.empty());
+        levelLore.add(Utils.text("Click chuột để xem và nâng cấp.", NamedTextColor.YELLOW));
+        levelItem.setData(DataComponentTypes.LORE, ItemLore.lore(levelLore));
         addButton(3, 6, levelItem, ClickHandler.openGui(new IslandLevelGui(player, islandData)));
 
         ItemStack leaveItem = ItemStack.of(Material.IRON_DOOR);

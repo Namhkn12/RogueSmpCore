@@ -13,6 +13,7 @@ import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -47,21 +48,29 @@ public class RecipeSearchGui extends BaseGui {
 
     public static void registerCommand() {
         new CommandAPICommand("recipes")
-                .withArguments(new GreedyStringArgument("query"))
+                .withOptionalArguments(new GreedyStringArgument("query"))
                 .executesPlayer((player, args) -> {
-                    new RecipeSearchGui(player, (String) args.get("query")).showInventory(player);
+                    new RecipeSearchGui(player, (String) args.getOrDefault("query", "")).showInventory(player);
                 })
                 .register(RogueSmpCore.getInstance());
     }
 
     private static List<String> search(String query) {
-        String needle = query.toLowerCase(Locale.ROOT);
+        String needle = normalize(query);
         List<String> found = new ArrayList<>();
         for (String key : CraftingManager.getInstance().getCraftableItemKeys()) {
-            if (key.toLowerCase(Locale.ROOT).contains(needle)) found.add(key);
+            if (needle.isEmpty() || normalize(key).contains(needle) || normalize(displayName(key)).contains(needle)) found.add(key);
         }
         found.sort(String.CASE_INSENSITIVE_ORDER);
         return found;
+    }
+
+    private static String displayName(String key) {
+        return ItemRef.isVanilla(key) ? "" : PlainTextComponentSerializer.plainText().serialize(ItemRef.displayName(key));
+    }
+
+    private static String normalize(String text) {
+        return Utils.removeVietnameseTones(text).toLowerCase(Locale.ROOT);
     }
 
     @Override
@@ -80,6 +89,7 @@ public class RecipeSearchGui extends BaseGui {
             event.setCancelled(true);
             openSearchDialog();
         });
+        addBackButton(getSlot(BOTTOM_ROW, 0));
 
         if (results.isEmpty()) {
             addButton(2, 4, noResultDisplay(), ClickHandler.noAction());
@@ -143,23 +153,20 @@ public class RecipeSearchGui extends BaseGui {
         ItemStack item = ItemStack.of(Material.BARRIER);
         item.setData(DataComponentTypes.ITEM_NAME, Component.text("Không tìm thấy vật phẩm nào", NamedTextColor.RED));
         item.setData(DataComponentTypes.LORE, ItemLore.lore(List.of(
-                Utils.text("Thử tìm theo ID khác.", NamedTextColor.GRAY)
+                Utils.text("Thử tìm theo tên hoặc ID khác.", NamedTextColor.GRAY)
         )));
         return item;
     }
 
     private void openSearchDialog() {
         Dialog dialog = DialogBuilder.create(Component.text("Tìm công thức"))
-                .addTextInput("query", Component.text("ID vật phẩm"), b -> b.initial(query))
+                .addTextInput("query", Component.text("Tên hoặc ID vật phẩm"), b -> b.initial(query))
                 .confirmation()
                 .yesButton(Component.text("Tìm kiếm"), null, (response, audience) -> {
                     String text = response.getText("query");
-                    if (text == null || text.isBlank()) {
-                        player.sendMessage(Utils.text("Bạn cần nhập ID vật phẩm.", NamedTextColor.RED));
-                        Utils.runLater(() -> showInventory(player));
-                        return;
-                    }
-                    Utils.runLater(() -> new RecipeSearchGui(player, text).showInventory(player));
+                    RecipeSearchGui next = new RecipeSearchGui(player, text);
+                    if (getBackAction() != null) next.withBackAction(getBackTitle(), getBackAction());
+                    Utils.runLater(() -> next.showInventory(player));
                 })
                 .noButton(Component.text("Huỷ"), null, (response, audience) -> Utils.runLater(() -> showInventory(player)))
                 .build();
